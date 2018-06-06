@@ -10,6 +10,7 @@
 #include "Engine/Math/IntVector2.hpp"
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/AABB2.hpp"
 
 int					ParseXmlAttribute( const XMLElement& element, const char* attributeName, int defaultValue );
@@ -19,6 +20,7 @@ float				ParseXmlAttribute( const XMLElement& element, const char* attributeName
 Rgba				ParseXmlAttribute( const XMLElement& element, const char* attributeName, const Rgba& defaultValue );
 Vector2				ParseXmlAttribute( const XMLElement& element, const char* attributeName, const Vector2& defaultValue );
 Vector3				ParseXmlAttribute( const XMLElement& element, const char* attributeName, const Vector3& defaultValue );
+Vector4				ParseXmlAttribute( const XMLElement& element, const char* attributeName, const Vector4& defaultValue );
 IntRange			ParseXmlAttribute( const XMLElement& element, const char* attributeName, const IntRange& defaultValue );
 FloatRange			ParseXmlAttribute( const XMLElement& element, const char* attributeName, const FloatRange& defaultValue );
 IntVector2			ParseXmlAttribute( const XMLElement& element, const char* attributeName, const IntVector2& defaultValue );

@@ -97,3 +97,19 @@ PFNGLCHECKFRAMEBUFFERSTATUSPROC			glCheckFramebufferStatus	= nullptr;
 PFNGLBLITFRAMEBUFFERPROC				glBlitFramebuffer			= nullptr;
 
 PFNGLPOLYGONMODEPROC					glPolygonMode				= nullptr;
+PFNGLCULLFACEPROC						glCullFace					= nullptr;
+PFNGLFRONTFACEPROC						glFrontFace					= nullptr;
+PFNGLBLENDEQUATIONSEPARATEPROC			glBlendEquationSeparate		= nullptr;
+PFNGLBLENDFUNCSEPARATEPROC				glBlendFuncSeparate			= nullptr;
+
+PFNGLUNIFORM1FVPROC						glUniform1fv				= nullptr;
+PFNGLUNIFORM2FVPROC						glUniform2fv				= nullptr;
+PFNGLUNIFORM3FVPROC						glUniform3fv				= nullptr;
+PFNGLUNIFORM4FVPROC						glUniform4fv				= nullptr;
+PFNGLDISABLEVERTEXATTRIBARRAYPROC		glDisableVertexAttribArray	= nullptr;
+PFNGLGETINTEGERVPROC					glGetIntegerv				= nullptr;
+PFNGLBINDBUFFERBASEPROC					glBindBufferBase			= nullptr;
+
+PFNGLDELETETEXTURESPROC					glDeleteTextures			= nullptr;
+PFNGLTEXSTORAGE2DPROC					glTexStorage2D				= nullptr;
+PFNGLTEXSUBIMAGE2DPROC					glTexSubImage2D				= nullptr;

@@ -89,6 +89,22 @@ bool ShaderProgram::LoadFromFiles( char const *root )
 	return (program_handle != NULL); 
 };
 
+bool ShaderProgram::LoadFromFiles( std::string vertexShaderPath, std::string fragmentShaderPath )
+{
+	// Compile the two stages we're using (all shaders will implement the vertex and fragment stages)
+	// later on, we can add in more stages;
+	GLuint vert_shader = LoadShaderFromFile( vertexShaderPath.c_str(), GL_VERTEX_SHADER );
+	GLuint frag_shader = LoadShaderFromFile( fragmentShaderPath.c_str(), GL_FRAGMENT_SHADER );
+
+	// Link the program
+	// program_handle is a member GLuint. 
+	program_handle = CreateAndLinkProgram( vert_shader, frag_shader );
+	glDeleteShader( vert_shader );
+	glDeleteShader( frag_shader );
+
+	return (program_handle != NULL);
+}
+
 bool ShaderProgram::LoadFromStrings( const char* vs_program, const char* fs_program )
 {
 
@@ -180,7 +196,7 @@ void ShaderProgram::LogShaderError(GLuint shader_id)
 	buffer[length] = NULL;
 	DebuggerPrintf("\n\nLogShaderError: \n");
 	DebuggerPrintf( buffer );
-	GUARANTEE_RECOVERABLE( false, "LogShaderError: See console output.." );
+	GUARANTEE_RECOVERABLE( false, "LogShaderError: See console output..\n" + std::string(buffer) );
 
 	// free up the memory we used. 
 	delete buffer;

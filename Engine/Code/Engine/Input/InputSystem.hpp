@@ -15,6 +15,7 @@ enum VK_Codes
 	F			= 0x46,
 	F1			= 0x70,				/* VK_F1 */
 	UP			= 0x26,				/* VK_UP */
+	DOWN		= 0x28,				/* VK_DOWN */
 	LEFT		= 0x25,				/* VK_LEFT */
 	RIGHT		= 0x27,				/* VK_RIGHT */
 	SPACE		= 0x20,				/* VK_SPACE */

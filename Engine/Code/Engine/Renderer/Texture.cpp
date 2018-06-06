@@ -19,7 +19,7 @@ Texture::Texture( const std::string& imageFilePath )
 	int numComponents = 0; // Filled in for us to indicate how many color/alpha components the image had (e.g. 3=RGB, 4=RGBA)
 	int numComponentsRequested = 0; // don't care; we support 3 (RGB) or 4 (RGBA)
 
-												// For newer context of OpenGL ( Upgraded from Semester II )
+	// For newer context of OpenGL ( Upgraded from Semester II )
 	stbi_set_flip_vertically_on_load( true );	// Flip the Vs of UV coordinate so that (0, 0) starts from bottom-left, instead of top-left..
 
 	// Load (and decompress) the image RGB(A) bytes from a file on disk, and create an OpenGL texture instance from it
@@ -38,6 +38,12 @@ Texture::Texture( Image& image )
 	PopulateFromData( (unsigned char*)imageBuffer, m_dimensions, 4 );
 }
 
+
+Texture::~Texture()
+{
+	if( m_textureID > 0 )
+		glDeleteTextures( 1, &m_textureID );
+}
 
 unsigned int Texture::GetHandle() const
 {

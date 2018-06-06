@@ -10,6 +10,19 @@ Transform::Transform( Vector3 const &position, Vector3 const &rotation, Vector3 
 	RecalculateTheMatrix();
 }
 
+Vector3 Transform::GetWorldPosition() const
+{
+	// If no parent
+	if( m_parent == nullptr )
+		return m_position;
+
+	// Get position relative to parent
+	Matrix44 worldTransformMat	= GetWorldTransformMatrix();
+	Vector3	 worldPosition		= worldTransformMat.GetTColumn();
+
+	return worldPosition;
+}
+
 Vector3 Transform::GetPosition() const
 {
 	return m_position;
@@ -54,6 +67,25 @@ void Transform::SetScale( Vector3 const &scale )
 	m_isDirty	= true;
 }
 
+void Transform::SetParentAs( Transform const *parent )
+{
+	m_parent = parent;
+}
+
+void Transform::AddChild( Transform *child )
+{
+	m_children.push_back( child );
+}
+
+void Transform::RemoveChild( Transform *childToRemove )
+{
+	for( uint childIdx = 0; childIdx < m_children.size(); childIdx++ )
+	{
+		if( m_children[childIdx] == childToRemove )
+			m_children.erase( m_children.begin() + childIdx );
+	}
+}
+
 void Transform::RecalculateTheMatrix() const
 {
 	// Set current Transform Matrix to Identity
@@ -63,4 +95,24 @@ void Transform::RecalculateTheMatrix() const
 	m_transformMatrix.Scale3D( m_scale );				// Append the Scale		Matrix
 
 	m_isDirty = false;
+}
+
+Matrix44 Transform::GetParentTransform() const
+{
+	if( m_parent == nullptr )
+		return Matrix44();
+
+	return m_parent->GetTransformMatrix();
+}
+
+Matrix44 Transform::GetWorldTransformMatrix() const
+{
+	if( m_parent == nullptr )
+		return GetTransformMatrix();
+	else
+	{
+		Matrix44 transformMatrix = m_parent->GetWorldTransformMatrix();
+		transformMatrix.Append( GetTransformMatrix() );
+		return transformMatrix;
+	}
 }

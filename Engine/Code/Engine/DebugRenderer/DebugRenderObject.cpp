@@ -6,6 +6,7 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Input/Command.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Renderer/Shader.hpp"
 
 
 bool DebugRenderObject::s_isDebugRenderingEnabled = true;
@@ -19,7 +20,9 @@ void DebugRenderObject::ToggleDebugRendering( Command& cmd )
 		s_isDebugRenderingEnabled = true;
 }
 
-DebugRenderObject::DebugRenderObject( float lifetime, Renderer &renderer, Camera &camera, Matrix44 modelMatrix, Mesh const *newMesh, Texture const *texture, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode renderMode /* = DEBUG_RENDER_USE_DEPTH */, ePolygonMode polygonMode /* = FRONT_AND_BACK_FILL */ )
+Shader* DebugRenderObject::s_debugShader = nullptr;
+
+DebugRenderObject::DebugRenderObject( float lifetime, Renderer &renderer, Camera &camera, Matrix44 modelMatrix, Mesh const *newMesh, Texture const *texture, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode renderMode /* = DEBUG_RENDER_USE_DEPTH */, eFillMode polygonMode /* = FRONT_AND_BACK_FILL */ )
 	: m_lifetime( lifetime )
 	, m_renderer( renderer )
 	, m_modelMatrix( modelMatrix )
@@ -31,6 +34,9 @@ DebugRenderObject::DebugRenderObject( float lifetime, Renderer &renderer, Camera
 	, m_renderMode( renderMode )
 	, m_polygonMode( polygonMode )
 {
+	if( s_debugShader == nullptr )
+		s_debugShader = m_renderer.CreateOrGetShader( "debug" );
+
 	// Command Register
 	CommandRegister( "enable_debug", DebugRenderObject::ToggleDebugRendering );
 }
@@ -42,9 +48,9 @@ DebugRenderObject::~DebugRenderObject()
 
 void DebugRenderObject::Update( float deltaSeconds )
 {
-	m_lifetime -= deltaSeconds;
+	m_timeElapsed += deltaSeconds;
 
-	if( m_lifetime < 0.f )
+	if( m_timeElapsed >= m_lifetime )
 		m_deleteMe = true;
 }
 
@@ -52,6 +58,8 @@ void DebugRenderObject::Render() const
 {
 	if( s_isDebugRenderingEnabled == false )
 		return;
+
+	m_renderer.UseShader( s_debugShader );
 
 	// Set the PolygonMode
 	switch (m_polygonMode)
@@ -79,9 +87,13 @@ void DebugRenderObject::Render() const
 		break;
 	}
 
-	m_renderer.SetCurrentTexture( m_texture );
-	m_renderer.SetCurrentCameraTo( &m_camera );
-	m_renderer.UseShaderProgram( nullptr );
+	// Color Lerp
+	float lerpFraction = ClampFloat01( m_timeElapsed / m_lifetime );
+	Rgba  debugColorLerp = Interpolate( m_startColor, m_endColor, lerpFraction );
+	m_renderer.SetUniform( "COLORLERP", debugColorLerp );
+
+	m_renderer.SetCurrentDiffuseTexture( m_texture );
+	m_renderer.BindCamera( &m_camera );
 	m_renderer.DrawMesh( *m_mesh, m_modelMatrix );
 
 

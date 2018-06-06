@@ -79,7 +79,7 @@ void Matrix44::Transpose()
 	Iw = originalMatrix.Tx;		Jw = originalMatrix.Ty;		Kw = originalMatrix.Tz;		Tw = originalMatrix.Tw;
 }
 
-Vector3 Matrix44::Multiply( const Vector3& vecToMultiply, const float w )
+Vector3 Matrix44::Multiply( const Vector3& vecToMultiply, const float w ) const
 {
 
 	Vector3 toReturn;
@@ -130,29 +130,35 @@ void Matrix44::Translate3D( Vector3 const &translation )
 	Append( translateMatrix );
 }
 
-void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisZXY )
+void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ )
 {
 	Matrix44 rotationAroundZMatrix;			// Clockwise
-	rotationAroundZMatrix.Ix =  CosDegree( rotateAroundAxisZXY.z );
-	rotationAroundZMatrix.Jx = -SinDegree( rotateAroundAxisZXY.z );
-	rotationAroundZMatrix.Iy =  SinDegree( rotateAroundAxisZXY.z );
-	rotationAroundZMatrix.Jy =  CosDegree( rotateAroundAxisZXY.z );
+	rotationAroundZMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.z );
+	rotationAroundZMatrix.Jx = -SinDegree( rotateAroundAxisYXZ.z );
+	rotationAroundZMatrix.Iy =  SinDegree( rotateAroundAxisYXZ.z );
+	rotationAroundZMatrix.Jy =  CosDegree( rotateAroundAxisYXZ.z );
 
 	Matrix44 rotationAroundXMatrix;			// Clockwise
-	rotationAroundXMatrix.Jy =  CosDegree( rotateAroundAxisZXY.x );
-	rotationAroundXMatrix.Ky = -SinDegree( rotateAroundAxisZXY.x );
-	rotationAroundXMatrix.Jz =  SinDegree( rotateAroundAxisZXY.x );
-	rotationAroundXMatrix.Kz =  CosDegree( rotateAroundAxisZXY.x );
+	rotationAroundXMatrix.Jy =  CosDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Ky = -SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Jz =  SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Kz =  CosDegree( rotateAroundAxisYXZ.x );
 
 	Matrix44 rotationAroundYMatrix;			// Counter-Clockwise
-	rotationAroundYMatrix.Ix =  CosDegree( rotateAroundAxisZXY.y );
-	rotationAroundYMatrix.Kx =  SinDegree( rotateAroundAxisZXY.y );
-	rotationAroundYMatrix.Iz = -SinDegree( rotateAroundAxisZXY.y );
-	rotationAroundYMatrix.Kz =  CosDegree( rotateAroundAxisZXY.y );
+	rotationAroundYMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.y );
+	rotationAroundYMatrix.Kx =  SinDegree( rotateAroundAxisYXZ.y );
+	rotationAroundYMatrix.Iz = -SinDegree( rotateAroundAxisYXZ.y );
+	rotationAroundYMatrix.Kz =  CosDegree( rotateAroundAxisYXZ.y );
 
-	Append( rotationAroundZMatrix );
-	Append( rotationAroundXMatrix );
-	Append( rotationAroundYMatrix );
+	Append( rotationAroundYMatrix );		// Yaw
+	Append( rotationAroundXMatrix );		// Pitch
+	Append( rotationAroundZMatrix );		// Roll
+
+	// Mat44 = Yaw * Pitch * Roll
+	// When we need to rotate V by Mat44,
+	//			It will be:		Matt44 * V
+	//						=>  Yaw * ( Pitch * ( Roll * V ) )
+	//								<---------------------- It get's applied as 1st Roll, 2nd Pitch, 3rd Yaw
 }
 
 void Matrix44::Scale3D( Vector3 const &scale )

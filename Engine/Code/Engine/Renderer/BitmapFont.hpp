@@ -8,7 +8,6 @@ class DebugRenderer;
 class BitmapFont
 {
 	friend class Renderer;
-	friend class DebugRenderer;
 
 public:
 	const std::string m_fontName;
@@ -23,6 +22,8 @@ private:
 	// private, can only called by Renderer (friend class)
 	explicit BitmapFont( const std::string& fontName, const SpriteSheet& glyphSheet, float baseAspect );
 	
-	const SpriteSheet&	m_spriteSheet; // used internally; assumed to be a 16x16 glyph sheet
-	float				m_baseAspect = 1.0f; // used as the base aspect ratio for all glyphs
+	float m_baseAspect = 1.0f;			// used as the base aspect ratio for all glyphs
+
+public:
+	const SpriteSheet&	m_spriteSheet;	// used internally; assumed to be a 16x16 glyph sheet
 };

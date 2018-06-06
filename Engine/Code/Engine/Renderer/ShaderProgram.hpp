@@ -1,4 +1,5 @@
 // Renderer/shaderprogram.h
+#include <string>
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Renderer/glfunctions.hpp"
@@ -10,6 +11,7 @@ public:
 	~ShaderProgram() {};
 
 	bool LoadFromFiles( char const *root ); // load a shader from file
+	bool LoadFromFiles( std::string vertexShaderPath, std::string fragmentShaderPath );
 	bool LoadFromStrings( const char* vs_program, const char* fs_program );
 	static GLuint LoadShaderFromFile( char const *filename, GLenum type );
 	static GLuint LoadShaderFromString( const char* shader_program, GLenum type );

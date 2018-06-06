@@ -1,14 +1,16 @@
 #include "Image.hpp"
 #include "Engine/../ThirdParty/stb/stb_image.h"
 
-Image::Image( const std::string& imageFilePath )
+Image::Image( const std::string& imageFilePath, bool flipVertically /* = false */ )
 {
 	int numComponents = 0;
 	int numComponentsRequested = 0;
 
 	// Get const char* n of all the pixels
+	stbi_set_flip_vertically_on_load( flipVertically );
 	unsigned char* imageData = stbi_load( imageFilePath.c_str(), &m_dimensions.x, &m_dimensions.y, &numComponents, numComponentsRequested );
-	
+	stbi_set_flip_vertically_on_load( false );
+
 	// Get array size as per color unit
 	const int totalPixals = m_dimensions.x * m_dimensions.y;
 	const int componentsPerPixal = numComponents;
@@ -57,7 +59,19 @@ void Image::SetTexel( int x, int y, const Rgba& color )
 	m_texels[ index ] = color;
 }
 
-unsigned char* Image::GetPointerToTexelVector()
+unsigned char * Image::GetPointerToTexelVector()
 {
 	return (unsigned char*) m_texels.data();
+}
+
+unsigned char const* Image::GetBuffer( uint offsetX, uint offsetY ) const
+{
+	uint index = GetIndexFromColumnRowNumberForMatrixOfWidth( offsetX, offsetY, m_dimensions.x );
+	
+	// unsigned char* buffer = (unsigned char*) m_texels.data();
+	// *buffer += index;
+	//		vs.
+	// (unsigned char*) ( m_texels.data() + index );
+	
+	return (unsigned char*) ( m_texels.data() + index );
 }

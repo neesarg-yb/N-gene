@@ -1,4 +1,6 @@
+#pragma once
 #include "Engine/Core/Rgba.hpp"
+#include "Engine/Math/Vector4.hpp"
 
 Rgba::Rgba() {
 	r = 255;
@@ -45,6 +47,18 @@ void Rgba::GetAsFloats( float& normalizedRed, float& normalizedGreen, float& nor
 	normalizedGreen = RangeMapFloat(g, 0.f, 255.f, 0.f, 1.f);
 	normalizedBlue  = RangeMapFloat(b, 0.f, 255.f, 0.f, 1.f);
 	normalizedAlpha = RangeMapFloat(a, 0.f, 255.f, 0.f, 1.f);
+}
+
+Vector4 Rgba::GetAsNormalizedRgba() const
+{
+	Vector4 normalizedRgba;
+
+	normalizedRgba.x = RangeMapFloat(r, 0.f, 255.f, 0.f, 1.f);
+	normalizedRgba.y = RangeMapFloat(g, 0.f, 255.f, 0.f, 1.f);
+	normalizedRgba.z = RangeMapFloat(b, 0.f, 255.f, 0.f, 1.f);
+	normalizedRgba.w = RangeMapFloat(a, 0.f, 255.f, 0.f, 1.f);
+
+	return normalizedRgba;
 }
 
 void Rgba::ScaleRGB( float rgbScale ) {

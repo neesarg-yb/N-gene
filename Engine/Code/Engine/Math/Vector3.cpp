@@ -2,7 +2,9 @@
 #include <math.h>
 #include "Vector3.hpp"
 #include "Engine/Math/MathUtil.hpp"
+#include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/Matrix44.hpp"
+#include "Engine/Core/EngineCommon.hpp"
 
 Vector3 Vector3::ZERO		= Vector3( 0.f, 0.f, 0.f );
 Vector3 Vector3::ONE_ALL	= Vector3( 1.f, 1.f, 1.f );
@@ -69,6 +71,39 @@ Vector3 Vector3::GetNormalized() const
 	return Vector3( x/lengthOfVec, y/lengthOfVec, z/lengthOfVec );
 }
 
+Vector3 Vector3::GetAsDirection() const
+{
+	Matrix44 rotationMatrix;
+	rotationMatrix.RotateDegrees3D( *this );
+
+	Vector3 unitForwardVector = Vector3( 0.f, 0.f, 1.f );
+	
+	return rotationMatrix.Multiply( unitForwardVector, 0.f );
+}
+
+void Vector3::GetTangentAndBitangent( Vector3 *tangent, Vector3 *bitangent /* = nullptr */ ) const
+{
+	Vector3 rightDir		= CrossProduct( *this, Vector3::UP );
+	float	rightDirLength	= rightDir.GetLength();
+
+	if ( rightDirLength == 0.0f )
+		rightDir	= CrossProduct( *this, Vector3::RIGHT );
+	
+	rightDir		= rightDir.GetNormalized();
+	Vector3 upDir	= CrossProduct( rightDir, *this );
+	upDir			= upDir.GetNormalized();
+
+	if( tangent != nullptr )
+		*tangent	= rightDir;
+	if( bitangent != nullptr )
+		*bitangent	= upDir;
+}
+
+Vector2 Vector3::IgnoreZ() const
+{
+	return Vector2( x, y );
+}
+
 Vector3 Vector3::CrossProduct( const Vector3& first_vec, const Vector3& second_vec )
 {
 	Vector3 toReturn;
@@ -115,8 +150,9 @@ void Vector3::SetFromText( const char* text )
 
 Vector3 PolarToCartesian( float radius, float rotation, float altitude )
 {
-	float x = radius * CosDegree( rotation ) * SinDegree( altitude );
-	float z = radius * SinDegree( rotation ) * SinDegree( altitude );
+	TODO( "This one is right, but according to my calculation x & z should be flipped.." );
+	float z = radius * SinDegree( altitude ) * SinDegree( rotation );
+	float x = radius * SinDegree( altitude ) * CosDegree( rotation );
 	float y = radius * CosDegree( altitude );
 
 	return Vector3( x, y, z );

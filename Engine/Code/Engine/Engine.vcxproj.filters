@@ -40,6 +40,12 @@
     <Filter Include="Renderer\Post Processing">
       <UniqueIdentifier>{080ec86a-3c33-481a-a10f-3dddd447dca1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Light">
+      <UniqueIdentifier>{bc2da2ea-704d-4dd1-9e80-8b57d61ebc5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Rendering Pipeline">
+      <UniqueIdentifier>{59cdb8d0-e565-4e15-b8f1-f70e51e101df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Math\Vector2.cpp">
@@ -209,6 +215,48 @@
     </ClCompile>
     <ClCompile Include="Core\Vertex.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Shader.cpp">
+      <Filter>Renderer\Post Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\RenderTypes.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vector4.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Light.cpp">
+      <Filter>Renderer\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="File\ModelLoader.cpp">
+      <Filter>File</Filter>
+    </ClCompile>
+    <ClCompile Include="File\File.cpp">
+      <Filter>File</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\UniformBuffer.cpp">
+      <Filter>Renderer\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Material.cpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\MaterialProperty.cpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Renderable.cpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\ForwardRenderingPath.cpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Scene.cpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\DrawCall.cpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\TextureCube.cpp">
+      <Filter>Renderer\Texture and Fonts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -409,6 +457,45 @@
     </ClInclude>
     <ClInclude Include="Renderer\VertexLayout.hpp">
       <Filter>Renderer\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Shader.hpp">
+      <Filter>Renderer\Post Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\RenderTypes.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector4.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Light.hpp">
+      <Filter>Renderer\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="File\ModelLoader.hpp">
+      <Filter>File</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\UniformBuffer.hpp">
+      <Filter>Renderer\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\MaterialProperty.hpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Material.hpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderable.hpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\ForwardRenderingPath.hpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Scene.hpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\DrawCall.hpp">
+      <Filter>Renderer\Rendering Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\TextureCube.hpp">
+      <Filter>Renderer\Texture and Fonts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

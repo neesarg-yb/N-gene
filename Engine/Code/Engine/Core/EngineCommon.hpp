@@ -3,25 +3,13 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/../ThirdParty/tinyxml/tinyxml2.h"
 
-typedef unsigned char byte_t;
 typedef tinyxml2::XMLElement XMLElement;
 typedef tinyxml2::XMLAttribute XMLAttribute;
+typedef unsigned int uint;
 
+#define MAX_LIGHTS 8U
 const  float	   g_aspectRatio = 1.77f;
 
-enum eTextureFormat 
-{
-	TEXTURE_FORMAT_RGBA8,	// default color format
-	TEXTURE_FORMAT_D24S8, 
-}; 
-
-enum ePrimitiveType
-{
-	PRIMITIVE_POINTS,		// in OpenGL, for example, this becomes GL_POINTS
-	PRIMITIVE_LINES,		// in OpenGL, for example, this becomes GL_LINES
-	PRIMITIVE_TRIANGES,		// in OpenGL, for example, this becomes GL_TRIANGLES
-	NUM_PRIMITIVE_TYPES
-};
 
 #define UNUSED(x) (void)(x);
 #define ARRAY_LENGTH(array) (sizeof((array))/sizeof((array)[0]))

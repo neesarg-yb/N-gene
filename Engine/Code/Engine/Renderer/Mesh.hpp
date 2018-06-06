@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Renderer/RenderTypes.hpp"
 #include "Engine/Renderer/VertexBuffer.hpp"
 #include "Engine/Renderer/IndexBuffer.hpp"
 #include "Engine/Renderer/VertexLayout.hpp"
@@ -10,7 +11,7 @@ struct DrawInstruction
 	ePrimitiveType	primitiveType	= PRIMITIVE_TRIANGES;
 	unsigned int	startIndex		= 0;
 	unsigned int	elementCount	= 0;
-	bool			isUsingIndices	= false;
+	bool			isUsingIndices	= true;
 
 	DrawInstruction() {};
 	DrawInstruction( ePrimitiveType primitiveType, unsigned int startIndex, unsigned int elementCount, bool isUsingIndices )

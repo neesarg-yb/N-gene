@@ -40,7 +40,7 @@ public:
 	void Append		( const Matrix44& matrixToAppend );						// a.k.a. Concatenate (right-multiply)
 	void Transpose	();
 	
-	Vector3 Multiply	( const Vector3& vecToMultiply, const float w );	// Mat44 * Vec4( x, y, z, w )
+	Vector3 Multiply	( const Vector3& vecToMultiply, const float w ) const;	// Mat44 * Vec4( x, y, z, w )
 
 	// Modifiers
 	void Translate2D	( const Vector2& translation );
@@ -49,7 +49,7 @@ public:
 	void ScaleUniform2D	( float scaleXY );
 
 	void Translate3D	( Vector3 const &translation );
-	void RotateDegrees3D( Vector3 const &rotateAroundAxisZXY );				// Rotation Order, Around Axis: Z(Roll, clockwise) --> X(Pitch, clockwise) --> Y(Yaw, counter-clockwise)
+	void RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ );				// Rotation Order, Around Axis:  Z(Roll, clockwise) --> X(Pitch, clockwise) --> Y(Yaw, counter-clockwise)
 	void Scale3D		( Vector3 const &scale );
 	void ScaleUniform3D	( float uniformScale );
 

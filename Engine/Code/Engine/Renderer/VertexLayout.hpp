@@ -11,10 +11,10 @@ struct VertexAttribute
 	eRenderDataType			type;
 	unsigned int			elementsCount;
 	bool					normalize;
-	unsigned int			memberOffset;
+	size_t					memberOffset;
 
 	VertexAttribute() { };
-	VertexAttribute( std::string name, eRenderDataType dataType, unsigned int elemCount, bool normalize, unsigned int memberOffset )
+	VertexAttribute( std::string name, eRenderDataType dataType, unsigned int elemCount, bool normalize, size_t memberOffset )
 	{
 		this->name			= name;
 		this->type			= dataType;

@@ -77,6 +77,18 @@ char ParseXmlAttribute( const XMLElement& element, const char* attributeName, ch
 
 	 return returnValue;
  }
+ 
+
+ Vector4 ParseXmlAttribute( const XMLElement& element, const char* attributeName, const Vector4& defaultValue )
+ {
+	 Vector4 returnValue = defaultValue;
+	 const char* fetchedString = element.Attribute(attributeName);
+
+	 if( fetchedString != NULL )
+		 returnValue.SetFromText( fetchedString );
+
+	 return returnValue;
+ }
 
  IntRange ParseXmlAttribute( const XMLElement& element, const char* attributeName, const IntRange& defaultValue )
  {

@@ -1,9 +1,10 @@
 #pragma once
+#include <map>
+#include <string>
+#include "Engine/Core/Image.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Math/IntVector2.hpp"
-#include "Engine/Core/Image.hpp"
-#include <string>
-#include <map>
+#include "Engine/Renderer/RenderTypes.hpp"
 
 class Texture
 {
@@ -14,10 +15,13 @@ public:
 	unsigned int GetWidth () const;
 	unsigned int GetHeight() const;
 
+public:
+	~Texture();
+
 private:
-	Texture() {};
-	Texture( const std::string& imageFilePath );	// Use renderer->CreateOrGetTexture() instead!
-	Texture( Image& image );						// Creates a Texture from Image object
+	 Texture() {};
+	 Texture( const std::string& imageFilePath );	// Use renderer->CreateOrGetTexture() instead!
+	 Texture( Image& image );						// Creates a Texture from Image object
 
 	void PopulateFromData	( unsigned char* imageData, const IntVector2& texelSize, int numComponents );
 	bool CreateRenderTarget	( unsigned int width, unsigned int height, eTextureFormat fmt );

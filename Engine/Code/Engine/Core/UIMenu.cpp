@@ -35,7 +35,7 @@ void UIMenu::Update( float deltaSeconds )
 
 void UIMenu::Render() const
 {
-	m_activeRenderer.SetCurrentCameraTo( m_UICamera );
+	m_activeRenderer.BindCamera( m_UICamera );
 	m_activeRenderer.ClearDepth(1.f);
 	m_activeRenderer.EnableDepth( COMPARE_LESS, false );
 

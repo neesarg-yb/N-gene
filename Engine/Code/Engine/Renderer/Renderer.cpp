@@ -3,19 +3,31 @@
 #pragma comment( lib, "opengl32" )	// Link in the OpenGL32.lib static library
 #include "Engine/Renderer/glfunctions.hpp"
 #include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Renderer/ShaderProgram.hpp"
+#include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/Renderer/TextureCube.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Math/Vector4.hpp"
+#include "Engine/Math/Matrix44.hpp"
+#include "Engine/Math/Transform.hpp"
 
-GLuint		Renderer::s_default_vao			= NULL;
-Sampler*	Renderer::s_defaultSampler		= nullptr;
-Texture*	Renderer::s_defaultColorTarget	= nullptr;
-Texture*	Renderer::s_defaultDepthTarget	= nullptr;
-Camera*		Renderer::s_default_camera		= nullptr;
-Camera*		Renderer::s_current_camera		= nullptr;
+Renderer*	Renderer::s_renderer				= nullptr;
 
-Texture*	Renderer::s_effectCurrentSource = nullptr;
-Texture*	Renderer::s_effectCurrentTarget = nullptr;
-Texture*	Renderer::s_sketchColorTarget	= nullptr;
-Camera*		Renderer::s_effectsCamera		= nullptr;
+GLuint		Renderer::s_default_vao				= NULL;
+Sampler*	Renderer::s_defaultNearestSampler	= nullptr;
+Sampler*	Renderer::s_defaultLinearSampler	= nullptr;
+Texture*	Renderer::s_defaultColorTarget		= nullptr;
+Texture*	Renderer::s_defaultDepthTarget		= nullptr;
+Camera*		Renderer::s_default_camera			= nullptr;
+Camera*		Renderer::s_current_camera			= nullptr;
+
+Texture*	Renderer::s_effectCurrentSource		= nullptr;
+Texture*	Renderer::s_effectCurrentTarget		= nullptr;
+Texture*	Renderer::s_sketchColorTarget		= nullptr;
+Camera*		Renderer::s_effectsCamera			= nullptr;
+
+unsigned int Renderer::s_maxConstantBufferBindings;
+unsigned int Renderer::s_maxConstantBufferSize;
 
 // Four needed variables.  Globals or private members of Renderer are fine; 
 static HMODULE gGLLibrary  = NULL; 
@@ -64,6 +76,9 @@ bool Renderer::RendererStartup( void* hwnd_voidptr )
 	gHDC = hdc; 
 	gGLContext = real_context; 
 
+	// For CubeMap
+	glEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
+
 	PostStartup();
 
 	return true; 
@@ -73,7 +88,8 @@ void Renderer::RendererShutdown()
 {
 	ReleaseDC( gGLwnd, gHDC );
 
-	delete s_defaultSampler;
+	delete s_defaultNearestSampler;
+	delete s_defaultLinearSampler;
 }
 
 void Renderer::GLShutdown()
@@ -96,7 +112,8 @@ void Renderer::PostStartup()
 	glGenVertexArrays( 1, &s_default_vao ); 
 	glBindVertexArray( s_default_vao ); 
 
-	s_defaultSampler = new Sampler();
+	s_defaultNearestSampler = new Sampler( SAMPLER_NEAREST );
+	s_defaultLinearSampler	= new Sampler( SAMPLER_LINEAR  );
 
 	// the default color and depth should match our output window
 	// so get width/height however you need to.
@@ -122,8 +139,20 @@ void Renderer::PostStartup()
 	s_effectsCamera->SetColorTarget( s_defaultColorTarget );
 	s_effectsCamera->SetDepthStencilTarget( s_defaultDepthTarget );
 
-	// set our default camera to be our current camera
-	SetCurrentCameraTo( nullptr ); 
+	// Checking how many UBOs I can bound..
+	GLint ubo_vs, ubo_fs, ubo_gs;
+	glGetIntegerv( GL_MAX_VERTEX_UNIFORM_BLOCKS, &ubo_vs );
+	glGetIntegerv( GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &ubo_fs );
+	glGetIntegerv( GL_MAX_GEOMETRY_UNIFORM_BLOCKS, &ubo_gs );
+	GLint minBlocks = ubo_vs	< ubo_fs ? ubo_vs : ubo_fs;
+	minBlocks		= minBlocks < ubo_gs ? minBlocks : ubo_gs;
+	s_maxConstantBufferBindings = (unsigned int) minBlocks;
+
+	GLint uboSize;
+	glGetIntegerv( GL_MAX_UNIFORM_BLOCK_SIZE, &uboSize );
+	s_maxConstantBufferSize = (unsigned int) uboSize;
+
+	GL_CHECK_ERROR(); 
 }
 
 bool Renderer::CopyFrameBuffer( FrameBuffer *dst, FrameBuffer *src )
@@ -179,40 +208,21 @@ bool Renderer::CopyFrameBuffer( FrameBuffer *dst, FrameBuffer *src )
 void Renderer::LoadAllInbuiltShaders()
 {
 	// Load the default shader
-	ShaderProgram* def_shaderProg = LoadShaderProgramFromStrings( "default", ShaderProgram::GetDefaultVertexShaderSource(), ShaderProgram::GetDefaultFragmentShaderSource() );
 	
-	m_defaultShader = def_shaderProg;
+	m_defaultShader = CreateOrGetShader( "default" );
 	m_currentShader = m_defaultShader;
 }
 
-ShaderProgram* Renderer::LoadShaderProgramFromStrings( const char* name, const char* vs_program, const char* fs_program )
-{
-	// If shader program exists, return the old one
-	std::map< std::string, ShaderProgram* >::iterator it = m_shaderProgramPool.find( name );
-	if( it != m_shaderProgramPool.end() )
-	{
-		return m_shaderProgramPool[ name ];
-	}
-	else
-	{
-		ShaderProgram* toReturn = new ShaderProgram();
-		bool newShaderLoaded = toReturn->LoadFromStrings( vs_program, fs_program );
-
-		GUARANTEE_RECOVERABLE( newShaderLoaded == true, std::string("Renderer: Failed to load ") + std::string(name) + std::string(" shader") );
-
-		m_shaderProgramPool[ name ] = toReturn;
-		return toReturn;
-	}
-}
-
-ShaderProgram* Renderer::CreateOrGetShaderProgram( const char* name )
+Shader* Renderer::CreateOrGetShader( const char* shaderfileName )
 {
 	// check for the name in pool
 		// if found, return its pointer
 		// else create a new one, add to pool and return appropriate pointer
 			// newShader in success & defaultShader on failure
-	ShaderProgram* toReturn = nullptr;
-	bool foundShaderProgram = FindShaderProgramFromPool( name, toReturn );
+	std::string name = shaderfileName + std::string(".shader");
+
+	Shader* toReturn = nullptr;
+	bool foundShaderProgram = FindShaderFromPool( name, toReturn );
 
 	if( foundShaderProgram )
 	{
@@ -220,41 +230,138 @@ ShaderProgram* Renderer::CreateOrGetShaderProgram( const char* name )
 	}
 	else
 	{
-		std::string relativePath = "Data//Shaders//" + std::string(name);
-
-		toReturn = new ShaderProgram();
-		bool newShaderLoaded = toReturn->LoadFromFiles( relativePath.c_str() );
-
-		if( newShaderLoaded )
-		{
-			m_shaderProgramPool[ name ] = toReturn;
-			return toReturn;
-		}
-		else
-		{
-			delete toReturn;
-			return m_defaultShader;
-		}
+		std::string relativePath	= "Data//Shaders//" + std::string(name);
+		toReturn					= Shader::CreateNewFromFile( relativePath );
+		
+		m_shaderPool[ name ] = toReturn;
+		return toReturn;
 	}
 
 }
 
-void Renderer::UseShaderProgram( ShaderProgram* useShader )
+void Renderer::UseShader( Shader const *useShader )
 {
-	m_currentShader = useShader != nullptr ? useShader : m_defaultShader;
+	m_currentShader = (useShader != nullptr) ? useShader : m_defaultShader;
+
+	GLuint programHandle = m_currentShader->m_program->GetHandle();
+	glUseProgram( programHandle );
+
+	BindRenderState( m_currentShader->m_renderState );
+
+	GL_CHECK_ERROR();
 }
 
-void Renderer::SetPassFloatForShaderTo( float passFloatToShader )
+void Renderer::BindRenderState( RenderState const &renderState )
 {
-	m_passFloatToShader = passFloatToShader;
+	// Cull Mode
+	SetCullingMode( renderState.m_cullMode );
+	
+	// Fill Mode
+	glPolygonMode( GL_FRONT_AND_BACK, GetAsOpenGLDataType( renderState.m_fillMode ) );
+
+	// Wind Order
+	glFrontFace( GetAsOpenGLDataType( renderState.m_frontFace ) );
+
+	// Depth State
+	if ( renderState.m_depthEnabled != true )
+		EnableDepth( COMPARE_ALWAYS, false );
+	else
+		EnableDepth( renderState.m_depthCompare, renderState.m_depthWrite );
+
+	// Blending
+	if (renderState.m_blendEnabled)
+	{
+		// Setting operation for color & alpha
+		glBlendEquationSeparate( GetAsOpenGLDataType( renderState.m_colorBlendOp ),		// ColorBlending
+							     GetAsOpenGLDataType( renderState.m_alphaBlendOp ) );	// AlphaBlending
+
+		// Setting (src, dest) blendFactor for color & alpha
+		glBlendFuncSeparate( GetAsOpenGLDataType( renderState.m_colorSrcFactor ),		// ColorBlending
+							 GetAsOpenGLDataType( renderState.m_colorDstFactor ),
+							 GetAsOpenGLDataType( renderState.m_alphaSrcFactor ),		// AlphaBlending
+							 GetAsOpenGLDataType( renderState.m_alphaDstFactor ) );
+	}
 }
 
-void Renderer::ResetPassFloatForShaderToZero()
+void Renderer::BindMaterialForShaderIndex( Material &material, uint shaderIndex /* = 0 */ )
 {
-	m_passFloatToShader = 0.f;
+	// Bind ShaderProgram and State
+	Shader const	*thisShader			= material.GetShader( shaderIndex );
+	unsigned int	 thisShaderHandle	= thisShader->m_program->GetHandle();
+	UseShader( thisShader );
+
+	// Bind the Material specific properties
+	for ( std::map< unsigned int, Texture const* >::iterator	bindPointTexturePair  = material.m_textureBindingPairs.begin();
+																bindPointTexturePair != material.m_textureBindingPairs.end();
+																bindPointTexturePair++ )
+	{
+		unsigned int	thisBindingPoint	= bindPointTexturePair->first;
+		Texture const*	thisTexture			= bindPointTexturePair->second;
+		Sampler const*	thisSampler			= material.m_samplerBindingPairs[ thisBindingPoint ];
+
+		BindTexture2D( thisBindingPoint, *thisTexture, thisSampler );
+	}
+
+	// Bind Uniform Properties
+	for each ( MaterialProperty *prop in std::get<1>(material.m_shaderGroup[ shaderIndex ]) )
+		prop->Bind( thisShaderHandle );
 }
 
-void Renderer::ApplyEffect( ShaderProgram* effectShaderProgram )
+void Renderer::SetUniform( char const *name, float flt )
+{
+	GLint float_loc = glGetUniformLocation( m_currentShader->m_program->GetHandle(), name );
+	if (float_loc >= 0)
+		glUniform1fv( float_loc, 1, &flt );
+}
+
+void Renderer::SetUniform( char const *name, Vector3 const &vct )
+{
+	float values[3] = { vct.x, vct.y, vct.z	};
+
+	GLint vec3_loc = glGetUniformLocation( m_currentShader->m_program->GetHandle(), name );
+	if (vec3_loc >= 0)
+		glUniform3fv( vec3_loc, 1, (GLfloat*)&values );
+}
+
+void Renderer::SetUniform( char const *name, Vector4 const &vct )
+{
+	float values[4] = { vct.x, vct.y, vct.z, vct.w	};
+
+	GLint vec4_loc = glGetUniformLocation( m_currentShader->m_program->GetHandle(), name );
+	if (vec4_loc >= 0)
+		glUniform4fv( vec4_loc, 1, (GLfloat*)&values );
+}
+
+void Renderer::SetUniform( char const *name, Rgba const &clr )
+{
+	Vector4 colorNormalized;
+	clr.GetAsFloats( colorNormalized.x, colorNormalized.y, colorNormalized.z, colorNormalized.w );
+
+	GLint floats_loc = glGetUniformLocation( m_currentShader->m_program->GetHandle(), name );
+	if (floats_loc >= 0)
+		glUniform4fv( floats_loc, 1, (GLfloat*)&colorNormalized );
+}
+
+void Renderer::SetUniform( char const *name, Matrix44 const &mat44 )
+{
+	GLint mat_loc = glGetUniformLocation( m_currentShader->m_program->GetHandle(), name );
+	if (mat_loc >= 0)
+		glUniformMatrix4fv( mat_loc, 1, GL_FALSE, (GLfloat*)&mat44 );
+}
+
+void Renderer::UpdateTime( float gameDeltaSeconds, float systemDeltaSeconds )
+{
+	UBOTimeData *timeUBO = m_timeUBO->As< UBOTimeData >();
+
+	timeUBO->gameDeltaTime		 = gameDeltaSeconds;
+	timeUBO->gameTotalTime		+= gameDeltaSeconds;
+	timeUBO->systemDeltaTime	 = systemDeltaSeconds;
+	timeUBO->systemTotalTime	+= systemDeltaSeconds;
+
+	m_timeUBO->UpdateGPU();
+}
+
+void Renderer::ApplyEffect( Shader* effectShader )
 {
 	// Get current colorTarget
 	EnableDepth( eCompare::COMPARE_ALWAYS, true );
@@ -272,8 +379,8 @@ void Renderer::ApplyEffect( ShaderProgram* effectShaderProgram )
 	}
 
 	s_effectsCamera->SetColorTarget( s_effectCurrentTarget );
-	SetCurrentCameraTo( s_effectsCamera );
-	UseShaderProgram( effectShaderProgram );
+	s_effectsCamera->Finalize();			// NOTE! BindCamera( s_effectsCamera ) was used before, instead of Finalize()..!
+	UseShader( effectShader );
 
 	DrawTexturedAABB( AABB2::NDC_SIZE, *s_effectCurrentSource, Vector2::ZERO, Vector2::ONE_ONE, RGBA_WHITE_COLOR );
 	
@@ -286,8 +393,8 @@ void Renderer::EndEffect()
 	if( s_effectCurrentTarget == s_defaultColorTarget )
 	{
 		s_effectsCamera->SetColorTarget( s_defaultColorTarget ); // Render back to Default Color Target because this target will finally render onto the backbuffer
-		SetCurrentCameraTo( s_effectsCamera );
-		UseShaderProgram( m_defaultShader );
+		s_effectsCamera->Finalize();							 // NOTE! BindCamera( s_effectsCamera ) was used before, instead of Finalize()..!
+		UseShader( m_defaultShader );
 		
 		DrawTexturedAABB( AABB2::NDC_SIZE, *s_sketchColorTarget, Vector2::ZERO, Vector2::ONE_ONE, RGBA_WHITE_COLOR );
 	}
@@ -410,6 +517,22 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glBlitFramebuffer );
 
 	GL_BIND_FUNCTION( glPolygonMode );
+	GL_BIND_FUNCTION( glCullFace );
+	GL_BIND_FUNCTION( glFrontFace );
+	GL_BIND_FUNCTION( glBlendEquationSeparate );
+	GL_BIND_FUNCTION( glBlendFuncSeparate );
+
+	GL_BIND_FUNCTION( glUniform1fv );
+	GL_BIND_FUNCTION( glUniform2fv );
+	GL_BIND_FUNCTION( glUniform3fv );
+	GL_BIND_FUNCTION( glUniform4fv );
+	GL_BIND_FUNCTION( glDisableVertexAttribArray );
+	GL_BIND_FUNCTION( glGetIntegerv );
+	GL_BIND_FUNCTION( glBindBufferBase );
+
+	GL_BIND_FUNCTION( glDeleteTextures );
+	GL_BIND_FUNCTION( glTexStorage2D );
+	GL_BIND_FUNCTION( glTexSubImage2D );
 }	
 	
 //------------------------------------------------------------------------
@@ -493,21 +616,6 @@ HGLRC CreateRealRenderContext( HDC hdc, int major, int minor )
 }
 
 
-
-int g_openGlPrimitiveTypes[ NUM_PRIMITIVE_TYPES ] =
-{
-	GL_POINTS,			// called PRIMITIVE_POINTS		in our engine
-	GL_LINES,			// called PRIMITIVE_LINES		in our engine
-	GL_TRIANGLES,		// called PRIMITIVE_TRIANGES	in our engine
-};
-
-int g_openGlDataTypes[ NUM_RDTs ] =
-{
-	GL_FLOAT,
-	GL_UNSIGNED_BYTE
-};
-
-
 Renderer::Renderer()
 {
 	framesBottomLeft = Vector2(0.f, 0.f);
@@ -527,49 +635,84 @@ Renderer::Renderer()
 
 	m_temp_render_buffer = new RenderBuffer();
 
-	// Setting up the default white texture
+	// Setting up the default texture(s)
 	Image white1x1Image( RGBA_WHITE_COLOR );
-	m_defaultWhiteTexture = new Texture( white1x1Image );
+	m_defaultWhiteTexture = new Texture( white1x1Image );			// Diffuse Texture : WHITE
+	Image normal1x1Image( Rgba( 127, 127, 255, 255 ) );
+	m_defaultNormalTexture = new Texture( normal1x1Image );			// Normal Texture  : RGB( 0.5, 0.5, 1.0 )
+	Image emessive1x1Image( RGBA_BLACK_COLOR );
+	m_defaultEmissiveTexture = new Texture( emessive1x1Image );		// Emissive Texture: BLACK
 
 	m_immediateMesh = new Mesh();
-}
 
-Renderer::Renderer( const Vector2& bottomLeft, const Vector2& topRight, const Rgba& inkColor, float drawingThickness ) {
-	framesBottomLeft = bottomLeft;
-	framesTopRight = topRight;
-	this->defaultInkColor = inkColor;
-	this->defaultDrawingThickness = drawingThickness;
+	// Creating the UBO
+	UBOTimeData timeStructToCopy;
+	m_timeUBO = UniformBuffer::For< UBOTimeData >( timeStructToCopy );
+	glBindBufferBase( GL_UNIFORM_BUFFER, 1, m_timeUBO->GetHandle() );
 
-	glLineWidth( defaultDrawingThickness );
-	glEnable( GL_BLEND );
-	glEnable( GL_LINE_SMOOTH );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	UBOObjectLightData objectLightDataToCopy;
+	m_objectLightDataUBO = UniformBuffer::For< UBOObjectLightData >( objectLightDataToCopy );
+	glBindBufferBase( GL_UNIFORM_BUFFER, 3, m_objectLightDataUBO->GetHandle() );
 
-	LoadAllInbuiltShaders();
+	UBOLightsBlock lightsBlockToCopy;
+	m_lightsBlockUBO = UniformBuffer::For< UBOLightsBlock >( lightsBlockToCopy );
+	glBindBufferBase( GL_UNIFORM_BUFFER, 4, m_lightsBlockUBO->GetHandle() );
 
-	m_temp_render_buffer = new RenderBuffer();
+	// set our default camera to be our current camera
+	BindCamera( nullptr );
 
-	// Setting up the default white texture
-	Image white1x1Image( RGBA_WHITE_COLOR );
-	m_defaultWhiteTexture = new Texture( white1x1Image );
-
-	m_immediateMesh = new Mesh();
+	s_renderer = this;
 }
 
 Renderer::~Renderer()
 {
-	TODO("Delete all loaded Textures of the texturePool..");
+	// Empty the TexturePool
+	while ( m_texturePool.size() > 0 )
+	{
+		delete m_texturePool.back().texture;
+		m_texturePool.back().texture = nullptr;
+		m_texturePool.pop_back();
+	}
+
+	// Empty the ShaderPool
+	for ( std::map< std::string, Shader*>::iterator it  = m_shaderPool.begin(); 
+													it != m_shaderPool.end(); 
+													it++ )
+	{
+		delete it->second;
+		it->second = nullptr;
+	}
+	m_shaderPool.clear();
+
+	// Other delete(s)
+	delete m_lightsBlockUBO;
+	delete m_objectLightDataUBO;
+	delete m_timeUBO;
 
 	if( m_immediateMesh != nullptr )
 		delete m_immediateMesh;
 
 	delete m_temp_render_buffer;
+	delete m_defaultEmissiveTexture;
+	delete m_defaultNormalTexture;
 	delete m_defaultWhiteTexture;
+}
+
+Renderer* Renderer::GetInstance()
+{
+	return s_renderer;
 }
 
 void Renderer::BeginFrame() 
 {
-	UseShaderProgram( m_defaultShader );
+	UseShader( m_defaultShader );
+
+	m_lightsBlockUBO->UpdateGPU();
+	m_objectLightDataUBO->UpdateGPU();
+
+	// To prevent RenderDoc from crashing..
+	for (int i = 0; i < 16; i++)
+		glDisableVertexAttribArray( (GLint) i );
 }
 
 void Renderer::EndFrame() 
@@ -577,9 +720,9 @@ void Renderer::EndFrame()
 	// copies the default camera's framebuffer to the "null" framebuffer, 
 	// also known as the back buffer.
 	if( s_current_camera != nullptr )
-		CopyFrameBuffer( nullptr, &s_current_camera->m_output_framebuffer ); 
+		CopyFrameBuffer( nullptr, &s_current_camera->m_outputFramebuffer ); 
 	else
-		CopyFrameBuffer( nullptr, &s_default_camera->m_output_framebuffer );
+		CopyFrameBuffer( nullptr, &s_default_camera->m_outputFramebuffer );
 
 	// "Present" the backbuffer by swapping the front (visible) and back (working) screen buffers
 	SwapBuffers( gHDC ); 
@@ -601,62 +744,111 @@ void Renderer::ClearColor( const Rgba& clearColor )
 	glClear( GL_COLOR_BUFFER_BIT );
 }
 
-void Renderer::SetProjectionMatrix( float screen_height, float screen_near, float screen_far )
+void Renderer::SetAmbientLight( Vector4 normalizedAmbientLight )
 {
-	if( s_current_camera == nullptr )
-		s_default_camera->SetProjectionOrtho( screen_height, screen_near, screen_far );
-	else
-		s_current_camera->SetProjectionOrtho( screen_height, screen_near, screen_far );
+	normalizedAmbientLight.Clamp01();
+	
+	UBOLightsBlock *thelightsBlock = m_lightsBlockUBO->As< UBOLightsBlock >();
+	thelightsBlock->ambientLight = normalizedAmbientLight;
 }
 
-void Renderer::SetCurrentTexture( Texture const * newTexture )
+void Renderer::SetAmbientLight( float intensity, Rgba const &color )
 {
-	m_currentTexture = newTexture;
+	UBOLightsBlock *theLightsBlock = m_lightsBlockUBO->As< UBOLightsBlock >();
+
+	Vector3 normalizedColor			= color.GetAsNormalizedRgba().IgnoreW();
+	theLightsBlock->ambientLight.x	= normalizedColor.x;
+	theLightsBlock->ambientLight.y	= normalizedColor.y;
+	theLightsBlock->ambientLight.z	= normalizedColor.z;
+	theLightsBlock->ambientLight.w	= ClampFloat01( intensity );
+}
+
+void Renderer::DisableAllLights()
+{
+	UBOLightsBlock *theLightsBlock = m_lightsBlockUBO->As< UBOLightsBlock >();
+
+	for (unsigned int i = 0; i < s_maxLights; i++)
+		theLightsBlock->lights[i].colorAndIntensity = Vector4::ZERO;
+}
+
+void Renderer::EnableLight(unsigned int idx, Light const &theLight)
+{
+	if( idx >= s_maxLights )
+		return;
+
+	UBOLightsBlock	*theLightsBlock = m_lightsBlockUBO->As< UBOLightsBlock >();
+	LightData		&lightToChange	= theLightsBlock->lights[idx];
+	
+	lightToChange					= theLight.GetLightDataForUBO();
+}
+
+void Renderer::SetSpecularConstants( float specAmount, float specPower )
+{
+	UBOObjectLightData *theObjectLightData = m_objectLightDataUBO->As< UBOObjectLightData >();
+
+	theObjectLightData->specularPower	= specPower;
+	theObjectLightData->specularAmount	= specAmount;
+}
+
+void Renderer::UpdateLightUBOs()
+{
+	// Binding the objectLightData
+	m_objectLightDataUBO->UpdateGPU();
+
+	// Binding the lightsBlock
+	m_lightsBlockUBO->UpdateGPU();
+}
+
+void Renderer::SetCurrentDiffuseTexture( Texture const * newTexture )
+{
+	if( newTexture != nullptr )
+		BindTexture2D( 0, *newTexture );
+	else
+		BindTexture2D( 0, *m_defaultWhiteTexture );
+}
+
+void Renderer::SetCurrentNormalTexture( Texture const * newNormalTexture )
+{
+	if( newNormalTexture != nullptr )
+		BindTexture2D( 1, *newNormalTexture );
+	else
+		BindTexture2D( 1, *m_defaultNormalTexture );
+}
+
+void Renderer::SetCurrentEmissiveTexture( Texture const * newEmessiveTexture )
+{
+	if( newEmessiveTexture != nullptr )
+		BindTexture2D( 2, *newEmessiveTexture );
+	else
+		BindTexture2D( 2, *m_defaultEmissiveTexture );
+}
+
+void Renderer::BindCamera( Camera *camera )
+{
+	// Set the Current Camera
+	if( camera != nullptr )
+		s_current_camera = camera;
+	else
+		s_current_camera = s_default_camera;
+
+	// Framebuffer & UBO updation
+	s_current_camera->Finalize();															// Bind Camera's Framebuffer
+	s_current_camera->UpdateUBO();															// Update UBO
+	glBindBufferBase( GL_UNIFORM_BUFFER, 2, s_current_camera->m_cameraUBO->GetHandle() );	// Bind UBO
+	
+	GL_CHECK_ERROR();
 }
 
 void Renderer::DrawMesh( Mesh const &mesh, const Matrix44 & modelMatrix /* = Matrix44() */ )
 {
-	if( m_currentTexture != nullptr )
-		BindTexture2D( *m_currentTexture );					// If rendering a texture
-	else
-		BindTexture2D( *m_defaultWhiteTexture );			// If rendering solid color, bind white-texture(1x1)
+	Camera *activeCamera = ( s_current_camera != nullptr ) ? s_current_camera : s_default_camera;
+	
+	BindMeshToProgram( m_currentShader->m_program, &mesh );
+	
+	// Bind all the Uniforms
+	SetUniform( "MODEL", modelMatrix );
+	SetUniform( "EYE_POSITION", activeCamera->m_cameraTransform.GetWorldPosition() );
 
-	if( m_secondaryTexture != nullptr )
-		BindTexture2D( *m_secondaryTexture, 1 );
-
-	Camera* activeCamera = nullptr;
-	if( s_current_camera != nullptr )
-		activeCamera = s_current_camera;
-	else
-		activeCamera = s_default_camera;
-
-
-	BindMeshToProgram( m_currentShader, &mesh );
-
-
-	// Now that it is described and bound, draw using our program
-	unsigned int program_handle = m_currentShader->GetHandle();
-	glUseProgram( program_handle ); 
-
-	// m_projection_matrix is a local variable;
-	GLint proj_mat_loc = glGetUniformLocation( program_handle, "PROJECTION" );
-	if (proj_mat_loc >= 0)
-		glUniformMatrix4fv( proj_mat_loc, 1, GL_FALSE, (GLfloat*)&activeCamera->m_proj_matrix );
-
-	GLint view_mat_loc = glGetUniformLocation( program_handle, "VIEW" );
-	if (view_mat_loc >= 0)
-		glUniformMatrix4fv( view_mat_loc, 1, GL_FALSE, (GLfloat*)&activeCamera->m_view_matrix );
-
-	GLint model_mat_loc = glGetUniformLocation( program_handle, "MODEL" );
-	if (model_mat_loc >= 0)
-		glUniformMatrix4fv( model_mat_loc, 1, GL_FALSE, (GLfloat*)&modelMatrix );
-
-	GLint pass_var_loc = glGetUniformLocation( program_handle, "PASSEDFLOAT" );
-	if( pass_var_loc >= 0 )
-		glUniform1f( pass_var_loc, m_passFloatToShader );
-
-
-	glBindFramebuffer( GL_FRAMEBUFFER, activeCamera->GetFrameBufferHandle() );
 	GLenum glPrimitiveType = GetAsOpenGLPrimitiveType( mesh.m_drawCallInstruction.primitiveType );
 
 	if( mesh.m_drawCallInstruction.isUsingIndices == true )
@@ -668,6 +860,8 @@ void Renderer::DrawMesh( Mesh const &mesh, const Matrix44 & modelMatrix /* = Mat
 	{
 		glDrawArrays( glPrimitiveType, 0, mesh.m_drawCallInstruction.elementCount );
 	}
+	
+	GL_CHECK_ERROR();
 }
 
 void Renderer::BindMeshToProgram( ShaderProgram const *shaderProgram, Mesh const *mesh )
@@ -682,7 +876,7 @@ void Renderer::BindMeshToProgram( ShaderProgram const *shaderProgram, Mesh const
 	{
 		VertexAttribute const &attribute = mesh->m_layout->GetAttributeAtIndex( attributeIdx );
 		
-		unsigned int bind = glGetAttribLocation( programHandle, attribute.name.c_str() );
+		int bind = glGetAttribLocation( programHandle, attribute.name.c_str() );
 		if( bind >= 0 )
 		{
 			glEnableVertexAttribArray( bind );
@@ -696,96 +890,8 @@ void Renderer::BindMeshToProgram( ShaderProgram const *shaderProgram, Mesh const
 				(GLvoid*) attribute.memberOffset );
 		}
 	}
-}
-
-void Renderer::DrawLine( const Vector2& start, const Vector2& end, const Rgba& startColor, const Rgba& endColor, float lineThickness ) {
-// 	UNIMPLEMENTED();
-
-	UNUSED( start );
-	UNUSED( end );
-	UNUSED( startColor );
-	UNUSED( endColor );
-	UNUSED( lineThickness );
-	/*
 	
-	// Setting line's thickness
-	glLineWidth(lineThickness);
-	glDisable( GL_TEXTURE_2D );
-
-	Vertex_3DPCU verts[] = { 
-		Vertex_3DPCU( start.GetAsVector3(), startColor, Vector2::ZERO ),
-		Vertex_3DPCU( end.GetAsVector3(),	endColor,	Vector2::ZERO )
-	};
-
-	DrawMeshImmediate( verts, 2, PRIMITIVE_LINES );
-
-	// Reset ink color & thickness
-	glColor4ub(defaultInkColor.r, defaultInkColor.g, defaultInkColor.b, defaultInkColor.a);
-	glLineWidth(defaultDrawingThickness);
-
-	*/
-}
-
-void Renderer::DrawFromVertexArray( const Vector2 vertex[], int arraySize, const Vector2& center, float orientationDegree, float scale ) {
-// 	UNIMPLEMENTED();
-
-	UNUSED( vertex );
-	UNUSED( arraySize );
-	UNUSED( center );
-	UNUSED( orientationDegree );
-	UNUSED( scale );
-	/*
-
-	glPushMatrix();
-	glTranslatef(center.x, center.y, 0.f);
-	glRotatef(orientationDegree, 0.f, 0.f, 1.f);
-	glScalef(scale, scale, scale);
-
-	// For loop for every line
-	for(int i=0; i<arraySize-1; i++) {
-		DrawLine(vertex[i], vertex[i+1], defaultInkColor, defaultInkColor, defaultDrawingThickness);
-	} 
-	DrawLine(vertex[arraySize-1], vertex[0], defaultInkColor, defaultInkColor, defaultDrawingThickness);
-
-	glPopMatrix();
-
-	*/
-}
-
-void Renderer::DrawPolygon( const Vector2& center, float radius, float sides, float orientationAngle ) {
-	// For loop for every line
-	for(float i=0; i<sides; i++) {
-		float startAngle = ( i * (360.f/sides) );
-		float endAngle = startAngle + (360.f/sides);
-
-		Vector2 startPoint;
-		Vector2 endPoint;
-
-		startPoint.x = ( center.x + (radius * CosDegree(startAngle + orientationAngle)));
-		startPoint.y = ( center.y + (radius * SinDegree(startAngle + orientationAngle)));
-		endPoint.x   = ( center.x + (radius * CosDegree(endAngle + orientationAngle)));
-		endPoint.y   = ( center.y + (radius * SinDegree(endAngle + orientationAngle)));
-
-		DrawLine(startPoint, endPoint, defaultInkColor, defaultInkColor, defaultDrawingThickness);
-	}
-}
-
-void Renderer::DrawDottedPolygon( const Vector2& center, float radius, float sides, float orientationAngle, const Rgba& color ) {
-	// For loop for every line
-	for(float i=0; i<sides; i+=2) {
-		float startAngle = ( i * (360.f/sides) );
-		float endAngle = startAngle + (360.f/sides);
-
-		Vector2 startPoint;
-		Vector2 endPoint;
-
-		startPoint.x = ( center.x + (radius * CosDegree(startAngle + orientationAngle)));
-		startPoint.y = ( center.y + (radius * SinDegree(startAngle + orientationAngle)));
-		endPoint.x   = ( center.x + (radius * CosDegree(endAngle + orientationAngle)));
-		endPoint.y   = ( center.y + (radius * SinDegree(endAngle + orientationAngle)));
-
-		DrawLine(startPoint, endPoint, color, color, defaultDrawingThickness);
-	}
+	GL_CHECK_ERROR();
 }
 
 void Renderer::DrawCube( const Vector3& center, const Vector3& dimensions, // width, height, depth
@@ -906,31 +1012,15 @@ void Renderer::DrawTexturedCube( const Vector3& center, const Vector3& dimension
 								 const AABB2& uv_bottom			 /* = AABB2::ONE_BY_ONE */, 
 								 const Texture* secondaryTexture /* = nullptr */           )
 {
-	m_currentTexture = texture;
 	m_secondaryTexture = secondaryTexture;
+	
+	Transform	modelTransform	= Transform( center, Vector3::ZERO, dimensions );
+	Mesh*		cubeMesh		= MeshBuilder::CreateCube( Vector3::ONE_ALL, Vector3::ZERO, color, uv_top, uv_side, uv_bottom );
+	
+	SetCurrentDiffuseTexture( texture );
+	DrawMesh( *cubeMesh, modelTransform.GetTransformMatrix() );
 
-	DrawCube( center, dimensions, color, uv_top, uv_side, uv_bottom );
-}
-
-void Renderer::DrawTexturedAABBArray( const Vertex_3DPCU* vertexes, int numVertexes, const Texture& texture )
-{
-//	UNIMPLEMENTED();
-
-	UNUSED( vertexes );
-	UNUSED( numVertexes );
-	UNUSED( texture );
-	/*
-
-	glEnable( GL_TEXTURE_2D );
-	glBindTexture( GL_TEXTURE_2D, texture.m_textureID );
-
-	DrawMeshImmediate( vertexes, numVertexes, PRIMITIVE_QUADS );
-
-	glColor4ub( defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a );
-
-	glDisable( GL_TEXTURE_2D );
-
-	*/
+	delete cubeMesh;
 }
 
 void Renderer::DrawText2D( const Vector2& drawMins, const std::string& asciiText, float cellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */ )
@@ -953,7 +1043,7 @@ void Renderer::DrawText2D( const Vector2& drawMins, const std::string& asciiText
 	}
 }
 
-void Renderer::DrawTextInBox2D( const std::string& asciiText, const Vector2& alignment, const AABB2& drawInBox, float desiredCellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */, TextDrawMode drawMode /* = TEXT_DRAW_OVERRUN */ )
+void Renderer::DrawTextInBox2D( const std::string& asciiText, const Vector2& alignment, const AABB2& drawInBox, float desiredCellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */, eTextDrawMode drawMode /* = TEXT_DRAW_OVERRUN */ )
 {
 	switch (drawMode)
 	{
@@ -1089,67 +1179,68 @@ void Renderer::DrawTextAsWordWrap( const std::string& asciiText, const Vector2& 
 	DrawTextAsShrinkToFit( bakedString, alignment, drawInBox, desiredCellHeight, tint, font );
 }
 
-void Renderer::BindTexture2D( const Texture& theTexture, unsigned int bindIndex /* = 0 */ )
+void Renderer::BindTexture2D( unsigned int bindIndex, const Texture& theTexture, Sampler const *theSampler /* = nullptr */ )
 {
 	GLuint textureIndex = bindIndex; // to see how they tie together
 	
 	// Bind the sampler;
-	glBindSampler( textureIndex, s_defaultSampler->GetHandle() ); 
+	if( theSampler == nullptr )
+		glBindSampler( textureIndex, s_defaultNearestSampler->GetHandle() ); 
+	else
+		glBindSampler( textureIndex, theSampler->GetHandle() );
+
 	// Bind the texture
 	glActiveTexture( GL_TEXTURE0 + textureIndex ); 
 	glBindTexture( GL_TEXTURE_2D, theTexture.m_textureID ); 
 }
 
+void Renderer::BindTextureCube( unsigned int bindIndex, const TextureCube& texCube, Sampler const *theSampler /*= nullptr */ )
+{
+	GLuint textureIndex = bindIndex; // to see how they tie together
+
+	// Bind the sampler;
+	if( theSampler == nullptr )
+		glBindSampler( textureIndex, s_defaultLinearSampler->GetHandle() ); 
+	else
+		glBindSampler( textureIndex, theSampler->GetHandle() );
+
+	// Bind the texture
+	glActiveTexture( GL_TEXTURE0 + textureIndex ); 
+	glBindTexture( GL_TEXTURE_CUBE_MAP, texCube.m_handle ); 
+}
+
 void Renderer::DrawAABB( const AABB2& bounds, const Rgba& color ) 
 {
-	m_currentTexture = nullptr;
+	Vector2		xyPosition		= ( bounds.maxs + bounds.mins ) * 0.5f;
+	Vector2		xyDimension		= Vector2( bounds.maxs.x - bounds.mins.x, bounds.maxs.y - bounds.mins.y );
+	Transform	modelTransform	= Transform( xyPosition.GetAsVector3(), Vector3::ZERO, xyDimension.GetAsVector3() );
+	Mesh*		planeMesh		= MeshBuilder::CreatePlane( Vector2::ONE_ONE, Vector3::ZERO, color );
 
-	Vertex_3DPCU verts[] = {
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.maxs.y ).GetAsVector3(), color, Vector2::ZERO ),	// Upper-left
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.maxs.y ).GetAsVector3(), color, Vector2::ZERO ),	// Upper-right
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.mins.y ).GetAsVector3(), color, Vector2::ZERO ),	// Bottom-right
-
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.mins.y ).GetAsVector3(), color, Vector2::ZERO ),	// Bottom-right
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.mins.y ).GetAsVector3(), color, Vector2::ZERO ),	// Bottom-left
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.maxs.y ).GetAsVector3(), color, Vector2::ZERO )	// Upper-left
-	};
-
-	DrawMeshImmediate( verts, 6, PRIMITIVE_TRIANGES );
+	SetCurrentDiffuseTexture( nullptr );
+	DrawMesh( *planeMesh, modelTransform.GetTransformMatrix() );
+	delete planeMesh;
 }
 
 
 void Renderer::DrawTexturedAABB( const AABB2& bounds, const Texture& texture, const Vector2& texCoordsAtMins, const Vector2& texCoordsAtMaxs, const Rgba& tint ) 
 {
-	m_currentTexture = &texture;
-
-	Vertex_3DPCU verts[] = {
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.maxs.y ).GetAsVector3(), tint, Vector2( texCoordsAtMins.x, texCoordsAtMaxs.y ) ),	// Upper-left
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.maxs.y ).GetAsVector3(), tint, Vector2( texCoordsAtMaxs.x, texCoordsAtMaxs.y ) ),	// Upper-right
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.mins.y ).GetAsVector3(), tint, Vector2( texCoordsAtMaxs.x, texCoordsAtMins.y ) ),	// Bottom-right
-
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.mins.y ).GetAsVector3(), tint, Vector2( texCoordsAtMaxs.x, texCoordsAtMins.y ) ),	// Bottom-right
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.mins.y ).GetAsVector3(), tint, Vector2( texCoordsAtMins.x, texCoordsAtMins.y ) ),	// Bottom-left
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.maxs.y ).GetAsVector3(), tint, Vector2( texCoordsAtMins.x, texCoordsAtMaxs.y ) )	// Upper-left
-	};
-
-	DrawMeshImmediate( verts, 6, PRIMITIVE_TRIANGES );
+	Vector2		xyPosition		= ( bounds.maxs + bounds.mins ) * 0.5f;
+	Vector2		xyDimension		= Vector2( bounds.maxs.x - bounds.mins.x, bounds.maxs.y - bounds.mins.y );
+	Transform	modelTransform	= Transform( xyPosition.GetAsVector3(), Vector3::ZERO, xyDimension.GetAsVector3() );
+	Mesh*		planeMesh		= MeshBuilder::CreatePlane( Vector2::ONE_ONE, Vector3::ZERO, tint, AABB2( texCoordsAtMins, texCoordsAtMaxs) );
+	
+	SetCurrentDiffuseTexture( &texture );
+	DrawMesh( *planeMesh, modelTransform.GetTransformMatrix() );
+	delete planeMesh;
 }
 
-void Renderer::DrawTexturedAABB( const Matrix44 &transformMatrix, const AABB2& bounds, const Texture& texture, const Vector2& texCoordsAtMins, const Vector2& texCoordsAtMaxs, const Rgba& tint )
+void Renderer::DrawTexturedAABB( const Matrix44 &transformMatrix, const Texture& texture, const Vector2& texCoordsAtMins, const Vector2& texCoordsAtMaxs, const Rgba& tint )
 {
-	m_currentTexture = &texture;
-
-	Vertex_3DPCU verts[] = {
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.maxs.y ).GetAsVector3(), tint, Vector2( texCoordsAtMins.x, texCoordsAtMaxs.y ) ),	// Upper-left
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.maxs.y ).GetAsVector3(), tint, Vector2( texCoordsAtMaxs.x, texCoordsAtMaxs.y ) ),	// Upper-right
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.mins.y ).GetAsVector3(), tint, Vector2( texCoordsAtMaxs.x, texCoordsAtMins.y ) ),	// Bottom-right
-
-		Vertex_3DPCU( Vector2( bounds.maxs.x, bounds.mins.y ).GetAsVector3(), tint, Vector2( texCoordsAtMaxs.x, texCoordsAtMins.y ) ),	// Bottom-right
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.mins.y ).GetAsVector3(), tint, Vector2( texCoordsAtMins.x, texCoordsAtMins.y ) ),	// Bottom-left
-		Vertex_3DPCU( Vector2( bounds.mins.x, bounds.maxs.y ).GetAsVector3(), tint, Vector2( texCoordsAtMins.x, texCoordsAtMaxs.y ) )	// Upper-left
-	};
-
-	DrawMeshImmediate( verts, 6, PRIMITIVE_TRIANGES, transformMatrix );
+	Mesh* planeMesh	= MeshBuilder::CreatePlane( Vector2::ONE_ONE, Vector3::ZERO, tint, AABB2( texCoordsAtMins, texCoordsAtMaxs) );
+	
+	SetCurrentDiffuseTexture( &texture );
+	DrawMesh( *planeMesh, transformMatrix );
+	delete planeMesh;
 }
 
 Texture* Renderer::CreateOrGetTexture( const std::string& pathToImage ) {
@@ -1162,7 +1253,7 @@ Texture* Renderer::CreateOrGetTexture( const std::string& pathToImage ) {
 		referenceToTexture = new Texture( pathToImage );
 
 		LoadedTexturesData newTexData = LoadedTexturesData( pathToImage, referenceToTexture );
-		texturePool.push_back(newTexData);
+		m_texturePool.push_back(newTexData);
 	}
 
 	return referenceToTexture;
@@ -1195,7 +1286,7 @@ Texture* Renderer::CreateOrGetTexture( const std::string& pathToImage ) {
 		 fontToReturn = new BitmapFont( std::string(bitmapFontName) , *bitmapFontSpritesheet , 1.f );
 
 		 // Add it to pool
-		 bitmapFontPool[ std::string(bitmapFontName) ] = fontToReturn;
+		 m_bitmapFontPool[ std::string(bitmapFontName) ] = fontToReturn;
 
 		 // return the bitmapFont
 		 return fontToReturn;
@@ -1205,10 +1296,10 @@ Texture* Renderer::CreateOrGetTexture( const std::string& pathToImage ) {
 
 bool Renderer::findTextureFromPool( const std::string& pathToImage , Texture* &foundTexture ) {
 	
-	for(unsigned int i=0; i<texturePool.size(); i++) {
+	for(unsigned int i=0; i<m_texturePool.size(); i++) {
 
-		if( pathToImage == texturePool[i].pathToImage ) {
-			foundTexture = texturePool[i].texture;
+		if( pathToImage == m_texturePool[i].pathToImage ) {
+			foundTexture = m_texturePool[i].texture;
 			return true;
 		}
 	}
@@ -1218,9 +1309,9 @@ bool Renderer::findTextureFromPool( const std::string& pathToImage , Texture* &f
 
 bool Renderer::findBitmapFontFromPool( const std::string& nameOfFont , BitmapFont* &foundFont )
 {
-	std::map< std::string , BitmapFont* >::iterator it = bitmapFontPool.find( nameOfFont );
+	std::map< std::string , BitmapFont* >::iterator it = m_bitmapFontPool.find( nameOfFont );
 
-	if( it != bitmapFontPool.end() )
+	if( it != m_bitmapFontPool.end() )
 	{
 		foundFont = it->second;
 		return true;
@@ -1229,68 +1320,17 @@ bool Renderer::findBitmapFontFromPool( const std::string& nameOfFont , BitmapFon
 	return false;
 }
 
-bool Renderer::FindShaderProgramFromPool( const std::string& nameOfShaderProgram, ShaderProgram* &foundShader )
+bool Renderer::FindShaderFromPool( const std::string& nameOfShaderProgram, Shader* &foundShader )
 {
-	std::map< std::string , ShaderProgram* >::iterator it = m_shaderProgramPool.find( nameOfShaderProgram );
+	std::map< std::string , Shader* >::iterator it = m_shaderPool.find( nameOfShaderProgram );
 
-	if( it != m_shaderProgramPool.end() )
+	if( it != m_shaderPool.end() )
 	{
 		foundShader = it->second;
 		return true;
 	}
 
 	return false;
-}
-
-GLenum Renderer::GetAsOpenGLPrimitiveType( ePrimitiveType inPrimitive ) const
-{
-	return g_openGlPrimitiveTypes[ inPrimitive ];
-}
-
-GLenum Renderer::GetAsOpenGLDataType( eRenderDataType inDataType ) const
-{
-	return g_openGlDataTypes[ inDataType ];
-}
-
-
-void Renderer::GLPushMatrix() {
-//	UNIMPLEMENTED();
-
-	// glPushMatrix();
-}
-
-void Renderer::GLTranslate( float x, float y, float z) {
-//	UNIMPLEMENTED();
-
-	UNUSED( x );
-	UNUSED( y );
-	UNUSED( z );
-	// glTranslatef(x, y, z);
-}
-
-void Renderer::GLRotate( float rotation, float x, float y, float z) {
-//	UNIMPLEMENTED();
-
-	UNUSED( rotation );
-	UNUSED( x );
-	UNUSED( y );
-	UNUSED( z );
-	// glRotatef(rotation, x, y, z);
-}
-
-void Renderer::GLScale( float x, float y, float z) {
-// 	UNIMPLEMENTED();
-
-	UNUSED( x );
-	UNUSED( y );
-	UNUSED( z );
-	// glScalef(x, y, z);
-}
-
-void Renderer::GLPopMatrix() {
-//	UNIMPLEMENTED();
-
-	// glPopMatrix();
 }
 
 Vector3 Renderer::GetDrawPositionUsingAnchorPoint( const Vector3& position, const Vector3& dimensions, const Vector3& anchorPoint /* = Vector3::ZERO */ )
@@ -1300,59 +1340,12 @@ Vector3 Renderer::GetDrawPositionUsingAnchorPoint( const Vector3& position, cons
 	return position - anchorPoin_X_halfDimensions;
 }
 
-void Renderer::GLBlendChangeBeforeAnimation() {
-//	UNIMPLEMENTED();
-
-	// glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-}
-
-void Renderer::GLBlendRestoreAfterAnimation() {
-//	UNIMPLEMENTED();
-
-	// glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-}
-
-GLenum Renderer::ToGLCompare( eCompare compare ) 
-{
-	// Convert our engine to GL enum 
-	switch ( compare )
-	{
-	case COMPARE_NEVER:
-		return GL_NEVER;
-		break;
-	case COMPARE_LESS:
-		return GL_LESS;
-		break;
-	case COMPARE_LEQUAL:
-		return GL_LEQUAL;
-		break;
-	case COMPARE_GREATER:
-		return GL_GREATER;
-		break;
-	case COMPARE_GEQUAL:
-		return GL_GEQUAL;
-		break;
-	case COMPARE_EQUAL:
-		return GL_EQUAL;
-		break;
-	case COMPARE_NOT_EQUAL:
-		return GL_NOTEQUAL;
-		break;
-	case COMPARE_ALWAYS:
-		return GL_ALWAYS;
-		break;
-	}
-
-	// It should not reach here..
-	return GL_NEVER;
-}
-
 //------------------------------------------------------------------------
 void Renderer::EnableDepth( eCompare compare, bool should_write )
 {
 	// enable/disable the test
 	glEnable( GL_DEPTH_TEST ); 
-	glDepthFunc( ToGLCompare(compare) ); 
+	glDepthFunc( GetAsOpenGLDataType(compare) ); 
 
 	// enable/disable write
 	glDepthMask( should_write ? GL_TRUE : GL_FALSE ); 
@@ -1371,18 +1364,18 @@ void Renderer::DisableDepth()
 //------------------------------------------------------------------------
 void Renderer::ClearDepth( float depth /* = 1.0f */ )
 {
+	glDepthMask( GL_TRUE );
 	glClearDepthf( depth );
 	glClear( GL_DEPTH_BUFFER_BIT ); 
 }
 
-void Renderer::SetCurrentCameraTo( Camera* newCamera )
+void Renderer::SetCullingMode( eCullMode newCullMode )
 {
-	s_current_camera = newCamera;
+	TODO("Cull mode none, glDisable()");
 
-	if( s_current_camera != nullptr )
-		s_current_camera->Finalize();
-	else
-		s_default_camera->Finalize();
+	glEnable( GL_CULL_FACE );
+	if (newCullMode != CULLMODE_NONE)
+		glCullFace( GetAsOpenGLDataType( newCullMode ) );
 }
 
 Texture* Renderer::CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt /* = TEXTURE_FORMAT_RGBA8 */ )
@@ -1396,6 +1389,14 @@ Texture* Renderer::CreateRenderTarget( unsigned int width, unsigned int height, 
 Texture* Renderer::CreateDepthStencilTarget( unsigned int width, unsigned int height )
 {
 	return CreateRenderTarget( width, height, TEXTURE_FORMAT_D24S8 ); 
+}
+
+Sampler const* Renderer::GetDefaultSampler( eSamplerType type /* = SAMPLER_NEAREST */ )
+{
+	if( type == SAMPLER_LINEAR )
+		return s_defaultLinearSampler;
+	else
+		return s_defaultNearestSampler;
 }
 
 Texture* Renderer::GetDefaultColorTarget()

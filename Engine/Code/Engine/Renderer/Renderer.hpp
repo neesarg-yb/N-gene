@@ -8,43 +8,29 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Math/AABB2.hpp"
 #include "Engine/Math/Vector2.hpp"
+#include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/MathUtil.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Renderer/Mesh.hpp"
 #include "Engine/Renderer/Texture.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
 #include "Engine/Renderer/External/glcorearb.h"
-#include "Engine/Renderer/ShaderProgram.hpp"
+#include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/RenderBuffer.hpp"
+#include "Engine/Renderer/UniformBuffer.hpp"
 #include "Engine/Renderer/Sampler.hpp"
+#include "Engine/Renderer/Light.hpp"
 #include "Engine/Renderer/Camera.hpp"
+#include "Engine/Renderer/RenderTypes.hpp"
+#include "Engine/Renderer/Material.hpp"
 
-enum TextDrawMode
-{
-	TEXT_DRAW_OVERRUN,
-	TEXT_DRAW_SHRINK_TO_FIT,
-	TEXT_DRAW_WORD_WRAP,
-	NUM_TEXT_DRAW_MODES
-};
-
-enum eCompare
-{
-	COMPARE_NEVER,			// GL_NEVER
-	COMPARE_LESS,			// GL_LESS
-	COMPARE_LEQUAL,			// GL_LEQUAL
-	COMPARE_GREATER,		// GL_GREATER
-	COMPARE_GEQUAL,			// GL_GEQUAL
-	COMPARE_EQUAL,			// GL_EQUAL
-	COMPARE_NOT_EQUAL,		// GL_NOTEQUAL
-	COMPARE_ALWAYS,			// GL_ALWAYS
-};
-
-enum eRenderDataType
-{
-	RDT_FLOAT = 0,			// GL_FLOAT
-	RDT_UNSIGNED_INT,		// GL_UNSIGNED_BYTE
-	NUM_RDTs
-};
+/*
+	UBO Binding Slots:
+		1 = uboTimeClock
+		2 = uboCamera
+		3 = uboObjectLightData
+		4 = uboLightsBlock
+*/
 
 struct LoadedTexturesData {
 	std::string pathToImage;
@@ -56,37 +42,50 @@ struct LoadedTexturesData {
 	}
 };
 
+class TextureCube;
+
 class Renderer
 {
 public:
 	static Camera*		s_current_camera;
 
 private:
-	RenderBuffer*		m_temp_render_buffer	= nullptr;
-	static Camera*		s_default_camera;
-	static Sampler*		s_defaultSampler;
-	static Texture*		s_defaultColorTarget;
-	static Texture*		s_defaultDepthTarget;
-	const  Texture*		m_defaultWhiteTexture	= nullptr;
-	const  Texture*		m_currentTexture		= nullptr;
-	const  Texture*		m_secondaryTexture		= nullptr;
+	static Renderer*	s_renderer;
 
-	static Camera*		s_effectsCamera;
-	static Texture*		s_sketchColorTarget;
-	static Texture*		s_effectCurrentTarget;
-	static Texture*		s_effectCurrentSource;
+	Mesh*					m_immediateMesh				= nullptr;
+	RenderBuffer*			m_temp_render_buffer		= nullptr;
+	UniformBuffer*			m_timeUBO					= nullptr;
+	UniformBuffer*			m_objectLightDataUBO		= nullptr;
+	UniformBuffer*			m_lightsBlockUBO			= nullptr;
+	static Camera*			s_default_camera;
+	static Sampler*			s_defaultNearestSampler;
+	static Sampler*			s_defaultLinearSampler;
+	static Texture*			s_defaultColorTarget;
+	static Texture*			s_defaultDepthTarget;
+	const  Texture*			m_defaultWhiteTexture		= nullptr;
+	const  Texture*			m_secondaryTexture			= nullptr;
+	const  Texture*			m_defaultNormalTexture		= nullptr;
+	const  Texture*			m_defaultEmissiveTexture	= nullptr;
 
-	Mesh*				m_immediateMesh			= nullptr;
-	float				m_passFloatToShader = 0.f;
+	static Camera*			s_effectsCamera;
+	static Texture*			s_sketchColorTarget;
+	static Texture*			s_effectCurrentTarget;
+	static Texture*			s_effectCurrentSource;
+
 
 public:
-	ShaderProgram* m_defaultShader = nullptr;
-	ShaderProgram* m_currentShader = nullptr;
+	Shader const *m_defaultShader = nullptr;
+	Shader const *m_currentShader = nullptr;
 	static GLuint  s_default_vao;
 
-	std::vector<LoadedTexturesData> texturePool;
-	std::map< std::string , BitmapFont* > bitmapFontPool;
-	std::map< std::string, ShaderProgram* > m_shaderProgramPool;
+	// How many UBOs
+	static unsigned int			s_maxConstantBufferBindings;
+	static unsigned int			s_maxConstantBufferSize;
+	static unsigned int const	s_maxLights = MAX_LIGHTS;
+
+	std::vector< LoadedTexturesData >		m_texturePool;
+	std::map< std::string , BitmapFont* >	m_bitmapFontPool;
+	std::map< std::string, Shader* >		m_shaderPool;
 
 	Vector2 framesBottomLeft;
 	Vector2 framesTopRight;
@@ -94,45 +93,82 @@ public:
 	Rgba	defaultColor;
 	float	defaultDrawingThickness;
 	
-	 Renderer	();
-	 Renderer	( const Vector2& bottomLeft, const Vector2& topRight, const Rgba& inkColor, float drawingThickness );
-	~Renderer	();
+	 Renderer();
+	~Renderer();
+
+	static Renderer*GetInstance();																						// Returns the last created Renderer instance
+	
+	void			BeginFrame();
+	void			EndFrame();
 
 	static bool		RendererStartup( void* hwnd );
 	static void		RendererShutdown();
 	static void		GLShutdown();
 
-	ShaderProgram*	CreateOrGetShaderProgram( const char* name );
-	void			LoadAllInbuiltShaders();																			// Also adds it to m_shaderProgramPool
-	ShaderProgram*	LoadShaderProgramFromStrings( const char* name, const char* vs_program, const char* fs_program );	// Note! If same program exists, returns the existing one
-	void			UseShaderProgram( ShaderProgram* useShader );
-	void			SetPassFloatForShaderTo( float passFloatToShader );
-	void			ResetPassFloatForShaderToZero();
+	Texture*		CreateOrGetTexture( const std::string& pathToImage );
+	BitmapFont*		CreateOrGetBitmapFont( const char* bitmapFontName );												// bitmapFontName = default, if it is default.png
+	Shader*			CreateOrGetShader( const char* shaderfileName );													// shaderFileName = default, if it is default.shader
 
-	void ApplyEffect( ShaderProgram* effectShaderProgram );
+	void SetAmbientLight( Vector4 normalizedAmbientLight );																// (x,y,z) = (r,g,b) & w = intensity_clamped_to_01
+	void SetAmbientLight( float intensity, Rgba const &color );															// intensity [ 0.f, 1.f ]
+	void DisableAllLights();
+	void EnableLight( unsigned int idx, Light const &theLight );
+	void SetSpecularConstants( float specAmount, float specPower );
+	void UpdateLightUBOs();																								// ObjectLightData & LightsBlock
+
+	void LoadAllInbuiltShaders();																						// Also adds it to m_shaderProgramPool
+	void UseShader( Shader const *useShader );
+	void BindRenderState( RenderState const &renderState );
+	void BindMaterialForShaderIndex( Material &material, uint shaderIndex = 0 );
+
+	void SetUniform( char const *name, float flt );
+	void SetUniform( char const *name, Vector3 const &vct );
+	void SetUniform( char const *name, Vector4 const &vct );
+	void SetUniform( char const *name, Rgba const &clr );
+	void SetUniform( char const *name, Matrix44 const &mat44 );
+	
+	void UpdateTime( float gameDeltaSeconds, float systemDeltaSeconds );
+		 
+	void ClearScreen( const Rgba& clearColor );
+	void ClearColor( const Rgba& clearColor );
+	void EnableDepth( eCompare compare, bool should_write );
+	void DisableDepth();
+	void ClearDepth( float depth = 1.0f );
+	void SetCullingMode( eCullMode newCullMode );
+
+	void ApplyEffect( Shader* effectShader );
 	void EndEffect();
 
-	void BeginFrame	();
-	void EndFrame	();
+	void SetCurrentDiffuseTexture	( Texture const * newTexture );
+	void SetCurrentNormalTexture	( Texture const * newNormalTexture );
+	void SetCurrentEmissiveTexture	( Texture const * newEmessiveTexture );
 
-	void GLPushMatrix();
-	void GLTranslate( float x, float y, float z);
-	void GLRotate( float rotation, float x, float y, float z);
-	void GLScale( float x, float y, float z);
-	void GLPopMatrix();
-
-	static Vector3	GetDrawPositionUsingAnchorPoint( const Vector3& position, const Vector3& dimensions, const Vector3& anchorPoint = Vector3::ZERO );	// AnchorPoints: Bottom = (0, -1, 0), Left = (-1, 0, 0), Far = (1, 0, 0)
-
-	void GLBlendChangeBeforeAnimation();
-	void GLBlendRestoreAfterAnimation();
-
-	void SetProjectionMatrix( float screen_height, float screen_near, float screen_far );								// takes (width, height, near, far)
-	void ClearScreen		( const Rgba& clearColor );
-	void ClearColor			( const Rgba& clearColor );
-
-	void SetCurrentTexture	( Texture const * newTexture );
-	void DrawMesh			( Mesh const &mesh, const Matrix44 & modelMatrix = Matrix44() );
+	void BindCamera			( Camera *camera );
 	void BindMeshToProgram	( ShaderProgram const *shaderProgram, Mesh const *mesh );
+	void BindTexture2D		( unsigned int bindIndex, const Texture& theTexture, Sampler const *theSampler = nullptr );
+	void BindTextureCube	( unsigned int bindIndex, const TextureCube& texCube, Sampler const *theSampler = nullptr );
+
+	void DrawTexturedCube	( const Vector3& center, const Vector3& dimensions,		// width, height, depth
+							  const Rgba&  color		= RGBA_WHITE_COLOR,
+							  const Texture* texture	= nullptr,					// if nullptr, draws a solid cube
+							  const AABB2& uv_top		= AABB2::ONE_BY_ONE, 
+							  const AABB2& uv_side	= AABB2::ONE_BY_ONE, 
+							  const AABB2& uv_bottom	= AABB2::ONE_BY_ONE,
+							  const Texture* secondaryTexture = nullptr );
+	void DrawAABB			( const AABB2& bounds, const Rgba& color );
+	void DrawTexturedAABB	( const AABB2& bounds, const Texture& texture, 
+							  const Vector2& texCoordsAtMins, const Vector2& texCoordsAtMaxs, 
+							  const Rgba& tint );
+	void DrawTexturedAABB	( const Matrix44 &transformMatrix,	
+							  const Texture& texture, 			const Vector2& texCoordsAtMins,	const Vector2& texCoordsAtMaxs, 
+							  const Rgba& tint );
+	void DrawText2D		    ( const Vector2& drawMins,	const std::string& asciiText,
+							  float cellHeight,			const Rgba& tint = RGBA_WHITE_COLOR,  const BitmapFont* font = nullptr );
+	void DrawTextInBox2D    ( const std::string& asciiText,			const Vector2& alignment, const AABB2& drawInBox, float desiredCellHeight, 
+							  const Rgba& tint = RGBA_WHITE_COLOR,	const BitmapFont* font = nullptr, 
+							  eTextDrawMode drawMode = TEXT_DRAW_OVERRUN );
+
+	void DrawMesh			( Mesh const &mesh, const Matrix44 & modelMatrix = Matrix44() );
 
 	template <typename VERTTYPE>
 	void DrawMeshImmediate( const VERTTYPE* vertexBuffer, unsigned int numVertexes, ePrimitiveType primitiveType, const Matrix44 &modelMatrix = Matrix44() )
@@ -151,53 +187,12 @@ public:
 		DrawMesh( *m_immediateMesh, modelMatrix );
 	}
 
-	void DrawLine			( const Vector2& start, const Vector2& end, const Rgba& startColor, const Rgba& endColor, float lineThickness );
-	void DrawFromVertexArray( const Vector2  vertex[], int arraySize, const Vector2& center, float orientationDegree, float scale );
-	void DrawPolygon		( const Vector2& center, float radius, float sides, float orientationAngle );
-	void DrawDottedPolygon	( const Vector2& center, float radius, float sides, float orientationAngle, const Rgba& color );
-	
-	void DrawTexturedCube	( const Vector3& center, const Vector3& dimensions, // width, height, depth
-								const Rgba&  color		= RGBA_WHITE_COLOR,
-								const Texture* texture	= nullptr,				// if nullptr, draws a solid cube
-								const AABB2& uv_top		= AABB2::ONE_BY_ONE, 
-								const AABB2& uv_side	= AABB2::ONE_BY_ONE, 
-								const AABB2& uv_bottom	= AABB2::ONE_BY_ONE,
-								const Texture* secondaryTexture = nullptr );
-
-	void BindTexture2D		( const Texture& theTexture, unsigned int bindIndex = 0 );
-
-	void DrawAABB			( const AABB2& bounds, const Rgba& color );
-	void DrawTexturedAABB	( const AABB2& bounds, const Texture& texture, 
-							  const Vector2& texCoordsAtMins, const Vector2& texCoordsAtMaxs, 
-							  const Rgba& tint );
-	void DrawTexturedAABB	( const Matrix44 &transformMatrix,	const AABB2& bounds,	
-							  const Texture& texture, 			const Vector2& texCoordsAtMins,	const Vector2& texCoordsAtMaxs, 
-							  const Rgba& tint );
-	void DrawTexturedAABBArray ( const Vertex_3DPCU* vertexes, int numVertexes, const Texture& texture );
-
-	void DrawText2D		    ( const Vector2& drawMins, const std::string& asciiText,
-							  float cellHeight, const Rgba& tint = RGBA_WHITE_COLOR, const BitmapFont* font = nullptr );
-	void DrawTextInBox2D    ( const std::string& asciiText, const Vector2& alignment, const AABB2& drawInBox, float desiredCellHeight, 
-							  const Rgba& tint = RGBA_WHITE_COLOR, const BitmapFont* font = nullptr, 
-							  TextDrawMode drawMode = TEXT_DRAW_OVERRUN );
-
-	Texture*		CreateOrGetTexture	 ( const std::string& pathToImage );
- 	BitmapFont*		CreateOrGetBitmapFont( const char* bitmapFontName );
-
-	static GLenum	ToGLCompare( eCompare compare );
-	void			EnableDepth( eCompare compare, bool should_write );
-	void			DisableDepth();
-	void			ClearDepth( float depth = 1.0f );
-
-	static void			SetCurrentCameraTo( Camera* newCamera );
-	static Texture*		CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt = TEXTURE_FORMAT_RGBA8 );
-	static Texture*		CreateDepthStencilTarget( unsigned int width, unsigned int height );
-	static Texture*		GetDefaultColorTarget();
-	static Texture*		GetDefaultDepthTarget();
-	
-
-	GLenum		GetAsOpenGLPrimitiveType	( ePrimitiveType	inPrimitive ) const;
-	GLenum		GetAsOpenGLDataType			( eRenderDataType	inDataType	) const;
+	static Sampler const*	GetDefaultSampler( eSamplerType type = SAMPLER_NEAREST );
+	static Texture*			GetDefaultColorTarget();
+	static Texture*			GetDefaultDepthTarget();
+	static Texture*			CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt = TEXTURE_FORMAT_RGBA8 );
+	static Texture*			CreateDepthStencilTarget( unsigned int width, unsigned int height );
+	static Vector3			GetDrawPositionUsingAnchorPoint( const Vector3& position, const Vector3& dimensions, const Vector3& anchorPoint = Vector3::ZERO );	// AnchorPoints: Bottom = (0, -1, 0), Left = (-1, 0, 0), Far = (1, 0, 0)
 
 private:
 	static void PostStartup();
@@ -205,7 +200,7 @@ private:
 
 	bool		findTextureFromPool		 ( const std::string& pathToImage , Texture* &foundTexture );
 	bool		findBitmapFontFromPool	 ( const std::string& nameOfFont , BitmapFont* &foundFont );
-	bool		FindShaderProgramFromPool( const std::string& nameOfShaderProgram, ShaderProgram* &foundShader );
+	bool		FindShaderFromPool		 ( const std::string& nameOfShaderProgram, Shader* &foundShader );
 
 	void DrawTextAsOverrun		( const std::string& asciiText, const Vector2& alignment, const AABB2& drawInBox, float desiredCellHeight, 
 								  const Rgba& tint = RGBA_WHITE_COLOR, const BitmapFont* font = nullptr );

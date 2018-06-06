@@ -1,5 +1,6 @@
 #pragma once
-class Matrix44;
+
+class Vector2;
 
 class Vector3
 {
@@ -27,6 +28,9 @@ public:
 
 	float			GetLength() const;
 	Vector3			GetNormalized() const;
+	Vector3			GetAsDirection() const;		// From Euler Rotation to Direction Vector
+	void			GetTangentAndBitangent( Vector3 *tangent, Vector3 *bitangent = nullptr ) const;	// If passed nullptr, it ignores that argument
+	Vector2			IgnoreZ() const;
 
 	// Producers
 	static Vector3	CrossProduct( const Vector3& first_vec, const Vector3& second_vec );

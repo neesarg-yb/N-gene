@@ -70,12 +70,12 @@ void DevConsole::Update( InputSystem& currentInputSystem )
 
 void DevConsole::Render()
 {
-	m_currentRenderer->SetCurrentCameraTo( s_devConsoleCamera );
+	m_currentRenderer->BindCamera( s_devConsoleCamera );
 	
 	// To form an overlay: do not clear screen, make depth of every pixel 1.f, do not write new depth..
-	m_currentRenderer->ClearDepth(1.f);
-	m_currentRenderer->EnableDepth( COMPARE_LESS, false );
-
+	m_currentRenderer->UseShader( nullptr );
+	m_currentRenderer->EnableDepth( COMPARE_ALWAYS, false );
+	
 	// Draw overlay
 	m_currentRenderer->DrawAABB( m_consoleBackgroundBox, m_consoleBackgroundColor );
 	// Draw input area

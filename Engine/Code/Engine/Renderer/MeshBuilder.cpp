@@ -7,9 +7,9 @@ void MeshBuilder::Begin( ePrimitiveType primType, bool useIndices )
 	m_drawInstruction.isUsingIndices	= useIndices;
 
 	if( useIndices )
-		m_drawInstruction.startIndex	= (unsigned int)m_indices.size();
+		m_drawInstruction.startIndex	= 0;
 	else
-		m_drawInstruction.startIndex	= (unsigned int)m_vertices.size();
+		m_drawInstruction.startIndex	= 0;
 }
 
 void MeshBuilder::End()
@@ -20,7 +20,7 @@ void MeshBuilder::End()
 	else
 		endIndex = (unsigned int)m_vertices.size();
 
-	m_drawInstruction.elementCount = endIndex - m_drawInstruction.startIndex;
+	m_drawInstruction.elementCount = endIndex;
 }
 
 void MeshBuilder::SetColor( Rgba const &color )
@@ -38,6 +38,26 @@ void MeshBuilder::SetUV( float x, float y )
 	SetUV( Vector2( x, y ) );
 }
 
+void MeshBuilder::SetNormal(Vector3 const &normal)
+{
+	m_stamp.m_normal = normal;
+}
+
+void MeshBuilder::SetNormal(float x, float y, float z)
+{
+	m_stamp.m_normal = Vector3( x, y, z );
+}
+
+void MeshBuilder::SetTangent4( Vector4 const &tangent4 )
+{
+	m_stamp.m_tangent = tangent4;
+}
+
+void MeshBuilder::SetTangent4( float x, float y, float z, float w )
+{
+	m_stamp.m_tangent = Vector4( x, y, z, w );
+}
+
 unsigned int MeshBuilder::PushVertex( Vector3 const &position )
 {
 	m_stamp.m_position = position;
@@ -53,17 +73,7 @@ void MeshBuilder::AddFace( unsigned int idx1, unsigned int idx2, unsigned int id
 	m_indices.push_back( idx3 );
 }
 
-Mesh* MeshBuilder::ConstructMesh() const
-{
-	Mesh *mesh = new Mesh();
-	mesh->SetIndices				( (unsigned int) m_indices.size(),  m_indices.data() );
-	mesh->SetVertices <Vertex_3DPCU>( (unsigned int)m_vertices.size(), m_vertices.data() );
-	mesh->SetDrawInstruction( m_drawInstruction );
-
-	return mesh;
-}
-
-Mesh* MeshBuilder::CreatePlane( Vector2 xySize, Vector3 centerPos )
+void MeshBuilder::AddPlane( Vector2 const &xySize, Vector3 const &centerPos, Rgba const &color /* = RGBA_WHITE_COLOR */, const AABB2 &uvBounds /* = AABB2::ONE_BY_ONE */ )
 {
 	Vector3 halfSize = xySize.GetAsVector3() / 2.f;
 	Vector3 blCorner = centerPos - halfSize;
@@ -71,31 +81,49 @@ Mesh* MeshBuilder::CreatePlane( Vector2 xySize, Vector3 centerPos )
 	Vector3 brCorner = Vector3( blCorner.x + xySize.x,	blCorner.y,				blCorner.z );
 	Vector3 tlCorner = Vector3( blCorner.x,				blCorner.y + xySize.y,	blCorner.z );
 
-	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_TRIANGES, true );
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
 
-	// Front Face
-	mb.SetUV( 0.f, 0.f );
-	unsigned int idx = mb.PushVertex( blCorner );
+	this->Begin( PRIMITIVE_TRIANGES, true );
 
-	mb.SetUV( 1.f, 0.f );
-	mb.PushVertex( brCorner );
+	// Back Face (towards you)
+	this->SetColor( color );
+	this->SetUV( uvBounds.mins.x, uvBounds.mins.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	unsigned int idx = this->PushVertex( blCorner );
+	
+	this->SetColor( color );
+	this->SetUV( uvBounds.maxs.x, uvBounds.mins.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( brCorner );
+	
+	this->SetColor( color );
+	this->SetUV( uvBounds.maxs.x, uvBounds.maxs.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( trCorner );
+	
+	this->SetColor( color );
+	this->SetUV( uvBounds.mins.x, uvBounds.maxs.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( tlCorner );
 
-	mb.SetUV( 1.f, 1.f );
-	mb.PushVertex( trCorner );
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
 
-	mb.SetUV( 0.f, 1.f );
-	mb.PushVertex( tlCorner );
-
-	mb.AddFace( idx + 0, idx + 1, idx + 2 );
-	mb.AddFace( idx + 2, idx + 3, idx + 0 );
-
-	mb.End();
-
-	return mb.ConstructMesh();
+	this->End();
 }
 
-Mesh* MeshBuilder::CreateCube( Vector3 size, Vector3 centerPos /* = Vector3::ZERO */ )
+void MeshBuilder::AddCube( Vector3 const &size, Vector3 const &centerPos /* = Vector3::ZERO */, Rgba const &color /* = RGBA_WHITE_COLOR */, const AABB2& uvTop /* = AABB2::ONE_BY_ONE */, const AABB2& uvSide /* = AABB2::ONE_BY_ONE */, const AABB2& uvBottom /* = AABB2::ONE_BY_ONE */ )
 {
 		
 	/*
@@ -127,123 +155,219 @@ Mesh* MeshBuilder::CreateCube( Vector3 size, Vector3 centerPos /* = Vector3::ZER
 		Vector3( top_center.x - half_dimensions.x, top_center.y, top_center.z + half_dimensions.z )
 	};
 
-	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_TRIANGES, true );
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
 
-	// Front Face
+	this->Begin( PRIMITIVE_TRIANGES, true );
+
+	// Back Face (towards you)
 	// e f
 	// a b
-	mb.SetUV( 0.f, 0.f );
-	unsigned int idx = mb.PushVertex( vertexPos[0] );						// a, 0
-	mb.SetUV( 1.f, 0.f );
-	mb.PushVertex( vertexPos[1] );											// b, 1
-	mb.SetUV( 1.f, 1.f );
-	mb.PushVertex( vertexPos[5] );											// f, 5
-	mb.SetUV( 0.f, 1.f );
-	mb.PushVertex( vertexPos[4] );											// e, 4
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.mins.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	unsigned int idx = this->PushVertex( vertexPos[0] );						// a, 0
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.mins.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[1] );											// b, 1
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.maxs.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[5] );											// f, 5
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.maxs.y );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[4] );											// e, 4
 													
-	mb.AddFace( idx + 0, idx + 1, idx + 2 );
-	mb.AddFace( idx + 2, idx + 3, idx + 0 );
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
 	
-	// Back Face
+	// Front Face (away from you)
 	// g h
 	// c d
-	mb.SetUV( 0.f, 0.f );
-	idx = mb.PushVertex( vertexPos[2] );									// c, 2
-	mb.SetUV( 1.f, 0.f );
-	mb.PushVertex( vertexPos[3] );											// d, 3
-	mb.SetUV( 1.f, 1.f );
-	mb.PushVertex( vertexPos[7] );											// h, 7
-	mb.SetUV( 0.f, 1.f );
-	mb.PushVertex( vertexPos[6] );											// g, 6
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.mins.y );
+	this->SetNormal( 0.f, 0.f, 1.f );
+	this->SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	idx = this->PushVertex( vertexPos[2] );									// c, 2
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.mins.y );
+	this->SetNormal( 0.f, 0.f, 1.f );
+	this->SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[3] );											// d, 3
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.maxs.y );
+	this->SetNormal( 0.f, 0.f, 1.f );
+	this->SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[7] );											// h, 7
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.maxs.y );
+	this->SetNormal( 0.f, 0.f, 1.f );
+	this->SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[6] );											// g, 6
 
-	mb.AddFace( idx + 0, idx + 1, idx + 2 );
-	mb.AddFace( idx + 2, idx + 3, idx + 0 );
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
 
 	// Left Face
 	// h e
 	// d a
-	mb.SetUV( 0.f, 0.f );
-	idx = mb.PushVertex( vertexPos[3] );									// d, 3
-	mb.SetUV( 1.f, 0.f );
-	mb.PushVertex( vertexPos[0] );											// a, 0
-	mb.SetUV( 1.f, 1.f );
-	mb.PushVertex( vertexPos[4] );											// e, 4
-	mb.SetUV( 0.f, 1.f );
-	mb.PushVertex( vertexPos[7] );											// h, 7
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.mins.y );
+	this->SetNormal( -1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	idx = this->PushVertex( vertexPos[3] );									// d, 3
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.mins.y );
+	this->SetNormal( -1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	this->PushVertex( vertexPos[0] );											// a, 0
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.maxs.y );
+	this->SetNormal( -1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	this->PushVertex( vertexPos[4] );											// e, 4
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.maxs.y );
+	this->SetNormal( -1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	this->PushVertex( vertexPos[7] );											// h, 7
 
-	mb.AddFace( idx + 0, idx + 1, idx + 2 );
-	mb.AddFace( idx + 2, idx + 3, idx + 0 );
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
 
 	// Right Face
 	// f g
 	// b c
-	mb.SetUV( 0.f, 0.f );
-	idx = mb.PushVertex( vertexPos[1] );									// b, 1
-	mb.SetUV( 1.f, 0.f );
-	mb.PushVertex( vertexPos[2] );											// c, 2
-	mb.SetUV( 1.f, 1.f );
-	mb.PushVertex( vertexPos[6] );											// g, 6
-	mb.SetUV( 0.f, 1.f );
-	mb.PushVertex( vertexPos[5] );											// f, 5
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.mins.y );
+	this->SetNormal( 1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, 1.f, 1.f );
+	idx = this->PushVertex( vertexPos[1] );									// b, 1
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.mins.y );
+	this->SetNormal( 1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, 1.f, 1.f );
+	this->PushVertex( vertexPos[2] );											// c, 2
+	this->SetColor( color );
+	this->SetUV( uvSide.maxs.x, uvSide.maxs.y );
+	this->SetNormal( 1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, 1.f, 1.f );
+	this->PushVertex( vertexPos[6] );											// g, 6
+	this->SetColor( color );
+	this->SetUV( uvSide.mins.x, uvSide.maxs.y );
+	this->SetNormal( 1.f, 0.f, 0.f );
+	this->SetTangent4( 0.f, 0.f, 1.f, 1.f );
+	this->PushVertex( vertexPos[5] );											// f, 5
 
-	mb.AddFace( idx + 0, idx + 1, idx + 2 );
-	mb.AddFace( idx + 2, idx + 3, idx + 0 );
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
 
 	// Top Face
 	// h g
 	// e f
-	mb.SetUV( 0.f, 0.f );
-	idx = mb.PushVertex( vertexPos[4] );									// e, 4
-	mb.SetUV( 1.f, 0.f );
-	mb.PushVertex( vertexPos[5] );											// f, 5
-	mb.SetUV( 1.f, 1.f );
-	mb.PushVertex( vertexPos[6] );											// g, 6
-	mb.SetUV( 0.f, 1.f );
-	mb.PushVertex( vertexPos[7] );											// h, 7
+	this->SetColor( color );
+	this->SetUV( uvTop.mins.x, uvTop.mins.y );
+	this->SetNormal( 0.f, 1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	idx = this->PushVertex( vertexPos[4] );									// e, 4
+	this->SetColor( color );
+	this->SetUV( uvTop.maxs.x, uvTop.mins.y );
+	this->SetNormal( 0.f, 1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[5] );											// f, 5
+	this->SetColor( color );
+	this->SetUV( uvTop.maxs.x, uvTop.maxs.y );
+	this->SetNormal( 0.f, 1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[6] );											// g, 6
+	this->SetColor( color );
+	this->SetUV( uvTop.mins.x, uvTop.maxs.y );
+	this->SetNormal( 0.f, 1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[7] );											// h, 7
 
-	mb.AddFace( idx + 0, idx + 1, idx + 2 );
-	mb.AddFace( idx + 2, idx + 3, idx + 0 );
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
 	
 	// Bottom Face
 	// a b
 	// d c
-	mb.SetUV( 0.f, 0.f );
-	idx = mb.PushVertex( vertexPos[3] );									// d, 3
-	mb.SetUV( 1.f, 0.f );
-	mb.PushVertex( vertexPos[2] );											// c, 2
-	mb.SetUV( 1.f, 1.f );
-	mb.PushVertex( vertexPos[1] );											// b, 1
-	mb.SetUV( 0.f, 1.f );
-	mb.PushVertex( vertexPos[0] );											// a, 0
+	this->SetColor( color );
+	this->SetUV( uvBottom.mins.x, uvBottom.mins.y );
+	this->SetNormal( 0.f, -1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	idx = this->PushVertex( vertexPos[3] );									// d, 3
+	this->SetColor( color );
+	this->SetUV( uvBottom.maxs.x, uvBottom.mins.y );
+	this->SetNormal( 0.f, -1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[2] );											// c, 2
+	this->SetColor( color );
+	this->SetUV( uvBottom.maxs.x, uvBottom.maxs.y );
+	this->SetNormal( 0.f, -1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[1] );											// b, 1
+	this->SetColor( color );
+	this->SetUV( uvBottom.mins.x, uvBottom.maxs.y );
+	this->SetNormal( 0.f, -1.f, 0.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( vertexPos[0] );											// a, 0
 
-	mb.AddFace( idx + 0, idx + 1, idx + 2 );
-	mb.AddFace( idx + 2, idx + 3, idx + 0 );
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
 
-	mb.End();
-
-	return mb.ConstructMesh();
+	this->End();
 }
 
-Mesh* MeshBuilder::CreateSphere( float radius, unsigned int wedges, unsigned int slices, Vector3 centerPos /* = Vector3::ZERO */ )
+void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int slices, Vector3 centerPos /* = Vector3::ZERO */, Rgba const &color /* = RGBA_WHITE_COLOR */ )
 {
-	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_TRIANGES, true );
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
+	
+	this->Begin( PRIMITIVE_TRIANGES, true );
 
 	for( unsigned int sliceIdx = 0; sliceIdx <= slices; sliceIdx++ )
 	{
 		float v			= (float)sliceIdx / (float)slices;
-		TODO("Idk why -180, 0 works. 0, 180 gets flipped Sphere. -90, 90 gets half Sphere..");
-		float altitude	= RangeMapFloat( v, 0.f, 1.f, -180.f, 0.f );
+		float altitude	= RangeMapFloat( v, 0.f, 1.f, 180.f, 0.f );
 
 		for( unsigned int wedgeIdx = 0; wedgeIdx <= wedges; wedgeIdx++ )
 		{
 			float u				= (float)wedgeIdx / (float)wedges;
 			float rotation		= 360.f * u;
 			Vector3 position	= centerPos + PolarToCartesian( radius, rotation, altitude );
-			
-			mb.SetUV( u, v );
-			mb.PushVertex( position );
+			Vector3 normal		= ( position - centerPos ).GetNormalized();
+
+			// derivative of (tan = d/du Polar)
+			float altitude90	= RangeMapFloat( altitude, 180.f, 0.f, -90.f, 90.f );
+			float tx			= -1.f * CosDegree( altitude90 ) * SinDegree( rotation ) * radius;
+			float ty			= 0.f;
+			float tz			= CosDegree( altitude90 ) * CosDegree( rotation ) * radius;
+			Vector4 tangent		= Vector4( tx, ty, tz, 1.f ).GetNormalized();
+
+			this->SetUV( u, v );
+			this->SetNormal( normal );
+			this->SetTangent4( tangent );
+			this->SetColor( color );
+			this->PushVertex( position );
 		}
 	}
 
@@ -251,17 +375,39 @@ Mesh* MeshBuilder::CreateSphere( float radius, unsigned int wedges, unsigned int
 	{
 		for( unsigned int wedgeIdx = 0; wedgeIdx < wedges; wedgeIdx++ )
 		{
-			unsigned int bottomLeftIdx	= ( wedges * sliceIdx ) + wedgeIdx;
-			unsigned int topLeftIdx		= bottomLeftIdx + wedges;
+			unsigned int bottomLeftIdx	= ( ( wedges + 1 ) * sliceIdx ) + wedgeIdx;
+			unsigned int topLeftIdx		= bottomLeftIdx + wedges + 1;
 			unsigned int bottomRightIdx = bottomLeftIdx + 1;
-			unsigned int topRightIdx	= bottomRightIdx + wedges;
+			unsigned int topRightIdx	= topLeftIdx + 1;
 
-			mb.AddFace( bottomLeftIdx,	bottomRightIdx, topRightIdx );
-			mb.AddFace( topRightIdx,	topLeftIdx,		bottomLeftIdx );
+			this->AddFace( bottomLeftIdx,	bottomRightIdx, topRightIdx );
+			this->AddFace( topRightIdx,		topLeftIdx,		bottomLeftIdx );
 		}
 	}
 
-	mb.End();
+	this->End();
+}
 
-	return mb.ConstructMesh();
+Mesh* MeshBuilder::CreatePlane( Vector2 const &xySize, Vector3 const &centerPos, Rgba const &color /*= RGBA_WHITE_COLOR*/, const AABB2 &uvBounds /*= AABB2::ONE_BY_ONE */ )
+{
+	MeshBuilder mb;
+	mb.AddPlane( xySize, centerPos, color, uvBounds );
+
+	return mb.ConstructMesh <Vertex_Lit>();
+}
+
+Mesh* MeshBuilder::CreateCube( Vector3 const &size, Vector3 const &centerPos /*= Vector3::ZERO*/, Rgba const &color /*= RGBA_WHITE_COLOR*/, const AABB2& uvTop /*= AABB2::ONE_BY_ONE*/, const AABB2& uvSide /*= AABB2::ONE_BY_ONE*/, const AABB2& uvBottom /*= AABB2::ONE_BY_ONE */ )
+{
+	MeshBuilder mb;
+	mb.AddCube( size, centerPos, color, uvTop, uvSide, uvBottom );
+
+	return mb.ConstructMesh <Vertex_Lit>();
+}
+
+Mesh* MeshBuilder::CreateSphere( float radius, unsigned int wedges, unsigned int slices, Vector3 centerPos /*= Vector3::ZERO*/, Rgba const &color /*= RGBA_WHITE_COLOR */ )
+{
+	MeshBuilder mb;
+	mb.AddSphere( radius, wedges, slices, centerPos, color );
+
+	return mb.ConstructMesh <Vertex_Lit>();
 }
