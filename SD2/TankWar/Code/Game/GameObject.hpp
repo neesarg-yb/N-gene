@@ -6,8 +6,7 @@
 class GameObject
 {
 public:
-			 GameObject( Transform const &transform );
-			 GameObject( Vector3 const &position, Vector3 const &rotation = Vector3::ZERO, Vector3 const &scale = Vector3::ONE_ALL );
+			 GameObject() { };
 	virtual ~GameObject() { };
 
 public:
@@ -16,5 +15,4 @@ public:
 
 public:
 	virtual void Update( float deltaSeconds ) = 0;
-	virtual void PreRender() = 0;
 };

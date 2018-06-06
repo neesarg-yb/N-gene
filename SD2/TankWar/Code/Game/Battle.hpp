@@ -7,6 +7,7 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
+#include "Game/Tank.hpp"
 
 class Material;
 
@@ -35,6 +36,9 @@ private:
 	Material*					 m_sphereMaterial				= nullptr;
 	Mesh*						 m_sphereMesh					= nullptr;
 
+	// TEST
+	Tank*						 m_tempTank						= nullptr;
+
 
 public:
 	// Lights
@@ -44,7 +48,6 @@ public:
 
 private:
 	double	GetTimeSinceBattleStarted() const;
-	void	MoveTheCameraAccordingToPlayerInput		( float deltaSeconds );
 	void	RotateTheCameraAccordingToPlayerInput	( float deltaSeconds );
 	void	ChnageLightAsPerInput					( float deltaSeconds );
 	

@@ -66,16 +66,13 @@ void Battle::Startup()
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
 	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 150.f );
-	s_camera->LookAt( Vector3( 0.f, 6.f, 0.f ), Vector3( 0.f, 0.f, 20.f ) );
+	s_camera->LookAt( Vector3( 0.f, 7.f, -10.f ), Vector3( 0.f, 2.f, 0.f ) );
 	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\galaxy2.png" );
 
 	// Setup the Lighting
 	s_lightSources.push_back( new Light( Vector3::ZERO ) );
 	s_lightSources[0]->SetUpForPointLight( 20.f, Vector3( 1.f, 0.f, 0.f), RGBA_WHITE_COLOR );
-	s_lightSources[0]->EnablePerimeterRotationAround( Vector3( 0.f, 0.f, 5.f ), 24.f );
-
-	s_lightSources.push_back( new Light( Vector3(0.f, 0.f, 1.f), Vector3( 0.3f, 0.3f, 0.3f) ) );
-	s_lightSources[1]->SetUpForSpotLight( 90.f, 20.f, 30.f );
+	s_lightSources[0]->EnablePerimeterRotationAround( Vector3( 0.f, 0.f, 5.f ), 10.f );
 
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, s_camera );
@@ -92,15 +89,19 @@ void Battle::Startup()
 	s_battleScene = new Scene();
 
 	s_battleScene->AddLight( *s_lightSources[0] );
-	s_battleScene->AddLight( *s_lightSources[1] );
 
 	s_battleScene->AddRenderable( *m_sphere );
 	s_battleScene->AddRenderable( *s_lightSources[0]->m_renderable );
-	s_battleScene->AddRenderable( *s_lightSources[1]->m_renderable );
 
 	s_battleScene->AddCamera( *s_camera );
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
+
+	// TEST TANK
+	m_tempTank = new Tank( Vector3::ONE_ALL );
+	s_lightSources[0]->m_transform.SetParentAs( &m_tempTank->m_transform );
+	s_camera->m_cameraTransform.SetParentAs( &m_tempTank->m_transform );
+	s_battleScene->AddRenderable( *m_tempTank->m_renderable );
 }
 
 void Battle::BeginFrame()
@@ -124,12 +125,7 @@ void Battle::Update( float deltaSeconds )
 		s_lightSources[i]->Update( deltaSeconds );
 	
 	// Camera Position
-	MoveTheCameraAccordingToPlayerInput( deltaSeconds );
-	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
-
-	// The spotlight attached to camera
-	s_lightSources[1]->SetPosition( s_camera->m_cameraTransform.GetPosition() );
-	s_lightSources[1]->SetEulerRotation( s_camera->m_cameraTransform.GetRotation() );
+//	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
@@ -143,6 +139,9 @@ void Battle::Update( float deltaSeconds )
 		AddNewPointLightToCamareaPosition( RGBA_BLUE_COLOR );
 	if( g_theInput->WasKeyJustPressed( 'W' ) )
 		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
+
+	// TEST
+	m_tempTank->Update( deltaSeconds );
 }
 
 void Battle::Render() const
@@ -172,20 +171,6 @@ void Battle::Render() const
 double Battle::GetTimeSinceBattleStarted() const
 {
 	return m_timeSinceStartOfTheBattle;
-}
-
-void Battle::MoveTheCameraAccordingToPlayerInput( float deltaSeconds )
-{
-	static float const movementSpeed = 5.f;		// Units per seconds
-
-	XboxController &inputController = g_theInput->m_controller[0];
-	Vector2 axisChnage				= inputController.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
-	float	leftShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown ?  1.f : 0.f;
-	float	rightShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown ? -1.f : 0.f;
-	float	finalYMovement			= (leftShoulder + rightShoulder) * movementSpeed * deltaSeconds;
-	Vector2 finalXZMovement			= axisChnage * movementSpeed * deltaSeconds;
-
-	s_camera->MoveCameraPositionBy( Vector3( finalXZMovement.x, finalYMovement, finalXZMovement.y ) );
 }
 
 void Battle::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
