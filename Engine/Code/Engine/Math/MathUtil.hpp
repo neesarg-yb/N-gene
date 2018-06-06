@@ -3,59 +3,71 @@
 #include <cstdlib>
 #include <math.h>
 #include <time.h>
+#include <string.h>
+#include <vector>
+#include <string>
 
 const float M_PI = 3.1415926535f;  /* Pi */
 
-class MathUtil {
-public:
-	static float DegreeToRadian(float degree);
-	static float RadianToDegree(float radian);
-	static float CosDegree(float degree);
-	static float SinDegree(float degree);
-	static float atan2fDegree(float y, float x);
-	
-	static int	 GetRandomIntInRange(int minInclusive, int maxInclusive);
-	static int	 GetRandomNonNegativeIntLessThan(int maxNotInclusive);
-	static float GetRandomFloatInRange(float minInclusive, float maxInclusive);
-	static float GetRandomFloatZeroToOne();
-	static float GetRandomFloatAsPlusOrMinusOne();
-	static bool	 CheckRandomChance( float chanceForSuccess );								// If 0.27 passed, returns true 27% of the time
+float DegreeToRadian(float degree);
+float RadianToDegree(float radian);
+float CosDegree(float degree);
+float SinDegree(float degree);
+float atan2fDegree(float y, float x);
 
-	static int	 ClampInt( int inValue, int min, int max );
-	static float ClampFloat01(float number);												// Clamps the number in range  [ 0.0f , 1.0f ]
-	static float ClampFloat(float inValue, float minInclusive, float maxInclusive);			// Clamps the inValue in range [ minInclusive, maxInclusive ]
-	static float ClampFloatNegativeOneToOne( float inValue );
-	static int	 RoundToNearestInt( float inValue );										// 0.5 rounds up to 1; -0.5 rounds up to 0
-	
-	// For a value in [inStart,inEnd], finds the corresponding value in [outStart,outEnd].
-	static float RangeMapFloat(float inValue, float inStart, float inEnd, float outStart, float outEnd);
+int	 GetRandomIntInRange(int minInclusive, int maxInclusive);
+int	 GetRandomNonNegativeIntLessThan(int maxNotInclusive);
+float GetRandomFloatInRange(float minInclusive, float maxInclusive);
+float GetRandomFloatZeroToOne();
+float GetRandomFloatAsPlusOrMinusOne();
+bool	 CheckRandomChance( float chanceForSuccess );								// If 0.27 passed, returns true 27% of the time
 
-	// Finds the % (as a fraction) of inValue in [rangeStart,rangeEnd].
-	// For example, 3 is 25% (0.25) of the way through the range [2,6].
-	static float GetFractionInRange( float inValue, float rangeStart, float rangeEnd );
+int	 ClampInt( int inValue, int min, int max );
+float ClampFloat01(float number);												// Clamps the number in range  [ 0.0f , 1.0f ]
+float ClampFloat(float inValue, float minInclusive, float maxInclusive);			// Clamps the inValue in range [ minInclusive, maxInclusive ]
+float ClampFloatNegativeOneToOne( float inValue );
+int	 RoundToNearestInt( float inValue );										// 0.5 rounds up to 1; -0.5 rounds up to 0
 
-	// Finds the value at a certain % (fraction) in [rangeStart,rangeEnd].
-	// For example, at 75% (0.75) of the way through [2,6] is 5.
-	static float Interpolate( float start, float end, float fractionTowardEnd );
+// For a value in [inStart,inEnd], finds the corresponding value in [outStart,outEnd].
+float RangeMapFloat(float inValue, float inStart, float inEnd, float outStart, float outEnd);
 
-	// Finds the “angular displacement” (or signed angular distance) from startDegrees to endDegrees.
-	static float GetAngularDisplacement( float startDegrees, float endDegrees );
+// Finds the % (as a fraction) of inValue in [rangeStart,rangeEnd].
+// For example, 3 is 25% (0.25) of the way through the range [2,6].
+float GetFractionInRange( float inValue, float rangeStart, float rangeEnd );
 
-	// I face currentDegrees and want to turn “toward” goalDegrees, by up to maxTurnDegrees.
-	static float TurnToward( float currentDegrees, float goalDegrees, float maxTurnDegrees );
+// Finds the value at a certain % (fraction) in [rangeStart,rangeEnd].
+// For example, at 75% (0.75) of the way through [2,6] is 5.
+float Interpolate( float start, float end, float fractionTowardEnd );
 
-	static bool  AreBitsSet( unsigned char bitFlags8, unsigned char flagsToCheck );
-	static bool  AreBitsSet( unsigned int bitFlags32, unsigned int flagsToCheck );
-	static void  SetBits( unsigned char& bitFlags8, unsigned char flagsToSet );
-	static void  SetBits( unsigned int& bitFlags32, unsigned int flagsToSet );
-	static void  ClearBits( unsigned char& bitFlags8, unsigned char flagToClear );
-	static void  ClearBits( unsigned int& bitFlags32, unsigned int flagToClear );
+// Finds the “angular displacement” (or signed angular distance) from startDegrees to endDegrees.
+float GetAngularDisplacement( float startDegrees, float endDegrees );
 
+// I face currentDegrees and want to turn “toward” goalDegrees, by up to maxTurnDegrees.
+float TurnToward( float currentDegrees, float goalDegrees, float maxTurnDegrees );
 
-	static void NewSeedForRandom();
-	
-private:
-	MathUtil() {
+bool  AreBitsSet( unsigned char bitFlags8, unsigned char flagsToCheck );
+bool  AreBitsSet( unsigned int bitFlags32, unsigned int flagsToCheck );
+void  SetBits( unsigned char& bitFlags8, unsigned char flagsToSet );
+void  SetBits( unsigned int& bitFlags32, unsigned int flagsToSet );
+void  ClearBits( unsigned char& bitFlags8, unsigned char flagToClear );
+void  ClearBits( unsigned int& bitFlags32, unsigned int flagToClear );
 
-	}
-};
+void NewSeedForRandom();
+
+float	SmoothStart2( float t ); // 2nd-degree smooth start (a.k.a. “quadratic ease in”)
+float	SmoothStart3( float t ); // 3rd-degree smooth start (a.k.a. “cubic ease in”)
+float	SmoothStart4( float t ); // 4th-degree smooth start (a.k.a. “quartic ease in”)
+float	SmoothStop2 ( float t ); // 2nd-degree smooth start (a.k.a. “quadratic ease out”)
+float	SmoothStop3 ( float t ); // 3rd-degree smooth start (a.k.a. “cubic ease out”)
+float	SmoothStop4 ( float t ); // 4th-degree smooth start (a.k.a. “quartic ease out”)
+float	SmoothStep3 ( float t ); // 3rd-degree smooth start/stop (a.k.a. “smoothstep”)
+
+int Interpolate( int start, int end, float fractionTowardEnd );
+unsigned char Interpolate( unsigned char start, unsigned char end, float fractionTowardEnd );
+
+void	SetFromText( int& setIt , const char* text );
+void	SetFromText( float& setIt , const char* text );
+void	SetFromText( bool& setIt , const char* text );
+void	SetFromText( std::vector<std::string>& setIt, const char* delimiter, const char* text );
+
+int	GetIndexFromColumnRowNumberForMatrixOfWidth( int columnNum , int rowNum , int width );		// It assumes that first cell is at ( zero , zero ) & width starts from 1

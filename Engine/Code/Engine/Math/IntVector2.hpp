@@ -1,10 +1,18 @@
 #pragma once
+#include "Engine/Math/MathUtil.hpp"
+#include "Engine/Math/Vector2.hpp"
+
+#include <string>
 
 class IntVector2
 {
 public:
+	static const IntVector2 ZERO;
+
+public:
 	 IntVector2();
 	 IntVector2( int x, int y );
+	 IntVector2( Vector2& inVec2 );
 	~IntVector2();
 
 	// Operators
@@ -16,6 +24,11 @@ public:
 	int x;
 	int y;
 
+	void SetFromText( const char* text );
+
 private:
 
 };
+
+
+const IntVector2 Interpolate( const IntVector2& start, const IntVector2& end, float fractionTowardEnd );

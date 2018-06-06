@@ -80,26 +80,26 @@ void XboxController::UpdateButtonState(XboxControllerButtonID buttonID, unsigned
 
 void XboxController::UpdateTriggerState(XboxControllerTriggerID triggerID , unsigned char rawTriggerValue) {
 	// Convert rawTriggerValue from [0, 255] to [0, 1.0] range
-	m_xboxTriggerStates[ triggerID ] = MathUtil::RangeMapFloat( (float)rawTriggerValue, 0.f, 255.f, 0.f, 1.f );
+	m_xboxTriggerStates[ triggerID ] = RangeMapFloat( (float)rawTriggerValue, 0.f, 255.f, 0.f, 1.f );
 }
 
 void XboxController::UpdateStickState(XboxControllerStickID stickID , short rawXValue, short rawYValue) {
 	// Normalize
 	// Map rawX, rawY from [-32768, +32767]
-	float rawNormalizedX = MathUtil::RangeMapFloat(rawXValue, -32768.f, 32767.f, -1.f, 1.f);
-	float rawNormalizedY = MathUtil::RangeMapFloat(rawYValue, -32768.f, 32767.f, -1.f, 1.f);
+	float rawNormalizedX = RangeMapFloat(rawXValue, -32768.f, 32767.f, -1.f, 1.f);
+	float rawNormalizedY = RangeMapFloat(rawYValue, -32768.f, 32767.f, -1.f, 1.f);
 
 	// Get rawPolar coordinates (R, theta)
 	float R = sqrtf( (rawNormalizedX*rawNormalizedX) + (rawNormalizedY*rawNormalizedY) );
-	float theta = MathUtil::atan2fDegree( rawNormalizedY, rawNormalizedX );
+	float theta = atan2fDegree( rawNormalizedY, rawNormalizedX );
 
 	// Correct R from dead-zone. [16%, 95%] -> [0%, 100%]
-	float correctedR = MathUtil::RangeMapFloat(R, 0.16f, 0.95f, 0.f, 1.f);
-	correctedR = MathUtil::ClampFloat01(correctedR);
+	float correctedR = RangeMapFloat(R, 0.16f, 0.95f, 0.f, 1.f);
+	correctedR = ClampFloat01(correctedR);
 
 	// Compute corrected (x, y) from (correctedR, theta)
-	float x_final = correctedR * MathUtil::CosDegree(theta);
-	float y_final = correctedR * MathUtil::SinDegree(theta);
+	float x_final = correctedR * CosDegree(theta);
+	float y_final = correctedR * SinDegree(theta);
 
 	// Set values to member state variable
 	m_xboxStickStates[ stickID ].correctedNormalizedPosition = Vector2( x_final, y_final );

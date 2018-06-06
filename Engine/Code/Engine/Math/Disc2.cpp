@@ -107,3 +107,13 @@ bool Disc2::DoDiscsOverlap(const Disc2& a, const Disc2& b) {
 bool Disc2::DoDiscAndPointOverlap(const Disc2& disc, const Vector2& point) {
 	return Vector2::GetDistance(disc.center, point) <= disc.radius;
 }
+
+const Disc2 Interpolate( const Disc2& start, const Disc2& end, float fractionTowardEnd )
+{
+	Disc2 resultDisc = Disc2();
+
+	resultDisc.center = Interpolate( start.center , end.center , fractionTowardEnd );
+	resultDisc.radius = Interpolate( start.radius , end.radius , fractionTowardEnd );
+
+	return resultDisc;
+}

@@ -16,6 +16,8 @@ public:
 	explicit AABB2( const Vector2& mins, const Vector2& maxs );
 	explicit AABB2( const Vector2& center, float radiusX, float radiusY );
 
+	void SetFromText( const char* inputText );
+
 	// Mutators
 	void StretchToIncludePoint( float x, float y );
 	void StretchToIncludePoint( const Vector2& point );
@@ -28,6 +30,7 @@ public:
 	bool	IsPointInside( const Vector2& point ) const;
 	Vector2 GetDimensions() const;
 	Vector2 GetCenter() const;
+	Vector2 GetClosestPointInsideAABB( Vector2 fromThePoint ) const;
 
 	// Operator
 	void  operator +=( const Vector2& translation );
@@ -37,7 +40,8 @@ public:
 
 	// Static functions
 	static bool DoAABBsOverlap( const AABB2& a, const AABB2& b );
-
 private:
 
 };
+
+const AABB2 Interpolate( const AABB2& start, const AABB2& end, float fractionTowardEnd );

@@ -31,6 +31,23 @@ AABB2::AABB2( const Vector2& center, float radiusX, float radiusY  ) {
 	this->maxs.y = center.y + radiusY;
 }
 
+void AABB2::SetFromText( const char* inputText )
+{
+	std::vector< std::string > fetchedStrings;
+	::SetFromText( fetchedStrings, ",", inputText );
+
+	float aabbArray[4] = {0.f};
+	for( int i = 0; i < 4; i++ )
+	{
+		::SetFromText( aabbArray[i], fetchedStrings[i].c_str() );
+	}
+
+	this->mins.x = aabbArray[0];
+	this->mins.y = aabbArray[1];
+	this->maxs.x = aabbArray[2];
+	this->maxs.y = aabbArray[3];
+}
+
 void AABB2::StretchToIncludePoint( float x, float y ) {
 	if( x < mins.x ) {
 		mins.x = x;
@@ -97,6 +114,15 @@ Vector2 AABB2::GetCenter() const {
 	return center;
 }
 
+Vector2 AABB2::GetClosestPointInsideAABB( Vector2 fromThePoint ) const
+{
+	Vector2 closestPoint;
+	closestPoint.x = ClampFloat( fromThePoint.x, mins.x, maxs.x );
+	closestPoint.y = ClampFloat( fromThePoint.y, mins.y, maxs.y );
+
+	return closestPoint;
+}
+
 void AABB2::operator+=( const Vector2& translation ) {
 	this->Translate(translation);
 }
@@ -136,4 +162,14 @@ bool AABB2::DoAABBsOverlap( const AABB2& a, const AABB2& b ) {
 	}
 	
 	return false;
+}
+
+const AABB2 Interpolate( const AABB2& start, const AABB2& end, float fractionTowardEnd )
+{
+	AABB2 resultAABB = AABB2();
+
+	resultAABB.mins = Interpolate( start.mins , end.mins , fractionTowardEnd );
+	resultAABB.maxs = Interpolate( start.maxs , end.maxs , fractionTowardEnd );
+
+	return resultAABB;
 }

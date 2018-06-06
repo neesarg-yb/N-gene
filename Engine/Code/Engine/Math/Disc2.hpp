@@ -36,3 +36,5 @@ public:
 private:
 
 };
+
+const Disc2 Interpolate( const Disc2& start, const Disc2& end, float fractionTowardEnd );
