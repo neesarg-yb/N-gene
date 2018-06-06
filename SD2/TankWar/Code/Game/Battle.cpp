@@ -39,6 +39,28 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 
 Battle::Battle()
 {
+	
+}
+
+Battle::~Battle()
+{
+	delete m_renderingPath;
+	delete s_battleScene;
+
+	delete m_sphere;
+	delete m_sphereMaterial;
+	delete m_sphereMesh;
+	
+	DebugRendererShutdown();
+
+	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
+		delete s_lightSources[i];
+	
+	delete s_camera;
+}
+
+void Battle::Startup()
+{
 	// Setup the camera
 	s_camera = new Camera();
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
@@ -57,7 +79,7 @@ Battle::Battle()
 
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, s_camera );
-	
+
 	// Placeholder sphere for Tank
 	m_sphereMesh		= MeshBuilder::CreateSphere( 4.f, 30, 30 );
 	m_sphereMaterial	= Material::CreateNewFromFile( "Data\\Materials\\stone_sphere.material" );
@@ -68,7 +90,7 @@ Battle::Battle()
 
 	// Battle Scene
 	s_battleScene = new Scene();
-	
+
 	s_battleScene->AddLight( *s_lightSources[0] );
 	s_battleScene->AddLight( *s_lightSources[1] );
 
@@ -79,23 +101,6 @@ Battle::Battle()
 	s_battleScene->AddCamera( *s_camera );
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
-}
-
-Battle::~Battle()
-{
-	delete m_renderingPath;
-	delete s_battleScene;
-
-	delete m_sphere;
-	delete m_sphereMaterial;
-	delete m_sphereMesh;
-	
-	DebugRendererShutdown();
-
-	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
-		delete s_lightSources[i];
-	
-	delete s_camera;
 }
 
 void Battle::BeginFrame()

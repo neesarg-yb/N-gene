@@ -11,7 +11,7 @@
 enum GameStates
 {
 	NONE = -1,
-	LOADING,
+	ATTRACT,
 	MENU,
 	BATTLE,
 	NUM_GAME_STATES
@@ -31,6 +31,7 @@ public:
 	Camera*		m_gameCamera	= nullptr;
 	Battle*		m_currentBattle	= nullptr;
 
+	void Startup();
 	void BeginFrame();
 	void EndFrame();
 	void Update();
@@ -43,19 +44,24 @@ private:
 	const float		m_transitionTime			=	2.5;
 	const float		m_halfTransitionTime		=	m_transitionTime * 0.5f;
 	float			m_fadeEffectAlpha			=	0.f;						// 0 to 1
-	GameStates		m_currentGameState			=	LOADING;
+	GameStates		m_currentGameState			=	ATTRACT;
 	GameStates		m_nextGameState				=	NONE;
+
+	float const		m_attractTime				= 4.f;
+	float			m_attractTimeRemaining		= m_attractTime;
 
 	void StartTransitionToState	( GameStates nextGameState );
 	void ConfirmTransitionToNextState();
 
-	void Update_Loading	( float deltaSeconds );
+	void Update_Attract	( float deltaSeconds );
 	void Update_Menu	( float deltaSeconds );
 	void Update_Battle	( float deltaSeconds );
 
-	void Render_Loading	() const;
+	void Render_Attract	() const;
 	void Render_Menu	() const;
 	void Render_Battle	() const;
+
+	void RenderLoadingScreen() const;
 
 	float	CalculateDeltaTime();
 	double	GetTimeSinceGameStarted() const;

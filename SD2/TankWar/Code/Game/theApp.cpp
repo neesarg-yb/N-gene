@@ -30,6 +30,11 @@ theApp::~theApp()
 	g_theRenderer = nullptr;
 }
 
+void theApp::Startup()
+{
+	g_theGame->Startup();
+}
+
 void theApp::RunFrame() {
 	BeginFrame();		// [ for ENGINE components, generally ]
 	Update();			// [ for  GAME  components, generally ]

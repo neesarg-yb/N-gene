@@ -101,6 +101,8 @@ void Initialize( HINSTANCE applicationInstanceHandle )
 	g_theApp = new theApp();		// Creating theApp class instance
 
 	CommandRegister( "quit", QuitTheApp );
+
+	g_theApp->Startup();
 }
 
 
@@ -127,7 +129,7 @@ int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR comman
 	Initialize( applicationInstanceHandle );
 
 	// Program main loop; keep running frames until it's time to quit
-	while( !g_theApp->IsQuitting() ) // #SD1ToDo: ...becomes:  !g_theApp->IsQuitting()
+	while( !g_theApp->IsQuitting() )
 	{
 		RunFrame();
 	}

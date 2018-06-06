@@ -15,7 +15,7 @@ class theApp
 {
 public:
 	theGame* g_theGame = nullptr;
-	bool m_isQuitting = false;						// ...becomes App::m_isQuitting
+	bool m_isQuitting = false;
 
 	bool IKeyIsPressed = false;
 	bool OKeyIsPressed = false;
@@ -25,6 +25,7 @@ public:
 	bool SpaceKeyIsPressed = false;
 	bool NKeyIsPressed = false;
 
+	void Startup();
 	void RunFrame();
 
 	bool IsQuitting();

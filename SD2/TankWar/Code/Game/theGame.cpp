@@ -10,28 +10,39 @@ void EchoTestCommand( Command& cmd )
 theGame::theGame()
 {
 	m_lastFramesTime = GetCurrentTimeSeconds();
-
-	// Camera Setup
-	m_gameCamera = new Camera();
-	m_gameCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
-	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
-	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
-	g_theRenderer->BindCamera( m_gameCamera );
-
-	// Battle creation
+	
+	// Construction
 	m_currentBattle = new Battle();
 
 	// Fonts for loading screen
 	m_textBmpFont = g_theRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
 	
-	// Console stuffs
-	CommandRegister( "echo", EchoTestCommand );
-	ConsolePrintf( RGBA_GREEN_COLOR, "%d Hello World!", 1 );
+	// Camera Setup
+	m_gameCamera = new Camera();
+	m_gameCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
+	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
+	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
 }
 
 theGame::~theGame()
 {
 	delete m_textBmpFont;
+}
+
+void theGame::Startup()
+{
+
+	// Render Loading Screen
+	g_theRenderer->BeginFrame();
+	RenderLoadingScreen();
+	g_theRenderer->EndFrame();
+
+	// Console stuffs
+	CommandRegister( "echo", EchoTestCommand );
+	ConsolePrintf( RGBA_GREEN_COLOR, "%d Hello World!", 1 );
+
+	// Call Startup for other classes
+	m_currentBattle->Startup();
 }
 
 void theGame::BeginFrame()
@@ -49,7 +60,9 @@ void theGame::EndFrame()
 void theGame::Update() 
 {
 	// Calculating deltaTime
-	float deltaSeconds			=	CalculateDeltaTime();
+	float deltaSeconds			= CalculateDeltaTime();
+	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
+
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
 	m_timeSinceStartOfTheGame	+=	deltaSeconds;
 	
@@ -83,8 +96,8 @@ void theGame::Update()
 	// Continue updating the currentGameState
 	switch (m_currentGameState)
 	{
-	case LOADING:
-		Update_Loading( deltaSeconds );
+	case ATTRACT:
+		Update_Attract( deltaSeconds );
 		break;
 	case MENU:
 		Update_Menu( deltaSeconds );
@@ -102,8 +115,8 @@ void theGame::Render() const
 {
 	switch (m_currentGameState)
 	{
-	case LOADING:
-		Render_Loading();
+	case ATTRACT:
+		Render_Attract();
 		break;
 	case MENU:
 		Render_Menu();
@@ -144,15 +157,20 @@ void theGame::ConfirmTransitionToNextState()
 	m_timeSinceTransitionBegan = 0;
 }
 
-void theGame::Update_Loading( float deltaSeconds )
+void theGame::Update_Attract( float deltaSeconds )
 {
-	UNUSED( deltaSeconds );
+	m_attractTimeRemaining -= deltaSeconds;
 
-	if( m_nextGameState == NONE )
-		StartTransitionToState( MENU );
+	if( m_attractTimeRemaining <= 0.f )
+	{
+		if( m_nextGameState == NONE )
+			StartTransitionToState( MENU );
+		
+		m_attractTimeRemaining = m_attractTime;
+	}
 }
 
-void theGame::Render_Loading() const
+void theGame::Render_Attract() const
 {
 	g_theRenderer->BindCamera( m_gameCamera );
 	g_theRenderer->UseShader( nullptr );
@@ -160,13 +178,16 @@ void theGame::Render_Loading() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 	
-	g_theRenderer->DrawTextInBox2D( "LOADING...", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	std::string countDownString =  m_attractTimeRemaining == m_attractTime ? ("...") : std::to_string( (int)m_attractTimeRemaining );
+	g_theRenderer->DrawTextInBox2D( "TANK WAR\n" + countDownString, Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
 void theGame::Update_Menu( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
 
+	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
+		StartTransitionToState( ATTRACT );
 	if( g_theInput->WasKeyJustPressed( VK_Codes::SPACE ) )
 		StartTransitionToState( BATTLE );
 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_START ].keyJustPressed )
@@ -195,6 +216,17 @@ void theGame::Update_Battle( float deltaSeconds )
 void theGame::Render_Battle() const
 {
 	m_currentBattle->Render();
+}
+
+void theGame::RenderLoadingScreen() const
+{
+	g_theRenderer->BindCamera( m_gameCamera );
+	g_theRenderer->UseShader( nullptr );
+
+	g_theRenderer->ClearScreen( m_default_screen_color );
+	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
+
+	g_theRenderer->DrawTextInBox2D( "Loading..", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
 float theGame::CalculateDeltaTime() {

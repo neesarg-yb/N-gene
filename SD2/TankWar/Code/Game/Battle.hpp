@@ -16,6 +16,7 @@ public:
 	 Battle();
 	~Battle();
 
+	void Startup();
 	void BeginFrame();
 	void EndFrame();
 	void Update( float deltaSeconds );
