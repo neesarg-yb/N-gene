@@ -162,3 +162,19 @@ float Vector2::GetDistanceSquared(const Vector2& pos1, const Vector2& pos2) {
 float Vector2::GetDistance(const Vector2& pos1, const Vector2& pos2) {
 	return sqrtf(Vector2::GetDistanceSquared(pos1, pos2));
 }
+
+float Vector2::DotProduct( const Vector2& a, const Vector2& b ) {
+	float scalerProduct = ( a.x * b.x ) + ( a.y * b.y );
+
+	return scalerProduct;
+}
+
+float Vector2::DotProductForAngleDifference( float angleInDegrees ) {
+	float firstAngle = 0.f;
+	float secondAngle = angleInDegrees;
+
+	Vector2 firstVector = Vector2( MathUtil::CosDegree(firstAngle) , MathUtil::SinDegree(firstAngle) );
+	Vector2 secondVector = Vector2( MathUtil::CosDegree(secondAngle) , MathUtil::SinDegree(secondAngle) );
+
+	return DotProduct( firstVector , secondVector );
+}

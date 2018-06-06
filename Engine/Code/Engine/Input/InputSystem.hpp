@@ -1,9 +1,7 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN		// Always #define this before #including <windows.h>
-#include <windows.h>			// #include this (massive, platform-specific) header in very few places
 #include "Engine/Math/Vector2.hpp"
-#include "Engine/KeyButtonState.hpp"
-#include "Engine/XboxController.hpp"
+#include "Engine/Input/KeyButtonState.hpp"
+#include "Engine/Input/XboxController.hpp"
 
 enum VK_Codes
 {
@@ -33,20 +31,20 @@ public:
 	void BeginFrame();
 	void EndFrame();
 	
-	void OnKeyPressed( unsigned char keyCode );
-	void OnKeyReleased( unsigned char keyCode );
-	bool IsKeyPressed( unsigned char keyCode ) const;
-	bool WasKeyJustPressed( unsigned char keyCode ) const;
-	bool WasKeyJustReleased( unsigned char keyCode ) const;
-
-public:
-	static const int			NUM_KEYS		= 256;
-	XboxController  m_controller[ 4 ];
+	void OnKeyPressed	( unsigned char keyCode );
+	void OnKeyReleased	( unsigned char keyCode );
+	bool IsKeyPressed	( unsigned char keyCode ) const;
+	bool WasKeyJustPressed	( unsigned char keyCode ) const;
+	bool WasKeyJustReleased	( unsigned char keyCode ) const;
 
 protected:
 	void UpdateKeyboard();
 	void UpdateController();
 
+public:
+	static const int			NUM_KEYS   = 256;
+	XboxController				m_controller[ 4 ];
+
 protected:
-	KeyButtonState	m_keyStates[ NUM_KEYS ];
+	KeyButtonState				m_keyStates[ NUM_KEYS ];
 };
