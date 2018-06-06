@@ -1,6 +1,42 @@
+#pragma once
 #include "MathUtil.hpp"
+#include "Engine/Math/Vector2.hpp"
 
 using namespace std;
+
+bool SolveQuadraticEquation( Vector2& out, float a, float b, float c )
+{
+	//	Quadratic Equation:
+	//
+	//	root = ( -b +- (d)^(0.5) ) / ( 2a )
+	//	d	 = ( b^2 ) - ( 4ac )
+
+	float bSquare	= b * b;
+	float ac		= a * c;
+	float d			= bSquare - (4.f * ac);
+
+	// Solution is imaginary or infinite
+	if( d < 0 || a == 0 )
+		return false;
+
+	float squareRootD	= sqrt( d );
+	float root1			= ( -b + squareRootD ) / ( 2.f * a );
+	float root2			= ( -b - squareRootD ) / ( 2.f * a );
+
+	// Smaller root first & larger second
+	if( root1 <= root2 )
+	{
+		out.x = root1; 
+		out.y = root2;
+	}
+	else
+	{
+		out.x = root2; 
+		out.y = root1;
+	}
+
+	return true;
+}
 
 float DegreeToRadian(float degree) {
 	return ( (degree * M_PI) / 180.f );
@@ -347,8 +383,8 @@ void SetFromText( std::vector<std::string>& setIt, const char* delimiter, const 
 {
 	std::string inputText = text;
 
-	unsigned int startPos = 0;
-	for( unsigned int nextDelPos = inputText.find( delimiter, startPos); nextDelPos != std::string::npos; nextDelPos = inputText.find( delimiter, nextDelPos+1 ) )
+	size_t startPos = 0;
+	for( size_t nextDelPos = inputText.find( delimiter, startPos); nextDelPos != std::string::npos; nextDelPos = inputText.find( delimiter, nextDelPos+1 ) )
 	{
 		// delimiter found, push_back the string
 		std::string strToPush( inputText, startPos, nextDelPos-startPos );
@@ -368,4 +404,29 @@ int GetIndexFromColumnRowNumberForMatrixOfWidth( int columnNum , int rowNum , in
 	int index = ( width * rowNum ) + columnNum;
 
 	return index;
+}
+
+std::vector<std::string> SplitIntoStringsByDelimiter( std::string passedString, char delimeter )
+{
+	std::string word = "";
+	passedString += delimeter;
+
+	int stringTotalLength = (int) passedString.length();
+
+	// Traverse the string from left-to-right
+	std::vector<std::string> subStringList;
+	for( int i=0; i<stringTotalLength; i++ )
+	{
+		if( passedString[i] != delimeter )
+			word += passedString[i];
+		else
+		{
+			if( (int) word.size() != 0 )
+				subStringList.push_back( word );
+
+			word = "";
+		}
+	}
+
+	return subStringList;
 }

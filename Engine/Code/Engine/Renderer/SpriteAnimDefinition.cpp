@@ -17,7 +17,7 @@ SpriteAnimDefinition::~SpriteAnimDefinition()
 
 int SpriteAnimDefinition::GetSpriteIndexAtTime( float elapsedSeconds ) const
 {
-	int totalFrames = m_spriteIndexes.size();
+	int totalFrames = (int) m_spriteIndexes.size();
 	float secondsPerFrame = 1.f / m_framesPerSecond;
 	int indexOfCurrentAnimFrame = (int) ( elapsedSeconds / secondsPerFrame ) % (totalFrames);		// (currentFrame)
 

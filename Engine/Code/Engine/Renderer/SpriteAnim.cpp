@@ -65,7 +65,7 @@ const Texture& SpriteAnim::GetTexture() const
 
 AABB2 SpriteAnim::GetCurrentUVs() const
 {
-	int		totalFrames = m_animDef->m_spriteIndexes.size();
+	int		totalFrames = (int) m_animDef->m_spriteIndexes.size();
 	float	secondPerFrame = 1 / m_animDef->m_framesPerSecond;			// (duration / length)
 	int		indexOfCurrentAnimFrame = (int) ( m_elapsedSeconds / secondPerFrame ) % (totalFrames);		// (currentFrame)
 

@@ -17,6 +17,7 @@ Vector2::Vector2( float initialX, float initialY )
 }
 
 Vector2 Vector2::ZERO		= Vector2(  0.f,  0.f );
+Vector2 Vector2::ONE_ONE	= Vector2(  1.f,  1.f );
 Vector2 Vector2::TOP_DIR	= Vector2(  0.f,  1.f );
 Vector2 Vector2::LEFT_DIR	= Vector2( -1.f,  0.f );
 Vector2 Vector2::RIGHT_DIR	= Vector2(  1.f,  0.f );
@@ -259,4 +260,12 @@ Vector2 Reflect( const Vector2& incomingVector , const Vector2& normalVector )
 	Vector2 reflectionVec = incomingVector - ( 2.f * reflectionVComp );
 	
 	return reflectionVec;
+}
+
+Vector2 PolarToCartesian( float r, float degrees )
+{
+	float x = r * CosDegree( degrees );
+	float y = r * SinDegree( degrees );
+
+	return Vector2( x, y );
 }

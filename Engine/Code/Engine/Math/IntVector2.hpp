@@ -8,6 +8,7 @@ class IntVector2
 {
 public:
 	static const IntVector2 ZERO;
+	static const IntVector2 MINUS_ONE_XY;
 
 public:
 	 IntVector2();

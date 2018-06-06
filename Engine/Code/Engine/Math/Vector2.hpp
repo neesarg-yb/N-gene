@@ -19,6 +19,7 @@ public:
 
 public:
 	static Vector2 ZERO;
+	static Vector2 ONE_ONE;
 	static Vector2 TOP_DIR;
 	static Vector2 LEFT_DIR;
 	static Vector2 RIGHT_DIR;
@@ -79,3 +80,5 @@ void DecomposeVectorIntoBasis( const Vector2& originalVector, const Vector2& new
 const Vector2 Interpolate( const Vector2& start, const Vector2& end, float fractionTowardEnd );
 
 Vector2 Reflect( const Vector2& incomingVector , const Vector2& normalVector );
+
+Vector2 PolarToCartesian( float r, float degrees );

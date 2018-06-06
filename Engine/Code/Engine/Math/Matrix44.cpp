@@ -69,6 +69,27 @@ void Matrix44::Append( const Matrix44& matrixToAppend )
 
 }
 
+void Matrix44::Transpose()
+{
+	Matrix44 originalMatrix = *this;
+
+	Ix = originalMatrix.Ix;		Jx = originalMatrix.Iy;		Kx = originalMatrix.Iz;		Tx = originalMatrix.Iw;
+	Iy = originalMatrix.Jx;		Jy = originalMatrix.Jy;		Ky = originalMatrix.Jz;		Ty = originalMatrix.Jw;
+	Iz = originalMatrix.Kx;		Jz = originalMatrix.Ky;		Kz = originalMatrix.Kz;		Tz = originalMatrix.Kw;
+	Iw = originalMatrix.Tx;		Jw = originalMatrix.Ty;		Kw = originalMatrix.Tz;		Tw = originalMatrix.Tw;
+}
+
+Vector3 Matrix44::Multiply( const Vector3& vecToMultiply, const float w )
+{
+
+	Vector3 toReturn;
+	toReturn.x	= ( Ix * vecToMultiply.x ) + ( Jx * vecToMultiply.y ) + ( Kx * vecToMultiply.z ) + ( Tx * w );
+	toReturn.y	= ( Iy * vecToMultiply.x ) + ( Jy * vecToMultiply.y ) + ( Ky * vecToMultiply.z ) + ( Ty * w );
+	toReturn.z	= ( Iz * vecToMultiply.x ) + ( Jz * vecToMultiply.y ) + ( Kz * vecToMultiply.z ) + ( Tz * w );
+
+	return toReturn;
+}
+
 void Matrix44::RotateDegrees2D( float rotationDegreesAboutZ )
 {
 	float rotationMatrix[16] =	{	 CosDegree( rotationDegreesAboutZ ), SinDegree( rotationDegreesAboutZ ), 0.f,		 0.f,
@@ -77,6 +98,7 @@ void Matrix44::RotateDegrees2D( float rotationDegreesAboutZ )
 									 0.f,								 0.f,								 0.f,		 1.f	};
 
 	Matrix44 rotationMatrix44 = Matrix44( rotationMatrix );
+
 	Append( rotationMatrix44 );
 }
 
@@ -85,6 +107,7 @@ void Matrix44::Translate2D( const Vector2& translation )
 	Matrix44 translationMatrix44;
 	translationMatrix44.Tx = translation.x;
 	translationMatrix44.Ty = translation.y;
+
 	Append( translationMatrix44 );
 }
 
@@ -93,7 +116,63 @@ void Matrix44::ScaleUniform2D( float scaleXY )
 	Matrix44 scaleMatrix44;
 	scaleMatrix44.Ix = scaleXY;
 	scaleMatrix44.Jy = scaleXY;
+
 	Append( scaleMatrix44 );
+}
+
+void Matrix44::Translate3D( Vector3 const &translation )
+{
+	Matrix44 translateMatrix;
+	translateMatrix.Tx = translation.x;
+	translateMatrix.Ty = translation.y;
+	translateMatrix.Tz = translation.z;
+	
+	Append( translateMatrix );
+}
+
+void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisZXY )
+{
+	Matrix44 rotationAroundZMatrix;			// Clockwise
+	rotationAroundZMatrix.Ix =  CosDegree( rotateAroundAxisZXY.z );
+	rotationAroundZMatrix.Jx = -SinDegree( rotateAroundAxisZXY.z );
+	rotationAroundZMatrix.Iy =  SinDegree( rotateAroundAxisZXY.z );
+	rotationAroundZMatrix.Jy =  CosDegree( rotateAroundAxisZXY.z );
+
+	Matrix44 rotationAroundXMatrix;			// Clockwise
+	rotationAroundXMatrix.Jy =  CosDegree( rotateAroundAxisZXY.x );
+	rotationAroundXMatrix.Ky = -SinDegree( rotateAroundAxisZXY.x );
+	rotationAroundXMatrix.Jz =  SinDegree( rotateAroundAxisZXY.x );
+	rotationAroundXMatrix.Kz =  CosDegree( rotateAroundAxisZXY.x );
+
+	Matrix44 rotationAroundYMatrix;			// Counter-Clockwise
+	rotationAroundYMatrix.Ix =  CosDegree( rotateAroundAxisZXY.y );
+	rotationAroundYMatrix.Kx =  SinDegree( rotateAroundAxisZXY.y );
+	rotationAroundYMatrix.Iz = -SinDegree( rotateAroundAxisZXY.y );
+	rotationAroundYMatrix.Kz =  CosDegree( rotateAroundAxisZXY.y );
+
+	Append( rotationAroundZMatrix );
+	Append( rotationAroundXMatrix );
+	Append( rotationAroundYMatrix );
+}
+
+void Matrix44::Scale3D( Vector3 const &scale )
+{
+	Matrix44 scaleMatrix;
+	scaleMatrix.Ix = scale.x;
+	scaleMatrix.Jy = scale.y;
+	scaleMatrix.Kz = scale.z;
+
+	Append( scaleMatrix );
+}
+
+void Matrix44::ScaleUniform3D( float uniformScale )
+{
+	Matrix44 scaleMatrix;
+	scaleMatrix.Ix = uniformScale;
+	scaleMatrix.Jy = uniformScale;
+	scaleMatrix.Kz = uniformScale;
+
+	Append( scaleMatrix );
 }
 
 void Matrix44::Scale2D( float scaleX, float scaleY )
@@ -158,11 +237,210 @@ Matrix44 Matrix44::MakeOrtho2D( const Vector2& bottomLeft, const Vector2& topRig
 	// Scale it down by
 	float xScale	=  2.f / ( topRight.x - bottomLeft.x );
 	float yScale	=  2.f / ( topRight.y - bottomLeft.y );
-	float zScale	= -2.f / ( 1.f - 0.f);
+	float zScale	=  2.f / ( 1.f - 0.f);							// On MSDN, it is -zScale. Which is wrong
 
 	toReturn.Ix = xScale;
 	toReturn.Jy = yScale;
 	toReturn.Kz = zScale;
+
+	return toReturn;
+}
+
+Matrix44 Matrix44::MakeOrtho3D( float screen_width, float screen_height, float screen_near, float screen_far )
+{
+
+	Matrix44 toReturn;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	//       Calculations are done according to the info provided by the link,         //
+	//---------------------------------------------------------------------------------//
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dd373965(v=vs.85).aspx //
+	//                                                                                 //
+	/////////////////////////////////////////////////////////////////////////////////////
+
+	const float		half_width	=  screen_width * 0.5f;
+	const float		half_height	=  screen_height * 0.5f;
+	const float		left		= -half_width;
+	const float&	right		=  half_width;
+	const float&	top			=  half_height;
+	const float		bottom		= -half_height;
+
+	// Translate it by
+	toReturn.Tx = -(right + left)/(right - left);
+	toReturn.Ty = -(top + bottom) / (top - bottom);
+	toReturn.Tz = -(screen_far + screen_near) / (screen_far - screen_near);
+
+	// Scale it down by
+	float xScale	=  2.f / ( right - left );
+	float yScale	=  2.f / ( top - bottom );
+	float zScale	=  2.f / ( screen_far - screen_near);			// On MSDN, it is -zScale. Which is wrong
+
+	toReturn.Ix = xScale;
+	toReturn.Jy = yScale;
+	toReturn.Kz = zScale;
+
+	return toReturn;
+}
+
+Matrix44 Matrix44::MakePerspective3D( float fovDegrees, float aspectRatio, float nearZ, float farZ )
+{
+	float fovRadians = DegreeToRadian( fovDegrees * 0.5f );
+	float d = 1.f / atan2f( fovRadians, 1.f );
+	float q = 1.f / ( farZ - nearZ );
+
+	float array[16] = {
+		// I Column
+		 d / aspectRatio,	
+		 0.f,	
+		 0.f,
+		 0.f,
+
+		// J Column
+		 0.f,
+		 d,
+		 0.f,
+		 0.f,
+
+		// K Column
+		 0.f,
+		 0.f,
+		 (nearZ + farZ) * q,
+		 1.f,
+
+		// T Column
+		 0.f,
+		 0.f,
+		-2.f * nearZ * farZ * q,
+		 0.f
+	};
+
+	return Matrix44( array );
+}
+
+Matrix44 Matrix44::MakeLookAtView( const Vector3& target_position, const Vector3& camera_position, const Vector3& camera_up_vector /* = Vector3( 0.f, 1.f, 0.f ) */ )
+{
+	Matrix44 toReturn;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	//       Calculations are done according to the info provided by the link,         //
+	//---------------------------------------------------------------------------------//
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb281710(v=vs.85).aspx //
+	//                                                                                 //
+	/////////////////////////////////////////////////////////////////////////////////////
+
+	Vector3 zaxis = (target_position - camera_position).GetNormalized();
+	Vector3 xaxis = Vector3::CrossProduct(camera_up_vector, zaxis).GetNormalized();
+	Vector3 yaxis = Vector3::CrossProduct(zaxis, xaxis);
+	Vector3 taxis = Vector3( Vector3::DotProduct(xaxis, camera_position),
+							 Vector3::DotProduct(yaxis, camera_position),
+							 Vector3::DotProduct(zaxis, camera_position) );
+	
+	toReturn.Ix	= xaxis.x;
+	toReturn.Iy = yaxis.x;
+	toReturn.Iz = zaxis.x;
+	toReturn.Iw = 0.f;
+
+	toReturn.Jx	= xaxis.y;
+	toReturn.Jy = yaxis.y;
+	toReturn.Jz = zaxis.y;
+	toReturn.Jw = 0.f;
+
+	toReturn.Kx	= xaxis.z;
+	toReturn.Ky = yaxis.z;
+	toReturn.Kz = zaxis.z;
+	toReturn.Kw = 0.f;
+
+	toReturn.Tx	= Vector3::DotProduct(xaxis, camera_position) * -1.f;
+	toReturn.Ty = Vector3::DotProduct(yaxis, camera_position) * -1.f;
+	toReturn.Tz = Vector3::DotProduct(zaxis, camera_position) * -1.f;
+	toReturn.Tw = 1.f;
+
+	/*
+	RESULT MATRIX,
+		__																							  __
+		|	xaxis.x						  yaxis.x						zaxis.x						0  |
+		|	xaxis.y						  yaxis.y						zaxis.y						0  |
+		|	xaxis.z						  yaxis.z						zaxis.z						0  |
+		|	-dot(xaxis, cameraPosition)  -dot(yaxis, cameraPosition)   -dot(zaxis, cameraPosition)  1  |
+		--																							  --
+	*/
+
+	return toReturn;
+}
+
+Vector3 Matrix44::GetIColumn() const
+{
+	return Vector3( Ix, Iy, Iz );
+}
+
+Vector3 Matrix44::GetJColumn() const
+{
+	return Vector3( Jx, Jy, Jz );
+}
+
+Vector3 Matrix44::GetKColumn() const
+{
+	return Vector3( Kx, Ky, Kz );
+}
+
+Vector3 Matrix44::GetTColumn() const
+{
+	return Vector3( Tx, Ty, Tz );
+}
+
+Vector3 Matrix44::GetEulerRotation() const
+{
+	/*
+		ASSUMING THAT ROTATION MATRIX IS,
+
+		--													  --     --			   --
+		|	 cz*cy - sz*sx*sy	-sz*cx		cz*sy + sz*sx*cy   |     |	Ix	Jx	Kx	|
+		|	 sz*cy + cz*sx*sy	 cz*cx		sz*sy - cz*sx*cy   |  =  |	Iy	Jy	Ky	|
+		|	-sz*cx				 sx			cx*cy			   |     |	Iz	Jz	Kz	|
+		--													  --     --			   --
+	*/
+
+	float xRad;
+	float yRad;
+	float zRad;
+
+	float sx = ClampFloat( Jz, -1.f, 1.f );
+	xRad	 = asinf( sx );
+
+	float cx = cosf( xRad );
+	if( cx != 0.f )
+	{
+		yRad = atan2f( -Iz, Kz );
+		zRad = atan2f( -Jx, Jy );
+	}
+	else
+	{
+		zRad = 0.f;
+		yRad = atan2f( Kx, Ix );
+	}
+
+	return Vector3( RadianToDegree(xRad), 
+					RadianToDegree(yRad), 
+					RadianToDegree(zRad) );
+}
+
+Matrix44 Matrix44::GetOrthonormalInverse() const
+{
+	Matrix44 toReturn	= *this;
+	Vector3  traslation	= toReturn.GetTColumn();
+
+	toReturn.Tx = 0.f;
+	toReturn.Ty = 0.f;
+	toReturn.Tz = 0.f;
+	toReturn.Tw = 1.f;
+
+	toReturn.Transpose();
+	Vector3 inverseTranslation = toReturn.Multiply( traslation * -1.f, 0.f );
+
+	toReturn.Tx = inverseTranslation.x;
+	toReturn.Ty = inverseTranslation.y;
+	toReturn.Tz = inverseTranslation.z;
+	toReturn.Tw = 1.f;
 
 	return toReturn;
 }

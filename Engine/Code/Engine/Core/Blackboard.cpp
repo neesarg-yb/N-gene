@@ -1,7 +1,5 @@
 #include "Blackboard.hpp"
 
-Blackboard* g_gameConfigBlackboard = nullptr;
-
 Blackboard::Blackboard()
 {
 

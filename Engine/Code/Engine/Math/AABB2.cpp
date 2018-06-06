@@ -1,8 +1,17 @@
 #include "Engine/Math/AABB2.hpp"
 
+AABB2 AABB2::ONE_BY_ONE = AABB2( 0.f, 0.f, 1.f, 1.f );
+AABB2 AABB2::NDC_SIZE	= AABB2( -1.f, -1.f, 1.f, 1.f );
+
 AABB2::AABB2()
 {
 
+}
+
+AABB2::AABB2( const AABB2& copy )
+{
+	mins = copy.mins;
+	maxs = copy.maxs;
 }
 
 AABB2::~AABB2()
@@ -141,6 +150,22 @@ AABB2 AABB2::operator+( const Vector2& translation ) const {
 AABB2 AABB2::operator-( const Vector2& antiTranslation ) const {
 	AABB2 temp = *this;
 	temp.Translate(Vector2( -antiTranslation.x, -antiTranslation.y ));
+
+	return temp;
+}
+
+AABB2 AABB2::operator*( const float multiplyAllBy ) const {
+	AABB2 temp	= *this;
+	temp.mins	= temp.mins * multiplyAllBy;
+	temp.maxs	= temp.maxs * multiplyAllBy;
+
+	return temp;
+}
+
+AABB2 AABB2::operator/( const float divideAllBy ) const {
+	AABB2 temp	= *this;
+	temp.mins	= temp.mins / divideAllBy;
+	temp.maxs	= temp.maxs / divideAllBy;
 
 	return temp;
 }

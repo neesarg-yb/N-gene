@@ -12,8 +12,8 @@ public:
 	 SpriteSheet( const Texture& texture, int tilesWide, int tilesHigh );
 	~SpriteSheet();
 	
-	AABB2 GetTexCoordsForSpriteCoords( const IntVector2& spriteCoords ) const;	// for sprites
-	AABB2 GetTexCoordsForSpriteIndex( int spriteIndex ) const;					// for sprite animations
+	AABB2 GetTexCoordsForSpriteCoords( IntVector2 spriteCoords ) const;			// Assumes that bottom-left coordinate is (0, 0)
+	AABB2 GetTexCoordsForSpriteIndex( int spriteIndex ) const;					// Assumes that zero-index starts from top-left..
 	int GetNumSprites() const;
 
 private:

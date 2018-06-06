@@ -29,6 +29,15 @@ Image::Image( const std::string& imageFilePath )
 	}
 }
 
+Image::Image( const Rgba& pixalColor, int width_px /* = 1 */, int height_px /* = 1 */ )
+{
+	for( int i=0; i<width_px; i++ )
+		for( int j=0; j<height_px; j++ )
+			m_texels.push_back( pixalColor );
+
+	m_dimensions = IntVector2( width_px, height_px );
+}
+
 IntVector2 Image::GetDimensions() const
 {
 	return m_dimensions;
@@ -46,4 +55,9 @@ void Image::SetTexel( int x, int y, const Rgba& color )
 	int index = GetIndexFromColumnRowNumberForMatrixOfWidth( x , y , m_dimensions.x );
 
 	m_texels[ index ] = color;
+}
+
+unsigned char* Image::GetPointerToTexelVector()
+{
+	return (unsigned char*) m_texels.data();
 }

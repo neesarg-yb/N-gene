@@ -1,12 +1,14 @@
 #pragma once
-
 #include <string>
 #include "Engine/Math/AABB2.hpp"
 #include "Engine/Renderer/SpriteSheet.hpp"
 
+class DebugRenderer;
+
 class BitmapFont
 {
 	friend class Renderer;
+	friend class DebugRenderer;
 
 public:
 	const std::string m_fontName;

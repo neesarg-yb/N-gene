@@ -1,20 +1,17 @@
 #pragma once
 #include <map>
 #include <string>
-#include "Engine/../ThirdParty/tinyxml/tinyxml2.h"
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/IntVector2.hpp"
 #include "Engine/Math/FloatRange.hpp"
 #include "Engine/Math/IntRange.hpp"
-
-typedef tinyxml2::XMLElement XMLElement;
-typedef tinyxml2::XMLAttribute XMLAttribute;
+#include "Engine/Core/EngineCommon.hpp"
 
 class Blackboard
 {
 public:
-	Blackboard();
+	 Blackboard();
 	~Blackboard();
 
 	void			PopulateFromXmlElementAttributes( const XMLElement& element );
