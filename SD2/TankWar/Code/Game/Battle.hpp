@@ -11,6 +11,8 @@
 
 class Material;
 
+typedef std::vector< GameObject* > GameObjectList;
+
 class Battle
 {
 public:
@@ -36,8 +38,7 @@ private:
 	Material*					 m_sphereMaterial				= nullptr;
 	Mesh*						 m_sphereMesh					= nullptr;
 
-	// TEST
-	Tank*						 m_tempTank						= nullptr;
+	GameObjectList				 m_allGameObjects;
 
 
 public:

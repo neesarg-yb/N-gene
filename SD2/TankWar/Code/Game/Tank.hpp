@@ -8,5 +8,9 @@ public:
 	~Tank();
 
 public:
+	float m_speed = 10.f;			// units per seconds
+	float m_rotationSpeed = 35.f;	// degrees per seconds
+
+public:
 	void Update( float deltaSeconds );
 };

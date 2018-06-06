@@ -2,6 +2,7 @@
 #include "Tank.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Material.hpp"
+#include "Game/GameCommon.hpp"
 
 Tank::Tank( Vector3 const &spawnPosition )
 {
@@ -26,5 +27,23 @@ Tank::~Tank()
 
 void Tank::Update( float deltaSeconds )
 {
-	m_transform.SetPosition( m_transform.GetPosition() + Vector3( 0.f, 0.f, deltaSeconds ) );
+	XboxController &thecontroller = g_theInput->m_controller[0];
+
+	// Left Stick
+	Vector2 leftStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+
+	// Move Forward
+	Vector2 translationXZ		= leftStickNormalized * m_speed * deltaSeconds;
+	Vector3 translation			= Vector3( translationXZ.x, 0.f, translationXZ.y );
+	Vector3 worldTranslation	= m_transform.GetWorldTransformMatrix().Multiply( translation, 0.f );
+	Vector3 currentPosition		= m_transform.GetPosition();
+
+	m_transform.SetPosition( currentPosition + worldTranslation );
+
+	// Right Stick
+	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
+	float	zRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
+	Vector3 currentRotation		 = m_transform.GetRotation();
+
+	m_transform.SetRotation( currentRotation + Vector3( 0.f, zRotation, 0.f ) );
 }

@@ -78,7 +78,7 @@ void Battle::Startup()
 	DebugRendererStartup( g_theRenderer, s_camera );
 
 	// Placeholder sphere for Tank
-	m_sphereMesh		= MeshBuilder::CreateSphere( 4.f, 30, 30 );
+	m_sphereMesh		= MeshBuilder::CreateSphere( 1.f, 30, 30 );
 	m_sphereMaterial	= Material::CreateNewFromFile( "Data\\Materials\\stone_sphere.material" );
 	m_sphere			= new Renderable( Vector3( 10.f, 3.2f, 20.f) );
 
@@ -97,11 +97,13 @@ void Battle::Startup()
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
-	// TEST TANK
-	m_tempTank = new Tank( Vector3::ONE_ALL );
-	s_lightSources[0]->m_transform.SetParentAs( &m_tempTank->m_transform );
-	s_camera->m_cameraTransform.SetParentAs( &m_tempTank->m_transform );
-	s_battleScene->AddRenderable( *m_tempTank->m_renderable );
+	// PLAYER TANK
+	Tank *playerTank = new Tank( Vector3::ONE_ALL );
+	s_lightSources[0]->m_transform.SetParentAs( &playerTank->m_transform );
+	s_camera->m_cameraTransform.SetParentAs( &playerTank->m_transform );
+	s_battleScene->AddRenderable( *playerTank->m_renderable );
+
+	m_allGameObjects.push_back( playerTank );
 }
 
 void Battle::BeginFrame()
@@ -123,9 +125,10 @@ void Battle::Update( float deltaSeconds )
 	ChnageLightAsPerInput( deltaSeconds );
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		s_lightSources[i]->Update( deltaSeconds );
-	
-	// Camera Position
-//	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
+
+	// Game Objects
+	for each( GameObject* go in m_allGameObjects )
+		go->Update( deltaSeconds );
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
@@ -140,8 +143,6 @@ void Battle::Update( float deltaSeconds )
 	if( g_theInput->WasKeyJustPressed( 'W' ) )
 		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
 
-	// TEST
-	m_tempTank->Update( deltaSeconds );
 }
 
 void Battle::Render() const
