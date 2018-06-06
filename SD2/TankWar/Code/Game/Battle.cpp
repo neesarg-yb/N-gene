@@ -9,7 +9,7 @@
 
 using namespace tinyxml2;
 
-Scene*				  Battle::s_testScene;
+Scene*				  Battle::s_battleScene;
 Camera*				  Battle::s_camera;
 std::vector< Light* > Battle::s_lightSources;
 
@@ -21,8 +21,8 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	newLight->SetUpForSpotLight( 40.f, 30.f, 40.f, Vector3( 0.f, 0.f, 1.f ), lightColor );
 	s_lightSources.push_back( newLight );
 
-	s_testScene->AddLight( *newLight );
-	s_testScene->AddRenderable( *newLight->m_renderable );
+	s_battleScene->AddLight( *newLight );
+	s_battleScene->AddRenderable( *newLight->m_renderable );
 
 	// DebugRenderWireSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	// DebugRenderSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
@@ -55,70 +55,28 @@ Battle::Battle()
 	s_lightSources.push_back( new Light( Vector3(0.f, 0.f, 1.f), Vector3( 0.3f, 0.3f, 0.3f) ) );
 	s_lightSources[1]->SetUpForSpotLight( 90.f, 20.f, 30.f );
 
-	s_lightSources.push_back( new Light( Vector3( 20.f, 4.f, 10.f ), Vector3( 10.f, -90.f, 0.f) ) );
-	s_lightSources[2]->SetUpForDirectionalLight( 30.f, Vector3(1.f, 0.f, 0.f), RGBA_GREEN_COLOR );
-
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, s_camera );
 	
-	// Setting up the transforms
-	m_spaceShipTransform = new Transform();
-	m_spaceShipTransform->SetScale( Vector3( 1.f, 1.f, 1.f ) );
-	m_spaceShipTransform->SetPosition( Vector3( 0.f, 0.f, 0.f ) );
-	
-	m_snowMikuTransform	= new Transform();
-	m_snowMikuTransform->SetScale( Vector3( 1.f, 1.f, 1.f ) );
-	m_snowMikuTransform->SetPosition( Vector3( -7.f, 0.f, 20.f ) );
-	m_snowMikuTransform->SetRotation( Vector3( 0.f, 180.f, 0.f ) );
-	
-	// SpaceShip Obj Model Loading
-	m_spaceShip				= new Renderable( *m_spaceShipTransform );
-	bool spaceShipLoaded	= ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceShip );
-	GUARANTEE_RECOVERABLE( spaceShipLoaded, "Warning: SpaceShip loading from obj file, failed!" );
-	m_spaceShipXRay			= new Renderable( Vector3( 0.f, 0.f, 40.f), Vector3( 0.f, 180.f, 0.f), Vector3( 1.f, 1.f, 1.f ) );
-	ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceShipXRay );
-
-	m_snowMiku				= new Renderable( *m_snowMikuTransform );
-	bool snowMikuLoaded		= ModelLoader::LoadObjectModelFromPath( "Data\\Models\\snow_miku\\ROOMITEMS011_ALL.obj", *m_snowMiku );
-	GUARANTEE_RECOVERABLE( snowMikuLoaded, "Warning: SnowMiku loading from obj file, failed!" );
-	
-	m_testSphereMesh	= MeshBuilder::CreateSphere( 4.f, 30, 30 );
-	m_testCubeMesh		= MeshBuilder::CreateCube( Vector3( 4.f, 4.f, 4.f ) );
-
-	// Test Material
-	m_cubeMaterial			= Material::CreateNewFromFile( "Data\\Materials\\couch_cube.material" );
-	m_sphereMaterial		= Material::CreateNewFromFile( "Data\\Materials\\stone_sphere.material" );
-	m_spaceShipXRayMaterial	= Material::CreateNewFromFile( "Data\\Materials\\ship_xray.material" );
-	m_spaceShipXRay->SetBaseMaterial( m_spaceShipXRayMaterial );
-
-	// Test Renderables
-	m_cube				= new Renderable( Vector3( 0.f, 0.f, 20.f ) );
+	// Placeholder sphere for Tank
+	m_sphereMesh		= MeshBuilder::CreateSphere( 4.f, 30, 30 );
+	m_sphereMaterial	= Material::CreateNewFromFile( "Data\\Materials\\stone_sphere.material" );
 	m_sphere			= new Renderable( Vector3( 10.f, 3.2f, 20.f) );
 
-	m_cube->SetBaseMesh( m_testCubeMesh );
-	m_sphere->SetBaseMesh( m_testSphereMesh );
-
-	m_cube->SetBaseMaterial( m_cubeMaterial );
+	m_sphere->SetBaseMesh( m_sphereMesh );
 	m_sphere->SetBaseMaterial( m_sphereMaterial );
 
-	// Test Scene
-	s_testScene = new Scene();
+	// Battle Scene
+	s_battleScene = new Scene();
+	
+	s_battleScene->AddLight( *s_lightSources[0] );
+	s_battleScene->AddLight( *s_lightSources[1] );
 
-	s_testScene->AddRenderable( *m_cube );
-	s_testScene->AddRenderable( *m_sphere );
-	s_testScene->AddRenderable( *m_spaceShip );
-	s_testScene->AddRenderable( *m_snowMiku );
-	s_testScene->AddRenderable( *m_spaceShipXRay );
+	s_battleScene->AddRenderable( *m_sphere );
+	s_battleScene->AddRenderable( *s_lightSources[0]->m_renderable );
+	s_battleScene->AddRenderable( *s_lightSources[1]->m_renderable );
 
-	s_testScene->AddLight( *s_lightSources[0] );
-	s_testScene->AddLight( *s_lightSources[1] );
-	s_testScene->AddLight( *s_lightSources[2] );
-
-	s_testScene->AddRenderable( *s_lightSources[0]->m_renderable );
-	s_testScene->AddRenderable( *s_lightSources[1]->m_renderable );
-	s_testScene->AddRenderable( *s_lightSources[2]->m_renderable );
-
-	s_testScene->AddCamera( *s_camera );
+	s_battleScene->AddCamera( *s_camera );
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 }
@@ -126,23 +84,11 @@ Battle::Battle()
 Battle::~Battle()
 {
 	delete m_renderingPath;
-	delete s_testScene;
+	delete s_battleScene;
 
-	delete m_spaceShipXRay;
-	delete m_spaceShip;
 	delete m_sphere;
-	delete m_cube;
-
-	delete m_spaceShipXRayMaterial;
-	delete m_snowMiku;
 	delete m_sphereMaterial;
-	delete m_cubeMaterial;
-	
-	delete m_testCubeMesh;
-	delete m_testSphereMesh;
-	delete m_snowMikuTransform;
-	delete m_spaceShipTransform;
-	delete m_spaceShipMesh;
+	delete m_sphereMesh;
 	
 	DebugRendererShutdown();
 
@@ -167,18 +113,22 @@ void Battle::Update( float deltaSeconds )
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 	
+	// Lights
 	ChnageLightAsPerInput( deltaSeconds );
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		s_lightSources[i]->Update( deltaSeconds );
 	
+	// Camera Position
 	MoveTheCameraAccordingToPlayerInput( deltaSeconds );
 	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
+
+	// The spotlight attached to camera
 	s_lightSources[1]->SetPosition( s_camera->m_cameraTransform.GetPosition() );
 	s_lightSources[1]->SetEulerRotation( s_camera->m_cameraTransform.GetRotation() );
 
+	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
-
-
+	
 	// Spawn Lights according to input
 	if( g_theInput->WasKeyJustPressed( 'R' ) )
 		AddNewPointLightToCamareaPosition( RGBA_RED_COLOR );
@@ -201,7 +151,7 @@ void Battle::Render() const
 	//  START DRAWING FROM HERE.. //
 	//							  //
 	////////////////////////////////
-	m_renderingPath->RenderSceneForCamera( *s_camera, *s_testScene );
+	m_renderingPath->RenderSceneForCamera( *s_camera, *s_battleScene );
 	
 	// DebugText for Lighting and Shader..
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );

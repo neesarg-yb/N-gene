@@ -22,27 +22,21 @@ public:
 	void Render() const;
 
 private:
-	double						 m_timeSinceStartOfTheBattle	= 0;
+	// Rendering Specific
 	static Camera*				 s_camera;
-	static Scene*				 s_testScene;
-	
-	ForwardRenderingPath*		 m_renderingPath				= nullptr;
-	Renderable*					 m_cube							= nullptr;
-	Renderable*					 m_sphere						= nullptr;
-	Renderable*					 m_spaceShip					= nullptr;
-	Renderable*					 m_spaceShipXRay				= nullptr;
-	Renderable*					 m_snowMiku						= nullptr;
-	Material*					 m_cubeMaterial					= nullptr;
-	Material*					 m_sphereMaterial				= nullptr;
-	Material*					 m_spaceShipXRayMaterial		= nullptr;
-	Mesh*						 m_testCubeMesh					= nullptr;
-	Mesh*						 m_testSphereMesh				= nullptr;
-	Mesh*						 m_spaceShipMesh				= nullptr;
-	Transform*					 m_spaceShipTransform			= nullptr;
-	Transform*					 m_snowMikuTransform			= nullptr;
+	static Scene*				 s_battleScene;
 	Vector4						 m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.2f );
+	ForwardRenderingPath*		 m_renderingPath				= nullptr;
+
+	// Battle Specific
+	double						 m_timeSinceStartOfTheBattle	= 0;
+	Renderable*					 m_sphere						= nullptr;
+	Material*					 m_sphereMaterial				= nullptr;
+	Mesh*						 m_sphereMesh					= nullptr;
+
 
 public:
+	// Lights
 	static std::vector< Light* > s_lightSources;
 	
 	static void	AddNewPointLightToCamareaPosition( Rgba lightColor );
