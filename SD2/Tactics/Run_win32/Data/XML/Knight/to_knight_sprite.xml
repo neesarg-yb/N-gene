@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+
+<sprites>
+
+<sprite id="knight_f.portrait">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="153,13,236,126" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.idle">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="11,15,26,40" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.idle">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="12,47,26,72" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.walk0">
+	<diffuse src="Data/Images/Sprites/to_knight.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="31,14,47,39" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.walk0">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="31,46,46,71" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+
+<sprite id="knight_f.tr.walk1">
+	<diffuse src="Data/Images/Sprites/to_knight.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="51,14,66,38" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.walk1">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="51,46,66,72" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.hit">
+	<diffuse src="Data/Images/Sprites/to_knight.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="71,14,87,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.hit">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="71,47,87,72" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.weak">
+	<diffuse src="Data/Images/Sprites/to_knight.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="91,16,107,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.weak">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="91,47,106,72" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.cast">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="110,13,126,40" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.cast">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="110,46,126,72" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.crouch">
+	<diffuse src="Data/Images/Sprites/to_knight.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="130,17,146,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.crouch">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="131,49,146,72" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.dead">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="9,85,27,104" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.dead">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="10,116,26,135" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.attack0">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="30,79,48,104" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.attack0">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="32,108,48,136" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.attack1">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="51,79,66,104" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.attack1">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="51,111,66,136" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.attack2">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="70,78,85,102" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.attack2">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="72,111,87,135" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.attack3">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="89,81,107,104" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.attack3">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="88,110,107,136" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="knight_f.tr.attack4">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="109,81,127,104" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="knight_f.al.attack4">
+   <diffuse src="Data/Images/Sprites/to_knight.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="110,110,127,136" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+</sprites>

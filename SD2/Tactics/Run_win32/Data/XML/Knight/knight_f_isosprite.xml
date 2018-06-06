@@ -1,0 +1,96 @@
+<isosprites>
+
+<isosprite id="knight_f.idle">
+   <!-- if one is not set, you can assum ea flip of the one that does -->
+   <facing dir="-1, 1" src="knight_f.al.idle" />            <!-- away left -->
+   <facing dir=" 1, 1" src="knight_f.al.idle" scale="-1, 1" />           <!-- away right -->
+   <facing dir="-1,-1" src="knight_f.tr.idle" scale="-1, 1" />   <!-- toward left -->
+   <facing dir=" 1,-1" src="knight_f.tr.idle" />  <!-- toward right -->
+</isosprite>
+
+<isosprite id="knight_f.walk0">
+   <facing dir="-1, 1" src="knight_f.al.walk0" />         
+   <facing dir=" 1, 1" src="knight_f.al.walk0" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.walk0" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.walk0" /> 
+</isosprite>
+
+<isosprite id="knight_f.walk1">
+   <facing dir="-1, 1" src="knight_f.al.walk1" /> 
+   <facing dir=" 1, 1" src="knight_f.al.walk1" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.walk1" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.walk1" />  
+</isosprite>
+
+<isosprite id="knight_f.hit">
+   <facing dir="-1, 1" src="knight_f.al.hit" /> 
+   <facing dir=" 1, 1" src="knight_f.al.hit" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.hit" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.hit" />  
+</isosprite>
+
+<isosprite id="knight_f.weak">
+   <facing dir="-1, 1" src="knight_f.al.weak" /> 
+   <facing dir=" 1, 1" src="knight_f.al.weak" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.weak" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.weak" />  
+</isosprite>
+
+<isosprite id="knight_f.cast">
+   <facing dir="-1, 1" src="knight_f.al.cast" /> 
+   <facing dir=" 1, 1" src="knight_f.al.cast" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.cast" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.cast" />  
+</isosprite>
+
+<isosprite id="knight_f.crouch">
+   <facing dir="-1, 1" src="knight_f.al.crouch" /> 
+   <facing dir=" 1, 1" src="knight_f.al.crouch" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.crouch" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.crouch" />  
+</isosprite>
+
+<isosprite id="knight_f.dead">
+   <facing dir="-1, 1" src="knight_f.al.dead" /> 
+   <facing dir=" 1, 1" src="knight_f.al.dead" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.dead" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.dead" />  
+</isosprite>
+
+<isosprite id="knight_f.attack0">
+   <facing dir="-1, 1" src="knight_f.al.attack0" /> 
+   <facing dir=" 1, 1" src="knight_f.al.attack0" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.attack0" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.attack0" />  
+</isosprite>
+
+<isosprite id="knight_f.attack1">
+   <facing dir="-1, 1" src="knight_f.al.attack1" /> 
+   <facing dir=" 1, 1" src="knight_f.al.attack1" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.attack1" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.attack1" />  
+</isosprite>
+
+<isosprite id="knight_f.attack2">
+   <facing dir="-1, 1" src="knight_f.al.attack2" /> 
+   <facing dir=" 1, 1" src="knight_f.al.attack2" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.attack2" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.attack2" />  
+</isosprite>
+
+<isosprite id="knight_f.attack3">
+   <facing dir="-1, 1" src="knight_f.al.attack3" /> 
+   <facing dir=" 1, 1" src="knight_f.al.attack3" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.attack3" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.attack3" />  
+</isosprite>
+
+<isosprite id="knight_f.attack4">
+   <facing dir="-1, 1" src="knight_f.al.attack4" /> 
+   <facing dir=" 1, 1" src="knight_f.al.attack4" scale="-1, 1" /> 
+   <facing dir="-1,-1" src="knight_f.tr.attack4" scale="-1, 1" /> 
+   <facing dir=" 1,-1" src="knight_f.tr.attack4" />  
+</isosprite>
+
+
+</isosprites>

@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+
+<sprites>
+  
+<sprite id="mage_f.portrait">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="152,12,236,129" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.idle">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="10,13,26,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.idle">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="11,45,26,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.walk0">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="30,12,46,39" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.walk0">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="31,44,46,70" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.walk1">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="50,12,66,38" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.walk1">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="50,44,66,71" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.hit">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="70,13,86,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.hit">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="71,45,87,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.weak">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="91,14,106,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.weak">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="91,47,106,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.cast">
+   <diffuse src="Data/Images/Sprites/to_mage.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="110,13,125,40" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.cast">
+   <diffuse src="Data/Images/Sprites/to_mage.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="110,43,126,72" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.crouch">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="131,16,147,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.crouch">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="130,48,146,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.dead">
+   <diffuse src="Data/Images/Sprites/to_mage.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="10,84,26,103" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.dead">
+   <diffuse src="Data/Images/Sprites/to_mage.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="11,113,27,135" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.attack0">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="31,75,47,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.attack0">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="30,108,46,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.attack1">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="50,77,66,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.attack1">
+   <diffuse src="Data/Images/Sprites/to_mage.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="51,109,67,136" />
+   <pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.attack2">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="71,76,87,101" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.attack2">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="70,107,86,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.tr.attack3">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="90,76,108,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.al.attack3">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="89,108,107,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="mage_f.al.attack4">
+   <diffuse src="Data/Images/Sprites/to_mage.split.png" />
+   <ppu count="16" />
+   <uv layout="pixel" uvs="110,108,126,136" />
+   <pivot xy="0.5,0" />
+</sprite>
+<sprite id="mage_f.tr.attack4">
+	<diffuse src="Data/Images/Sprites/to_mage.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="111,76,127,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+</sprites>

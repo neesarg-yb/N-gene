@@ -1,0 +1,345 @@
+<?xml version="1.0"?>
+
+<sprites>
+
+<sprite id="archer_f.portrait">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="152,13,235,130" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.idle">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="10,14,25,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.idle">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="10,46,24,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.walk0">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="30,12,46,39" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.walk0">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="30,45,44,70" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.walk1">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="50,13,65,38" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.walk1">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="49,44,65,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.hit">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="70,12,86,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.hit">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="70,44,85,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.weak">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="90,15,106,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.weak">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="90,47,105,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.cast">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="111,13,126,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.cast">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="110,46,124,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.crouch">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="129,15,145,40" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.crouch">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="130,49,145,72" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.dead">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="10,85,26,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.dead">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="10,116,25,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.attack0">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="30,79,46,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.attack0">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="31,108,46,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.attack1">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="50,78,65,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.attack1">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="50,110,66,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.attack2">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="70,79,85,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.attack2">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="71,111,85,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.attack3">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="89,78,107,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.attack3">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="88,109,105,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<sprite id="archer_f.tr.attack4">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="110,78,126,104" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="archer_f.al.attack4">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="110,109,125,136" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+<!-- working copy - male -->
+<sprite id="to_archer_27">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="30,139,46,167" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_28">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="70,140,86,168" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_29">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="111,140,127,168" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_30">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="10,141,25,168" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_31">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="49,141,66,166" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_32">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="153,141,237,258" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_33">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="91,142,107,168" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_34">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="131,144,146,168" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_35">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="32,171,46,197" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_36">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="90,171,105,200" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_37">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="12,172,26,200" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_38">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="51,172,67,199" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_39">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="71,172,87,200" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_40">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="111,172,126,200" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_41">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="131,174,145,200" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_42">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="70,204,86,229" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_43">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="31,205,47,232" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_44">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="51,205,66,232" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_45">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="89,206,108,232" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_46">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="111,206,127,232" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_47">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="10,212,27,231" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_48">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="32,234,47,264" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_49">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="71,235,86,264" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_50">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="89,235,107,264" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_51">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="111,235,126,264" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_52">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="51,236,67,264" />
+	<pivot xy="0.5,0" />
+</sprite>
+<sprite id="to_archer_53">
+	<diffuse src="Data/Images/Sprites/to_archer.split.png" />
+	<ppu count="16" />
+	<uv layout="pixel" uvs="11,241,27,263" />
+	<pivot xy="0.5,0" />
+</sprite>
+
+</sprites>

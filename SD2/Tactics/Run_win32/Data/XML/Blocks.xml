@@ -1,0 +1,15 @@
+<BlockDefinitions>
+
+  <BlockDefinition
+    name="Grass"
+    spriteTextureName="Terrain.png"
+    spriteSheetDimension="32,32"
+    texCoordsForTop="6,0"
+    texCoordsForSide="3,0"
+    texCoordsForBottom="3,0"
+    boxOutlineTextureName="selection.png"
+    dimensions="1,1,1"
+    anchorPoint="0,-1,0"
+    />
+  
+</BlockDefinitions>

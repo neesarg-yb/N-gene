@@ -1,0 +1,30 @@
+
+<animset id="mage_f">
+   <set id= "idle">
+      <anim id="mage_f.idle" />
+   </set>
+   <set id= "weak">
+      <anim id="mage_f.weak" />
+   </set>
+   <set id= "walk">
+      <anim id="mage_f.walk" />
+   </set>
+   <set id= "hit">
+      <anim id="mage_f.hit" />
+   </set>
+   <set id= "die">
+      <anim id="mage_f.die" />
+   </set>
+   <set id= "jump">
+      <anim id="mage_f.jump" />
+   </set>
+   <set id= "attack">
+      <anim id="mage_f.attack" />
+   </set>
+   <set id= "cast">
+      <anim id="mage_f.cast" />
+   </set>
+   <set id= "cast">
+      <anim id="mage_f.dead" />
+   </set>
+</animset>

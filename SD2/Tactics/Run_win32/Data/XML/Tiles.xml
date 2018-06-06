@@ -1,0 +1,20 @@
+<TileDefinitions>
+
+  <TileDefinition
+    name="MoveIndicator"
+    dimensions="1,1"
+    tintColor="128,0,128"
+    drawOffset="-0.05"
+    anchorBoxSize="1,1,1"
+    anchorPoint="0,-1,0"
+    />
+
+  <TileDefinition
+    name="Reachable"
+    dimensions="1,1"
+    tintColor="255,255,255,128"
+    anchorBoxSize="1,1,1"
+    anchorPoint="0,-1,0"
+    />
+  
+</TileDefinitions>

@@ -1,0 +1,281 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="General">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{e23c0ae8-3cdd-429b-b0d2-7ee0cae33d07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{00d017a6-2a23-437d-845a-653e9503da48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML Files">
+      <UniqueIdentifier>{e0db8349-5452-43b9-a632-ca081e0cdd55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Abilities">
+      <UniqueIdentifier>{3e59992b-81e1-4f90-a2f2-ee8045cae4c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SpriteAndAnimation">
+      <UniqueIdentifier>{264a1be1-cdad-40df-bbd5-a2b4a9be0a68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML Files\Sprites">
+      <UniqueIdentifier>{9246d31a-07e7-426a-a8f3-2baca8f5bc10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML Files\Sprites\Archer">
+      <UniqueIdentifier>{5945b152-b65c-4894-a0da-7a3fe9d29c9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML Files\Sprites\Mage">
+      <UniqueIdentifier>{d9817ba8-ad49-4f83-85c5-7d0871692acd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML Files\Sprites\Knight">
+      <UniqueIdentifier>{6fb2f450-20c8-4e34-a3f2-1168844deea2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main_Win32.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="theGame.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="theApp.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Polygon2.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="GameCommon.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Battle.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Tile.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="TileDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="AbilityData.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability_Attack.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability_Defend.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability_Fireball.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability_Heal.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability_Move.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability_ShootArrow.cpp">
+      <Filter>Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAndAnimation\Sprite.cpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAndAnimation\IsoSprite.cpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAndAnimation\IsoAnimation.cpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAndAnimation\AnimationSet.cpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAndAnimation\Animator.cpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="theGame.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="theApp.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon2.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="GameCommon.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineBuildPreferences.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Battle.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Block.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Tile.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="TileDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="AbilityData.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability_Attack.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability_Defend.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability_Fireball.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability_Heal.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability_Move.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability_ShootArrow.hpp">
+      <Filter>Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAndAnimation\Sprite.hpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAndAnimation\IsoSprite.hpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAndAnimation\IsoAnimation.hpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAndAnimation\AnimationSet.hpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAndAnimation\Animator.hpp">
+      <Filter>SpriteAndAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Run_win32\Data\Shaders\default.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\default.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\block.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\block.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\fs_grayscale.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\fs_grayscale.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\discard_alpha.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\discard_alpha.vs">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\Run_win32\Data\XML\Actors.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Blocks.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Tiles.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Archer\archer_f_animation.xml">
+      <Filter>XML Files\Sprites\Archer</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Archer\archer_f_animset.xml">
+      <Filter>XML Files\Sprites\Archer</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Archer\archer_f_isosprite.xml">
+      <Filter>XML Files\Sprites\Archer</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Archer\to_archer_sprite.xml">
+      <Filter>XML Files\Sprites\Archer</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Mage\mage_f_animation.xml">
+      <Filter>XML Files\Sprites\Mage</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Mage\mage_f_animset.xml">
+      <Filter>XML Files\Sprites\Mage</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Mage\mage_f_isosprite.xml">
+      <Filter>XML Files\Sprites\Mage</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Mage\to_mage_sprite.xml">
+      <Filter>XML Files\Sprites\Mage</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Knight\knight_f_animation.xml">
+      <Filter>XML Files\Sprites\Knight</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Knight\knight_f_animset.xml">
+      <Filter>XML Files\Sprites\Knight</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Knight\knight_f_isosprite.xml">
+      <Filter>XML Files\Sprites\Knight</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\XML\Knight\to_knight_sprite.xml">
+      <Filter>XML Files\Sprites\Knight</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>

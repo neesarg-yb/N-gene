@@ -1,0 +1,47 @@
+<isoanims>
+
+<isoanim id="archer_f.idle" loop="loop">
+   <frame src="archer_f.idle" duration="1.0" />
+</isoanim>
+<isoanim id="archer_f.weak" loop="loop">
+   <frame src="archer_f.weak" duration="1.0" />
+</isoanim>
+<isoanim id="archer_f.dead" loop="loop">
+   <frame src="archer_f.dead" duration="1.0" />
+</isoanim>
+<isoanim id="archer_f.walk" loop="loop">
+   <frame src="archer_f.walk0" duration=".25" />
+   <frame src="archer_f.walk1" duration=".25" />
+</isoanim>
+<isoanim id="archer_f.attack" loop="clamp">
+   <frame src="archer_f.walk1" duration=".25" />
+   <frame src="archer_f.attack2" duration=".1" />
+   <frame src="archer_f.attack3" duration=".1" />
+   <frame src="archer_f.attack4" duration=".1" />
+</isoanim>
+
+<isoanim id="archer_f.charge" loop="clamp">
+   <frame src="archer_f.cast" duration=".25" />
+</isoanim>
+
+<isoanim id="archer_f.spell_attack" loop="clamp">
+   <frame src="archer_f.attack0" duration=".75" />
+   <frame src="archer_f.attack3" duration=".25" />
+</isoanim>
+
+<isoanim id="archer_f.hit" loop="clamp">
+   <frame src="archer_f.hit" duration="1.0" />
+</isoanim>
+
+<!-- jump is normalized;
+   25% for prep
+   25% for upward
+   25% for downward
+   25% for landing -->
+<isoanim id="archer_f.jump" loop="clamp">
+   <frame src="archer_f.crouch" duration=".25" />
+   <frame src="archer_f.cast" duration=".50" />
+   <frame src="archer_f.crouch" duration=".25" />
+</isoanim>
+
+</isoanims>
