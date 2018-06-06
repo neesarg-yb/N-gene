@@ -20,10 +20,9 @@ public:
 	// Color, Intensity
 	Vector4		m_lightColorAndIntensity	= Vector4( 0.f, 0.f, 0.f, 0.f );
 
-private:
+public:
 	// Position, Direction
 	Transform	m_transform;
-public:
 	Vector3		m_direction					= Vector3( 0.f, 0.f, 1.f );			// m_transform.GetRotation()->GetAsDirection()
 	float		m_directionFactor			= 0.f;								// 1: Direction Light & 0: Point Light
 	
