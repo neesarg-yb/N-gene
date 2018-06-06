@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Core/Time.hpp"
+#include "Engine/Core/UIMenu.hpp"
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Math/FloatRange.hpp"
@@ -47,9 +48,15 @@ private:
 	GameStates		m_currentGameState			=	ATTRACT;
 	GameStates		m_nextGameState				=	NONE;
 
-	float const		m_attractTime				= 4.f;
-	float			m_attractTimeRemaining		= m_attractTime;
+	// Menu Specific
+	UIMenu*								 m_attractMenu	= nullptr;
+	std::function< void( const char* ) > quitStdFunc	= std::bind( &theGame::QuitGame,		this, std::placeholders::_1 );
+	std::function< void( const char* ) > startStdFunc	= std::bind( &theGame::GoToMenuState, this, std::placeholders::_1 );
+	
+	void GoToMenuState( char const *actionName );
+	void QuitGame( char const *actionName );
 
+	// Game States
 	void StartTransitionToState	( GameStates nextGameState );
 	void ConfirmTransitionToNextState();
 

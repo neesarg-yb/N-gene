@@ -7,9 +7,8 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Core/Window.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Game/GameCommon.hpp"
 
-
-theApp* g_theApp = nullptr;
 void QuitTheApp( Command& cmd );
 
 

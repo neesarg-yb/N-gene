@@ -1,6 +1,7 @@
 #include "theGame.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Game/theApp.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -31,7 +32,6 @@ theGame::~theGame()
 
 void theGame::Startup()
 {
-
 	// Render Loading Screen
 	g_theRenderer->BeginFrame();
 	RenderLoadingScreen();
@@ -40,6 +40,13 @@ void theGame::Startup()
 	// Console stuffs
 	CommandRegister( "echo", EchoTestCommand );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%d Hello World!", 1 );
+
+	// Seting up the Attract Menu
+	m_attractMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.45f, 0.45f, 0.55f, 0.55f ) );
+
+	m_attractMenu->AddNewMenuAction( MenuAction( "Quit", &quitStdFunc ) );
+	m_attractMenu->AddNewMenuAction( MenuAction( "Start", &startStdFunc ) );
+	m_attractMenu->m_selectionIndex = 1;
 
 	// Call Startup for other classes
 	m_currentBattle->Startup();
@@ -159,27 +166,24 @@ void theGame::ConfirmTransitionToNextState()
 
 void theGame::Update_Attract( float deltaSeconds )
 {
-	m_attractTimeRemaining -= deltaSeconds;
-
-	if( m_attractTimeRemaining <= 0.f )
-	{
-		if( m_nextGameState == NONE )
-			StartTransitionToState( MENU );
-		
-		m_attractTimeRemaining = m_attractTime;
-	}
+	// Menu handles the state transition
+	m_attractMenu->Update( deltaSeconds );
 }
 
 void theGame::Render_Attract() const
 {
+	// Title
 	g_theRenderer->BindCamera( m_gameCamera );
 	g_theRenderer->UseShader( nullptr );
 
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 	
-	std::string countDownString =  m_attractTimeRemaining == m_attractTime ? ("...") : std::to_string( (int)m_attractTimeRemaining );
-	g_theRenderer->DrawTextInBox2D( "TANK WAR\n" + countDownString, Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "TANK WAR", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "( Use Controller )", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+
+	// Menu
+	m_attractMenu->Render();
 }
 
 void theGame::Update_Menu( float deltaSeconds )
@@ -202,7 +206,7 @@ void theGame::Render_Menu() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
-	g_theRenderer->DrawTextInBox2D( "MAIN MENU\n \n Press start\\space button to jump to the game.. \n \n (Press ~ for DevConsole )", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "MAIN MENU\n \n Press start to jump to the battle.. \n \n (Press ~ for DevConsole )", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
 void theGame::Update_Battle( float deltaSeconds )
@@ -216,6 +220,18 @@ void theGame::Update_Battle( float deltaSeconds )
 void theGame::Render_Battle() const
 {
 	m_currentBattle->Render();
+}
+
+void theGame::GoToMenuState( char const * actionName )
+{
+	UNUSED( actionName );
+	StartTransitionToState( MENU );
+}
+
+void theGame::QuitGame( char const * actionName )
+{
+	UNUSED( actionName );
+	g_theApp->m_isQuitting = true;
 }
 
 void theGame::RenderLoadingScreen() const
