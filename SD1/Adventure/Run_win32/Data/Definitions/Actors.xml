@@ -1,0 +1,75 @@
+<ActorDefinitions>
+
+  <ActorDefinition name="Player" faction="good" tags="human,!dog">
+    <Size physicsRadius="0.25" localDrawBounds="-0.5,-0.3,0.5,1.033"/>
+    <Movement>
+      <Walk speed="2.0"/>
+    </Movement>
+    <Health max="100" start="100"/>
+    <SpriteAnimSet spriteSheet="KushnariovaCharacters_12x53.png" spriteLayout="12,53" fps="10">
+      <SpriteAnim name="MoveEast"		spriteIndexes="327,328,329,328"/>
+      <SpriteAnim name="MoveWest"		spriteIndexes="333,334,335,334"/>
+      <SpriteAnim name="MoveNorth"	spriteIndexes="324,325,326,325"/>
+      <SpriteAnim name="MoveSouth"	spriteIndexes="330,331,332,331"/>
+      <SpriteAnim name="Idle"		    spriteIndexes="330,331,332,331" fps="3"/>
+    </SpriteAnimSet>
+  </ActorDefinition>
+
+  <ActorDefinition name="Goblin" faction="evil">
+    <Size physicsRadius="0.3" localDrawBounds="-0.5,-0.3,0.5,1.033"/>
+    <Movement>
+      <Walk speed="1.0"/>
+    </Movement>
+    <Health max="30" start="30"/>
+    <SpriteAnimSet spriteSheet="KushnariovaCharacters_12x53.png" spriteLayout="12,53">
+      <SpriteAnim name="MoveEast"		spriteIndexes="63,64,65,64" fps="5"/>
+      <SpriteAnim name="MoveWest"		spriteIndexes="69,70,71,70" fps="5"/>
+      <SpriteAnim name="MoveNorth"	spriteIndexes="60,61,62,61" fps="5"/>
+      <SpriteAnim name="MoveSouth"	spriteIndexes="66,67,68,67" fps="5"/>
+      <SpriteAnim name="Idle"		    spriteIndexes="67"/>
+    </SpriteAnimSet>
+    <Behaviors>
+      <Wander proximity="8" initialUtility="0.2"/>
+    </Behaviors>
+  </ActorDefinition>
+
+  <ActorDefinition name="Friend" faction="good">
+    <Size physicsRadius="0.3" localDrawBounds="-0.5,-0.3,0.5,1.033"/>
+    <Movement>
+      <Walk speed="1.2"/>
+    </Movement>
+    <Health max="30" start="30"/>
+    <SpriteAnimSet spriteSheet="KushnariovaCharacters_12x53.png" spriteLayout="12,53">
+      <SpriteAnim name="MoveEast"		spriteIndexes="243,244,245,244" fps="5"/>
+      <SpriteAnim name="MoveWest"		spriteIndexes="249,250,251,250" fps="5"/>
+      <SpriteAnim name="MoveNorth"	spriteIndexes="240,241,242,241" fps="5"/>
+      <SpriteAnim name="MoveSouth"	spriteIndexes="246,247,248,247" fps="5"/>
+      <SpriteAnim name="Idle"		    spriteIndexes="247"/>
+    </SpriteAnimSet>
+    <Behaviors>
+      <FollowPlayer initialUtility="1"/>
+    </Behaviors>
+  </ActorDefinition>
+
+
+  <ActorDefinition name="Clown" faction="evil">
+    <Size physicsRadius="0.25" localDrawBounds="-0.5,-0.3,0.5,1.033"/>
+    <Movement>
+      <Walk speed="1.5"/>
+    </Movement>
+    <Health max="100" start="100"/>
+    <SpriteAnimSet spriteSheet="KushnariovaCharacters_12x53.png" spriteLayout="12,53" fps="10">
+      <SpriteAnim name="MoveEast"		spriteIndexes="51,52,53,52"/>
+      <SpriteAnim name="MoveWest"		spriteIndexes="57,58,59,58"/>
+      <SpriteAnim name="MoveNorth"	spriteIndexes="48,49,50,49"/>
+      <SpriteAnim name="MoveSouth"	spriteIndexes="54,55,56,55"/>
+      <SpriteAnim name="Idle"		    spriteIndexes="54,55,56,55" fps="3"/>
+    </SpriteAnimSet>
+    <Behaviors>
+      <Wander proximity="12"/>
+      <Follow range="6"/>
+      <Attack range="3" rateOfFire="1"/>
+    </Behaviors>
+  </ActorDefinition>
+
+</ActorDefinitions>

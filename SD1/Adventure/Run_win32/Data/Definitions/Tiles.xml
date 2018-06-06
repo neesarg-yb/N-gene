@@ -1,0 +1,73 @@
+<TileDefinitions>
+  
+  <TileDefinition
+		name="Grass"
+		baseSpriteCoords="5,0"
+		baseSpriteTint="255,255,255"
+		allowsSight="true"
+		allowsWalking="true"
+		allowsFlying="true"
+		allowsSwimming="false"
+    texelValue="0,255,0"
+    tags="flamable"
+	/>
+
+  <TileDefinition
+		name="StoneFloor"
+		baseSpriteCoords="4,10"
+		baseSpriteTint="255,255,255"
+		allowsSight="true"
+		allowsWalking="true"
+		allowsFlying="true"
+		allowsSwimming="false"
+    texelValue="255,255,255"
+	/>
+  
+  <TileDefinition
+		name="Lava"
+		baseSpriteCoords="21,3"
+		baseSpriteTint="255,255,255"
+		allowsSight="false"
+		allowsWalking="false"
+		allowsFlying="true"
+		allowsSwimming="false"
+    texelValue="255,0,0"
+	/>
+  
+  <TileDefinition
+		name="Stone"
+		baseSpriteCoords="13,6"
+		baseSpriteTint="255,255,255"
+		allowsSight="false"
+		allowsWalking="false"
+		allowsFlying="true"
+		allowsSwimming="false"
+    texelValue="0,0,0"
+	/>
+
+  <TileDefinition
+		name="Water"
+		baseSpriteCoords="0,22"
+		baseSpriteTint="255,255,255"
+		allowsSight="true"
+		allowsWalking="false"
+		allowsFlying="true"
+		allowsSwimming="true"
+    texelValue="0,0,255"
+	/>
+
+  <TileDefinition
+		name="MagicRune"
+		baseSpriteCoords="0,5"
+		baseSpriteTint="255,255,255"
+		overlaySpriteCoords="0,15"
+		overlaySpriteTint="255,80,80"
+		allowsSight="true"
+		allowsWalking="false"
+		allowsFlying="true"
+		allowsSwimming="true"
+    texelValue="255,255,0"
+    tags="holy"
+	/>
+
+</TileDefinitions>

@@ -1,0 +1,15 @@
+<ProjectileDefinitions>
+
+  <ProjectileDefinition name="Fire">
+    <Size physicsRadius="0.1" localDrawBounds="-0.2,-0.2,0.2,0.2"/>
+    <Movement>
+      <Fly speed="5.0"/>
+    </Movement>
+    <Health max="1" start="1"/>
+    <Damage amount="3~10"/>
+    <SpriteAnimSet spriteSheet="Terrain_32x32.png" spriteLayout="32,32">
+      <SpriteAnim name="Idle" spriteIndexes="489" autoOrient="true"/>
+    </SpriteAnimSet>
+  </ProjectileDefinition>
+
+</ProjectileDefinitions>

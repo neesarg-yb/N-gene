@@ -1,0 +1,20 @@
+<MapDefinitions>
+
+  <MapDefinition name="Island" defaultTile="Water" width="15~20" height="15~20">
+      <GenerationSteps>
+        <FillAndEdge  fillTile="Grass"  edgeTile="Water" />
+        <Sprinkle     iterations="1"    withTile="Stone"  fraction="0.15"    edgeThickness="1" />
+        <Mutate       ifTile="Grass"    toTile="Water"    chanceToMutate="0.05" />
+      </GenerationSteps>
+  </MapDefinition>
+  
+  <MapDefinition name="Hell" defaultTile="Lava" width="15~20" height="15~20">
+    <GenerationSteps>
+      <FillAndEdge  fillTile="StoneFloor" edgeTile="Lava" />
+      <Sprinkle     withTile="Stone"      fraction="0.1"    edgeThickness="1" />
+      <Sprinkle     chanceToRun="0.33"    iterations="1~2"  withTile="Lava"   fraction="0.05"   edgeThickness="1" />
+      <FromFile     imageName="TestMap.png" />
+    </GenerationSteps>
+  </MapDefinition>
+  
+</MapDefinitions>

@@ -1,0 +1,19 @@
+<AdventureDefinitions>
+
+  <AdventureDefinition name="Balrog" title="Kill the Balrog">
+    <StartConditions startMap="The Village" startOnTileType="Grass"/>
+    <VictoryConditions haveDied="Balrog"/>
+    <Map name="The Village" mapDefinition="Island">
+      <Portal type="TeleportVortex"          onTileType="Grass"      toMap="Temple of Evil" reciprocalType="TeleportVortex"/>
+      <Actor  type="Goblin"  spawnCount="3"  onTileType="Grass"/>
+      <Actor  type="Friend"  spawnCount="5"  onTileType="Grass"/>
+    </Map>
+    <Map name="Temple of Evil" mapDefinition="Hell">
+      <Portal type="TeleportVortex"          onTileType="StoneFloor" toMap="The Village"    reciprocalType="TeleportVortex"/>
+      <Actor  type="Clown"   spawnCount="2"  onTileType="Grass"/>
+      <Actor  type="Goblin"  spawnCount="1"  onTileType="StoneFloor"/>
+      <Actor  type="Friend"  spawnCount="2"  onTileType="Grass"/>
+    </Map>
+  </AdventureDefinition>
+
+</AdventureDefinitions>

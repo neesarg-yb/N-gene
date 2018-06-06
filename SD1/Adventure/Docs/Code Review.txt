@@ -1,0 +1,62 @@
+------------------
+    Neesarg:
+------------------
+Is the Button Down method in: InputController
+m_xboxButtonState should be private
+	theGame.cpp
+
+Game: Filter->General
+	Catagories: Entities
+
+Get rid of Goblins & Polygon2.
+
+Variables:
+	Bool: isWordFirst Ex: Bool m_isKeyPressed
+	use m_ in theApp..
+
+Delete unsued code!
+
+#include Engine/../ThirdParty -> #include ThirdParty
+Re organize #includes: Engines first and Game second
+
+All Render() should be const.
+
+Render() can not change the gamestate. Check it in GameStates Transition
+
+Render_Defeat .. and all have DrawInTextBox( .., .. ,.., .. );
+	make it to a new simple function with one or two arguments
+
+Double linebreak or comment for class & struct seperation
+
+const std::string& str
+Make methods const; removing the const from argument is not right.
+
+Why just Player can ResetHealth() ?, Actor or Entity should have that!
+
+Make a new Folder for MapGenSteps
+
+remove enum Faction -> We'll replace with string
+
+EntityDefinition:
+
+
+ActorDefinition: if( it != s_definition.end() ) { ERROR("Two Definitions") }
+
+
+
+------------------
+    Michael:
+------------------
+To make a warning an error.. Write this in EngineCommon:
+#pragma warning ( error : 4458 );
+	        ( disable : XXXX );
+
+
+for() {
+	break;
+	continue; }
+
+explicit Vector2( from IntVec2 );
+
+virtual ~Entity();
+

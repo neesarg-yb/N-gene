@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="General">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="XML Files">
+      <UniqueIdentifier>{0fbe8b36-9404-4e17-a418-e6022498eb5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities">
+      <UniqueIdentifier>{1e65911e-4238-43b1-a7ed-daaf1507ea33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{b868956d-7af2-4e1e-8cef-2dd609949132}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MapGenSteps">
+      <UniqueIdentifier>{14ebc705-3da2-424f-a5b7-1f9630d759af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI Behaviour">
+      <UniqueIdentifier>{85f922eb-556f-4d99-b555-3ac9316ef269}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main_Win32.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="theGame.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="theApp.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="GameCommon.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera2D.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprinkle.cpp">
+      <Filter>MapGenSteps</Filter>
+    </ClCompile>
+    <ClCompile Include="MapGenStep.cpp">
+      <Filter>MapGenSteps</Filter>
+    </ClCompile>
+    <ClCompile Include="FillAndEdge.cpp">
+      <Filter>MapGenSteps</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorDefinition.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityDefinition.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Portal.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="PortalDefinition.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectileDefinition.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Tile.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="TileDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="MapDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Adventure.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="AdventureDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="FromFile.cpp">
+      <Filter>MapGenSteps</Filter>
+    </ClCompile>
+    <ClCompile Include="Mutate.cpp">
+      <Filter>MapGenSteps</Filter>
+    </ClCompile>
+    <ClCompile Include="TileExtraInfo.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="AIBehavior.cpp">
+      <Filter>AI Behaviour</Filter>
+    </ClCompile>
+    <ClCompile Include="AIBehavior_Wander.cpp">
+      <Filter>AI Behaviour</Filter>
+    </ClCompile>
+    <ClCompile Include="AIBehavior_Follow.cpp">
+      <Filter>AI Behaviour</Filter>
+    </ClCompile>
+    <ClCompile Include="AIBehavior_Attack.cpp">
+      <Filter>AI Behaviour</Filter>
+    </ClCompile>
+    <ClCompile Include="AIBehavior_FollowPlayer.cpp">
+      <Filter>AI Behaviour</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="theGame.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="theApp.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="GameCommon.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineBuildPreferences.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera2D.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprinkle.hpp">
+      <Filter>MapGenSteps</Filter>
+    </ClInclude>
+    <ClInclude Include="MapGenStep.hpp">
+      <Filter>MapGenSteps</Filter>
+    </ClInclude>
+    <ClInclude Include="FillAndEdge.hpp">
+      <Filter>MapGenSteps</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorDefinition.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityDefinition.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Portal.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="PortalDefinition.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileDefinition.hpp">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="TileDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Tile.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="MapDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="AdventureDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Adventure.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="FromFile.hpp">
+      <Filter>MapGenSteps</Filter>
+    </ClInclude>
+    <ClInclude Include="Mutate.hpp">
+      <Filter>MapGenSteps</Filter>
+    </ClInclude>
+    <ClInclude Include="TileExtraInfo.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="AIBehavior.hpp">
+      <Filter>AI Behaviour</Filter>
+    </ClInclude>
+    <ClInclude Include="AIBehavior_Wander.hpp">
+      <Filter>AI Behaviour</Filter>
+    </ClInclude>
+    <ClInclude Include="AIBehavior_Follow.hpp">
+      <Filter>AI Behaviour</Filter>
+    </ClInclude>
+    <ClInclude Include="AIBehavior_Attack.hpp">
+      <Filter>AI Behaviour</Filter>
+    </ClInclude>
+    <ClInclude Include="AIBehavior_FollowPlayer.hpp">
+      <Filter>AI Behaviour</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Maps.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Tiles.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Actors.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Projectiles.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Portals.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Adventures.xml">
+      <Filter>XML Files</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>
