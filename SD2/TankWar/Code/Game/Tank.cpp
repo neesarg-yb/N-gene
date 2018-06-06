@@ -2,6 +2,7 @@
 #include "Tank.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Material.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
 
 Tank::Tank( Vector3 const &spawnPosition )
@@ -27,6 +28,7 @@ Tank::~Tank()
 
 void Tank::Update( float deltaSeconds )
 {
+	// Control the Tank using Xbox Controller
 	XboxController &thecontroller = g_theInput->m_controller[0];
 
 	// Left Stick
@@ -46,4 +48,14 @@ void Tank::Update( float deltaSeconds )
 	Vector3 currentRotation		 = m_transform.GetRotation();
 
 	m_transform.SetRotation( currentRotation + Vector3( 0.f, zRotation, 0.f ) );
+
+	// Debug Trail
+	static float remainingTrailTime = m_spawnTrailPointAfter;
+	remainingTrailTime -= deltaSeconds;
+
+	if( remainingTrailTime <= 0 )
+	{
+		DebugRenderPoint( 10.f, m_transform.GetWorldPosition(), RGBA_YELLOW_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+		remainingTrailTime = m_spawnTrailPointAfter;
+	}
 }
