@@ -59,9 +59,11 @@ public:
 
 public:
 	Transform		 m_cameraTransform;
+private:
 	Matrix44		 m_viewMatrix;		// inverse of cameraMatrix (used for shader) (World to Camera)
 	Matrix44		 m_projMatrix;		// projection, identity by default..
 
+public:
 	UniformBuffer	*m_cameraUBO		= nullptr;
 	FrameBuffer		 m_outputFramebuffer;
 

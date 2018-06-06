@@ -46,6 +46,9 @@ void Camera::Finalize()
 
 void Camera::UpdateUBO()
 {
+	// Update viewMatrix if transform has a parent
+	m_viewMatrix = m_cameraTransform.GetWorldTransformMatrix().GetOrthonormalInverse();
+
 	*m_cameraUBO->As<UBOCameraMatrices>() = GetUBOCameraMatrices();
 	m_cameraUBO->UpdateGPU();
 }
@@ -124,36 +127,24 @@ void Camera::SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspec
 void Camera::SetCameraPositionTo( Vector3 const &newPosition )
 {
 	m_cameraTransform.SetPosition( newPosition );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 void Camera::SetCameraEulerRotationTo( Vector3 const &newEulerRotation )
 {
 	m_cameraTransform.SetRotation( newEulerRotation );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 void Camera::MoveCameraPositionBy( Vector3 const &localTranslation )
 {
-	Vector3 worldTranslation	= m_cameraTransform.GetTransformMatrix().Multiply( localTranslation, 0.f );
+	Vector3 worldTranslation	= m_cameraTransform.GetWorldTransformMatrix().Multiply( localTranslation, 0.f );
 	Vector3 currentPosition		= m_cameraTransform.GetPosition();
 	m_cameraTransform.SetPosition( currentPosition + worldTranslation );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 void Camera::RotateCameraBy( Vector3 const &localRotation )
 {
 	Vector3 currentRotation = m_cameraTransform.GetRotation();
 	m_cameraTransform.SetRotation( currentRotation + localRotation );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 Vector3 Camera::GetForwardVector() const 
@@ -174,6 +165,7 @@ Matrix44 Camera::GetCameraModelMatrix() const
 UBOCameraMatrices Camera::GetUBOCameraMatrices() const
 {
 	UBOCameraMatrices toReturn;
+
 	toReturn.viewMatrix			= m_viewMatrix;
 	toReturn.projectionMatrix	= m_projMatrix;
 
