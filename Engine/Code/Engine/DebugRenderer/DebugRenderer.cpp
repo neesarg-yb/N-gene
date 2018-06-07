@@ -220,12 +220,21 @@ void DebugRender2DText( float lifetime, Vector2 const &position, float const hei
 	debugRenderObjectQueue.push_back( textObject );
 }
 
-void DebugRenderPoint( float lifetime, Vector3 const &position, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
+void DebugRenderPoint( float lifetime, float size, Vector3 const &position, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	float halfSize = size * 0.5f;
+
 	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_POINTS, false );
-	mb.SetColor( RGBA_WHITE_COLOR );
-	mb.PushVertex( Vector3::ZERO );
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	mb.PushVertex( Vector3( 0.f,  halfSize, 0.f ) );
+	mb.PushVertex( Vector3( 0.f, -halfSize, 0.f ) );
+
+	mb.PushVertex( Vector3(  halfSize, 0.f, 0.f ) );
+	mb.PushVertex( Vector3( -halfSize, 0.f, 0.f ) );
+
+	mb.PushVertex( Vector3( 0.f, 0.f,  halfSize ) );
+	mb.PushVertex( Vector3( 0.f, 0.f, -halfSize ) );
 	mb.End();
 
 	Transform modelTransform = Transform( position, Vector3::ZERO, Vector3::ONE_ALL );
