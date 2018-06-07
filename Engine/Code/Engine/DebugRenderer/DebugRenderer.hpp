@@ -47,7 +47,7 @@ void DebugRender2DText( float lifetime,
 //////////////////////
 // 3D Render System //
 //////////////////////
-void DebugRenderPoint( float lifetime, 
+void DebugRenderPoint( float lifetime, float size,
 	Vector3 const	&position, 
 	Rgba const		&startColor, 
 	Rgba const		&endColor, 
