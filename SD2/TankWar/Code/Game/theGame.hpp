@@ -50,7 +50,7 @@ private:
 
 	// Menu Specific
 	UIMenu*								 m_attractMenu	= nullptr;
-	std::function< void( const char* ) > quitStdFunc	= std::bind( &theGame::QuitGame,		this, std::placeholders::_1 );
+	std::function< void( const char* ) > quitStdFunc	= std::bind( &theGame::QuitGame,	  this, std::placeholders::_1 );
 	std::function< void( const char* ) > startStdFunc	= std::bind( &theGame::GoToMenuState, this, std::placeholders::_1 );
 	
 	void GoToMenuState( char const *actionName );

@@ -27,19 +27,18 @@ public:
 
 private:
 	// Rendering Specific
-	static Camera*				 s_camera;
-	static Scene*				 s_battleScene;
-	Vector4						 m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.2f );
-	ForwardRenderingPath*		 m_renderingPath				= nullptr;
+	static Camera*				s_camera;
+	static Scene*				s_battleScene;
+	Vector4						m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.2f );
+	ForwardRenderingPath*		m_renderingPath				= nullptr;
+	
+	GameObjectList				m_allGameObjects;
 
 	// Battle Specific
-	double						 m_timeSinceStartOfTheBattle	= 0;
-	Renderable*					 m_sphere						= nullptr;
-	Material*					 m_sphereMaterial				= nullptr;
-	Mesh*						 m_sphereMesh					= nullptr;
-
-	GameObjectList				 m_allGameObjects;
-
+	double						m_timeSinceStartOfTheBattle	= 0;
+	Renderable*					m_sphere						= nullptr;
+	Material*					m_sphereMaterial				= nullptr;
+	Mesh*						m_sphereMesh					= nullptr;
 
 public:
 	// Lights

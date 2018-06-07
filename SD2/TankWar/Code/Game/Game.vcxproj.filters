@@ -164,6 +164,9 @@
     <None Include="..\..\Run_win32\Data\Shaders\skybox.vs">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\..\Run_win32\Data\Materials\terrain.material">
+      <Filter>Materials</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader">

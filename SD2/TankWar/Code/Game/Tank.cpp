@@ -13,7 +13,7 @@ Tank::Tank( Vector3 const &spawnPosition )
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 
 	// Set Mesh
-	Mesh *sphereMesh = MeshBuilder::CreateSphere( 4.f, 30, 30 );
+	Mesh *sphereMesh = MeshBuilder::CreateSphere( 2.5f, 30, 30 );
 	m_renderable->SetBaseMesh( sphereMesh );
 
 	// Set Material
@@ -56,7 +56,7 @@ void Tank::Update( float deltaSeconds )
 
 	if( remainingTrailTime <= 0 )
 	{
-		DebugRenderPoint( 10.f, m_transform.GetWorldPosition(), RGBA_YELLOW_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+		DebugRenderPoint( 10.f, 0.5f, m_transform.GetWorldPosition(), RGBA_YELLOW_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 		remainingTrailTime = m_spawnTrailPointAfter;
 	}
 }

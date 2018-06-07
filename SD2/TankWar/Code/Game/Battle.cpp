@@ -6,20 +6,13 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
+#include "Game/Terrain.hpp"
 
 using namespace tinyxml2;
 
 Scene*				  Battle::s_battleScene;
 Camera*				  Battle::s_camera;
 std::vector< Light* > Battle::s_lightSources;
-
-Vector3 SinWavePlane( float u, float v )
-{
-	Vector3 outPos	= Vector3( u, 0.f, v );
-	outPos.y		= sinf( sqrtf( u*u + v*v ) ) * 5.f;
-
-	return outPos;
-}
 
 void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 {
@@ -61,8 +54,15 @@ Battle::~Battle()
 	
 	DebugRendererShutdown();
 
+	// Lights
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		delete s_lightSources[i];
+
+	// GameObject Pool
+	for( unsigned int i = 0; i < m_allGameObjects.size(); i++ )
+		delete m_allGameObjects[i];
+
+	m_allGameObjects.clear();
 	
 	delete s_camera;
 }
@@ -73,9 +73,9 @@ void Battle::Startup()
 	s_camera = new Camera();
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
-	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 150.f );
+	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
 	s_camera->LookAt( Vector3( 0.f, 7.f, -10.f ), Vector3( 0.f, 2.f, 0.f ) );
-	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\galaxy2.png" );
+	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
 	// Setup the Lighting
 	s_lightSources.push_back( new Light( Vector3::ZERO ) );
@@ -110,20 +110,13 @@ void Battle::Startup()
 	s_lightSources[0]->m_transform.SetParentAs( &playerTank->m_transform );
 	s_camera->m_cameraTransform.SetParentAs( &playerTank->m_transform );
 	s_battleScene->AddRenderable( *playerTank->m_renderable );
+	
+	// TERRAIN
+	Terrain *terrain = new Terrain( Vector3( 0.f, -10.f, 0.f ), Vector2( 500.f, 500.f ) );
+	s_battleScene->AddRenderable( *terrain->m_renderable );
 
 	m_allGameObjects.push_back( playerTank );
-
-	// TEST SURFACEPATCH
-	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_TRIANGES, true );
-	mb.AddMeshFromSurfacePatch( SinWavePlane, Vector2( -100.f, -100.f ), Vector2( 100.f, 100.f ), 20 );
-	mb.End();
-
-	Mesh* testPlane = mb.ConstructMesh<Vertex_Lit>();
-	Renderable* planeR = new Renderable( Vector3( 0.f, -10.f, 0.f ) );
-	planeR->SetBaseMesh( testPlane );
-	planeR->SetBaseMaterial( Material::CreateNewFromFile( "Data\\Materials\\default.material" ) );
-	s_battleScene->AddRenderable( *planeR );
+	m_allGameObjects.push_back( terrain );
 }
 
 void Battle::BeginFrame()
