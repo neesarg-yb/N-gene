@@ -388,6 +388,57 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 	this->End();
 }
 
+void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, uint sampleFrequency, Rgba const &color /* = RGBA_WHITE_COLOR */ )
+{
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
+
+	
+	Vector2 step = ( uvRangeMax - uvRangeMin ) / (float)sampleFrequency;
+
+	for( float v = uvRangeMin.x; v <= uvRangeMax.x; v += step.x )
+	{
+		for( float u = uvRangeMin.y; u <= uvRangeMax.y; u += step.y )
+		{
+			Vector3 position	= SurfacePatch( u, v );
+
+			Vector3 positionTowardU		= SurfacePatch( u + step.x, v );
+			Vector3 positionTowardV		= SurfacePatch( u, v + step.y );
+			Vector3 directionTowardU	= positionTowardU - position;
+			Vector3 directionTowardV	= positionTowardV - position;
+			Vector3 normal				= Vector3::CrossProduct( directionTowardV, directionTowardU ).GetNormalized();
+
+			this->SetUV( u, v );
+			this->SetNormal( normal );
+			this->SetTangent4( Vector4( directionTowardU.GetNormalized(), 1.f) );
+			this->SetColor( color );
+			this->PushVertex( position );
+		}
+	}
+
+	for( unsigned int vIdx = 0; vIdx < sampleFrequency; vIdx++ )
+	{
+		for( unsigned int uIdx = 0; uIdx < sampleFrequency; uIdx++ )
+		{
+			unsigned int bottomLeftIdx	= ( ( sampleFrequency + 1 ) * uIdx ) + vIdx;
+			unsigned int topLeftIdx		= bottomLeftIdx + sampleFrequency + 1;
+			unsigned int bottomRightIdx = bottomLeftIdx + 1;
+			unsigned int topRightIdx	= topLeftIdx + 1;
+
+			this->AddFace( bottomLeftIdx,	bottomRightIdx, topRightIdx );
+			this->AddFace( topRightIdx,		topLeftIdx,		bottomLeftIdx );
+		}
+	}
+
+	this->End();
+}
+
 Mesh* MeshBuilder::CreatePlane( Vector2 const &xySize, Vector3 const &centerPos, Rgba const &color /*= RGBA_WHITE_COLOR*/, const AABB2 &uvBounds /*= AABB2::ONE_BY_ONE */ )
 {
 	MeshBuilder mb;
