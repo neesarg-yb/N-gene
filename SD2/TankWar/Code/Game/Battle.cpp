@@ -13,6 +13,14 @@ Scene*				  Battle::s_battleScene;
 Camera*				  Battle::s_camera;
 std::vector< Light* > Battle::s_lightSources;
 
+Vector3 SinWavePlane( float u, float v )
+{
+	Vector3 outPos	= Vector3( u, 0.f, v );
+	outPos.y		= sinf( sqrtf( u*u + v*v ) ) * 5.f;
+
+	return outPos;
+}
+
 void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 {
 	Vector3 cameraPos = s_camera->m_cameraTransform.GetPosition();
@@ -104,6 +112,18 @@ void Battle::Startup()
 	s_battleScene->AddRenderable( *playerTank->m_renderable );
 
 	m_allGameObjects.push_back( playerTank );
+
+	// TEST SURFACEPATCH
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_TRIANGES, true );
+	mb.AddMeshFromSurfacePatch( SinWavePlane, Vector2( -100.f, -100.f ), Vector2( 100.f, 100.f ), 20 );
+	mb.End();
+
+	Mesh* testPlane = mb.ConstructMesh<Vertex_Lit>();
+	Renderable* planeR = new Renderable( Vector3( 0.f, -10.f, 0.f ) );
+	planeR->SetBaseMesh( testPlane );
+	planeR->SetBaseMaterial( Material::CreateNewFromFile( "Data\\Materials\\default.material" ) );
+	s_battleScene->AddRenderable( *planeR );
 }
 
 void Battle::BeginFrame()

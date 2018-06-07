@@ -45,9 +45,10 @@ void Tank::Update( float deltaSeconds )
 	// Right Stick
 	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	float	zRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
+	float	xRotation			 = rightStickNormalized.y * m_rotationSpeed * deltaSeconds;
 	Vector3 currentRotation		 = m_transform.GetRotation();
 
-	m_transform.SetRotation( currentRotation + Vector3( 0.f, zRotation, 0.f ) );
+	m_transform.SetRotation( currentRotation + Vector3( xRotation, zRotation, 0.f ) );
 
 	// Debug Trail
 	static float remainingTrailTime = m_spawnTrailPointAfter;
