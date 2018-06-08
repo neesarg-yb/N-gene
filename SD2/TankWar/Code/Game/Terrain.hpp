@@ -8,9 +8,10 @@ public:
 	~Terrain();
 
 public:
-	float	m_maxHeight			= 5.f;
+	float	m_maxHeight			= 8.f;
 	AABB2	m_terrainBoundsXZ	= AABB2( -100.f, -100.f, 100.f, 100.f );
 
 public:
-	void Update( float deltaSeconds );
+	void	Update( float deltaSeconds );
+	Vector3 SinWavePlane( float u, float v );
 };

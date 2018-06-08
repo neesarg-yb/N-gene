@@ -2,10 +2,10 @@
 #include "Terrain.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 
-Vector3 SinWavePlane( float u, float v )
+Vector3 Terrain::SinWavePlane( float u, float v )
 {
 	Vector3 outPos	= Vector3( u, 0.f, v );
-	outPos.y		= sinf( sqrtf( u*u + v*v ) ) * 10.f;
+	outPos.y		= sinf( sqrtf( u*u + v*v ) ) * m_maxHeight;
 
 	return outPos;
 }
@@ -24,7 +24,7 @@ Terrain::Terrain( Vector3 spawnPosition, Vector2 size )
 	// Set Mesh
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, true );
-	mb.AddMeshFromSurfacePatch( SinWavePlane, m_terrainBoundsXZ.mins, m_terrainBoundsXZ.maxs, 10, RGBA_GRAY_COLOR );
+	mb.AddMeshFromSurfacePatch( [this]( float u, float v ) { return this->SinWavePlane(u,v); }, m_terrainBoundsXZ.mins, m_terrainBoundsXZ.maxs, 10, RGBA_GRAY_COLOR );
 	mb.End();
 
 	Mesh *terrainMesh = mb.ConstructMesh< Vertex_Lit >();
