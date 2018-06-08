@@ -388,7 +388,7 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 	this->End();
 }
 
-void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, uint sampleFrequency, Rgba const &color /* = RGBA_WHITE_COLOR */ )
+void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, uint sampleFrequency, float xzScale /* = 1.f */, Rgba const &color /* = RGBA_WHITE_COLOR */ )
 {
 	// If parameters doesn't match with current operation
 	bool mbParameterMatches = true;
@@ -406,10 +406,12 @@ void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )
 	{
 		for( float u = uvRangeMin.y; u <= uvRangeMax.y; u += step.y )
 		{
-			Vector3 position	= SurfacePatch( u, v );
+			Vector3 position	= SurfacePatch( u * xzScale, v * xzScale );
 
-			Vector3 positionTowardU		= SurfacePatch( u + step.x, v );
-			Vector3 positionTowardV		= SurfacePatch( u, v + step.y );
+			float	stepU				= u + step.x;
+			float	stepV				= v + step.y;
+			Vector3 positionTowardU		= SurfacePatch( stepU * xzScale,	 v * xzScale );
+			Vector3 positionTowardV		= SurfacePatch(		u * xzScale, stepV * xzScale );
 			Vector3 directionTowardU	= positionTowardU - position;
 			Vector3 directionTowardV	= positionTowardV - position;
 			Vector3 normal				= Vector3::CrossProduct( directionTowardV, directionTowardU ).GetNormalized();
