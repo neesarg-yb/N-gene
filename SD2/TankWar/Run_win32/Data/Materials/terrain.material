@@ -3,5 +3,5 @@
    		<shader fileName="lit" />
    	</shadergroup>
 
-   	<texture bind="0" src="Data\Images\terrain\checkers.png" />
+   	<texture bind="0" src="Data\Images\terrain\DebugWhiteGray.png" />
 </material>

@@ -105,15 +105,15 @@ void Battle::Startup()
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
+	// TERRAIN
+	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), 1000U, 8.f );
+	s_battleScene->AddRenderable( *terrain->m_renderable );
+
 	// PLAYER TANK
-	Tank *playerTank = new Tank( Vector3::ONE_ALL );
+	Tank *playerTank = new Tank( Vector3::ZERO, *terrain );
 	s_lightSources[0]->m_transform.SetParentAs( &playerTank->m_transform );
 	s_camera->m_cameraTransform.SetParentAs( &playerTank->m_transform );
 	s_battleScene->AddRenderable( *playerTank->m_renderable );
-	
-	// TERRAIN
-	Terrain *terrain = new Terrain( Vector3( 0.f, -10.f, 0.f ), Vector2( 50.f, 50.f ), 10.f, 10.f );
-	s_battleScene->AddRenderable( *terrain->m_renderable );
 
 	m_allGameObjects.push_back( playerTank );
 	m_allGameObjects.push_back( terrain );
