@@ -10,7 +10,9 @@ Vector3 Terrain::SinWavePlane( float u, float v )
 	return outPos;
 }
 
-Terrain::Terrain( Vector3 spawnPosition, Vector2 size )
+Terrain::Terrain( Vector3 spawnPosition, Vector2 size, float maxHeight, float xzScale )
+	: m_maxHeight( maxHeight )
+	, m_xzScale( xzScale )
 {
 	// Set transform
 	m_transform = Transform( spawnPosition, Vector3::ZERO, Vector3::ONE_ALL );
@@ -24,7 +26,7 @@ Terrain::Terrain( Vector3 spawnPosition, Vector2 size )
 	// Set Mesh
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, true );
-	mb.AddMeshFromSurfacePatch( [this]( float u, float v ) { return this->SinWavePlane(u,v); }, m_terrainBoundsXZ.mins, m_terrainBoundsXZ.maxs, 10, RGBA_GRAY_COLOR );
+	mb.AddMeshFromSurfacePatch( [this]( float u, float v ) { return this->SinWavePlane(u,v); }, m_terrainBoundsXZ.mins, m_terrainBoundsXZ.maxs, m_maxHeight, m_xzScale, RGBA_WHITE_COLOR );
 	mb.End();
 
 	Mesh *terrainMesh = mb.ConstructMesh< Vertex_Lit >();

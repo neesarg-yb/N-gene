@@ -112,7 +112,7 @@ void Battle::Startup()
 	s_battleScene->AddRenderable( *playerTank->m_renderable );
 	
 	// TERRAIN
-	Terrain *terrain = new Terrain( Vector3( 0.f, -10.f, 0.f ), Vector2( 500.f, 500.f ) );
+	Terrain *terrain = new Terrain( Vector3( 0.f, -10.f, 0.f ), Vector2( 50.f, 50.f ), 10.f, 10.f );
 	s_battleScene->AddRenderable( *terrain->m_renderable );
 
 	m_allGameObjects.push_back( playerTank );
