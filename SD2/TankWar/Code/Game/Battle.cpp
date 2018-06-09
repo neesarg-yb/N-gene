@@ -106,7 +106,7 @@ void Battle::Startup()
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
 	// TERRAIN
-	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 8.f );
+	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
 	s_battleScene->AddRenderable( *terrain->m_renderable );
 
 	// PLAYER TANK

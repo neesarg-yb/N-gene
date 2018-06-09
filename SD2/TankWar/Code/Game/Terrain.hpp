@@ -13,13 +13,15 @@ enum eTerrainQuadVetrex
 class Terrain : public GameObject
 {
 public:
-	 Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight );
+	 Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath );
 	~Terrain();
 
 public:
-	float			 m_maxHeight		= 2.f;
-	IntVector2		 m_sampleSize		= IntVector2( 100, 100 );
-	AABB2			 m_terrainBoundsXZ	= AABB2( -100.f, -100.f, 100.f, 100.f );
+	float			 m_maxHeight			= 2.f;
+	IntVector2		 m_sampleSize			= IntVector2( 100, 100 );		// Same as terrain dimension
+
+private:
+	Image			*m_heightMapImage		= nullptr;
 
 public:
 	void			Update( float deltaSeconds );
@@ -27,8 +29,10 @@ public:
 
 private:
 	Vector3			SinWavePlane( float u, float v );
+	Vector3			GetVertexPositionUsingHeightMap( float u, float v );
 	Vector3			GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQuadVetrex cornerVertex );
 
 	// Convenience Methods
-	inline Vector3	SinWavePlane( Vector2 uv ) { return SinWavePlane( uv.x, uv.y ); };
+	inline Vector3	SinWavePlane( Vector2 uv ) { return SinWavePlane( uv.x, uv.y ); }
+	inline Vector3	GetVertexPositionUsingHeightMap( Vector2 uv ) { return GetVertexPositionUsingHeightMap( uv.x, uv.y ); }
 };

@@ -2,8 +2,9 @@
 #include "Terrain.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Core/Image.hpp"
 
-Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight )
+Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath )
 	: m_maxHeight( maxHeight )
 	, m_sampleSize( gridSize )
 {
@@ -14,13 +15,15 @@ Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight )
 
 	// Bounds
 	Vector2 spawnPositionXZ = Vector2( spawnPosition.x, spawnPosition.z );
-	m_terrainBoundsXZ = AABB2( spawnPositionXZ, gridSize.x * 0.5f, gridSize.y * 0.5f  );
+
+	// Load Height Map Image
+	m_heightMapImage = new Image( heightMapImagePath );
 
 	// Set Mesh
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, true );
-	mb.AddMeshFromSurfacePatch( [this]( float u, float v ) { return this->SinWavePlane(u,v); }, 
-								m_terrainBoundsXZ.mins, m_terrainBoundsXZ.maxs, m_sampleSize, RGBA_GRAY_COLOR );
+	mb.AddMeshFromSurfacePatch( [this]( float u, float v ) { return this->GetVertexPositionUsingHeightMap(u,v); }, 
+								Vector2::ZERO, Vector2( m_sampleSize ) - Vector2::ONE_ONE, m_sampleSize, RGBA_GRAY_COLOR );
 	mb.End();
 
 	Mesh *terrainMesh = mb.ConstructMesh< Vertex_Lit >();
@@ -73,6 +76,22 @@ Vector3 Terrain::SinWavePlane( float u, float v )
 	return outPos;
 }
 
+Vector3 Terrain::GetVertexPositionUsingHeightMap( float u, float v )
+{
+	Vector3 outPos	= Vector3( u, 0.f, v );
+	
+	IntVector2 imageDimensions = m_heightMapImage->GetDimensions();
+	u = RangeMapFloat( u, 0.f, (float)m_sampleSize.x, 0.f, (float)imageDimensions.x - 1.f );
+	v = RangeMapFloat( v, 0.f, (float)m_sampleSize.y, 0.f, (float)imageDimensions.y - 1.f );
+	u = ClampFloat( u, 0.f, (float)imageDimensions.x - 1.f );
+	v = ClampFloat( v, 0.f, (float)imageDimensions.y - 1.f );
+
+	float	rCol	= (float) m_heightMapImage->GetTexel( (int)u, (int)v ).r;
+	outPos.y		= RangeMapFloat( rCol, 0.f, 255.f, 0.f, m_maxHeight );
+
+	return outPos;
+}
+
 Vector3 Terrain::GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQuadVetrex cornerVertex )
 {
 	// Get coords for Bottom Left Corner
@@ -106,7 +125,7 @@ Vector3 Terrain::GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQu
 			uvBeforeScale	+= cornerStep;
 
 	// Get world position from UVs
-	Vector3 cornerPosition	 = SinWavePlane( uvBeforeScale );
+	Vector3 cornerPosition	 = GetVertexPositionUsingHeightMap( uvBeforeScale );
 
 //	DebugRenderPoint( 0.f, 1.f, cornerPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
