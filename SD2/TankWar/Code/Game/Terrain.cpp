@@ -11,16 +11,10 @@ Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, s
 	// Set transform
 	m_transform = Transform( spawnPosition, Vector3::ZERO, Vector3::ONE_ALL );
 
-	// Load Height Map Image
+	// Load HeightMap Image
 	m_heightMapImage = new Image( heightMapImagePath );
 
-	// Set Mesh
-	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_TRIANGES, true );
-	mb.AddMeshFromSurfacePatch( [this]( float u, float v ) { return this->GetVertexPositionUsingHeightMap(u,v); }, 
-								Vector2::ZERO, Vector2( m_sampleSize ) - Vector2::ONE_ONE, m_sampleSize, RGBA_GRAY_COLOR );
-	mb.End();
-
+	// Set Chunks
 	m_chunks = MakeChunksUsingSurfacePatch( [this]( float u, float v ) { return this->GetVertexPositionUsingHeightMap(u,v); }, 
 								 IntVector2( 50, 52 ) );
 }
@@ -40,20 +34,35 @@ void Terrain::Update( float deltaSeconds )
 
 float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition )
 {
+	// Note: myXZPosition is in World Space
+	// You'll get corner's position in Terrain Space by passing corresponding local XZCoord
+	// After that you need to convert it to world space before three lerps
+
 	//  Logic:
 	//  
 	//  Hb = lerp( bl_h, br_h, frac_x );
 	//  Ht = lerp( tl_h, tr_h, frac.x );
 	//  H  = lerp( Hb, Ht, frac.y );
 
-	Vector2 xzFraction;
-	xzFraction.x = fmodf( myXZPosition.x, 1.f );
-	xzFraction.y = fmodf( myXZPosition.y, 1.f );
+	// Get XZ position relative to Terrain
+	Vector3 terrainWorldPos	= m_transform.GetWorldPosition();
+	Vector2 posOnTerrain	= myXZPosition - Vector2( terrainWorldPos.x, terrainWorldPos.z );
 
-	Vector3 bottomLeft	= GiveQuadVertexForMyPositionAt( myXZPosition, TERRAIN_QUAD_BOTTOM_LEFT  );
-	Vector3 bottomRight = GiveQuadVertexForMyPositionAt( myXZPosition, TERRAIN_QUAD_BOTTOM_RIGHT );
-	Vector3 topLeft		= GiveQuadVertexForMyPositionAt( myXZPosition, TERRAIN_QUAD_TOP_LEFT	 );
-	Vector3 topRight	= GiveQuadVertexForMyPositionAt( myXZPosition, TERRAIN_QUAD_TOP_RIGHT	 );
+	Vector2 xzFraction;
+	xzFraction.x = fmodf( posOnTerrain.x, 1.f );
+	xzFraction.y = fmodf( posOnTerrain.y, 1.f );
+
+	// It will be local to terrain
+	Vector3 bottomLeft	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_LEFT  );
+	Vector3 bottomRight = GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_RIGHT );
+	Vector3 topLeft		= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_LEFT	 );
+	Vector3 topRight	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_RIGHT	 );
+
+	// Convert Y coordinate from local( terrain space ) to world
+	bottomLeft.y		+= terrainWorldPos.y;
+	bottomRight.y		+= terrainWorldPos.y;
+	topLeft.y			+= terrainWorldPos.y;
+	topRight.y			+= terrainWorldPos.y;
 
 	float	heightBottom	= Interpolate( bottomLeft.y,	bottomRight.y,	xzFraction.x );
 	float	heightTop		= Interpolate( topLeft.y,		topRight.y,		xzFraction.x );
@@ -121,13 +130,21 @@ Vector3 Terrain::GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQu
 	// Get world position from UVs
 	Vector3 cornerPosition	 = GetVertexPositionUsingHeightMap( uvBeforeScale );
 
-//	DebugRenderPoint( 0.f, 1.f, cornerPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderPoint( 0.f, 1.5f, cornerPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 	return cornerPosition;
 }
 
 ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, IntVector2 maxChunkDimension )
 {
+	// LOGIC OVERVIEW:
+	//
+	// For each chunk
+		// Get uvRangeMin & Max
+		// Calculate new sampleSize
+		// Use AddMeshFromSurfacePatch
+			// Add it to ChunkList
+	
 	ChunkList chunks;
 
 	// Get number of chunks
@@ -157,30 +174,31 @@ ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, fl
 			int			ssY			= (int) ( topRightUV.y - bottomLeftUV.y );
 			IntVector2	sampleSize	= IntVector2( ssX, ssY );
 
+			// Get the center of this Chunk
+			Vector2		centerXZ	= ( bottomLeftUV + topRightUV ) * 0.5f;
+			float		centerY		= GetYCoordinateForMyPositionAt( centerXZ );
+			Vector3		chunkCenter	= Vector3( centerXZ.x, centerY, centerXZ.y );
+
 			MeshBuilder chunkMB;
 			chunkMB.Begin( PRIMITIVE_TRIANGES, true );
 			chunkMB.AddMeshFromSurfacePatch( SurfacePatch, bottomLeftUV, topRightUV, sampleSize, RGBA_WHITE_COLOR );
+			/*chunkMB.SetVertexPositionsRelativeTo( chunkCenter );*/
 			chunkMB.End();
 
 			// Create a renderable
-			m_renderable = new Renderable( m_transform );
+			Transform chunkTransform	= Transform( chunkCenter, Vector3::ZERO, Vector3::ONE_ALL );
+			m_renderable				= new Renderable( m_transform );
 
 			Mesh *terrainMesh = chunkMB.ConstructMesh<Vertex_Lit>();
 			m_renderable->SetBaseMesh( terrainMesh );
-			Material *sphereMaterial = Material::CreateNewFromFile( "Data\\Materials\\terrain.material" );
-			m_renderable->SetBaseMaterial( sphereMaterial );
+			Material *terrainMaterial = Material::CreateNewFromFile( "Data\\Materials\\terrain.material" );
+			m_renderable->SetBaseMaterial( terrainMaterial );
 
 			chunks.push_back( m_renderable );
 
 			m_renderable = nullptr;
 		}
 	}
-
-	// For each chunk
-		// Get uvRangeMin & Max
-		// Calculate new sampleSize
-		// Use AddMeshFromSurfacePatch
-			// Add it to ChunkList
 
 	return chunks;
 }
