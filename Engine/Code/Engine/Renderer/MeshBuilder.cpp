@@ -388,7 +388,7 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 	this->End();
 }
 
-void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, uint sampleFrequency, Rgba const &color /* = RGBA_WHITE_COLOR */ )
+void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, IntVector2 sampleFrequency, Rgba const &color /* = RGBA_WHITE_COLOR */ )
 {
 	// If parameters doesn't match with current operation
 	bool mbParameterMatches = true;
@@ -400,13 +400,15 @@ void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )
 	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
 
 	
-	Vector2 step = ( uvRangeMax - uvRangeMin ) / (float)sampleFrequency;
+	Vector2 step;
+	step.x = ( uvRangeMax.x - uvRangeMin.x ) / sampleFrequency.x;
+	step.y = ( uvRangeMax.y - uvRangeMin.y ) / sampleFrequency.y;
 
-	for( float v = uvRangeMin.x; v <= uvRangeMax.x; v += step.x )
+	for( float v = uvRangeMin.y; v <= uvRangeMax.y; v += step.y )
 	{
-		for( float u = uvRangeMin.y; u <= uvRangeMax.y; u += step.y )
+		for( float u = uvRangeMin.x; u <= uvRangeMax.x; u += step.x )
 		{
-			Vector3 position	= SurfacePatch( u, v );
+			Vector3 position			= SurfacePatch( u, v );
 
 			Vector3 positionTowardU		= SurfacePatch( u + step.x, v );
 			Vector3 positionTowardV		= SurfacePatch( u, v + step.y );
@@ -422,14 +424,14 @@ void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )
 		}
 	}
 
-	for( unsigned int vIdx = 0; vIdx < sampleFrequency; vIdx++ )
+	for( int vIdx = 0; vIdx < sampleFrequency.y; vIdx++ )
 	{
-		for( unsigned int uIdx = 0; uIdx < sampleFrequency; uIdx++ )
+		for( int uIdx = 0; uIdx < sampleFrequency.x; uIdx++ )
 		{
-			unsigned int bottomLeftIdx	= ( ( sampleFrequency + 1 ) * uIdx ) + vIdx;
-			unsigned int topLeftIdx		= bottomLeftIdx + sampleFrequency + 1;
-			unsigned int bottomRightIdx = bottomLeftIdx + 1;
-			unsigned int topRightIdx	= topLeftIdx + 1;
+			int bottomLeftIdx	= ( ( sampleFrequency.x + 1 ) * vIdx ) + uIdx;
+			int topLeftIdx		= bottomLeftIdx + sampleFrequency.x + 1;
+			int bottomRightIdx	= bottomLeftIdx + 1;
+			int topRightIdx		= topLeftIdx + 1;
 
 			this->AddFace( bottomLeftIdx,	bottomRightIdx, topRightIdx );
 			this->AddFace( topRightIdx,		topLeftIdx,		bottomLeftIdx );
