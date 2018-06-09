@@ -1,4 +1,6 @@
+#pragma once
 #include "Engine/Math/Vector2.hpp"
+#include "Engine/Math/IntVector2.hpp"
 
 
 //-----------------------------------------------------------------------------------------------
@@ -14,6 +16,12 @@ Vector2::Vector2( float initialX, float initialY )
 {
 	x = initialX;
 	y = initialY;
+}
+
+Vector2::Vector2( const IntVector2& copyFrom )
+{
+	x = (float) copyFrom.x;
+	y = (float) copyFrom.y;
 }
 
 Vector2 Vector2::ZERO		= Vector2(  0.f,  0.f );
