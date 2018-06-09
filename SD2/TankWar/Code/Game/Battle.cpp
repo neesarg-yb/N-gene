@@ -107,7 +107,10 @@ void Battle::Startup()
 
 	// TERRAIN
 	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
-	s_battleScene->AddRenderable( *terrain->m_renderable );
+	for each (Renderable* chunk in terrain->m_chunks)
+	{
+		s_battleScene->AddRenderable( *chunk );
+	}
 
 	// PLAYER TANK
 	Tank *playerTank = new Tank( Vector3::ZERO, *terrain );

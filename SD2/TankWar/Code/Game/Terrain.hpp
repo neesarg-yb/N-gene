@@ -1,5 +1,8 @@
 #pragma once
 #include "Game/GameObject.hpp"
+#include <functional>
+
+typedef std::vector< Renderable* > ChunkList;
 
 enum eTerrainQuadVetrex
 {
@@ -19,6 +22,7 @@ public:
 public:
 	float			 m_maxHeight			= 2.f;
 	IntVector2		 m_sampleSize			= IntVector2( 100, 100 );		// Same as terrain dimension
+	ChunkList		 m_chunks;
 
 private:
 	Image			*m_heightMapImage		= nullptr;
@@ -28,9 +32,13 @@ public:
 	float			GetYCoordinateForMyPositionAt( Vector2 myXZPosition );
 
 private:
+	// Surface Patch
 	Vector3			SinWavePlane( float u, float v );
 	Vector3			GetVertexPositionUsingHeightMap( float u, float v );
 	Vector3			GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQuadVetrex cornerVertex );
+
+	// Chunking
+	ChunkList		MakeChunksUsingSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, IntVector2 maxChunkDimension );
 
 	// Convenience Methods
 	inline Vector3	SinWavePlane( Vector2 uv ) { return SinWavePlane( uv.x, uv.y ); }

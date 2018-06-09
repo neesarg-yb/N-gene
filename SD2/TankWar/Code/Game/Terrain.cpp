@@ -10,11 +10,6 @@ Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, s
 {
 	// Set transform
 	m_transform = Transform( spawnPosition, Vector3::ZERO, Vector3::ONE_ALL );
-	m_renderable = new Renderable( m_transform );
-	m_renderable->m_modelTransform.SetParentAs( &m_transform );
-
-	// Bounds
-	Vector2 spawnPositionXZ = Vector2( spawnPosition.x, spawnPosition.z );
 
 	// Load Height Map Image
 	m_heightMapImage = new Image( heightMapImagePath );
@@ -26,17 +21,16 @@ Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, s
 								Vector2::ZERO, Vector2( m_sampleSize ) - Vector2::ONE_ONE, m_sampleSize, RGBA_GRAY_COLOR );
 	mb.End();
 
-	Mesh *terrainMesh = mb.ConstructMesh< Vertex_Lit >();
-	m_renderable->SetBaseMesh( terrainMesh );
-
-	// Set Material
-	Material *sphereMaterial = Material::CreateNewFromFile( "Data\\Materials\\terrain.material" );
-	m_renderable->SetBaseMaterial( sphereMaterial );
+	m_chunks = MakeChunksUsingSurfacePatch( [this]( float u, float v ) { return this->GetVertexPositionUsingHeightMap(u,v); }, 
+								 IntVector2( 50, 52 ) );
 }
 
 Terrain::~Terrain()
 {
 	delete m_renderable;
+
+	for( uint i = 0; i < m_chunks.size(); i++ )
+		delete m_chunks[i];
 }
 
 void Terrain::Update( float deltaSeconds )
@@ -130,4 +124,63 @@ Vector3 Terrain::GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQu
 //	DebugRenderPoint( 0.f, 1.f, cornerPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 	return cornerPosition;
+}
+
+ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, IntVector2 maxChunkDimension )
+{
+	ChunkList chunks;
+
+	// Get number of chunks
+	IntVector2 numChunks;
+	numChunks.x = (int) (m_sampleSize.x / maxChunkDimension.x);
+	numChunks.y = (int) (m_sampleSize.y / maxChunkDimension.y);
+
+	// If there are any leftover blocks after division
+	if( m_sampleSize.x - (numChunks.x * maxChunkDimension.x) > 0 )
+		numChunks.x++;
+	if( m_sampleSize.y - (numChunks.y * maxChunkDimension.y) > 0 )
+		numChunks.y++;
+	
+	for( int yChunk = 0; yChunk < numChunks.y; yChunk++ )
+	{
+		for( int xChunk = 0; xChunk < numChunks.x; xChunk++ )
+		{
+			// Inside a Chunk
+			Vector2 bottomLeftUV	= Vector2( (float) xChunk * maxChunkDimension.x, (float) yChunk * maxChunkDimension.y );
+			Vector2 topRightUV		= bottomLeftUV + maxChunkDimension;
+			// In case if it overflows where there are no more tiles
+			topRightUV.x			= ClampFloat( topRightUV.x, 0.f, (float)m_sampleSize.x );
+			topRightUV.y			= ClampFloat( topRightUV.y, 0.f, (float)m_sampleSize.y );
+
+			// Get new sample size for this chunk
+			int			ssX			= (int) ( topRightUV.x - bottomLeftUV.x );
+			int			ssY			= (int) ( topRightUV.y - bottomLeftUV.y );
+			IntVector2	sampleSize	= IntVector2( ssX, ssY );
+
+			MeshBuilder chunkMB;
+			chunkMB.Begin( PRIMITIVE_TRIANGES, true );
+			chunkMB.AddMeshFromSurfacePatch( SurfacePatch, bottomLeftUV, topRightUV, sampleSize, RGBA_WHITE_COLOR );
+			chunkMB.End();
+
+			// Create a renderable
+			m_renderable = new Renderable( m_transform );
+
+			Mesh *terrainMesh = chunkMB.ConstructMesh<Vertex_Lit>();
+			m_renderable->SetBaseMesh( terrainMesh );
+			Material *sphereMaterial = Material::CreateNewFromFile( "Data\\Materials\\terrain.material" );
+			m_renderable->SetBaseMaterial( sphereMaterial );
+
+			chunks.push_back( m_renderable );
+
+			m_renderable = nullptr;
+		}
+	}
+
+	// For each chunk
+		// Get uvRangeMin & Max
+		// Calculate new sampleSize
+		// Use AddMeshFromSurfacePatch
+			// Add it to ChunkList
+
+	return chunks;
 }
