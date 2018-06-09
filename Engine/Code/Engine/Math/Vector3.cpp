@@ -46,6 +46,16 @@ const Vector3 Vector3::operator / ( float inverseScale ) const
 	return Vector3( x / inverseScale, y / inverseScale, z / inverseScale );
 }
 
+void Vector3::operator-=( const Vector3& vetToSubtract )
+{
+	*this = *this - vetToSubtract;
+}
+
+void Vector3::operator+=( const Vector3& vetToAdd )
+{
+	*this = *this + vetToAdd;
+}
+
 bool Vector3::operator == ( const Vector3& vecToCompare ) const
 {
 	return (x == vecToCompare.x) && (y == vecToCompare.y) && (z == vecToCompare.z);

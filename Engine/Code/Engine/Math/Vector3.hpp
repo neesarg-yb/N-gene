@@ -23,6 +23,8 @@ public:
 	const Vector3 operator -  ( const Vector3& vecToSubtract ) const;		// vec2 - vec2
 	const Vector3 operator *  ( float uniformScale ) const;					// vec2 * float
 	const Vector3 operator /  ( float inverseScale ) const;					// vec2 / float
+		  void	  operator += ( const Vector3& vetToAdd );					// vec3_a = vec3_a + vec3_b
+		  void	  operator -= ( const Vector3& vetToSubtract );				// vec3_a = vec3_a - vec3_b
 		  bool	  operator == ( const Vector3& vecToCompare ) const;		// vec2 == vec2
 		  bool	  operator != ( const Vector3& vecToCompare ) const;		// vec2 != vec2
 
