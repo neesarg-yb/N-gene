@@ -66,6 +66,8 @@ public:
 	void			AddSphere	( float radius, unsigned int wedges, unsigned int slices, Vector3 centerPos = Vector3::ZERO, Rgba const &color = RGBA_WHITE_COLOR );	// Adds a sphere on existing MeshBuilder
 	void			AddMeshFromSurfacePatch ( std::function< Vector3( float , float ) > SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, IntVector2 sampleFrequency, Rgba const &color = RGBA_WHITE_COLOR );
 
+	void			SetVertexPositionsRelativeTo( Vector3 pivotPosition );		// Subtracts the pivotPosition from every vertex position
+
 public:
 	static Mesh*	CreatePlane	( Vector2 const &xySize, Vector3 const &centerPos, Rgba const &color = RGBA_WHITE_COLOR, const AABB2 &uvBounds = AABB2::ONE_BY_ONE );
 	static Mesh*	CreateCube	( Vector3 const &size, Vector3 const &centerPos = Vector3::ZERO, Rgba const &color = RGBA_WHITE_COLOR, const AABB2& uvTop = AABB2::ONE_BY_ONE, const AABB2& uvSide = AABB2::ONE_BY_ONE, const AABB2& uvBottom = AABB2::ONE_BY_ONE );
