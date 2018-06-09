@@ -3,7 +3,7 @@
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
-Terrain::Terrain( Vector3 spawnPosition, uint gridSize, float maxHeight )
+Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight )
 	: m_maxHeight( maxHeight )
 	, m_sampleSize( gridSize )
 {
@@ -14,7 +14,7 @@ Terrain::Terrain( Vector3 spawnPosition, uint gridSize, float maxHeight )
 
 	// Bounds
 	Vector2 spawnPositionXZ = Vector2( spawnPosition.x, spawnPosition.z );
-	m_terrainBoundsXZ = AABB2( spawnPositionXZ, gridSize * 0.5f, gridSize * 0.5f  );
+	m_terrainBoundsXZ = AABB2( spawnPositionXZ, gridSize.x * 0.5f, gridSize.y * 0.5f  );
 
 	// Set Mesh
 	MeshBuilder mb;

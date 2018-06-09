@@ -13,13 +13,13 @@ enum eTerrainQuadVetrex
 class Terrain : public GameObject
 {
 public:
-	 Terrain( Vector3 spawnPosition, uint gridSize, float maxHeight );
+	 Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight );
 	~Terrain();
 
 public:
-	float			m_maxHeight			= 2.f;
-	uint			m_sampleSize		= 100U;
-	AABB2			m_terrainBoundsXZ	= AABB2( -100.f, -100.f, 100.f, 100.f );
+	float			 m_maxHeight		= 2.f;
+	IntVector2		 m_sampleSize		= IntVector2( 100, 100 );
+	AABB2			 m_terrainBoundsXZ	= AABB2( -100.f, -100.f, 100.f, 100.f );
 
 public:
 	void			Update( float deltaSeconds );
