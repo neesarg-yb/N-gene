@@ -7,6 +7,8 @@
 
 # define M_PI           3.1415926535f  /* pi */
 
+class IntVector2;
+
 //-----------------------------------------------------------------------------------------------
 class Vector2
 {
@@ -15,6 +17,7 @@ public:
 	~Vector2() {}											// destructor: do nothing (for speed)
 	 Vector2() {}											// default constructor: do nothing (for speed)
 	 Vector2( const Vector2& copyFrom );					// copy constructor (from another vec2)
+	 Vector2( const IntVector2& copyFrom );
 	explicit Vector2( float initialX, float initialY );				// explicit constructor (from x, y)
 
 public:
