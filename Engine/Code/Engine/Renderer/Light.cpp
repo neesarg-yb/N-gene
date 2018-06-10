@@ -89,7 +89,7 @@ LightData Light::GetLightDataForUBO() const
 	LightData lightData;
 	
 	lightData.colorAndIntensity	= m_lightColorAndIntensity;
-	lightData.position			= m_transform.GetPosition();
+	lightData.position			= m_transform.GetWorldPosition();
 	lightData.direction			= m_direction;
 	lightData.directionFactor	= m_directionFactor;
 	lightData.attenuation		= m_attenuation;
@@ -127,7 +127,7 @@ float Light::GetAttenuationForRenderableAt( Vector3 const &renderablePos ) const
 
 Vector3 Light::GetPosition() const
 {
-	return m_transform.GetPosition();
+	return m_transform.GetWorldPosition();
 }
 
 Vector3 Light::GetEulerRotation() const
