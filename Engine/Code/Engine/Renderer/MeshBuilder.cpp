@@ -447,8 +447,8 @@ void MeshBuilder::SetVertexPositionsRelativeTo( Vector3 pivotPosition )
 		// Assuming that every positions were set relative to Vector3::ZERO
 		// Subtract the pivotPosition
 
-	for each (Vertex_Master vert in m_vertices)
-		vert.m_position -= pivotPosition;
+	for( uint i = 0; i < m_vertices.size(); i++ )
+		m_vertices[i].m_position -= pivotPosition;
 }
 
 Mesh* MeshBuilder::CreatePlane( Vector2 const &xySize, Vector3 const &centerPos, Rgba const &color /*= RGBA_WHITE_COLOR*/, const AABB2 &uvBounds /*= AABB2::ONE_BY_ONE */ )
