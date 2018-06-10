@@ -16,10 +16,10 @@ std::vector< Light* > Battle::s_lightSources;
 
 void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 {
-	Vector3 cameraPos = s_camera->m_cameraTransform.GetPosition();
+	Vector3 cameraPos = s_camera->m_cameraTransform.GetWorldPosition();
 	
 	Light* newLight	= new Light( cameraPos, s_camera->m_cameraTransform.GetRotation() );
-	newLight->SetUpForSpotLight( 40.f, 30.f, 40.f, Vector3( 0.f, 0.f, 1.f ), lightColor );
+	newLight->SetUpForPointLight( 40.f, Vector3( 0.f, 0.f, 1.f ), lightColor );
 	s_lightSources.push_back( newLight );
 
 	s_battleScene->AddLight( *newLight );
@@ -106,7 +106,7 @@ void Battle::Startup()
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
 	// TERRAIN
-	Terrain *terrain = new Terrain( Vector3( -50.f, 5.f, -50.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
+	Terrain *terrain = new Terrain( Vector3( 50.f, 10.f, 50.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
 	for each (Renderable* chunk in terrain->m_chunks)
 	{
 		s_battleScene->AddRenderable( *chunk );
@@ -114,8 +114,8 @@ void Battle::Startup()
 
 	// PLAYER TANK
 	Tank *playerTank = new Tank( Vector3::ZERO, *terrain );
-	s_lightSources[0]->m_transform.SetParentAs( &playerTank->m_transform );
 	s_camera->m_cameraTransform.SetParentAs( &playerTank->m_transform );
+	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
 	s_battleScene->AddRenderable( *playerTank->m_renderable );
 
 	m_allGameObjects.push_back( playerTank );

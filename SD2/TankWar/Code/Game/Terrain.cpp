@@ -8,6 +8,10 @@ Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, s
 	: m_maxHeight( maxHeight )
 	, m_sampleSize( gridSize )
 {
+	// NOTE!
+	//
+	// TERRAIN'S ORIGIN IS AT BOTTOM LEFT CORNER, NOT AT THE CENTER!
+
 	// Set transform
 	m_transform = Transform( spawnPosition, Vector3::ZERO, Vector3::ONE_ALL );
 
@@ -130,8 +134,6 @@ Vector3 Terrain::GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQu
 	// Get world position from UVs
 	Vector3 cornerPosition	 = GetVertexPositionUsingHeightMap( uvBeforeScale );
 
-	DebugRenderPoint( 0.f, 1.5f, cornerPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-
 	return cornerPosition;
 }
 
@@ -174,20 +176,19 @@ ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, fl
 			int			ssY			= (int) ( topRightUV.y - bottomLeftUV.y );
 			IntVector2	sampleSize	= IntVector2( ssX, ssY );
 
-			// Get the center of this Chunk
-			Vector2		centerXZ	= ( bottomLeftUV + topRightUV ) * 0.5f;
-			float		centerY		= GetYCoordinateForMyPositionAt( centerXZ );
-			Vector3		chunkCenter	= Vector3( centerXZ.x, centerY, centerXZ.y );
+			// Get the pivot point for this Chunk
+			Vector3		chunkBottomLeftPos	= Vector3( bottomLeftUV.x, 0.f, bottomLeftUV.y );
 
 			MeshBuilder chunkMB;
 			chunkMB.Begin( PRIMITIVE_TRIANGES, true );
 			chunkMB.AddMeshFromSurfacePatch( SurfacePatch, bottomLeftUV, topRightUV, sampleSize, RGBA_WHITE_COLOR );
-			/*chunkMB.SetVertexPositionsRelativeTo( chunkCenter );*/
+			chunkMB.SetVertexPositionsRelativeTo( chunkBottomLeftPos );
 			chunkMB.End();
 
 			// Create a renderable
-			Transform chunkTransform	= Transform( chunkCenter, Vector3::ZERO, Vector3::ONE_ALL );
-			m_renderable				= new Renderable( m_transform );
+			Transform chunkTransform	= Transform( chunkBottomLeftPos, Vector3::ZERO, Vector3::ONE_ALL );
+			chunkTransform.SetParentAs( &m_transform );
+			m_renderable				= new Renderable( chunkTransform );
 
 			Mesh *terrainMesh = chunkMB.ConstructMesh<Vertex_Lit>();
 			m_renderable->SetBaseMesh( terrainMesh );
