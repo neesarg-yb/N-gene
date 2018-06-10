@@ -1,8 +1,0 @@
-<material id="couch_cube">
-	<shadergroup>
-   		<shader fileName="lit" />
-   	</shadergroup>
-
-   	<texture bind="0" src="Data\Images\couch\example_colour.png" />
-   	<texture bind="1" src="Data\Images\couch\example_normal.png" />
-</material>
