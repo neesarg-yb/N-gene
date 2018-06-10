@@ -106,7 +106,7 @@ void Battle::Startup()
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
 	// TERRAIN
-	Terrain *terrain = new Terrain( Vector3( 50.f, 10.f, 50.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
+	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
 	for each (Renderable* chunk in terrain->m_chunks)
 	{
 		s_battleScene->AddRenderable( *chunk );
