@@ -286,6 +286,8 @@
     <ClCompile Include="Main_Win32.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
+    <ClCompile Include="World\Block.cpp" />
+    <ClCompile Include="World\BlockDefinition.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
@@ -299,6 +301,8 @@
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
+    <ClInclude Include="World\Block.hpp" />
+    <ClInclude Include="World\BlockDefinition.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Run_win32\Data\Materials\couch_cube.material" />

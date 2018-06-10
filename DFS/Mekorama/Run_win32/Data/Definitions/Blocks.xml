@@ -1,0 +1,35 @@
+<BlockDefinitions>
+	<BlockDefinition
+		name				= "Grass"
+		materialFileName	= "Block_Grass"
+
+		spritesheetSize		= "32,32"
+		topUVCoords			= "5,0"
+		sideUVCoords		= "1,7"
+		bottomUVCoords		= "1,7"
+		
+		isSolid				= "true"
+	/>
+	<BlockDefinition
+		name				= "Brick Red"
+		materialFileName	= "Block_Brick Red"
+
+		spritesheetSize		= "32,32"
+		topUVCoords			= "8,4"
+		sideUVCoords		= "8,4"
+		bottomUVCoords		= "8,4"
+		
+		isSolid				= "true"
+	/>
+	<BlockDefinition
+		name				= "Water"
+		materialFileName	= "Block_Water"
+
+		spritesheetSize		= "32,32"
+		topUVCoords			= "16,20"
+		sideUVCoords		= "16,20"
+		bottomUVCoords		= "16,20"
+		
+		isSolid				= "false"
+	/>
+</BlockDefinitions>

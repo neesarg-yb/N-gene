@@ -6,6 +6,7 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
+#include "Game/World/BlockDefinition.hpp"
 
 using namespace tinyxml2;
 
@@ -44,6 +45,8 @@ Battle::Battle()
 
 Battle::~Battle()
 {
+	BlockDefinition::DeleteAllDefinition();
+
 	delete m_renderingPath;
 	delete s_battleScene;
 
@@ -103,6 +106,10 @@ void Battle::Startup()
 	s_battleScene->AddCamera( *s_camera );
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
+
+
+	// TEST: Definition Loading
+	BlockDefinition::LoadAllDefinitions( "Data\\Definitions\\Blocks.xml" );
 }
 
 void Battle::BeginFrame()
