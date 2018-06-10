@@ -6,7 +6,6 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
-#include "Game/Terrain.hpp"
 
 using namespace tinyxml2;
 
@@ -104,22 +103,6 @@ void Battle::Startup()
 	s_battleScene->AddCamera( *s_camera );
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
-
-	// TERRAIN
-	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
-	for each (Renderable* chunk in terrain->m_chunks)
-	{
-		s_battleScene->AddRenderable( *chunk );
-	}
-
-	// PLAYER TANK
-	Tank *playerTank = new Tank( Vector3::ZERO, *terrain );
-	s_camera->m_cameraTransform.SetParentAs( &playerTank->m_transform );
-	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
-	s_battleScene->AddRenderable( *playerTank->m_renderable );
-
-	m_allGameObjects.push_back( playerTank );
-	m_allGameObjects.push_back( terrain );
 }
 
 void Battle::BeginFrame()
@@ -158,7 +141,6 @@ void Battle::Update( float deltaSeconds )
 		AddNewPointLightToCamareaPosition( RGBA_BLUE_COLOR );
 	if( g_theInput->WasKeyJustPressed( 'W' ) )
 		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
-
 }
 
 void Battle::Render() const

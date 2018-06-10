@@ -34,12 +34,6 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Tank.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -58,12 +52,6 @@
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="Tank.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain.hpp">
       <Filter>General</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,7 +7,7 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
-#include "Game/Tank.hpp"
+#include "Game/GameObject.hpp"
 
 class Material;
 
