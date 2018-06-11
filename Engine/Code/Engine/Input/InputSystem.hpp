@@ -3,6 +3,13 @@
 #include "Engine/Input/KeyButtonState.hpp"
 #include "Engine/Input/XboxController.hpp"
 
+enum eMouseModes
+{
+	MOUSE_MODE_ABSOLUTE = 0,
+	MOUSE_MODE_RELATIVE,
+	NUM_MOUSE_MODES
+};
+
 enum VK_Codes
 {
 	I			= 0x49,
@@ -34,21 +41,37 @@ public:
 
 	void BeginFrame();
 	void EndFrame();
-	
+
+	// Keyboard
 	void OnKeyPressed	( unsigned char keyCode );
 	void OnKeyReleased	( unsigned char keyCode );
 	bool IsKeyPressed	( unsigned char keyCode ) const;
 	bool WasKeyJustPressed	( unsigned char keyCode ) const;
 	bool WasKeyJustReleased	( unsigned char keyCode ) const;
 
+	// Mouse
+	Vector2	GetMouseDelta();
+	Vector2 GetMouseClientPosition();
+	Vector2 GetCenterOfClientWindow();
+
+	Vector2 SetMouseScreenPosition( Vector2 mousePosition );
+	void	ShowCursor( bool show );
+	void	MouseLockToScreen( bool lock );
+
+
 protected:
+	void UpdateMouse();
 	void UpdateKeyboard();
 	void UpdateController();
 
 public:
-	static const int			NUM_KEYS   = 256;
-	XboxController				m_controller[ 4 ];
+	static const int	NUM_KEYS   = 256;
+	XboxController		m_controller[ 4 ];
 
 protected:
-	KeyButtonState				m_keyStates[ NUM_KEYS ];
+	KeyButtonState		m_keyStates[ NUM_KEYS ];
+
+private:
+	Vector2				m_mousePositionLastFrame = Vector2::ZERO;
+	Vector2				m_mousePositionThisFrame = Vector2::ZERO;
 };
