@@ -849,6 +849,9 @@ void Renderer::DrawMesh( Mesh const &mesh, const Matrix44 & modelMatrix /* = Mat
 	SetUniform( "MODEL", modelMatrix );
 	SetUniform( "EYE_POSITION", activeCamera->m_cameraTransform.GetWorldPosition() );
 
+	// Update the Light UBO
+	UpdateLightUBOs();
+
 	GLenum glPrimitiveType = GetAsOpenGLPrimitiveType( mesh.m_drawCallInstruction.primitiveType );
 
 	if( mesh.m_drawCallInstruction.isUsingIndices == true )
