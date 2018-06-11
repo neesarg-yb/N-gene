@@ -8,6 +8,7 @@
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Game/GameObject.hpp"
+#include "Game/World/Block.hpp"
 
 class Material;
 

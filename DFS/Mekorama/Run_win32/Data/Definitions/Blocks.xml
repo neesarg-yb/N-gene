@@ -4,9 +4,9 @@
 		materialFileName	= "Block_Grass"
 
 		spritesheetSize		= "32,32"
-		topUVCoords			= "5,0"
-		sideUVCoords		= "1,7"
-		bottomUVCoords		= "1,7"
+		topUVCoords			= "4,0"
+		sideUVCoords		= "17,1"
+		bottomUVCoords		= "17,1"
 		
 		isSolid				= "true"
 	/>
@@ -15,9 +15,9 @@
 		materialFileName	= "Block_Brick Red"
 
 		spritesheetSize		= "32,32"
-		topUVCoords			= "8,4"
-		sideUVCoords		= "8,4"
-		bottomUVCoords		= "8,4"
+		topUVCoords			= "4,8"
+		sideUVCoords		= "4,8"
+		bottomUVCoords		= "4,8"
 		
 		isSolid				= "true"
 	/>
@@ -26,9 +26,9 @@
 		materialFileName	= "Block_Water"
 
 		spritesheetSize		= "32,32"
-		topUVCoords			= "16,20"
-		sideUVCoords		= "16,20"
-		bottomUVCoords		= "16,20"
+		topUVCoords			= "25,31"
+		sideUVCoords		= "25,31"
+		bottomUVCoords		= "25,31"
 		
 		isSolid				= "false"
 	/>

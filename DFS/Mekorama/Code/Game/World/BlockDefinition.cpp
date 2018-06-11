@@ -22,9 +22,9 @@ BlockDefinition::BlockDefinition( const XMLElement& root )
 
 	// UVs
 	m_spriteSheetDimension	= ParseXmlAttribute( root, "spritesheetSize", m_spriteSheetDimension );
-	m_uvTop					= ParseXmlAttribute( root, "topUVCoords", m_uvTop );
-	m_uvSide				= ParseXmlAttribute( root, "sideUVCoords", m_uvSide );
-	m_uvBottom				= ParseXmlAttribute( root, "bottomUVCoords", m_uvBottom );
+	m_uvTopCoord			= ParseXmlAttribute( root, "topUVCoords", m_uvTopCoord );
+	m_uvSideCoord			= ParseXmlAttribute( root, "sideUVCoords", m_uvSideCoord );
+	m_uvBottomCoord			= ParseXmlAttribute( root, "bottomUVCoords", m_uvBottomCoord );
 }
 
 BlockDefinition::~BlockDefinition()

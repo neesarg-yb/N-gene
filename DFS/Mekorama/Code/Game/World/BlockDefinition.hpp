@@ -25,9 +25,9 @@ public:
 
 	// UVs
 	IntVector2	m_spriteSheetDimension	= IntVector2::ONE_ONE;
-	IntVector2	m_uvTop					= IntVector2::ONE_ONE;
-	IntVector2	m_uvSide				= IntVector2::ONE_ONE;
-	IntVector2	m_uvBottom				= IntVector2::ONE_ONE;
+	IntVector2	m_uvTopCoord			= IntVector2::ONE_ONE;
+	IntVector2	m_uvSideCoord			= IntVector2::ONE_ONE;
+	IntVector2	m_uvBottomCoord			= IntVector2::ONE_ONE;
 
 public:
 	// Static pool

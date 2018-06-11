@@ -17,6 +17,9 @@
     <Filter Include="World">
       <UniqueIdentifier>{6f956215-1f71-4d55-81fa-a672acd14f8e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="XML Definitions">
+      <UniqueIdentifier>{bada9d42-6263-4c91-8805-cc1d840292fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -175,5 +178,10 @@
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader">
       <Filter>Shaders</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Blocks.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

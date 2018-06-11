@@ -110,6 +110,18 @@ void Battle::Startup()
 
 	// TEST: Definition Loading
 	BlockDefinition::LoadAllDefinitions( "Data\\Definitions\\Blocks.xml" );
+
+	Block* tempGrass = new Block( Vector3( 0.f, 0.f, 0.f ), "Grass" );
+	m_allGameObjects.push_back( tempGrass );
+	s_battleScene->AddRenderable( *tempGrass->m_renderable );
+
+	Block* tempBrick = new Block( Vector3( -1.5f, 0.f, 2.f), "Brick Red" );
+	m_allGameObjects.push_back( tempBrick );
+	s_battleScene->AddRenderable( *tempBrick->m_renderable );
+
+	Block* tempWater = new Block( Vector3(  1.5f, 0.f, 2.f), "Water" );
+	m_allGameObjects.push_back( tempWater );
+	s_battleScene->AddRenderable( *tempWater->m_renderable );
 }
 
 void Battle::BeginFrame()
