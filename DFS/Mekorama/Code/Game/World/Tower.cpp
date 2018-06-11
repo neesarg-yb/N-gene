@@ -23,11 +23,11 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 				Vector3 localPosition		 = Vector3( (float)rowIdx, (float)sliceIdx, (float)colIdx );
 				localPosition				+= Vector3( 0.f, 0.5f, 0.f );					// So localPosition is at bottom-center
 
-				Transform m_blockTransform = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
+				Transform m_blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
 				m_blockTransform.SetParentAs( &m_transform );
 
-				static uint nextBlkIdx = 0;
-				Block*	thiBlock	= new Block( m_blockTransform.GetWorldPosition(), m_definition.m_blocksDefinitionList[ nextBlkIdx ] );
+				static uint nextBlkIdx		 = 0;
+				Block*		thiBlock		 = new Block( m_blockTransform.GetWorldPosition(), m_definition.m_blocksDefinitionList[ nextBlkIdx ] );
 
 				m_allBlocks.push_back( thiBlock );
 

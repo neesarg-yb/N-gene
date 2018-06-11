@@ -1,44 +1,133 @@
-<TowerDefinition name = "Tower1" xzDimension = "3,3">
+<TowerDefinition name = "Tower1" xzDimension = "5,5">
 	<Slice>
-		<Block type = "Grass" />
-		<Block type = "Grass" />
-		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
 
-		<Block type = "Grass" />
-		<Block type = "Grass" />
-		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
 
-		<Block type = "Grass" />
-		<Block type = "Grass" />
-		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
 	</Slice>
 	<Slice>
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
 		
 		<Block type = "Water" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+
+		<Block type = "Brick Red" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+
+		<Block type = "Water" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+
 		<Block type = "Water" />
 		<Block type = "Water" />
-		
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Water" />
 	</Slice>
-  	<Slice>
-    	<Block type = "Void" />
-    	<Block type = "Void" />
-    	<Block type = "Void" />
-
-    	<Block type = "Void" />
-    	<Block type = "Void" />
-    	<Block type = "Void" />
-
-    	<Block type = "Void" />
-    	<Block type = "Void" />
-    	<Block type = "Void" />
-  	</Slice>
 	<Slice>
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Void" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+	</Slice>
+	<Slice>
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+		<Block type = "Grass" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Grass" />
+		
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+	</Slice>
+	<Slice>
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
@@ -46,9 +135,87 @@
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
 
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+	</Slice>
+	<Slice>
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Grass" />
+
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Grass" />
+
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Grass" />
+
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+	</Slice>
+	<Slice>
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		
+		<Block type = "Void" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
 	</Slice>
 </TowerDefinition>
