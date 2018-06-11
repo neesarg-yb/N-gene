@@ -34,11 +34,26 @@ InputSystem::~InputSystem()
 void InputSystem::BeginFrame() {
 	UpdateController();
 	UpdateKeyboard();
+	UpdateMouse();
 	RunMessagePump();		// Ask Windows to call our registred WinProc function with WM_KEYDOWN notifications, etc.
 }
 
 void InputSystem::EndFrame() {
 
+}
+
+void InputSystem::UpdateMouse()
+{
+// 	// Absolute Mode - I get mouse position and I can potentially lock to the screen
+// 	m_mousePositionLastFrame = m_mousePositionThisFrame;
+// 	m_mousePositionThisFrame = GetMouseClientPosition();
+// 
+// 	// Relative Mode - I care about deltas; I reset to the center ( meaning, mutually exclusive modes )
+// 	if( m_mouseMode = MOUSEMODE_RELATIVE )
+// 	{
+// 		m_mousePositionLastFrame = GetCenterOfClientWindow();
+// 		SetMouseScreenPosition( m_mousePositionLastFrame );
+// 	}
 }
 
 void InputSystem::UpdateKeyboard() {
