@@ -7,14 +7,14 @@
 #include "Engine/Input/Command.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Game/GameCommon.hpp"
-#include "Game/Battle.hpp"
+#include "Game/Level.hpp"
 
 enum GameStates
 {
 	NONE = -1,
 	ATTRACT,
 	MENU,
-	BATTLE,
+	LEVEL,
 	NUM_GAME_STATES
 };
 
@@ -30,7 +30,7 @@ public:
 
 	BitmapFont*	m_textBmpFont	= nullptr;
 	Camera*		m_gameCamera	= nullptr;
-	Battle*		m_currentBattle	= nullptr;
+	Level*		m_currentLevel	= nullptr;
 
 	void Startup();
 	void BeginFrame();
@@ -62,11 +62,11 @@ private:
 
 	void Update_Attract	( float deltaSeconds );
 	void Update_Menu	( float deltaSeconds );
-	void Update_Battle	( float deltaSeconds );
+	void Update_Level	( float deltaSeconds );
 
 	void Render_Attract	() const;
 	void Render_Menu	() const;
-	void Render_Battle	() const;
+	void Render_Level	() const;
 
 	void RenderLoadingScreen() const;
 

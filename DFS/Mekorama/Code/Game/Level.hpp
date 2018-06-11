@@ -14,11 +14,11 @@ class Material;
 
 typedef std::vector< GameObject* > GameObjectList;
 
-class Battle
+class Level
 {
 public:
-	 Battle();
-	~Battle();
+	Level();
+	~Level();
 
 	void Startup();
 	void BeginFrame();
@@ -29,8 +29,8 @@ public:
 private:
 	// Rendering Specific
 	static Camera*				s_camera;
-	static Scene*				s_battleScene;
-	Vector4						m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.2f );
+	static Scene*				s_levelScene;
+	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.2f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
 	
 	GameObjectList				m_allGameObjects;

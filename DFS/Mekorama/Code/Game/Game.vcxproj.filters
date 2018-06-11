@@ -34,9 +34,6 @@
     <ClCompile Include="GameCommon.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Battle.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>General</Filter>
     </ClCompile>
@@ -45,6 +42,9 @@
     </ClCompile>
     <ClCompile Include="World\BlockDefinition.cpp">
       <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>General</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -69,7 +69,7 @@
     <ClInclude Include="World\BlockDefinition.hpp">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="Battle.hpp">
+    <ClInclude Include="Level.hpp">
       <Filter>General</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,7 +13,7 @@ theGame::theGame()
 	m_lastFramesTime = GetCurrentTimeSeconds();
 	
 	// Construction
-	m_currentBattle = new Battle();
+	m_currentLevel = new Level();
 
 	// Fonts for loading screen
 	m_textBmpFont = g_theRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
@@ -49,19 +49,19 @@ void theGame::Startup()
 	m_attractMenu->m_selectionIndex = 1;
 
 	// Call Startup for other classes
-	m_currentBattle->Startup();
+	m_currentLevel->Startup();
 }
 
 void theGame::BeginFrame()
 {
-	if( m_currentGameState == BATTLE )
-		m_currentBattle->BeginFrame();
+	if( m_currentGameState == LEVEL )
+		m_currentLevel->BeginFrame();
 }
 
 void theGame::EndFrame()
 {
-	if( m_currentGameState == BATTLE )
-		m_currentBattle->EndFrame();
+	if( m_currentGameState == LEVEL )
+		m_currentLevel->EndFrame();
 }
 
 void theGame::Update() 
@@ -109,8 +109,8 @@ void theGame::Update()
 	case MENU:
 		Update_Menu( deltaSeconds );
 		break;
-	case BATTLE:
-		Update_Battle( deltaSeconds );
+	case LEVEL:
+		Update_Level( deltaSeconds );
 		break;
 	default:
 		ERROR_AND_DIE( "Error: No valid gamestate found..! | theGame::Update()" );
@@ -128,8 +128,8 @@ void theGame::Render() const
 	case MENU:
 		Render_Menu();
 		break;
-	case BATTLE:
-		Render_Battle();
+	case LEVEL:
+		Render_Level();
 		break;
 	default:
 		ERROR_AND_DIE( "Error: No valid gamestate found..! | theGame::Render()" );
@@ -179,7 +179,7 @@ void theGame::Render_Attract() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 	
-	g_theRenderer->DrawTextInBox2D( "TANK WAR", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "Mekorama", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 	g_theRenderer->DrawTextInBox2D( "( Use Controller )", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Menu
@@ -193,9 +193,9 @@ void theGame::Update_Menu( float deltaSeconds )
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		StartTransitionToState( ATTRACT );
 	if( g_theInput->WasKeyJustPressed( VK_Codes::SPACE ) )
-		StartTransitionToState( BATTLE );
+		StartTransitionToState( LEVEL );
 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_START ].keyJustPressed )
-		StartTransitionToState( BATTLE );
+		StartTransitionToState( LEVEL );
 }
 
 void theGame::Render_Menu() const
@@ -206,20 +206,20 @@ void theGame::Render_Menu() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
-	g_theRenderer->DrawTextInBox2D( "MAIN MENU\n \n Press start to jump to the battle.. \n \n (Press ~ for DevConsole )", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "MAIN MENU\n \n Press start to jump to the level.. \n \n (Press ~ for DevConsole )", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
-void theGame::Update_Battle( float deltaSeconds )
+void theGame::Update_Level( float deltaSeconds )
 {
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		StartTransitionToState( MENU );
 
-	m_currentBattle->Update( deltaSeconds );
+	m_currentLevel->Update( deltaSeconds );
 }
 
-void theGame::Render_Battle() const
+void theGame::Render_Level() const
 {
-	m_currentBattle->Render();
+	m_currentLevel->Render();
 }
 
 void theGame::GoToMenuState( char const * actionName )

@@ -1,5 +1,5 @@
 #pragma once
-#include "Battle.hpp"
+#include "Level.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Math/Matrix44.hpp"
@@ -10,11 +10,11 @@
 
 using namespace tinyxml2;
 
-Scene*				  Battle::s_battleScene;
-Camera*				  Battle::s_camera;
-std::vector< Light* > Battle::s_lightSources;
+Scene*				  Level::s_levelScene;
+Camera*				  Level::s_camera;
+std::vector< Light* > Level::s_lightSources;
 
-void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
+void Level::AddNewPointLightToCamareaPosition( Rgba lightColor )
 {
 	Vector3 cameraPos = s_camera->m_cameraTransform.GetWorldPosition();
 	
@@ -22,8 +22,8 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	newLight->SetUpForPointLight( 40.f, Vector3( 0.f, 0.f, 1.f ), lightColor );
 	s_lightSources.push_back( newLight );
 
-	s_battleScene->AddLight( *newLight );
-	s_battleScene->AddRenderable( *newLight->m_renderable );
+	s_levelScene->AddLight( *newLight );
+	s_levelScene->AddRenderable( *newLight->m_renderable );
 
 	// DebugRenderWireSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	// DebugRenderSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
@@ -38,17 +38,17 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
 }
 
-Battle::Battle()
+Level::Level()
 {
 	
 }
 
-Battle::~Battle()
+Level::~Level()
 {
 	BlockDefinition::DeleteAllDefinition();
 
 	delete m_renderingPath;
-	delete s_battleScene;
+	delete s_levelScene;
 
 	delete m_sphere;
 	delete m_sphereMaterial;
@@ -69,7 +69,7 @@ Battle::~Battle()
 	delete s_camera;
 }
 
-void Battle::Startup()
+void Level::Startup()
 {
 	// Setup the camera
 	s_camera = new Camera();
@@ -96,14 +96,14 @@ void Battle::Startup()
 	m_sphere->SetBaseMaterial( m_sphereMaterial );
 
 	// Battle Scene
-	s_battleScene = new Scene();
+	s_levelScene = new Scene();
 
-	s_battleScene->AddLight( *s_lightSources[0] );
+	s_levelScene->AddLight( *s_lightSources[0] );
 
-	s_battleScene->AddRenderable( *m_sphere );
-	s_battleScene->AddRenderable( *s_lightSources[0]->m_renderable );
+	s_levelScene->AddRenderable( *m_sphere );
+	s_levelScene->AddRenderable( *s_lightSources[0]->m_renderable );
 
-	s_battleScene->AddCamera( *s_camera );
+	s_levelScene->AddCamera( *s_camera );
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
@@ -113,32 +113,32 @@ void Battle::Startup()
 
 	Block* tempGrass = new Block( Vector3( 0.f, 0.f, 0.f ), "Grass" );
 	m_allGameObjects.push_back( tempGrass );
-	s_battleScene->AddRenderable( *tempGrass->m_renderable );
+	s_levelScene->AddRenderable( *tempGrass->m_renderable );
 
 	Block* tempBrick = new Block( Vector3( -1.5f, 0.f, 2.f), "Brick Red" );
 	m_allGameObjects.push_back( tempBrick );
-	s_battleScene->AddRenderable( *tempBrick->m_renderable );
+	s_levelScene->AddRenderable( *tempBrick->m_renderable );
 
 	Block* tempWater = new Block( Vector3(  1.5f, 0.f, 2.f), "Water" );
 	m_allGameObjects.push_back( tempWater );
-	s_battleScene->AddRenderable( *tempWater->m_renderable );
+	s_levelScene->AddRenderable( *tempWater->m_renderable );
 
 	Block* tempVoid = new Block( Vector3( 0.f, 0.f, -1.f ), "Void" );
 	m_allGameObjects.push_back( tempVoid );
-	s_battleScene->AddRenderable( *tempVoid->m_renderable );
+	s_levelScene->AddRenderable( *tempVoid->m_renderable );
 }
 
-void Battle::BeginFrame()
+void Level::BeginFrame()
 {
 
 }
 
-void Battle::EndFrame()
+void Level::EndFrame()
 {
 
 }
 
-void Battle::Update( float deltaSeconds )
+void Level::Update( float deltaSeconds )
 {
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
@@ -170,7 +170,7 @@ void Battle::Update( float deltaSeconds )
 		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
 }
 
-void Battle::Render() const
+void Level::Render() const
 {
 	// Bind all the Uniforms
 	g_theRenderer->UseShader( g_theRenderer->CreateOrGetShader( "lit" ) );
@@ -181,7 +181,7 @@ void Battle::Render() const
 	//  START DRAWING FROM HERE.. //
 	//							  //
 	////////////////////////////////
-	m_renderingPath->RenderSceneForCamera( *s_camera, *s_battleScene );
+	m_renderingPath->RenderSceneForCamera( *s_camera, *s_levelScene );
 	
 	// DebugText for Lighting and Shader..
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
@@ -197,12 +197,12 @@ void Battle::Render() const
 	DebugRendererRender();
 }
 
-double Battle::GetTimeSinceBattleStarted() const
+double Level::GetTimeSinceBattleStarted() const
 {
 	return m_timeSinceStartOfTheBattle;
 }
 
-void Battle::MoveTheCameraAccordingToPlayerInput( float deltaSeconds )
+void Level::MoveTheCameraAccordingToPlayerInput( float deltaSeconds )
 {
 	static float const movementSpeed = 5.f;		// Units per seconds
 
@@ -216,7 +216,7 @@ void Battle::MoveTheCameraAccordingToPlayerInput( float deltaSeconds )
 	s_camera->MoveCameraPositionBy( Vector3( finalXZMovement.x, finalYMovement, finalXZMovement.y ) );
 }
 
-void Battle::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
+void Level::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
 {
 	static float const rotationSpeed = 45.f;	// Degrees per seconds
 
@@ -228,7 +228,7 @@ void Battle::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
 	s_camera->RotateCameraBy( Vector3( -finalYXEulerRotation.y, finalYXEulerRotation.x, 0.f ) );
 }
 
-void Battle::ChnageLightAsPerInput(float deltaSeconds)
+void Level::ChnageLightAsPerInput(float deltaSeconds)
 {
 	// Ambient Light
 	static float const ambientFactorChangeSpeed = 0.35f;		// Per seconds
