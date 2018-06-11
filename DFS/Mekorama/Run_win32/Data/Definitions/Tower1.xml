@@ -187,35 +187,4 @@
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 	</Slice>
-	<Slice>
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		
-		<Block type = "Void" />
-		<Block type = "Water" />
-		<Block type = "Water" />
-		<Block type = "Water" />
-		<Block type = "Void" />
-
-		<Block type = "Void" />
-		<Block type = "Water" />
-		<Block type = "Water" />
-		<Block type = "Water" />
-		<Block type = "Void" />
-
-		<Block type = "Void" />
-		<Block type = "Water" />
-		<Block type = "Water" />
-		<Block type = "Water" />
-		<Block type = "Void" />
-
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-	</Slice>
 </TowerDefinition>

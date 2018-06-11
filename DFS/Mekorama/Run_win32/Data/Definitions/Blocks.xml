@@ -25,10 +25,10 @@
 		name				= "Water"
 		materialFileName	= "Block_Water"
 
-		spritesheetSize		= "32,32"
-		topUVCoords			= "25,31"
-		sideUVCoords		= "25,31"
-		bottomUVCoords		= "25,31"
+		spritesheetSize		= "1,1"
+		topUVCoords			= "0,0"
+		sideUVCoords		= "0,0"
+		bottomUVCoords		= "0,0"
 		
 		isSolid				= "false"
 	/>
