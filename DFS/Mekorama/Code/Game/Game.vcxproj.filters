@@ -46,6 +46,12 @@
     <ClCompile Include="Level.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="World\TowerDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Tower.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -71,6 +77,12 @@
     </ClInclude>
     <ClInclude Include="Level.hpp">
       <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="World\TowerDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Tower.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +205,9 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Run_win32\Data\Definitions\Blocks.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Tower1.xml">
       <Filter>XML Definitions</Filter>
     </Xml>
   </ItemGroup>

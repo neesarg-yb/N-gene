@@ -62,7 +62,7 @@ void BlockDefinition::LoadAllDefinitions( std::string pathToDefinitionXML )
 	}
 }
 
-void BlockDefinition::DeleteAllDefinition()
+void BlockDefinition::DeleteAllDefinitions()
 {
 	// Delete each
 	for( BlockDefinitionMap::iterator it = s_definitions.begin(); it != s_definitions.end(); it++ )

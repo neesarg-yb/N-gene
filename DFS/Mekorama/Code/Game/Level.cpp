@@ -7,6 +7,8 @@
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
 #include "Game/World/BlockDefinition.hpp"
+#include "Game/World/TowerDefinition.hpp"
+#include "Game/World/Tower.hpp"
 
 using namespace tinyxml2;
 
@@ -45,7 +47,7 @@ Level::Level()
 
 Level::~Level()
 {
-	BlockDefinition::DeleteAllDefinition();
+	BlockDefinition::DeleteAllDefinitions();
 
 	delete m_renderingPath;
 	delete s_levelScene;
@@ -110,22 +112,11 @@ void Level::Startup()
 
 	// TEST: Definition Loading
 	BlockDefinition::LoadAllDefinitions( "Data\\Definitions\\Blocks.xml" );
+	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower1.xml" );
 
-	Block* tempGrass = new Block( Vector3( 0.f, 0.f, 0.f ), "Grass" );
-	m_allGameObjects.push_back( tempGrass );
-	s_levelScene->AddRenderable( *tempGrass->m_renderable );
-
-	Block* tempBrick = new Block( Vector3( -1.5f, 0.f, 2.f), "Brick Red" );
-	m_allGameObjects.push_back( tempBrick );
-	s_levelScene->AddRenderable( *tempBrick->m_renderable );
-
-	Block* tempWater = new Block( Vector3(  1.5f, 0.f, 2.f), "Water" );
-	m_allGameObjects.push_back( tempWater );
-	s_levelScene->AddRenderable( *tempWater->m_renderable );
-
-	Block* tempVoid = new Block( Vector3( 0.f, 0.f, -1.f ), "Void" );
-	m_allGameObjects.push_back( tempVoid );
-	s_levelScene->AddRenderable( *tempVoid->m_renderable );
+	Tower *testTower = new Tower( Vector3::ZERO, "Tower1" );
+	for( uint i = 0; i < testTower->m_allBlocks.size(); i++ )
+		s_levelScene->AddRenderable( *testTower->m_allBlocks[i]->m_renderable );
 }
 
 void Level::BeginFrame()

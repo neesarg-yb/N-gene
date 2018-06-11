@@ -1,6 +1,6 @@
 <material id="Block_Water">
 	<shadergroup>
-   		<shader fileName="lit_alpha" />
+   		<shader fileName="lit" />
    	</shadergroup>
 
    	<texture bind="0" src="Data\Images\Blocks\Terrain_32x32.png" />

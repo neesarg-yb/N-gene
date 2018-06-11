@@ -1,0 +1,54 @@
+<TowerDefinition name = "Tower1" xzDimension = "3,3">
+	<Slice>
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+	</Slice>
+	<Slice>
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+	</Slice>
+  	<Slice>
+    	<Block type = "Void" />
+    	<Block type = "Void" />
+    	<Block type = "Void" />
+
+    	<Block type = "Void" />
+    	<Block type = "Void" />
+    	<Block type = "Void" />
+
+    	<Block type = "Void" />
+    	<Block type = "Void" />
+    	<Block type = "Void" />
+  	</Slice>
+	<Slice>
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+	</Slice>
+</TowerDefinition>

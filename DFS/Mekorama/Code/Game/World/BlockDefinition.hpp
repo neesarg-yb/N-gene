@@ -12,7 +12,7 @@ class BlockDefinition
 {
 private:
 	 BlockDefinition() { }
-	 BlockDefinition( const XMLElement& root );
+	 BlockDefinition( XMLElement const &root );
 	~BlockDefinition();
 
 public:
@@ -35,5 +35,5 @@ public:
 
 public:
 	static void	LoadAllDefinitions( std::string pathToDefinitionXML );
-	static void DeleteAllDefinition();
+	static void DeleteAllDefinitions();
 };
