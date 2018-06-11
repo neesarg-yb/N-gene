@@ -98,7 +98,7 @@ void Battle::Startup()
 
 	s_battleScene->AddLight( *s_lightSources[0] );
 
-	s_battleScene->AddRenderable( *m_sphere );
+//	s_battleScene->AddRenderable( *m_sphere );
 	s_battleScene->AddRenderable( *s_lightSources[0]->m_renderable );
 
 	s_battleScene->AddCamera( *s_camera );
@@ -107,9 +107,9 @@ void Battle::Startup()
 
 	// TERRAIN
 	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
-	for each (Renderable* chunk in terrain->m_chunks)
+	for( uint i = 0; i < terrain->m_chunks.size(); i++ )
 	{
-		s_battleScene->AddRenderable( *chunk );
+		s_battleScene->AddRenderable( *terrain->m_chunks[i] );
 	}
 
 	// PLAYER TANK
