@@ -305,6 +305,10 @@
     <ClInclude Include="World\BlockDefinition.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Brick Red.material" />
+    <None Include="..\..\Run_win32\Data\Materials\Block_Grass.material" />
+    <None Include="..\..\Run_win32\Data\Materials\Block_Void.material" />
+    <None Include="..\..\Run_win32\Data\Materials\Block_Water.material" />
     <None Include="..\..\Run_win32\Data\Materials\couch_cube.material" />
     <None Include="..\..\Run_win32\Data\Materials\default.material" />
     <None Include="..\..\Run_win32\Data\Materials\ship_xray.material" />

@@ -60,9 +60,6 @@
     <ClInclude Include="EngineBuildPreferences.hpp">
       <Filter>General</Filter>
     </ClInclude>
-    <ClInclude Include="Battle.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
     <ClInclude Include="GameObject.hpp">
       <Filter>General</Filter>
     </ClInclude>
@@ -71,6 +68,9 @@
     </ClInclude>
     <ClInclude Include="World\BlockDefinition.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Battle.hpp">
+      <Filter>General</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +171,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\..\Run_win32\Data\Materials\terrain.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Brick Red.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Grass.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Void.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Water.material">
       <Filter>Materials</Filter>
     </None>
   </ItemGroup>

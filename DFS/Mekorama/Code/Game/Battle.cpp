@@ -122,6 +122,10 @@ void Battle::Startup()
 	Block* tempWater = new Block( Vector3(  1.5f, 0.f, 2.f), "Water" );
 	m_allGameObjects.push_back( tempWater );
 	s_battleScene->AddRenderable( *tempWater->m_renderable );
+
+	Block* tempVoid = new Block( Vector3( 0.f, 0.f, -1.f ), "Void" );
+	m_allGameObjects.push_back( tempVoid );
+	s_battleScene->AddRenderable( *tempVoid->m_renderable );
 }
 
 void Battle::BeginFrame()
@@ -138,6 +142,10 @@ void Battle::Update( float deltaSeconds )
 {
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
+
+	// Camera Movement
+	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
+	MoveTheCameraAccordingToPlayerInput( deltaSeconds );
 	
 	// Lights
 	ChnageLightAsPerInput( deltaSeconds );
@@ -192,6 +200,20 @@ void Battle::Render() const
 double Battle::GetTimeSinceBattleStarted() const
 {
 	return m_timeSinceStartOfTheBattle;
+}
+
+void Battle::MoveTheCameraAccordingToPlayerInput( float deltaSeconds )
+{
+	static float const movementSpeed = 5.f;		// Units per seconds
+
+	XboxController &inputController = g_theInput->m_controller[0];
+	Vector2 axisChnage				= inputController.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	float	leftShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown ?  1.f : 0.f;
+	float	rightShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown ? -1.f : 0.f;
+	float	finalYMovement			= (leftShoulder + rightShoulder) * movementSpeed * deltaSeconds;
+	Vector2 finalXZMovement			= axisChnage * movementSpeed * deltaSeconds;
+
+	s_camera->MoveCameraPositionBy( Vector3( finalXZMovement.x, finalYMovement, finalXZMovement.y ) );
 }
 
 void Battle::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )

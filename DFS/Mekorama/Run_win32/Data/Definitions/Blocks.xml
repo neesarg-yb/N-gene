@@ -6,7 +6,7 @@
 		spritesheetSize		= "32,32"
 		topUVCoords			= "4,0"
 		sideUVCoords		= "17,1"
-		bottomUVCoords		= "17,1"
+		bottomUVCoords		= "16,1"
 		
 		isSolid				= "true"
 	/>
@@ -30,6 +30,17 @@
 		sideUVCoords		= "25,31"
 		bottomUVCoords		= "25,31"
 		
+		isSolid				= "false"
+	/>
+	<BlockDefinition
+		name 				= "Void"
+		materialFileName	= "Block_Void"
+
+		spritesheetSize		= "32,32"
+		topUVCoords			= "0,0"
+		sideUVCoords		= "0,0"
+		bottomUVCoords		= "0,0"
+
 		isSolid				= "false"
 	/>
 </BlockDefinitions>

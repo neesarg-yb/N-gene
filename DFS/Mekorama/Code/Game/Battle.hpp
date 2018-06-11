@@ -49,6 +49,7 @@ public:
 
 private:
 	double	GetTimeSinceBattleStarted() const;
+	void	MoveTheCameraAccordingToPlayerInput		( float deltaSeconds );
 	void	RotateTheCameraAccordingToPlayerInput	( float deltaSeconds );
 	void	ChnageLightAsPerInput					( float deltaSeconds );
 	
