@@ -101,28 +101,37 @@ LightData Light::GetLightDataForUBO() const
 
 float Light::GetAttenuationForRenderableAt( Vector3 const &renderablePos ) const
 {
-	// Direction and Distance
-	Vector3		directionToLight	= m_transform.GetWorldPosition() - renderablePos;
-	float const distanceFromLight	= directionToLight.GetLength();
-				directionToLight	= directionToLight.GetNormalized();
+// 	// Direction and Distance
+// 	Vector3		directionToLight	= m_transform.GetWorldPosition() - renderablePos;
+// 	float const distanceFromLight	= directionToLight.GetLength();
+// 				directionToLight	= directionToLight.GetNormalized();
+// 
+// 	Vector3		lightForwardDir		= m_direction.GetNormalized();
+// 	float		lightPower			= m_lightColorAndIntensity.w;
+// 	
+// 	// Get actual Light Direction
+// 	directionToLight				= Interpolate( lightForwardDir * -1.f, directionToLight, m_directionFactor );
+// 
+// 	// Light Power
+// 	float const dotAngle			= Vector3::DotProduct( lightForwardDir, directionToLight * -1.f );
+// 				lightPower			= lightPower * dotAngle;
+// 	TODO("Ask Forseth and correct this implemntation where inner & outer angles are taken in account");
+// 
+// 	// Main Calculation
+// 	float const a = m_attenuation.x;
+// 	float const b = distanceFromLight * m_attenuation.y;
+// 	float const c = distanceFromLight * distanceFromLight * m_attenuation.z;
+// 
+// 	return lightPower / ( a + b + c );
 
-	Vector3		lightForwardDir		= m_direction.GetNormalized();
-	float		lightPower			= m_lightColorAndIntensity.w;
-	
-	// Get actual Light Direction
-	directionToLight				= Interpolate( lightForwardDir * -1.f, directionToLight, m_directionFactor );
+	float const distanceFromLight	= (m_transform.GetWorldPosition() - renderablePos).GetLength();
+	float const lightIntensity		= m_lightColorAndIntensity.w;
 
-	// Light Power
-	float const dotAngle			= Vector3::DotProduct( lightForwardDir, directionToLight * -1.f );
-				lightPower			= lightPower * dotAngle;
-	TODO("Ask Forseth and correct this implemntation where inner & outer angles are taken in account");
-
-	// Main Calculation
 	float const a = m_attenuation.x;
 	float const b = distanceFromLight * m_attenuation.y;
 	float const c = distanceFromLight * distanceFromLight * m_attenuation.z;
-
-	return lightPower / ( a + b + c );
+	
+	return lightIntensity / ( a + b + c );
 }
 
 Vector3 Light::GetPosition() const

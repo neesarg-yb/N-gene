@@ -38,8 +38,10 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 
 	// Generate draw calls
 	std::vector< DrawCall > drawCalls;
-	for each( Renderable *thisRenderable in scene.m_renderables )
+	for ( uint renderableIdx = 0; renderableIdx < scene.m_renderables.size(); renderableIdx++ )
 	{
+		Renderable *thisRenderable = scene.m_renderables[ renderableIdx ];
+
 		// For each mesh in theRenderable, construct a drawcall
 		for( unsigned int mIdx = 0; mIdx < thisRenderable->m_meshes.size(); mIdx++ )
 		{
@@ -61,8 +63,10 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 	SortDrawCallsForCamera( drawCalls, camera );
 
 	// Render 'em
-	for each( DrawCall dc in drawCalls )
+	for( uint dcIdx = 0; dcIdx < drawCalls.size(); dcIdx++ )
 	{
+		DrawCall& dc = drawCalls[ dcIdx ];
+
 		// Draw for each Shaders present in ShaderGroup
 		uint shaderGroupSize = (uint) dc.m_material->m_shaderGroup.size();
 		for( uint shaderIndex = 0; shaderIndex < shaderGroupSize; shaderIndex++ )
