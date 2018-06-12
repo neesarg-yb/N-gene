@@ -57,6 +57,9 @@ public:
 	void SetupForSkybox	( std::string pathToSkyboxImage );								// Enables the Skybox using the image at path
 	void RenderSkyBox	( Renderer &theRenderer );
 
+	// Screen to World
+	Vector3	GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ = 0.f );
+
 public:
 	Transform		 m_cameraTransform;
 private:
