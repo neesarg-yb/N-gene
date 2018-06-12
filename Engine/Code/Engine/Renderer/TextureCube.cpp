@@ -40,7 +40,7 @@ TextureCube::~TextureCube()
 bool TextureCube::MakeFromImage( char const *imagePath )
 {
 	// Get CubeMap texture
-	Image img = Image( imagePath, true );
+	Image img = Image( imagePath, false );
 	TODO("When to delete the Texture? Who owns the texture?");
 
 	uint width	= img.GetWidth();
