@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/MathUtil.hpp"
 
 class Matrix44
@@ -41,6 +42,7 @@ public:
 	void Transpose	();
 	
 	Vector3 Multiply	( const Vector3& vecToMultiply, const float w ) const;	// Mat44 * Vec4( x, y, z, w )
+	Vector4	Multiply	( const Vector4& vecToMultiply ) const;
 
 	// Modifiers
 	void Translate2D	( const Vector2& translation );
@@ -69,8 +71,11 @@ public:
 	Vector3 GetKColumn() const;
 	Vector3 GetTColumn() const;
 
+	void	GetAsFloats( float (&outArray)[16] ) const;
+
 	// Information Fetchers
 	Vector3		GetEulerRotation() const;
+	bool		GetInverse( Matrix44 &outInvMatrix ) const;
 	Matrix44	GetOrthonormalInverse() const;
 private:
 
