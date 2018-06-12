@@ -1,5 +1,6 @@
 #pragma once
 #include "Level.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Math/Matrix44.hpp"
@@ -184,7 +185,7 @@ void Level::Render() const
 
 	DebugRenderPoint( 0.f, 5.f, Vector3( -50.f,  10.f, -50.f ), RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRenderPoint( 0.f, 5.f, Vector3( -50.f, -10.f, -50.f ), RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-
+	
 	DebugRendererRender();
 }
 
@@ -198,11 +199,11 @@ void Level::MoveTheCameraAccordingToPlayerInput( float deltaSeconds )
 	static float const movementSpeed = 5.f;		// Units per seconds
 
 	XboxController &inputController = g_theInput->m_controller[0];
-	Vector2 axisChnage				= inputController.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	Vector2 axisChange				= inputController.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
 	float	leftShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown ?  1.f : 0.f;
 	float	rightShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown ? -1.f : 0.f;
 	float	finalYMovement			= (leftShoulder + rightShoulder) * movementSpeed * deltaSeconds;
-	Vector2 finalXZMovement			= axisChnage * movementSpeed * deltaSeconds;
+	Vector2 finalXZMovement			= axisChange * movementSpeed * deltaSeconds;
 
 	s_camera->MoveCameraPositionBy( Vector3( finalXZMovement.x, finalYMovement, finalXZMovement.y ) );
 }
@@ -212,10 +213,12 @@ void Level::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
 	static float const rotationSpeed = 45.f;	// Degrees per seconds
 
 	XboxController &inputController	= g_theInput->m_controller[0];
+	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
+	g_theInput->ShowCursor( true );
+	g_theInput->MouseLockToScreen( true );
 	Vector2 axisChange				= inputController.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	Vector2 finalYXEulerRotation	= axisChange * rotationSpeed * deltaSeconds;
 
-	TODO("I'm doing Anti-Clockwise rotation, under the hood. But it seems the camera is doing Clockwise rotation.. :/");
 	s_camera->RotateCameraBy( Vector3( -finalYXEulerRotation.y, finalYXEulerRotation.x, 0.f ) );
 }
 

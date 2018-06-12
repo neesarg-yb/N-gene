@@ -64,6 +64,18 @@ bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam
 
 	}
 
+	TODO("Write cases for WM_ACTIVE, WM_MOVE, WM_SIZE..!");
+	// WM_ACTIVE
+	//	Sets bool in InputManager, 
+	//		so if window goes inactive, you can free the mouse
+	//		&  if windows goes active, you can lock the mouse
+
+	// WM_MOVE
+	//	So you can lock the mouse to new moved rect of the window
+
+	// WM_LOCK
+	//	So you can lock the mouse to new resized rect of the window
+
 	return true; 
 }
 
