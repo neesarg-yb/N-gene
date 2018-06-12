@@ -36,33 +36,35 @@ enum VK_Codes
 class InputSystem
 {
 public:
-	InputSystem();
+	 InputSystem();
 	~InputSystem();
 
-	void BeginFrame();
-	void EndFrame();
+	void	BeginFrame();
+	void	EndFrame();
 
 	// Keyboard
-	void OnKeyPressed	( unsigned char keyCode );
-	void OnKeyReleased	( unsigned char keyCode );
-	bool IsKeyPressed	( unsigned char keyCode ) const;
-	bool WasKeyJustPressed	( unsigned char keyCode ) const;
-	bool WasKeyJustReleased	( unsigned char keyCode ) const;
+	void	OnKeyPressed	( unsigned char keyCode );
+	void	OnKeyReleased	( unsigned char keyCode );
+	bool	IsKeyPressed	( unsigned char keyCode ) const;
+	bool	WasKeyJustPressed	( unsigned char keyCode ) const;
+	bool	WasKeyJustReleased	( unsigned char keyCode ) const;
 
 	// Mouse
-	Vector2	GetMouseDelta();
-	Vector2 GetMouseClientPosition();
-	Vector2 GetCenterOfClientWindow();
-
-	Vector2 SetMouseScreenPosition( Vector2 mousePosition );
 	void	ShowCursor( bool show );
 	void	MouseLockToScreen( bool lock );
 
+	Vector2	GetMouseDelta();
+	Vector2 GetMouseClientPosition();
+	Vector2 GetCenterOfClientWindow();		// In Client Space
+
+	void	SetMouseModeTo( eMouseModes mouseMode );
+	void	SetMouseScreenPosition( Vector2 desktopPosition );
+	void	SetMouseClientPosition( Vector2 clientPosition );
 
 protected:
-	void UpdateMouse();
-	void UpdateKeyboard();
-	void UpdateController();
+	void	UpdateMouse();
+	void	UpdateKeyboard();
+	void	UpdateController();
 
 public:
 	static const int	NUM_KEYS   = 256;
@@ -72,6 +74,7 @@ protected:
 	KeyButtonState		m_keyStates[ NUM_KEYS ];
 
 private:
+	eMouseModes			m_mouseMode				 = MOUSE_MODE_ABSOLUTE;
 	Vector2				m_mousePositionLastFrame = Vector2::ZERO;
 	Vector2				m_mousePositionThisFrame = Vector2::ZERO;
 };
