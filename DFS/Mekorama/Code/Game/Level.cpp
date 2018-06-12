@@ -160,6 +160,10 @@ void Level::Update( float deltaSeconds )
 		AddNewPointLightToCamareaPosition( RGBA_BLUE_COLOR );
 	if( g_theInput->WasKeyJustPressed( 'W' ) )
 		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
+
+	// TESTING WORLD TO SCREEN
+	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();
+	s_camera->GetWorldPositionFromScreen( mousClientPos );
 }
 
 void Level::Render() const
@@ -213,9 +217,6 @@ void Level::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
 	static float const rotationSpeed = 45.f;	// Degrees per seconds
 
 	XboxController &inputController	= g_theInput->m_controller[0];
-	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
-	g_theInput->ShowCursor( true );
-	g_theInput->MouseLockToScreen( true );
 	Vector2 axisChange				= inputController.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	Vector2 finalYXEulerRotation	= axisChange * rotationSpeed * deltaSeconds;
 
