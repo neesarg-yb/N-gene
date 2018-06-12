@@ -1,3 +1,5 @@
+#pragma once
+#include "Engine/Core/Window.hpp"
 #include "Engine/Input/InputSystem.hpp"
 
 #define WIN32_LEAN_AND_MEAN		// Always #define this before #including <windows.h>
@@ -44,16 +46,16 @@ void InputSystem::EndFrame() {
 
 void InputSystem::UpdateMouse()
 {
-// 	// Absolute Mode - I get mouse position and I can potentially lock to the screen
-// 	m_mousePositionLastFrame = m_mousePositionThisFrame;
-// 	m_mousePositionThisFrame = GetMouseClientPosition();
-// 
-// 	// Relative Mode - I care about deltas; I reset to the center ( meaning, mutually exclusive modes )
-// 	if( m_mouseMode = MOUSEMODE_RELATIVE )
-// 	{
-// 		m_mousePositionLastFrame = GetCenterOfClientWindow();
-// 		SetMouseScreenPosition( m_mousePositionLastFrame );
-// 	}
+	// Absolute Mode - I get mouse position and I can potentially lock to the screen
+	m_mousePositionLastFrame = m_mousePositionThisFrame;
+	m_mousePositionThisFrame = GetMouseClientPosition();
+
+	// Relative Mode - I care about deltas; I reset to the center ( meaning, mutually exclusive modes )
+	if( m_mouseMode == MOUSE_MODE_RELATIVE )
+	{
+		m_mousePositionLastFrame = GetCenterOfClientWindow();
+		SetMouseClientPosition( m_mousePositionLastFrame );
+	}
 }
 
 void InputSystem::UpdateKeyboard() {
@@ -97,4 +99,106 @@ bool InputSystem::WasKeyJustPressed( unsigned char keyCode ) const {
 
 bool InputSystem::WasKeyJustReleased( unsigned char keyCode ) const {
 	return m_keyStates[ keyCode ].keyJustReleasesd;
+}
+
+Vector2 InputSystem::GetMouseDelta()
+{
+	return (m_mousePositionThisFrame - m_mousePositionLastFrame);
+}
+
+Vector2 InputSystem::GetMouseClientPosition()
+{
+	POINT desktopPos;
+	::GetCursorPos( &desktopPos );
+
+	HWND hwnd = (HWND) Window::GetInstance()->GetHandle();
+	
+	::ScreenToClient( hwnd, &desktopPos );
+	POINT clientPos = desktopPos;
+
+	return Vector2( (float)clientPos.x, (float)clientPos.y );
+}
+
+Vector2 InputSystem::GetCenterOfClientWindow()
+{
+	HWND hwnd = (HWND) Window::GetInstance()->GetHandle();
+
+	RECT clientRect;
+	::GetClientRect( hwnd, &clientRect );		// This should give you ( 0, 0, widthOfClient, heightOfClient )
+
+	Vector2 clientCenter;
+	clientCenter.x		 = ( clientRect.left + clientRect.right ) * 0.5f;
+	clientCenter.y		 = ( clientRect.top + clientRect.bottom ) * 0.5f;
+
+	return clientCenter;
+}
+
+void InputSystem::SetMouseModeTo( eMouseModes mouseMode )
+{
+	switch (mouseMode)
+	{
+	case MOUSE_MODE_ABSOLUTE:
+		m_mouseMode = MOUSE_MODE_ABSOLUTE;
+		break;
+	case MOUSE_MODE_RELATIVE:
+		SetMouseClientPosition( GetCenterOfClientWindow() );
+		m_mouseMode = MOUSE_MODE_RELATIVE;
+		break;
+	default:
+		GUARANTEE_RECOVERABLE( false, "Warning: mouseMode is invalid!" );
+		break;
+	}
+}
+
+void InputSystem::SetMouseScreenPosition( Vector2 desktopPosition )
+{
+	::SetCursorPos( (int)desktopPosition.x, (int)desktopPosition.y );
+}
+
+void InputSystem::SetMouseClientPosition( Vector2 clientPosition )
+{
+	// Convert client to screen position
+	// & Call the SetMouseScreenPosition( ... )
+
+	HWND hwnd = (HWND) Window::GetInstance()->GetHandle();
+	
+	POINT mousePos;
+	mousePos.x = (LONG)clientPosition.x;
+	mousePos.y = (LONG)clientPosition.y;
+	::ClientToScreen( hwnd, &mousePos );
+
+	Vector2 mouseDesktopPos = Vector2( (float)mousePos.x, (float)mousePos.y );
+	SetMouseScreenPosition( mouseDesktopPos );
+}
+
+void InputSystem::ShowCursor( bool show )
+{
+	::ShowCursor( show );
+}
+
+void InputSystem::MouseLockToScreen( bool lock )
+{
+	if( !lock )
+	{
+		::ClipCursor( nullptr );
+	}
+	else
+	{
+		HWND hwnd = (HWND) Window::GetInstance()->GetHandle();
+		
+		RECT clientRect;
+		::GetClientRect( hwnd, &clientRect );		// This should give you ( 0, 0, widthOfClient, heightOfClient )
+
+		POINT offset;
+		offset.x = 0;
+		offset.y = 0;
+		::ClientToScreen( hwnd, &offset );			// Top-Left corner in screen space
+
+		clientRect.left		+= offset.x;
+		clientRect.right	+= offset.x;
+		clientRect.top		+= offset.y;
+		clientRect.bottom	+= offset.y;
+
+		::ClipCursor( &clientRect );
+	}
 }
