@@ -30,8 +30,8 @@ private:
 	// Rendering Specific
 	static Camera*				s_camera;
 	static Scene*				s_battleScene;
-	Vector4						m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.2f );
-	ForwardRenderingPath*		m_renderingPath				= nullptr;
+	Vector4						m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.6f );
+	ForwardRenderingPath*		m_renderingPath					= nullptr;
 	
 	GameObjectList				m_allGameObjects;
 
