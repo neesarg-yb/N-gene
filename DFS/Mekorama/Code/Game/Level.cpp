@@ -77,6 +77,7 @@ void Level::Startup()
 	// Setup the camera
 	s_camera = new Camera();
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
+	s_camera->SetColorTarget( Renderer::GetDefaultPickTarget(), 3 );
 	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
 	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
 	s_camera->LookAt( Vector3( 0.f, 7.f, -10.f ), Vector3( 0.f, 2.f, 0.f ) );

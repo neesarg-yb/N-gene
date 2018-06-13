@@ -288,6 +288,7 @@
     <ClCompile Include="theGame.cpp" />
     <ClCompile Include="World\Block.cpp" />
     <ClCompile Include="World\BlockDefinition.cpp" />
+    <ClCompile Include="World\Robot.cpp" />
     <ClCompile Include="World\Tower.cpp" />
     <ClCompile Include="World\TowerDefinition.cpp" />
   </ItemGroup>
@@ -305,6 +306,7 @@
     <ClInclude Include="theGame.hpp" />
     <ClInclude Include="World\Block.hpp" />
     <ClInclude Include="World\BlockDefinition.hpp" />
+    <ClInclude Include="World\Robot.hpp" />
     <ClInclude Include="World\Tower.hpp" />
     <ClInclude Include="World\TowerDefinition.hpp" />
   </ItemGroup>
