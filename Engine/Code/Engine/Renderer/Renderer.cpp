@@ -18,6 +18,7 @@ Sampler*	Renderer::s_defaultNearestSampler	= nullptr;
 Sampler*	Renderer::s_defaultLinearSampler	= nullptr;
 Texture*	Renderer::s_defaultColorTarget		= nullptr;
 Texture*	Renderer::s_defaultDepthTarget		= nullptr;
+Texture*	Renderer::s_defaultPickTarget		= nullptr;
 Camera*		Renderer::s_default_camera			= nullptr;
 Camera*		Renderer::s_current_camera			= nullptr;
 
@@ -123,10 +124,11 @@ void Renderer::PostStartup()
 	// create our output textures
 	s_defaultColorTarget = CreateRenderTarget( window_width, window_height );
 	s_defaultDepthTarget = CreateRenderTarget( window_width, window_height, TEXTURE_FORMAT_D24S8 );
+	s_defaultPickTarget  = CreateRenderTarget( window_width, window_height );
 
 	// setup the default camera
 	s_default_camera = new Camera();
-	s_default_camera->SetColorTarget( s_defaultColorTarget ); 
+	s_default_camera->SetColorTarget( s_defaultColorTarget );
 	s_default_camera->SetDepthStencilTarget( s_defaultDepthTarget );
 	s_default_camera->SetProjectionOrtho( 5.0f, 0.0f, 100.0f );  
 	s_default_camera->LookAt( Vector3( 3.0f, 3.0f, -10.0f ), Vector3::ZERO ); 
@@ -1405,6 +1407,11 @@ Sampler const* Renderer::GetDefaultSampler( eSamplerType type /* = SAMPLER_NEARE
 Texture* Renderer::GetDefaultColorTarget()
 {
 	return s_defaultColorTarget;
+}
+
+Texture* Renderer::GetDefaultPickTarget()
+{
+	return s_defaultPickTarget;
 }
 
 Texture* Renderer::GetDefaultDepthTarget()

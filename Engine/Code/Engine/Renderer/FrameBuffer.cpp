@@ -52,8 +52,6 @@ void FrameBuffer::SetDepthStencilTarget( Texture *depth_target )
 
 bool FrameBuffer::Finalize()
 {
-	GL_CHECK_ERROR();
-
 	glBindFramebuffer( GL_FRAMEBUFFER, m_handle ); 
 
 	// keep track of which outputs go to which attachments; 
