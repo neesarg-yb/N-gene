@@ -8,6 +8,7 @@
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Game/Tank.hpp"
+#include "Game/Terrain.hpp"
 
 class Material;
 
@@ -36,9 +37,8 @@ private:
 
 	// Battle Specific
 	double						m_timeSinceStartOfTheBattle	= 0;
-	Renderable*					m_sphere						= nullptr;
-	Material*					m_sphereMaterial				= nullptr;
-	Mesh*						m_sphereMesh					= nullptr;
+	Terrain*					m_terrain						= nullptr;
+	Tank*						m_playerTank					= nullptr;
 
 public:
 	// Lights

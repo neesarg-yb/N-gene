@@ -16,11 +16,11 @@ Tank::Tank( Vector3 const &spawnPosition, Terrain &isInTerrain )
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 
 	// Set Mesh
-	Mesh *sphereMesh = MeshBuilder::CreateSphere( m_radius, 30, 30 );
+	Mesh *sphereMesh = MeshBuilder::CreateCube( Vector3( 2.f, 1.f, 2.f ), Vector3::ZERO );
 	m_renderable->SetBaseMesh( sphereMesh );
 
 	// Set Material
-	Material *sphereMaterial = Material::CreateNewFromFile( "Data\\Materials\\stone_sphere.material" );
+	Material *sphereMaterial = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 	m_renderable->SetBaseMaterial( sphereMaterial );
 }
 
@@ -51,11 +51,15 @@ void Tank::Update( float deltaSeconds )
 
 	// Right Stick
 	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
-	float	yRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
 	float	xRotation			 = rightStickNormalized.y * m_rotationSpeed * deltaSeconds;
+	float	yRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
 	Vector3 currentRotation		 = m_transform.GetRotation();
 
 	m_transform.SetRotation( currentRotation + Vector3( xRotation, yRotation, 0.f ) );
+
+	// Aligning the tank
+	Matrix44 alignedModel		= m_parentTerrain.GetModelMatrixForMyPositionAt( finalXZPosition );
+	DebugRenderBasis( 0.f, alignedModel, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 	// Debug Trail
 	static float remainingTrailTime = m_spawnTrailPointAfter;

@@ -30,6 +30,7 @@ private:
 public:
 	void			Update( float deltaSeconds );
 	float			GetYCoordinateForMyPositionAt( Vector2 myXZPosition );
+	Matrix44		GetModelMatrixForMyPositionAt( Vector2 myXZPosition );
 
 private:
 	// Surface Patch

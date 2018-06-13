@@ -47,10 +47,6 @@ Battle::~Battle()
 {
 	delete m_renderingPath;
 	delete s_battleScene;
-
-	delete m_sphere;
-	delete m_sphereMaterial;
-	delete m_sphereMesh;
 	
 	DebugRendererShutdown();
 
@@ -85,20 +81,10 @@ void Battle::Startup()
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, s_camera );
 
-	// Placeholder sphere for Tank
-	m_sphereMesh		= MeshBuilder::CreateSphere( 1.f, 30, 30 );
-	m_sphereMaterial	= Material::CreateNewFromFile( "Data\\Materials\\stone_sphere.material" );
-	m_sphere			= new Renderable( Vector3( 10.f, 3.2f, 20.f) );
-
-	m_sphere->SetBaseMesh( m_sphereMesh );
-	m_sphere->SetBaseMaterial( m_sphereMaterial );
-
 	// Battle Scene
 	s_battleScene = new Scene();
 
 	s_battleScene->AddLight( *s_lightSources[0] );
-
-//	s_battleScene->AddRenderable( *m_sphere );
 	s_battleScene->AddRenderable( *s_lightSources[0]->m_renderable );
 
 	s_battleScene->AddCamera( *s_camera );
@@ -106,20 +92,20 @@ void Battle::Startup()
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
 	// TERRAIN
-	Terrain *terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
-	for( uint i = 0; i < terrain->m_chunks.size(); i++ )
+	m_terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
+	for( uint i = 0; i < m_terrain->m_chunks.size(); i++ )
 	{
-		s_battleScene->AddRenderable( *terrain->m_chunks[i] );
+		s_battleScene->AddRenderable( *m_terrain->m_chunks[i] );
 	}
 
 	// PLAYER TANK
-	Tank *playerTank = new Tank( Vector3::ZERO, *terrain );
-	s_camera->m_cameraTransform.SetParentAs( &playerTank->m_transform );
+	m_playerTank = new Tank( Vector3::ZERO, *m_terrain );
+	s_camera->m_cameraTransform.SetParentAs( &m_playerTank->m_transform );
 	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
-	s_battleScene->AddRenderable( *playerTank->m_renderable );
+	s_battleScene->AddRenderable( *m_playerTank->m_renderable );
 
-	m_allGameObjects.push_back( playerTank );
-	m_allGameObjects.push_back( terrain );
+	m_allGameObjects.push_back( m_playerTank );
+	m_allGameObjects.push_back( m_terrain );
 }
 
 void Battle::BeginFrame()

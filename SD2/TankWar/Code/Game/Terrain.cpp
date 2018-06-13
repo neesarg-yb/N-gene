@@ -75,6 +75,30 @@ float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition )
 	return myHeight;
 }
 
+Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition )
+{
+	// Get XZ position relative to Terrain
+	Vector3 terrainWorldPos	= m_transform.GetWorldPosition();
+	Vector2 posOnTerrain	= myXZPosition - Vector2( terrainWorldPos.x, terrainWorldPos.z );
+
+	float	myY				= GetYCoordinateForMyPositionAt( myXZPosition );
+	Vector3 myPosition		= Vector3( myXZPosition.x, myY, myXZPosition.y );
+
+	Vector2 stepXZ			= Vector2( 1.f, 1.f );
+	Vector3 du				= GetVertexPositionUsingHeightMap( posOnTerrain + Vector2( 1.f, 0.f ) )
+							- GetVertexPositionUsingHeightMap( posOnTerrain - Vector2( 1.f, 0.f ) );
+	Vector3	dv				= GetVertexPositionUsingHeightMap( posOnTerrain + Vector2( 0.f, 1.f ) )
+							- GetVertexPositionUsingHeightMap( posOnTerrain - Vector2( 0.f, 1.f ) );
+
+	Vector3 tangent			= du.GetNormalized();
+	Vector3 bitangent		= dv.GetNormalized();
+	Vector3 normal			= Vector3::CrossProduct( bitangent, tangent );
+
+	Matrix44 newModel		= Matrix44( bitangent, normal, tangent, myPosition );
+
+	return newModel;
+}
+
 Vector3 Terrain::SinWavePlane( float u, float v )
 {
 	Vector3 outPos	= Vector3( u, 0.f, v );
@@ -167,6 +191,7 @@ ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, fl
 			// Inside a Chunk
 			Vector2 bottomLeftUV	= Vector2( (float) xChunk * maxChunkDimension.x, (float) yChunk * maxChunkDimension.y );
 			Vector2 topRightUV		= bottomLeftUV + maxChunkDimension;
+			Vector2 centerUV		= ( bottomLeftUV + topRightUV ) * 0.5f;
 			// In case if it overflows where there are no more tiles
 			topRightUV.x			= ClampFloat( topRightUV.x, 0.f, (float)m_sampleSize.x );
 			topRightUV.y			= ClampFloat( topRightUV.y, 0.f, (float)m_sampleSize.y );
@@ -177,16 +202,16 @@ ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, fl
 			IntVector2	sampleSize	= IntVector2( ssX, ssY );
 
 			// Get the pivot point for this Chunk
-			Vector3		chunkBottomLeftPos	= Vector3( bottomLeftUV.x, 0.f, bottomLeftUV.y );
+			Vector3		chunkCenterPos	= Vector3( centerUV.x, 0.f, centerUV.y );
 
 			MeshBuilder chunkMB;
 			chunkMB.Begin( PRIMITIVE_TRIANGES, true );
 			chunkMB.AddMeshFromSurfacePatch( SurfacePatch, bottomLeftUV, topRightUV, sampleSize, RGBA_WHITE_COLOR );
-			chunkMB.SetVertexPositionsRelativeTo( chunkBottomLeftPos );
+			chunkMB.SetVertexPositionsRelativeTo( chunkCenterPos );
 			chunkMB.End();
 
 			// Create a renderable
-			Transform chunkTransform	= Transform( chunkBottomLeftPos, Vector3::ZERO, Vector3::ONE_ALL );
+			Transform chunkTransform	= Transform( chunkCenterPos, Vector3::ZERO, Vector3::ONE_ALL );
 			chunkTransform.SetParentAs( &m_transform );
 			m_renderable				= new Renderable( chunkTransform );
 
