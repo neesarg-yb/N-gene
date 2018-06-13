@@ -49,4 +49,6 @@ public:
 Vector3 PolarToCartesian( float radius, float rotation, float altitude );	// rotation = 0 starts at x-axis arrow; altitude = 0 starts at y-axis arrow
 
 
-const Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd );
+Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd );
+Vector3 Slerp( Vector3 const &a, Vector3 const &b, float t );
+Vector3 SlerpUnit( Vector3 const &a, Vector3 const &b, float t );
