@@ -16,6 +16,14 @@ Matrix44::Matrix44( const Vector2& iBasis, const Vector2& jBasis, const Vector2&
 	Iw = 0;				Jw = 0;				Kw = 0;		Tw = 1;
 }
 
+Matrix44::Matrix44( const Vector3& iBasis, const Vector3& jBasis, const Vector3& kBasis, const Vector3& translation /* = Vector3::ZERO */ )
+{
+	Ix = iBasis.x;		Jx = jBasis.x;		Kx = kBasis.x;		Tx = translation.x; 
+	Iy = iBasis.y;		Jy = jBasis.y;		Ky = kBasis.y;		Ty = translation.y; 
+	Iz = iBasis.z;		Jz = jBasis.z;		Kz = kBasis.z;		Tz = translation.z;		
+	Iw = 0;				Jw = 0;				Kw = 0;				Tw = 1;
+}
+
 Vector2 Matrix44::TransformPosition2D( const Vector2& position2D )
 {
 	Vector2 transformedPos2D = Vector2( Ix*position2D.x + Jx*position2D.y + Kx*0.f + Tx*1.f, 
@@ -384,6 +392,25 @@ Matrix44 Matrix44::MakeLookAtView( const Vector3& target_position, const Vector3
 	return toReturn;
 }
 
+Matrix44 Matrix44::LerpMatrix( Matrix44 const &a, Matrix44 const &b, float t )
+{
+	Vector3 a_right			= a.GetIColumn();
+	Vector3 b_right			= b.GetIColumn(); 
+	Vector3 a_up			= a.GetJColumn();
+	Vector3 b_up			= b.GetJColumn(); 
+	Vector3 a_forward		= a.GetKColumn(); 
+	Vector3 b_forward		= b.GetKColumn();
+	Vector3 a_translation	= a.GetTColumn();
+	Vector3 b_translation	= b.GetTColumn();
+
+	Vector3 right			= Slerp( a_right, b_right, t ); 
+	Vector3 up				= Slerp( a_up, b_up, t ); 
+	Vector3 forward			= Slerp( a_forward, b_forward, t ); 
+	Vector3 translation		= Interpolate( a_translation, b_translation, t ); 
+
+	return Matrix44( right, up, forward, translation ); 
+}
+
 Vector3 Matrix44::GetIColumn() const
 {
 	return Vector3( Ix, Iy, Iz );
@@ -588,7 +615,7 @@ bool Matrix44::GetInverse( Matrix44 &outInvMatrix ) const
     if (det == 0)
         return false;
 
-    det = 1.0 / det;
+    det = 1.0f / det;
 
 	float invOut[16];
     for (i = 0; i < 16; i++)
