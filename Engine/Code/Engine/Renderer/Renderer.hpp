@@ -30,6 +30,11 @@
 		2 = uboCamera
 		3 = uboObjectLightData
 		4 = uboLightsBlock
+
+	RENDER TARGETS:
+		0 = Color Target
+		1 = Bloom Texture ( from Camera )
+		3 = Pick Buffer Target
 */
 
 struct LoadedTexturesData {
@@ -62,6 +67,7 @@ private:
 	static Sampler*			s_defaultLinearSampler;
 	static Texture*			s_defaultColorTarget;
 	static Texture*			s_defaultDepthTarget;
+	static Texture*			s_defaultPickTarget;
 	const  Texture*			m_defaultWhiteTexture		= nullptr;
 	const  Texture*			m_secondaryTexture			= nullptr;
 	const  Texture*			m_defaultNormalTexture		= nullptr;
@@ -189,6 +195,7 @@ public:
 
 	static Sampler const*	GetDefaultSampler( eSamplerType type = SAMPLER_NEAREST );
 	static Texture*			GetDefaultColorTarget();
+	static Texture*			GetDefaultPickTarget();
 	static Texture*			GetDefaultDepthTarget();
 	static Texture*			CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt = TEXTURE_FORMAT_RGBA8 );
 	static Texture*			CreateDepthStencilTarget( unsigned int width, unsigned int height );
