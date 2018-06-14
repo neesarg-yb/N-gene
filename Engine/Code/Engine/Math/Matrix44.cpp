@@ -142,19 +142,19 @@ void Matrix44::Translate3D( Vector3 const &translation )
 
 void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ )
 {
-	Matrix44 rotationAroundZMatrix;			// Clockwise
+	Matrix44 rotationAroundZMatrix;
 	rotationAroundZMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Jx = -SinDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Iy =  SinDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Jy =  CosDegree( rotateAroundAxisYXZ.z );
 
-	Matrix44 rotationAroundXMatrix;			// Clockwise
+	Matrix44 rotationAroundXMatrix;
 	rotationAroundXMatrix.Jy =  CosDegree( rotateAroundAxisYXZ.x );
-	rotationAroundXMatrix.Ky = -SinDegree( rotateAroundAxisYXZ.x );
-	rotationAroundXMatrix.Jz =  SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Ky =  SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Jz = -SinDegree( rotateAroundAxisYXZ.x );
 	rotationAroundXMatrix.Kz =  CosDegree( rotateAroundAxisYXZ.x );
 
-	Matrix44 rotationAroundYMatrix;			// Counter-Clockwise
+	Matrix44 rotationAroundYMatrix;
 	rotationAroundYMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.y );
 	rotationAroundYMatrix.Kx =  SinDegree( rotateAroundAxisYXZ.y );
 	rotationAroundYMatrix.Iz = -SinDegree( rotateAroundAxisYXZ.y );
@@ -438,7 +438,7 @@ Vector3 Matrix44::GetEulerRotation() const
 		|	-sz*cx				 sx			cx*cy			   |     |	Iz	Jz	Kz	|
 		--													  --     --			   --
 	*/
-
+	/*
 	float xRad;
 	float yRad;
 	float zRad;
@@ -461,6 +461,30 @@ Vector3 Matrix44::GetEulerRotation() const
 	return Vector3( RadianToDegree(xRad), 
 					RadianToDegree(yRad), 
 					RadianToDegree(zRad) );
+	*/
+
+	float xDeg = asinf(Ky);
+	float yDeg = 0.f;
+	float zDeg = 0.f;;
+
+	xDeg = ClampFloatNegativeOneToOne(xDeg);
+
+	float cx = cosf(xDeg);
+	if(cx != 0.f)
+	{
+		yDeg = atan2f(Kx, Kz);
+		zDeg = atan2f(Iy, Jy);
+	}
+	else
+	{
+		// Gimble lock case
+		zDeg = 0.f;
+		yDeg = atan2f(-Kx, Ix);
+	}
+
+	return Vector3( RadianToDegree(xDeg), 
+					RadianToDegree(yDeg), 
+					RadianToDegree(zDeg) );
 }
 
 bool Matrix44::GetInverse( Matrix44 &outInvMatrix ) const
