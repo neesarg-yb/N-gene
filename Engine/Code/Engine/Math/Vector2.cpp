@@ -158,6 +158,15 @@ float Vector2::NormalizeAndGetLength() {
 	return lengthOfThis;
 }
 
+void Vector2::RotateByDegrees( float degrees )
+{
+	float vLength	= GetLength();
+	float vAngle	= GetOrientationDegrees();
+
+	x = vLength * CosDegree( vAngle + degrees );
+	y = vLength * SinDegree( vAngle + degrees );
+}
+
 float Vector2::GetOrientationDegrees() const {
 	return atan2fDegree(y, x);
 }
