@@ -29,8 +29,9 @@ private:
 
 public:
 	void			Update( float deltaSeconds );
-	float			GetYCoordinateForMyPositionAt( Vector2 myXZPosition );
-	Matrix44		GetModelMatrixForMyPositionAt( Vector2 myXZPosition );
+	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition );
+	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition );
+	Matrix44		GetModelMatrixForMyPositionAt	( Vector2 myXZPosition, Vector2 uvForwardDirection, Vector2 uvRightDirection );
 
 private:
 	// Surface Patch

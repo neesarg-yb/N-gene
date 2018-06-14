@@ -7,6 +7,7 @@
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
 #include "Game/Terrain.hpp"
+#include "Engine/Core/StringUtils.hpp"
 
 using namespace tinyxml2;
 
@@ -99,7 +100,7 @@ void Battle::Startup()
 	}
 
 	// PLAYER TANK
-	m_playerTank = new Tank( Vector3::ZERO, *m_terrain );
+	m_playerTank = new Tank( Vector2::ZERO, *m_terrain );
 	s_camera->m_cameraTransform.SetParentAs( &m_playerTank->m_transform );
 	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
 	s_battleScene->AddRenderable( *m_playerTank->m_renderable );

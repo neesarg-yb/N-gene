@@ -7,16 +7,16 @@
 #include "Game/Terrain.hpp"
 #include "Engine/Core/StringUtils.hpp"
 
-Tank::Tank( Vector3 const &spawnPosition, Terrain &isInTerrain )
+Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain )
 	: m_parentTerrain( isInTerrain )
 {
 	// Set transform
-	m_transform = Transform( spawnPosition, Vector3::ZERO, Vector3::ONE_ALL );
+	m_transform = Transform( Vector3::ZERO, Vector3::ZERO, Vector3::ONE_ALL );
 	m_renderable = new Renderable( m_transform );
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 
 	// Set Mesh
-	Mesh *sphereMesh = MeshBuilder::CreateCube( Vector3( 2.f, 1.f, 2.f ), Vector3::ZERO );
+	Mesh *sphereMesh = MeshBuilder::CreateCube( Vector3( 2.f, m_height, 2.f ), Vector3::ZERO );
 	m_renderable->SetBaseMesh( sphereMesh );
 
 	// Set Material
@@ -31,35 +31,14 @@ Tank::~Tank()
 
 void Tank::Update( float deltaSeconds )
 {
-	// Control the Tank using Xbox Controller
-	XboxController &thecontroller = g_theInput->m_controller[0];
+	// Handle the input
+	HandleInput( deltaSeconds );
 
-	// Left Stick
-	Vector2 leftStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
-
-	// Move Forward
-	Vector2 translationXZ		= leftStickNormalized * m_speed * deltaSeconds;
-	Vector3 translation			= Vector3( translationXZ.x, 0.f, translationXZ.y );
-	Vector3 worldTranslation	= m_transform.GetWorldTransformMatrix().Multiply( translation, 0.f );
-	Vector3 currentPosition		= m_transform.GetPosition();
-	Vector3 finalPosition		= currentPosition + worldTranslation;
-
- 	Vector2 finalXZPosition		= Vector2( finalPosition.x, finalPosition.z );
- 	finalPosition.y				= m_parentTerrain.GetYCoordinateForMyPositionAt( finalXZPosition );
-	finalPosition.y				+= m_radius;
-	m_transform.SetPosition( finalPosition );
-
-	// Right Stick
-	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
-	float	xRotation			 = rightStickNormalized.y * m_rotationSpeed * deltaSeconds;
-	float	yRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
-	Vector3 currentRotation		 = m_transform.GetRotation();
-
-	m_transform.SetRotation( currentRotation + Vector3( xRotation, yRotation, 0.f ) );
-
-	// Aligning the tank
-	Matrix44 alignedModel		= m_parentTerrain.GetModelMatrixForMyPositionAt( finalXZPosition );
+	// Set transform
+	Matrix44 alignedModel = m_parentTerrain.GetModelMatrixForMyPositionAt( m_xzPosition, m_xzForward, m_xzRight );
 	DebugRenderBasis( 0.f, alignedModel, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	m_transform.SetFromMatrix( alignedModel );
+	//m_transform.SetPosition( alignedModel.GetTColumn() );
 
 	// Debug Trail
 	static float remainingTrailTime = m_spawnTrailPointAfter;
@@ -75,4 +54,30 @@ void Tank::Update( float deltaSeconds )
 	std::string pos  = Stringf("Pos: ( %f, %f, %f )", m_transform.GetWorldPosition().x,m_transform.GetWorldPosition().y,m_transform.GetWorldPosition().z );
 
 	DebugRender2DText( 0.f, Vector2(0.f, 0.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, pos.c_str() );
+}
+
+void Tank::HandleInput( float deltaSeconds )
+{
+	// Control the Tank using Xbox Controller
+	XboxController &thecontroller = g_theInput->m_controller[0];
+
+	// Left Stick
+	Vector2 leftStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+
+	// Move Forward
+	Vector2 translationXZ		 = leftStickNormalized * m_speed * deltaSeconds;
+	m_xzPosition				+= translationXZ;
+
+	// Right Stick
+	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
+	float	yRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
+	m_xzRight.RotateByDegrees( -yRotation );
+	m_xzForward.RotateByDegrees( -yRotation );
+	DebugRender2DText( 0.f, Vector2( -400.f, -400.f ), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "Right:   ( %f, %f ) ", m_xzRight.x, m_xzRight.y ) );
+	DebugRender2DText( 0.f, Vector2( -400.f, -380.f ), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "Forward: ( %f, %f ) ", m_xzForward.x, m_xzForward.y ) );
+
+	// Aligning the tank
+// 	Vector2 uvDirection			= m_transform.GetWorldTransformMatrix().GetIColumn()
+// 	Matrix44 alignedModel		= m_parentTerrain.GetModelMatrixForMyPositionAt( finalXZPosition, uvDirection );
+// 	DebugRenderBasis( 0.f, alignedModel, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }

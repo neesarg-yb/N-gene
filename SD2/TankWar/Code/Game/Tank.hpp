@@ -6,12 +6,17 @@ class Terrain;
 class Tank : public GameObject
 {
 public:
-	 Tank( Vector3 const &spawnPosition, Terrain &isInTerrain );
+	 Tank( Vector2 const &spawnPosition, Terrain &isInTerrain );
 	~Tank();
 
 public:
-	float m_radius			= 1.f;
-	float m_speed			= 10.f;			// units per seconds
+	// XZ Plane info
+	Vector2	m_xzPosition	= Vector2::ZERO;
+	Vector2 m_xzForward		= Vector2( 0.f, 1.f );
+	Vector2 m_xzRight		= Vector2( 1.f, 0.f );
+
+	float m_height			= 1.f;
+	float m_speed			= 10.f;	// units per seconds
 	float m_rotationSpeed	= 35.f;	// degrees per seconds
 	
 	// Debug Trail
@@ -22,4 +27,7 @@ public:
 
 public:
 	void Update( float deltaSeconds );
+
+private:
+	void HandleInput( float deltaSeconds );
 };

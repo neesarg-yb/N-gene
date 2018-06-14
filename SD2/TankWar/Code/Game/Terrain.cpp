@@ -75,7 +75,14 @@ float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition )
 	return myHeight;
 }
 
-Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition )
+Vector3 Terrain::Get3DCoordinateForMyPositionAt( Vector2 myXZPosition )
+{
+	float yCoord = GetYCoordinateForMyPositionAt( myXZPosition );
+
+	return Vector3( myXZPosition.x, yCoord, myXZPosition.y );
+}
+
+Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition, Vector2 ForwardDirection, Vector2 RightDirection )
 {
 	// Get XZ position relative to Terrain
 	Vector3 terrainWorldPos	= m_transform.GetWorldPosition();
@@ -84,17 +91,16 @@ Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition )
 	float	myY				= GetYCoordinateForMyPositionAt( myXZPosition );
 	Vector3 myPosition		= Vector3( myXZPosition.x, myY, myXZPosition.y );
 
-	Vector2 stepXZ			= Vector2( 1.f, 1.f );
-	Vector3 du				= GetVertexPositionUsingHeightMap( posOnTerrain + Vector2( 1.f, 0.f ) )
-							- GetVertexPositionUsingHeightMap( posOnTerrain - Vector2( 1.f, 0.f ) );
-	Vector3	dv				= GetVertexPositionUsingHeightMap( posOnTerrain + Vector2( 0.f, 1.f ) )
-							- GetVertexPositionUsingHeightMap( posOnTerrain - Vector2( 0.f, 1.f ) );
+	Vector3 du				= GetVertexPositionUsingHeightMap( posOnTerrain + RightDirection * 0.5f )
+							- GetVertexPositionUsingHeightMap( posOnTerrain - RightDirection * 0.5f );
+	Vector3	dv				= GetVertexPositionUsingHeightMap( posOnTerrain + ForwardDirection * 0.5f )
+							- GetVertexPositionUsingHeightMap( posOnTerrain - ForwardDirection * 0.5f );
 
 	Vector3 tangent			= du.GetNormalized();
 	Vector3 bitangent		= dv.GetNormalized();
 	Vector3 normal			= Vector3::CrossProduct( bitangent, tangent );
 
-	Matrix44 newModel		= Matrix44( bitangent, normal, tangent, myPosition );
+	Matrix44 newModel		= Matrix44( tangent, normal, bitangent, myPosition );
 
 	return newModel;
 }
