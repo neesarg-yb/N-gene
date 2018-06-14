@@ -67,6 +67,15 @@ void Transform::SetScale( Vector3 const &scale )
 	m_isDirty	= true;
 }
 
+void Transform::SetFromMatrix( Matrix44 const &model )
+{
+	m_position	= model.GetTColumn();
+	m_scale		= Vector3( model.GetIColumn().GetLength(), model.GetJColumn().GetLength(), model.GetKColumn().GetLength() );
+	m_rotation	= model.GetEulerRotation();
+	
+	m_isDirty	= true;
+}
+
 void Transform::SetParentAs( Transform const *parent )
 {
 	m_parent = parent;
