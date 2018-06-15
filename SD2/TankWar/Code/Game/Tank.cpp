@@ -3,17 +3,37 @@
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Material.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Core/StringUtils.hpp"
+#include "Engine/Renderer/Camera.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Terrain.hpp"
-#include "Engine/Core/StringUtils.hpp"
 
-Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain )
+Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, Camera* attachedCamera )
 	: m_parentTerrain( isInTerrain )
+	, m_isControlledByXbox( isPlayer )
+	, m_attachedCamera( attachedCamera )
 {
-	// Set transform
-	m_transform = Transform( Vector3::ZERO, Vector3::ZERO, Vector3::ONE_ALL );
-	m_renderable = new Renderable( m_transform );
+	// Setup the Camera
+	m_attachedCamera->LookAt(	Vector3( 0.f, 10.f, -10.f ),
+								Vector3::ZERO,
+								Vector3::UP );
+
+	// Set transform hierarchy
+	//		Anchor Transform
+	//			|---> Attached Camera's Transform
+	//			|---> Tank's Transform
+	//					|---> Renderable's Transfomr
+	
+	// Anchor Transform:
+	Vector3	xyzPos		= m_parentTerrain.Get3DCoordinateForMyPositionAt( spawnPosition );
+	m_anchorTransform	= Transform( xyzPos,		Vector3::ZERO, Vector3::ONE_ALL );
+	// Tank's Transform:
+	m_transform			= Transform( Vector3::ZERO, Vector3::ZERO, Vector3::ONE_ALL );
+	m_transform.SetParentAs( &m_anchorTransform );
+	m_renderable		= new Renderable( m_transform );
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
+	// Camera's Transform:
+	m_attachedCamera->m_cameraTransform.SetParentAs( &m_anchorTransform );
 
 	// Set Mesh
 	Mesh *sphereMesh = MeshBuilder::CreateCube( Vector3( 2.f, m_height, 2.f ), Vector3::ZERO );
@@ -31,14 +51,22 @@ Tank::~Tank()
 
 void Tank::Update( float deltaSeconds )
 {
-	// Handle the input
-	HandleInput( deltaSeconds );
+	// If Player Tank, handle input
+	if( m_isControlledByXbox )
+		HandleInput( deltaSeconds );
 
 	// Set transform
 	Matrix44 alignedModel = m_parentTerrain.GetModelMatrixForMyPositionAt( m_xzPosition, m_xzForward, m_xzRight );
 	DebugRenderBasis( 0.f, alignedModel, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	m_transform.SetFromMatrix( alignedModel );
-	//m_transform.SetPosition( alignedModel.GetTColumn() );
+	
+	Matrix44	alignmentMatrix = m_parentTerrain.GetModelMatrixForMyPositionAt( m_xzPosition, m_xzForward, m_xzRight );
+	Vector3		posInWorld		= alignmentMatrix.GetTColumn();
+	m_anchorTransform.SetPosition( posInWorld );
+
+	alignmentMatrix.Tx			= 0.f;
+	alignmentMatrix.Ty			= m_height;
+	alignmentMatrix.Tz			= 0.f;
+	m_transform.SetFromMatrix( alignmentMatrix );
 
 	// Debug Trail
 	static float remainingTrailTime = m_spawnTrailPointAfter;

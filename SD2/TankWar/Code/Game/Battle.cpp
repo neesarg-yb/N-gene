@@ -71,7 +71,6 @@ void Battle::Startup()
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
 	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
-	s_camera->LookAt( Vector3( 0.f, 7.f, -10.f ), Vector3( 0.f, 2.f, 0.f ) );
 	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
 	// Setup the Lighting
@@ -100,8 +99,7 @@ void Battle::Startup()
 	}
 
 	// PLAYER TANK
-	m_playerTank = new Tank( Vector2::ZERO, *m_terrain );
-	s_camera->m_cameraTransform.SetParentAs( &m_playerTank->m_transform );
+	m_playerTank = new Tank( Vector2::ZERO, *m_terrain, true, s_camera );
 	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
 	s_battleScene->AddRenderable( *m_playerTank->m_renderable );
 
