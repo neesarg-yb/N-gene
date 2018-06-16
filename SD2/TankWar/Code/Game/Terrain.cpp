@@ -105,6 +105,15 @@ Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition, Vector2 F
 	return newModel;
 }
 
+RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 const &direction, float const maxDistance )
+{
+	RaycastResult hitReasult = RaycastResult( startPosition );
+
+	hitReasult.impactPosition = Vector3( 50.f, 10.f, 50.f );
+
+	return hitReasult;
+}
+
 Vector3 Terrain::SinWavePlane( float u, float v )
 {
 	Vector3 outPos	= Vector3( u, 0.f, v );

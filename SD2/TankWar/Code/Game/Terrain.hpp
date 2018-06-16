@@ -13,6 +13,21 @@ enum eTerrainQuadVetrex
 	NUM_TERRAIN_QUAD_VERTICES
 };
 
+struct RaycastResult
+{
+	RaycastResult( Vector3 startPosition )
+	{
+		// Set values as if impact didn't happen at startPosition
+		didImpact			= false;
+		impactPosition		= startPosition;
+		fractionTravelled	= 0.f;
+	}
+
+	bool	didImpact;
+	Vector3	impactPosition;
+	float	fractionTravelled;
+};
+
 class Terrain : public GameObject
 {
 public:
@@ -29,9 +44,14 @@ private:
 
 public:
 	void			Update( float deltaSeconds );
+
+	// Fetching the Position
 	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition );
 	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition );
 	Matrix44		GetModelMatrixForMyPositionAt	( Vector2 myXZPosition, Vector2 uvForwardDirection, Vector2 uvRightDirection );
+
+	// Raycast
+	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float const maxDistance );
 
 private:
 	// Surface Patch

@@ -7,8 +7,10 @@
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Game/Terrain.hpp"
 #include "Game/Turret.hpp"
+#include "Game/Tank.hpp"
 
 using namespace tinyxml2;
 
@@ -124,18 +126,36 @@ void Battle::Update( float deltaSeconds )
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 	
+
 	// Lights
 	ChnageLightAsPerInput( deltaSeconds );
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		s_lightSources[i]->Update( deltaSeconds );
 
+
 	// Game Objects
 	for each( GameObject* go in m_allGameObjects )
 		go->Update( deltaSeconds );
 
+
+	// Do the Raycast from Center of Screen
+	Vector2 screenCenter		= Vector2( Window::GetInstance()->GetWidth() * 0.5f, Window::GetInstance()->GetHeight() * 0.5f );
+	
+	Vector3 cameraFarPosition	= s_camera->GetWorldPositionFromScreen( screenCenter,  1.f );
+	Vector3 startPosition		= s_camera->GetWorldPositionFromScreen( screenCenter, -1.f );
+	Vector3 raycastDir			= ( cameraFarPosition - startPosition ).GetNormalized();
+	
+	RaycastResult hitResult = m_terrain->Raycast( startPosition, raycastDir, 500.f );
+	DebugRenderLineSegment( 0.f, 
+							m_playerTank->m_turret->m_barrelRenderable->GetPosition(),	RGBA_GREEN_COLOR, 
+							cameraFarPosition,											RGBA_GREEN_COLOR, 
+							RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+
+
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
 	
+
 	// Spawn Lights according to input
 	if( g_theInput->WasKeyJustPressed( 'R' ) )
 		AddNewPointLightToCamareaPosition( RGBA_RED_COLOR );

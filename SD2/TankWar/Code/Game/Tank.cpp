@@ -65,7 +65,7 @@ void Tank::Update( float deltaSeconds )
 	// Set transform
 	Matrix44	tankMatrix		= m_transform.GetWorldTransformMatrix();
 	Matrix44	alignmentMatrix = m_parentTerrain.GetModelMatrixForMyPositionAt( m_xzPosition, m_xzForward, m_xzRight );
-	Matrix44	lerpAlignMatrix	= Matrix44::LerpMatrix( tankMatrix, alignmentMatrix, deltaSeconds * 8.f );
+	Matrix44	lerpAlignMatrix	= Matrix44::LerpMatrix( tankMatrix, alignmentMatrix, deltaSeconds * 7.f );
 
 	Transform	worldTransform;				// It contains everything
 	worldTransform.SetFromMatrix( lerpAlignMatrix );
