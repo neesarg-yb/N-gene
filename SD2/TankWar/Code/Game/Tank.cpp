@@ -94,7 +94,7 @@ void Tank::HandleInput( float deltaSeconds )
 	XboxController &thecontroller = g_theInput->m_controller[0];
 
 	// Left Stick
-	Vector2 leftStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	Vector2 leftStickNormalized	 = thecontroller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
 	// Right Stick
 	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	float	yRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
