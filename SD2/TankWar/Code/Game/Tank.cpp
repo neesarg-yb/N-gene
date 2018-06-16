@@ -86,10 +86,6 @@ void Tank::Update( float deltaSeconds )
 		DebugRenderPoint( 10.f, 0.5f, m_transform.GetWorldPosition(), RGBA_YELLOW_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 		remainingTrailTime = m_spawnTrailPointAfter;
 	}
-
-	// Debug Position
-	std::string pos  = Stringf("Pos: ( %f, %f, %f )", m_transform.GetWorldPosition().x,m_transform.GetWorldPosition().y,m_transform.GetWorldPosition().z );
-	DebugRender2DText( 0.f, Vector2(0.f, 0.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, pos.c_str() );
 }
 
 void Tank::HandleInput( float deltaSeconds )
@@ -107,8 +103,6 @@ void Tank::HandleInput( float deltaSeconds )
 	// Set Forward & Right directions
 	m_xzRight.RotateByDegrees( -yRotation );
 	m_xzForward.RotateByDegrees( -yRotation );
-	DebugRender2DText( 0.f, Vector2( -400.f, -400.f ), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "Right:   ( %f, %f ) ", m_xzRight.x, m_xzRight.y ) );
-	DebugRender2DText( 0.f, Vector2( -400.f, -380.f ), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "Forward: ( %f, %f ) ", m_xzForward.x, m_xzForward.y ) );
 
 	// Move Forward
 	Vector2 translationXZ		 = leftStickNormalized * m_speed * deltaSeconds;
@@ -119,7 +113,6 @@ void Tank::HandleInput( float deltaSeconds )
 	currentXRot					+= xRotation;
 	currentXRot					 = ClampFloat( currentXRot, -20.f, 45.f );
 	m_cameraSpringTransform.SetRotation( Vector3( currentXRot, 0.f, 0.f ) );
-	DebugRender2DText( 0.f, Vector2( -400.f, -360.f ), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "X Rotation:  %f", currentXRot ) );
 	DrawDebugAimCross();
 }
 

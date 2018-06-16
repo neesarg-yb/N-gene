@@ -194,7 +194,7 @@ void theGame::Update_Menu( float deltaSeconds )
 		StartTransitionToState( ATTRACT );
 	if( g_theInput->WasKeyJustPressed( VK_Codes::SPACE ) )
 		StartTransitionToState( BATTLE );
-	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_START ].keyJustPressed )
+	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed )
 		StartTransitionToState( BATTLE );
 }
 
@@ -206,7 +206,7 @@ void theGame::Render_Menu() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
-	g_theRenderer->DrawTextInBox2D( "MAIN MENU\n \n Press start to jump to the battle.. \n \n (Press ~ for DevConsole )", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "MAIN MENU\n \n Press (A) to jump to the battle.. \n \n (Press ~ for DevConsole )", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
 void theGame::Update_Battle( float deltaSeconds )

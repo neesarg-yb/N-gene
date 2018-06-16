@@ -169,9 +169,6 @@ void Battle::Render() const
 	toSpawnSpotLights	= std::string( "Keys: R(red), G(green), B(blue), W(white)" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
 
-	DebugRenderPoint( 0.f, 5.f, Vector3( -50.f,  10.f, -50.f ), RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	DebugRenderPoint( 0.f, 5.f, Vector3( -50.f, -10.f, -50.f ), RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-
 	DebugRendererRender();
 }
 
