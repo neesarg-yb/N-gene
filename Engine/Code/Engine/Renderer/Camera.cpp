@@ -62,8 +62,12 @@ unsigned int Camera::GetFrameBufferHandle() const
 
 void Camera::PreRender( Renderer &theRenderer )
 {
-	// Clear Targets..
-	TODO("If camera should, clear the target!");
+	TODO( "Decide when you'll bind Bloom and other textures, again!" );
+	// Unbind all other color targets except main one..
+	for( uint i = 1; i < MAX_COLOR_TARGETS; i++ )
+		m_outputFramebuffer.SetColorTarget( nullptr, i );
+
+	m_outputFramebuffer.Finalize();
 
 	// Render SkyBox if enabled
 	if( m_skyboxEnabled )

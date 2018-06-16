@@ -428,7 +428,6 @@ Matrix44 Matrix44::MakeLookAtView( const Vector3& target_position, const Vector3
 	return toReturn;
 }
 
-#include "Engine/Core/EngineCommon.hpp"
 Matrix44 Matrix44::LerpMatrix( Matrix44 const &a, Matrix44 const &b, float t )
 {
 	t = ClampFloat01( t );
