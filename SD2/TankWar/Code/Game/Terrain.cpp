@@ -105,11 +105,53 @@ Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition, Vector2 F
 	return newModel;
 }
 
-RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 const &direction, float const maxDistance )
+RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance )
 {
-	RaycastResult hitReasult = RaycastResult( startPosition );
+	// LOGIC:
+	//
+	// For each Step size
+		// Move Forward
+			// If myY <= terrainY
+				// return RaycastResult
+			// Else, 
+				// If max distance is reached, return noHit Result
+				// Else continue..
+	
+	RaycastResult	hitReasult	= RaycastResult( startPosition );
+					direction	= direction.GetNormalized();
+	Vector3			step		= direction * 1.f;
 
-	hitReasult.impactPosition = Vector3( 50.f, 10.f, 50.f );
+	GUARANTEE_OR_DIE( maxDistance != 0,				"Error: maxDistance can't be ZERO!!" );
+	GUARANTEE_OR_DIE( direction.GetLength() != 0.f, "Error: Infinite Raycast; the direction is ZERO!" );
+
+	// While we reached maxDistance
+	float	distanceTravelled	= 0.f;
+	Vector3 currentPos			= startPosition;
+
+	while ( distanceTravelled <= maxDistance )
+	{
+		// Set loop condition: distanceTravelled
+		currentPos			+= step;
+		distanceTravelled	 = ( currentPos - startPosition ).GetLength();
+
+		// If we just went under the Terrain
+		float terrainHeight	 = GetYCoordinateForMyPositionAt( currentPos.x, currentPos.z );
+		if( currentPos.y <= terrainHeight )
+		{
+			hitReasult.didImpact			= true;
+			hitReasult.impactPosition		= currentPos;
+			hitReasult.fractionTravelled	= distanceTravelled / maxDistance;
+			
+			return hitReasult;
+		}
+		else
+		{
+			// Set the hit result if we reach maxDistance on next step
+			hitReasult.didImpact			= false;
+			hitReasult.impactPosition		= currentPos;
+			hitReasult.fractionTravelled	= distanceTravelled / maxDistance;
+		}
+	}
 
 	return hitReasult;
 }

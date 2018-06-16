@@ -51,7 +51,7 @@ public:
 	Matrix44		GetModelMatrixForMyPositionAt	( Vector2 myXZPosition, Vector2 uvForwardDirection, Vector2 uvRightDirection );
 
 	// Raycast
-	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float const maxDistance );
+	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance );
 
 private:
 	// Surface Patch
@@ -64,5 +64,6 @@ private:
 
 	// Convenience Methods
 	inline Vector3	SinWavePlane( Vector2 uv ) { return SinWavePlane( uv.x, uv.y ); }
+	inline float	GetYCoordinateForMyPositionAt( float x, float z ) { return GetYCoordinateForMyPositionAt( Vector2( x, z ) ); }
 	inline Vector3	GetVertexPositionUsingHeightMap( Vector2 uv ) { return GetVertexPositionUsingHeightMap( uv.x, uv.y ); }
 };
