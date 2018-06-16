@@ -159,6 +159,13 @@ void Matrix44::SetKColumn( Vector3 kColumn )
 	Kz = kColumn.z;
 }
 
+void Matrix44::SetTColumn( Vector3 tColumn )
+{
+	Tx = tColumn.x;
+	Ty = tColumn.y;
+	Tz = tColumn.z;
+}
+
 void Matrix44::NormalizeIJKColumns()
 {
 	Vector3 iColumn = GetIColumn();
