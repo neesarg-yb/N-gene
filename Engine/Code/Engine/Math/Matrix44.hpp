@@ -54,6 +54,7 @@ public:
 	void SetIColumn( Vector3 iColumn );
 	void SetJColumn( Vector3 jColumn );
 	void SetKColumn( Vector3 kColumn );
+	void SetTColumn( Vector3 tColumn );
 	void NormalizeIJKColumns();
 
 	void Translate3D	( Vector3 const &translation );
