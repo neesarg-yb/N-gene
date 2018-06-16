@@ -51,6 +51,12 @@ public:
 	void Scale2D		( float scaleX, float scaleY );
 	void ScaleUniform2D	( float scaleXY );
 
+	// Column Operations
+	void SetIColumn( Vector3 iColumn );
+	void SetJColumn( Vector3 jColumn );
+	void SetKColumn( Vector3 kColumn );
+	void NormalizeIJKColumns();
+
 	void Translate3D	( Vector3 const &translation );
 	void RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ );				// Rotation Order, Around Axis:  Z(Roll, clockwise) --> X(Pitch, clockwise) --> Y(Yaw, counter-clockwise)
 	void Scale3D		( Vector3 const &scale );

@@ -67,10 +67,11 @@ void Transform::SetScale( Vector3 const &scale )
 	m_isDirty	= true;
 }
 
-void Transform::SetFromMatrix( Matrix44 const &model )
+void Transform::SetFromMatrix( Matrix44 model )
 {
 	m_position	= model.GetTColumn();
 	m_scale		= Vector3( model.GetIColumn().GetLength(), model.GetJColumn().GetLength(), model.GetKColumn().GetLength() );
+	model.NormalizeIJKColumns();
 	m_rotation	= model.GetEulerRotation();
 	
 	m_isDirty	= true;

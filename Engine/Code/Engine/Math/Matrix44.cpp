@@ -138,6 +138,42 @@ void Matrix44::ScaleUniform2D( float scaleXY )
 	Append( scaleMatrix44 );
 }
 
+void Matrix44::SetIColumn( Vector3 iColumn )
+{
+	Ix = iColumn.x;
+	Iy = iColumn.y;
+	Iz = iColumn.z;
+}
+
+void Matrix44::SetJColumn( Vector3 jColumn )
+{
+	Jx = jColumn.x;
+	Jy = jColumn.y;
+	Jz = jColumn.z;
+}
+
+void Matrix44::SetKColumn( Vector3 kColumn )
+{
+	Kx = kColumn.x;
+	Ky = kColumn.y;
+	Kz = kColumn.z;
+}
+
+void Matrix44::NormalizeIJKColumns()
+{
+	Vector3 iColumn = GetIColumn();
+	Vector3 jColumn = GetJColumn();
+	Vector3 kColumn = GetKColumn();
+
+	iColumn = iColumn.GetNormalized();
+	jColumn = jColumn.GetNormalized();
+	kColumn = kColumn.GetNormalized();
+
+	SetIColumn( iColumn );
+	SetJColumn( jColumn );
+	SetKColumn( kColumn );
+}
+
 void Matrix44::Translate3D( Vector3 const &translation )
 {
 	Matrix44 translateMatrix;
@@ -392,8 +428,11 @@ Matrix44 Matrix44::MakeLookAtView( const Vector3& target_position, const Vector3
 	return toReturn;
 }
 
+#include "Engine/Core/EngineCommon.hpp"
 Matrix44 Matrix44::LerpMatrix( Matrix44 const &a, Matrix44 const &b, float t )
 {
+	t = ClampFloat01( t );
+
 	Vector3 a_right			= a.GetIColumn();
 	Vector3 b_right			= b.GetIColumn(); 
 	Vector3 a_up			= a.GetJColumn();

@@ -32,7 +32,7 @@ public:
 	void		SetPosition		( Vector3 const &position );
 	void		SetRotation		( Vector3 const &rotation );						// rotation = Vec3(Pitch, Yaw, Roll); but the order the rotation is applied is: Roll_Z -> Pitch_X -> Yaw_Y
 	void		SetScale		( Vector3 const &scale	 );
-	void		SetFromMatrix	( Matrix44 const &model );
+	void		SetFromMatrix	( Matrix44 model );
 
 	void		SetParentAs	( Transform const *parent );
 	void		AddChild	( Transform *child );
