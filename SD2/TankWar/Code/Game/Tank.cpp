@@ -5,6 +5,7 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Camera.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Terrain.hpp"
 #include "Game/Turret.hpp"
@@ -80,6 +81,17 @@ void Tank::Update( float deltaSeconds )
 // 	Vector3 tankRot			 = m_transform.GetRotation();
 // 	std::string tankRotation = Stringf( "Tank Rot: ( %f, %f, %f )", tankRot.x, m_anchorTransform.GetRotation().y, tankRot.z );
 // 	DebugRender2DText( 0.f, Vector2( -400.f, -400.f ), 15.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, tankRotation.c_str() );
+
+	// Make Turret look at target
+
+	// Raycast
+	Vector2 screenCenter		= Vector2( Window::GetInstance()->GetWidth() * 0.5f, Window::GetInstance()->GetHeight() * 0.5f );
+	Vector3 cameraFarPosition	= m_attachedCamera->GetWorldPositionFromScreen( screenCenter,  0.f );
+	Vector3 startPosition		= m_attachedCamera->GetWorldPositionFromScreen( screenCenter, -1.f );
+	Vector3 raycastDir			= ( cameraFarPosition - startPosition ).GetNormalized();
+
+	RaycastResult hitResult = m_parentTerrain.Raycast( startPosition, raycastDir, 500.f );
+	m_turret->LookAtPosition( hitResult.impactPosition );
 
 	// Debug Trail
 	static float remainingTrailTime = m_spawnTrailPointAfter;

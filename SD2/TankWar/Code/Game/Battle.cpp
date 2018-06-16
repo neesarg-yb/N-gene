@@ -137,27 +137,6 @@ void Battle::Update( float deltaSeconds )
 	for each( GameObject* go in m_allGameObjects )
 		go->Update( deltaSeconds );
 
-
-	// Raycast
-	Vector2 screenCenter		= Vector2( Window::GetInstance()->GetWidth() * 0.5f, Window::GetInstance()->GetHeight() * 0.5f );
-	
-	Vector3 cameraFarPosition	= s_camera->GetWorldPositionFromScreen( screenCenter,  0.f );
-	Vector3 startPosition		= s_camera->GetWorldPositionFromScreen( screenCenter, -1.f );
-
-	Vector3 raycastDir			= ( cameraFarPosition - startPosition ).GetNormalized();
-	
-	RaycastResult hitResult = m_terrain->Raycast( startPosition, raycastDir, 500.f );
-	DebugRenderLineSegment( 0.f, 
-							m_playerTank->m_turret->m_barrelRenderable->GetPosition(),	RGBA_GREEN_COLOR, 
-							hitResult.impactPosition,									RGBA_GREEN_COLOR, 
-							RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	DebugRenderWireCube( 0.f, hitResult.impactPosition - Vector3::ONE_ALL, hitResult.impactPosition + Vector3::ONE_ALL, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-
-	if( g_theInput->WasKeyJustPressed( 'Q' ) )
-	{
-		DebugRenderPoint( 10.f, 0.5f, hitResult.impactPosition, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	}
-
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
 	

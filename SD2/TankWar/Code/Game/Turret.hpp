@@ -14,10 +14,11 @@ public:
 
 public:
 	Transform	m_headTransform;		// Camera should be parented to this one
-	Transform	m_barrelTransform;
-
 	Renderable*	m_barrelRenderable		= nullptr;
 
 private:
 	Tank&		m_parentTank;
+
+public:
+	void		LookAtPosition( Vector3 targetPosInWorldSpace );
 };
