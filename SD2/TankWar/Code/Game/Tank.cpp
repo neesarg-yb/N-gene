@@ -19,9 +19,9 @@ Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, C
 								Vector3::UP );
 
 	// Set transform hierarchy
-	//		Anchor Transform							( Sets			 XZ-Rotation )
-	//			|---> Attached Camera's Transform		( Don't need	  Y-Rotation )
-	//			|---> Tank's Transform					( Sets			  Y-Rotation ) 
+	//		Anchor Transform							( Sets			  Y-Rotation )
+	//			|---> Attached Camera's Transform		( Don't need	 XZ-Rotation )
+	//			|---> Tank's Transform					( Sets			 XZ-Rotation ) 
 	//					|---> Renderable's Transfomr	( Gets all		XYZ-Rotation )
 	
 	// Anchor Transform:
@@ -36,7 +36,7 @@ Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, C
 	m_attachedCamera->m_cameraTransform.SetParentAs( &m_anchorTransform );
 
 	// Set Mesh
-	Mesh *sphereMesh = MeshBuilder::CreateCube( Vector3( 2.f, m_height, 2.f ), Vector3::ZERO );
+	Mesh *sphereMesh = MeshBuilder::CreateCube( Vector3( 2.f, m_height, 2.f ), Vector3( 0.f, m_height, 0.f ) );
 	m_renderable->SetBaseMesh( sphereMesh );
 
 	// Set Material
@@ -53,24 +53,22 @@ void Tank::Update( float deltaSeconds )
 {
 	// If Player Tank, handle input
 	if( m_isControlledByXbox )
-		HandleInput( deltaSeconds );
+		HandleInput( deltaSeconds );		// m_xzPosition is set
 
 	// Set transform
+	Matrix44	tankMatrix		= m_transform.GetWorldTransformMatrix();
 	Matrix44	alignmentMatrix = m_parentTerrain.GetModelMatrixForMyPositionAt( m_xzPosition, m_xzForward, m_xzRight );
-	Vector3		posInWorld		= alignmentMatrix.GetTColumn();
-	m_anchorTransform.SetPosition( posInWorld );
+	Matrix44	lerpAlignMatrix	= Matrix44::LerpMatrix( tankMatrix, alignmentMatrix, deltaSeconds * 8.f );
 
-	alignmentMatrix.Tx			= 0.f;
-	alignmentMatrix.Ty			= m_height;
-	alignmentMatrix.Tz			= 0.f;
-	Matrix44	lerpMatrix		= Matrix44::LerpMatrix( m_transform.GetTransformMatrix(), alignmentMatrix, deltaSeconds * 8.f );
-	m_transform.SetFromMatrix( lerpMatrix );
-
-	// Tank's Transform shouldn't care about Y Rotation
-	//		Y Rotation gets applied on Anchor Transform
-	Vector3 ignoreYRotation		= m_transform.GetRotation();
-	ignoreYRotation.y			= 0.f;
-	m_transform.SetRotation( ignoreYRotation );
+	Transform	worldTransform;				// It contains everything
+	worldTransform.SetFromMatrix( lerpAlignMatrix );
+	Vector3		worldRotation	= worldTransform.GetRotation();
+	// Anchor Transform just needs Position & Y-Rotation
+	m_anchorTransform.SetPosition( worldTransform.GetWorldPosition() );
+	m_anchorTransform.SetRotation( Vector3( 0.f, worldRotation.y, 0.f ) );
+	// Tank Transform need XZ-Rotation
+	worldRotation.y = 0.f;
+	m_transform.SetRotation( worldRotation );
 
 	// Debug Trail
 	static float remainingTrailTime = m_spawnTrailPointAfter;
@@ -98,10 +96,6 @@ void Tank::HandleInput( float deltaSeconds )
 	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	float	yRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
 
-	// Set Anchor's Y Rotation
-	Vector3 anchorRotation		 = m_anchorTransform.GetRotation();
-	anchorRotation.y			+= yRotation;
-	m_anchorTransform.SetRotation( anchorRotation );
 	// Set Forward & Right directions
 	m_xzRight.RotateByDegrees( -yRotation );
 	m_xzForward.RotateByDegrees( -yRotation );

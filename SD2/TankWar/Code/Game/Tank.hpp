@@ -36,5 +36,5 @@ public:
 	void Update( float deltaSeconds );
 
 private:
-	void HandleInput( float deltaSeconds );
+	void HandleInput( float deltaSeconds );		// Sets anchor transform's Y Rotation & m_xzPosition
 };
