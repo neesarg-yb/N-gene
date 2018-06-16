@@ -221,18 +221,18 @@ Vector3 Camera::GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ /
 	ndcXYZ.x	= RangeMapFloat( screenPosition.x, 0.f, (float)Window::GetInstance()->GetWidth(),  -1.f,  1.f );
 	ndcXYZ.y	= RangeMapFloat( screenPosition.y, 0.f, (float)Window::GetInstance()->GetHeight(),  1.f, -1.f );
 	ndcXYZ.z	= ClampFloat( ndcZ, -1.f, 1.f );
-
-	std::string ndcString = Stringf( "NDC: ( %f, %f, %f )", ndcXYZ.x, ndcXYZ.y, ndcXYZ.z );
-	DebugRender2DText( 0.f, Vector2(-380.f, -400.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, ndcString.c_str() );
+// 
+// 	std::string ndcString = Stringf( "NDC: ( %f, %f, %f )", ndcXYZ.x, ndcXYZ.y, ndcXYZ.z );
+// 	DebugRender2DText( 0.f, Vector2(-380.f, -400.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, ndcString.c_str() );
 
 	// NDC to View
 	Matrix44 invProjMatrix;	
 	bool valid			= m_projMatrix.GetInverse( invProjMatrix );
 	Vector4	 viewPos	= invProjMatrix.Multiply( Vector4( ndcXYZ, 1.f ) );
 	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
-
-	std::string viewString = Stringf( "View: ( %f, %f, %f, %f )", viewPos.x, viewPos.y, viewPos.z, viewPos.w );
-	DebugRender2DText( 0.f, Vector2(-380.f, -380.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, viewString.c_str() );
+// 
+// 	std::string viewString = Stringf( "View: ( %f, %f, %f, %f )", viewPos.x, viewPos.y, viewPos.z, viewPos.w );
+// 	DebugRender2DText( 0.f, Vector2(-380.f, -380.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, viewString.c_str() );
 
 	// View to World
 	Matrix44 invViewMatrix;
@@ -241,9 +241,9 @@ Vector3 Camera::GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ /
 	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
 
 	Vector3 worldPos	= Vector3( worldPos4.x, worldPos4.y, worldPos4.z ) / worldPos4.w;
-
-	std::string worldString = Stringf( "World: ( %f, %f, %f )", worldPos.x, worldPos.y, worldPos.z );
-	DebugRender2DText( 0.f, Vector2(-380.f, -360.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, worldString.c_str() );
+// 
+// 	std::string worldString = Stringf( "World: ( %f, %f, %f )", worldPos.x, worldPos.y, worldPos.z );
+// 	DebugRender2DText( 0.f, Vector2(-380.f, -360.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, worldString.c_str() );
 
 	return worldPos;
 }
