@@ -42,4 +42,5 @@ public:
 
 private:
 	void HandleInput( float deltaSeconds );		// Sets anchor transform's Y Rotation & m_xzPosition
+	void DrawDebugAimCross();
 };

@@ -120,4 +120,18 @@ void Tank::HandleInput( float deltaSeconds )
 	currentXRot					 = ClampFloat( currentXRot, -20.f, 45.f );
 	m_cameraSpringTransform.SetRotation( Vector3( currentXRot, 0.f, 0.f ) );
 	DebugRender2DText( 0.f, Vector2( -400.f, -360.f ), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "X Rotation:  %f", currentXRot ) );
+	DrawDebugAimCross();
+}
+
+void Tank::DrawDebugAimCross()
+{
+	AABB2 leftLineBounds	= AABB2( -30.f, 00.f, -5.f, 0.f );
+	AABB2 topLineBounds		= AABB2(  0.f,  30.f,  0.f, 5.f );
+	AABB2 rightLineBounds	= leftLineBounds * -1.f;
+	AABB2 bottomLineBounds	= topLineBounds * -1.f;
+
+	DebugRender2DLine( 0.f, leftLineBounds.mins,	RGBA_PURPLE_COLOR, leftLineBounds.maxs,		RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	DebugRender2DLine( 0.f, rightLineBounds.mins,	RGBA_PURPLE_COLOR, rightLineBounds.maxs,	RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	DebugRender2DLine( 0.f, topLineBounds.mins,		RGBA_PURPLE_COLOR, topLineBounds.maxs,		RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	DebugRender2DLine( 0.f, bottomLineBounds.mins,	RGBA_PURPLE_COLOR, bottomLineBounds.maxs,	RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
 }
