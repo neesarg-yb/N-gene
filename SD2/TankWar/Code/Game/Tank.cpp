@@ -7,17 +7,13 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Terrain.hpp"
+#include "Game/Turret.hpp"
 
 Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, Camera* attachedCamera )
 	: m_parentTerrain( isInTerrain )
 	, m_isControlledByXbox( isPlayer )
 	, m_attachedCamera( attachedCamera )
 {
-	// Setup the Camera
-	m_attachedCamera->LookAt(	Vector3( 0.f, 7.f, -10.f ),
-								Vector3( 0.f, 3.f, 0.f ),
-								Vector3::UP );
-
 	// Set transform hierarchy
 	//		Anchor Transform							( Sets			  Y-Rotation )
 	//			|---> Attached Camera's Transform		( Don't need	 XZ-Rotation )
@@ -32,20 +28,29 @@ Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, C
 	m_transform.SetParentAs( &m_anchorTransform );
 	m_renderable		= new Renderable( m_transform );
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
-	// Camera's Transform:
-	m_attachedCamera->m_cameraTransform.SetParentAs( &m_anchorTransform );
 
 	// Set Mesh
-	Mesh *sphereMesh = MeshBuilder::CreateCube( Vector3( 2.f, m_height, 2.f ), Vector3( 0.f, m_height, 0.f ) );
-	m_renderable->SetBaseMesh( sphereMesh );
+	Mesh *cubeMesh = MeshBuilder::CreateCube( Vector3( 2.f, m_height, 2.f ), Vector3( 0.f, m_height, 0.f ) );
+	m_renderable->SetBaseMesh( cubeMesh );
 
 	// Set Material
-	Material *sphereMaterial = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
-	m_renderable->SetBaseMaterial( sphereMaterial );
+	Material *tankMaterial = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
+	m_renderable->SetBaseMaterial( tankMaterial );
+
+	// Setup the Turret
+	m_turret = new Turret( *this );
+	
+	// Setup the Camera
+	m_attachedCamera->LookAt(	Vector3( 0.f, 7.f, -10.f ),
+		Vector3( 0.f, 3.f, 0.f ),
+		Vector3::UP );
+	// Camera's Transform:
+	m_attachedCamera->m_cameraTransform.SetParentAs( &m_anchorTransform );
 }
 
 Tank::~Tank()
 {
+	delete m_turret;
 	delete m_renderable;
 }
 

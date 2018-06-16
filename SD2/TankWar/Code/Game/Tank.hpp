@@ -1,6 +1,7 @@
 #pragma once
 #include "Game/GameObject.hpp"
 
+class Turret;
 class Terrain;
 class Camera;
 
@@ -31,6 +32,9 @@ public:
 
 	// Terrain
 	Terrain&	m_parentTerrain;
+
+	// Turret
+	Turret*		m_turret				= nullptr;
 
 public:
 	void Update( float deltaSeconds );

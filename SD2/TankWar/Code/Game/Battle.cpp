@@ -6,8 +6,9 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
-#include "Game/Terrain.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Game/Terrain.hpp"
+#include "Game/Turret.hpp"
 
 using namespace tinyxml2;
 
@@ -102,6 +103,7 @@ void Battle::Startup()
 	m_playerTank = new Tank( Vector2::ZERO, *m_terrain, true, s_camera );
 	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
 	s_battleScene->AddRenderable( *m_playerTank->m_renderable );
+	s_battleScene->AddRenderable( *m_playerTank->m_turret->m_barrelRenderable );
 
 	m_allGameObjects.push_back( m_playerTank );
 	m_allGameObjects.push_back( m_terrain );

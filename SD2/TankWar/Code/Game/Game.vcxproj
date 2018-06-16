@@ -288,6 +288,7 @@
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
+    <ClCompile Include="Turret.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
@@ -303,6 +304,7 @@
     <ClInclude Include="Terrain.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
+    <ClInclude Include="Turret.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Run_win32\Data\Materials\couch_cube.material" />
