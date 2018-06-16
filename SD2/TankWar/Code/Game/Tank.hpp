@@ -13,6 +13,7 @@ public:
 
 public:
 	Transform	m_anchorTransform;
+	Transform	m_cameraSpringTransform;
 
 	// If it is a Player Tank
 	bool		m_isControlledByXbox	= false;

@@ -16,7 +16,8 @@ Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, C
 {
 	// Set transform hierarchy
 	//		Anchor Transform							( Sets			  Y-Rotation )
-	//			|---> Attached Camera's Transform		( Don't need	 XZ-Rotation )
+	//			|---> Camera Spring's Transform			( Sets			  X-Rotation )
+	//			|		|---> Camera					( Gets			 XY-Rotation )
 	//			|---> Tank's Transform					( Sets			 XZ-Rotation ) 
 	//					|---> Renderable's Transfomr	( Gets all		XYZ-Rotation )
 	
@@ -45,7 +46,8 @@ Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, C
 		Vector3( 0.f, 3.f, 0.f ),
 		Vector3::UP );
 	// Camera's Transform:
-	m_attachedCamera->m_cameraTransform.SetParentAs( &m_anchorTransform );
+	m_cameraSpringTransform.SetParentAs( &m_anchorTransform );
+	m_attachedCamera->m_cameraTransform.SetParentAs( &m_cameraSpringTransform );
 }
 
 Tank::~Tank()
@@ -100,6 +102,7 @@ void Tank::HandleInput( float deltaSeconds )
 	// Right Stick
 	Vector2 rightStickNormalized = thecontroller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	float	yRotation			 = rightStickNormalized.x * m_rotationSpeed * deltaSeconds;
+	float	xRotation			 = rightStickNormalized.y * m_rotationSpeed * deltaSeconds;
 
 	// Set Forward & Right directions
 	m_xzRight.RotateByDegrees( -yRotation );
@@ -110,4 +113,11 @@ void Tank::HandleInput( float deltaSeconds )
 	// Move Forward
 	Vector2 translationXZ		 = leftStickNormalized * m_speed * deltaSeconds;
 	m_xzPosition				+= (m_xzForward * translationXZ.y) + (m_xzRight * translationXZ.x);
+
+	// Sets CameraSpring's X-Rotation
+	float currentXRot			 = m_cameraSpringTransform.GetRotation().x;
+	currentXRot					+= xRotation;
+	currentXRot					 = ClampFloat( currentXRot, -20.f, 45.f );
+	m_cameraSpringTransform.SetRotation( Vector3( currentXRot, 0.f, 0.f ) );
+	DebugRender2DText( 0.f, Vector2( -400.f, -360.f ), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "X Rotation:  %f", currentXRot ) );
 }
