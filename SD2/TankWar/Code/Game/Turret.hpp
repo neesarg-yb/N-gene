@@ -20,5 +20,5 @@ private:
 	Tank&		m_parentTank;
 
 public:
-	void		LookAtPosition( Vector3 targetPosInWorldSpace );
+	void		LookAtPosition( Vector3 targetPosInWorldSpace, float deltaSeconds );
 };

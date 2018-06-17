@@ -91,7 +91,7 @@ void Tank::Update( float deltaSeconds )
 	Vector3 raycastDir			= ( cameraFarPosition - startPosition ).GetNormalized();
 
 	RaycastResult hitResult = m_parentTerrain.Raycast( startPosition, raycastDir, 500.f );
-	m_turret->LookAtPosition( hitResult.impactPosition );
+	m_turret->LookAtPosition( hitResult.impactPosition, deltaSeconds );
 
 	// Debug Trail
 	static float remainingTrailTime = m_spawnTrailPointAfter;
