@@ -18,8 +18,8 @@ public:
 	const float m_aspectRatio = g_aspectRatio;
 
 public:
-	 Camera();
-	~Camera();
+			 Camera();
+	virtual ~Camera();
 
 	// For output_framebuffer
 	void SetColorTarget( Texture *color_target, uint slot = 0 );
