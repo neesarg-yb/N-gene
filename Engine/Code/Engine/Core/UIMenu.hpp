@@ -42,6 +42,9 @@ private:
 	void	ChangeSelectionBy( int indexChange );
 	void	ExecuteSelectedAction();
 	void	HandleXboxInput( float deltaSeconds );
+	void	HandleKeyboardInput( float deltaSeconds );
 	void	ChangeSelectionAccordingToLeftStick( float deltaSeconds );
+	void	ChangeSelectionAccordingToArrowKeys( float deltaSeconds );
 	void	CheckForFaceButtonPress();
+	void	CheckForSpaceOrEnterPress();
 };
