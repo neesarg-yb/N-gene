@@ -13,9 +13,9 @@
 
 using namespace tinyxml2;
 
-Scene*				  Level::s_levelScene;
-Camera*				  Level::s_camera;
-std::vector< Light* > Level::s_lightSources;
+Scene*					Level::s_levelScene;
+OrbitCamera*			Level::s_camera;
+std::vector< Light* >	Level::s_lightSources;
 
 void Level::AddNewPointLightToCamareaPosition( Rgba lightColor )
 {
@@ -75,12 +75,15 @@ Level::~Level()
 void Level::Startup()
 {
 	// Setup the camera
-	s_camera = new Camera();
+	s_camera = new OrbitCamera( Vector3::ZERO );
+	// Set Color Targets
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
-	s_camera->SetColorTarget( Renderer::GetDefaultPickTarget(), 3 );
-	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
-	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
-	s_camera->LookAt( Vector3( 0.f, 7.f, -10.f ), Vector3( 0.f, 2.f, 0.f ) );
+	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
+	// Projection Matrix
+	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f ); 
+	// Orbit Camera
+	s_camera->SetSphericalCoordinate( 10.f, 0.f, 90.f );
+	// Skybox
 	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
 	// Setup the Lighting
@@ -137,8 +140,8 @@ void Level::Update( float deltaSeconds )
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
 	// Camera Movement
-	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
-	MoveTheCameraAccordingToPlayerInput( deltaSeconds );
+	RotateTheCameraAccordingToPlayerInput( deltaSeconds );DebugRenderPoint( 25.f, 2.f, Vector3::ONE_ALL ,RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderPoint( 0.f, 2.f, Vector3::ZERO ,RGBA_BLUE_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	
 	// Lights
 	ChnageLightAsPerInput( deltaSeconds );
@@ -199,29 +202,36 @@ double Level::GetTimeSinceBattleStarted() const
 	return m_timeSinceStartOfTheBattle;
 }
 
-void Level::MoveTheCameraAccordingToPlayerInput( float deltaSeconds )
-{
-	static float const movementSpeed = 5.f;		// Units per seconds
-
-	XboxController &inputController = g_theInput->m_controller[0];
-	Vector2 axisChange				= inputController.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
-	float	leftShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown ?  1.f : 0.f;
-	float	rightShoulder			= inputController.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown ? -1.f : 0.f;
-	float	finalYMovement			= (leftShoulder + rightShoulder) * movementSpeed * deltaSeconds;
-	Vector2 finalXZMovement			= axisChange * movementSpeed * deltaSeconds;
-
-	s_camera->MoveCameraPositionBy( Vector3( finalXZMovement.x, finalYMovement, finalXZMovement.y ) );
-}
-
 void Level::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
 {
 	static float const rotationSpeed = 45.f;	// Degrees per seconds
+	static float const altitudeSpeed = 20.f;
 
-	XboxController &inputController	= g_theInput->m_controller[0];
-	Vector2 axisChange				= inputController.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
-	Vector2 finalYXEulerRotation	= axisChange * rotationSpeed * deltaSeconds;
+	float turnLeftAxis		= 0.f;
+	float altitudeUpAxis	= 0.f;
 
-	s_camera->RotateCameraBy( Vector3( -finalYXEulerRotation.y, finalYXEulerRotation.x, 0.f ) );
+	// Theta Change
+	if( g_theInput->IsKeyPressed( 'A' ) || g_theInput->IsKeyPressed( LEFT ) )
+		turnLeftAxis += 1.f;
+	if( g_theInput->IsKeyPressed( 'D' ) || g_theInput->IsKeyPressed( RIGHT ) )
+		turnLeftAxis -= 1.f;
+
+	// Altitude Change
+	if( g_theInput->IsKeyPressed( 'W' ) || g_theInput->IsKeyPressed( UP ) )
+		altitudeUpAxis += 1.f;
+	if( g_theInput->IsKeyPressed( 'S' ) || g_theInput->IsKeyPressed( DOWN ) )
+		altitudeUpAxis -= 1.f;
+
+	float cameraRadius	 = s_camera->m_radius;
+	float cameraAltitude = s_camera->m_altitude;
+	float cameraRotation = s_camera->m_rotation;
+	
+	// Set Rotation & Altitude
+	cameraRotation		+= deltaSeconds * rotationSpeed * -turnLeftAxis;
+	cameraAltitude		+= deltaSeconds * altitudeSpeed * -altitudeUpAxis;
+	cameraAltitude		 = ClampFloat( cameraAltitude, 30.f, 30.f + 90.f );
+
+	s_camera->SetSphericalCoordinate( cameraRadius, cameraRotation, cameraAltitude );
 }
 
 void Level::ChnageLightAsPerInput(float deltaSeconds)
