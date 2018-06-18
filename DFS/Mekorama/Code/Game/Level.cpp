@@ -82,7 +82,7 @@ void Level::Startup()
 	// Projection Matrix
 	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f ); 
 	// Orbit Camera
-	s_camera->SetSphericalCoordinate( 10.f, 0.f, 90.f );
+	s_camera->SetSphericalCoordinate( 10.f, -90.f, 90.f );
 	// Skybox
 	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
@@ -140,8 +140,7 @@ void Level::Update( float deltaSeconds )
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
 	// Camera Movement
-	RotateTheCameraAccordingToPlayerInput( deltaSeconds );DebugRenderPoint( 25.f, 2.f, Vector3::ONE_ALL ,RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	DebugRenderPoint( 0.f, 2.f, Vector3::ZERO ,RGBA_BLUE_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
 	
 	// Lights
 	ChnageLightAsPerInput( deltaSeconds );
@@ -156,13 +155,7 @@ void Level::Update( float deltaSeconds )
 	DebugRendererUpdate( deltaSeconds );
 	
 	// Spawn Lights according to input
-	if( g_theInput->WasKeyJustPressed( 'R' ) )
-		AddNewPointLightToCamareaPosition( RGBA_RED_COLOR );
-	if( g_theInput->WasKeyJustPressed( 'G' ) )
-		AddNewPointLightToCamareaPosition( RGBA_GREEN_COLOR );
-	if( g_theInput->WasKeyJustPressed( 'B' ) )
-		AddNewPointLightToCamareaPosition( RGBA_BLUE_COLOR );
-	if( g_theInput->WasKeyJustPressed( 'W' ) )
+	if( g_theInput->WasKeyJustPressed( 'L' ) )
 		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
 
 	// TESTING WORLD TO SCREEN
@@ -186,13 +179,10 @@ void Level::Render() const
 	// DebugText for Lighting and Shader..
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
-	std::string toSpawnSpotLights	= std::string( "Spawn new SpotLights," );
+	std::string toSpawnSpotLights	= std::string( "Spawn new PointLights with L" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
-	toSpawnSpotLights	= std::string( "Keys: R(red), G(green), B(blue), W(white)" );
-	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
-
-	DebugRenderPoint( 0.f, 5.f, Vector3( -50.f,  10.f, -50.f ), RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	DebugRenderPoint( 0.f, 5.f, Vector3( -50.f, -10.f, -50.f ), RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	
+	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	
 	DebugRendererRender();
 }

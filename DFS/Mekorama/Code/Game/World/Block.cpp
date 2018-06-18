@@ -17,6 +17,8 @@ Block::Block( Vector3 const &position, std::string blockDefinitionName )
 
 	// Transform Parenting
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
+
+	Vector3 worldPos = m_transform.GetWorldPosition();
 }
 
 Block::~Block()

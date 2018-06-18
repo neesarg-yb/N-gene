@@ -8,8 +8,9 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 	m_transform.SetPosition( position );
 
 	// Create Blocks
-	uint blocksPerSlice = m_definition.m_xzDimension.x * m_definition.m_xzDimension.y;
-	uint numSlices		= (uint) ( m_definition.m_blocksDefinitionList.size() / blocksPerSlice );
+	uint	blocksPerSlice	= m_definition.m_xzDimension.x * m_definition.m_xzDimension.y;
+	uint	numSlices		= (uint) ( m_definition.m_blocksDefinitionList.size() / blocksPerSlice );
+	Vector3 halfDimentions	= Vector3( (float)m_definition.m_xzDimension.x, (float)numSlices, (float)m_definition.m_xzDimension.y ) * 0.5f;
 
 	// for each slices
 	for( uint sliceIdx = 0U; sliceIdx < numSlices; sliceIdx++ )
@@ -20,8 +21,7 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 			// rows
 			for( uint rowIdx = 0U; rowIdx < (uint)m_definition.m_xzDimension.x; rowIdx++ )
 			{
-				Vector3 localPosition		 = Vector3( (float)rowIdx, (float)sliceIdx, (float)colIdx );
-				localPosition				+= Vector3( 0.f, 0.5f, 0.f );					// So localPosition is at bottom-center
+				Vector3 localPosition		 = Vector3( (float)rowIdx, (float)sliceIdx, (float)colIdx ) - halfDimentions;
 
 				Transform m_blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
 				m_blockTransform.SetParentAs( &m_transform );
