@@ -31,6 +31,7 @@ UIMenu::~UIMenu()
 void UIMenu::Update( float deltaSeconds )
 {
 	HandleXboxInput( deltaSeconds );
+	HandleKeyboardInput( deltaSeconds );
 }
 
 void UIMenu::Render() const
@@ -133,6 +134,12 @@ void UIMenu::HandleXboxInput( float deltaSeconds )
 	CheckForFaceButtonPress();
 }
 
+void UIMenu::HandleKeyboardInput( float deltaSeconds )
+{
+	ChangeSelectionAccordingToArrowKeys( deltaSeconds );
+	CheckForSpaceOrEnterPress();
+}
+
 void UIMenu::ChangeSelectionAccordingToLeftStick( float deltaSeconds )
 {
 	const float	delayBeforeNextInput	= 0.25f;
@@ -163,11 +170,32 @@ void UIMenu::ChangeSelectionAccordingToLeftStick( float deltaSeconds )
 	}
 }
 
+void UIMenu::ChangeSelectionAccordingToArrowKeys( float deltaSeconds )
+{
+	UNUSED( deltaSeconds );
+
+	bool upKeyPressed	=	m_activeInput.WasKeyJustPressed( UP ) ||
+							m_activeInput.WasKeyJustPressed( 'W' );
+	bool downKeyPressed =	m_activeInput.WasKeyJustPressed( DOWN ) ||
+							m_activeInput.WasKeyJustPressed( 'S' );
+
+	if( upKeyPressed )
+		ChangeSelectionBy( +1 );
+	if( downKeyPressed )
+		ChangeSelectionBy( -1 );
+}
+
 void UIMenu::CheckForFaceButtonPress()
 {
 	XboxController& controller	= m_activeInput.m_controller[0];
 	
 	// A-Button pressed
 	if( controller.m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed )
+		ExecuteSelectedAction();
+}
+
+void UIMenu::CheckForSpaceOrEnterPress()
+{
+	if( m_activeInput.WasKeyJustPressed( SPACE ) )
 		ExecuteSelectedAction();
 }
