@@ -1,10 +1,14 @@
 #include "OrbitCamera.hpp"
 
-void OrbitCamera::SetTarget( Vector3 new_target )
+OrbitCamera::OrbitCamera( Vector3 targetPos )
+	: m_target( targetPos )
 {
-	m_target = new_target;
 
-	Camera::LookAt( GetOrbitCameraPosition(), m_target );
+}
+
+OrbitCamera::~OrbitCamera()
+{
+
 }
 
 void OrbitCamera::SetSphericalCoordinate( float rad, float rot, float alt )
