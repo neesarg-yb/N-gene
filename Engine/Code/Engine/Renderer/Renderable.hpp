@@ -18,7 +18,7 @@ public:
 	 Renderable( Vector3 const &position, Vector3 const &eulerRotation = Vector3::ZERO, Vector3 const &scale = Vector3::ONE_ALL );
 
 public:
-	uint						m_pickID			= 4294967295;
+	uint						m_pickID			= INVALID_PICK_ID;
 	Transform					m_modelTransform;
 	std::vector< Mesh* >		m_meshes;
 	std::vector< Material* >	m_materials;

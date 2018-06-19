@@ -541,6 +541,7 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glDeleteTextures );
 	GL_BIND_FUNCTION( glTexStorage2D );
 	GL_BIND_FUNCTION( glTexSubImage2D );
+	GL_BIND_FUNCTION( glReadPixels );
 }	
 	
 //------------------------------------------------------------------------
