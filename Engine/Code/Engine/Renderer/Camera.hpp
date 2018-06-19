@@ -40,6 +40,7 @@ public:
 	void SetProjectionOrtho( float size, float screen_near, float screen_far ); 
 	void IncrementCameraSizeBy( float sizeIncrement );									// If using Orthographic Camera
 	void SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspectRatio, float nearZ, float farZ );
+	void CopyTransformViewAndProjection( Camera const &referenceCamera );						// Caution!: Copies View and Projection Matrices from referenceCamera
 
 	// Camera's movement and rotation
 	void SetCameraPositionTo		( Vector3 const &newPosition );						// Reset the position

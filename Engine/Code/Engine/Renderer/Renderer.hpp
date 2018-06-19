@@ -67,7 +67,6 @@ private:
 	static Sampler*			s_defaultLinearSampler;
 	static Texture*			s_defaultColorTarget;
 	static Texture*			s_defaultDepthTarget;
-	static Texture*			s_defaultPickTarget;
 	const  Texture*			m_defaultWhiteTexture		= nullptr;
 	const  Texture*			m_secondaryTexture			= nullptr;
 	const  Texture*			m_defaultNormalTexture		= nullptr;
@@ -127,6 +126,7 @@ public:
 	void BindRenderState( RenderState const &renderState );
 	void BindMaterialForShaderIndex( Material &material, uint shaderIndex = 0 );
 
+	void SetUniform( char const *name, uint unsignedInt );
 	void SetUniform( char const *name, float flt );
 	void SetUniform( char const *name, Vector3 const &vct );
 	void SetUniform( char const *name, Vector4 const &vct );
@@ -195,7 +195,6 @@ public:
 
 	static Sampler const*	GetDefaultSampler( eSamplerType type = SAMPLER_NEAREST );
 	static Texture*			GetDefaultColorTarget();
-	static Texture*			GetDefaultPickTarget();
 	static Texture*			GetDefaultDepthTarget();
 	static Texture*			CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt = TEXTURE_FORMAT_RGBA8 );
 	static Texture*			CreateDepthStencilTarget( unsigned int width, unsigned int height );
