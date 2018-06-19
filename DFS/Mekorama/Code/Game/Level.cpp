@@ -42,6 +42,7 @@ void Level::AddNewPointLightToCamareaPosition( Rgba lightColor )
 }
 
 Level::Level()
+	: m_pickBuffer( *g_theRenderer )
 {
 	
 }
@@ -139,6 +140,17 @@ void Level::Update( float deltaSeconds )
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
+
+	// Mouse Position
+	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();
+	std::string posString = Stringf( "Mouse Pos: ( %f, %f )", mousClientPos.x, mousClientPos.y );
+	DebugRender2DText( 0.f, Vector2(-850.f, -460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, posString.c_str() );
+
+	// Pick Buffer
+	m_pickBuffer.GeneratePickBuffer( *s_camera, *s_levelScene );
+	uint handle = m_pickBuffer.GetHandle( mousClientPos );
+//	GameObject *selectedGameObject = GetGameObjectFromID( handle );
+
 	// Camera Movement
 	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
 	
@@ -157,10 +169,6 @@ void Level::Update( float deltaSeconds )
 	// Spawn Lights according to input
 	if( g_theInput->WasKeyJustPressed( 'L' ) )
 		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
-
-	// TESTING WORLD TO SCREEN
-	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();
-	s_camera->GetWorldPositionFromScreen( mousClientPos );
 }
 
 void Level::Render() const
@@ -182,8 +190,9 @@ void Level::Render() const
 	std::string toSpawnSpotLights	= std::string( "Spawn new PointLights with L" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
 	
+	// Basis at Origin
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	
+
 	DebugRendererRender();
 }
 

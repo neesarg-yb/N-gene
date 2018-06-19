@@ -317,13 +317,11 @@
     <None Include="..\..\Run_win32\Data\Materials\Block_Water.material" />
     <None Include="..\..\Run_win32\Data\Materials\couch_cube.material" />
     <None Include="..\..\Run_win32\Data\Materials\default.material" />
-    <None Include="..\..\Run_win32\Data\Materials\ship_xray.material" />
+    <None Include="..\..\Run_win32\Data\Materials\pickbuffer.material" />
     <None Include="..\..\Run_win32\Data\Materials\snow_miku_a.material" />
     <None Include="..\..\Run_win32\Data\Materials\snow_miku_body.material" />
     <None Include="..\..\Run_win32\Data\Materials\snow_miku_lambert.material" />
-    <None Include="..\..\Run_win32\Data\Materials\ship.material" />
     <None Include="..\..\Run_win32\Data\Materials\stone_sphere.material" />
-    <None Include="..\..\Run_win32\Data\Materials\terrain.material" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.vs" />
@@ -344,6 +342,9 @@
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_tangent.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_uv.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_xray_normals.shader" />
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.fs" />
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.shader" />
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\skybox.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\skybox.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\skybox.vs" />

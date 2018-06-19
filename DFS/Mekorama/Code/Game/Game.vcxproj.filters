@@ -128,9 +128,6 @@
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_uv.shader">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\..\Run_win32\Data\Materials\ship.material">
-      <Filter>Materials</Filter>
-    </None>
     <None Include="..\..\Run_win32\Data\Materials\stone_sphere.material">
       <Filter>Materials</Filter>
     </None>
@@ -170,9 +167,6 @@
     <None Include="..\..\Run_win32\Data\Shaders\combine_fs.vs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\..\Run_win32\Data\Materials\ship_xray.material">
-      <Filter>Materials</Filter>
-    </None>
     <None Include="..\..\Run_win32\Data\Shaders\lit_alpha.shader">
       <Filter>Shaders</Filter>
     </None>
@@ -188,9 +182,6 @@
     <None Include="..\..\Run_win32\Data\Shaders\skybox.vs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\..\Run_win32\Data\Materials\terrain.material">
-      <Filter>Materials</Filter>
-    </None>
     <None Include="..\..\Run_win32\Data\Materials\Block_Brick Red.material">
       <Filter>Materials</Filter>
     </None>
@@ -202,6 +193,18 @@
     </None>
     <None Include="..\..\Run_win32\Data\Materials\Block_Water.material">
       <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\pickbuffer.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.vs">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

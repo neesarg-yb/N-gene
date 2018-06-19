@@ -7,6 +7,7 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
+#include "Engine/Renderer/PickBuffer.hpp"
 #include "Game/GameObject.hpp"
 #include "Game/World/Block.hpp"
 
@@ -40,6 +41,9 @@ private:
 	Renderable*					m_sphere						= nullptr;
 	Material*					m_sphereMaterial				= nullptr;
 	Mesh*						m_sphereMesh					= nullptr;
+
+	// PickBuffer
+	PickBuffer					m_pickBuffer;
 
 public:
 	// Lights
