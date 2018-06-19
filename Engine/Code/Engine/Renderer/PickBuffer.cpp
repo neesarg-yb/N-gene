@@ -63,12 +63,24 @@ void PickBuffer::GeneratePickBuffer( Camera &activeCamera, Scene &currentScene )
 			m_activeRenderer.DrawMesh( *meshR, renderable->m_modelTransform.GetWorldTransformMatrix() );
 		}
 	}
-
 }
 
-uint PickBuffer::GetHandle( Vector2 mousePosition )
+uint PickBuffer::GetPickID( Vector2 mousePosition )
 {
-	return 0U;
+	IntVector2 mousePosFromLowerLeft;
+	uint x = (int)mousePosition.x;
+	uint y = m_pickTarget->GetHeight() - (uint)mousePosition.y;
+
+	// Set active texture
+	glBindTexture( GL_TEXTURE_2D, m_pickTarget->GetHandle() ); 
+
+	// Read pixel
+	uint pickID = INVALID_PICK_ID;
+	glReadPixels( x, y, 1U, 1U, GL_RGBA, GL_UNSIGNED_BYTE, &pickID );
+
+	GL_CHECK_ERROR();
+
+	return pickID;
 }
 
 void PickBuffer::ResizePickTargets( uint width, uint height )

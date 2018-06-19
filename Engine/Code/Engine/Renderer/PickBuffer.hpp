@@ -26,7 +26,7 @@ private:
 
 public:
 	void GeneratePickBuffer( Camera &activeCamera, Scene &currentScene );
-	uint GetHandle( Vector2 mousePosition );
+	uint GetPickID( Vector2 mousePosition );
 
 private:
 	void ResizePickTargets( uint width, uint height );
