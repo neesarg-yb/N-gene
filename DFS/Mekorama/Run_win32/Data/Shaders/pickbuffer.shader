@@ -12,7 +12,7 @@
 
    <blend>
       	<color   op ="add" src ="one" dest ="zero" />
-      	<alpha   op ="add" src ="one" dest ="one" />
+      	<alpha   op ="add" src ="one" dest ="zero" />
    </blend>
 
    <depth write ="true" test ="less" />

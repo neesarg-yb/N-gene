@@ -148,8 +148,12 @@ void Level::Update( float deltaSeconds )
 
 	// Pick Buffer
 	m_pickBuffer.GeneratePickBuffer( *s_camera, *s_levelScene );
-	uint handle = m_pickBuffer.GetHandle( mousClientPos );
-//	GameObject *selectedGameObject = GetGameObjectFromID( handle );
+	uint pickID = m_pickBuffer.GetPickID( mousClientPos );
+	GameObject *selectedGameObject	= GameObject::GetFromPickID( pickID );
+	std::string pickedObjectStr		= Stringf( "Selected PickID: %u", pickID );
+	DebugRender2DText( 0.f, Vector2(-850.f, -420.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, pickedObjectStr.c_str() );
+	if( selectedGameObject != nullptr )
+		selectedGameObject->ObjectSelected();
 
 	// Camera Movement
 	RotateTheCameraAccordingToPlayerInput( deltaSeconds );

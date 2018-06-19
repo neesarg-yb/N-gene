@@ -1,9 +1,11 @@
 #pragma once
 #include "Block.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 Block::Block( Vector3 const &position, std::string blockDefinitionName )
-	: m_definition( *BlockDefinition::s_definitions[ blockDefinitionName ] )
+	: GameObject( GameObject::GetNewPickID() )
+	, m_definition( *BlockDefinition::s_definitions[ blockDefinitionName ] )
 {
 	// Transform
 	m_transform.SetPosition( position );
@@ -14,6 +16,7 @@ Block::Block( Vector3 const &position, std::string blockDefinitionName )
 												GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvSideCoord ),		// Side UV
 												GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvBottomCoord ) );	// Bot	UV
 	m_renderable = new Renderable( cubeMesh, m_definition.m_material );
+	m_renderable->SetPickID( m_pickID );
 
 	// Transform Parenting
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
@@ -29,6 +32,14 @@ Block::~Block()
 void Block::Update( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
+}
+
+void Block::ObjectSelected()
+{
+	Vector3 centerPos	= m_transform.GetWorldPosition();
+	Vector3 bottomLeft	= centerPos - ( Vector3::ONE_ALL * 0.5f );
+	Vector3 topRight	= centerPos + ( Vector3::ONE_ALL * 0.5f );
+	DebugRenderWireCube( 0.f, bottomLeft, topRight, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }
 
 AABB2 Block::GetUVBoundsFromCoord( IntVector2 spriteSheetDimension, IntVector2 uvCoord )

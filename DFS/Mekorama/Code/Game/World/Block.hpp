@@ -13,6 +13,7 @@ public:
 
 public:
 	void Update( float deltaSeconds );
+	void ObjectSelected();
 
 private:
 	AABB2 GetUVBoundsFromCoord( IntVector2 spriteSheetDimension, IntVector2 uvCoord );		// uvCoord start from (0, 0)
