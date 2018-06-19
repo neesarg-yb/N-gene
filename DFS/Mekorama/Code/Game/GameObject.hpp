@@ -6,13 +6,19 @@
 class GameObject
 {
 public:
-			 GameObject( uint pickID = INVALID_PICK_ID );
+			 GameObject();
 	virtual ~GameObject();
 
 public:
-	const uint	 m_pickID;
 	Transform	 m_transform;
 	Renderable	*m_renderable	= nullptr;
+
+private:
+	// PickID Stuff
+	uint m_pickID = INVALID_PICK_ID ;
+public:
+	void SetPickID( uint pickID );
+	uint GetPickID() const;
 
 public:
 	virtual void Update( float deltaSeconds ) = 0;

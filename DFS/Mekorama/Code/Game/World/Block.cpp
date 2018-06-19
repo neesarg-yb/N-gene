@@ -4,9 +4,12 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 Block::Block( Vector3 const &position, std::string blockDefinitionName )
-	: GameObject( GameObject::GetNewPickID() )
-	, m_definition( *BlockDefinition::s_definitions[ blockDefinitionName ] )
+	: m_definition( *BlockDefinition::s_definitions[ blockDefinitionName ] )
 {
+	// PickID if it is a solid block
+	if( m_definition.m_isSolid )
+		SetPickID( GameObject::GetNewPickID() );
+
 	// Transform
 	m_transform.SetPosition( position );
 
@@ -16,7 +19,7 @@ Block::Block( Vector3 const &position, std::string blockDefinitionName )
 												GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvSideCoord ),		// Side UV
 												GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvBottomCoord ) );	// Bot	UV
 	m_renderable = new Renderable( cubeMesh, m_definition.m_material );
-	m_renderable->SetPickID( m_pickID );
+	m_renderable->SetPickID( GetPickID() );
 
 	// Transform Parenting
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
