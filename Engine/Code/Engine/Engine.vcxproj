@@ -313,6 +313,7 @@
     <ClCompile Include="Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\MeshBuilder.cpp" />
     <ClCompile Include="Renderer\OrbitCamera.cpp" />
+    <ClCompile Include="Renderer\PickBuffer.cpp" />
     <ClCompile Include="Renderer\Renderable.cpp" />
     <ClCompile Include="Renderer\RenderBuffer.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
@@ -394,6 +395,7 @@
     <ClInclude Include="Renderer\Mesh.hpp" />
     <ClInclude Include="Renderer\MeshBuilder.hpp" />
     <ClInclude Include="Renderer\OrbitCamera.hpp" />
+    <ClInclude Include="Renderer\PickBuffer.hpp" />
     <ClInclude Include="Renderer\Renderable.hpp" />
     <ClInclude Include="Renderer\RenderBuffer.hpp" />
     <ClInclude Include="Renderer\Renderer.hpp" />

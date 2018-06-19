@@ -68,6 +68,11 @@ bool Renderable::IsAlphaQueueType( uint idx /*= 0 */ ) const
 	return m_materials[ idx ]->GetShader()->m_isAlphaQueueType;
 }
 
+void Renderable::SetPickID( uint pickID )
+{
+	m_pickID = pickID;
+}
+
 void Renderable::SetBaseMesh( Mesh *newMesh )
 {
 	// If empty, push back new

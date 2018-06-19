@@ -86,6 +86,7 @@ extern PFNGLFRONTFACEPROC					glFrontFace;
 extern PFNGLBLENDEQUATIONSEPARATEPROC		glBlendEquationSeparate;
 extern PFNGLBLENDFUNCSEPARATEPROC			glBlendFuncSeparate;
 
+extern PFNGLUNIFORM1UIVPROC					glUniform1uiv;
 extern PFNGLUNIFORM1FVPROC					glUniform1fv;
 extern PFNGLUNIFORM2FVPROC					glUniform2fv;
 extern PFNGLUNIFORM3FVPROC					glUniform3fv;

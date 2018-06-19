@@ -247,12 +247,11 @@ void Material::LoadTheShaderGroup( XMLElement const &shaderGroupElement, Rendere
 		// Get default material XMLElement
 		XMLElement const *defaultMaterialDataElement = shaderRoot->FirstChildElement( "material" );
 
-		// Return if there are no defaults defined in XML file
-		if( defaultMaterialDataElement == nullptr )
-			return;
-
 		// Fetch all the default textures
-		FetchAllTextureBindingPairsTo( defaultTexturePairs, *defaultMaterialDataElement );
+		if( defaultMaterialDataElement != nullptr )
+		{
+			FetchAllTextureBindingPairsTo( defaultTexturePairs, *defaultMaterialDataElement );
+		}
 
 		/////////////////////////////////////////
 		// Set the Shader & Default Properties //
@@ -262,7 +261,11 @@ void Material::LoadTheShaderGroup( XMLElement const &shaderGroupElement, Rendere
 		m_shaderGroup.push_back( newShaderTuple );
 
 		uint currentShaderIdx = (uint) m_shaderGroup.size() - 1U;
-		SetAllMaterialPropertiesFromXML( *defaultMaterialDataElement, currentShaderIdx );
+		// Set all the default properties
+		if( defaultMaterialDataElement != nullptr )
+		{
+			SetAllMaterialPropertiesFromXML( *defaultMaterialDataElement, currentShaderIdx );		
+		}
 	}
 
 	// Set default textures

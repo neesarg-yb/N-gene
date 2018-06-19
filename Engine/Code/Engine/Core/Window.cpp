@@ -1,9 +1,9 @@
-#include "Engine/Core/Window.hpp"
-
+#include "Window.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-
 #define GAME_WINDOW_CLASS (TEXT( "Simple Window Class" ))
+
+#include "Engine/Math/IntVector2.hpp"
 
 static Window* gWindow = nullptr; 
 
@@ -178,4 +178,12 @@ unsigned int Window::GetHeight() const
 
 	return height;
 
+}
+
+IntVector2 Window::GetDimensions() const
+{
+	uint width	= GetWidth();
+	uint height	= GetHeight();
+
+	return IntVector2( (int)width, (int)height );
 }

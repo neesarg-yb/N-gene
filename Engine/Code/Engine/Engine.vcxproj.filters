@@ -258,6 +258,9 @@
     <ClCompile Include="Renderer\TextureCube.cpp">
       <Filter>Renderer\Texture and Fonts</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\PickBuffer.cpp">
+      <Filter>Renderer\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -496,6 +499,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\TextureCube.hpp">
       <Filter>Renderer\Texture and Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\PickBuffer.hpp">
+      <Filter>Renderer\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

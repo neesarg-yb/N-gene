@@ -102,6 +102,7 @@ PFNGLFRONTFACEPROC						glFrontFace					= nullptr;
 PFNGLBLENDEQUATIONSEPARATEPROC			glBlendEquationSeparate		= nullptr;
 PFNGLBLENDFUNCSEPARATEPROC				glBlendFuncSeparate			= nullptr;
 
+PFNGLUNIFORM1UIVPROC					glUniform1uiv				= nullptr;
 PFNGLUNIFORM1FVPROC						glUniform1fv				= nullptr;
 PFNGLUNIFORM2FVPROC						glUniform2fv				= nullptr;
 PFNGLUNIFORM3FVPROC						glUniform3fv				= nullptr;
