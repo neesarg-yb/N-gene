@@ -1,5 +1,5 @@
 <TowerDefinition name = "Tower1" xzDimension = "5,5">
-	<Slice>
+	<Layer>
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
@@ -29,8 +29,8 @@
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
-	</Slice>
-	<Slice>
+	</Layer>
+	<Layer>
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Water" />
@@ -60,8 +60,8 @@
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Water" />
-	</Slice>
-	<Slice>
+	</Layer>
+	<Layer>
 		<Block type = "Void" />
 		<Block type = "Void" />
 		<Block type = "Void" />
@@ -91,9 +91,8 @@
 		<Block type = "Void" />
 		<Block type = "Void" />
 		<Block type = "Void" />
-
-	</Slice>
-	<Slice>
+	</Layer>
+	<Layer>
 		<Block type = "Void" />
 		<Block type = "Void" />
 		<Block type = "Void" />
@@ -124,8 +123,8 @@
 		<Block type = "Void" />
 		<Block type = "Void" />
 
-	</Slice>
-	<Slice>
+	</Layer>
+	<Layer>
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
@@ -155,8 +154,8 @@
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
-	</Slice>
-	<Slice>
+	</Layer>
+	<Layer>
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
@@ -186,5 +185,5 @@
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
-	</Slice>
+	</Layer>
 </TowerDefinition>

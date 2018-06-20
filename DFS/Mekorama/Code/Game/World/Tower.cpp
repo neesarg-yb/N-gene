@@ -12,7 +12,7 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 	uint	numSlices		= (uint) ( m_definition.m_blocksDefinitionList.size() / blocksPerSlice );
 	Vector3 halfDimentions	= Vector3( (float)m_definition.m_xzDimension.x, (float)numSlices, (float)m_definition.m_xzDimension.y ) * 0.5f;
 
-	// for each slices
+	// for each slices/layers
 	for( uint sliceIdx = 0U; sliceIdx < numSlices; sliceIdx++ )
 	{
 		// columns

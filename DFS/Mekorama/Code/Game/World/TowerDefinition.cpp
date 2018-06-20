@@ -12,8 +12,8 @@ TowerDefinition::TowerDefinition( XMLElement const &root )
 	m_towerName		= ParseXmlAttribute( root, "name", m_towerName );
 	m_xzDimension	= ParseXmlAttribute( root, "xzDimension", m_xzDimension );
 
-	// For each slices
-	for( XMLElement const *thisSlice = root.FirstChildElement("Slice"); thisSlice != nullptr; thisSlice = thisSlice->NextSiblingElement("Slice") )
+	// For each slices/layers
+	for( XMLElement const *thisSlice = root.FirstChildElement("Layer"); thisSlice != nullptr; thisSlice = thisSlice->NextSiblingElement("Layer") )
 	{
 		// For each blocks
 		for( XMLElement const *thisBlock = thisSlice->FirstChildElement("Block"); thisBlock != nullptr; thisBlock = thisBlock->NextSiblingElement("Block") )

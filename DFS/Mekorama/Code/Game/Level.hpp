@@ -18,7 +18,7 @@ typedef std::vector< GameObject* > GameObjectList;
 class Level
 {
 public:
-	Level();
+	 Level();
 	~Level();
 
 	void Startup();
