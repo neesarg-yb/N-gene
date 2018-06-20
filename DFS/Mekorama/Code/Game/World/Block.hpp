@@ -16,5 +16,6 @@ public:
 	void ObjectSelected();
 
 private:
-	AABB2 GetUVBoundsFromCoord( IntVector2 spriteSheetDimension, IntVector2 uvCoord );		// uvCoord start from (0, 0)
+	Renderable* CreateNewRenderable();
+	AABB2		GetUVBoundsFromCoord( IntVector2 spriteSheetDimension, IntVector2 uvCoord );		// uvCoord start from (0, 0)
 };

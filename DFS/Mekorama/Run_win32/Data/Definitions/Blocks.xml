@@ -43,4 +43,15 @@
 
 		isSolid				= "false"
 	/>
+	<BlockDefinition
+		name 				= "Stairs"
+		materialFileName	= "Block_Stairs"
+
+		spritesheetSize		= "32,32"
+		topUVCoords			= "16,3"
+		sideUVCoords		= "15,9"
+		bottomUVCoords		= "15,9"
+
+		isSolid				= "true"
+	/>
 </BlockDefinitions>

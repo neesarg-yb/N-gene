@@ -2,7 +2,7 @@
 
 	<PuzzleTower name="Tower1" />
 	
-	<SpanwPlayer onBlock="0,0" onLayer="5" />
-	<FinishPoint atBlock="5,5" inLayer="5" />
+	<SpanwPlayer onBlock="6,0" onLayer="0" />
+	<FinishPoint atBlock="6,5" inLayer="5" />
 
 </LevelDefinition>
