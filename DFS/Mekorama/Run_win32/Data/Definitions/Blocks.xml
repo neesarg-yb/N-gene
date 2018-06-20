@@ -54,4 +54,15 @@
 
 		isSolid				= "true"
 	/>
+	<BlockDefinition
+		name 				= "Finish"
+		materialFileName	= "Block_Finish"
+
+		spritesheetSize		= "32,32"
+		topUVCoords			= "2,13"
+		sideUVCoords		= "10,4"
+		bottomUVCoords		= "10,4"
+
+		isSolid				= "true"
+	/>
 </BlockDefinitions>

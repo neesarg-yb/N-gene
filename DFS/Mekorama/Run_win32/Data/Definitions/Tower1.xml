@@ -214,6 +214,6 @@
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
-		<Block type = "Grass" />
+		<Block type = "Finish" />
 	</Layer>
 </TowerDefinition>
