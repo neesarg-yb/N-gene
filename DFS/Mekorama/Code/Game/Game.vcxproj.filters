@@ -55,6 +55,9 @@
     <ClCompile Include="World\Robot.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="World\LevelDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -88,6 +91,9 @@
       <Filter>World</Filter>
     </ClInclude>
     <ClInclude Include="World\Robot.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\LevelDefinition.hpp">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>

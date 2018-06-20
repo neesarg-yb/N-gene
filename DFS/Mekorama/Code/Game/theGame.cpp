@@ -2,6 +2,9 @@
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Game/theApp.hpp"
+#include "Game/World/BlockDefinition.hpp"
+#include "Game/World/TowerDefinition.hpp"
+#include "Game/World/LevelDefinition.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -11,9 +14,6 @@ void EchoTestCommand( Command& cmd )
 theGame::theGame()
 {
 	m_lastFramesTime = GetCurrentTimeSeconds();
-	
-	// Construction
-	m_currentLevel = new Level();
 
 	// Fonts for loading screen
 	m_textBmpFont = g_theRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
@@ -27,6 +27,10 @@ theGame::theGame()
 
 theGame::~theGame()
 {
+	LevelDefinition::DeleteAllDefinitions();
+	TowerDefinition::DeleteAllDefinitions();
+	BlockDefinition::DeleteAllDefinitions();
+
 	delete m_textBmpFont;
 }
 
@@ -48,7 +52,14 @@ void theGame::Startup()
 	m_attractMenu->AddNewMenuAction( MenuAction( "Start", &startStdFunc ) );
 	m_attractMenu->m_selectionIndex = 1;
 
+
+	// Load All Definitions
+	BlockDefinition::LoadAllDefinitions( "Data\\Definitions\\Blocks.xml" );
+	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower1.xml" );
+	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level1.xml" );
+
 	// Call Startup for other classes
+	m_currentLevel = new Level( "Level1" );
 	m_currentLevel->Startup();
 }
 

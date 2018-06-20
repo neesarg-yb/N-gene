@@ -41,16 +41,15 @@ void Level::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
 }
 
-Level::Level()
+Level::Level( std::string definitionName )
 	: m_pickBuffer( *g_theRenderer )
+	, m_definition( *LevelDefinition::s_definitions[ definitionName ] )
 {
-	
+
 }
 
 Level::~Level()
 {
-	BlockDefinition::DeleteAllDefinitions();
-
 	delete m_renderingPath;
 	delete s_levelScene;
 
@@ -114,11 +113,6 @@ void Level::Startup()
 	s_levelScene->AddCamera( *s_camera );
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
-
-
-	// TEST: Definition Loading
-	BlockDefinition::LoadAllDefinitions( "Data\\Definitions\\Blocks.xml" );
-	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower1.xml" );
 
 	Tower *testTower = new Tower( Vector3::ZERO, "Tower1" );
 	for( uint i = 0; i < testTower->m_allBlocks.size(); i++ )

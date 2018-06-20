@@ -10,6 +10,7 @@
 #include "Engine/Renderer/PickBuffer.hpp"
 #include "Game/GameObject.hpp"
 #include "Game/World/Block.hpp"
+#include "Game/World/LevelDefinition.hpp"
 
 class Material;
 
@@ -18,7 +19,7 @@ typedef std::vector< GameObject* > GameObjectList;
 class Level
 {
 public:
-	 Level();
+	 Level( std::string definitionName );
 	~Level();
 
 	void Startup();
@@ -26,6 +27,9 @@ public:
 	void EndFrame();
 	void Update( float deltaSeconds );
 	void Render() const;
+
+public:
+	LevelDefinition const		&m_definition;
 
 private:
 	// Rendering Specific
