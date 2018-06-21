@@ -3,6 +3,7 @@
 #include "Vector3.hpp"
 #include "Engine/Math/MathUtil.hpp"
 #include "Engine/Math/Vector2.hpp"
+#include "Engine/Math/IntVector3.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 
@@ -24,6 +25,13 @@ Vector3::Vector3( float initialX, float initialY, float initialZ )
 	this->x = initialX;
 	this->y = initialY;
 	this->z = initialZ;
+}
+
+Vector3::Vector3( const IntVector3 &copyFrom )
+{
+	this->x	= (float) copyFrom.x;
+	this->y	= (float) copyFrom.y;
+	this->z	= (float) copyFrom.z;
 }
 
 const Vector3 Vector3::operator + ( const Vector3& vecToAdd ) const

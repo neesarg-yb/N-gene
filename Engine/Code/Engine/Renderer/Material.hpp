@@ -16,6 +16,7 @@ typedef std::map< int, std::string >				BindPointTexturePairs;
 class Material
 {
 public:
+	 Material( Material const &copy );
 	 Material( Shader &shader );
 	~Material();
 
