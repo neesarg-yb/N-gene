@@ -25,6 +25,13 @@ size_t MaterialPropertyFloat::GetByteSize() const
 	return sizeof( m_data );
 }
 
+MaterialProperty* MaterialPropertyFloat::Clone() const
+{
+	MaterialProperty* clonedProp = new MaterialPropertyFloat( *this );
+
+	return clonedProp;
+}
+
 MaterialPropertyVector2::MaterialPropertyVector2( char const *name, Vector2 const &data )
 {
 	m_name = name;
@@ -46,6 +53,13 @@ void MaterialPropertyVector2::SetData( void const *data )
 size_t MaterialPropertyVector2::GetByteSize() const
 {
 	return sizeof( m_data );
+}
+
+MaterialProperty* MaterialPropertyVector2::Clone() const
+{
+	MaterialProperty* clonedProp = new MaterialPropertyVector2( *this );
+
+	return clonedProp;
 }
 
 MaterialPropertyVector3::MaterialPropertyVector3( char const *name, Vector3 const &data )
@@ -71,6 +85,13 @@ size_t MaterialPropertyVector3::GetByteSize() const
 	return sizeof( m_data );
 }
 
+MaterialProperty* MaterialPropertyVector3::Clone() const
+{
+	MaterialProperty* clonedProp = new MaterialPropertyVector3( *this );
+
+	return clonedProp;
+}
+
 MaterialPropertyVector4::MaterialPropertyVector4( char const *name, Vector4 const &data )
 {
 	m_name = name;
@@ -92,6 +113,13 @@ void MaterialPropertyVector4::SetData( void const *data )
 size_t MaterialPropertyVector4::GetByteSize() const
 {
 	return sizeof( m_data );
+}
+
+MaterialProperty* MaterialPropertyVector4::Clone() const
+{
+	MaterialProperty* clonedProp = new MaterialPropertyVector4( *this );
+
+	return clonedProp;
 }
 
 MaterialPropertyRgba::MaterialPropertyRgba( char const *name, Rgba const &data )
@@ -118,4 +146,11 @@ void MaterialPropertyRgba::SetData( void const *data )
 size_t MaterialPropertyRgba::GetByteSize() const
 {
 	return sizeof( m_data );
+}
+
+MaterialProperty* MaterialPropertyRgba::Clone() const
+{
+	MaterialProperty* clonedProp = new MaterialPropertyRgba( *this );
+
+	return clonedProp;
 }
