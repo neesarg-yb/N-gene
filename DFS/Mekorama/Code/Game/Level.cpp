@@ -114,7 +114,10 @@ void Level::Startup()
 
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
+	// Prepare the Tower
 	Tower *testTower = new Tower( Vector3::ZERO, "Tower1" );
+	testTower->SetFinishBlockAt( m_definition.m_finishPosition );
+
 	for( uint i = 0; i < testTower->m_allBlocks.size(); i++ )
 		s_levelScene->AddRenderable( *testTower->m_allBlocks[i]->m_renderable );
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Math/IntVector3.hpp"
 #include "Game/World/Block.hpp"
 #include "Game/World/TowerDefinition.hpp"
 
@@ -13,5 +14,7 @@ public:
 	TowerDefinition const	&m_definition;
 
 public:
-	void Update( float deltaSeconds );
+	void	Update( float deltaSeconds );
+	void	SetFinishBlockAt( IntVector3 finishPos );
+	uint	GetIndexOfBlockAt( IntVector3 blockPos );
 };

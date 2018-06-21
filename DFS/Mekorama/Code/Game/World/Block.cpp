@@ -4,10 +4,10 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 Block::Block( Vector3 const &position, std::string blockDefinitionName )
-	: m_definition( *BlockDefinition::s_definitions[ blockDefinitionName ] )
+	: m_definition( BlockDefinition::s_definitions[ blockDefinitionName ] )
 {
 	// PickID if it is a solid block
-	if( m_definition.m_isSolid )
+	if( m_definition->m_isSolid )
 		SetPickID( GameObject::GetNewPickID() );
 
 	// Transform
@@ -41,12 +41,27 @@ void Block::ObjectSelected()
 	DebugRenderWireCube( 0.f, bottomLeft, topRight, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }
 
+void Block::ChangeBlockTypeTo( std::string definitionName )
+{
+	if( m_definition->m_typeName == definitionName )
+		return;
+
+	// Change block definition
+	m_definition = BlockDefinition::s_definitions[ definitionName ];
+
+	// Reset the Renderable
+	delete m_renderable;
+	m_renderable = nullptr;
+	m_renderable = CreateNewRenderable();
+	m_renderable->m_modelTransform.SetParentAs( &m_transform );
+}
+
 Renderable* Block::CreateNewRenderable()
 {
 	Mesh* renderableMesh = nullptr;
 
 	// Stairs has a different shape
-	if( m_definition.m_typeName == "Stairs" )
+	if( m_definition->m_typeName == "Stairs" )
 	{
 		Vector3 firstStepSize		= Vector3( 1.00f,  0.33f, 1.00f );
 		Vector3 secondStepSize		= Vector3( 0.67f,  0.33f, 0.67f );
@@ -60,17 +75,17 @@ Renderable* Block::CreateNewRenderable()
 		MeshBuilder mbStairs;
 		mbStairs.Begin( PRIMITIVE_TRIANGES, true );
 		mbStairs.AddCube(	firstStepSize, firstStepCenter, RGBA_WHITE_COLOR,
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvTopCoord ),
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvSideCoord ),
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvBottomCoord ) );
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvTopCoord ),
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvSideCoord ),
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvBottomCoord ) );
 		mbStairs.AddCube(	secondStepSize, secondStepCenter, RGBA_WHITE_COLOR,
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvTopCoord ),
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvSideCoord ),
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvBottomCoord ) );
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvTopCoord ),
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvSideCoord ),
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvBottomCoord ) );
 		mbStairs.AddCube(	thirdStepSize, thirdStepCenter, RGBA_WHITE_COLOR,
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvTopCoord ),
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvSideCoord ),
-							GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvBottomCoord ) );
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvTopCoord ),
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvSideCoord ),
+							GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvBottomCoord ) );
 		mbStairs.End();
 
 		renderableMesh = mbStairs.ConstructMesh<Vertex_Lit>();
@@ -79,12 +94,14 @@ Renderable* Block::CreateNewRenderable()
 	else // All other blocks have the same mesh
 	{
 		renderableMesh = MeshBuilder::CreateCube(	Vector3::ONE_ALL, Vector3::ZERO, RGBA_WHITE_COLOR, 
-													GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvTopCoord ),			// Top	UV
-													GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvSideCoord ),		// Side UV
-													GetUVBoundsFromCoord( m_definition.m_spriteSheetDimension, m_definition.m_uvBottomCoord ) );	// Bot	UV
+													GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvTopCoord ),		// Top	UV
+													GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvSideCoord ),		// Side UV
+													GetUVBoundsFromCoord( m_definition->m_spriteSheetDimension, m_definition->m_uvBottomCoord ) );	// Bot	UV
 	}
 	
-	Renderable *renderable = new Renderable( renderableMesh, m_definition.m_material );
+	Material	*dupMaterial	= new Material( *m_definition->m_material );
+	Renderable	*renderable		= new Renderable( renderableMesh, dupMaterial );
+	renderable->SetPickID( GetPickID() );
 
 	return renderable;
 }

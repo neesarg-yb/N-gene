@@ -50,3 +50,22 @@ void Tower::Update( float deltaSeconds )
 	UNUSED( deltaSeconds );
 }
 
+void Tower::SetFinishBlockAt( IntVector3 finishPos )
+{
+	int idx = GetIndexOfBlockAt( finishPos );
+
+	m_allBlocks[ idx ]->ChangeBlockTypeTo( "Finish" );
+}
+
+uint Tower::GetIndexOfBlockAt( IntVector3 blockPos )
+{
+	IntVector2	towerXZDim			= m_definition.m_xzDimension;
+	uint		numBlocksInALayer	= towerXZDim.x * towerXZDim.y;
+
+	uint		idx					= ( blockPos.x )							// rowIdx
+									+ ( blockPos.z * towerXZDim.x )				// columnIdx * width
+									+ ( blockPos.y * numBlocksInALayer );		// hightIdx  * blocksInALayer
+
+	return idx;
+}
+

@@ -9,13 +9,14 @@ public:
 	~Block();
 
 public:
-	BlockDefinition const &m_definition;
+	BlockDefinition *m_definition	= nullptr;
 
 public:
 	void Update( float deltaSeconds );
 	void ObjectSelected();
+	void ChangeBlockTypeTo( std::string definitionName );
 
 private:
-	Renderable* CreateNewRenderable();
+	Renderable* CreateNewRenderable();		// Creates new Renderable according to m_definition
 	AABB2		GetUVBoundsFromCoord( IntVector2 spriteSheetDimension, IntVector2 uvCoord );		// uvCoord start from (0, 0)
 };
