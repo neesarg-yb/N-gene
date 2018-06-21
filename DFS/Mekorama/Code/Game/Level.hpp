@@ -21,7 +21,7 @@ typedef std::vector< GameObject* > GameObjectList;
 class Level
 {
 public:
-	 Level( std::string definitionName );
+	 Level( std::string definitionName, Robot &playerRobot );
 	~Level();
 
 	void Startup();
@@ -40,11 +40,12 @@ private:
 	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.7f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
 	
+	// Tower Specific
 	GameObjectList				m_allGameObjects;
-	Robot*						m_playerRobot				= nullptr;
+	Robot&						m_playerRobot;
 	Tower*						m_tower						= nullptr;
 
-	// Level Specific
+	// Local
 	double						m_timeSinceStartOfTheBattle	= 0;
 	Renderable*					m_sphere					= nullptr;
 	Material*					m_sphereMaterial			= nullptr;

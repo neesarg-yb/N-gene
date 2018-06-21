@@ -1,0 +1,88 @@
+<TowerDefinition name = "Tower2" xzDimension = "6,6">
+	<Layer>
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer>
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+		<Block type = "Void" />
+	</Layer>
+</TowerDefinition>

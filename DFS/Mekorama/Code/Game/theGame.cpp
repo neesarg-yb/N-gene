@@ -27,6 +27,11 @@ theGame::theGame()
 
 theGame::~theGame()
 {
+	if( m_currentLevel != nullptr )
+		delete m_currentLevel;
+
+	delete m_playerRobot;
+
 	LevelDefinition::DeleteAllDefinitions();
 	TowerDefinition::DeleteAllDefinitions();
 	BlockDefinition::DeleteAllDefinitions();
@@ -55,12 +60,24 @@ void theGame::Startup()
 
 	// Load All Definitions
 	BlockDefinition::LoadAllDefinitions( "Data\\Definitions\\Blocks.xml" );
-	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower1.xml" );
-	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level1.xml" );
 
-	// Call Startup for other classes
-	m_currentLevel = new Level( "Level1" );
-	m_currentLevel->Startup();
+	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower1.xml" );
+	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower2.xml" );
+	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower3.xml" );
+	
+	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level1.xml" );
+	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level2.xml" );
+	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level3.xml" );
+
+	// Setup the Robot
+	m_playerRobot = new Robot( Vector3::ZERO );
+
+	// Setup the LevelSelection UI
+	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.45f, 0.42f, 0.55f, 0.55f ) );
+	for( LevelDefinitionMap::iterator it = LevelDefinition::s_definitions.begin(); it != LevelDefinition::s_definitions.end(); it++ )
+	{
+		m_levelSelectionMenu->AddNewMenuAction( MenuAction(it->first.c_str(), &levelSelectedStdFunc) );
+	}
 }
 
 void theGame::BeginFrame()
@@ -203,8 +220,8 @@ void theGame::Update_Menu( float deltaSeconds )
 
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		StartTransitionToState( ATTRACT );
-	if( g_theInput->WasKeyJustPressed( VK_Codes::SPACE ) )
-		StartTransitionToState( LEVEL );
+
+	m_levelSelectionMenu->Update( deltaSeconds );
 }
 
 void theGame::Render_Menu() const
@@ -215,7 +232,11 @@ void theGame::Render_Menu() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
-	g_theRenderer->DrawTextInBox2D( "MAIN MENU\n \n Press SPACE to jump to the level.. \n \n (Press ~ for DevConsole )", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "Jump to..", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "(Press ~ for DevConsole )", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	
+
+	m_levelSelectionMenu->Render();
 }
 
 void theGame::Update_Level( float deltaSeconds )
@@ -241,6 +262,17 @@ void theGame::QuitGame( char const * actionName )
 {
 	UNUSED( actionName );
 	g_theApp->m_isQuitting = true;
+}
+
+void theGame::LevelSelected( char const *actionName )
+{
+	if( m_currentLevel != nullptr )
+		delete m_currentLevel;
+
+	m_currentLevel = new Level( actionName, *m_playerRobot );
+	m_currentLevel->Startup();
+
+	StartTransitionToState( LEVEL );
 }
 
 void theGame::RenderLoadingScreen() const

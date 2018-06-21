@@ -13,6 +13,7 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 	Vector3 halfDimentions	= Vector3( (float)m_definition.m_xzDimension.x, (float)numSlices, (float)m_definition.m_xzDimension.y ) * 0.5f;
 
 	// for each slices/layers
+	uint nextBlkIdx	= 0;
 	for( uint sliceIdx = 0U; sliceIdx < numSlices; sliceIdx++ )
 	{
 		// columns
@@ -26,7 +27,7 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 				Transform m_blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
 				m_blockTransform.SetParentAs( &m_transform );
 
-				static uint nextBlkIdx		 = 0;
+				
 				Block*		thiBlock		 = new Block( m_blockTransform.GetWorldPosition(), m_definition.m_blocksDefinitionList[ nextBlkIdx ] );
 
 				m_allBlocks.push_back( thiBlock );

@@ -237,5 +237,17 @@
     <Xml Include="..\..\Run_win32\Data\Definitions\Level1.xml">
       <Filter>XML Definitions</Filter>
     </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Level2.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Level3.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Tower2.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Tower3.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

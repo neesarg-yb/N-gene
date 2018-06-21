@@ -40,30 +40,29 @@ void Level::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
 }
 
-Level::Level( std::string definitionName )
+Level::Level( std::string definitionName, Robot &playerRobot )
 	: m_pickBuffer( *g_theRenderer )
 	, m_definition( *LevelDefinition::s_definitions[ definitionName ] )
+	, m_playerRobot( playerRobot )
 {
 
 }
 
 Level::~Level()
 {
-	delete m_playerRobot;
 	delete m_tower;
 
 	delete m_renderingPath;
 	delete s_levelScene;
 
 	delete m_sphere;
-	delete m_sphereMaterial;
-	delete m_sphereMesh;
 	
 	DebugRendererShutdown();
 
 	// Lights
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		delete s_lightSources[i];
+	s_lightSources.clear();
 
 	// GameObject Pool
 	for( unsigned int i = 0; i < m_allGameObjects.size(); i++ )
@@ -123,13 +122,11 @@ void Level::Startup()
 	for( uint i = 0; i < m_tower->m_allBlocks.size(); i++ )
 		s_levelScene->AddRenderable( *m_tower->m_allBlocks[i]->m_renderable );
 
-	// Robot Test
-	m_playerRobot = new Robot( Vector3( 0.f, 4.f, 0.f ) );
-	m_allGameObjects.push_back( m_playerRobot );
-	s_levelScene->AddRenderable( *m_playerRobot->m_renderable );
+	// Robot
+	s_levelScene->AddRenderable( *m_playerRobot.m_renderable );
 
 	Vector3 playerWorldLocation = m_tower->GetWorldLocationOfBlockAt( m_definition.m_startPosition );
-	m_playerRobot->m_transform.SetPosition( playerWorldLocation );
+	m_playerRobot.m_transform.SetPosition( playerWorldLocation );
 }
 
 void Level::BeginFrame()
@@ -147,6 +144,8 @@ void Level::Update( float deltaSeconds )
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
+	// Update player
+	m_playerRobot.Update( deltaSeconds );
 
 	// Mouse Position
 	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();

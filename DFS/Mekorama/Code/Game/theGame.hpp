@@ -8,6 +8,7 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Level.hpp"
+#include "Game/World/Robot.hpp"
 
 enum GameStates
 {
@@ -39,22 +40,31 @@ public:
 	void Render() const;
 
 private:
-	double			m_timeSinceStartOfTheGame	=	0;
+	// Player
+	Robot*			m_playerRobot						= nullptr;
+
+	// Local
+	double			m_timeSinceStartOfTheGame			=	0;
 	double			m_lastFramesTime;
-	double			m_timeSinceTransitionBegan	=	0;
-	const float		m_transitionTime			=	2.5;
-	const float		m_halfTransitionTime		=	m_transitionTime * 0.5f;
-	float			m_fadeEffectAlpha			=	0.f;						// 0 to 1
-	GameStates		m_currentGameState			=	ATTRACT;
-	GameStates		m_nextGameState				=	NONE;
+	double			m_timeSinceTransitionBegan			=	0;
+	const float		m_transitionTime					=	2.5;
+	const float		m_halfTransitionTime				=	m_transitionTime * 0.5f;
+	float			m_fadeEffectAlpha					=	0.f;						// 0 to 1
+	GameStates		m_currentGameState					=	ATTRACT;
+	GameStates		m_nextGameState						=	NONE;
+
+	// Level Selection UI
+	UIMenu*			m_levelSelectionMenu				= nullptr;
+	std::function< void( const char* ) > levelSelectedStdFunc = std::bind( &theGame::LevelSelected, this, std::placeholders::_1 );
 
 	// Menu Specific
 	UIMenu*								 m_attractMenu	= nullptr;
 	std::function< void( const char* ) > quitStdFunc	= std::bind( &theGame::QuitGame,	  this, std::placeholders::_1 );
 	std::function< void( const char* ) > startStdFunc	= std::bind( &theGame::GoToMenuState, this, std::placeholders::_1 );
 	
-	void GoToMenuState( char const *actionName );
-	void QuitGame( char const *actionName );
+	void GoToMenuState	( char const *actionName );
+	void QuitGame		( char const *actionName );
+	void LevelSelected	( char const *actionName );
 
 	// Game States
 	void StartTransitionToState	( GameStates nextGameState );
