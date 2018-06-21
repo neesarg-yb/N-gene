@@ -9,6 +9,7 @@
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Engine/Renderer/PickBuffer.hpp"
 #include "Game/GameObject.hpp"
+#include "Game/World/Tower.hpp"
 #include "Game/World/Block.hpp"
 #include "Game/World/Robot.hpp"
 #include "Game/World/LevelDefinition.hpp"
@@ -41,6 +42,7 @@ private:
 	
 	GameObjectList				m_allGameObjects;
 	Robot*						m_playerRobot				= nullptr;
+	Tower*						m_tower						= nullptr;
 
 	// Level Specific
 	double						m_timeSinceStartOfTheBattle	= 0;

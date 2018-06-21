@@ -9,7 +9,6 @@
 #include "Engine/Renderer/Material.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
-#include "Game/World/Tower.hpp"
 
 using namespace tinyxml2;
 
@@ -51,6 +50,7 @@ Level::Level( std::string definitionName )
 Level::~Level()
 {
 	delete m_playerRobot;
+	delete m_tower;
 
 	delete m_renderingPath;
 	delete s_levelScene;
@@ -117,17 +117,19 @@ void Level::Startup()
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
 	// Prepare the Tower
-	Tower *testTower = new Tower( Vector3::ZERO, "Tower1" );
-	testTower->SetFinishBlockAt( m_definition.m_finishPosition );
+	m_tower = new Tower( Vector3::ZERO, m_definition.m_towerName );
+	m_tower->SetFinishBlockAt( m_definition.m_finishPosition );
 
-	for( uint i = 0; i < testTower->m_allBlocks.size(); i++ )
-		s_levelScene->AddRenderable( *testTower->m_allBlocks[i]->m_renderable );
+	for( uint i = 0; i < m_tower->m_allBlocks.size(); i++ )
+		s_levelScene->AddRenderable( *m_tower->m_allBlocks[i]->m_renderable );
 
 	// Robot Test
 	m_playerRobot = new Robot( Vector3( 0.f, 4.f, 0.f ) );
 	m_allGameObjects.push_back( m_playerRobot );
 	s_levelScene->AddRenderable( *m_playerRobot->m_renderable );
 
+	Vector3 playerWorldLocation = m_tower->GetWorldLocationOfBlockAt( m_definition.m_startPosition );
+	m_playerRobot->m_transform.SetPosition( playerWorldLocation );
 }
 
 void Level::BeginFrame()

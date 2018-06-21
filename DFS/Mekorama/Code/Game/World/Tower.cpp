@@ -50,14 +50,14 @@ void Tower::Update( float deltaSeconds )
 	UNUSED( deltaSeconds );
 }
 
-void Tower::SetFinishBlockAt( IntVector3 finishPos )
+void Tower::SetFinishBlockAt( IntVector3 const &finishPos )
 {
 	int idx = GetIndexOfBlockAt( finishPos );
 
 	m_allBlocks[ idx ]->ChangeBlockTypeTo( "Finish" );
 }
 
-uint Tower::GetIndexOfBlockAt( IntVector3 blockPos )
+uint Tower::GetIndexOfBlockAt( IntVector3 const &blockPos )
 {
 	IntVector2	towerXZDim			= m_definition.m_xzDimension;
 	uint		numBlocksInALayer	= towerXZDim.x * towerXZDim.y;
@@ -67,5 +67,13 @@ uint Tower::GetIndexOfBlockAt( IntVector3 blockPos )
 									+ ( blockPos.y * numBlocksInALayer );		// hightIdx  * blocksInALayer
 
 	return idx;
+}
+
+Vector3 Tower::GetWorldLocationOfBlockAt( IntVector3 const &blockPos )
+{
+	uint	blockIdx = GetIndexOfBlockAt( blockPos );
+	Vector3 worldPos = m_allBlocks[ blockIdx ]->m_transform.GetWorldPosition();
+	
+	return worldPos;
 }
 

@@ -9,7 +9,6 @@ public:
 	~Robot();
 
 public:
-	IntVector3	m_positionInTower	= IntVector3( -1, -1, -1 );
 	Vector2		m_facingDirectionXZ	= Vector2( 0.f, 1.f );
 
 public:

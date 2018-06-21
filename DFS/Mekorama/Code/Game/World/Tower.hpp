@@ -6,7 +6,7 @@
 class Tower : public GameObject
 {
 public:
-	 Tower( Vector3 position, std::string towerDefinitionName );	// position: of bottom center
+	 Tower( Vector3 position, std::string towerDefinitionName );	// position: of center
 	~Tower();
 
 public:
@@ -15,6 +15,7 @@ public:
 
 public:
 	void	Update( float deltaSeconds );
-	void	SetFinishBlockAt( IntVector3 finishPos );
-	uint	GetIndexOfBlockAt( IntVector3 blockPos );
+	void	SetFinishBlockAt( IntVector3 const &finishPos );
+	uint	GetIndexOfBlockAt( IntVector3 const &blockPos );
+	Vector3	GetWorldLocationOfBlockAt( IntVector3 const &blockPos );
 };
