@@ -50,6 +50,8 @@ Level::Level( std::string definitionName )
 
 Level::~Level()
 {
+	delete m_playerRobot;
+
 	delete m_renderingPath;
 	delete s_levelScene;
 
@@ -120,6 +122,12 @@ void Level::Startup()
 
 	for( uint i = 0; i < testTower->m_allBlocks.size(); i++ )
 		s_levelScene->AddRenderable( *testTower->m_allBlocks[i]->m_renderable );
+
+	// Robot Test
+	m_playerRobot = new Robot( Vector3( 0.f, 4.f, 0.f ) );
+	m_allGameObjects.push_back( m_playerRobot );
+	s_levelScene->AddRenderable( *m_playerRobot->m_renderable );
+
 }
 
 void Level::BeginFrame()
@@ -211,15 +219,15 @@ void Level::RotateTheCameraAccordingToPlayerInput( float deltaSeconds )
 	float altitudeUpAxis	= 0.f;
 
 	// Theta Change
-	if( g_theInput->IsKeyPressed( 'A' ) || g_theInput->IsKeyPressed( LEFT ) )
+	if( g_theInput->IsKeyPressed( 'A' ) )
 		turnLeftAxis += 1.f;
-	if( g_theInput->IsKeyPressed( 'D' ) || g_theInput->IsKeyPressed( RIGHT ) )
+	if( g_theInput->IsKeyPressed( 'D' ) )
 		turnLeftAxis -= 1.f;
 
 	// Altitude Change
-	if( g_theInput->IsKeyPressed( 'W' ) || g_theInput->IsKeyPressed( UP ) )
+	if( g_theInput->IsKeyPressed( 'W' ) )
 		altitudeUpAxis += 1.f;
-	if( g_theInput->IsKeyPressed( 'S' ) || g_theInput->IsKeyPressed( DOWN ) )
+	if( g_theInput->IsKeyPressed( 'S' ) )
 		altitudeUpAxis -= 1.f;
 
 	float cameraRadius	 = s_camera->m_radius;

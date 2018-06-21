@@ -212,6 +212,15 @@
     <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.vs">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\..\Run_win32\Data\Materials\bb8.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Finish.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Stairs.material">
+      <Filter>Materials</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader">
@@ -223,6 +232,9 @@
       <Filter>XML Definitions</Filter>
     </Xml>
     <Xml Include="..\..\Run_win32\Data\Definitions\Tower1.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Level1.xml">
       <Filter>XML Definitions</Filter>
     </Xml>
   </ItemGroup>

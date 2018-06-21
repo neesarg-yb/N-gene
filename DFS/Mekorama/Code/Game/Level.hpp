@@ -10,6 +10,7 @@
 #include "Engine/Renderer/PickBuffer.hpp"
 #include "Game/GameObject.hpp"
 #include "Game/World/Block.hpp"
+#include "Game/World/Robot.hpp"
 #include "Game/World/LevelDefinition.hpp"
 
 class Material;
@@ -39,12 +40,13 @@ private:
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
 	
 	GameObjectList				m_allGameObjects;
+	Robot*						m_playerRobot				= nullptr;
 
-	// Battle Specific
+	// Level Specific
 	double						m_timeSinceStartOfTheBattle	= 0;
-	Renderable*					m_sphere						= nullptr;
-	Material*					m_sphereMaterial				= nullptr;
-	Mesh*						m_sphereMesh					= nullptr;
+	Renderable*					m_sphere					= nullptr;
+	Material*					m_sphereMaterial			= nullptr;
+	Mesh*						m_sphereMesh				= nullptr;
 
 	// PickBuffer
 	PickBuffer					m_pickBuffer;

@@ -313,8 +313,11 @@
     <ClInclude Include="World\TowerDefinition.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Run_win32\Data\Materials\bb8.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Brick Red.material" />
+    <None Include="..\..\Run_win32\Data\Materials\Block_Finish.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Grass.material" />
+    <None Include="..\..\Run_win32\Data\Materials\Block_Stairs.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Void.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Water.material" />
     <None Include="..\..\Run_win32\Data\Materials\couch_cube.material" />
@@ -357,6 +360,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Run_win32\Data\Definitions\Blocks.xml" />
+    <Xml Include="..\..\Run_win32\Data\Definitions\Level1.xml" />
     <Xml Include="..\..\Run_win32\Data\Definitions\Tower1.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
