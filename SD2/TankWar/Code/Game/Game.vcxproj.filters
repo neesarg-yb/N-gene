@@ -43,6 +43,9 @@
     <ClCompile Include="Turret.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -70,6 +73,9 @@
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="Turret.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.hpp">
       <Filter>General</Filter>
     </ClInclude>
   </ItemGroup>

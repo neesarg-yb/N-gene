@@ -42,6 +42,12 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
 }
 
+void Battle::AddBulletToQueue( Bullet &newBullet )
+{
+	m_allGameObjects.push_back( (GameObject*) &newBullet );
+	s_battleScene->AddRenderable( *newBullet.m_renderable );
+}
+
 Battle::Battle()
 {
 	
@@ -134,8 +140,8 @@ void Battle::Update( float deltaSeconds )
 
 
 	// Game Objects
-	for each( GameObject* go in m_allGameObjects )
-		go->Update( deltaSeconds );
+	for( uint idx = 0; idx < m_allGameObjects.size(); idx++ )
+		m_allGameObjects[ idx ]->Update( deltaSeconds );
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );

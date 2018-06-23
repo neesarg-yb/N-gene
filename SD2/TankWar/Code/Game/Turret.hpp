@@ -2,6 +2,7 @@
 #include "Engine/Math/Transform.hpp"
 
 class Tank;
+class Bullet;
 class Renderable;
 
 class Turret
@@ -21,4 +22,5 @@ private:
 
 public:
 	void		LookAtPosition( Vector3 targetPosInWorldSpace, float deltaSeconds );
+	Bullet*		CreateANewBullet();
 };

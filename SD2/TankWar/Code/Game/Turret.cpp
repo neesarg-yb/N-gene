@@ -1,9 +1,10 @@
 #pragma once
 #include "Turret.hpp"
-#include "Game/Tank.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/Tank.hpp"
+#include "Game/Bullet.hpp"
 
 #define TANK_HALF_LENGTH 0.5f
 
@@ -58,4 +59,11 @@ void Turret::LookAtPosition( Vector3 targetPosInWorldSpace, float deltaSeconds )
 	turrateBasesInTankSpace.SetTColumn( m_headTransform.GetPosition() );
 
 	m_headTransform.SetFromMatrix( turrateBasesInTankSpace );
+}
+
+Bullet* Turret::CreateANewBullet()
+{
+	Bullet* newBullet = new Bullet( m_headTransform.GetWorldPosition(), m_headTransform.GetWorldTransformMatrix().GetKColumn() );
+	
+	return newBullet;
 }

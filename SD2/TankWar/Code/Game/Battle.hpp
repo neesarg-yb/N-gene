@@ -9,6 +9,7 @@
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Game/Tank.hpp"
 #include "Game/Terrain.hpp"
+#include "Game/Bullet.hpp"
 
 class Material;
 
@@ -43,8 +44,11 @@ private:
 public:
 	// Lights
 	static std::vector< Light* > s_lightSources;
-	
 	static void	AddNewPointLightToCamareaPosition( Rgba lightColor );
+
+public:
+	// Add to Battle
+	void	AddBulletToQueue( Bullet &newBullet );
 
 private:
 	double	GetTimeSinceBattleStarted() const;

@@ -14,7 +14,6 @@ using namespace tinyxml2;
 class theApp
 {
 public:
-	theGame* g_theGame = nullptr;
 	bool m_isQuitting = false;
 
 	bool IKeyIsPressed = false;

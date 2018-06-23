@@ -9,6 +9,8 @@
 #include "Game/GameCommon.hpp"
 #include "Game/Terrain.hpp"
 #include "Game/Turret.hpp"
+#include "Game/Battle.hpp"
+#include "Game/theGame.hpp"
 
 Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, Camera* attachedCamera )
 	: m_parentTerrain( isInTerrain )
@@ -97,6 +99,32 @@ void Tank::Update( float deltaSeconds )
 		DebugRenderPoint( 10.f, 0.5f, m_transform.GetWorldPosition(), RGBA_YELLOW_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 		remainingTrailTime = m_spawnTrailPointAfter;
 	}
+
+	// Bullets
+	ShootBullets( deltaSeconds );
+}
+
+void Tank::ShootBullets( float deltaSeconds )
+{
+	m_timeElapsedSinceLastFire += deltaSeconds;
+
+	// If it is not time to shoot next bullet, return
+	if( m_timeElapsedSinceLastFire < ( 1 / m_bulletsPerSecond ) )
+		return;
+
+	// If fire trigger not pressed, return
+	XboxController &theController = g_theInput->m_controller[0];
+	if( theController.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ] < 0.33f )
+		return;
+
+	// Create new bullet
+	Bullet *aBullet = m_turret->CreateANewBullet();
+
+	// Add it to battle's queue
+	g_theGame->m_currentBattle->AddBulletToQueue( *aBullet );
+
+	// Reset Time Elapsed
+	m_timeElapsedSinceLastFire = 0.f;
 }
 
 void Tank::HandleInput( float deltaSeconds )

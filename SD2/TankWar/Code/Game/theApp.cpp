@@ -8,9 +8,9 @@ void QuitTheApp( Command& cmd );
 
 theApp::theApp()
 {
-	g_theRenderer = new Renderer();
-	g_theGame = new theGame();
-	g_theInput = new InputSystem();
+	g_theRenderer	= new Renderer();
+	g_theGame		= new theGame();
+	g_theInput		= new InputSystem();
 
 	DevConsole::InitalizeSingleton( *g_theRenderer );
 	Window::GetInstance()->AddMessageHandler( DevConsole::ConsoleMessageHandler );
