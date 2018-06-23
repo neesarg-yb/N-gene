@@ -42,10 +42,13 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
 }
 
-void Battle::AddBulletToQueue( Bullet &newBullet )
+void Battle::AddNewGameObject( GameObject &newGO )
 {
-	m_allGameObjects.push_back( (GameObject*) &newBullet );
-	s_battleScene->AddRenderable( *newBullet.m_renderable );
+	// Add GameObject to pool
+	m_allGameObjects[ newGO.m_type ].push_back( &newGO );
+
+	// Add its Renderable to scene
+	newGO.AddRenderablesToScene( *s_battleScene );
 }
 
 Battle::Battle()
@@ -65,10 +68,13 @@ Battle::~Battle()
 		delete s_lightSources[i];
 
 	// GameObject Pool
-	for( unsigned int i = 0; i < m_allGameObjects.size(); i++ )
-		delete m_allGameObjects[i];
+	for( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )
+	{
+		for( unsigned int i = 0; i < m_allGameObjects[ type ].size(); i++ )
+			delete m_allGameObjects[ type ][i];
 
-	m_allGameObjects.clear();
+		m_allGameObjects[ type ].clear();
+	}
 	
 	delete s_camera;
 }
@@ -102,19 +108,12 @@ void Battle::Startup()
 
 	// TERRAIN
 	m_terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
-	for( uint i = 0; i < m_terrain->m_chunks.size(); i++ )
-	{
-		s_battleScene->AddRenderable( *m_terrain->m_chunks[i] );
-	}
+	AddNewGameObject( *m_terrain );
 
 	// PLAYER TANK
 	m_playerTank = new Tank( Vector2::ZERO, *m_terrain, true, s_camera );
 	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
-	s_battleScene->AddRenderable( *m_playerTank->m_renderable );
-	s_battleScene->AddRenderable( *m_playerTank->m_turret->m_barrelRenderable );
-
-	m_allGameObjects.push_back( m_playerTank );
-	m_allGameObjects.push_back( m_terrain );
+	AddNewGameObject( *m_playerTank );
 }
 
 void Battle::BeginFrame()
@@ -139,9 +138,13 @@ void Battle::Update( float deltaSeconds )
 		s_lightSources[i]->Update( deltaSeconds );
 
 
-	// Game Objects
-	for( uint idx = 0; idx < m_allGameObjects.size(); idx++ )
-		m_allGameObjects[ idx ]->Update( deltaSeconds );
+	// For each type
+	for ( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )
+	{
+		// For each game objects
+		for( uint idx = 0; idx < m_allGameObjects[ type ].size(); idx++ )
+			m_allGameObjects[ type ][ idx ]->Update( deltaSeconds );
+	}
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );

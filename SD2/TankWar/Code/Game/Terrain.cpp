@@ -3,9 +3,11 @@
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Core/Image.hpp"
+#include "Engine/Renderer/Scene.hpp"
 
 Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath )
-	: m_maxHeight( maxHeight )
+	: GameObject( GAME_OBJECT_TERRAIN )
+	, m_maxHeight( maxHeight )
 	, m_sampleSize( gridSize )
 {
 	// NOTE!
@@ -34,6 +36,13 @@ Terrain::~Terrain()
 void Terrain::Update( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
+}
+
+void Terrain::AddRenderablesToScene( Scene &activeScene )
+{
+	// Add all chunks to scene
+	for( uint i = 0; i < m_chunks.size(); i++ )
+		activeScene.AddRenderable( *m_chunks[i] );
 }
 
 float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition )

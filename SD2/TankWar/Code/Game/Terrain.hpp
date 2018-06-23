@@ -2,6 +2,7 @@
 #include "Game/GameObject.hpp"
 #include <functional>
 
+class Scene;
 typedef std::vector< Renderable* > ChunkList;
 
 enum eTerrainQuadVetrex
@@ -44,6 +45,7 @@ private:
 
 public:
 	void			Update( float deltaSeconds );
+	void			AddRenderablesToScene( Scene &activeScene );
 
 	// Fetching the Position
 	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition );

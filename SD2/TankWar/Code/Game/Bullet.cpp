@@ -1,9 +1,11 @@
 #pragma once
 #include "Bullet.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/Renderer/Scene.hpp"
 
 Bullet::Bullet( Vector3 const &spawnPosition, Vector3 const &velocity )
-	: m_velocity( velocity )
+	: GameObject( GAME_OBJECT_BULLET )
+	, m_velocity( velocity )
 {
 	// Set Transform
 	m_transform = Transform( spawnPosition, Vector3::ZERO, Vector3::ONE_ALL );
@@ -30,5 +32,10 @@ void Bullet::Update( float deltaSeconds )
 	Vector3 position = m_transform.GetPosition();
 	position		+= m_velocity * deltaSeconds * m_bulletSpeed;
 	m_transform.SetPosition( position );
+}
+
+void Bullet::AddRenderablesToScene( Scene &activeScene )
+{
+	activeScene.AddRenderable( *m_renderable );
 }
 

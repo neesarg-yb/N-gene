@@ -34,7 +34,7 @@ private:
 	Vector4						m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.6f );
 	ForwardRenderingPath*		m_renderingPath					= nullptr;
 	
-	GameObjectList				m_allGameObjects;
+	GameObjectList				m_allGameObjects[ NUM_GAME_OBJECT_TYPES ];
 
 	// Battle Specific
 	double						m_timeSinceStartOfTheBattle	= 0;
@@ -48,7 +48,7 @@ public:
 
 public:
 	// Add to Battle
-	void	AddBulletToQueue( Bullet &newBullet );
+	void	AddNewGameObject( GameObject &newGO );
 
 private:
 	double	GetTimeSinceBattleStarted() const;

@@ -13,7 +13,8 @@
 #include "Game/theGame.hpp"
 
 Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, Camera* attachedCamera )
-	: m_parentTerrain( isInTerrain )
+	: GameObject( GAME_OBJECT_TANK )
+	, m_parentTerrain( isInTerrain )
 	, m_isControlledByXbox( isPlayer )
 	, m_attachedCamera( attachedCamera )
 {
@@ -104,6 +105,12 @@ void Tank::Update( float deltaSeconds )
 	ShootBullets( deltaSeconds );
 }
 
+void Tank::AddRenderablesToScene( Scene &activeScene )
+{
+	activeScene.AddRenderable( *m_renderable );
+	activeScene.AddRenderable( *m_turret->m_barrelRenderable );
+}
+
 void Tank::ShootBullets( float deltaSeconds )
 {
 	m_timeElapsedSinceLastFire += deltaSeconds;
@@ -121,7 +128,7 @@ void Tank::ShootBullets( float deltaSeconds )
 	Bullet *aBullet = m_turret->CreateANewBullet();
 
 	// Add it to battle's queue
-	g_theGame->m_currentBattle->AddBulletToQueue( *aBullet );
+	g_theGame->m_currentBattle->AddNewGameObject( *aBullet );
 
 	// Reset Time Elapsed
 	m_timeElapsedSinceLastFire = 0.f;
