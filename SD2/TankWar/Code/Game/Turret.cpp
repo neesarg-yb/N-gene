@@ -5,14 +5,14 @@
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
-#define TANK_HALF_LENGTH 0.7f
+#define TANK_HALF_LENGTH 0.5f
 
 Turret::Turret( Tank &parentTank )
 	: m_parentTank( parentTank )
 {
 	// Head Sphere
 	m_headTransform.SetParentAs( &m_parentTank.m_transform );
-	m_headTransform.SetPosition( Vector3( 2.f, m_parentTank.m_height * 2.f, TANK_HALF_LENGTH ) );		// m_parentTank.m_height * "2.f" because Renderable of Tank has Y-Offset equal to m_height, already
+	m_headTransform.SetPosition( Vector3( 0.f, m_parentTank.m_height * 2.f, TANK_HALF_LENGTH ) );		// m_parentTank.m_height * "2.f" because Renderable of Tank has Y-Offset equal to m_height, already
 	// Renderable
 	m_barrelRenderable	= new Renderable();
 	MeshBuilder turretMB;
@@ -55,8 +55,7 @@ void Turret::LookAtPosition( Vector3 targetPosInWorldSpace, float deltaSeconds )
 	turrateBasesInTankSpace.Append( worldToTankMat );
 	turrateBasesInTankSpace.Append( worldLookAtMat );
 	// Ignore translation if there are any
-	turrateBasesInTankSpace.SetTColumn( Vector3::ZERO );
+	turrateBasesInTankSpace.SetTColumn( m_headTransform.GetPosition() );
 
 	m_headTransform.SetFromMatrix( turrateBasesInTankSpace );
-	m_headTransform.SetPosition( Vector3( 0.f, m_parentTank.m_height * 2.f, TANK_HALF_LENGTH ) );
 }
