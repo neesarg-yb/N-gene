@@ -10,6 +10,36 @@ Material::Material( Shader &shader )
 	AddShader( shader );
 }
 
+Material::Material( Material const &copy )
+{
+	m_id					= copy.m_id;
+
+	// Shallow Copy
+	m_samplerBindingPairs	= copy.m_samplerBindingPairs;
+	m_textureBindingPairs	= copy.m_textureBindingPairs;
+
+	// Deep Copy of Properties
+	std::vector< ShaderAndMatDefaultsTuple > shaderGroup;
+	// For each tuple member
+	for each (ShaderAndMatDefaultsTuple thisShaderMatT in copy.m_shaderGroup)
+	{
+		Shader*					sharedShader = std::get<0>( thisShaderMatT );
+		MaterialPropertyList	deepCopiedMatProperties;
+		// For each Material Properties this tuple have
+		for each (MaterialProperty* thisMatProperty in std::get<1>( thisShaderMatT ) )
+		{
+			MaterialProperty* clonedMatProperty = thisMatProperty->Clone();
+			deepCopiedMatProperties.push_back( clonedMatProperty );
+		}
+		
+		// Push back the newly made tuple
+		ShaderAndMatDefaultsTuple customCopiedTuple = std::make_tuple( sharedShader, deepCopiedMatProperties );
+		shaderGroup.push_back( customCopiedTuple );
+	}
+
+	m_shaderGroup = shaderGroup;
+}
+
 Material::~Material()
 {
 	// Delete all the MaterialPropertie(s)
@@ -247,12 +277,11 @@ void Material::LoadTheShaderGroup( XMLElement const &shaderGroupElement, Rendere
 		// Get default material XMLElement
 		XMLElement const *defaultMaterialDataElement = shaderRoot->FirstChildElement( "material" );
 
-		// Return if there are no defaults defined in XML file
-		if( defaultMaterialDataElement == nullptr )
-			return;
-
 		// Fetch all the default textures
-		FetchAllTextureBindingPairsTo( defaultTexturePairs, *defaultMaterialDataElement );
+		if( defaultMaterialDataElement != nullptr )
+		{
+			FetchAllTextureBindingPairsTo( defaultTexturePairs, *defaultMaterialDataElement );
+		}
 
 		/////////////////////////////////////////
 		// Set the Shader & Default Properties //
@@ -262,7 +291,11 @@ void Material::LoadTheShaderGroup( XMLElement const &shaderGroupElement, Rendere
 		m_shaderGroup.push_back( newShaderTuple );
 
 		uint currentShaderIdx = (uint) m_shaderGroup.size() - 1U;
-		SetAllMaterialPropertiesFromXML( *defaultMaterialDataElement, currentShaderIdx );
+		// Set all the default properties
+		if( defaultMaterialDataElement != nullptr )
+		{
+			SetAllMaterialPropertiesFromXML( *defaultMaterialDataElement, currentShaderIdx );		
+		}
 	}
 
 	// Set default textures

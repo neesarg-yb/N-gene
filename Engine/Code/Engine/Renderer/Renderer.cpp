@@ -18,7 +18,6 @@ Sampler*	Renderer::s_defaultNearestSampler	= nullptr;
 Sampler*	Renderer::s_defaultLinearSampler	= nullptr;
 Texture*	Renderer::s_defaultColorTarget		= nullptr;
 Texture*	Renderer::s_defaultDepthTarget		= nullptr;
-Texture*	Renderer::s_defaultPickTarget		= nullptr;
 Camera*		Renderer::s_default_camera			= nullptr;
 Camera*		Renderer::s_current_camera			= nullptr;
 
@@ -124,7 +123,6 @@ void Renderer::PostStartup()
 	// create our output textures
 	s_defaultColorTarget = CreateRenderTarget( window_width, window_height );
 	s_defaultDepthTarget = CreateRenderTarget( window_width, window_height, TEXTURE_FORMAT_D24S8 );
-	s_defaultPickTarget  = CreateRenderTarget( window_width, window_height );
 
 	// setup the default camera
 	s_default_camera = new Camera();
@@ -351,6 +349,13 @@ void Renderer::SetUniform( char const *name, Matrix44 const &mat44 )
 		glUniformMatrix4fv( mat_loc, 1, GL_FALSE, (GLfloat*)&mat44 );
 }
 
+void Renderer::SetUniform( char const *name, uint unsignedInt )
+{
+	GLint float_loc = glGetUniformLocation( m_currentShader->m_program->GetHandle(), name );
+	if (float_loc >= 0)
+		glUniform1uiv( float_loc, 1, &unsignedInt );
+}
+
 void Renderer::UpdateTime( float gameDeltaSeconds, float systemDeltaSeconds )
 {
 	UBOTimeData *timeUBO = m_timeUBO->As< UBOTimeData >();
@@ -524,6 +529,7 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glBlendEquationSeparate );
 	GL_BIND_FUNCTION( glBlendFuncSeparate );
 
+	GL_BIND_FUNCTION( glUniform1uiv );
 	GL_BIND_FUNCTION( glUniform1fv );
 	GL_BIND_FUNCTION( glUniform2fv );
 	GL_BIND_FUNCTION( glUniform3fv );
@@ -535,6 +541,7 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glDeleteTextures );
 	GL_BIND_FUNCTION( glTexStorage2D );
 	GL_BIND_FUNCTION( glTexSubImage2D );
+	GL_BIND_FUNCTION( glReadPixels );
 }	
 	
 //------------------------------------------------------------------------
@@ -1407,11 +1414,6 @@ Sampler const* Renderer::GetDefaultSampler( eSamplerType type /* = SAMPLER_NEARE
 Texture* Renderer::GetDefaultColorTarget()
 {
 	return s_defaultColorTarget;
-}
-
-Texture* Renderer::GetDefaultPickTarget()
-{
-	return s_defaultPickTarget;
 }
 
 Texture* Renderer::GetDefaultDepthTarget()

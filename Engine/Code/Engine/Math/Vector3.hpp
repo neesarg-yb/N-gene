@@ -1,6 +1,7 @@
 #pragma once
 
 class Vector2;
+class IntVector3;
 
 class Vector3
 {
@@ -13,6 +14,7 @@ public:
 
 public:
 			  Vector3() {};
+			  Vector3( const IntVector3 &copyFrom );
 			  Vector3( const Vector3& copyFrom );			
 	 explicit Vector3( float initialX, float initialY, float initialZ );		
 			 ~Vector3() {};

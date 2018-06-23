@@ -102,6 +102,7 @@ PFNGLFRONTFACEPROC						glFrontFace					= nullptr;
 PFNGLBLENDEQUATIONSEPARATEPROC			glBlendEquationSeparate		= nullptr;
 PFNGLBLENDFUNCSEPARATEPROC				glBlendFuncSeparate			= nullptr;
 
+PFNGLUNIFORM1UIVPROC					glUniform1uiv				= nullptr;
 PFNGLUNIFORM1FVPROC						glUniform1fv				= nullptr;
 PFNGLUNIFORM2FVPROC						glUniform2fv				= nullptr;
 PFNGLUNIFORM3FVPROC						glUniform3fv				= nullptr;
@@ -113,3 +114,4 @@ PFNGLBINDBUFFERBASEPROC					glBindBufferBase			= nullptr;
 PFNGLDELETETEXTURESPROC					glDeleteTextures			= nullptr;
 PFNGLTEXSTORAGE2DPROC					glTexStorage2D				= nullptr;
 PFNGLTEXSUBIMAGE2DPROC					glTexSubImage2D				= nullptr;
+PFNGLREADPIXELSPROC						glReadPixels				= nullptr;

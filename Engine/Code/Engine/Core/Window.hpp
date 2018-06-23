@@ -1,9 +1,10 @@
 #pragma once
-
 #include <vector>
 #include "Engine/Core/EngineCommon.hpp"
 
 typedef bool (*windows_message_handler_cb)( unsigned int msg, size_t wparam, size_t lparam ); 
+
+class IntVector2;
 
 class Window
 {
@@ -19,6 +20,7 @@ public:
 	
 	unsigned int	GetWidth () const;
 	unsigned int	GetHeight() const;
+	IntVector2		GetDimensions() const;
 
 public:
 	void*	m_hwnd; 

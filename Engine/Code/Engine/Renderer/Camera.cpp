@@ -52,7 +52,7 @@ void Camera::UpdateUBO()
 	m_viewMatrix = m_cameraTransform.GetWorldTransformMatrix().GetOrthonormalInverse();
 
 	*m_cameraUBO->As<UBOCameraMatrices>() = GetUBOCameraMatrices();
-	m_cameraUBO->UpdateGPU();
+	 m_cameraUBO->UpdateGPU();
 }
 
 unsigned int Camera::GetFrameBufferHandle() const
@@ -128,6 +128,13 @@ void Camera::IncrementCameraSizeBy( float sizeIncrement )
 void Camera::SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspectRatio, float nearZ, float farZ )
 {
 	m_projMatrix = Matrix44::MakePerspective3D( fovDegrees, aspectRatio, nearZ, farZ );
+}
+
+void Camera::CopyTransformViewAndProjection( Camera const &referenceCamera )
+{
+	m_cameraTransform	= referenceCamera.m_cameraTransform;
+	m_projMatrix		= referenceCamera.m_projMatrix;
+	m_viewMatrix		= referenceCamera.m_viewMatrix;
 }
 
 void Camera::SetCameraPositionTo( Vector3 const &newPosition )
