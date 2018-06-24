@@ -114,6 +114,10 @@ void Battle::Startup()
 	m_playerTank = new Tank( Vector2::ZERO, *m_terrain, true, s_camera );
 	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
 	AddNewGameObject( *m_playerTank );
+
+	// TESTING THE ENEMY
+	Enemy* testEnemy = new Enemy( Vector2::ONE_ONE, *m_terrain );
+	AddNewGameObject( *testEnemy );
 }
 
 void Battle::BeginFrame()

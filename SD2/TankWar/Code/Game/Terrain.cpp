@@ -45,7 +45,7 @@ void Terrain::AddRenderablesToScene( Scene &activeScene )
 		activeScene.AddRenderable( *m_chunks[i] );
 }
 
-float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition )
+float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ )
 {
 	// Note: myXZPosition is in World Space
 	// You'll get corner's position in Terrain Space by passing corresponding local XZCoord
@@ -79,14 +79,14 @@ float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition )
 
 	float	heightBottom	= Interpolate( bottomLeft.y,	bottomRight.y,	xzFraction.x );
 	float	heightTop		= Interpolate( topLeft.y,		topRight.y,		xzFraction.x );
-	float	myHeight		= Interpolate( heightBottom,	heightTop,		xzFraction.y );
+	float	myHeight			= Interpolate( heightBottom,	heightTop,		xzFraction.y );
 
-	return myHeight;
+	return myHeight + yOffset;
 }
 
-Vector3 Terrain::Get3DCoordinateForMyPositionAt( Vector2 myXZPosition )
+Vector3 Terrain::Get3DCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ )
 {
-	float yCoord = GetYCoordinateForMyPositionAt( myXZPosition );
+	float yCoord = GetYCoordinateForMyPositionAt( myXZPosition, yOffset );
 
 	return Vector3( myXZPosition.x, yCoord, myXZPosition.y );
 }

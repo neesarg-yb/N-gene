@@ -48,8 +48,8 @@ public:
 	void			AddRenderablesToScene( Scene &activeScene );
 
 	// Fetching the Position
-	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition );
-	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition );
+	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f );
+	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f );
 	Matrix44		GetModelMatrixForMyPositionAt	( Vector2 myXZPosition, Vector2 uvForwardDirection, Vector2 uvRightDirection );
 
 	// Raycast

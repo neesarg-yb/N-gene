@@ -10,6 +10,7 @@
 #include "Game/Tank.hpp"
 #include "Game/Terrain.hpp"
 #include "Game/Bullet.hpp"
+#include "Game/Enemy.hpp"
 
 class Material;
 

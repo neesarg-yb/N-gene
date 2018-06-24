@@ -46,6 +46,9 @@
     <ClCompile Include="Bullet.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -76,6 +79,9 @@
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="Bullet.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.hpp">
       <Filter>General</Filter>
     </ClInclude>
   </ItemGroup>
