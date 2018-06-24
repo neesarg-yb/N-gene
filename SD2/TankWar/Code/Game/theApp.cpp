@@ -51,7 +51,7 @@ void theApp::RunFrame() {
 }
 
 void theApp::BeginFrame() {
-	
+	g_theAudioSystem->BeginFrame();
 	g_theInput->BeginFrame();
 	g_theRenderer->BeginFrame();
 	g_theGame->BeginFrame();
@@ -61,6 +61,7 @@ void theApp::EndFrame() {
 	g_theGame->EndFrame();
 	g_theRenderer->EndFrame();
 	g_theInput->EndFrame();
+	g_theAudioSystem->EndFrame();
 }
 
 void theApp::Update() {
