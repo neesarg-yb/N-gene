@@ -158,7 +158,12 @@ float Vector2::NormalizeAndGetLength() {
 	return lengthOfThis;
 }
 
-void Vector2::RotateByDegrees( float degrees )
+void Vector2::RotateByDegreesClockwise( float degrees )
+{
+	RotateByDegreesAntiClockwise( -degrees );
+}
+
+void Vector2::RotateByDegreesAntiClockwise( float degrees )
 {
 	float vLength	= GetLength();
 	float vAngle	= GetOrientationDegrees();
