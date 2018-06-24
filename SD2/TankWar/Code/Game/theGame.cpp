@@ -48,6 +48,14 @@ void theGame::Startup()
 	m_attractMenu->AddNewMenuAction( MenuAction( "Start", &startStdFunc ) );
 	m_attractMenu->m_selectionIndex = 1;
 
+	// Load All Sounds
+	m_attractMusic				= g_theAudioSystem->CreateOrGetSound( "Data/Audio/AttractMusic.mp3" );
+	m_anticipateMusic			= g_theAudioSystem->CreateOrGetSound( "Data/Audio/Anticipation.mp3" );
+	m_battleBackgroundMusic		= g_theAudioSystem->CreateOrGetSound( "Data/Audio/GameplayMusic.mp3" );
+
+	// Start playing attract sound
+	m_attractPlayback = g_theAudioSystem->PlaySound( m_attractMusic, true, 0.5f );
+
 	// Call Startup for other classes
 	m_currentBattle->Startup();
 }
@@ -154,6 +162,30 @@ void theGame::StartTransitionToState( GameStates nextGameState )
 
 	// Reset appropriate variables for the transitionEffect..
 	m_timeSinceTransitionBegan = 0;
+
+	// Audio Playback
+	g_theAudioSystem->StopSound( m_attractPlayback );
+	g_theAudioSystem->StopSound( m_anticipatePlayback );
+	g_theAudioSystem->StopSound( m_battleBackgroundPlayback );
+
+	switch (nextGameState)
+	{
+	case NONE:
+		break;
+	case ATTRACT:
+		m_attractPlayback = g_theAudioSystem->PlaySound( m_attractMusic, true, 0.5f );
+		break;
+	case MENU:
+		m_anticipatePlayback = g_theAudioSystem->PlaySound( m_anticipateMusic, false, 0.5f );
+		break;
+	case BATTLE:
+		m_battleBackgroundPlayback = g_theAudioSystem->PlaySound( m_battleBackgroundMusic, true, 0.5f, 1.f );
+		break;
+	case NUM_GAME_STATES:
+		break;
+	default:
+		break;
+	}
 }
 
 void theGame::ConfirmTransitionToNextState()

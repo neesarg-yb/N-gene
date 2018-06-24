@@ -48,6 +48,14 @@ private:
 	GameStates		m_currentGameState			=	ATTRACT;
 	GameStates		m_nextGameState				=	NONE;
 
+	// Audio
+	SoundID			m_attractMusic;
+	SoundID			m_anticipateMusic;
+	SoundID			m_battleBackgroundMusic;
+	SoundPlaybackID	m_attractPlayback;
+	SoundPlaybackID	m_anticipatePlayback;
+	SoundPlaybackID	m_battleBackgroundPlayback;
+
 	// Menu Specific
 	UIMenu*								 m_attractMenu	= nullptr;
 	std::function< void( const char* ) > quitStdFunc	= std::bind( &theGame::QuitGame,	  this, std::placeholders::_1 );
