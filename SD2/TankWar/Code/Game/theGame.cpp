@@ -53,6 +53,9 @@ void theGame::Startup()
 	m_anticipateMusic			= g_theAudioSystem->CreateOrGetSound( "Data/Audio/Anticipation.mp3" );
 	m_battleBackgroundMusic		= g_theAudioSystem->CreateOrGetSound( "Data/Audio/GameplayMusic.mp3" );
 
+	// Audio Group
+	g_theAudioSystem->LoadAudioGroupFromFile( "Data/Audio/Gun_Pistol_Shot.audiogroup" );
+
 	// Start playing attract sound
 	m_attractPlayback = g_theAudioSystem->PlaySound( m_attractMusic, true, 0.5f );
 
@@ -224,6 +227,8 @@ void theGame::Update_Menu( float deltaSeconds )
 
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		StartTransitionToState( ATTRACT );
+	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_START ].keyJustPressed )
+		StartTransitionToState( ATTRACT );
 	if( g_theInput->WasKeyJustPressed( VK_Codes::SPACE ) )
 		StartTransitionToState( BATTLE );
 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed )
@@ -244,6 +249,8 @@ void theGame::Render_Menu() const
 void theGame::Update_Battle( float deltaSeconds )
 {
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
+		StartTransitionToState( MENU );
+	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_START ].keyJustPressed )
 		StartTransitionToState( MENU );
 
 	m_currentBattle->Update( deltaSeconds );

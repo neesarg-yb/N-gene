@@ -130,6 +130,9 @@ void Tank::ShootBullets( float deltaSeconds )
 	// Add it to battle's queue
 	g_theGame->m_currentBattle->AddNewGameObject( *aBullet );
 
+	// Play sound
+	g_theAudioSystem->PlayOneSoundFromAudioGroup( "Gun_Pistol_Shot", 0.25f );
+
 	// Reset Time Elapsed
 	m_timeElapsedSinceLastFire = 0.f;
 }

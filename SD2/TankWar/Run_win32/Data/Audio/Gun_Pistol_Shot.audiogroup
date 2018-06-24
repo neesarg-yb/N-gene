@@ -1,0 +1,7 @@
+<audiogroup name="Gun_Pistol_Shot">
+	<sound path="Data/Audio/Gun_Pistol_Shot01.wav"/>
+	<sound path="Data/Audio/Gun_Pistol_Shot02.wav"/>
+	<sound path="Data/Audio/Gun_Pistol_Shot03.wav"/>
+	<sound path="Data/Audio/Gun_Pistol_Shot04.wav"/>
+	<sound path="Data/Audio/Gun_Pistol_Shot05.wav"/>
+</audiogroup>
