@@ -2,6 +2,10 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Math/MathUtil.hpp"
+#include "Engine/Core/XMLUtilities.hpp"
+
+using namespace tinyxml2;
 
 //-----------------------------------------------------------------------------------------------
 // To disable audio entirely (and remove requirement for fmod.dll / fmod64.dll) for any game,
@@ -37,6 +41,8 @@ AudioSystem::AudioSystem()
 
 	result = m_fmodSystem->init( 512, FMOD_INIT_NORMAL, nullptr );
 	ValidateResult( result );
+
+	NewSeedForRandom();
 }
 
 
@@ -189,6 +195,73 @@ void AudioSystem::SetSoundPlaybackSpeed( SoundPlaybackID soundPlaybackID, float 
 	channelAssignedToSound->setFrequency( frequency * speed );
 }
 
+
+void AudioSystem::LoadAudioGroupFromFile( std::string xmlFilePath )
+{
+	// Load XML
+	XMLDocument audiogroupDoc;
+	audiogroupDoc.LoadFile( xmlFilePath.c_str() );
+	XMLElement* const xmlRoot = audiogroupDoc.RootElement();
+	std::string rootName = xmlRoot->Name();
+	GUARANTEE_RECOVERABLE( xmlRoot != nullptr, "Error: Could not load the XML audiogroup file!!" );
+	GUARANTEE_RECOVERABLE( rootName == "audiogroup", "Error: Root element should be named \"audiogroup\"..!" );
+
+	// Create an audiogroup
+	std::string audioGroupName = ParseXmlAttribute( *xmlRoot, "name", "" );
+	GUARANTEE_OR_DIE( audioGroupName != "", "Error: audiogroup name can't be empty!!" );
+	for( XMLElement const	*soundElement  = xmlRoot->FirstChildElement( "sound" ); 
+							 soundElement != nullptr;
+							 soundElement  = soundElement->NextSiblingElement( "sound" ) )
+	{
+		// Fetch each sounds
+		std::string filePath = ParseXmlAttribute( *soundElement, "path", "" );
+		
+		// Make sure it's a valid filePath
+		GUARANTEE_RECOVERABLE( filePath != "", "Error: Path of a sound can't be empty!!" );
+		if( filePath == "" )
+			continue;
+
+		// Add it to audiogroup
+		AddSoundToAudioGroupNamed( audioGroupName, filePath );
+	}
+}
+
+void AudioSystem::AddSoundToAudioGroupNamed( std::string audioGroupName, std::string soundFilePath )
+{
+	SoundID soundToAdd = CreateOrGetSound( soundFilePath );
+
+	// If couldn't find the sound
+	if( soundToAdd == MISSING_SOUND_ID )
+	{
+		std::string soundNotFoundStr = Stringf( "Error: Sound at \"%s\" not found!", soundFilePath.c_str() );
+		GUARANTEE_RECOVERABLE( false, soundNotFoundStr.c_str() );
+		return;
+	}
+
+	// If sound already exists..
+	for each (SoundID soundsInGroup in m_audioGroups[audioGroupName])
+	{
+		if( soundToAdd == soundsInGroup )
+			return;
+	}
+
+	// Add sound to the AudioGroup
+	m_audioGroups[ audioGroupName ].push_back( soundToAdd );
+}
+
+void AudioSystem::PlayOneSoundFromAudioGroup( std::string audioGroupName, float volume /* = 1.f */, float balance /* = 0.f */, float speed /* = 1.f */ )
+{
+	size_t groupSize = m_audioGroups[ audioGroupName ].size();
+
+	// If audio group is empty, return
+	if( groupSize == 0 )
+		return;
+
+	// Play once Clip
+	int randomIdx	= GetRandomIntInRange( 0, (int)groupSize - 1 );
+	SoundID sID		= m_audioGroups[ audioGroupName ].at( randomIdx );
+	PlaySound( sID, false, volume, balance, speed );
+}
 
 //-----------------------------------------------------------------------------------------------
 void AudioSystem::ValidateResult( FMOD_RESULT result )
