@@ -8,6 +8,7 @@ theApp*			g_theApp				= nullptr;
 theGame*		g_theGame				= nullptr;
 Renderer*		g_theRenderer			= nullptr;
 InputSystem*	g_theInput				= nullptr;
+AudioSystem*	g_theAudioSystem		= nullptr;
 /*
 AudioSystem* g_theAudio = nullptr;
 */

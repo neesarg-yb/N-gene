@@ -3,14 +3,16 @@
 #include "Engine/Math/IntRange.hpp"
 #include "Engine/Math/FloatRange.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Audio/AudioSystem.hpp"
 
 void QuitTheApp( Command& cmd );
 
 theApp::theApp()
 {
-	g_theRenderer	= new Renderer();
-	g_theGame		= new theGame();
-	g_theInput		= new InputSystem();
+	g_theRenderer		= new Renderer();
+	g_theGame			= new theGame();
+	g_theInput			= new InputSystem();
+	g_theAudioSystem	= new AudioSystem();
 
 	DevConsole::InitalizeSingleton( *g_theRenderer );
 	Window::GetInstance()->AddMessageHandler( DevConsole::ConsoleMessageHandler );
@@ -19,6 +21,9 @@ theApp::theApp()
 theApp::~theApp()
 {
 	DevConsole::DestroySingleton();
+
+	delete g_theAudioSystem;
+	g_theAudioSystem = nullptr;
 
 	delete g_theInput;
 	g_theInput = nullptr;
@@ -46,6 +51,7 @@ void theApp::RunFrame() {
 }
 
 void theApp::BeginFrame() {
+	
 	g_theInput->BeginFrame();
 	g_theRenderer->BeginFrame();
 	g_theGame->BeginFrame();
