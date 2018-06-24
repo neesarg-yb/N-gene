@@ -115,9 +115,9 @@ void Battle::Startup()
 	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
 	AddNewGameObject( *m_playerTank );
 
-	// TESTING THE ENEMY
-	Enemy* testEnemy = new Enemy( Vector2( 50.f, 100.f ), *m_terrain );
-	AddNewGameObject( *testEnemy );
+	// TESTING THE ENEMY BASE
+	EnemyBase* testEnemyBase = new EnemyBase( Vector2( 30.f, 50.f ), *m_terrain, 10, 0.65f, 20.f );
+	AddNewGameObject( *testEnemyBase );
 }
 
 void Battle::BeginFrame()

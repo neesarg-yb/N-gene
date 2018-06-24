@@ -1,11 +1,13 @@
 #pragma once
 #include "Enemy.hpp"
 #include "Game/Terrain.hpp"
+#include "Game/EnemyBase.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Scene.hpp"
 
-Enemy::Enemy( Vector2 const &spawnPosition, Terrain &isInTerrain )
+Enemy::Enemy( Vector2 const &spawnPosition, Terrain &isInTerrain, EnemyBase &parentBase )
 	: GameObject( GAME_OBJECT_ENEMY )
+	, m_parentBase( parentBase )
 	, m_paerntTerrain( isInTerrain )
 	, m_currentPositionXZ( spawnPosition )
 {
@@ -31,11 +33,17 @@ Enemy::Enemy( Vector2 const &spawnPosition, Terrain &isInTerrain )
 	// Set Material
 	Material* material = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 	m_renderable->SetBaseMaterial( material );
+
+	// Tell parent, I AM BORN!
+	m_parentBase.IncreaseChildCount();
 }
 
 Enemy::~Enemy()
 {
+	// Tell parent, I'M ABOUT TO DIE..! :(
+	m_parentBase.ReduceChildCount();
 
+	delete m_renderable;
 }
 
 void Enemy::Update( float deltaSeconds )

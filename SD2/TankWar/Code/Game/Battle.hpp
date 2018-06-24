@@ -11,6 +11,7 @@
 #include "Game/Terrain.hpp"
 #include "Game/Bullet.hpp"
 #include "Game/Enemy.hpp"
+#include "Game/EnemyBase.hpp"
 
 class Material;
 

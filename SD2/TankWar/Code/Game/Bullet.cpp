@@ -23,7 +23,7 @@ Bullet::Bullet( Vector3 const &spawnPosition, Vector3 const &velocity )
 
 Bullet::~Bullet()
 {
-
+	delete m_renderable;
 }
 
 void Bullet::Update( float deltaSeconds )
