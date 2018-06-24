@@ -10,7 +10,7 @@ public:
 
 public:
 	Vector3		m_velocity		= Vector3::ZERO;	// per second
-	float		m_bulletSpeed	= 20.f;	// units per seconds
+	float		m_bulletSpeed	= 25.f;				// units per seconds
 
 public:
 	void Update( float deltaSeconds );

@@ -150,8 +150,8 @@ void Tank::HandleInput( float deltaSeconds )
 	float	xRotation			 = rightStickNormalized.y * m_rotationSpeed * deltaSeconds;
 
 	// Set Forward & Right directions
-	m_xzRight.RotateByDegrees( -yRotation );
-	m_xzForward.RotateByDegrees( -yRotation );
+	m_xzRight.RotateByDegreesClockwise( yRotation );
+	m_xzForward.RotateByDegreesClockwise( yRotation );
 
 	// Move Forward
 	Vector2 translationXZ		 = leftStickNormalized * m_speed * deltaSeconds;

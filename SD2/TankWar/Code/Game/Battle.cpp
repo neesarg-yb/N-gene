@@ -116,7 +116,7 @@ void Battle::Startup()
 	AddNewGameObject( *m_playerTank );
 
 	// TESTING THE ENEMY
-	Enemy* testEnemy = new Enemy( Vector2::ONE_ONE, *m_terrain );
+	Enemy* testEnemy = new Enemy( Vector2( 50.f, 100.f ), *m_terrain );
 	AddNewGameObject( *testEnemy );
 }
 

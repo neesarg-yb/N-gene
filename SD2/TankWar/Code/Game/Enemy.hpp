@@ -15,7 +15,7 @@ public:
 	Terrain		&m_paerntTerrain;
 
 	float		 m_radius				= 1.f;
-	float		 m_speed				= 12.f;				// units per seconds
+	float		 m_speed				= 8.f;				// units per seconds
 	float		 m_rotationSpeed		= 35.f;				// degrees per seconds
 
 public:

@@ -41,9 +41,14 @@ Enemy::~Enemy()
 void Enemy::Update( float deltaSeconds )
 {
 	// Rotation Test
-	m_forwardDiractionXZ.RotateByDegrees( m_rotationSpeed * deltaSeconds );
+	m_forwardDiractionXZ.RotateByDegreesClockwise( m_rotationSpeed * deltaSeconds );
 	Vector3 rotation = Get3DRotation( m_forwardDiractionXZ );
 	m_transform.SetRotation( rotation );
+
+	// Move Forward
+	m_currentPositionXZ		= m_currentPositionXZ + ( m_forwardDiractionXZ * ( m_speed * deltaSeconds ) );
+	Vector3 xyzPos			= m_paerntTerrain.Get3DCoordinateForMyPositionAt( m_currentPositionXZ, m_radius );
+	m_transform.SetPosition( xyzPos );
 }
 
 void Enemy::AddRenderablesToScene( Scene &activeScene )
@@ -53,7 +58,7 @@ void Enemy::AddRenderablesToScene( Scene &activeScene )
 
 Vector3 Enemy::Get3DRotation( Vector2 xzForwardDirection )
 {
-	float orientationInDegreesFromXAxis = xzForwardDirection.GetOrientationDegrees();
+	float orientationInDegreesFromXAxis = -1.f * xzForwardDirection.GetOrientationDegrees();	// Get Orientation considers clockwise rotation negative
 	float orientationInDegreesFromZAxis = orientationInDegreesFromXAxis + 90.f;
 
 	return Vector3( 0.f, orientationInDegreesFromZAxis, 0.f );
