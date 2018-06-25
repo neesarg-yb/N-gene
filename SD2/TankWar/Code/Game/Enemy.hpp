@@ -27,6 +27,7 @@ public:
 	void	AddToVelocity	( Vector2 const &velToAdd );
 	void	SeekTowards		( Vector2 const &targetPos, float weight );
 	void	SeparateFromOtherEnemies( float separationDistance, float weight );
+	void	AlignWithOtherEnemies	( float flockRadius,		float weight );
 
 private:
 	Vector3 Get3DRotation( Vector2 xzForwardDirection );			// Gives Euler y-axis rotation for transform from forward direction vec2 in XZ-Plane

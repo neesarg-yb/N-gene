@@ -77,6 +77,9 @@ void Enemy::Update( float deltaSeconds )
 
 	// Separate
 	SeparateFromOtherEnemies( m_radius * 2.f, 1.f );
+
+	// Align
+	AlignWithOtherEnemies( 30.f, 1.f );
 }
 
 void Enemy::AddRenderablesToScene( Scene &activeScene )
@@ -128,6 +131,33 @@ void Enemy::SeparateFromOtherEnemies( float separationDistance, float weight )
 
 	// Add it to our velocity
 	AddToVelocity( separationTotalVelocity * weight );
+}
+
+void Enemy::AlignWithOtherEnemies( float flockRadius, float weight )
+{
+	// Get all other enemies in the battle
+	EnemyList &enemiesInBattle = *(EnemyList*)( &g_theGame->m_currentBattle->m_allGameObjects[ m_type ] );
+
+	// To get average velocity for alignment
+	int		countForAverage		= 0;
+	Vector2 sumOfAllVelocities	= Vector2::ZERO;
+	for each (Enemy* enemy in enemiesInBattle)
+	{
+		float dist = (enemy->m_currentPositionXZ - m_currentPositionXZ).GetLength();
+
+		// count only if other enemy is close enough to considered in a flock
+		if( dist <= flockRadius )
+		{
+			sumOfAllVelocities += enemy->m_currentVelocityXZ;
+			countForAverage++;
+		}
+	}
+
+	// Calculate the average
+	Vector2 avgVelocity	= sumOfAllVelocities / countForAverage;
+
+	// Add it to out velocity
+	AddToVelocity( avgVelocity * weight );
 }
 
 Vector3 Enemy::Get3DRotation( Vector2 xzForwardDirection )
