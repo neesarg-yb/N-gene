@@ -6,6 +6,8 @@
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Scene.hpp"
 
+typedef std::vector< Enemy* > EnemyList;
+
 Enemy::Enemy( Vector2 const &spawnPosition, Terrain &isInTerrain, EnemyBase &parentBase )
 	: GameObject( GAME_OBJECT_ENEMY )
 	, m_parentBase( parentBase )
@@ -48,9 +50,9 @@ Enemy::~Enemy()
 
 void Enemy::Update( float deltaSeconds )
 {
-	//////////////////////
-	//  PHYSICS UPDATE  //
-	//////////////////////
+	///////////////////////
+	//  MOVEMENT UPDATE  //
+	///////////////////////
 
 	// Normalize current velocity
 	m_currentVelocityXZ	= m_currentVelocityXZ.GetNormalized();
@@ -71,7 +73,10 @@ void Enemy::Update( float deltaSeconds )
 
 	// Move Towards player
 	Vector2 playerPosXZ	= g_theGame->m_currentBattle->m_playerTank->m_xzPosition;
-	SeekTowards( playerPosXZ );
+	SeekTowards( playerPosXZ, 1.f );
+
+	// Separate
+	SeparateFromOtherEnemies( m_radius * 2.f, 1.f );
 }
 
 void Enemy::AddRenderablesToScene( Scene &activeScene )
@@ -84,12 +89,45 @@ void Enemy::AddToVelocity( Vector2 const &velToAdd )
 	m_currentVelocityXZ += velToAdd;
 }
 
-void Enemy::SeekTowards( Vector2 const &targetPos )
+void Enemy::SeekTowards( Vector2 const &targetPos, float weight )
 {
-	Vector2 desiredVelocity		= (targetPos - m_currentPositionXZ).GetNormalized();
+	Vector2 towardsTarget		= targetPos - m_currentPositionXZ;
+	Vector2 desiredVelocity		= towardsTarget.GetNormalized();
 	Vector2 steeringVelocity	= desiredVelocity - m_currentVelocityXZ;						// Note: Assumes that m_currentVelocityXZ is already NORMALIZED
+	
+	AddToVelocity( steeringVelocity * weight );
+}
 
-	AddToVelocity( steeringVelocity );
+void Enemy::SeparateFromOtherEnemies( float separationDistance, float weight )
+{
+	// Get all other enemies in the battle
+	EnemyList &enemiesInBattle = *(EnemyList*)( &g_theGame->m_currentBattle->m_allGameObjects[ m_type ] );
+
+	// Get cumulative separation desired velocity
+	Vector2 separationTotalVelocity = Vector2::ZERO;
+	for each (Enemy* otherEnemy in enemiesInBattle)
+	{
+		// Ignore yourself from the list
+		if( otherEnemy == this )
+			continue;
+
+		// get the desired velocity to flee away from otherEnemy
+		Vector2 desiredVelocity  = m_currentPositionXZ - otherEnemy->m_currentPositionXZ;
+		float	distBetweenTwo	 = desiredVelocity.GetLength();
+		desiredVelocity			 = desiredVelocity.GetNormalized();
+		desiredVelocity			 = desiredVelocity / distBetweenTwo;								// So enemies which are closer have more effect on separation behavior
+		
+		// Apply only if distance is less than desired separation
+		if( distBetweenTwo > 0.f && distBetweenTwo < separationDistance )
+			separationTotalVelocity += desiredVelocity;
+	}
+
+	// Normalize it
+	if( separationTotalVelocity != Vector2::ZERO )
+		separationTotalVelocity	 = separationTotalVelocity.GetNormalized();
+
+	// Add it to our velocity
+	AddToVelocity( separationTotalVelocity * weight );
 }
 
 Vector3 Enemy::Get3DRotation( Vector2 xzForwardDirection )

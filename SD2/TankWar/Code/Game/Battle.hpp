@@ -35,14 +35,14 @@ private:
 	static Scene*				s_battleScene;
 	Vector4						m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.6f );
 	ForwardRenderingPath*		m_renderingPath					= nullptr;
-	
-	GameObjectList				m_allGameObjects[ NUM_GAME_OBJECT_TYPES ];
 
 public:
 	// Battle Specific
 	double						m_timeSinceStartOfTheBattle	= 0;
 	Terrain*					m_terrain						= nullptr;
 	Tank*						m_playerTank					= nullptr;
+
+	GameObjectList				m_allGameObjects[ NUM_GAME_OBJECT_TYPES ];
 
 public:
 	// Lights
