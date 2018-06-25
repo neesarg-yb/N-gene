@@ -141,12 +141,10 @@ void Battle::Update( float deltaSeconds )
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		s_lightSources[i]->Update( deltaSeconds );
 
-
-	// For each type
-	for ( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )
+	// Update: GameObjects
+	for ( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )				// For each type
 	{
-		// For each game objects
-		for( uint idx = 0; idx < m_allGameObjects[ type ].size(); idx++ )
+		for( uint idx = 0; idx < m_allGameObjects[ type ].size(); idx++ )	// For each game objects of that type
 			m_allGameObjects[ type ][ idx ]->Update( deltaSeconds );
 	}
 

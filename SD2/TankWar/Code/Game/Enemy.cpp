@@ -1,5 +1,6 @@
 #pragma once
 #include "Enemy.hpp"
+#include "Game/theGame.hpp"
 #include "Game/Terrain.hpp"
 #include "Game/EnemyBase.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
@@ -13,8 +14,7 @@ Enemy::Enemy( Vector2 const &spawnPosition, Terrain &isInTerrain, EnemyBase &par
 {
 	// Set Transform
 	Vector3 xyzPos		= m_paerntTerrain.Get3DCoordinateForMyPositionAt( m_currentPositionXZ, m_radius );
-	Vector3 rotation	= Get3DRotation( m_forwardDiractionXZ );
-	m_transform			= Transform( xyzPos, rotation, Vector3::ONE_ALL );
+	m_transform			= Transform( xyzPos, Vector3::ZERO, Vector3::ONE_ALL );
 
 	// Set Renderable
 	m_renderable		= new Renderable();
@@ -48,20 +48,44 @@ Enemy::~Enemy()
 
 void Enemy::Update( float deltaSeconds )
 {
-	// Rotation Test
-	m_forwardDiractionXZ.RotateByDegreesClockwise( m_rotationSpeed * deltaSeconds );
-	Vector3 rotation = Get3DRotation( m_forwardDiractionXZ );
+	// Normalize current velocity
+	m_currentVelocityXZ	= m_currentVelocityXZ.GetNormalized();
+
+	// Set facing rotation according to velocity
+	Vector3 rotation	= Get3DRotation( m_currentVelocityXZ );
 	m_transform.SetRotation( rotation );
 
-	// Move Forward
-	m_currentPositionXZ		= m_currentPositionXZ + ( m_forwardDiractionXZ * ( m_speed * deltaSeconds ) );
-	Vector3 xyzPos			= m_paerntTerrain.Get3DCoordinateForMyPositionAt( m_currentPositionXZ, m_radius );
-	m_transform.SetPosition( xyzPos );
+	// Change position according to velocity
+	m_currentPositionXZ	= m_currentPositionXZ + ( m_currentVelocityXZ * m_speed * deltaSeconds );
+	Vector3 newPosition = m_paerntTerrain.Get3DCoordinateForMyPositionAt( m_currentPositionXZ );
+	m_transform.SetPosition( newPosition );
+
+
+	//////////////////////
+	// BEHAVIOUR UPDATE //
+	//////////////////////
+
+	// Move Towards player
+	Vector2 playerPosXZ	= g_theGame->m_currentBattle->m_playerTank->m_xzPosition;
+	SteerTowards( playerPosXZ );
 }
 
 void Enemy::AddRenderablesToScene( Scene &activeScene )
 {
 	activeScene.AddRenderable( *m_renderable );
+}
+
+void Enemy::AddToVelocity( Vector2 const &velToAdd )
+{
+	m_currentVelocityXZ += velToAdd;
+}
+
+void Enemy::SteerTowards( Vector2 const &targetPos )
+{
+	Vector2 desiredVelocity		= (targetPos - m_currentPositionXZ).GetNormalized();
+	Vector2 steeringVelocity	= desiredVelocity - m_currentVelocityXZ;
+
+	AddToVelocity( steeringVelocity );
 }
 
 Vector3 Enemy::Get3DRotation( Vector2 xzForwardDirection )

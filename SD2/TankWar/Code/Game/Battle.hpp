@@ -38,6 +38,7 @@ private:
 	
 	GameObjectList				m_allGameObjects[ NUM_GAME_OBJECT_TYPES ];
 
+public:
 	// Battle Specific
 	double						m_timeSinceStartOfTheBattle	= 0;
 	Terrain*					m_terrain						= nullptr;
