@@ -11,6 +11,7 @@
 //-----------------------------------------------------------------------------------------------
 typedef size_t SoundID;
 typedef size_t SoundPlaybackID;
+typedef std::vector< SoundID > SoundIDList;
 constexpr size_t MISSING_SOUND_ID = (size_t)(-1); // for bad SoundIDs and SoundPlaybackIDs
 
 
@@ -29,6 +30,7 @@ public:
 	virtual void				BeginFrame();
 	virtual void				EndFrame();
 
+	// One Clip Playback
 	virtual SoundID				CreateOrGetSound( const std::string& soundFilePath );
 	virtual SoundPlaybackID		PlaySound( SoundID soundID, bool isLooped=false, float volume=1.f, float balance=0.0f, float speed=1.0f, bool isPaused=false );
 	virtual void				StopSound( SoundPlaybackID soundPlaybackID );
@@ -36,11 +38,17 @@ public:
 	virtual void				SetSoundPlaybackBalance( SoundPlaybackID soundPlaybackID, float balance );	// balance is in [-1,1], where 0 is L/R centered
 	virtual void				SetSoundPlaybackSpeed( SoundPlaybackID soundPlaybackID, float speed );		// speed is frequency multiplier (1.0 == normal)
 
+	// Audio Group
+	virtual void				LoadAudioGroupFromFile		( std::string xmlFilePath );
+	virtual void				AddSoundToAudioGroupNamed	( std::string audioGroupName, std::string soundFilePath );
+	virtual void				PlayOneSoundFromAudioGroup	( std::string audioGroupName, float volume = 1.f, float balance = 0.f, float speed = 1.f );
+
 	virtual void				ValidateResult( FMOD_RESULT result );
 
 protected:
-	FMOD::System*						m_fmodSystem;
-	std::map< std::string, SoundID >	m_registeredSoundIDs;
-	std::vector< FMOD::Sound* >			m_registeredSounds;
+	FMOD::System*							m_fmodSystem;
+	std::map< std::string, SoundID >		m_registeredSoundIDs;
+	std::vector< FMOD::Sound* >				m_registeredSounds;
+	std::map< std::string, SoundIDList >	m_audioGroups;
 };
 

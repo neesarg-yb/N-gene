@@ -341,8 +341,9 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 		mbParameterMatches = false;
 	// Die
 	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
-	
-	this->Begin( PRIMITIVE_TRIANGES, true );
+
+	// Vertex count to determine start index
+	uint myVerticesStartsFrom = (uint) m_vertices.size();
 
 	for( unsigned int sliceIdx = 0; sliceIdx <= slices; sliceIdx++ )
 	{
@@ -380,8 +381,8 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 			unsigned int bottomRightIdx = bottomLeftIdx + 1;
 			unsigned int topRightIdx	= topLeftIdx + 1;
 
-			this->AddFace( bottomLeftIdx,	bottomRightIdx, topRightIdx );
-			this->AddFace( topRightIdx,		topLeftIdx,		bottomLeftIdx );
+			this->AddFace( myVerticesStartsFrom + bottomLeftIdx,	myVerticesStartsFrom + bottomRightIdx,	myVerticesStartsFrom + topRightIdx );
+			this->AddFace( myVerticesStartsFrom + topRightIdx,		myVerticesStartsFrom + topLeftIdx,		myVerticesStartsFrom + bottomLeftIdx );
 		}
 	}
 

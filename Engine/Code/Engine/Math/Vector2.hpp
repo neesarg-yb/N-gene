@@ -48,7 +48,8 @@ public:
 	float	GetLength() const;
 	Vector2 GetNormalized() const;
 	float	NormalizeAndGetLength();
-	void	RotateByDegrees( float degrees );
+	void	RotateByDegreesClockwise( float degrees );
+	void	RotateByDegreesAntiClockwise( float degrees );
 	float	GetOrientationDegrees() const;
 	Vector3	GetAsVector3() const;
 
