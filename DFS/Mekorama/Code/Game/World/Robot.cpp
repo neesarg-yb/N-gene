@@ -2,6 +2,10 @@
 #include "Robot.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Math/HeatMap3D.hpp"
+#include "Game/theGame.hpp"
+#include "Game/Level.hpp"
+#include "Game/World/Tower.hpp"
 
 Robot::Robot( Vector3 const &worldPosition )
 {
@@ -31,6 +35,7 @@ Robot::~Robot()
 void Robot::Update( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
+	UpdateHeatMap();
 }
 
 void Robot::ObjectSelected()
@@ -39,4 +44,22 @@ void Robot::ObjectSelected()
 	Vector3 bottomLeft	= centerPos - ( Vector3::ONE_ALL * 0.5f );
 	Vector3 topRight	= centerPos + ( Vector3::ONE_ALL * 0.5f );
 	DebugRenderWireCube( 0.f, bottomLeft, topRight, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+}
+
+void Robot::UpdateHeatMap()
+{
+	if( m_currentHeatMap != nullptr )
+		delete m_currentHeatMap;
+
+	Tower &currentTower = *g_theGame->m_currentLevel->m_tower;
+	m_currentHeatMap = new HeatMap3D( IntVector3( 3, 2, 2 ), 99999999.f );
+
+	m_currentHeatMap->SetHeat( 12.f, IntVector3( 2, 1, 1 ) );
+	m_currentHeatMap->AddHeat( 1.0f, IntVector3( 2, 1, 1 ) );
+	float heat	= m_currentHeatMap->GetHeat( IntVector3( 2, 1, 1 ) );
+
+	m_currentHeatMap->SetHeat( 89.f, IntVector3( 0, 0, 1 ) );
+	float heat2 = m_currentHeatMap->GetHeat( IntVector3( 0, 0, 1 ) );
+
+	float jj;
 }

@@ -13,6 +13,9 @@ void EchoTestCommand( Command& cmd )
 
 theGame::theGame()
 {
+	// Set global variable
+	g_theGame = this;
+
 	m_lastFramesTime = GetCurrentTimeSeconds();
 
 	// Fonts for loading screen

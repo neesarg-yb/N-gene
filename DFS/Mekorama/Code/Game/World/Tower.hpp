@@ -12,6 +12,7 @@ public:
 public:
 	std::vector< Block* >	 m_allBlocks;
 	TowerDefinition const	&m_definition;
+	IntVector3				 m_dimensionXYZ;
 
 public:
 	void	Update( float deltaSeconds );

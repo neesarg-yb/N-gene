@@ -40,11 +40,13 @@ private:
 	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.7f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
 	
+public:
 	// Tower Specific
 	GameObjectList				m_allGameObjects;
 	Robot&						m_playerRobot;
 	Tower*						m_tower						= nullptr;
 
+private:
 	// Local
 	double						m_timeSinceStartOfTheBattle	= 0;
 	Renderable*					m_sphere					= nullptr;
