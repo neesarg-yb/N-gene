@@ -6,7 +6,8 @@
 class HeatMap3D
 {
 public:
-	HeatMap3D( IntVector3 const &mapDimension, float initialHeatValue );
+	 HeatMap3D( IntVector3 const &mapDimension, float initialHeatValue );
+	~HeatMap3D() { }
 
 public:
 	std::vector< float >	m_heatPerCell;
