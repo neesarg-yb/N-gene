@@ -18,8 +18,8 @@ private:
 public:
 	// Properties
 	std::string		m_towerName			= "Name not assigned";
-	IntVector3		m_startPosition		= IntVector3::ZERO;
-	IntVector3		m_finishPosition	= IntVector3::ONE_ALL;
+	IntVector3		m_spawnPlayerOn		= IntVector3::ZERO;
+	IntVector3		m_spawnFinishAt		= IntVector3::ONE_ALL;
 
 public:
 	// Static pool

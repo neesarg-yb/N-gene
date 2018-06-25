@@ -17,23 +17,22 @@ LevelDefinition::LevelDefinition( XMLElement const &root )
 	m_towerName			= ParseXmlAttribute( *towerElement, "name", m_towerName );
 	
 	// Start Position
-	IntVector2	xzPos	= IntVector2( m_startPosition.x, m_startPosition.z );
-	int			yPos	= m_startPosition.y;
+	IntVector2	xzPos	= IntVector2( m_spawnPlayerOn.x, m_spawnPlayerOn.z );
+	int			yPos	= m_spawnPlayerOn.y;
 
 	xzPos				= ParseXmlAttribute( *spawnElement, "onBlock", xzPos );
 	yPos				= ParseXmlAttribute( *spawnElement, "inLayer", yPos );
-	yPos++;				// It is onBlock of that layer; i.e. same xzCoord but a layer higher
 
-	m_startPosition		= IntVector3( xzPos.x, yPos, xzPos.y );
+	m_spawnPlayerOn		= IntVector3( xzPos.x, yPos, xzPos.y );
 
 	// Finish Position
-	xzPos				= IntVector2( m_finishPosition.x, m_finishPosition.z );
-	yPos				= m_finishPosition.y;
+	xzPos				= IntVector2( m_spawnFinishAt.x, m_spawnFinishAt.z );
+	yPos				= m_spawnFinishAt.y;
 
 	xzPos				= ParseXmlAttribute( *finishElement, "atBlock", xzPos );
 	yPos				= ParseXmlAttribute( *finishElement, "inLayer", yPos );
 
-	m_finishPosition	= IntVector3( xzPos.x, yPos, xzPos.y );
+	m_spawnFinishAt		= IntVector3( xzPos.x, yPos, xzPos.y );
 }
 
 LevelDefinition::~LevelDefinition()

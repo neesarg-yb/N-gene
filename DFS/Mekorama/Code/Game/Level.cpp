@@ -117,7 +117,7 @@ void Level::Startup()
 
 	// Prepare the Tower
 	m_tower = new Tower( Vector3::ZERO, m_definition.m_towerName );
-	m_tower->SetFinishBlockAt( m_definition.m_finishPosition );
+	m_tower->SetFinishBlockAt( m_definition.m_spawnFinishAt );
 
 	for( uint i = 0; i < m_tower->m_allBlocks.size(); i++ )
 		s_levelScene->AddRenderable( *m_tower->m_allBlocks[i]->m_renderable );
@@ -125,7 +125,8 @@ void Level::Startup()
 	// Robot
 	s_levelScene->AddRenderable( *m_playerRobot.m_renderable );
 
-	Vector3 playerWorldLocation = m_tower->GetWorldLocationOfBlockAt( m_definition.m_startPosition );
+	Vector3 playerWorldLocation = m_tower->GetWorldLocationOfBlockAt( m_definition.m_spawnPlayerOn );
+	playerWorldLocation.y++;	// Note: to spawn on top of that block, not at it!
 	m_playerRobot.m_transform.SetPosition( playerWorldLocation );
 }
 
