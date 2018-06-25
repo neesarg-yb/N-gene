@@ -3,10 +3,10 @@
 #include <vector>
 #include "Engine/Math/IntVector2.hpp"
 
-class HeatMap
+class HeatMap2D
 {
 public:
-	HeatMap( const IntVector2& mapDimension, float initialHeatValue );
+	HeatMap2D( const IntVector2& mapDimension, float initialHeatValue );
 
 public:
 	std::vector< float >	m_heatPerGridCell;
