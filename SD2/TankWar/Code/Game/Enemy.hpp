@@ -17,7 +17,7 @@ public:
 	EnemyBase	&m_parentBase;
 
 	float		 m_radius				= 1.f;
-	float		 m_speed				= 8.f;						// units per seconds
+	float		 m_speed				= 6.f;						// units per seconds
 
 public:
 	void	Update( float deltaSeconds );

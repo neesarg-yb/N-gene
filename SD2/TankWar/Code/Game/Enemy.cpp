@@ -79,7 +79,7 @@ void Enemy::Update( float deltaSeconds )
 	SeparateFromOtherEnemies( m_radius * 2.f, 1.f );
 
 	// Align
-	AlignWithOtherEnemies( 30.f, 1.f );
+	AlignWithOtherEnemies( 10.f, 1.f );
 }
 
 void Enemy::AddRenderablesToScene( Scene &activeScene )
@@ -139,7 +139,7 @@ void Enemy::AlignWithOtherEnemies( float flockRadius, float weight )
 	EnemyList &enemiesInBattle = *(EnemyList*)( &g_theGame->m_currentBattle->m_allGameObjects[ m_type ] );
 
 	// To get average velocity for alignment
-	int		countForAverage		= 0;
+	float		countForAverage	= 0.f;
 	Vector2 sumOfAllVelocities	= Vector2::ZERO;
 	for each (Enemy* enemy in enemiesInBattle)
 	{
