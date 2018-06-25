@@ -48,6 +48,10 @@ Enemy::~Enemy()
 
 void Enemy::Update( float deltaSeconds )
 {
+	//////////////////////
+	//  PHYSICS UPDATE  //
+	//////////////////////
+
 	// Normalize current velocity
 	m_currentVelocityXZ	= m_currentVelocityXZ.GetNormalized();
 
@@ -67,7 +71,7 @@ void Enemy::Update( float deltaSeconds )
 
 	// Move Towards player
 	Vector2 playerPosXZ	= g_theGame->m_currentBattle->m_playerTank->m_xzPosition;
-	SteerTowards( playerPosXZ );
+	SeekTowards( playerPosXZ );
 }
 
 void Enemy::AddRenderablesToScene( Scene &activeScene )
@@ -80,10 +84,10 @@ void Enemy::AddToVelocity( Vector2 const &velToAdd )
 	m_currentVelocityXZ += velToAdd;
 }
 
-void Enemy::SteerTowards( Vector2 const &targetPos )
+void Enemy::SeekTowards( Vector2 const &targetPos )
 {
 	Vector2 desiredVelocity		= (targetPos - m_currentPositionXZ).GetNormalized();
-	Vector2 steeringVelocity	= desiredVelocity - m_currentVelocityXZ;
+	Vector2 steeringVelocity	= desiredVelocity - m_currentVelocityXZ;						// Note: Assumes that m_currentVelocityXZ is already NORMALIZED
 
 	AddToVelocity( steeringVelocity );
 }

@@ -25,7 +25,7 @@ public:
 
 	// Flocking Behavior
 	void	AddToVelocity	( Vector2 const &velToAdd );
-	void	SteerTowards	( Vector2 const &targetPos );
+	void	SeekTowards		( Vector2 const &targetPos );
 
 private:
 	Vector3 Get3DRotation( Vector2 xzForwardDirection );			// Gives Euler y-axis rotation for transform from forward direction vec2 in XZ-Plane
