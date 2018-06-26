@@ -7,6 +7,7 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
+#include "Engine/Math/HeatMap3D.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 
@@ -203,6 +204,22 @@ void Level::Render() const
 	
 	// Basis at Origin
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+
+	// HeatMap Debug Render
+	HeatMap3D *newHeatMap = m_tower->GetNewHeatMapForTargetPosition( IntVector3( 0, 1, 0 ) );
+	Matrix44 cameraTransform = s_camera->m_cameraTransform.GetWorldTransformMatrix();
+	for( int z = 0; z < m_tower->m_dimensionXYZ.z; z++ )
+		for( int y = 0; y < m_tower->m_dimensionXYZ.y; y++ )
+			for( int x = 0; x < m_tower->m_dimensionXYZ.x; x++ )
+			{
+				uint	blockIdx		= m_tower->GetIndexOfBlockAt( IntVector3(x,y,z) );
+				float	blockHeat		= newHeatMap->GetHeat( IntVector3(x, y, z) ); 
+				Vector3 blockWorldPos	= m_tower->m_allBlocks[ blockIdx ]->m_transform.GetWorldPosition();
+
+				if( blockHeat < newHeatMap->m_initialHeatValue )
+					DebugRenderTag( 0.f, 0.2f, blockWorldPos, cameraTransform.GetJColumn(), cameraTransform.GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf( "%d", (int)blockHeat ) );
+			}
+	delete newHeatMap;
 
 	DebugRendererRender();
 }
