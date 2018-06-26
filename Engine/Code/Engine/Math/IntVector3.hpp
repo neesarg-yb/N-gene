@@ -6,15 +6,19 @@ class IntVector3
 {
 public:
 	static IntVector3 ZERO;
-	static IntVector3 ONE_ALL;		// = ( 1, 1, 1 )
-	static IntVector3 UP;			// = ( 0, 1, 0 )
-	static IntVector3 FRONT;		// = ( 0, 0, 1 )
-	static IntVector3 RIGHT;		// = ( 1, 0, 0 )
+	static IntVector3 ONE_ALL;		// = (  1,  1,  1  )
+	static IntVector3 UP;			// = (  0,  1,  0  )
+	static IntVector3 BOTTOM;		// = (  0, -1,  0  )
+	static IntVector3 FRONT;		// = (  0,  0,  1  )
+	static IntVector3 BACK;			// = (  0,  0, -1  )
+	static IntVector3 RIGHT;		// = (  1,  0,  0  )
+	static IntVector3 LEFT;			// = ( -1,  0,  0  )
 
 public:
 			  IntVector3() {};
 			  IntVector3( const IntVector3& copyFrom );			
-	 explicit IntVector3( int initialX, int initialY, int initialZ );		
+	 explicit IntVector3( int initialX, int initialY, int initialZ );
+	 explicit IntVector3( Vector3 vec3ToCopy );
 			 ~IntVector3() {};
 
 

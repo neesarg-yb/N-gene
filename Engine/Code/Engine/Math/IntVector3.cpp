@@ -3,11 +3,14 @@
 #include "IntVector3.hpp"
 #include "Engine/Math/Vector3.hpp"
 
-IntVector3 IntVector3::ZERO			= IntVector3( 0, 0, 0 );
-IntVector3 IntVector3::ONE_ALL		= IntVector3( 1, 1, 1 );
-IntVector3 IntVector3::UP			= IntVector3( 0, 1, 0 );
-IntVector3 IntVector3::FRONT		= IntVector3( 0, 0, 1 );
-IntVector3 IntVector3::RIGHT		= IntVector3( 1, 0, 0 );
+IntVector3 IntVector3::ZERO			= IntVector3(  0,  0,  0  );
+IntVector3 IntVector3::ONE_ALL		= IntVector3(  1,  1,  1  );
+IntVector3 IntVector3::UP			= IntVector3(  0,  1,  0  );
+IntVector3 IntVector3::BOTTOM		= IntVector3(  0, -1,  0  );
+IntVector3 IntVector3::FRONT		= IntVector3(  0,  0,  1  );
+IntVector3 IntVector3::BACK			= IntVector3(  0,  0, -1  );
+IntVector3 IntVector3::RIGHT		= IntVector3(  1,  0,  0  );
+IntVector3 IntVector3::LEFT			= IntVector3( -1,  0,  0  );
 
 IntVector3::IntVector3( const IntVector3& copyFrom )
 {
@@ -21,6 +24,13 @@ IntVector3::IntVector3( int initialX, int initialY, int initialZ )
 	this->x = initialX;
 	this->y = initialY;
 	this->z = initialZ;
+}
+
+IntVector3::IntVector3( Vector3 vec3ToCopy )
+{
+	this->x = (int) vec3ToCopy.x;
+	this->y = (int) vec3ToCopy.y;
+	this->z = (int) vec3ToCopy.z;
 }
 
 const IntVector3 IntVector3::operator + ( const IntVector3& vecToAdd ) const
