@@ -129,9 +129,6 @@
     <ClCompile Include="Core\Tags.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Math\HeatMap.cpp">
-      <Filter>Math</Filter>
-    </ClCompile>
     <ClCompile Include="Math\CubicSpline.cpp">
       <Filter>Math</Filter>
     </ClCompile>
@@ -261,6 +258,12 @@
     <ClCompile Include="Renderer\PickBuffer.cpp">
       <Filter>Renderer\Components</Filter>
     </ClCompile>
+    <ClCompile Include="Math\HeatMap2D.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\HeatMap3D.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -364,9 +367,6 @@
     </ClInclude>
     <ClInclude Include="Core\Tags.hpp">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Math\HeatMap.hpp">
-      <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Math\CubicSpline.hpp">
       <Filter>Math</Filter>
@@ -502,6 +502,12 @@
     </ClInclude>
     <ClInclude Include="Renderer\PickBuffer.hpp">
       <Filter>Renderer\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\HeatMap2D.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\HeatMap3D.hpp">
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
