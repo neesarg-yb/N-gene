@@ -48,18 +48,12 @@ void Robot::ObjectSelected()
 
 void Robot::UpdateHeatMap()
 {
+	// Delete the old HeatMap
 	if( m_currentHeatMap != nullptr )
 		delete m_currentHeatMap;
 
-	Tower &currentTower = *g_theGame->m_currentLevel->m_tower;
-	m_currentHeatMap = new HeatMap3D( IntVector3( 3, 2, 2 ), 99999999.f );
-
-	m_currentHeatMap->SetHeat( 12.f, IntVector3( 2, 1, 1 ) );
-	m_currentHeatMap->AddHeat( 1.0f, IntVector3( 2, 1, 1 ) );
-	float heat	= m_currentHeatMap->GetHeat( IntVector3( 2, 1, 1 ) );
-
-	m_currentHeatMap->SetHeat( 89.f, IntVector3( 0, 0, 1 ) );
-	float heat2 = m_currentHeatMap->GetHeat( IntVector3( 0, 0, 1 ) );
-
-	float jj;
+	// Get HeatMap from tower
+	Tower		&currentTower		 = *g_theGame->m_currentLevel->m_tower;
+	IntVector3	 targetPos			 = IntVector3( 0, 1, 0 );
+	m_currentHeatMap				 = currentTower.GetNewHeatMapForTargetPosition( targetPos ); 
 }

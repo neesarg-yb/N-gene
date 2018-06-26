@@ -52,7 +52,7 @@
 		sideUVCoords		= "15,9"
 		bottomUVCoords		= "15,9"
 
-		isSolid				= "true"
+		isSolid				= "false"
 	/>
 	<BlockDefinition
 		name 				= "Finish"
