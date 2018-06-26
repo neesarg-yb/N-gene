@@ -1,6 +1,7 @@
 #pragma once
 #include "Tower.hpp"
 #include "Engine/Math/HeatMap3D.hpp"
+#include "Engine/Core/StringUtils.hpp"
 
 Tower::Tower( Vector3 position, std::string towerDefinitionName )
 	: m_definition( *TowerDefinition::s_definitions[ towerDefinitionName ] )
@@ -28,16 +29,30 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 			{
 				Vector3 localPosition		 = Vector3( (float)rowIdx, (float)sliceIdx, (float)colIdx ) - halfDimentions;
 
-				Transform m_blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
-				m_blockTransform.SetParentAs( &m_transform );
-
-				
-				Block*		thiBlock		 = new Block( m_blockTransform.GetWorldPosition(), m_definition.m_blocksDefinitionList[ nextBlkIdx ] );
-
+				Transform blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
+				blockTransform.SetParentAs( &m_transform );
+								
+				Block* thiBlock				= new Block( blockTransform.GetWorldPosition(), m_definition.m_blocksDefinitionList[ nextBlkIdx ] );
 				m_allBlocks.push_back( thiBlock );
 
 				nextBlkIdx++;
 			}
+		}
+	}
+
+	// Generate extra layer of void/air on top
+	m_dimensionXYZ.y += 1;
+	for( uint colIdx = 0U; colIdx < (uint)m_definition.m_xzDimension.y; colIdx++ )
+	{
+		for( uint rowIdx = 0U; rowIdx < (uint)m_definition.m_xzDimension.x; rowIdx++ )
+		{
+			Vector3 localPosition		 = Vector3( (float)rowIdx, (float)numSlices, (float)colIdx ) - halfDimentions;
+
+			Transform blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
+			blockTransform.SetParentAs( &m_transform );
+			
+			Block* thiBlock				= new Block( blockTransform.GetWorldPosition(), "Air" );
+			m_allBlocks.push_back( thiBlock );
 		}
 	}
 }

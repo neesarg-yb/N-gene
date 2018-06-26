@@ -73,75 +73,75 @@
 	</Layer>
 	<Layer>
 		<Block type = "Brick Red" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 
 		<Block type = "Brick Red" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 
 		<Block type = "Brick Red" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 
 		<Block type = "Grass" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 
 		<Block type = "Stairs" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 	</Layer>
 	<Layer>
 		<Block type = "Brick Red" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 
 		<Block type = "Grass" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 
 		<Block type = "Grass" />
 		<Block type = "Grass" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 		<Block type = "Grass" />
 		
 		<Block type = "Stairs" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
-		<Block type = "Void" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 
 	</Layer>
 	<Layer>
@@ -159,21 +159,21 @@
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
 		<Block type = "Brick Red" />
@@ -188,28 +188,28 @@
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 		
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Grass" />
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Grass" />
 
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Grass" />
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Grass" />
 
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Grass" />
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Water" />
 		<Block type = "Grass" />
 
-		<Block type = "Void" />
+		<Block type = "Air" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />

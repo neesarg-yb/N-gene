@@ -206,7 +206,7 @@ void Level::Render() const
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 	// HeatMap Debug Render
-	HeatMap3D *newHeatMap = m_tower->GetNewHeatMapForTargetPosition( IntVector3( 0, 5, 0 ) );
+	HeatMap3D *newHeatMap = m_tower->GetNewHeatMapForTargetPosition( IntVector3( 1, 1, 0 ) );
 	Matrix44 cameraTransform = s_camera->m_cameraTransform.GetWorldTransformMatrix();
 	for( int z = 0; z < m_tower->m_dimensionXYZ.z; z++ )
 		for( int y = 0; y < m_tower->m_dimensionXYZ.y; y++ )

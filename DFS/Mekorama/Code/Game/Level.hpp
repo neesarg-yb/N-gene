@@ -3,6 +3,7 @@
 #include "Engine/Renderer/OrbitCamera.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Math/Vector4.hpp"
+#include "Engine/Math/IntVector3.hpp"
 #include "Engine/Renderer/Light.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/Renderable.hpp"
