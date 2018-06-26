@@ -25,5 +25,6 @@ public:
 public:
 	HeatMap3D*	GetNewHeatMapForTargetPosition( IntVector3 targetPos );
 	bool		HasSolidBlockBeneath( IntVector3 const &myPosition );
+	bool		HasStairsBlockBeneath( IntVector3 const &myPosition );
 	bool		PositionIsOutsideTowersBounds( IntVector3 const &myPosition );
 };

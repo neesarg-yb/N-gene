@@ -126,9 +126,10 @@ HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos )
 						Block &goalBlock	= *m_allBlocks[ GetIndexOfBlockAt(goalPos) ];
 
 						// Goal is not solid
-						// Goal has a solid beneath it
-						bool hasSolidBlockBeneathCurrent = HasSolidBlockBeneath( goalPos );
-						if( goalBlock.m_definition->m_isSolid == false && hasSolidBlockBeneathCurrent == true )
+						// Goal has a solid/stairs beneath it
+						bool hasSolidBlockBeneathGoal	= HasSolidBlockBeneath( goalPos );
+						bool hasStairsBeneathGoal		= HasStairsBlockBeneath( goalPos );
+						if( goalBlock.m_definition->m_isSolid == false && ( hasSolidBlockBeneathGoal || hasStairsBeneathGoal ) )
 						{
 							// Change its heat value
 							float heatAtGoal		= newHeatMap->GetHeat( goalPos );
@@ -205,6 +206,19 @@ bool Tower::HasSolidBlockBeneath( IntVector3 const &myPosition )
 	// Else, return actual value
 	uint idx = GetIndexOfBlockAt( posOfBlockUnderneeth );
 	return m_allBlocks[ idx ]->m_definition->m_isSolid;
+}
+
+bool Tower::HasStairsBlockBeneath( IntVector3 const &myPosition )
+{
+	IntVector3 posOfBlockUnderneeth = myPosition + IntVector3::BOTTOM;
+
+	// If that block is out of bounds
+	if( PositionIsOutsideTowersBounds( posOfBlockUnderneeth ) )
+		return false;
+
+	// Else, return actual value
+	uint idx = GetIndexOfBlockAt( posOfBlockUnderneeth );
+	return ( m_allBlocks[ idx ]->m_definition->m_typeName == "Stairs" );
 }
 
 bool Tower::PositionIsOutsideTowersBounds( IntVector3 const &myPosition )
