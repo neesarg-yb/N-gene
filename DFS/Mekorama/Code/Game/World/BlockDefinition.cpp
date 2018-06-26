@@ -9,8 +9,9 @@ BlockDefinitionMap BlockDefinition::s_definitions;
 BlockDefinition::BlockDefinition( const XMLElement& root )
 {
 	// Properties
-	m_typeName	= ParseXmlAttribute( root, "name", m_typeName );
-	m_isSolid	= ParseXmlAttribute( root, "isSolid", m_isSolid );
+	m_typeName		= ParseXmlAttribute( root, "name", m_typeName );
+	m_isSolid		= ParseXmlAttribute( root, "isSolid", m_isSolid );
+	m_isSelectable	= ParseXmlAttribute( root, "isSelectable", m_isSelectable );
 
 	// Material
 	std::string matFileName	= ParseXmlAttribute( root, "materialFileName", "" );

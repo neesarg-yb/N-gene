@@ -8,6 +8,7 @@
 		sideUVCoords		= "17,1"
 		bottomUVCoords		= "16,1"
 		
+		isSelectable		= "true"
 		isSolid				= "true"
 	/>
 	<BlockDefinition
@@ -19,6 +20,7 @@
 		sideUVCoords		= "4,8"
 		bottomUVCoords		= "4,8"
 		
+		isSelectable		= "true"
 		isSolid				= "true"
 	/>
 	<BlockDefinition
@@ -30,6 +32,7 @@
 		sideUVCoords		= "0,0"
 		bottomUVCoords		= "0,0"
 		
+		isSelectable		= "false"
 		isSolid				= "false"
 	/>
 	<BlockDefinition
@@ -41,6 +44,7 @@
 		sideUVCoords		= "0,0"
 		bottomUVCoords		= "0,0"
 
+		isSelectable		= "false"
 		isSolid				= "false"
 	/>
 	<BlockDefinition
@@ -52,6 +56,7 @@
 		sideUVCoords		= "15,9"
 		bottomUVCoords		= "15,9"
 
+		isSelectable		= "true"
 		isSolid				= "false"
 	/>
 	<BlockDefinition
@@ -63,6 +68,7 @@
 		sideUVCoords		= "10,4"
 		bottomUVCoords		= "10,4"
 
+		isSelectable		= "true"
 		isSolid				= "true"
 	/>
 </BlockDefinitions>

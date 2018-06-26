@@ -6,8 +6,8 @@
 Block::Block( Vector3 const &position, std::string blockDefinitionName )
 	: m_definition( BlockDefinition::s_definitions[ blockDefinitionName ] )
 {
-	// PickID if it is a solid block
-	if( m_definition->m_isSolid )
+	// PickID if it is a selectable block
+	if( m_definition->m_isSelectable )
 		SetPickID( GameObject::GetNewPickID() );
 
 	// Transform
