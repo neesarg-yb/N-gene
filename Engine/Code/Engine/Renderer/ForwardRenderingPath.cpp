@@ -1,6 +1,7 @@
 #pragma once
 #include <tuple>
 #include "ForwardRenderingPath.hpp"
+#include "Engine/Renderer/Texture.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/Light.hpp"
 #include "Engine/Renderer/Camera.hpp"
@@ -16,16 +17,26 @@ typedef std::tuple< float, DrawCall > ZDistanceDrawcallTuple;
 ForwardRenderingPath::ForwardRenderingPath( Renderer &activeRenderer )
 	: m_renderer( activeRenderer )
 {
-
+	m_shadowCamera			= new Camera();
+	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 2048, 2048, TEXTURE_FORMAT_RGBA8 );
+	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 2048, 2048, TEXTURE_FORMAT_D24S8 );
+	m_shadowCamera->SetColorTarget( m_shadowColorTarget );
+	m_shadowCamera->SetDepthStencilTarget( m_shadowDepthTarget );
 }
 
 ForwardRenderingPath::~ForwardRenderingPath()
 {
-
+	delete m_shadowDepthTarget;
+	delete m_shadowColorTarget;
+	delete m_shadowCamera;
 }
 
 void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) const
 {
+	// For each Lights, Render for ShadowMap
+	TODO( "I'm assuming that there is only one directional light & it uses ShadowMap!" );
+	RenderSceneForShadowMap( scene );
+
 	// Bind the camera
 	m_renderer.BindCamera( &camera );
 	
@@ -82,6 +93,39 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 	camera.PostRender( m_renderer );
 
 	TODO( "Apply Effects, if there are any.." );
+}
+
+void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene ) const
+{
+	for each (Light* light in scene.m_lights)
+	{
+		// Setup the camera at that light
+		Matrix44 lightsWorldMatrix	= light->m_transform.GetWorldTransformMatrix();
+		m_shadowCamera->m_cameraTransform.SetFromMatrix( lightsWorldMatrix );
+		Matrix44 projectionMatrix	= Matrix44::MakeOrtho3D( 256, 256, -100, 100 );
+		m_shadowCamera->SetProjectionMatrix( projectionMatrix );
+
+		m_renderer.BindCamera( m_shadowCamera );
+
+		m_renderer.ClearColor( RGBA_BLACK_COLOR );
+		m_renderer.ClearDepth( 1.0f ); 
+		m_renderer.EnableDepth( COMPARE_LESS, true );
+
+		for each (Renderable* thisRenderable in scene.m_renderables)
+		{
+			for( unsigned int mIdx = 0; mIdx < thisRenderable->m_meshes.size(); mIdx++ )
+			{
+				// Setup a drawcall
+				Mesh const	*mesh		= thisRenderable->GetMesh( mIdx );
+				Material	*material	= thisRenderable->GetMaterial( mIdx );
+				Transform	&transform  = thisRenderable->m_modelTransform;
+
+				// Draw for each Shaders present in ShaderGroup
+				m_renderer.BindMaterialForShaderIndex( *material );
+				m_renderer.DrawMesh( *mesh, transform.GetWorldTransformMatrix() );
+			}
+		}
+	}
 }
 
 void ForwardRenderingPath::SetMostContributingLights( unsigned int &lightCount, unsigned int ( &effectiveLightIndices )[MAX_LIGHTS], Vector3 const &renderablePosition, std::vector< Light* > &lightsInScene ) const
