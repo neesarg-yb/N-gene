@@ -99,3 +99,5 @@ extern PFNGLDELETETEXTURESPROC				glDeleteTextures;
 extern PFNGLTEXSTORAGE2DPROC				glTexStorage2D;
 extern PFNGLTEXSUBIMAGE2DPROC				glTexSubImage2D;
 extern PFNGLREADPIXELSPROC					glReadPixels;
+
+extern PFNGLVIEWPORTPROC					glViewport;

@@ -107,6 +107,11 @@ void Camera::LookAt( Vector3 position, Vector3 target, Vector3 up /* = Vector3::
 	m_viewMatrix = cameraMatrix.GetOrthonormalInverse();
 }
 
+void Camera::SetProjectionMatrix( Matrix44 const &projMatrix )
+{
+	m_projMatrix = projMatrix;
+}
+
 void Camera::SetProjectionOrtho( float size, float screen_near, float screen_far )
 {
 	m_size		  = size;

@@ -37,6 +37,7 @@ public:
 	void LookAt( Vector3 position, Vector3 target, Vector3 up = Vector3::UP ); 
 
 	// projection settings
+	void SetProjectionMatrix( Matrix44 const &projMatrix );
 	void SetProjectionOrtho( float size, float screen_near, float screen_far ); 
 	void IncrementCameraSizeBy( float sizeIncrement );									// If using Orthographic Camera
 	void SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspectRatio, float nearZ, float farZ );

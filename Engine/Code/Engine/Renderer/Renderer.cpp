@@ -542,7 +542,9 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glTexStorage2D );
 	GL_BIND_FUNCTION( glTexSubImage2D );
 	GL_BIND_FUNCTION( glReadPixels );
-}	
+
+	GL_BIND_FUNCTION( glViewport );
+}
 	
 //------------------------------------------------------------------------
 // Creates a real context as a specific version (major.minor)
@@ -845,6 +847,13 @@ void Renderer::BindCamera( Camera *camera )
 	s_current_camera->UpdateUBO();															// Update UBO
 	glBindBufferBase( GL_UNIFORM_BUFFER, 2, s_current_camera->m_cameraUBO->GetHandle() );	// Bind UBO
 	
+	// Set glVewPort
+	uint minX	= 0.f;
+	uint minY	= 0.f;
+	uint width	= s_current_camera->m_outputFramebuffer.GetWidth();
+	uint height = s_current_camera->m_outputFramebuffer.GetHeight();
+	glViewport( minX, minY, width, height );
+
 	GL_CHECK_ERROR();
 }
 
