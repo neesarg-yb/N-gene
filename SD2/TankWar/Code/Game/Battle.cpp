@@ -89,9 +89,8 @@ void Battle::Startup()
 	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
 	// Setup the Lighting
-	s_lightSources.push_back( new Light( Vector3::ZERO ) );
-	s_lightSources[0]->SetUpForPointLight( 20.f, Vector3( 1.f, 0.f, 0.f), RGBA_WHITE_COLOR );
-	s_lightSources[0]->EnablePerimeterRotationAround( Vector3( 0.f, 0.f, 5.f ), 10.f );
+	s_lightSources.push_back( new Light( Vector3( 35.f, 40.f, 20.f ), Vector3( -45.f, 0.f, 0.f ) ) );
+	s_lightSources[0]->SetUpForDirectionalLight( 20.f, Vector3( 1.f, 0.f, 0.f ), RGBA_WHITE_COLOR );
 
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, s_camera );
@@ -112,7 +111,6 @@ void Battle::Startup()
 
 	// PLAYER TANK
 	m_playerTank = new Tank( Vector2::ZERO, *m_terrain, true, s_camera );
-	s_lightSources[0]->m_transform.SetParentAs( &s_camera->m_cameraTransform );
 	AddNewGameObject( *m_playerTank );
 
 	// TESTING THE ENEMY BASE
