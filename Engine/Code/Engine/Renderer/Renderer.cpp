@@ -848,8 +848,8 @@ void Renderer::BindCamera( Camera *camera )
 	glBindBufferBase( GL_UNIFORM_BUFFER, 2, s_current_camera->m_cameraUBO->GetHandle() );	// Bind UBO
 	
 	// Set glVewPort
-	uint minX	= 0.f;
-	uint minY	= 0.f;
+	uint minX	= 0U;
+	uint minY	= 0U;
 	uint width	= s_current_camera->m_outputFramebuffer.GetWidth();
 	uint height = s_current_camera->m_outputFramebuffer.GetHeight();
 	glViewport( minX, minY, width, height );

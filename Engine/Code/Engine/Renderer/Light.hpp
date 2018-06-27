@@ -20,7 +20,6 @@ public:
 	// Color, Intensity
 	Vector4		m_lightColorAndIntensity	= Vector4( 0.f, 0.f, 0.f, 0.f );
 
-public:
 	// Position, Direction
 	Transform	m_transform;
 	Vector3		m_direction					= Vector3( 0.f, 0.f, 1.f );			// m_transform.GetRotation()->GetAsDirection()
@@ -31,6 +30,10 @@ public:
 	float		m_dotInnerAngle				= 0.f;
 	float		m_dotOuterAngle				= 360.f;
 	
+	// ShadowMap
+	bool		m_isUsingShadowMap			= false;
+	Matrix44	m_viewProjectionMat			= Matrix44();
+
 public:
 	Renderable *m_renderable				= nullptr;
 	
@@ -49,6 +52,8 @@ public:
 	void SetUpForPointLight			( float intensity, Vector3 const &attenuationConstants = Vector3( 0.f, 0.f, 1.f ), Rgba const &theColor = RGBA_WHITE_COLOR );
 	void SetUpForSpotLight			( float intensity, float innerAngle, float outerAngle, Vector3 const &attenuationConstants = Vector3( 0.f, 0.f, 1.f ), Rgba const &theColor = RGBA_WHITE_COLOR );
 	void SetUpForDirectionalLight	( float intensity, Vector3 const &attenuationConstants = Vector3( 0.f, 0.f, 1.f ), Rgba const &theColor = RGBA_WHITE_COLOR );
+
+	void UsesShadowMap( bool usesShadowMap, Matrix44 const &viewProjMat = Matrix44() );
 
 public:
 	virtual void Update( float deltaSeconds );
