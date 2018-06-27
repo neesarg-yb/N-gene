@@ -117,3 +117,4 @@ PFNGLTEXSUBIMAGE2DPROC					glTexSubImage2D				= nullptr;
 PFNGLREADPIXELSPROC						glReadPixels				= nullptr;
 
 PFNGLVIEWPORTPROC						glViewport					= nullptr;
+PFNGLSAMPLERPARAMETERFVPROC				glSamplerParameterfv		= nullptr;
