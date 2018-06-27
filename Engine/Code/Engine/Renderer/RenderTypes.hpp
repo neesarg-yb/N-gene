@@ -20,6 +20,11 @@ struct LightData
 	
 	Vector3		padding_02;
 	float		dotOuterAngle;
+
+	Vector3		padding_03;
+	float		isUsingShadow;
+
+	Matrix44	viewProjectionMatrix;
 };
 
 struct UBOLightsBlock
