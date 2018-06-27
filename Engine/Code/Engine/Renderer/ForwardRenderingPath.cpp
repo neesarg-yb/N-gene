@@ -18,6 +18,7 @@ ForwardRenderingPath::ForwardRenderingPath( Renderer &activeRenderer )
 	: m_renderer( activeRenderer )
 {
 	m_shadowCamera			= new Camera();
+	m_shadowSampler			= new Sampler( SAMPLER_SHADOW );
 	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 2048, 2048, TEXTURE_FORMAT_RGBA8 );
 	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 2048, 2048, TEXTURE_FORMAT_D24S8 );
 	m_shadowCamera->SetColorTarget( m_shadowColorTarget );
@@ -28,6 +29,7 @@ ForwardRenderingPath::~ForwardRenderingPath()
 {
 	delete m_shadowDepthTarget;
 	delete m_shadowColorTarget;
+	delete m_shadowSampler;
 	delete m_shadowCamera;
 }
 
@@ -39,7 +41,7 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 
 	// Bind the camera
 	m_renderer.BindCamera( &camera );
-	m_renderer.BindTexture2D( 3, m_shadowCamera->m_outputFramebuffer.m_depth_stencil_target->GetHandle() );
+	m_renderer.BindTexture2D( 3, m_shadowCamera->m_outputFramebuffer.m_depth_stencil_target->GetHandle(), m_shadowSampler );
 	
 	// Do the camera cleanup operations
 	m_renderer.ClearColor( RGBA_BLACK_COLOR );
@@ -107,7 +109,7 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene ) const
 		// Setup the camera at that light
 		Matrix44 lightsWorldMatrix	= light->m_transform.GetWorldTransformMatrix();
 		m_shadowCamera->m_cameraTransform.SetFromMatrix( lightsWorldMatrix );
-		Matrix44 projectionMatrix	= Matrix44::MakeOrtho3D( 256, 256, -100, 100 );
+		Matrix44 projectionMatrix	= Matrix44::MakeOrtho3D( 32, 32, -100, 100 );
 		m_shadowCamera->SetProjectionMatrix( projectionMatrix );
 		m_shadowCamera->UpdateViewMatrix();
 

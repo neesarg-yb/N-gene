@@ -101,3 +101,4 @@ extern PFNGLTEXSUBIMAGE2DPROC				glTexSubImage2D;
 extern PFNGLREADPIXELSPROC					glReadPixels;
 
 extern PFNGLVIEWPORTPROC					glViewport;
+extern PFNGLSAMPLERPARAMETERFVPROC			glSamplerParameterfv;

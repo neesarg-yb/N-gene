@@ -544,6 +544,7 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glReadPixels );
 
 	GL_BIND_FUNCTION( glViewport );
+	GL_BIND_FUNCTION( glSamplerParameterfv );
 }
 	
 //------------------------------------------------------------------------

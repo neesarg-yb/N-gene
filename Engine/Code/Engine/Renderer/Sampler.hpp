@@ -6,6 +6,7 @@ enum eSamplerType
 {
 	SAMPLER_LINEAR,
 	SAMPLER_NEAREST,
+	SAMPLER_SHADOW,
 	NUM_SAMPLER_TYPES
 };
 
@@ -24,5 +25,6 @@ public:
 private:
 	bool CreateDefault();
 	bool CreateLinear ();
+	bool CreateShadow ();
 	void Destroy();
 };

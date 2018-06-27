@@ -9,6 +9,7 @@ class Camera;
 class Texture;
 class Renderer;
 class Vector3;
+class Sampler;
 
 class ForwardRenderingPath 
 {
@@ -19,6 +20,7 @@ public:
 public:
 	Renderer	&m_renderer;
 	Camera		*m_shadowCamera			= nullptr;
+	Sampler		*m_shadowSampler		= nullptr;
 	Texture		*m_shadowColorTarget	= nullptr;
 	Texture		*m_shadowDepthTarget	= nullptr;
 
