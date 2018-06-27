@@ -41,7 +41,7 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 
 	// Bind the camera
 	m_renderer.BindCamera( &camera );
-	m_renderer.BindTexture2D( 3, m_shadowCamera->m_outputFramebuffer.m_depth_stencil_target->GetHandle(), m_shadowSampler );
+	m_renderer.BindTexture2D( 4, m_shadowCamera->m_outputFramebuffer.m_depth_stencil_target->GetHandle(), m_shadowSampler );
 	
 	// Do the camera cleanup operations
 	m_renderer.ClearColor( RGBA_BLACK_COLOR );
