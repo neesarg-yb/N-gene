@@ -225,8 +225,12 @@ void Light::SetUpForDirectionalLight( float intensity, Vector3 const &attenuatio
 	m_dotOuterAngle				= 360.f;
 }
 
-void Light::UsesShadowMap( bool usesShadowMap, Matrix44 const &viewProjMat /*= Matrix44() */ )
+void Light::UsesShadowMap( bool usesShadowMap )
 {
 	m_isUsingShadowMap	= usesShadowMap;
-	m_viewProjectionMat	= viewProjMat;
+}
+
+void Light::SetViewProjectionForShadowMap( Matrix44 const &viewProjMatrix )
+{
+	m_viewProjectionMat	= viewProjMatrix;
 }

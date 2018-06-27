@@ -53,7 +53,8 @@ public:
 	void SetUpForSpotLight			( float intensity, float innerAngle, float outerAngle, Vector3 const &attenuationConstants = Vector3( 0.f, 0.f, 1.f ), Rgba const &theColor = RGBA_WHITE_COLOR );
 	void SetUpForDirectionalLight	( float intensity, Vector3 const &attenuationConstants = Vector3( 0.f, 0.f, 1.f ), Rgba const &theColor = RGBA_WHITE_COLOR );
 
-	void UsesShadowMap( bool usesShadowMap, Matrix44 const &viewProjMat = Matrix44() );
+	void UsesShadowMap( bool usesShadowMap );
+	void SetViewProjectionForShadowMap( Matrix44 const &viewProjMatrix );
 
 public:
 	virtual void Update( float deltaSeconds );
