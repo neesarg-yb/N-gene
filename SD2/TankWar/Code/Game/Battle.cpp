@@ -91,6 +91,7 @@ void Battle::Startup()
 	// Setup the Lighting
 	s_lightSources.push_back( new Light( Vector3( 35.f, 40.f, 20.f ), Vector3( -45.f, 0.f, 0.f ) ) );
 	s_lightSources[0]->SetUpForDirectionalLight( 20.f, Vector3( 1.f, 0.f, 0.f ), RGBA_WHITE_COLOR );
+	s_lightSources[0]->UsesShadowMap( true );
 
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, s_camera );
