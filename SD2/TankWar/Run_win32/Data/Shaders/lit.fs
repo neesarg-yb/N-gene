@@ -25,6 +25,11 @@ struct LightData
 
    vec3     padding_02;
    float    dot_outer_angle; 
+
+   vec3     padding_03;
+   float    is_using_shadow;
+
+   mat4     lights_view_projection;
 };
 
 struct LightFactor
