@@ -1215,6 +1215,21 @@ void Renderer::BindTexture2D( unsigned int bindIndex, const Texture& theTexture,
 	glBindTexture( GL_TEXTURE_2D, theTexture.m_textureID ); 
 }
 
+void Renderer::BindTexture2D( unsigned int bindIndex, const uint textureHandle, Sampler const *theSampler /*= nullptr */ )
+{
+	GLuint textureIndex = bindIndex; // to see how they tie together
+
+	// Bind the sampler;
+	if( theSampler == nullptr )
+		glBindSampler( textureIndex, s_defaultNearestSampler->GetHandle() ); 
+	else
+		glBindSampler( textureIndex, theSampler->GetHandle() );
+
+	// Bind the texture
+	glActiveTexture( GL_TEXTURE0 + textureIndex ); 
+	glBindTexture( GL_TEXTURE_2D, textureHandle ); 
+}
+
 void Renderer::BindTextureCube( unsigned int bindIndex, const TextureCube& texCube, Sampler const *theSampler /*= nullptr */ )
 {
 	GLuint textureIndex = bindIndex; // to see how they tie together

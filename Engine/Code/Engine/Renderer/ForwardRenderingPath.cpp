@@ -39,6 +39,7 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 
 	// Bind the camera
 	m_renderer.BindCamera( &camera );
+	m_renderer.BindTexture2D( 3, m_shadowCamera->m_outputFramebuffer.m_depth_stencil_target->GetHandle() );
 	
 	// Do the camera cleanup operations
 	m_renderer.ClearColor( RGBA_BLACK_COLOR );
@@ -99,11 +100,22 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene ) const
 {
 	for each (Light* light in scene.m_lights)
 	{
+		// If light doesn't use ShadowMap, skip
+		if( light->m_isUsingShadowMap == false )
+			continue;
+
 		// Setup the camera at that light
 		Matrix44 lightsWorldMatrix	= light->m_transform.GetWorldTransformMatrix();
 		m_shadowCamera->m_cameraTransform.SetFromMatrix( lightsWorldMatrix );
 		Matrix44 projectionMatrix	= Matrix44::MakeOrtho3D( 256, 256, -100, 100 );
 		m_shadowCamera->SetProjectionMatrix( projectionMatrix );
+		m_shadowCamera->UpdateViewMatrix();
+
+		// Set viewProjection Matrix
+		Matrix44 viewProjMat;
+		viewProjMat.Append( m_shadowCamera->GetProjectionMatrix() );
+		viewProjMat.Append( m_shadowCamera->GetViewMatrix() );
+		light->SetViewProjectionForShadowMap( viewProjMat );
 
 		m_renderer.BindCamera( m_shadowCamera );
 
