@@ -35,6 +35,7 @@
 		0 = Color Target
 		1 = Bloom Texture ( from Camera )
 		3 = Pick Buffer Target
+		4 = ShadowMap
 */
 
 struct LoadedTexturesData {
