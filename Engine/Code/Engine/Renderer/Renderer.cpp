@@ -1408,11 +1408,13 @@ void Renderer::ClearDepth( float depth /* = 1.0f */ )
 
 void Renderer::SetCullingMode( eCullMode newCullMode )
 {
-	TODO("Cull mode none, glDisable()");
-
-	glEnable( GL_CULL_FACE );
 	if (newCullMode != CULLMODE_NONE)
+	{
+		glEnable( GL_CULL_FACE );
 		glCullFace( GetAsOpenGLDataType( newCullMode ) );
+	}
+	else
+		glDisable( GL_CULL_FACE );
 }
 
 Texture* Renderer::CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt /* = TEXTURE_FORMAT_RGBA8 */ )
