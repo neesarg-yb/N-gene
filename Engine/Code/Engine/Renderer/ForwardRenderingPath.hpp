@@ -26,7 +26,7 @@ public:
 
 public:
 	void RenderSceneForCamera( Camera &camera, Scene &scene ) const;
-	void RenderSceneForShadowMap( Scene &scene ) const;
+	void RenderSceneForShadowMap( Scene &scene, Vector3 const &sceneCameraPosition ) const;
 
 private:
 	void SetMostContributingLights( unsigned int &lightCount, unsigned int (&effectiveLightIndices)[MAX_LIGHTS], Vector3 const &renderablePosition, std::vector< Light* > &lightsInScene ) const;
