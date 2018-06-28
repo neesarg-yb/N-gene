@@ -264,6 +264,9 @@
     <ClCompile Include="Math\HeatMap3D.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="Math\AABB3.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -507,6 +510,9 @@
       <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Math\HeatMap3D.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\AABB3.hpp">
       <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
