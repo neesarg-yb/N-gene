@@ -14,6 +14,7 @@
 
 Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, Camera* attachedCamera )
 	: GameObject( GAME_OBJECT_TANK )
+	, m_xzPosition( spawnPosition )
 	, m_parentTerrain( isInTerrain )
 	, m_isControlledByXbox( isPlayer )
 	, m_attachedCamera( attachedCamera )

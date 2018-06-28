@@ -1,6 +1,7 @@
 #pragma once
-#include "Game/GameObject.hpp"
 #include <functional>
+#include "Engine/Math/AABB3.hpp"
+#include "Game/GameObject.hpp"
 
 class Scene;
 typedef std::vector< Renderable* > ChunkList;
@@ -37,6 +38,7 @@ public:
 
 public:
 	float			 m_maxHeight			= 2.f;
+	AABB3			 m_worldBounds;
 	IntVector2		 m_sampleSize			= IntVector2( 100, 100 );		// Same as terrain dimension
 	ChunkList		 m_chunks;
 

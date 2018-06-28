@@ -23,6 +23,10 @@ Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, s
 	// Set Chunks
 	m_chunks = MakeChunksUsingSurfacePatch( [this]( float u, float v ) { return this->GetVertexPositionUsingHeightMap(u,v); }, 
 								 IntVector2( 50, 52 ) );
+
+	Vector3 boundsMin	= m_transform.GetWorldPosition() + Vector3::ZERO;
+	Vector3 boundsMax	= m_transform.GetWorldPosition() + Vector3( (float)m_sampleSize.x, maxHeight, (float)m_sampleSize.y );
+	m_worldBounds		= AABB3( boundsMin, boundsMax );
 }
 
 Terrain::~Terrain()

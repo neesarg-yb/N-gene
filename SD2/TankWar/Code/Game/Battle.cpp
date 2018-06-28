@@ -107,16 +107,29 @@ void Battle::Startup()
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
 	// TERRAIN
-	m_terrain = new Terrain( Vector3( 0.f, 0.f, 0.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
+	m_terrain = new Terrain( Vector3( 10.f, 20.f, 30.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
 	AddNewGameObject( *m_terrain );
 
+	AABB2	terrainsXZBounds;
+	terrainsXZBounds.mins = Vector2( m_terrain->m_worldBounds.mins.x, m_terrain->m_worldBounds.mins.z );
+	terrainsXZBounds.maxs = Vector2( m_terrain->m_worldBounds.maxs.x, m_terrain->m_worldBounds.maxs.z );
+
+
 	// PLAYER TANK
-	m_playerTank = new Tank( Vector2::ZERO, *m_terrain, true, s_camera );
+	Vector2 middleOfTheTerrain = (terrainsXZBounds.mins + terrainsXZBounds.maxs) * 0.5f;
+	m_playerTank = new Tank( middleOfTheTerrain, *m_terrain, true, s_camera );
 	AddNewGameObject( *m_playerTank );
 
 	// TESTING THE ENEMY BASE
-	EnemyBase* testEnemyBase = new EnemyBase( Vector2( 30.f, 50.f ), *m_terrain, 10, 0.65f, 20.f );
-	AddNewGameObject( *testEnemyBase );
+	for( uint i = 0; i < 10; i++ )
+	{
+		Vector2 randPosOnTerrain;
+		randPosOnTerrain.x = GetRandomFloatInRange( terrainsXZBounds.mins.x, terrainsXZBounds.maxs.x );
+		randPosOnTerrain.y = GetRandomFloatInRange( terrainsXZBounds.mins.y, terrainsXZBounds.maxs.y );
+
+		EnemyBase* testEnemyBase = new EnemyBase( randPosOnTerrain, *m_terrain, 10, 0.65f, 20.f );
+		AddNewGameObject( *testEnemyBase );
+	};
 }
 
 void Battle::BeginFrame()
