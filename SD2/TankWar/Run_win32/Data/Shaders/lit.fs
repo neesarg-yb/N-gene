@@ -157,7 +157,7 @@ LightFactor CalculateLighting( vec3 world_pos,
    spec_factor *= SPECULAR_AMOUNT; 
    spec_power *= SPECULAR_POWER; 
 
-   for (uint i = 0; i < 1; ++i) {
+   for (uint i = 0; i < MAX_LIGHTS; ++i) {
       LightFactor l = CalculateLightFactor( world_pos, eye_dir, normal, LIGHTS[i], spec_factor, spec_power ); 
       lf.diffuse += l.diffuse;
       lf.specular += l.specular; 
