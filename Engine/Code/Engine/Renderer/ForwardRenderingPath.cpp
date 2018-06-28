@@ -19,8 +19,8 @@ ForwardRenderingPath::ForwardRenderingPath( Renderer &activeRenderer )
 {
 	m_shadowCamera			= new Camera();
 	m_shadowSampler			= new Sampler( SAMPLER_SHADOW );
-	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 2048, 2048, TEXTURE_FORMAT_RGBA8 );
-	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 2048, 2048, TEXTURE_FORMAT_D24S8 );
+	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 3072, 3072, TEXTURE_FORMAT_RGBA8 );
+	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 3072, 3072, TEXTURE_FORMAT_D24S8 );
 	m_shadowCamera->SetColorTarget( m_shadowColorTarget );
 	m_shadowCamera->SetDepthStencilTarget( m_shadowDepthTarget );
 }
@@ -37,7 +37,7 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 {
 	// For each Lights, Render for ShadowMap
 	TODO( "I'm assuming that there is only one directional light & it uses ShadowMap!" );
-	RenderSceneForShadowMap( scene );
+	RenderSceneForShadowMap( scene, camera.m_cameraTransform.GetWorldPosition() );
 
 	// Bind the camera
 	m_renderer.BindCamera( &camera );
@@ -98,7 +98,7 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 	TODO( "Apply Effects, if there are any.." );
 }
 
-void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene ) const
+void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const &sceneCameraPosition ) const
 {
 	for each (Light* light in scene.m_lights)
 	{
@@ -106,10 +106,15 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene ) const
 		if( light->m_isUsingShadowMap == false )
 			continue;
 
+		// We need shadowCamera's position to follow sceneCameraPosition
+		Matrix44 lightsWorldMatrix			= light->m_transform.GetWorldTransformMatrix();
+		Vector3  moveBackwardsDirection		= lightsWorldMatrix.GetKColumn() * -1.f;
+		Vector3  shadowCamAdjustedPosition	= sceneCameraPosition + ( moveBackwardsDirection * 50.f );
+		lightsWorldMatrix.SetTColumn( shadowCamAdjustedPosition );
+
 		// Setup the camera at that light
-		Matrix44 lightsWorldMatrix	= light->m_transform.GetWorldTransformMatrix();
 		m_shadowCamera->m_cameraTransform.SetFromMatrix( lightsWorldMatrix );
-		Matrix44 projectionMatrix	= Matrix44::MakeOrtho3D( 32, 32, -100, 100 );
+		Matrix44 projectionMatrix	= Matrix44::MakeOrtho3D( 128, 128, -100, 100 );
 		m_shadowCamera->SetProjectionMatrix( projectionMatrix );
 		m_shadowCamera->UpdateViewMatrix();
 
