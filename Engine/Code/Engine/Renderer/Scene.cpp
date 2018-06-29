@@ -1,4 +1,6 @@
+#pragma once
 #include "Scene.hpp"
+#include "Engine/Core/EngineCommon.hpp"
 
 void Scene::AddLight( Light &light )
 {
@@ -27,4 +29,24 @@ void Scene::AddCamera( Camera &camera )
 void Scene::AddRenderable( Renderable &renderable )
 {
 	m_renderables.push_back( &renderable );
+}
+
+void Scene::RemoveRenderable( Renderable &removeMe )
+{
+	uint totalRenderables = m_renderables.size();
+
+	for( uint i = 0; i < totalRenderables; i++ )
+	{
+		if( m_renderables[i] == &removeMe )
+		{
+			// Swap it with the last one
+			std::swap( m_renderables[i], m_renderables[ totalRenderables - 1 ] );
+
+			// pop back
+			m_renderables.pop_back();
+
+			// return..
+			return;
+		}
+	}
 }
