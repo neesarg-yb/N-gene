@@ -29,6 +29,12 @@ EnemyBase::EnemyBase( Vector2 const &basePositionXZ, Terrain &isInTerrain, int c
 	// Set Material
 	Material* material	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 	m_renderable->SetBaseMaterial( material );
+
+	// Set bounds
+	m_worldBounds = AABB3( m_transform.GetWorldPosition(), m_towerSize.x, m_towerSize.y, m_towerSize.z );
+
+	// Set Health
+	m_health = 10.f;
 }
 
 EnemyBase::~EnemyBase()

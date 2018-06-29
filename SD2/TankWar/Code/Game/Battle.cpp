@@ -19,6 +19,161 @@ Scene*				  Battle::s_battleScene;
 Camera*				  Battle::s_camera;
 std::vector< Light* > Battle::s_lightSources;
 
+Battle::Battle()
+{
+
+}
+
+Battle::~Battle()
+{
+	delete m_renderingPath;
+	delete s_battleScene;
+
+	DebugRendererShutdown();
+
+	// Lights
+	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
+		delete s_lightSources[i];
+
+	// GameObject Pool
+	for( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )
+	{
+		for( unsigned int i = 0; i < m_allGameObjects[ type ].size(); i++ )
+			delete m_allGameObjects[ type ][i];
+
+		m_allGameObjects[ type ].clear();
+	}
+
+	delete s_camera;
+}
+
+void Battle::Startup()
+{
+	// Setup the camera
+	s_camera = new Camera();
+	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
+	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
+	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
+	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
+
+	// Setup the Lighting
+	s_lightSources.push_back( new Light( Vector3( 35.f, 40.f, 20.f ), Vector3( -45.f, 0.f, 0.f ) ) );
+	s_lightSources[0]->SetUpForDirectionalLight( 20.f, Vector3( 1.f, 0.f, 0.f ), RGBA_WHITE_COLOR );
+	s_lightSources[0]->UsesShadowMap( true );
+
+	// Setup the DebugRenderer
+	DebugRendererStartup( g_theRenderer, s_camera );
+
+	// Battle Scene
+	s_battleScene = new Scene();
+
+	s_battleScene->AddLight( *s_lightSources[0] );
+	s_battleScene->AddRenderable( *s_lightSources[0]->m_renderable );
+
+	s_battleScene->AddCamera( *s_camera );
+
+	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
+
+	// TERRAIN
+	m_terrain = new Terrain( Vector3( 10.f, 20.f, 30.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
+	AddNewGameObject( *m_terrain );
+
+	AABB2	terrainsXZBounds;
+	terrainsXZBounds.mins = Vector2( m_terrain->m_worldBounds.mins.x, m_terrain->m_worldBounds.mins.z );
+	terrainsXZBounds.maxs = Vector2( m_terrain->m_worldBounds.maxs.x, m_terrain->m_worldBounds.maxs.z );
+
+
+	// PLAYER TANK
+	Vector2 middleOfTheTerrain = (terrainsXZBounds.mins + terrainsXZBounds.maxs) * 0.5f;
+	m_playerTank = new Tank( middleOfTheTerrain, *m_terrain, true, s_camera );
+	AddNewGameObject( *m_playerTank );
+
+	// TESTING THE ENEMY BASE
+	for( uint i = 0; i < 10; i++ )
+	{
+		Vector2 randPosOnTerrain;
+		randPosOnTerrain.x = GetRandomFloatInRange( terrainsXZBounds.mins.x, terrainsXZBounds.maxs.x );
+		randPosOnTerrain.y = GetRandomFloatInRange( terrainsXZBounds.mins.y, terrainsXZBounds.maxs.y );
+
+		EnemyBase* testEnemyBase = new EnemyBase( randPosOnTerrain, *m_terrain, 10, 0.65f, 20.f );
+		AddNewGameObject( *testEnemyBase );
+	};
+}
+
+void Battle::BeginFrame()
+{
+
+}
+
+void Battle::EndFrame()
+{
+
+}
+
+void Battle::Update( float deltaSeconds )
+{
+	// Battle::Update
+	m_timeSinceStartOfTheBattle += deltaSeconds;
+
+	// Lights
+	ChnageLightAsPerInput( deltaSeconds );
+	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
+		s_lightSources[i]->Update( deltaSeconds );
+
+	// Cleanup the GameObjects with ZERO health
+	DeleteGameObjectsWithZeroOrLessHealth();
+
+	// Update: GameObjects
+	for ( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )				// For each type
+	{
+		for( uint idx = 0; idx < m_allGameObjects[ type ].size(); idx++ )	// For each game objects of that type
+			m_allGameObjects[ type ][ idx ]->Update( deltaSeconds );
+	}
+
+	// Check for collision
+	BulletToEnemyCollision();
+	BulletToEnemyBaseCollision();
+
+	// Debug Renderer
+	DebugRendererUpdate( deltaSeconds );
+
+
+	// Spawn Lights according to input
+	if( g_theInput->WasKeyJustPressed( 'R' ) )
+		AddNewPointLightToCamareaPosition( RGBA_RED_COLOR );
+	if( g_theInput->WasKeyJustPressed( 'G' ) )
+		AddNewPointLightToCamareaPosition( RGBA_GREEN_COLOR );
+	if( g_theInput->WasKeyJustPressed( 'B' ) )
+		AddNewPointLightToCamareaPosition( RGBA_BLUE_COLOR );
+	if( g_theInput->WasKeyJustPressed( 'W' ) )
+		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
+
+}
+
+void Battle::Render() const
+{
+	// Bind all the Uniforms
+	g_theRenderer->UseShader( g_theRenderer->CreateOrGetShader( "lit" ) );
+	g_theRenderer->SetUniform( "EYE_POSITION", s_camera->GetCameraModelMatrix().GetTColumn() );
+
+	////////////////////////////////
+	// 							  //
+	//  START DRAWING FROM HERE.. //
+	//							  //
+	////////////////////////////////
+	m_renderingPath->RenderSceneForCamera( *s_camera, *s_battleScene );
+
+	// DebugText for Lighting and Shader..
+	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
+	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
+	std::string toSpawnSpotLights	= std::string( "Spawn new SpotLights," );
+	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
+	toSpawnSpotLights	= std::string( "Keys: R(red), G(green), B(blue), W(white)" );
+	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
+
+	DebugRendererRender();
+}
+
 void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 {
 	Vector3 cameraPos = s_camera->m_cameraTransform.GetWorldPosition();
@@ -110,158 +265,32 @@ void Battle::BulletToEnemyCollision()
 	}
 }
 
-Battle::Battle()
+void Battle::BulletToEnemyBaseCollision()
 {
-	
-}
+	// If a point is inside AABB3
+	BulletList		&bullets = * (BulletList*)		( &m_allGameObjects[ GAME_OBJECT_BULLET ] );
+	EnemyBaseList	&eBases	 = * (EnemyBaseList*)	( &m_allGameObjects[ GAME_OBJECT_ENEMY_BASE ] );
 
-Battle::~Battle()
-{
-	delete m_renderingPath;
-	delete s_battleScene;
-	
-	DebugRendererShutdown();
-
-	// Lights
-	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
-		delete s_lightSources[i];
-
-	// GameObject Pool
-	for( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )
+	// For each enemy bases
+	for( uint e = 0; e < eBases.size(); e++ )
 	{
-		for( unsigned int i = 0; i < m_allGameObjects[ type ].size(); i++ )
-			delete m_allGameObjects[ type ][i];
+		// Get AABB3 bounds of the base
+		AABB3 eBaseBounds = eBases[e]->m_worldBounds;
 
-		m_allGameObjects[ type ].clear();
+		// For each bullets
+		for( uint b = 0; b < bullets.size(); b++ )
+		{
+			// If bullet is inside the AABB3
+			bool collisionHappened = eBaseBounds.IsPointInsideMe( bullets[b]->m_transform.GetWorldPosition() );
+
+			if( collisionHappened )
+			{
+				// Reduce one health
+				eBases[e]->m_health		-= 1.f;
+				bullets[b]->m_health	-= 1.f;
+			}
+		}
 	}
-	
-	delete s_camera;
-}
-
-void Battle::Startup()
-{
-	// Setup the camera
-	s_camera = new Camera();
-	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
-	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
-	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
-	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
-
-	// Setup the Lighting
-	s_lightSources.push_back( new Light( Vector3( 35.f, 40.f, 20.f ), Vector3( -45.f, 0.f, 0.f ) ) );
-	s_lightSources[0]->SetUpForDirectionalLight( 20.f, Vector3( 1.f, 0.f, 0.f ), RGBA_WHITE_COLOR );
-	s_lightSources[0]->UsesShadowMap( true );
-
-	// Setup the DebugRenderer
-	DebugRendererStartup( g_theRenderer, s_camera );
-
-	// Battle Scene
-	s_battleScene = new Scene();
-
-	s_battleScene->AddLight( *s_lightSources[0] );
-	s_battleScene->AddRenderable( *s_lightSources[0]->m_renderable );
-
-	s_battleScene->AddCamera( *s_camera );
-
-	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
-
-	// TERRAIN
-	m_terrain = new Terrain( Vector3( 10.f, 20.f, 30.f ), IntVector2( 500, 400 ), 30.f, "Data\\Images\\terrain\\heightmapt.png" );
-	AddNewGameObject( *m_terrain );
-
-	AABB2	terrainsXZBounds;
-	terrainsXZBounds.mins = Vector2( m_terrain->m_worldBounds.mins.x, m_terrain->m_worldBounds.mins.z );
-	terrainsXZBounds.maxs = Vector2( m_terrain->m_worldBounds.maxs.x, m_terrain->m_worldBounds.maxs.z );
-
-
-	// PLAYER TANK
-	Vector2 middleOfTheTerrain = (terrainsXZBounds.mins + terrainsXZBounds.maxs) * 0.5f;
-	m_playerTank = new Tank( middleOfTheTerrain, *m_terrain, true, s_camera );
-	AddNewGameObject( *m_playerTank );
-
-	// TESTING THE ENEMY BASE
-	for( uint i = 0; i < 10; i++ )
-	{
-		Vector2 randPosOnTerrain;
-		randPosOnTerrain.x = GetRandomFloatInRange( terrainsXZBounds.mins.x, terrainsXZBounds.maxs.x );
-		randPosOnTerrain.y = GetRandomFloatInRange( terrainsXZBounds.mins.y, terrainsXZBounds.maxs.y );
-
-		EnemyBase* testEnemyBase = new EnemyBase( randPosOnTerrain, *m_terrain, 10, 0.65f, 20.f );
-		AddNewGameObject( *testEnemyBase );
-	};
-}
-
-void Battle::BeginFrame()
-{
-
-}
-
-void Battle::EndFrame()
-{
-
-}
-
-void Battle::Update( float deltaSeconds )
-{
-	// Battle::Update
-	m_timeSinceStartOfTheBattle += deltaSeconds;
-	
-	// Lights
-	ChnageLightAsPerInput( deltaSeconds );
-	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
-		s_lightSources[i]->Update( deltaSeconds );
-
-	// Cleanup the GameObjects with ZERO health
-	DeleteGameObjectsWithZeroOrLessHealth();
-
-	// Update: GameObjects
-	for ( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )				// For each type
-	{
-		for( uint idx = 0; idx < m_allGameObjects[ type ].size(); idx++ )	// For each game objects of that type
-			m_allGameObjects[ type ][ idx ]->Update( deltaSeconds );
-	}
-
-	// Check for collision
-	BulletToEnemyCollision();
-
-	// Debug Renderer
-	DebugRendererUpdate( deltaSeconds );
-	
-
-	// Spawn Lights according to input
-	if( g_theInput->WasKeyJustPressed( 'R' ) )
-		AddNewPointLightToCamareaPosition( RGBA_RED_COLOR );
-	if( g_theInput->WasKeyJustPressed( 'G' ) )
-		AddNewPointLightToCamareaPosition( RGBA_GREEN_COLOR );
-	if( g_theInput->WasKeyJustPressed( 'B' ) )
-		AddNewPointLightToCamareaPosition( RGBA_BLUE_COLOR );
-	if( g_theInput->WasKeyJustPressed( 'W' ) )
-		AddNewPointLightToCamareaPosition( RGBA_WHITE_COLOR );
-
-}
-
-void Battle::Render() const
-{
-	// Bind all the Uniforms
-	g_theRenderer->UseShader( g_theRenderer->CreateOrGetShader( "lit" ) );
-	g_theRenderer->SetUniform( "EYE_POSITION", s_camera->GetCameraModelMatrix().GetTColumn() );
-
-	////////////////////////////////
-	// 							  //
-	//  START DRAWING FROM HERE.. //
-	//							  //
-	////////////////////////////////
-	m_renderingPath->RenderSceneForCamera( *s_camera, *s_battleScene );
-	
-	// DebugText for Lighting and Shader..
-	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
-	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
-	std::string toSpawnSpotLights	= std::string( "Spawn new SpotLights," );
-	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
-	toSpawnSpotLights	= std::string( "Keys: R(red), G(green), B(blue), W(white)" );
-	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
-
-	DebugRendererRender();
 }
 
 double Battle::GetTimeSinceBattleStarted() const

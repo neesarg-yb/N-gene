@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Math/AABB3.hpp"
 #include "Game/GameObject.hpp"
 
 class Terrain;
@@ -13,6 +14,7 @@ public:
 	Terrain			&m_parentTerrain;
 	Vector2 const	 m_xzPosition;
 	Vector3 const	 m_towerSize;
+	AABB3			 m_worldBounds;
 	int		const	 m_maxEnemiesCount;
 	float	const	 m_spawnRate					=	1.f;		// Enemies per second
 
