@@ -46,11 +46,21 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 
 Battle::Battle()
 {
+	// Setup the UI Camera
+	m_uiCamera = new Camera();
+	m_uiCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
+	m_uiCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
+	m_uiCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
 
+	// Fonts
+	m_bitmapFonts = g_theRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
 }
 
 Battle::~Battle()
 {
+	delete m_bitmapFonts;
+	delete m_uiCamera;
+
 	delete m_renderingPath;
 	delete s_battleScene;
 
@@ -189,6 +199,7 @@ void Battle::Render() const
 	//							  //
 	////////////////////////////////
 	m_renderingPath->RenderSceneForCamera( *s_camera, *s_battleScene );
+	RenderUI();
 
 	// DebugText for Lighting and Shader..
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
@@ -199,6 +210,33 @@ void Battle::Render() const
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
 
 	DebugRendererRender();
+}
+
+void Battle::RenderUI() const
+{
+	g_theRenderer->BindCamera( m_uiCamera );
+	g_theRenderer->UseShader( nullptr );
+
+	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
+
+	// Background
+	AABB2		bcBounds		= AABB2( g_aspectRatio - 0.55f, 0.78f, g_aspectRatio - 0.01f, 0.97f );
+	g_theRenderer->DrawAABB( bcBounds, RGBA_GRAY_COLOR );
+	
+	// Health
+	std::string healthStr		= Stringf( "Health:  %d", (int)m_playerTank->m_health );
+	AABB2		healthBounds	= AABB2( g_aspectRatio - 0.5f, 0.9, g_aspectRatio - 0.1f, 1.f );
+	g_theRenderer->DrawTextInBox2D( healthStr.c_str(), Vector2(0.f, 0.f), healthBounds, 0.04f, RGBA_RED_COLOR, m_bitmapFonts, TEXT_DRAW_OVERRUN );
+	
+	// Enemies
+	std::string enemiesStr		= Stringf( "Enemies: %d", (int)m_allGameObjects[ GAME_OBJECT_ENEMY ].size() );
+	AABB2		enemiesBounds	= AABB2( healthBounds.mins.x, healthBounds.mins.y - 0.05f, healthBounds.maxs.x, healthBounds.maxs.y - 0.05f );
+	g_theRenderer->DrawTextInBox2D( enemiesStr.c_str(), Vector2(0.f, 0.f), enemiesBounds, 0.04f, RGBA_RED_COLOR, m_bitmapFonts, TEXT_DRAW_OVERRUN );
+
+	// Enemy Bases
+	std::string basesStr		= Stringf( "Bases:   %d", (int)m_allGameObjects[ GAME_OBJECT_ENEMY_BASE ].size() );
+	AABB2		basesBounds		= AABB2( enemiesBounds.mins.x, enemiesBounds.mins.y - 0.05f, enemiesBounds.maxs.x, enemiesBounds.maxs.y - 0.05f );
+	g_theRenderer->DrawTextInBox2D( basesStr.c_str(), Vector2(0.f, 0.f), basesBounds, 0.04f, RGBA_RED_COLOR, m_bitmapFonts, TEXT_DRAW_OVERRUN );
 }
 
 void Battle::AddNewGameObject( GameObject &newGO )

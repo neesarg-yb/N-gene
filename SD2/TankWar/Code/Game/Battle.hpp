@@ -31,11 +31,15 @@ public:
 	void EndFrame();
 	void Update( float deltaSeconds );
 	void Render() const;
+	void RenderUI() const;
 
 private:
 	// Rendering Specific
 	static Camera*				s_camera;
 	static Scene*				s_battleScene;
+	Camera*						m_uiCamera						= nullptr;
+	AABB2						m_boundsForUI					= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
+	BitmapFont*					m_bitmapFonts					= nullptr;
 	Vector4						m_ambientLight					= Vector4( 1.f, 1.f, 1.f, 0.6f );
 	ForwardRenderingPath*		m_renderingPath					= nullptr;
 
