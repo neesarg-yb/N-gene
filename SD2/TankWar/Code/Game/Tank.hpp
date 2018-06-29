@@ -30,6 +30,8 @@ public:
 	float		m_bulletsPerSecond			= 2.f;
 	float		m_timeElapsedSinceLastFire	= 0.f;
 	
+	float const	m_initialHealth				= 15.f;
+
 	// Debug Trail
 	float		m_spawnTrailPointAfter		= 0.2f;
 
@@ -43,6 +45,9 @@ public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
+
+public:
+	void inline ResetHealth() { m_health = m_initialHealth; }
 
 private:
 	void ShootBullets( float deltaSeconds );

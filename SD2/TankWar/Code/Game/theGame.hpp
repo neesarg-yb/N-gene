@@ -15,6 +15,7 @@ enum GameStates
 	ATTRACT,
 	MENU,
 	BATTLE,
+	VICTORY,
 	NUM_GAME_STATES
 };
 
@@ -71,10 +72,12 @@ private:
 	void Update_Attract	( float deltaSeconds );
 	void Update_Menu	( float deltaSeconds );
 	void Update_Battle	( float deltaSeconds );
+	void Update_Victory	( float deltaSeconds );
 
 	void Render_Attract	() const;
 	void Render_Menu	() const;
 	void Render_Battle	() const;
+	void Render_Victory	() const;
 
 	void RenderLoadingScreen() const;
 

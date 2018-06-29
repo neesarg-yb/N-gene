@@ -55,7 +55,7 @@ Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, C
 	m_attachedCamera->m_cameraTransform.SetParentAs( &m_cameraSpringTransform );
 
 	// Set Health
-	m_health = 15.f;
+	m_health = m_initialHealth;
 }
 
 Tank::~Tank()

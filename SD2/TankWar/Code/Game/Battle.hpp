@@ -45,9 +45,11 @@ private:
 
 public:
 	// Battle Specific
-	double						m_timeSinceStartOfTheBattle	= 0;
+	double						m_timeSinceStartOfTheBattle		= 0;
 	Terrain*					m_terrain						= nullptr;
 	Tank*						m_playerTank					= nullptr;
+	float const					m_respawnTime					= 5.f;
+	float						m_remainingRespawnTime			= 0.f;
 
 	GameObjectList				m_allGameObjects[ NUM_GAME_OBJECT_TYPES ];
 
@@ -57,6 +59,8 @@ public:
 	static void	AddNewPointLightToCamareaPosition( Rgba lightColor );
 
 public:
+	bool	IsBattleWon() const;
+
 	// Add to Battle
 	void	AddNewGameObject( GameObject &newGO );
 	void	DeleteGameObjectsWithZeroOrLessHealth();
@@ -66,6 +70,7 @@ public:
 	void	BulletToEnemyBaseCollision();
 	void	BulletToTerrainCollision();
 	void	EnemyToTankCollision();
+	void	RespawnThePlayer();
 
 private:
 	double	GetTimeSinceBattleStarted() const;

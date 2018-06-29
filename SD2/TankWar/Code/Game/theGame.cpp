@@ -3,6 +3,14 @@
 #include "Engine/Core/DevConsole.hpp"
 #include "Game/theApp.hpp"
 
+bool gameWonFromCommand = false;
+
+void WinTheGame( Command& cmd )
+{
+	UNUSED( cmd );
+	gameWonFromCommand = true;
+}
+
 void EchoTestCommand( Command& cmd )
 {
 	ConsolePrintf( "%s", cmd.GetNextString().c_str() );
@@ -39,6 +47,7 @@ void theGame::Startup()
 
 	// Console stuffs
 	CommandRegister( "echo", EchoTestCommand );
+	CommandRegister( "win_game", WinTheGame );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%d Hello World!", 1 );
 
 	// Seting up the Attract Menu
@@ -123,6 +132,9 @@ void theGame::Update()
 	case BATTLE:
 		Update_Battle( deltaSeconds );
 		break;
+	case VICTORY:
+		Update_Victory( deltaSeconds );
+		break;
 	default:
 		ERROR_AND_DIE( "Error: No valid gamestate found..! | theGame::Update()" );
 		break;
@@ -141,6 +153,9 @@ void theGame::Render() const
 		break;
 	case BATTLE:
 		Render_Battle();
+		break;
+	case VICTORY:
+		Render_Victory();
 		break;
 	default:
 		ERROR_AND_DIE( "Error: No valid gamestate found..! | theGame::Render()" );
@@ -254,11 +269,45 @@ void theGame::Update_Battle( float deltaSeconds )
 		StartTransitionToState( MENU );
 
 	m_currentBattle->Update( deltaSeconds );
+
+	if( m_currentBattle->IsBattleWon() || gameWonFromCommand )
+	{
+		StartTransitionToState( VICTORY );
+		gameWonFromCommand = false;
+	}
+}
+
+void theGame::Update_Victory( float deltaSeconds )
+{
+	UNUSED( deltaSeconds );
+
+	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed )
+	{
+		// Create a new level
+		delete m_currentBattle;
+		m_currentBattle = new Battle();
+		m_currentBattle->Startup();
+
+		// Start transition to that level
+		StartTransitionToState( BATTLE );
+	}
 }
 
 void theGame::Render_Battle() const
 {
 	m_currentBattle->Render();
+}
+
+void theGame::Render_Victory() const
+{
+	g_theRenderer->BindCamera( m_gameCamera );
+	g_theRenderer->UseShader( nullptr );
+
+	g_theRenderer->ClearScreen( m_default_screen_color );
+	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
+
+	g_theRenderer->DrawTextInBox2D( "Victory!", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "Press (A) to continue..", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
 void theGame::GoToMenuState( char const * actionName )

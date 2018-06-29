@@ -44,6 +44,14 @@ void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
 }
 
+bool Battle::IsBattleWon() const
+{
+	bool result =	( m_allGameObjects[ GAME_OBJECT_ENEMY ].size()		== 0 ) && 
+					( m_allGameObjects[ GAME_OBJECT_ENEMY_BASE ].size() == 0 );
+
+	return result;
+}
+
 Battle::Battle()
 {
 	// Setup the UI Camera
@@ -58,7 +66,6 @@ Battle::Battle()
 
 Battle::~Battle()
 {
-	delete m_bitmapFonts;
 	delete m_uiCamera;
 
 	delete m_renderingPath;
@@ -69,6 +76,8 @@ Battle::~Battle()
 	// Lights
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		delete s_lightSources[i];
+
+	s_lightSources.clear();
 
 	// GameObject Pool
 	for( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )
@@ -124,13 +133,13 @@ void Battle::Startup()
 	AddNewGameObject( *m_playerTank );
 
 	// TESTING THE ENEMY BASE
-	for( uint i = 0; i < 10; i++ )
+	for( uint i = 0; i < 10U; i++ )
 	{
 		Vector2 randPosOnTerrain;
 		randPosOnTerrain.x = GetRandomFloatInRange( terrainsXZBounds.mins.x, terrainsXZBounds.maxs.x );
 		randPosOnTerrain.y = GetRandomFloatInRange( terrainsXZBounds.mins.y, terrainsXZBounds.maxs.y );
 
-		EnemyBase* testEnemyBase = new EnemyBase( randPosOnTerrain, *m_terrain, 10, 0.65f, 20.f );
+		EnemyBase* testEnemyBase = new EnemyBase( randPosOnTerrain, *m_terrain, 11, 0.65f, 20.f );
 		AddNewGameObject( *testEnemyBase );
 	};
 }
@@ -149,6 +158,13 @@ void Battle::Update( float deltaSeconds )
 {
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
+
+	// If in middle of respawning the Tank, return
+	if( m_remainingRespawnTime > 0.f )
+	{
+		m_remainingRespawnTime -= deltaSeconds;
+		return;
+	}
 
 	// Lights
 	ChnageLightAsPerInput( deltaSeconds );
@@ -201,6 +217,10 @@ void Battle::Render() const
 	m_renderingPath->RenderSceneForCamera( *s_camera, *s_battleScene );
 	RenderUI();
 
+	// If in respawn, don't draw Debug things
+	if( m_remainingRespawnTime > 0.f )
+		return;
+
 	// DebugText for Lighting and Shader..
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
@@ -220,12 +240,13 @@ void Battle::RenderUI() const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	// Background
+	Rgba		overlayColor	= Rgba( 0, 0, 0, 200 );
 	AABB2		bcBounds		= AABB2( g_aspectRatio - 0.55f, 0.78f, g_aspectRatio - 0.01f, 0.97f );
-	g_theRenderer->DrawAABB( bcBounds, RGBA_GRAY_COLOR );
+	g_theRenderer->DrawAABB( bcBounds, overlayColor );
 	
 	// Health
 	std::string healthStr		= Stringf( "Health:  %d", (int)m_playerTank->m_health );
-	AABB2		healthBounds	= AABB2( g_aspectRatio - 0.5f, 0.9, g_aspectRatio - 0.1f, 1.f );
+	AABB2		healthBounds	= AABB2( g_aspectRatio - 0.5f, 0.9f, g_aspectRatio - 0.1f, 1.f );
 	g_theRenderer->DrawTextInBox2D( healthStr.c_str(), Vector2(0.f, 0.f), healthBounds, 0.04f, RGBA_RED_COLOR, m_bitmapFonts, TEXT_DRAW_OVERRUN );
 	
 	// Enemies
@@ -237,6 +258,15 @@ void Battle::RenderUI() const
 	std::string basesStr		= Stringf( "Bases:   %d", (int)m_allGameObjects[ GAME_OBJECT_ENEMY_BASE ].size() );
 	AABB2		basesBounds		= AABB2( enemiesBounds.mins.x, enemiesBounds.mins.y - 0.05f, enemiesBounds.maxs.x, enemiesBounds.maxs.y - 0.05f );
 	g_theRenderer->DrawTextInBox2D( basesStr.c_str(), Vector2(0.f, 0.f), basesBounds, 0.04f, RGBA_RED_COLOR, m_bitmapFonts, TEXT_DRAW_OVERRUN );
+
+	// Respawn
+	if( m_remainingRespawnTime > 0 )
+	{
+		AABB2	overlayBounds	= m_boundsForUI;
+		g_theRenderer->DrawAABB( overlayBounds, overlayColor );
+		std::string respawnStr	= Stringf("Respawning in %d..", (int)m_remainingRespawnTime );
+		g_theRenderer->DrawTextInBox2D( respawnStr.c_str(), Vector2( 0.5f, 0.5f ), overlayBounds, 0.08f, RGBA_RED_COLOR, m_bitmapFonts, TEXT_DRAW_SHRINK_TO_FIT );
+	}
 }
 
 void Battle::AddNewGameObject( GameObject &newGO )
@@ -253,6 +283,10 @@ void Battle::DeleteGameObjectsWithZeroOrLessHealth()
 	// For each types of GameObjects
 	for( uint t = 0; t < NUM_GAME_OBJECT_TYPES; t++ )
 	{
+		// Except Tank
+		if( t == GAME_OBJECT_TANK )
+			continue;
+
 		// For each GameObjects of that type
 		for( uint g = 0; g < m_allGameObjects[t].size(); g++ )
 		{
@@ -277,6 +311,13 @@ void Battle::DeleteGameObjectsWithZeroOrLessHealth()
 			// decrement the index b/c we just popped back one game object
 			g--;
 		}
+	}
+
+	// If Tank's health is ZERO, signal to respawn
+	if( m_playerTank->m_health <= 0.f )
+	{
+		RespawnThePlayer();
+		m_remainingRespawnTime = m_respawnTime;
 	}
 }
 
@@ -365,10 +406,21 @@ void Battle::EnemyToTankCollision()
 		// Reduce health on collision
 		if( dist < sumOfRadius )
 		{
-			// m_playerTank->m_health	-= 1.f;
+			m_playerTank->m_health	-= 1.f;
 			enemies[e]->m_health	-= 1.f;
 		}
 	}
+}
+
+void Battle::RespawnThePlayer()
+{
+	m_playerTank->ResetHealth();
+	Vector2 randomXZPos;
+	AABB3	terrainBounds = m_terrain->m_worldBounds;
+	randomXZPos.x = GetRandomFloatInRange( terrainBounds.mins.x, terrainBounds.maxs.x );
+	randomXZPos.y = GetRandomFloatInRange( terrainBounds.mins.z, terrainBounds.maxs.z );
+
+	m_playerTank->m_xzPosition = randomXZPos;
 }
 
 double Battle::GetTimeSinceBattleStarted() const
