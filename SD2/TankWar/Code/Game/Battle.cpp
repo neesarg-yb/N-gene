@@ -159,6 +159,7 @@ void Battle::Update( float deltaSeconds )
 	BulletToEnemyCollision();
 	BulletToEnemyBaseCollision();
 	BulletToTerrainCollision();
+	EnemyToTankCollision();
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
@@ -309,6 +310,26 @@ void Battle::BulletToTerrainCollision()
 		// If bullet is under terrain
 		if( yCoordOfBullet <= yCoordOfTerrain )
 			bullets[b]->m_health = 0.f;
+	}
+}
+
+void Battle::EnemyToTankCollision()
+{
+	EnemyList &enemies = * (EnemyList*) (&m_allGameObjects[ GAME_OBJECT_ENEMY ] );
+
+	// For each enemies
+	for( uint e = 0; e < enemies.size(); e++ )
+	{
+		Vector3 enemyPos	= enemies[e]->m_transform.GetWorldPosition();
+		float	dist		= ( enemyPos - m_playerTank->m_transform.GetWorldPosition() ).GetLength();
+		float	sumOfRadius	= enemies[e]->m_radius + 2.f;
+
+		// Reduce health on collision
+		if( dist < sumOfRadius )
+		{
+			// m_playerTank->m_health	-= 1.f;
+			enemies[e]->m_health	-= 1.f;
+		}
 	}
 }
 

@@ -53,6 +53,9 @@ Tank::Tank( Vector2 const &spawnPosition, Terrain &isInTerrain, bool isPlayer, C
 	// Camera's Transform:
 	m_cameraSpringTransform.SetParentAs( &m_anchorTransform );
 	m_attachedCamera->m_cameraTransform.SetParentAs( &m_cameraSpringTransform );
+
+	// Set Health
+	m_health = 15.f;
 }
 
 Tank::~Tank()
@@ -83,10 +86,11 @@ void Tank::Update( float deltaSeconds )
 	m_transform.SetRotation( worldRotation );
 
 	// Raycast
-	Vector2 screenCenter		= Vector2( Window::GetInstance()->GetWidth() * 0.5f, Window::GetInstance()->GetHeight() * 0.5f );
-	Vector3 cameraFarPosition	= m_attachedCamera->GetWorldPositionFromScreen( screenCenter,  0.f );
-	Vector3 startPosition		= m_attachedCamera->GetWorldPositionFromScreen( screenCenter, -1.f );
-	Vector3 raycastDir			= ( cameraFarPosition - startPosition ).GetNormalized();
+	Vector2 screenCenter		 = Vector2( Window::GetInstance()->GetWidth() * 0.5f, Window::GetInstance()->GetHeight() * 0.5f );
+	Vector3 cameraFarPosition	 = m_attachedCamera->GetWorldPositionFromScreen( screenCenter,  0.f );
+	Vector3 startPosition		 = m_attachedCamera->GetWorldPositionFromScreen( screenCenter, -1.f );
+	Vector3 raycastDir			 = ( cameraFarPosition - startPosition ).GetNormalized();
+	startPosition				+= raycastDir * 10.f;		// Push it forwards so start position is on top of the Tank's position
 
 	// Make Turret look at target
 	RaycastResult hitResult = m_parentTerrain.Raycast( startPosition, raycastDir, 500.f );

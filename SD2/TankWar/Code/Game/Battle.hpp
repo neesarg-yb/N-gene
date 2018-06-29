@@ -61,6 +61,7 @@ public:
 	void	BulletToEnemyCollision();
 	void	BulletToEnemyBaseCollision();
 	void	BulletToTerrainCollision();
+	void	EnemyToTankCollision();
 
 private:
 	double	GetTimeSinceBattleStarted() const;
