@@ -25,3 +25,14 @@ AABB3::~AABB3()
 
 }
 
+bool AABB3::IsPointInsideMe( Vector3 const &point ) const
+{
+	bool biggerThanMins		= (point.x >= mins.x) && (point.y >= mins.y) && (point.z >= mins.z);
+	bool smallerThanMaxs	= (point.x <= maxs.x) && (point.y <= maxs.y) && (point.z <= maxs.z);
+
+	if( biggerThanMins && smallerThanMaxs )
+		return true;
+	else
+		return false;
+}
+

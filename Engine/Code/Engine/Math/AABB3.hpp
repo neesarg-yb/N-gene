@@ -12,4 +12,7 @@ public:
 public:
 	Vector3 mins;
 	Vector3 maxs;
+
+public:
+	bool IsPointInsideMe( Vector3 const &point ) const;
 };
