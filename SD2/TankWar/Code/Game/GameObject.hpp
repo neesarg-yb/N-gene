@@ -26,6 +26,8 @@ public:
 	Transform				 m_transform;
 	Renderable				*m_renderable	= nullptr;
 
+	float					 m_health		= 1.f;
+
 public:
 	virtual void Update						( float deltaSeconds ) = 0;
 	virtual void AddRenderablesToScene		( Scene &activeScene ) = 0;

@@ -52,6 +52,38 @@ void Battle::AddNewGameObject( GameObject &newGO )
 	newGO.AddRenderablesToScene( *s_battleScene );
 }
 
+void Battle::DeleteGameObjectsWithZeroOrLessHealth()
+{
+	// For each types of GameObjects
+	for( uint t = 0; t < NUM_GAME_OBJECT_TYPES; t++ )
+	{
+		// For each GameObjects of that type
+		for( uint g = 0; g < m_allGameObjects[t].size(); g++ )
+		{
+			// If health is not low, go for next
+			if( m_allGameObjects[t][g]->m_health > 0.f )
+				continue;
+
+			uint lastIndex = (uint) m_allGameObjects[t].size() - 1U;
+
+			// swap it with the last one
+			std::swap( m_allGameObjects[t][g], m_allGameObjects[t][lastIndex] );
+
+			// Remove its renderable
+			m_allGameObjects[t][lastIndex]->RemoveRenderablesFromScene( *s_battleScene );
+
+			// delete it
+			delete m_allGameObjects[t][lastIndex];
+
+			// pop back
+			m_allGameObjects[t].pop_back();
+
+			// decrement the index b/c we just popped back one game object
+			g--;
+		}
+	}
+}
+
 void Battle::BulletToEnemyCollision()
 {
 	// Sphere to sphere collision
@@ -68,31 +100,11 @@ void Battle::BulletToEnemyCollision()
 			float dist			= ( bullets[b]->m_transform.GetWorldPosition() - enemies[e]->m_transform.GetWorldPosition() ).GetLength();
 			float sumOfRadius	= bullets[b]->m_radius + enemies[e]->m_radius;
 
-			// collision - delete both of them
+			// collision - both should die!
 			if( dist <= sumOfRadius )
 			{
-				uint bLast = (uint)bullets.size() - 1U;
-				uint eLast = (uint)enemies.size() - 1U;
-
-				// move them to last pos. in their std::vector
-				std::swap( bullets[b], bullets[ bLast ] );
-				std::swap( enemies[e], enemies[ eLast ] );
-
-				// Remove from Scene
-				bullets[bLast]->RemoveRenderablesFromScene( *s_battleScene );
-				enemies[eLast]->RemoveRenderablesFromScene( *s_battleScene );
-
-				// Delete the GameObject
-				delete bullets[bLast];
-				delete enemies[eLast];
-
-				// pop back
-				bullets.pop_back();
-				enemies.pop_back();
-
-				// Move back once on indices: b/c you just deleted one..
-				b--;
-				e--;
+				bullets[b]->m_health = 0.f;
+				enemies[e]->m_health = 0.f;
 			}
 		}
 	}
@@ -198,6 +210,9 @@ void Battle::Update( float deltaSeconds )
 	ChnageLightAsPerInput( deltaSeconds );
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
 		s_lightSources[i]->Update( deltaSeconds );
+
+	// Cleanup the GameObjects with ZERO health
+	DeleteGameObjectsWithZeroOrLessHealth();
 
 	// Update: GameObjects
 	for ( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )				// For each type

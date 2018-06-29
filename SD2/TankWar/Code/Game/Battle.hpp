@@ -54,6 +54,7 @@ public:
 public:
 	// Add to Battle
 	void	AddNewGameObject( GameObject &newGO );
+	void	DeleteGameObjectsWithZeroOrLessHealth();
 
 	// Collision
 	void	BulletToEnemyCollision();
