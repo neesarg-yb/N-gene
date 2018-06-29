@@ -60,6 +60,7 @@ public:
 	// Collision
 	void	BulletToEnemyCollision();
 	void	BulletToEnemyBaseCollision();
+	void	BulletToTerrainCollision();
 
 private:
 	double	GetTimeSinceBattleStarted() const;

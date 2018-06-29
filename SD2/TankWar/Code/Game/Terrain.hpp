@@ -69,6 +69,8 @@ private:
 
 	// Convenience Methods
 	inline Vector3	SinWavePlane( Vector2 uv ) { return SinWavePlane( uv.x, uv.y ); }
+
+public:
 	inline float	GetYCoordinateForMyPositionAt( float x, float z ) { return GetYCoordinateForMyPositionAt( Vector2( x, z ) ); }
 	inline Vector3	GetVertexPositionUsingHeightMap( Vector2 uv ) { return GetVertexPositionUsingHeightMap( uv.x, uv.y ); }
 };

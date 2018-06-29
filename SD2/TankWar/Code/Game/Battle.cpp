@@ -19,6 +19,31 @@ Scene*				  Battle::s_battleScene;
 Camera*				  Battle::s_camera;
 std::vector< Light* > Battle::s_lightSources;
 
+
+void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
+{
+	Vector3 cameraPos = s_camera->m_cameraTransform.GetWorldPosition();
+
+	Light* newLight	= new Light( cameraPos, s_camera->m_cameraTransform.GetRotation() );
+	newLight->SetUpForPointLight( 40.f, Vector3( 0.f, 0.f, 1.f ), lightColor );
+	s_lightSources.push_back( newLight );
+
+	s_battleScene->AddLight( *newLight );
+	s_battleScene->AddRenderable( *newLight->m_renderable );
+
+	// DebugRenderWireSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRenderSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRenderQuad( 10.f, cameraPos, Vector3( 15.f, 45.f, 15.f ), Vector2::ONE_ONE, nullptr, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRenderWireCube( 10.f, cameraPos - Vector3( 0.5f, 0.5f, 0.5f ), cameraPos + Vector3( 0.5f, 0.5f, 0.5f ), RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRenderBasis( 10.f, newLight->m_renderable->GetTransform().GetWorldTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRenderLineSegment( 10.f, cameraPos - Vector3( 0.5f, 0.5f, 0.5f ), RGBA_WHITE_COLOR, cameraPos + Vector3( 0.5f, 0.5f, 0.5f ), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRenderPoint( 10.f, cameraPos - Vector3( 0.f, 0.f, -.5f ), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRender2DText( 2.5f, Vector2::ZERO, 15.f, RGBA_WHITE_COLOR, RGBA_BLACK_COLOR, "Light Spawned!" );
+	// DebugRender2DLine( 1.f, Vector2( -100.f, -100.f), RGBA_WHITE_COLOR, Vector2( 100.f, 100.f ), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	// DebugRender2DLine( 1.f, Vector2( -100.f, 100.f), RGBA_WHITE_COLOR, Vector2( 100.f, -100.f ), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
+}
+
 Battle::Battle()
 {
 
@@ -133,6 +158,7 @@ void Battle::Update( float deltaSeconds )
 	// Check for collision
 	BulletToEnemyCollision();
 	BulletToEnemyBaseCollision();
+	BulletToTerrainCollision();
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
@@ -172,30 +198,6 @@ void Battle::Render() const
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, toSpawnSpotLights);
 
 	DebugRendererRender();
-}
-
-void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
-{
-	Vector3 cameraPos = s_camera->m_cameraTransform.GetWorldPosition();
-	
-	Light* newLight	= new Light( cameraPos, s_camera->m_cameraTransform.GetRotation() );
-	newLight->SetUpForPointLight( 40.f, Vector3( 0.f, 0.f, 1.f ), lightColor );
-	s_lightSources.push_back( newLight );
-
-	s_battleScene->AddLight( *newLight );
-	s_battleScene->AddRenderable( *newLight->m_renderable );
-
-	// DebugRenderWireSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	// DebugRenderSphere( 10.f, cameraPos, .5f, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	// DebugRenderQuad( 10.f, cameraPos, Vector3( 15.f, 45.f, 15.f ), Vector2::ONE_ONE, nullptr, RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	// DebugRenderWireCube( 10.f, cameraPos - Vector3( 0.5f, 0.5f, 0.5f ), cameraPos + Vector3( 0.5f, 0.5f, 0.5f ), RGBA_WHITE_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	// DebugRenderBasis( 10.f, newLight->m_renderable->GetTransform().GetWorldTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	// DebugRenderLineSegment( 10.f, cameraPos - Vector3( 0.5f, 0.5f, 0.5f ), RGBA_WHITE_COLOR, cameraPos + Vector3( 0.5f, 0.5f, 0.5f ), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	// DebugRenderPoint( 10.f, cameraPos - Vector3( 0.f, 0.f, -.5f ), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	// DebugRender2DText( 2.5f, Vector2::ZERO, 15.f, RGBA_WHITE_COLOR, RGBA_BLACK_COLOR, "Light Spawned!" );
-	// DebugRender2DLine( 1.f, Vector2( -100.f, -100.f), RGBA_WHITE_COLOR, Vector2( 100.f, 100.f ), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
-	// DebugRender2DLine( 1.f, Vector2( -100.f, 100.f), RGBA_WHITE_COLOR, Vector2( 100.f, -100.f ), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
-	// DebugRender2DQuad( 2.5f, AABB2( Vector2::ZERO , 10.f, 10.f), RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR );
 }
 
 void Battle::AddNewGameObject( GameObject &newGO )
@@ -290,6 +292,23 @@ void Battle::BulletToEnemyBaseCollision()
 				bullets[b]->m_health	-= 1.f;
 			}
 		}
+	}
+}
+
+void Battle::BulletToTerrainCollision()
+{
+	BulletList &bullets = * (BulletList*) (&m_allGameObjects[ GAME_OBJECT_BULLET ]);
+
+	// For each bullets
+	for( uint b = 0; b < bullets.size(); b++ )
+	{
+		Vector3 bulletPos		= bullets[b]->m_transform.GetWorldPosition();
+		float yCoordOfBullet	= bulletPos.y;
+		float yCoordOfTerrain	= m_terrain->GetYCoordinateForMyPositionAt( bulletPos.x, bulletPos.z );
+
+		// If bullet is under terrain
+		if( yCoordOfBullet <= yCoordOfTerrain )
+			bullets[b]->m_health = 0.f;
 	}
 }
 
