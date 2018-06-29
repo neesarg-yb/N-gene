@@ -33,7 +33,7 @@ void Scene::AddRenderable( Renderable &renderable )
 
 void Scene::RemoveRenderable( Renderable &removeMe )
 {
-	uint totalRenderables = m_renderables.size();
+	uint totalRenderables = (uint) m_renderables.size();
 
 	for( uint i = 0; i < totalRenderables; i++ )
 	{
