@@ -22,6 +22,7 @@ public:
 public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
+	void RemoveRenderablesFromScene( Scene &activeScene );
 
 	inline void IncreaseChildCount	( int increment = 1 ) { m_currentlyAliveSpawnedEnemies += increment; }
 	inline void ReduceChildCount	( int reduction = 1 ) { m_currentlyAliveSpawnedEnemies -= reduction; }

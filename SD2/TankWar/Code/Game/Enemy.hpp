@@ -22,6 +22,7 @@ public:
 public:
 	void	Update( float deltaSeconds );
 	void	AddRenderablesToScene( Scene &activeScene );
+	void	RemoveRenderablesFromScene( Scene &activeScene );
 
 	// Flocking Behavior
 	void	AddToVelocity	( Vector2 const &velToAdd );

@@ -112,6 +112,12 @@ void Tank::AddRenderablesToScene( Scene &activeScene )
 	activeScene.AddRenderable( *m_turret->m_barrelRenderable );
 }
 
+void Tank::RemoveRenderablesFromScene( Scene &activeScene )
+{
+	activeScene.RemoveRenderable( *m_renderable );
+	activeScene.RemoveRenderable( *m_turret->m_barrelRenderable );
+}
+
 void Tank::ShootBullets( float deltaSeconds )
 {
 	m_timeElapsedSinceLastFire += deltaSeconds;

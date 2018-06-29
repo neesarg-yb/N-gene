@@ -27,6 +27,7 @@ public:
 	Renderable				*m_renderable	= nullptr;
 
 public:
-	virtual void Update					( float deltaSeconds ) = 0;
-	virtual void AddRenderablesToScene	( Scene &activeScene ) = 0;
+	virtual void Update						( float deltaSeconds ) = 0;
+	virtual void AddRenderablesToScene		( Scene &activeScene ) = 0;
+	virtual void RemoveRenderablesFromScene	( Scene &activeScene ) = 0;
 };

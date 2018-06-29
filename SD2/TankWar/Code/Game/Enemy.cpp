@@ -87,6 +87,11 @@ void Enemy::AddRenderablesToScene( Scene &activeScene )
 	activeScene.AddRenderable( *m_renderable );
 }
 
+void Enemy::RemoveRenderablesFromScene( Scene &activeScene )
+{
+	activeScene.RemoveRenderable( *m_renderable );
+}
+
 void Enemy::AddToVelocity( Vector2 const &velToAdd )
 {
 	m_currentVelocityXZ += velToAdd;

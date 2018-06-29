@@ -12,7 +12,7 @@ Bullet::Bullet( Vector3 const &spawnPosition, Vector3 const &velocity )
 
 	// Set Renderable
 	m_renderable		= new Renderable();
-	Mesh* sphereMesh	= MeshBuilder::CreateSphere( 0.2f, 5, 5, Vector3::ZERO, RGBA_RED_COLOR );
+	Mesh* sphereMesh	= MeshBuilder::CreateSphere( m_radius, 5, 5, Vector3::ZERO, RGBA_RED_COLOR );
 	m_renderable->SetBaseMesh( sphereMesh );
 	Material* sphereMat	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 	m_renderable->SetBaseMaterial( sphereMat );
@@ -37,5 +37,10 @@ void Bullet::Update( float deltaSeconds )
 void Bullet::AddRenderablesToScene( Scene &activeScene )
 {
 	activeScene.AddRenderable( *m_renderable );
+}
+
+void Bullet::RemoveRenderablesFromScene( Scene &activeScene )
+{
+	activeScene.RemoveRenderable( *m_renderable );
 }
 

@@ -15,7 +15,9 @@
 
 class Material;
 
-typedef std::vector< GameObject* > GameObjectList;
+typedef std::vector< GameObject* >	GameObjectList;
+typedef std::vector< Bullet* >		BulletList;
+typedef std::vector< Enemy* >		EnemyList;
 
 class Battle
 {
@@ -52,6 +54,9 @@ public:
 public:
 	// Add to Battle
 	void	AddNewGameObject( GameObject &newGO );
+
+	// Collision
+	void	BulletToEnemyCollision();
 
 private:
 	double	GetTimeSinceBattleStarted() const;

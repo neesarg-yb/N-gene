@@ -49,6 +49,13 @@ void Terrain::AddRenderablesToScene( Scene &activeScene )
 		activeScene.AddRenderable( *m_chunks[i] );
 }
 
+void Terrain::RemoveRenderablesFromScene( Scene &activeScene )
+{
+	// Remove all chunks to scene
+	for( uint i = 0; i < m_chunks.size(); i++ )
+		activeScene.RemoveRenderable( *m_chunks[i] );
+}
+
 float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ )
 {
 	// Note: myXZPosition is in World Space

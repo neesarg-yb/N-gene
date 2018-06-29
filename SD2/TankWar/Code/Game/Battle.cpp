@@ -1,4 +1,5 @@
 #pragma once
+#include <utility>
 #include "Battle.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/File/ModelLoader.hpp"
@@ -49,6 +50,52 @@ void Battle::AddNewGameObject( GameObject &newGO )
 
 	// Add its Renderable to scene
 	newGO.AddRenderablesToScene( *s_battleScene );
+}
+
+void Battle::BulletToEnemyCollision()
+{
+	// Sphere to sphere collision
+	BulletList &bullets = * (BulletList*)	( &m_allGameObjects[ GAME_OBJECT_BULLET ] );
+	EnemyList &enemies	= * (EnemyList*)	( &m_allGameObjects[ GAME_OBJECT_ENEMY ] );
+	
+	// For each bullets
+	for( uint b = 0; b < bullets.size(); b++ )
+	{
+		// For each enemies
+		for( uint e = 0; e < enemies.size(); e++ )
+		{
+			// distance between two
+			float dist			= ( bullets[b]->m_transform.GetWorldPosition() - enemies[e]->m_transform.GetWorldPosition() ).GetLength();
+			float sumOfRadius	= bullets[b]->m_radius + enemies[e]->m_radius;
+
+			// collision - delete both of them
+			if( dist <= sumOfRadius )
+			{
+				uint bLast = (uint)bullets.size() - 1U;
+				uint eLast = (uint)enemies.size() - 1U;
+
+				// move them to last pos. in their std::vector
+				std::swap( bullets[b], bullets[ bLast ] );
+				std::swap( enemies[e], enemies[ eLast ] );
+
+				// Remove from Scene
+				bullets[bLast]->RemoveRenderablesFromScene( *s_battleScene );
+				enemies[eLast]->RemoveRenderablesFromScene( *s_battleScene );
+
+				// Delete the GameObject
+				delete bullets[bLast];
+				delete enemies[eLast];
+
+				// pop back
+				bullets.pop_back();
+				enemies.pop_back();
+
+				// Move back once on indices: b/c you just deleted one..
+				b--;
+				e--;
+			}
+		}
+	}
 }
 
 Battle::Battle()
@@ -147,7 +194,6 @@ void Battle::Update( float deltaSeconds )
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 	
-
 	// Lights
 	ChnageLightAsPerInput( deltaSeconds );
 	for( unsigned int i = 0; i < s_lightSources.size(); i++ )
@@ -159,6 +205,9 @@ void Battle::Update( float deltaSeconds )
 		for( uint idx = 0; idx < m_allGameObjects[ type ].size(); idx++ )	// For each game objects of that type
 			m_allGameObjects[ type ][ idx ]->Update( deltaSeconds );
 	}
+
+	// Check for collision
+	BulletToEnemyCollision();
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );

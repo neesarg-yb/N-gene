@@ -48,6 +48,7 @@ private:
 public:
 	void			Update( float deltaSeconds );
 	void			AddRenderablesToScene( Scene &activeScene );
+	void			RemoveRenderablesFromScene( Scene &activeScene );
 
 	// Fetching the Position
 	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f );

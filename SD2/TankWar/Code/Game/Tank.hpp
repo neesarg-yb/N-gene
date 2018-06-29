@@ -42,6 +42,7 @@ public:
 public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
+	void RemoveRenderablesFromScene( Scene &activeScene );
 
 private:
 	void ShootBullets( float deltaSeconds );

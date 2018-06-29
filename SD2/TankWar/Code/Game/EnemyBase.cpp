@@ -60,3 +60,8 @@ void EnemyBase::AddRenderablesToScene( Scene &activeScene )
 {
 	activeScene.AddRenderable( *m_renderable );
 }
+
+void EnemyBase::RemoveRenderablesFromScene( Scene &activeScene )
+{
+	activeScene.RemoveRenderable( *m_renderable );
+}
