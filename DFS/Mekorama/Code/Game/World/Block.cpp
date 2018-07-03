@@ -2,17 +2,21 @@
 #include "Block.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/World/Tower.hpp"
 
-Block::Block( Vector3 const &position, std::string blockDefinitionName )
+Block::Block( IntVector3 const &positionInTower, std::string blockDefinitionName, Tower const &parentTower )
 	: GameObject( GAMEOBJECT_TYPE_BLOCK )
 	, m_definition( BlockDefinition::s_definitions[ blockDefinitionName ] )
+	, m_parentTower( parentTower )
+	, m_posInTower( positionInTower )
 {
 	// PickID if it is a selectable block
 	if( m_definition->m_isSelectable )
 		SetPickID( GameObject::GetNewPickID() );
 
 	// Transform
-	m_transform.SetPosition( position );
+	m_transform.SetParentAs( &m_parentTower.m_transform );
+	UpdateLocalTransformPosition();
 
 	// Renderable
 	m_renderable = CreateNewRenderable();
@@ -55,6 +59,17 @@ void Block::ChangeBlockTypeTo( std::string definitionName )
 	m_renderable = nullptr;
 	m_renderable = CreateNewRenderable();
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
+}
+
+IntVector3 Block::GetMyPositionInTower() const
+{
+	return m_posInTower;
+}
+
+void Block::UpdateLocalTransformPosition()
+{
+	Vector3 localPosition = Vector3( m_posInTower );
+	m_transform.SetPosition( localPosition );
 }
 
 Renderable* Block::CreateNewRenderable()

@@ -22,6 +22,9 @@ public:
 	uint	GetIndexOfBlockAt( IntVector3 const &blockPos );
 	Vector3	GetWorldLocationOfBlockAt( IntVector3 const &blockPos );
 
+	Block*	GetBlockAt( IntVector3 const &blockPos );
+	Block*	GetBlockOnTopOfMe( Block &baseBlock );
+
 public:
 	HeatMap3D*	GetNewHeatMapForTargetPosition( IntVector3 targetPos );
 	bool		HasSolidBlockBeneath( IntVector3 const &myPosition );

@@ -56,7 +56,7 @@ void Level::Startup()
 	// Projection Matrix
 	m_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f ); 
 	// Orbit Camera
-	m_camera->SetSphericalCoordinate( 10.f, -90.f, 90.f );
+	m_camera->SetSphericalCoordinate( 15.f, -90.f, 90.f );
 	// Skybox
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
@@ -118,16 +118,24 @@ void Level::Update( float deltaSeconds )
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
-	// Update player
-	m_playerRobot.Update( deltaSeconds );
-
 	// Target Block
 	ChangeTargetBlockOnMouseClick();
 
 	// Show selected block
 	if( m_targetBlock != nullptr )
 		m_targetBlock->ObjectSelected();
-	
+
+	// Tell Robot to move at target blocks
+	if( m_targetBlock != nullptr )	
+	{
+		Block* targetBlock = m_tower->GetBlockOnTopOfMe( *m_targetBlock );
+		targetBlock->ObjectSelected();
+//		m_playerRobot.MoveAtBlock( targetBlock );
+	}
+
+	// Update Robot
+	m_playerRobot.Update( deltaSeconds );
+
 	// Camera Movement
 	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
 	

@@ -13,8 +13,7 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 	// Create Blocks
 	uint	blocksPerSlice	= m_definition.m_xzDimension.x * m_definition.m_xzDimension.y;
 	uint	numSlices		= (uint) ( m_definition.m_blocksDefinitionList.size() / blocksPerSlice );
-	Vector3 halfDimentions	= Vector3( (float)m_definition.m_xzDimension.x, (float)numSlices, (float)m_definition.m_xzDimension.y ) * 0.5f;
-
+	
 	// Set XYZ dimension
 	m_dimensionXYZ			= IntVector3( (int)m_definition.m_xzDimension.x, (int)numSlices, (int)m_definition.m_xzDimension.y );
 
@@ -28,12 +27,8 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 			// rows
 			for( uint rowIdx = 0U; rowIdx < (uint)m_definition.m_xzDimension.x; rowIdx++ )
 			{
-				Vector3 localPosition		 = Vector3( (float)rowIdx, (float)sliceIdx, (float)colIdx ) - halfDimentions;
-
-				Transform blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
-				blockTransform.SetParentAs( &m_transform );
-								
-				Block* thiBlock				= new Block( blockTransform.GetWorldPosition(), m_definition.m_blocksDefinitionList[ nextBlkIdx ] );
+				IntVector3	posInTower	= IntVector3( (int)rowIdx, (int)sliceIdx, (int)colIdx );
+				Block*		thiBlock	= new Block( posInTower, m_definition.m_blocksDefinitionList[ nextBlkIdx ], *this );
 				m_allBlocks.push_back( thiBlock );
 
 				nextBlkIdx++;
@@ -47,12 +42,8 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 	{
 		for( uint rowIdx = 0U; rowIdx < (uint)m_definition.m_xzDimension.x; rowIdx++ )
 		{
-			Vector3 localPosition		 = Vector3( (float)rowIdx, (float)numSlices, (float)colIdx ) - halfDimentions;
-
-			Transform blockTransform	 = Transform( localPosition, Vector3::ZERO, Vector3::ONE_ALL );
-			blockTransform.SetParentAs( &m_transform );
-			
-			Block* thiBlock				= new Block( blockTransform.GetWorldPosition(), "Air" );
+			IntVector3	posInTower	= IntVector3( (int)rowIdx, (int)numSlices, (int)colIdx );
+			Block*		thiBlock	= new Block( posInTower, "Air", *this );
 			m_allBlocks.push_back( thiBlock );
 		}
 	}
@@ -96,6 +87,24 @@ Vector3 Tower::GetWorldLocationOfBlockAt( IntVector3 const &blockPos )
 	Vector3 worldPos = m_allBlocks[ blockIdx ]->m_transform.GetWorldPosition();
 	
 	return worldPos;
+}
+
+Block* Tower::GetBlockAt( IntVector3 const &blockPos )
+{
+	uint idx = GetIndexOfBlockAt( blockPos );
+
+	return m_allBlocks[ idx ];
+}
+
+Block* Tower::GetBlockOnTopOfMe( Block &baseBlock )
+{
+	// Get place in tower of baseBlock
+	IntVector3 baseBlockPos		= baseBlock.GetMyPositionInTower();
+	IntVector3 targetBlockPos	= baseBlockPos + IntVector3::UP;
+
+	// Get the block's pointer
+	Block* targetBlock			= GetBlockAt( targetBlockPos );
+	return targetBlock;
 }
 
 HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos )
