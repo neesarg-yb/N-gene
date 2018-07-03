@@ -3,8 +3,10 @@
 
 std::map< uint, GameObject* > GameObject::s_pickIDPool;
 
-GameObject::GameObject()
+GameObject::GameObject( eGameObjectType const &type )
+	: m_type( type )
 {
+
 }
 
 GameObject::~GameObject()

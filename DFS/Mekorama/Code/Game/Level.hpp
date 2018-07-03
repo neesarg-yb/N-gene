@@ -40,7 +40,11 @@ private:
 	Scene*						m_levelScene				= nullptr;
 	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.7f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
-	
+
+public:
+	// Lights
+	std::vector< Light* >		m_lightSources;
+
 public:
 	// Tower Specific
 	GameObjectList				m_allGameObjects;
@@ -57,13 +61,15 @@ private:
 	// PickBuffer
 	PickBuffer					m_pickBuffer;
 
-public:
-	// Lights
-	std::vector< Light* >		m_lightSources;
+	// Gameplay Specific
+	Block*						m_targetBlock				= nullptr;
 
 private:
 	double	GetTimeSinceBattleStarted() const;
 	void	RotateTheCameraAccordingToPlayerInput	( float deltaSeconds );
 	void	ChnageLightAsPerInput					( float deltaSeconds );
+
+	// Gameplay Specific
+	void	ChangeTargetBlockOnMouseClick();
 	
 };

@@ -4,7 +4,8 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 Block::Block( Vector3 const &position, std::string blockDefinitionName )
-	: m_definition( BlockDefinition::s_definitions[ blockDefinitionName ] )
+	: GameObject( GAMEOBJECT_TYPE_BLOCK )
+	, m_definition( BlockDefinition::s_definitions[ blockDefinitionName ] )
 {
 	// PickID if it is a selectable block
 	if( m_definition->m_isSelectable )

@@ -3,15 +3,24 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 
+enum eGameObjectType
+{
+	GAMEOBJECT_TYPE_BLOCK = 0,
+	GAMEOBJECT_TYPE_ROBOT,
+	GAMEOBJECT_TYPE_TOWER,
+	NUM_GAMEOBJECT_TYPES
+};
+
 class GameObject
 {
 public:
-			 GameObject();
+			 GameObject( eGameObjectType const &type );
 	virtual ~GameObject();
 
 public:
-	Transform	 m_transform;
-	Renderable	*m_renderable	= nullptr;
+	Transform				 m_transform;
+	Renderable				*m_renderable	= nullptr;
+	eGameObjectType const	 m_type;
 
 private:
 	// PickID Stuff

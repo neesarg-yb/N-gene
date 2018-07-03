@@ -8,6 +8,7 @@
 #include "Game/World/Tower.hpp"
 
 Robot::Robot( Vector3 const &worldPosition )
+	: GameObject( GAMEOBJECT_TYPE_ROBOT )
 {
 	// PickID
 	SetPickID( GameObject::GetNewPickID() );

@@ -4,7 +4,8 @@
 #include "Engine/Core/StringUtils.hpp"
 
 Tower::Tower( Vector3 position, std::string towerDefinitionName )
-	: m_definition( *TowerDefinition::s_definitions[ towerDefinitionName ] )
+	: GameObject( GAMEOBJECT_TYPE_TOWER )
+	, m_definition( *TowerDefinition::s_definitions[ towerDefinitionName ] )
 {
 	// Set tower's transform
 	m_transform.SetPosition( position );

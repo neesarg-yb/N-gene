@@ -121,20 +121,13 @@ void Level::Update( float deltaSeconds )
 	// Update player
 	m_playerRobot.Update( deltaSeconds );
 
-	// Mouse Position
-	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();
-	std::string posString = Stringf( "Mouse Pos: ( %f, %f )", mousClientPos.x, mousClientPos.y );
-	DebugRender2DText( 0.f, Vector2(-850.f, -460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, posString.c_str() );
+	// Target Block
+	ChangeTargetBlockOnMouseClick();
 
-	// Pick Buffer
-	m_pickBuffer.GeneratePickBuffer( *m_camera, *m_levelScene );
-	uint		pickID				= m_pickBuffer.GetPickID( mousClientPos );
-	GameObject *selectedGameObject	= GameObject::GetFromPickID( pickID );
-	std::string pickedObjectStr		= Stringf( "Selected PickID: %u", pickID );
-	DebugRender2DText( 0.f, Vector2(-850.f, -420.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, pickedObjectStr.c_str() );
-	if( selectedGameObject != nullptr )
-		selectedGameObject->ObjectSelected();
-
+	// Show selected block
+	if( m_targetBlock != nullptr )
+		m_targetBlock->ObjectSelected();
+	
 	// Camera Movement
 	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
 	
@@ -244,4 +237,44 @@ void Level::ChnageLightAsPerInput(float deltaSeconds)
 	}
 
 	g_theRenderer->SetAmbientLight( m_ambientLight );
+}
+
+void Level::ChangeTargetBlockOnMouseClick()
+{
+	// Mouse Position
+	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();
+	std::string posString = Stringf( "Mouse Pos: ( %f, %f )", mousClientPos.x, mousClientPos.y );
+	DebugRender2DText( 0.f, Vector2(-850.f, -460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, posString.c_str() );
+
+	// PickBuffer
+	m_pickBuffer.GeneratePickBuffer( *m_camera, *m_levelScene );
+	uint		pickID				= m_pickBuffer.GetPickID( mousClientPos );
+	GameObject *selectedGameObject	= GameObject::GetFromPickID( pickID );
+	std::string pickedObjectStr		= Stringf( "Selected PickID: %u", pickID );
+	DebugRender2DText( 0.f, Vector2(-850.f, -420.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, pickedObjectStr.c_str() );
+
+	// Selected Game Object
+	bool selectButtonJustPressed = g_theInput->WasKeyJustPressed( SPACE );
+	if( selectedGameObject != nullptr && selectButtonJustPressed )
+	{
+		selectedGameObject->ObjectSelected();
+
+		switch ( selectedGameObject->m_type )
+		{
+		case GAMEOBJECT_TYPE_BLOCK: {	// Change the targetBlock
+			Block* selectedBlock	= (Block*) selectedGameObject;
+			m_targetBlock			= selectedBlock;
+			}
+			break;
+
+		case GAMEOBJECT_TYPE_ROBOT:
+			break;
+		
+		default:
+			// If TOWER or NUM_GAMEOBJECT_TYPES got selected
+			GUARANTEE_RECOVERABLE( false, "Invalid GameObject got selected!" );
+			break;
+		}
+	}
+
 }
