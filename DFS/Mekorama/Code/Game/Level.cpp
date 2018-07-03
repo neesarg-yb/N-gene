@@ -95,12 +95,12 @@ void Level::Startup()
 	for( uint i = 0; i < m_tower->m_allBlocks.size(); i++ )
 		m_levelScene->AddRenderable( *m_tower->m_allBlocks[i]->m_renderable );
 
-	// Robot
-	m_levelScene->AddRenderable( *m_playerRobot.m_renderable );
+	// Setup the Player Robot
+	IntVector3 playerActualPos = m_definition.m_spawnPlayerOn + IntVector3::UP;		// Note: to spawn on top of that block, not at it!
+	m_playerRobot.SetParentTower( *m_tower );
+	m_playerRobot.m_posInTower = playerActualPos;
 
-	Vector3 playerWorldLocation = m_tower->GetWorldLocationOfBlockAt( m_definition.m_spawnPlayerOn );
-	playerWorldLocation.y++;	// Note: to spawn on top of that block, not at it!
-	m_playerRobot.m_transform.SetPosition( playerWorldLocation );
+	m_levelScene->AddRenderable( *m_playerRobot.m_renderable );
 }
 
 void Level::BeginFrame()
@@ -130,7 +130,7 @@ void Level::Update( float deltaSeconds )
 	{
 		Block* targetBlock = m_tower->GetBlockOnTopOfMe( *m_targetBlock );
 		targetBlock->ObjectSelected();
-//		m_playerRobot.MoveAtBlock( targetBlock );
+		m_playerRobot.MoveAtBlock( *targetBlock );
 	}
 
 	// Update Robot

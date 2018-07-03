@@ -73,7 +73,7 @@ void theGame::Startup()
 	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level3.xml" );
 
 	// Setup the Robot
-	m_playerRobot = new Robot( Vector3::ZERO );
+	m_playerRobot = new Robot( IntVector3::ZERO, nullptr );
 
 	// Setup the LevelSelection UI
 	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.45f, 0.42f, 0.55f, 0.55f ) );

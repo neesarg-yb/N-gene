@@ -7,14 +7,13 @@
 #include "Game/Level.hpp"
 #include "Game/World/Tower.hpp"
 
-Robot::Robot( Vector3 const &worldPosition )
+Robot::Robot( IntVector3 const &posInTower, Tower const *parentTower /* = nullptr */ )
 	: GameObject( GAMEOBJECT_TYPE_ROBOT )
+	, m_posInTower( posInTower )
+	, m_parentTower( parentTower )
 {
 	// PickID
 	SetPickID( GameObject::GetNewPickID() );
-
-	// Transform
-	m_transform.SetPosition( worldPosition );
 
 	// Renderable
 	m_renderable		= new Renderable( Vector3::ZERO, Vector3::ZERO, Vector3( 0.007f, 0.007f, 0.007f ) );
@@ -36,7 +35,7 @@ Robot::~Robot()
 void Robot::Update( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
-	UpdateHeatMap();
+	UpdateLocalTransform();
 }
 
 void Robot::ObjectSelected()
@@ -47,14 +46,28 @@ void Robot::ObjectSelected()
 	DebugRenderWireCube( 0.f, bottomLeft, topRight, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }
 
-void Robot::UpdateHeatMap()
+void Robot::SetParentTower( Tower const &parent )
 {
-	// Delete the old HeatMap
-	if( m_currentHeatMap != nullptr )
-		delete m_currentHeatMap;
+	m_parentTower = &parent;
 
-	// Get HeatMap from tower
-	Tower		&currentTower		 = *g_theGame->m_currentLevel->m_tower;
-	IntVector3	 targetPos			 = IntVector3( 0, 1, 0 );
-	m_currentHeatMap				 = currentTower.GetNewHeatMapForTargetPosition( targetPos ); 
+	// Transform
+	m_transform.SetParentAs( &m_parentTower->m_transform );
+	UpdateLocalTransform();
+}
+
+void Robot::MoveAtBlock( Block &targetBlock )
+{
+	// Get HeatMap
+//	HeatMap3D* heatMap = m_parentTower.GetNewHeatMapForTargetPosition( targetBlock.GetMyPositionInTower() );
+
+	// Get next block position to move at
+	
+
+//	delete heatMap;
+}
+
+void Robot::UpdateLocalTransform()
+{
+	Vector3 localPosition = Vector3( m_posInTower );
+	m_transform.SetPosition( localPosition );
 }
