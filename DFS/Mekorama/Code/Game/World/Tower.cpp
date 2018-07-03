@@ -69,7 +69,7 @@ void Tower::SetFinishBlockAt( IntVector3 const &finishPos )
 	m_allBlocks[ idx ]->ChangeBlockTypeTo( "Finish" );
 }
 
-uint Tower::GetIndexOfBlockAt( IntVector3 const &blockPos )
+uint Tower::GetIndexOfBlockAt( IntVector3 const &blockPos ) const
 {
 	IntVector2	towerXZDim			= m_definition.m_xzDimension;
 	uint		numBlocksInALayer	= towerXZDim.x * towerXZDim.y;
@@ -81,7 +81,7 @@ uint Tower::GetIndexOfBlockAt( IntVector3 const &blockPos )
 	return idx;
 }
 
-Vector3 Tower::GetWorldLocationOfBlockAt( IntVector3 const &blockPos )
+Vector3 Tower::GetWorldLocationOfBlockAt( IntVector3 const &blockPos ) const
 {
 	uint	blockIdx = GetIndexOfBlockAt( blockPos );
 	Vector3 worldPos = m_allBlocks[ blockIdx ]->m_transform.GetWorldPosition();
@@ -91,9 +91,15 @@ Vector3 Tower::GetWorldLocationOfBlockAt( IntVector3 const &blockPos )
 
 Block* Tower::GetBlockAt( IntVector3 const &blockPos )
 {
-	uint idx = GetIndexOfBlockAt( blockPos );
+	Block* toReturn = nullptr;
 
-	return m_allBlocks[ idx ];
+	if( IsPositionOutsideTowersBounds( blockPos ) == false )
+	{
+		uint idx = GetIndexOfBlockAt( blockPos );
+		toReturn = m_allBlocks[ idx ];
+	}
+
+	return toReturn;
 }
 
 Block* Tower::GetBlockOnTopOfMe( Block &baseBlock )
@@ -107,7 +113,51 @@ Block* Tower::GetBlockOnTopOfMe( Block &baseBlock )
 	return targetBlock;
 }
 
-HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos )
+std::vector< IntVector3 > Tower::GetNeighbourBlocksPos( IntVector3 const &myPosition )
+{
+	std::vector< IntVector3 > neighbourPositions;
+
+	IntVector3 stepNorth	= myPosition + IntVector3::FRONT;
+	IntVector3 stepSouth	= myPosition + IntVector3::BACK;
+	IntVector3 stepRight	= myPosition + IntVector3::RIGHT;
+	IntVector3 stepLeft		= myPosition + IntVector3::LEFT;
+	IntVector3 stepTop		= myPosition + IntVector3::UP;
+	IntVector3 stepBottom	= myPosition + IntVector3::BOTTOM;
+
+	// NORTH
+	Block* neighbourBlock = GetBlockAt( stepNorth );
+	if( neighbourBlock != nullptr )
+		neighbourPositions.push_back( neighbourBlock->GetMyPositionInTower() );
+
+	// SOUTH
+	neighbourBlock = GetBlockAt( stepSouth );
+	if( neighbourBlock != nullptr )
+		neighbourPositions.push_back( neighbourBlock->GetMyPositionInTower() );
+
+	// RIGHT
+	neighbourBlock = GetBlockAt( stepRight );
+	if( neighbourBlock != nullptr )
+		neighbourPositions.push_back( neighbourBlock->GetMyPositionInTower() );
+
+	// LEFT
+	neighbourBlock = GetBlockAt( stepLeft );
+	if( neighbourBlock != nullptr )
+		neighbourPositions.push_back( neighbourBlock->GetMyPositionInTower() );
+
+	// TOP
+	neighbourBlock = GetBlockAt( stepTop );
+	if( neighbourBlock != nullptr )
+		neighbourPositions.push_back( neighbourBlock->GetMyPositionInTower() );
+
+	// BOTTOM
+	neighbourBlock = GetBlockAt( stepBottom );
+	if( neighbourBlock != nullptr )
+		neighbourPositions.push_back( neighbourBlock->GetMyPositionInTower() );
+
+	return neighbourPositions;
+}
+
+HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos ) const
 {
 	// Create a new HeatMap
 	float maxHeatValue = ( m_dimensionXYZ.x * m_dimensionXYZ.y * m_dimensionXYZ.z ) + 10.f;
@@ -144,7 +194,7 @@ HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos )
 					for( int i = 0; i < 4; i++ )
 					{
 						// Skip if surrounding block is out of bounds
-						if( PositionIsOutsideTowersBounds( newsSurroundingBlocks[i] ) )
+						if( IsPositionOutsideTowersBounds( newsSurroundingBlocks[i] ) )
 							continue;
 
 						IntVector3 goalPos	= newsSurroundingBlocks[i];
@@ -172,7 +222,7 @@ HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos )
 					// For each Up
 					IntVector3 upBlockPos	= currentBlockAt + IntVector3::UP;
 					// Ignore if not out of bounds
-					if( PositionIsOutsideTowersBounds( upBlockPos ) == false )
+					if( IsPositionOutsideTowersBounds( upBlockPos ) == false )
 					{
 						Block &upBlock			= *m_allBlocks[ GetIndexOfBlockAt( upBlockPos ) ];
 						// Goal is not solid
@@ -194,7 +244,7 @@ HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos )
 					// For each Down
 					IntVector3 botBlockPos	= currentBlockAt + IntVector3::BOTTOM;
 					// Ignore if not out of bounds
-					if( PositionIsOutsideTowersBounds( botBlockPos ) == false )
+					if( IsPositionOutsideTowersBounds( botBlockPos ) == false )
 					{
 						Block &botBlock			= *m_allBlocks[ GetIndexOfBlockAt( botBlockPos ) ];
 						// Goal is stairs
@@ -220,12 +270,12 @@ HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos )
 	return newHeatMap;
 }
 
-bool Tower::HasSolidBlockBeneath( IntVector3 const &myPosition )
+bool Tower::HasSolidBlockBeneath( IntVector3 const &myPosition ) const
 {
 	IntVector3 posOfBlockUnderneeth = myPosition + IntVector3::BOTTOM;
 
 	// If that block is out of bounds
-	if( PositionIsOutsideTowersBounds( posOfBlockUnderneeth ) )
+	if( IsPositionOutsideTowersBounds( posOfBlockUnderneeth ) )
 		return false;
 
 	// Else, return actual value
@@ -233,12 +283,12 @@ bool Tower::HasSolidBlockBeneath( IntVector3 const &myPosition )
 	return m_allBlocks[ idx ]->m_definition->m_isSolid;
 }
 
-bool Tower::HasStairsBlockBeneath( IntVector3 const &myPosition )
+bool Tower::HasStairsBlockBeneath( IntVector3 const &myPosition ) const
 {
 	IntVector3 posOfBlockUnderneeth = myPosition + IntVector3::BOTTOM;
 
 	// If that block is out of bounds
-	if( PositionIsOutsideTowersBounds( posOfBlockUnderneeth ) )
+	if( IsPositionOutsideTowersBounds( posOfBlockUnderneeth ) )
 		return false;
 
 	// Else, return actual value
@@ -246,7 +296,7 @@ bool Tower::HasStairsBlockBeneath( IntVector3 const &myPosition )
 	return ( m_allBlocks[ idx ]->m_definition->m_typeName == "Stairs" );
 }
 
-bool Tower::PositionIsOutsideTowersBounds( IntVector3 const &myPosition )
+bool Tower::IsPositionOutsideTowersBounds( IntVector3 const &myPosition ) const
 {
 	// if block is out of bounds
 	if( myPosition.x >= m_dimensionXYZ.x	|| myPosition.y >= m_dimensionXYZ.y	|| myPosition.z >= m_dimensionXYZ.z ||

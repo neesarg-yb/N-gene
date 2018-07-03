@@ -19,15 +19,17 @@ public:
 public:
 	void	Update( float deltaSeconds );
 	void	SetFinishBlockAt( IntVector3 const &finishPos );
-	uint	GetIndexOfBlockAt( IntVector3 const &blockPos );
-	Vector3	GetWorldLocationOfBlockAt( IntVector3 const &blockPos );
+	uint	GetIndexOfBlockAt( IntVector3 const &blockPos ) const;
+	Vector3	GetWorldLocationOfBlockAt( IntVector3 const &blockPos ) const;
 
 	Block*	GetBlockAt( IntVector3 const &blockPos );
 	Block*	GetBlockOnTopOfMe( Block &baseBlock );
 
+	std::vector< IntVector3 > GetNeighbourBlocksPos( IntVector3 const &myPosition );
+
 public:
-	HeatMap3D*	GetNewHeatMapForTargetPosition( IntVector3 targetPos );
-	bool		HasSolidBlockBeneath( IntVector3 const &myPosition );
-	bool		HasStairsBlockBeneath( IntVector3 const &myPosition );
-	bool		PositionIsOutsideTowersBounds( IntVector3 const &myPosition );
+	HeatMap3D*	GetNewHeatMapForTargetPosition( IntVector3 targetPos ) const;
+	bool		HasSolidBlockBeneath( IntVector3 const &myPosition ) const;
+	bool		HasStairsBlockBeneath( IntVector3 const &myPosition ) const;
+	bool		IsPositionOutsideTowersBounds( IntVector3 const &myPosition ) const;
 };

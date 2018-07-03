@@ -56,7 +56,7 @@ void Level::Startup()
 	// Projection Matrix
 	m_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f ); 
 	// Orbit Camera
-	m_camera->SetSphericalCoordinate( 15.f, -90.f, 90.f );
+	m_camera->SetSphericalCoordinate( 10.f, -90.f, 90.f );
 	// Skybox
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
@@ -101,6 +101,10 @@ void Level::Startup()
 	m_playerRobot.m_posInTower = playerActualPos;
 
 	m_levelScene->AddRenderable( *m_playerRobot.m_renderable );
+
+	// Change the center of OrbitCamera
+	Vector3 towerCenter = m_tower->m_transform.GetWorldPosition() + ( Vector3( m_tower->m_dimensionXYZ ) * 0.5f );
+	m_camera->m_target = towerCenter;
 }
 
 void Level::BeginFrame()
@@ -129,7 +133,6 @@ void Level::Update( float deltaSeconds )
 	if( m_targetBlock != nullptr )	
 	{
 		Block* targetBlock = m_tower->GetBlockOnTopOfMe( *m_targetBlock );
-		targetBlock->ObjectSelected();
 		m_playerRobot.MoveAtBlock( *targetBlock );
 	}
 
@@ -171,22 +174,6 @@ void Level::Render() const
 	
 	// Basis at Origin
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-
-	// HeatMap Debug Render
-	HeatMap3D *newHeatMap = m_tower->GetNewHeatMapForTargetPosition( IntVector3( 1, 1, 0 ) );
-	Matrix44 cameraTransform = m_camera->m_cameraTransform.GetWorldTransformMatrix();
-	for( int z = 0; z < m_tower->m_dimensionXYZ.z; z++ )
-		for( int y = 0; y < m_tower->m_dimensionXYZ.y; y++ )
-			for( int x = 0; x < m_tower->m_dimensionXYZ.x; x++ )
-			{
-				uint	blockIdx		= m_tower->GetIndexOfBlockAt( IntVector3(x,y,z) );
-				float	blockHeat		= newHeatMap->GetHeat( IntVector3(x, y, z) ); 
-				Vector3 blockWorldPos	= m_tower->m_allBlocks[ blockIdx ]->m_transform.GetWorldPosition();
-
-				if( blockHeat < newHeatMap->m_initialHeatValue )
-					DebugRenderTag( 0.f, 0.2f, blockWorldPos, cameraTransform.GetJColumn(), cameraTransform.GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf( "%d", (int)blockHeat ) );
-			}
-	delete newHeatMap;
 
 	DebugRendererRender();
 }
