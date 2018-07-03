@@ -36,8 +36,8 @@ public:
 
 private:
 	// Rendering Specific
-	static OrbitCamera*			s_camera;
-	static Scene*				s_levelScene;
+	OrbitCamera*				m_camera					= nullptr;
+	Scene*						m_levelScene				= nullptr;
 	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.7f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
 	
@@ -59,9 +59,7 @@ private:
 
 public:
 	// Lights
-	static std::vector< Light* > s_lightSources;
-	
-	static void	AddNewPointLightToCamareaPosition( Rgba lightColor );
+	std::vector< Light* >		m_lightSources;
 
 private:
 	double	GetTimeSinceBattleStarted() const;
