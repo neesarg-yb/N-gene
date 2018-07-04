@@ -162,6 +162,9 @@ void Battle::EndFrame()
 
 void Battle::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 

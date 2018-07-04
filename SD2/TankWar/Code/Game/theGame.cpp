@@ -263,18 +263,15 @@ void theGame::Render_Menu() const
 
 void theGame::Update_Battle( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		StartTransitionToState( MENU );
 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_START ].keyJustPressed )
 		StartTransitionToState( MENU );
 
-	// Profiler Test
-	Profiler::GetInstance()->Push( "Battle::Update" );
-
 	m_currentBattle->Update( deltaSeconds );
-
-	// Profiler Test
-	Profiler::GetInstance()->Pop();
 
 	if( m_currentBattle->IsBattleWon() || gameWonFromCommand )
 	{
