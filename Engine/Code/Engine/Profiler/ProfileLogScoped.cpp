@@ -34,7 +34,7 @@ ProfileLogScoped::~ProfileLogScoped()
 	DebuggerPrintf( Stringf( "\n----------\n%s\n----------\n%s\n%s\n\n", profilingHeadStr.c_str(), secondsStr.c_str(), millisecondsStr.c_str() ).c_str() );
 }
 
-uint64_t ProfileLogScoped::GetPerformanceCounter() const
+uint64_t ProfileLogScoped::GetPerformanceCounter()
 {
 	LARGE_INTEGER hpc;
 	QueryPerformanceCounter( &hpc );
@@ -42,7 +42,7 @@ uint64_t ProfileLogScoped::GetPerformanceCounter() const
 	return *( (uint64_t*) &hpc );
 }
 
-double ProfileLogScoped::GetSecondsFromPerformanceCounter( uint64_t hpc ) const
+double ProfileLogScoped::GetSecondsFromPerformanceCounter( uint64_t hpc )
 {
 	LARGE_INTEGER frq;
 	QueryPerformanceFrequency( &frq );
@@ -53,7 +53,7 @@ double ProfileLogScoped::GetSecondsFromPerformanceCounter( uint64_t hpc ) const
 	return (double)hpc * secondsPerClockCycle;
 }
 
-double ProfileLogScoped::GetMillliSecondsFromPerformanceCounter( uint64_t hpc ) const
+double ProfileLogScoped::GetMillliSecondsFromPerformanceCounter( uint64_t hpc )
 {
 	LARGE_INTEGER frq;
 	QueryPerformanceFrequency( &frq );

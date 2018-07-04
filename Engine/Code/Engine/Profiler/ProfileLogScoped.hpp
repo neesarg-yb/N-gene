@@ -14,8 +14,8 @@ public:
 	uint64_t	m_hpcStart;
 	char const *m_tag;
 
-private:
-	uint64_t	GetPerformanceCounter() const;
-	double		GetSecondsFromPerformanceCounter( uint64_t hpc ) const;
-	double		GetMillliSecondsFromPerformanceCounter( uint64_t hpc ) const;
+public:
+	static uint64_t	GetPerformanceCounter();
+	static double	GetSecondsFromPerformanceCounter( uint64_t hpc );
+	static double	GetMillliSecondsFromPerformanceCounter( uint64_t hpc );
 };
