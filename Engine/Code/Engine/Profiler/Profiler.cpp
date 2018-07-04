@@ -24,6 +24,9 @@ Profiler::~Profiler()
 
 void Profiler::Push( std::string const &id )
 {
+	if( m_paused )
+		return;
+
 	// Start a new measurement
 	ProfileMeasurement *measure = CreateMeasurement( id );
 	
@@ -41,6 +44,9 @@ void Profiler::Push( std::string const &id )
 
 void Profiler::Pop()
 {
+	if( m_paused )
+		return;
+
 	// Someone called pop without push
 	GUARANTEE_OR_DIE( m_activeNode != nullptr, "Profiler: There's an extra Pop() somewhere!!" );
 
@@ -54,12 +60,29 @@ void Profiler::MarkFrame()
 	{
 		AddReportToHistoryArray( m_activeNode );
 		Pop();
-
+		
 		// not null - someone forgot to pop
 		GUARANTEE_OR_DIE( m_activeNode == nullptr, "MarkFrame: someone forgot to Pop!" );
 	}
 
+	if( m_isPausing )
+	{
+		m_paused	= true;
+		m_isPausing = false;
+	}
+
 	Push("frame");
+}
+
+void Profiler::Pause()
+{
+	m_isPausing = true;
+}
+
+void Profiler::Resume()
+{
+	m_paused	= false;
+	m_isPausing = false;
 }
 
 ProfileMeasurement* Profiler::CreateMeasurement( std::string const &id )
