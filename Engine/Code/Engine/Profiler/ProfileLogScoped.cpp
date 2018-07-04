@@ -5,6 +5,7 @@
 #include "ProfileLogScoped.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Core/DevConsole.hpp"
 
 ProfileLogScoped::ProfileLogScoped( char const *tag )
 	: m_tag( tag )
@@ -19,7 +20,18 @@ ProfileLogScoped::~ProfileLogScoped()
 	double		seconds			= GetSecondsFromPerformanceCounter( hpcDifference );
 	double		milliseconds	= GetMillliSecondsFromPerformanceCounter( hpcDifference );
 
-	DebuggerPrintf( Stringf("\n-----------\nProfiling \"%s\"\n----------\nMilliseconds Difference: %lf\nSeconds      Difference: %lf\n\n", m_tag, milliseconds, seconds ).c_str() );
+	std::string profilingHeadStr	= Stringf("Profiling \"%s\"", m_tag );
+	std::string millisecondsStr		= Stringf("Milliseconds Difference: %lf", milliseconds );
+	std::string secondsStr			= Stringf("Seconds      Difference: %lf", seconds );
+
+	// Print on Console
+	ConsolePrintf( RGBA_WHITE_COLOR, " " );
+	ConsolePrintf( RGBA_WHITE_COLOR, profilingHeadStr.c_str() );
+	ConsolePrintf( RGBA_GRAY_COLOR,  secondsStr.c_str() );
+	ConsolePrintf( RGBA_GRAY_COLOR,  millisecondsStr.c_str() );
+
+	// Print in Debugger Output
+	DebuggerPrintf( Stringf( "\n----------\n%s\n----------\n%s\n%s\n\n", profilingHeadStr.c_str(), secondsStr.c_str(), millisecondsStr.c_str() ).c_str() );
 }
 
 uint64_t ProfileLogScoped::GetPerformanceCounter() const
