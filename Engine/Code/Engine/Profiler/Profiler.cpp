@@ -36,6 +36,7 @@ Profiler::~Profiler() { }
 
 void Profiler::Startup() { s_secondsPerClockCycle = Profiler::CalculateSecondsPerClockCycle(); }
 void Profiler::Shutdown() { }
+
 void Profiler::Push( std::string const &id ) { UNUSED(id); }
 void Profiler::Pop() { }
 void Profiler::MarkFrame() { }
@@ -188,6 +189,13 @@ void Profiler::AddReportToHistoryArray( ProfileMeasurement* newReport )
 	m_measurementHistory[ m_currentReportIndex ] = newReport;
 }
 
+ProfileMeasurement* Profiler::GetPreviousFrame( uint skip_count /*= 0 */ )
+{
+	int actualIndex = m_currentReportIndex - (int)skip_count;
+	actualIndex		= ModuloNonNegative( actualIndex, MAX_HISTORY_COUNT );
+	return m_measurementHistory[ actualIndex ];
+}
+
 double Profiler::CalculateSecondsPerClockCycle()
 {
 	LARGE_INTEGER frq;
@@ -215,4 +223,12 @@ double Profiler::GetSecondsFromPerformanceCounter( uint64_t hpc )
 double Profiler::GetMillliSecondsFromPerformanceCounter( uint64_t hpc )
 {
 	return ( (double)hpc * s_secondsPerClockCycle * 1000.0 );
+}
+
+int Profiler::ModuloNonNegative( int operatingOn, int moduloBy )
+{
+	// ( b + (a % b) ) % b
+	int nnMod = ( moduloBy + ( operatingOn % moduloBy ) ) % moduloBy;
+
+	return nnMod;
 }
