@@ -10,6 +10,7 @@
 #include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Math/Transform.hpp"
+#include "Engine/Core/Window.hpp"
 
 Renderer*	Renderer::s_renderer				= nullptr;
 
@@ -43,9 +44,9 @@ void BindGLFunctions();
 // Rendering startup - called after we have created our window
 // error checking has been removed for brevity, but you should check
 // the return values at each step.
-bool Renderer::RendererStartup( void* hwnd_voidptr ) 
+bool Renderer::RendererStartup() 
 {
-	HWND hwnd = static_cast<HWND>( hwnd_voidptr );
+	HWND hwnd = static_cast<HWND>( Window::GetInstance()->m_hwnd );
 
 	// load and get a handle to the opengl dll (dynamic link library)
 	gGLLibrary = ::LoadLibraryA( "opengl32.dll" ); 

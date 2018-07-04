@@ -45,8 +45,12 @@ public:
 	~Profiler();
 
 public:
+	static void			Startup();
+	static void			Shutdown();
+
+public:
 	static Profiler*	s_instance;
-	static Profiler*	GetInstace();
+	static Profiler*	GetInstance();
 
 private:
 	// Pause and Resume
@@ -57,7 +61,7 @@ private:
 private:
 	// Measurement History
 	ProfileMeasurement	*m_activeNode;
-	ProfileMeasurement*	 m_measurementHistory[ MAX_HISTORY_COUNT ];
+	ProfileMeasurement*	 m_measurementHistory[ MAX_HISTORY_COUNT ] = { nullptr };
 
 	// Managing the History
 	int					m_currentReportIndex	=	-1;
