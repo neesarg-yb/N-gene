@@ -317,8 +317,8 @@ void ConsolePrintf( Rgba const &color, char const *format, ... )
 	va_list args;
 	va_start( args, format );
 
-	char buffer[100];
-	vsnprintf_s( buffer, 100, format, args );
+	char buffer[1000];
+	vsnprintf_s( buffer, 1000, format, args );
 
 	va_end( args );
 	DevConsole::GetInstance()->WriteToOutputBuffer( buffer, color );
@@ -329,8 +329,8 @@ void ConsolePrintf( char const *format, ... )
 	va_list args;
 	va_start( args, format );
 
-	char buffer[100];
-	vsnprintf_s( buffer, 100, format, args );
+	char buffer[1000];
+	vsnprintf_s( buffer, 1000, format, args );
 
 	va_end( args );
 	DevConsole::GetInstance()->WriteToOutputBuffer( buffer );
