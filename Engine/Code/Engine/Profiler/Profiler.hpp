@@ -49,10 +49,16 @@ public:
 	static Profiler*	GetInstace();
 
 private:
+	// Pause and Resume
+	bool				m_paused	= false;
+	bool				m_isPausing	= false;
+
+private:
+	// Measurement History
 	ProfileMeasurement	*m_activeNode;
 	ProfileMeasurement*	 m_measurementHistory[ MAX_HISTORY_COUNT ];
 
-	// Managing the measurementHistory
+	// Managing the History
 	int					m_currentReportIndex	=	-1;
 	void				AddReportToHistoryArray( ProfileMeasurement* newReport );
 
@@ -60,7 +66,12 @@ public:
 	void				Push( std::string const &id );
 	void				Pop();
 	void				MarkFrame();
+
+public:
+	void				Pause();
+	void				Resume();
 	
+public:
 	ProfileMeasurement* CreateMeasurement( std::string const &id );
 	void				DestroyMeasurementTreeRecursively( ProfileMeasurement* root );
 };
