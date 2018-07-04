@@ -1,12 +1,17 @@
 #pragma once
 #include <queue>
 #include <vector>
-#include "Engine/Renderer/External/glcorearb.h"
+#include "Engine/Profiler/ProfileScoped.hpp"
 #include "Engine/Profiler/ProfileLogScoped.hpp"
+#include "Engine/Renderer/External/glcorearb.h"
 
 #define MAX_HISTORY_COUNT 256
-#define PROFILE_LOG_SCOPE(tag) ProfileLogScoped __timer__ ##__LINE__ ## (tag)
-#define PROFILE_LOG_SCOPE_FUNCTION() ProfileLogScoped __timer__ ##__LINE__ ## (__FUNCTION__)
+
+#define PROFILE_LOG_SCOPE(tag)			ProfileLogScoped __timer__ ##__LINE__ ## (tag)
+#define PROFILE_LOG_SCOPE_FUNCTION()	ProfileLogScoped __timer__ ##__LINE__ ## (__FUNCTION__)
+
+#define PROFILE_SCOPE(tag)				ProfileScoped __timer__ ##__LINE__ ## (tag)
+#define PROFILE_SCOPE_FUNCTION()		ProfileScoped __timer__ ##__LINE__ ## (__FUNCTION__)
 
 struct ProfileMeasurement;
 
