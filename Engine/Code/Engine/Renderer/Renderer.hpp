@@ -107,7 +107,7 @@ public:
 	void			BeginFrame();
 	void			EndFrame();
 
-	static bool		RendererStartup( void* hwnd );
+	static bool		RendererStartup();
 	static void		RendererShutdown();
 	static void		GLShutdown();
 

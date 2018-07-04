@@ -1,10 +1,23 @@
 #pragma once
 #include "Profiler.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Input/Command.hpp"
+
+void PauseTheProfiler( Command &command )
+{
+	UNUSED( command );
+	Profiler::GetInstance()->Pause();
+}
+
+void ResumeTheProfiler( Command &command )
+{
+	UNUSED( command );
+	Profiler::GetInstance()->Resume();
+}
 
 Profiler* Profiler::s_instance = nullptr;
 
-Profiler* Profiler::GetInstace()
+Profiler* Profiler::GetInstance()
 {
 	if( s_instance == nullptr )
 		s_instance = new Profiler();
@@ -19,7 +32,29 @@ Profiler::Profiler()
 
 Profiler::~Profiler()
 {
+	for( int i = 0; i < MAX_HISTORY_COUNT; i++ )
+	{
+		if( m_measurementHistory[i] == nullptr )
+			continue;
 
+		delete m_measurementHistory[i];
+		m_measurementHistory[i] = nullptr;
+	}
+}
+
+void Profiler::Startup()
+{
+	GetInstance();
+
+	// Command Register
+	CommandRegister( "profiler_pause",	PauseTheProfiler );
+	CommandRegister( "profiler_resume", ResumeTheProfiler );
+}
+
+void Profiler::Shutdown()
+{
+	if( s_instance != nullptr )
+		delete s_instance;
 }
 
 void Profiler::Push( std::string const &id )

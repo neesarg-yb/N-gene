@@ -45,3 +45,6 @@ bool wglGetTypedProcAddress( T *out, char const *name )
 
 	return (*out != nullptr); 
 }
+
+void EngineStartup();
+void EngineShutdown();
