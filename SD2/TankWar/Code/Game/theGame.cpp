@@ -269,12 +269,12 @@ void theGame::Update_Battle( float deltaSeconds )
 		StartTransitionToState( MENU );
 
 	// Profiler Test
-	Profiler::GetInstace()->Push( "Battle::Update" );
+	Profiler::GetInstance()->Push( "Battle::Update" );
 
 	m_currentBattle->Update( deltaSeconds );
 
 	// Profiler Test
-	Profiler::GetInstace()->Pop();
+	Profiler::GetInstance()->Pop();
 
 	if( m_currentBattle->IsBattleWon() || gameWonFromCommand )
 	{

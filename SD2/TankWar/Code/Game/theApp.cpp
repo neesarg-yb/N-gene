@@ -37,9 +37,6 @@ theApp::~theApp()
 
 void theApp::Startup()
 {
-	// Create the Profiler Instance
-	Profiler::GetInstace();
-
 	g_theGame->Startup();
 }
 
@@ -55,7 +52,7 @@ void theApp::RunFrame() {
 
 void theApp::BeginFrame() {
 	// Profiler MarkFrame
-	Profiler::GetInstace()->MarkFrame();
+	Profiler::GetInstance()->MarkFrame();
 
 	g_theAudioSystem->BeginFrame();
 	g_theInput->BeginFrame();
