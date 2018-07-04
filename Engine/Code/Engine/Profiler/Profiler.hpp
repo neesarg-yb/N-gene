@@ -4,6 +4,8 @@
 #include "Engine/Renderer/External/glcorearb.h"
 #include "Engine/Profiler/ProfileLogScoped.hpp"
 
+#define MAX_HISTORY_COUNT 256
+
 struct ProfileMeasurement
 {
 	// Measurement Data
@@ -46,14 +48,18 @@ public:
 	static Profiler*	s_instance;
 	static Profiler*	GetInstace();
 
-public:
-	ProfileMeasurement					*m_activeNode;
-	std::queue< ProfileMeasurement* >	 m_measurementHistory;
+private:
+	ProfileMeasurement	*m_activeNode;
+	ProfileMeasurement*	 m_measurementHistory[ MAX_HISTORY_COUNT ];
+
+	// Managing the measurementHistory
+	int					m_currentReportIndex	=	-1;
+	void				AddReportToHistoryArray( ProfileMeasurement* newReport );
 
 public:
-	void Push( std::string const &id );
-	void Pop();
-	void MarkFrame();
+	void				Push( std::string const &id );
+	void				Pop();
+	void				MarkFrame();
 	
 	ProfileMeasurement* CreateMeasurement( std::string const &id );
 	void				DestroyMeasurementTreeRecursively( ProfileMeasurement* root );

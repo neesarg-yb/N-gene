@@ -52,15 +52,7 @@ void Profiler::MarkFrame()
 {
 	if( m_activeNode != nullptr )
 	{
-		if( m_measurementHistory.size() >= 256 )
-		{
-			ProfileMeasurement* oldestM = m_measurementHistory.front();
-			m_measurementHistory.pop();
-
-			DestroyMeasurementTreeRecursively( oldestM );
-		}
-
-		m_measurementHistory.push( m_activeNode );
+		AddReportToHistoryArray( m_activeNode );
 		Pop();
 
 		// not null - someone forgot to pop
@@ -91,4 +83,23 @@ void Profiler::DestroyMeasurementTreeRecursively( ProfileMeasurement* root )
 		delete child;
 		child = nullptr;
 	}
+}
+
+
+void Profiler::AddReportToHistoryArray( ProfileMeasurement* newReport )
+{
+	// Get next index to add report at
+	m_currentReportIndex++;
+	m_currentReportIndex = m_currentReportIndex % MAX_HISTORY_COUNT;
+
+	// If report at that index isn't nullptr
+	if( m_measurementHistory[ m_currentReportIndex ] != nullptr )
+	{
+		// delete it
+		DestroyMeasurementTreeRecursively( m_measurementHistory[ m_currentReportIndex ] );
+		m_measurementHistory[ m_currentReportIndex ] = nullptr;
+	}
+
+	// Now add a new entry there..
+	m_measurementHistory[ m_currentReportIndex ] = newReport;
 }
