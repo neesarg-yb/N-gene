@@ -96,11 +96,14 @@ void Initialize( HINSTANCE applicationInstanceHandle )
 	g_gameConfigBlackboard = new Blackboard();
 
 	CreateOpenGLWindow( applicationInstanceHandle, g_aspectRatio );
-	Renderer::RendererStartup( g_hWnd );
-	g_theApp = new theApp();		// Creating theApp class instance
 
+	// ENGINE STARTUP
+	EngineStartup();
+
+	g_theApp = new theApp();		// Creating theApp class instance
 	CommandRegister( "quit", QuitTheApp );
 
+	// GAME STARTUP
 	g_theApp->Startup();
 }
 
@@ -112,11 +115,11 @@ void Shutdown()
 	delete g_theApp;
 	g_theApp = nullptr;
 
+	// ENGINE SHUTDOWN
+	EngineShutdown();
+
 	delete g_gameConfigBlackboard;
 	g_gameConfigBlackboard = nullptr;
-
-	Renderer::RendererShutdown();
-	Renderer::GLShutdown();
 }
 
 
