@@ -10,6 +10,7 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/Window.hpp"
 #include "Engine/Profiler/Profiler.hpp"
+#include "Engine/Input/Command.hpp"
 #include "Game/Terrain.hpp"
 #include "Game/Turret.hpp"
 #include "Game/Tank.hpp"
@@ -20,6 +21,17 @@ Scene*				  Battle::s_battleScene;
 Camera*				  Battle::s_camera;
 std::vector< Light* > Battle::s_lightSources;
 
+void PauseTheProfiler( Command &command )
+{
+	UNUSED( command );
+	Profiler::GetInstace()->Pause();
+}
+
+void ResumeTheProfiler( Command &command )
+{
+	UNUSED( command );
+	Profiler::GetInstace()->Resume();
+}
 
 void Battle::AddNewPointLightToCamareaPosition( Rgba lightColor )
 {
@@ -149,6 +161,10 @@ void Battle::Startup()
 		EnemyBase* testEnemyBase = new EnemyBase( randPosOnTerrain, *m_terrain, 11, 0.65f, 20.f );
 		AddNewGameObject( *testEnemyBase );
 	};
+
+	// Command Register
+	CommandRegister( "pause_profile", PauseTheProfiler );
+	CommandRegister( "resume_profile", ResumeTheProfiler );
 }
 
 void Battle::BeginFrame()
