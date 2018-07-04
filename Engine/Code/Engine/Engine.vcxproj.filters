@@ -46,6 +46,9 @@
     <Filter Include="Renderer\Rendering Pipeline">
       <UniqueIdentifier>{59cdb8d0-e565-4e15-b8f1-f70e51e101df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Profiler">
+      <UniqueIdentifier>{c8785f69-4265-4c14-b759-139182ccefbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Math\Vector2.cpp">
@@ -266,6 +269,9 @@
     </ClCompile>
     <ClCompile Include="Math\AABB3.cpp">
       <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\ProfileLogScoped.cpp">
+      <Filter>Profiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -514,6 +520,9 @@
     </ClInclude>
     <ClInclude Include="Math\AABB3.hpp">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ProfileLogScoped.hpp">
+      <Filter>Profiler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
