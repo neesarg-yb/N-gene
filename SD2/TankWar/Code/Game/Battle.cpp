@@ -94,6 +94,8 @@ Battle::~Battle()
 
 void Battle::Startup()
 {
+	PROFILE_LOG_SCOPE_FUNCTION();
+
 	// Setup the camera
 	s_camera = new Camera();
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
@@ -101,7 +103,7 @@ void Battle::Startup()
 	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
 
 	{
-		PROFILE_LOG_SCOPE( "Skybox Loading.." );
+		PROFILE_LOG_SCOPE("Skybox Loading");
 		s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 	}
 
