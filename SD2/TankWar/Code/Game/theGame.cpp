@@ -268,7 +268,13 @@ void theGame::Update_Battle( float deltaSeconds )
 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_START ].keyJustPressed )
 		StartTransitionToState( MENU );
 
+	// Profiler Test
+	Profiler::GetInstace()->Push( "Battle::Update" );
+
 	m_currentBattle->Update( deltaSeconds );
+
+	// Profiler Test
+	Profiler::GetInstace()->Pop();
 
 	if( m_currentBattle->IsBattleWon() || gameWonFromCommand )
 	{

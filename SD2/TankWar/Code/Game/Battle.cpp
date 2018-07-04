@@ -9,10 +9,10 @@
 #include "Engine/Renderer/Material.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/Terrain.hpp"
 #include "Game/Turret.hpp"
 #include "Game/Tank.hpp"
-#include "Engine/Profiler/ProfileLogScoped.hpp"
 
 using namespace tinyxml2;
 
@@ -181,18 +181,26 @@ void Battle::Update( float deltaSeconds )
 	// Cleanup the GameObjects with ZERO health
 	DeleteGameObjectsWithZeroOrLessHealth();
 
+	// Profiler Test
+	Profiler::GetInstace()->Push( "GameObject Update" );
 	// Update: GameObjects
 	for ( int type = 0; type < NUM_GAME_OBJECT_TYPES; type++ )				// For each type
 	{
 		for( uint idx = 0; idx < m_allGameObjects[ type ].size(); idx++ )	// For each game objects of that type
 			m_allGameObjects[ type ][ idx ]->Update( deltaSeconds );
 	}
+	// Profiler Test END
+	Profiler::GetInstace()->Pop();
 
+	// Profiler Test
+	Profiler::GetInstace()->Push( "Collisions" );
 	// Check for collision
 	BulletToEnemyCollision();
 	BulletToEnemyBaseCollision();
 	BulletToTerrainCollision();
 	EnemyToTankCollision();
+	// Profiler Test END
+	Profiler::GetInstace()->Pop();
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );

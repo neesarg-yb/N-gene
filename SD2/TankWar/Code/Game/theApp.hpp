@@ -8,6 +8,7 @@
 #include "Engine/Core/Blackboard.hpp"
 #include "Engine/Core/Image.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 using namespace tinyxml2;
 
