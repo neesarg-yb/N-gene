@@ -50,8 +50,9 @@ public:
 
 private:
 	// Pause and Resume
-	bool				m_paused	= false;
-	bool				m_isPausing	= false;
+	bool				m_paused		= false;
+	bool				m_isPausing		= false;
+	bool				m_isResuming	= false;
 
 private:
 	// Measurement History
