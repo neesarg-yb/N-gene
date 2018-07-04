@@ -276,6 +276,9 @@
     <ClCompile Include="Profiler\Profiler.cpp">
       <Filter>Profiler</Filter>
     </ClCompile>
+    <ClCompile Include="Profiler\ProfileScoped.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -528,6 +531,9 @@
       <Filter>Profiler</Filter>
     </ClInclude>
     <ClInclude Include="Profiler\Profiler.hpp">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ProfileScoped.hpp">
       <Filter>Profiler</Filter>
     </ClInclude>
   </ItemGroup>
