@@ -12,6 +12,7 @@
 #include "Game/Terrain.hpp"
 #include "Game/Turret.hpp"
 #include "Game/Tank.hpp"
+#include "Engine/Profiler/ProfileLogScoped.hpp"
 
 using namespace tinyxml2;
 
@@ -98,7 +99,11 @@ void Battle::Startup()
 	s_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	s_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() ); 
 	s_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f );
-	s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
+
+	{
+		PROFILE_LOG_SCOPE( "Skybox Loading.." );
+		s_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
+	}
 
 	// Setup the Lighting
 	s_lightSources.push_back( new Light( Vector3( 35.f, 40.f, 20.f ), Vector3( -45.f, 0.f, 0.f ) ) );
