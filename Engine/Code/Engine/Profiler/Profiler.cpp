@@ -67,8 +67,14 @@ void Profiler::MarkFrame()
 
 	if( m_isPausing )
 	{
-		m_paused	= true;
-		m_isPausing = false;
+		m_paused		= true;
+		m_isPausing		= false;
+	}
+
+	if( m_isResuming )
+	{
+		m_paused		= false;
+		m_isResuming	= false;
 	}
 
 	Push("frame");
@@ -81,8 +87,7 @@ void Profiler::Pause()
 
 void Profiler::Resume()
 {
-	m_paused	= false;
-	m_isPausing = false;
+	m_isResuming = true;
 }
 
 ProfileMeasurement* Profiler::CreateMeasurement( std::string const &id )
