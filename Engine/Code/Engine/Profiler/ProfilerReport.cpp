@@ -1,6 +1,5 @@
 #pragma once
 #include "ProfilerReport.hpp"
-#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/DevConsole.hpp"
 
 ProfileReport::ProfileReport()
@@ -25,24 +24,10 @@ void ProfileReport::PrintToDevConsole()
 	if( m_root == nullptr )
 		return;
 
-	PrintMyDataToConsoleRecursively( m_root );
+	std::vector< std::string > reportStrings;
+	m_root->GetProfileReportAsStringsVector( reportStrings );
+
+	// Print strings on DevConsole
+	for( uint i = 0; i < reportStrings.size(); i++ )
+		ConsolePrintf( "%s", reportStrings[i].c_str() );
 }
-
-void ProfileReport::PrintMyDataToConsoleRecursively( ProfileReportEntry *root )
-{
-	std::string idStr			= Stringf( "%s: %-*s", "ID", 23, root->m_id.c_str() );
-	std::string callStr			= Stringf( "%s: %-*u", "cCount", 3, root->m_callCount );
-	std::string totalTimeStr	= Stringf( "%s: %-*f", "TotalMS", 10, Profiler::GetMillliSecondsFromPerformanceCounter( root->m_totalHPC ) );
-	std::string selfTimeStr		= Stringf( "%s: %-*f", "SelftMS", 10, Profiler::GetMillliSecondsFromPerformanceCounter( root->m_selfHPC ) );
-	std::string percentTotalStr = Stringf( "%s: %-*f", "%Total", 10, root->m_percentTotalTime );
-	std::string percentSelftStr = Stringf( "%s: %-*f", "%Self", 10, root->m_percentSelfTime );
-
-	std::string combinedStr = Stringf( "%s %s %s %s  %s  %s", idStr.c_str(), callStr.c_str(), totalTimeStr.c_str(), percentTotalStr.c_str(), selfTimeStr.c_str(), percentSelftStr.c_str() );
-	ConsolePrintf( "%s", combinedStr.c_str() );
-
-	for each (ProfileReportEntry* pChild in root->m_children)
-	{
-		PrintMyDataToConsoleRecursively( pChild );
-	}
-}
-

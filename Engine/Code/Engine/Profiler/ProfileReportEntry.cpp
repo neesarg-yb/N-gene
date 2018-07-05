@@ -1,5 +1,6 @@
 #pragma once
 #include "ProfileReportEntry.hpp"
+#include "Engine/Core/StringUtils.hpp"
 
 ProfileReportEntry::ProfileReportEntry( std::string const &id )
 	: m_id( id )
@@ -85,3 +86,20 @@ uint64_t ProfileReportEntry::GetFramesTotalHPC( ProfileMeasurement* child )
 	return possibleParent->GetElapsedHPC();
 }
 
+void ProfileReportEntry::GetProfileReportAsStringsVector( std::vector<std::string> &outStrings )
+{
+	std::string idStr			= Stringf( "%s: %-*s", "ID", 23, m_id.c_str() );
+	std::string callStr			= Stringf( "%s: %-*u", "cCount", 3, m_callCount );
+	std::string totalTimeStr	= Stringf( "%s: %-*f", "TotalMS", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_totalHPC ) );
+	std::string selfTimeStr		= Stringf( "%s: %-*f", "SelftMS", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_selfHPC ) );
+	std::string percentTotalStr = Stringf( "%s: %-*f", "%Total", 10, m_percentTotalTime );
+	std::string percentSelftStr = Stringf( "%s: %-*f", "%Self", 10, m_percentSelfTime );
+
+	std::string combinedStr = Stringf( "%s %s %s %s  %s  %s", idStr.c_str(), callStr.c_str(), totalTimeStr.c_str(), percentTotalStr.c_str(), selfTimeStr.c_str(), percentSelftStr.c_str() );
+	outStrings.push_back( combinedStr );
+
+	for each (ProfileReportEntry* pChild in m_children)
+	{
+		pChild->GetProfileReportAsStringsVector( outStrings );
+	}
+}
