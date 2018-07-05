@@ -11,6 +11,7 @@
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 Renderer*	Renderer::s_renderer				= nullptr;
 
@@ -730,6 +731,8 @@ void Renderer::BeginFrame()
 
 void Renderer::EndFrame() 
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// copies the default camera's framebuffer to the "null" framebuffer, 
 	// also known as the back buffer.
 	if( s_current_camera != nullptr )

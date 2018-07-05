@@ -36,7 +36,7 @@ private:
 	bool				m_isPausing		= false;
 	bool				m_isResuming	= false;
 
-private:
+public:
 	// Measurement History
 	ProfileMeasurement	*m_activeNode;
 	ProfileMeasurement*	 m_measurementHistory[ MAX_HISTORY_COUNT ] = { nullptr };
@@ -91,16 +91,20 @@ struct ProfileMeasurement
 	}
 
 	// Functions
-	void AddChild( ProfileMeasurement *child )
+	void		AddChild( ProfileMeasurement *child )
 	{
 		children.push_back( child );
 	}
-	void StartMeasurement()
+	void		StartMeasurement()
 	{
 		startHPC = Profiler::GetPerformanceCounter();
 	}
-	void FinishMeasurement()
+	void		FinishMeasurement()
 	{
 		endHPC = Profiler::GetPerformanceCounter();
+	}
+	uint64_t	GetElapsedHPC()
+	{
+		return (endHPC - startHPC);
 	}
 };
