@@ -11,6 +11,7 @@ bool printThisFrame = false;
 void QuitTheApp( Command& cmd );
 void PrintFrame( Command& cmd )
 {
+	UNUSED( cmd );
 	printThisFrame = true;
 }
 

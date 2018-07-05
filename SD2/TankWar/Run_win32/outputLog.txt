@@ -1,1 +1,60 @@
+1 Hello World!
+ 
+Profiling "Skybox Loading"
+Seconds      Difference: 2.568987
+Milliseconds Difference: 2568.986832
+ 
+Profiling "Battle::Startup"
+Seconds      Difference: 3.711686
+Milliseconds Difference: 3711.685551
+Command: frame_print
+Invalid Command!
+Command: print_frame
+ID: frame                   cCount: 1   TotalMS: 73.495637  %Total: 100.000000  SelftMS: 13.089538   %Self: 17.809952 
+ID: theApp::BeginFrame      cCount: 1   TotalMS: 0.372330   %Total: 0.506602    SelftMS: 0.372330    %Self: 0.506602  
+ID: theApp::Update          cCount: 1   TotalMS: 3.621923   %Total: 4.928078    SelftMS: 0.007658    %Self: 0.010420  
+ID: theGame::Update         cCount: 1   TotalMS: 3.614265   %Total: 4.917659    SelftMS: 0.031726    %Self: 0.043168  
+ID: theGame::Update_Battle  cCount: 1   TotalMS: 3.582538   %Total: 4.874491    SelftMS: 0.005835    %Self: 0.007939  
+ID: Battle::Update          cCount: 1   TotalMS: 3.576703   %Total: 4.866552    SelftMS: 0.098461    %Self: 0.133969  
+ID: GameObject Update       cCount: 1   TotalMS: 3.444692   %Total: 4.686934    SelftMS: 0.357014    %Self: 0.485762  
+ID: Enemy::Update           cCount: 70  TotalMS: 3.087678   %Total: 4.201172    SelftMS: 3.087678    %Self: 4.201172  
+ID: Collisions              cCount: 1   TotalMS: 0.033550   %Total: 0.045649    SelftMS: 0.033550    %Self: 0.045649  
+ID: theApp::Render          cCount: 1   TotalMS: 22.902498  %Total: 31.161711   SelftMS: 22.902498   %Self: 31.161711 
+ID: theApp::EndFrame        cCount: 1   TotalMS: 33.509348  %Total: 45.593657   SelftMS: 0.009481    %Self: 0.012901  
+ID: Renderer::EndFrame      cCount: 1   TotalMS: 33.499867  %Total: 45.580756   SelftMS: 33.499867   %Self: 45.580756 
+Command: print_frame
+ID: frame                   cCount: 1   TotalMS: 100.334040 %Total: 100.000000  SelftMS: 21.124721   %Self: 21.054391 
+ID: theApp::BeginFrame      cCount: 1   TotalMS: 0.388740   %Total: 0.387446    SelftMS: 0.388740    %Self: 0.387446  
+ID: theApp::Update          cCount: 1   TotalMS: 0.041208   %Total: 0.041071    SelftMS: 0.008752    %Self: 0.008723  
+ID: theGame::Update         cCount: 1   TotalMS: 0.032456   %Total: 0.032348    SelftMS: 0.019692    %Self: 0.019627  
+ID: theGame::Update_Battle  cCount: 1   TotalMS: 0.012764   %Total: 0.012721    SelftMS: 0.010940    %Self: 0.010904  
+ID: Battle::Update          cCount: 1   TotalMS: 0.001823   %Total: 0.001817    SelftMS: 0.001823    %Self: 0.001817  
+ID: theApp::Render          cCount: 1   TotalMS: 77.863678  %Total: 77.604449   SelftMS: 77.863678   %Self: 77.604449 
+ID: theApp::EndFrame        cCount: 1   TotalMS: 0.915691   %Total: 0.912643    SelftMS: 0.005835    %Self: 0.005815  
+ID: Renderer::EndFrame      cCount: 1   TotalMS: 0.909857   %Total: 0.906828    SelftMS: 0.909857    %Self: 0.906828  
+Command: print_frame
+ID: frame                   cCount: 1   TotalMS: 119.986580 %Total: 100.000000  SelftMS: 3.525649    %Self: 2.938370  
+ID: theApp::BeginFrame      cCount: 1   TotalMS: 0.649846   %Total: 0.541599    SelftMS: 0.649846    %Self: 0.541599  
+ID: theApp::Update          cCount: 1   TotalMS: 0.021151   %Total: 0.017628    SelftMS: 0.005105    %Self: 0.004255  
+ID: theGame::Update         cCount: 1   TotalMS: 0.016046   %Total: 0.013373    SelftMS: 0.011305    %Self: 0.009422  
+ID: theGame::Update_Battle  cCount: 1   TotalMS: 0.004741   %Total: 0.003951    SelftMS: 0.003647    %Self: 0.003039  
+ID: Battle::Update          cCount: 1   TotalMS: 0.001094   %Total: 0.000912    SelftMS: 0.001094    %Self: 0.000912  
+ID: theApp::Render          cCount: 1   TotalMS: 114.737491 %Total: 95.625270   SelftMS: 114.737491  %Self: 95.625270 
+ID: theApp::EndFrame        cCount: 1   TotalMS: 1.052443   %Total: 0.877134    SelftMS: 0.005470    %Self: 0.004559  
+ID: Renderer::EndFrame      cCount: 1   TotalMS: 1.046973   %Total: 0.872575    SelftMS: 1.046973    %Self: 0.872575  
+Command: print_frame
+ID: frame                   cCount: 1   TotalMS: 168.466445 %Total: 100.000000  SelftMS: 12.841561   %Self: 7.622622  
+ID: theApp::BeginFrame      cCount: 1   TotalMS: 0.239954   %Total: 0.142434    SelftMS: 0.239954    %Self: 0.142434  
+ID: theApp::Update          cCount: 1   TotalMS: 7.731047   %Total: 4.589072    SelftMS: 0.005105    %Self: 0.003031  
+ID: theGame::Update         cCount: 1   TotalMS: 7.725942   %Total: 4.586042    SelftMS: 0.009846    %Self: 0.005845  
+ID: theGame::Update_Battle  cCount: 1   TotalMS: 7.716096   %Total: 4.580197    SelftMS: 0.003282    %Self: 0.001948  
+ID: Battle::Update          cCount: 1   TotalMS: 7.712813   %Total: 4.578249    SelftMS: 0.103932    %Self: 0.061693  
+ID: GameObject Update       cCount: 1   TotalMS: 7.561110   %Total: 4.488199    SelftMS: 0.445629    %Self: 0.264521  
+ID: Enemy::Update           cCount: 108 TotalMS: 7.115481   %Total: 4.223678    SelftMS: 7.115481    %Self: 4.223678  
+ID: Collisions              cCount: 1   TotalMS: 0.047772   %Total: 0.028357    SelftMS: 0.047772    %Self: 0.028357  
+ID: theApp::Render          cCount: 1   TotalMS: 146.678020 %Total: 87.066609   SelftMS: 146.678020  %Self: 87.066609 
+ID: theApp::EndFrame        cCount: 1   TotalMS: 0.975862   %Total: 0.579262    SelftMS: 0.006199    %Self: 0.003680  
+ID: Renderer::EndFrame      cCount: 1   TotalMS: 0.969663   %Total: 0.575582    SelftMS: 0.969663    %Self: 0.575582  
+Command: print_log
+Invalid Command!
 Command: save_log
