@@ -4,6 +4,7 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Core/Image.hpp"
 #include "Engine/Renderer/Scene.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath )
 	: GameObject( GAME_OBJECT_TERRAIN )
@@ -39,6 +40,9 @@ Terrain::~Terrain()
 
 void Terrain::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	UNUSED( deltaSeconds );
 }
 

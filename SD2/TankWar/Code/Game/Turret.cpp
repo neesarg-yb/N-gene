@@ -1,6 +1,7 @@
 #pragma once
 #include "Turret.hpp"
 #include "Engine/Renderer/Camera.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Tank.hpp"
@@ -39,6 +40,9 @@ Turret::~Turret()
 
 void Turret::LookAtPosition( Vector3 targetPosInWorldSpace, float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	UNUSED( deltaSeconds );
 
 	// Get Look At in World Space

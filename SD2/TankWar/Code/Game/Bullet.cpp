@@ -2,6 +2,7 @@
 #include "Bullet.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Scene.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 Bullet::Bullet( Vector3 const &spawnPosition, Vector3 const &velocity )
 	: GameObject( GAME_OBJECT_BULLET )
@@ -28,6 +29,9 @@ Bullet::~Bullet()
 
 void Bullet::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Update the position accrd. to velocity
 	Vector3 position = m_transform.GetPosition();
 	position		+= m_velocity * deltaSeconds * m_bulletSpeed;

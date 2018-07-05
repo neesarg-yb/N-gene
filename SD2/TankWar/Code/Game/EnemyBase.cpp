@@ -5,6 +5,7 @@
 #include "Game/theGame.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 EnemyBase::EnemyBase( Vector2 const &basePositionXZ, Terrain &isInTerrain, int const maxEnemiesCount, float const spawnRate, float const towerHeight )
 	: GameObject( GAME_OBJECT_ENEMY_BASE )
@@ -44,6 +45,9 @@ EnemyBase::~EnemyBase()
 
 void EnemyBase::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// If all spawned enemies are alive ( on max capacity ), return
 	if( m_currentlyAliveSpawnedEnemies >= m_maxEnemiesCount )
 		return;

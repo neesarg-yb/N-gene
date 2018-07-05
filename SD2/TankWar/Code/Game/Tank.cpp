@@ -3,6 +3,7 @@
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Material.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Core/Window.hpp"
@@ -66,6 +67,9 @@ Tank::~Tank()
 
 void Tank::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// If Player Tank, handle input
 	if( m_isControlledByXbox )
 		HandleInput( deltaSeconds );		// m_xzPosition is set

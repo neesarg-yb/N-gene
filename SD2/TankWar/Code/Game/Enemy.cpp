@@ -51,6 +51,7 @@ Enemy::~Enemy()
 
 void Enemy::Update( float deltaSeconds )
 {
+	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
 	///////////////////////

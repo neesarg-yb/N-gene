@@ -222,6 +222,9 @@ void Battle::Update( float deltaSeconds )
 
 void Battle::Render() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Bind all the Uniforms
 	g_theRenderer->UseShader( g_theRenderer->CreateOrGetShader( "lit" ) );
 	g_theRenderer->SetUniform( "EYE_POSITION", s_camera->GetCameraModelMatrix().GetTColumn() );

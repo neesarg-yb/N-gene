@@ -146,6 +146,9 @@ void theGame::Update()
 
 void theGame::Render() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	switch (m_currentGameState)
 	{
 	case ATTRACT:
@@ -301,6 +304,9 @@ void theGame::Update_Victory( float deltaSeconds )
 
 void theGame::Render_Battle() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	m_currentBattle->Render();
 }
 
