@@ -25,7 +25,7 @@ void ProfileReport::PrintToDevConsole()
 		return;
 
 	std::vector< std::string > reportStrings;
-	m_root->GetProfileReportAsStringsVector( reportStrings );
+	m_root->GetProfileReportAsStringsVector( reportStrings, 0 );
 
 	// Print strings on DevConsole
 	for( uint i = 0; i < reportStrings.size(); i++ )
