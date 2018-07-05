@@ -19,5 +19,4 @@ public:
 
 public:
 	void	PrintToDevConsole();
-	void	PrintMyDataToConsoleRecursively( ProfileReportEntry *root );
 };
