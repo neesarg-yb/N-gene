@@ -5,6 +5,7 @@
 #include "Engine/Core/Window.hpp"
 #include "Engine/Audio/AudioSystem.hpp"
 #include "Engine/Profiler/ProfilerReport.hpp"
+#include "Engine/Profiler/ProfilerConsole.hpp"
 
 bool printThisFrame = false;
 
@@ -13,6 +14,20 @@ void PrintFrame( Command& cmd )
 {
 	UNUSED( cmd );
 	printThisFrame = true;
+}
+void ShowHideProfileConsole( Command& cmd )
+{
+	UNUSED( cmd );
+	if( ProfileConsole::GetInstance()->IsOpen() )
+	{
+		ProfileConsole::GetInstance()->Close();
+		DevConsole::GetInstance()->Close();
+	}
+	else
+	{
+		ProfileConsole::GetInstance()->Open();
+		DevConsole::GetInstance()->Close();
+	}
 }
 
 theApp::theApp()
@@ -46,6 +61,7 @@ theApp::~theApp()
 void theApp::Startup()
 {
 	CommandRegister( "print_frame", PrintFrame );
+	CommandRegister( "profiler", ShowHideProfileConsole );
 	g_theGame->Startup();
 }
 
@@ -99,6 +115,8 @@ void theApp::Update() {
 
 	g_theGame->Update();
 
+	ProfileConsole::GetInstance()->Update( *g_theInput );
+
 	if( DevConsole::GetInstance()->IsOpen() )
 		DevConsole::GetInstance()->Update( *g_theInput );
 }
@@ -108,6 +126,8 @@ void theApp::Render() {
 	PROFILE_SCOPE_FUNCTION();
 
 	g_theGame->Render();
+
+	ProfileConsole::GetInstance()->Render();
 
 	if( DevConsole::GetInstance()->IsOpen() )
 		DevConsole::GetInstance()->Render();
