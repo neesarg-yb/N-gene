@@ -88,7 +88,7 @@ uint64_t ProfileReportEntry::GetFramesTotalHPC( ProfileMeasurement* child )
 
 void ProfileReportEntry::GetProfileReportAsStringsVector( std::vector<std::string> &outStrings, uint herairchyLevel )
 {
-	// If herairchy level ZERO => We need to provide headers, too!
+	// If hierarchy level ZERO => We need to provide headers, too!
 	if( herairchyLevel == 0 )
 	{
 		std::string idStr			= Stringf( "%-*s", 50, "ID" );
