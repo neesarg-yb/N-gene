@@ -304,6 +304,8 @@
     <ClCompile Include="Math\Vector4.cpp" />
     <ClCompile Include="Profiler\ProfileLogScoped.cpp" />
     <ClCompile Include="Profiler\Profiler.cpp" />
+    <ClCompile Include="Profiler\ProfileReportEntry.cpp" />
+    <ClCompile Include="Profiler\ProfilerReport.cpp" />
     <ClCompile Include="Profiler\ProfileScoped.cpp" />
     <ClCompile Include="Renderer\BitmapFont.cpp" />
     <ClCompile Include="Renderer\Camera.cpp" />
@@ -388,6 +390,8 @@
     <ClInclude Include="Math\Vector4.hpp" />
     <ClInclude Include="Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Profiler\Profiler.hpp" />
+    <ClInclude Include="Profiler\ProfileReportEntry.hpp" />
+    <ClInclude Include="Profiler\ProfilerReport.hpp" />
     <ClInclude Include="Profiler\ProfileScoped.hpp" />
     <ClInclude Include="Renderer\BitmapFont.hpp" />
     <ClInclude Include="Renderer\Camera.hpp" />
