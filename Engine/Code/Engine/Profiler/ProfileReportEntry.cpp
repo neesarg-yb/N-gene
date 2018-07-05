@@ -9,12 +9,10 @@ ProfileReportEntry::ProfileReportEntry( std::string const &id )
 
 ProfileReportEntry::~ProfileReportEntry()
 {
-	for( ProfileReportEntryMap::iterator childIt  = m_children.begin();
-										 childIt != m_children.end();
-										 childIt++ )
+	for each (ProfileReportEntry* pEntry in m_children)
 	{
-		delete childIt->second;
-		childIt->second = nullptr;
+		delete pEntry;
+		pEntry = nullptr;
 	}
 }
 
@@ -35,16 +33,14 @@ void ProfileReportEntry::PopulateTree( ProfileMeasurement* root )
 
 ProfileReportEntry* ProfileReportEntry::GetOrCreateChild( std::string const &childID )
 {
-	for( ProfileReportEntryMap::iterator it  = m_children.begin();
-										 it != m_children.end();
-										 it++ )
+	for each (ProfileReportEntry* pEntry in m_children)
 	{
-		if( it->first == childID )
-			return it->second;
+		if( pEntry->m_id == childID )
+			return pEntry;
 	}
 
 	ProfileReportEntry* newChild = new ProfileReportEntry( childID );
-	m_children[ childID ] = newChild;
+	m_children.push_back( newChild );
 
 	return newChild;
 }

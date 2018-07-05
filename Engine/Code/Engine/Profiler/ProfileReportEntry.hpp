@@ -5,7 +5,7 @@
 #include "Engine/Profiler/Profiler.hpp"
 
 class ProfileReportEntry;
-typedef std::map< std::string, ProfileReportEntry* > ProfileReportEntryMap;
+typedef std::vector< ProfileReportEntry* > ProfileReportEntryList;
 
 class ProfileReportEntry
 {
@@ -23,7 +23,7 @@ public:
 
 public:
 	ProfileReportEntry		*m_parent	= nullptr;
-	ProfileReportEntryMap	 m_children;
+	ProfileReportEntryList	 m_children;
 
 public:
 	void				PopulateTree( ProfileMeasurement* root );
