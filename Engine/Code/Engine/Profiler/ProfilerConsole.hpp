@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Math/AABB2.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Core/Rgba.hpp"
 
 class Camera;
 class Renderer;
@@ -24,7 +25,13 @@ public:
 	Camera*			m_profileConsoleCamera		= nullptr;
 	Renderer*		m_currentRenderer			= nullptr;
 	BitmapFont*		m_fonts						= nullptr;
-	AABB2 const		m_drawBounds				= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
+	AABB2	const	m_drawBounds				= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
+	Rgba	const	m_accentColor				= Rgba( 70, 141, 185, 200 );
+	Rgba	const	m_boxBackgroudColor			= Rgba( 0, 0, 0, 180 );
+
+	int				m_fps						= 0;
+	std::string		m_profileReportString		= "";
+	std::string		m_hotkeysInfoString			= "";
 
 public:
 	void Update( InputSystem& currentInputSystem );
