@@ -86,6 +86,9 @@ void theGame::EndFrame()
 
 void theGame::Update() 
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Calculating deltaTime
 	float deltaSeconds			= CalculateDeltaTime();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps

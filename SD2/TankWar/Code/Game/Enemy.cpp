@@ -5,6 +5,7 @@
 #include "Game/EnemyBase.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Renderer/Scene.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 typedef std::vector< Enemy* > EnemyList;
 
@@ -50,6 +51,8 @@ Enemy::~Enemy()
 
 void Enemy::Update( float deltaSeconds )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	///////////////////////
 	//  MOVEMENT UPDATE  //
 	///////////////////////

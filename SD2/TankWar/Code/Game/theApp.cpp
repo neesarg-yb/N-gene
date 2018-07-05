@@ -4,8 +4,15 @@
 #include "Engine/Math/FloatRange.hpp"
 #include "Engine/Core/Window.hpp"
 #include "Engine/Audio/AudioSystem.hpp"
+#include "Engine/Profiler/ProfilerReport.hpp"
+
+bool printThisFrame = false;
 
 void QuitTheApp( Command& cmd );
+void PrintFrame( Command& cmd )
+{
+	printThisFrame = true;
+}
 
 theApp::theApp()
 {
@@ -37,6 +44,7 @@ theApp::~theApp()
 
 void theApp::Startup()
 {
+	CommandRegister( "print_frame", PrintFrame );
 	g_theGame->Startup();
 }
 
@@ -51,8 +59,22 @@ void theApp::RunFrame() {
 }
 
 void theApp::BeginFrame() {
+	// Testing ProfileReport
+	ProfileMeasurement* lastMeasurement = Profiler::GetInstance()->GetPreviousFrame();
+	if( lastMeasurement != nullptr && printThisFrame )
+	{
+		ProfileReport lastFrameReport;
+		lastFrameReport.GenerateReportFromFrame( lastMeasurement );
+
+		lastFrameReport.PrintToDevConsole();
+		printThisFrame = false;
+	}
+
 	// Profiler MarkFrame
 	Profiler::GetInstance()->MarkFrame();
+
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
 
 	g_theAudioSystem->BeginFrame();
 	g_theInput->BeginFrame();
@@ -61,6 +83,9 @@ void theApp::BeginFrame() {
 }
 
 void theApp::EndFrame() {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	g_theGame->EndFrame();
 	g_theRenderer->EndFrame();
 	g_theInput->EndFrame();
@@ -68,6 +93,9 @@ void theApp::EndFrame() {
 }
 
 void theApp::Update() {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	g_theGame->Update();
 
 	if( DevConsole::GetInstance()->IsOpen() )
@@ -75,6 +103,9 @@ void theApp::Update() {
 }
 
 void theApp::Render() {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	g_theGame->Render();
 
 	if( DevConsole::GetInstance()->IsOpen() )
