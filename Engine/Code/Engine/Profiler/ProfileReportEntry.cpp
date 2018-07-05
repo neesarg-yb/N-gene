@@ -101,6 +101,7 @@ void ProfileReportEntry::GetProfileReportAsStringsVector( std::vector<std::strin
 		std::string combinedStr = Stringf( "%s  %s  %s  %s  %s  %s", idStr.c_str(), callStr.c_str(), totalTimeStr.c_str(), percentTotalStr.c_str(), selfTimeStr.c_str(), percentSelftStr.c_str() );
 		outStrings.push_back( " " );
 		outStrings.push_back( combinedStr );
+		outStrings.push_back( " " );
 	}
 
 	std::string idStr			= Stringf( "%-*s%-*s", herairchyLevel, "", (50 - herairchyLevel), m_id.c_str() );
