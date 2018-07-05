@@ -30,7 +30,7 @@ public:
 	ProfileReportEntry* GetOrCreateChild( std::string const &childID );
 	void				CalculateInitialData( ProfileMeasurement* node );		// Sets totalHPC & callCount
 	void				CalculateRemainingData( ProfileMeasurement* node );
-	void				GetProfileReportAsStringsVector( std::vector<std::string> &outStrings );
+	void				GetProfileReportAsStringsVector( std::vector<std::string> &outStrings, uint herairchyLevel );
 
 private:
 	uint64_t			ChildrensTotalHPC( ProfileMeasurement* root );

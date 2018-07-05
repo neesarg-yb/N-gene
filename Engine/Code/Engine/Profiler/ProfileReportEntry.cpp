@@ -86,20 +86,35 @@ uint64_t ProfileReportEntry::GetFramesTotalHPC( ProfileMeasurement* child )
 	return possibleParent->GetElapsedHPC();
 }
 
-void ProfileReportEntry::GetProfileReportAsStringsVector( std::vector<std::string> &outStrings )
+void ProfileReportEntry::GetProfileReportAsStringsVector( std::vector<std::string> &outStrings, uint herairchyLevel )
 {
-	std::string idStr			= Stringf( "%s: %-*s", "ID", 23, m_id.c_str() );
-	std::string callStr			= Stringf( "%s: %-*u", "cCount", 3, m_callCount );
-	std::string totalTimeStr	= Stringf( "%s: %-*f", "TotalMS", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_totalHPC ) );
-	std::string selfTimeStr		= Stringf( "%s: %-*f", "SelftMS", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_selfHPC ) );
-	std::string percentTotalStr = Stringf( "%s: %-*f", "%Total", 10, m_percentTotalTime );
-	std::string percentSelftStr = Stringf( "%s: %-*f", "%Self", 10, m_percentSelfTime );
+	// If herairchy level ZERO => We need to provide headers, too!
+	if( herairchyLevel == 0 )
+	{
+		std::string idStr			= Stringf( "%-*s", 50, "ID" );
+		std::string callStr			= Stringf( "%-*s",  6, "Calls" );
+		std::string totalTimeStr	= Stringf( "%-*s", 10, "Total MS" );
+		std::string selfTimeStr		= Stringf( "%-*s", 10, "Self MS" );
+		std::string percentTotalStr = Stringf( "%-*s", 10, "%Total" );
+		std::string percentSelftStr = Stringf( "%-*s", 10, "%Self" );
 
-	std::string combinedStr = Stringf( "%s %s %s %s  %s  %s", idStr.c_str(), callStr.c_str(), totalTimeStr.c_str(), percentTotalStr.c_str(), selfTimeStr.c_str(), percentSelftStr.c_str() );
+		std::string combinedStr = Stringf( "%s  %s  %s  %s  %s  %s", idStr.c_str(), callStr.c_str(), totalTimeStr.c_str(), percentTotalStr.c_str(), selfTimeStr.c_str(), percentSelftStr.c_str() );
+		outStrings.push_back( " " );
+		outStrings.push_back( combinedStr );
+	}
+
+	std::string idStr			= Stringf( "%-*s%-*s", herairchyLevel, "", (50 - herairchyLevel), m_id.c_str() );
+	std::string callStr			= Stringf( "%-*u", 6, m_callCount );
+	std::string totalTimeStr	= Stringf( "%-*.2f", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_totalHPC ) );
+	std::string selfTimeStr		= Stringf( "%-*.2f", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_selfHPC ) );
+	std::string percentTotalStr = Stringf( "%-*.2f", 10, m_percentTotalTime );
+	std::string percentSelftStr = Stringf( "%-*.2f", 10, m_percentSelfTime );
+
+	std::string combinedStr = Stringf( "%s  %s  %s  %s  %s  %s", idStr.c_str(), callStr.c_str(), totalTimeStr.c_str(), percentTotalStr.c_str(), selfTimeStr.c_str(), percentSelftStr.c_str() );
 	outStrings.push_back( combinedStr );
 
 	for each (ProfileReportEntry* pChild in m_children)
 	{
-		pChild->GetProfileReportAsStringsVector( outStrings );
+		pChild->GetProfileReportAsStringsVector( outStrings, herairchyLevel + 1 );
 	}
 }
