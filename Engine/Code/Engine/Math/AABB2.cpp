@@ -170,6 +170,16 @@ AABB2 AABB2::operator/( const float divideAllBy ) const {
 	return temp;
 }
 
+AABB2 AABB2::GetBoundsFromPercentage( Vector2 const &minPercentFraction, Vector2 const &maxPercentFraction ) const
+{
+	float minX = RangeMapFloat( minPercentFraction.x, 0.f, 1.f, mins.x, maxs.x );
+	float minY = RangeMapFloat( minPercentFraction.y, 0.f, 1.f, mins.y, maxs.y );
+	float maxX = RangeMapFloat( maxPercentFraction.x, 0.f, 1.f, mins.x, maxs.x );
+	float maxY = RangeMapFloat( maxPercentFraction.y, 0.f, 1.f, mins.y, maxs.y );
+
+	return AABB2( minX, minY, maxX, maxY );
+}
+
 bool AABB2::DoAABBsOverlap( const AABB2& a, const AABB2& b ) {
 	Vector2 centerA = a.GetCenter();
 	Vector2 centerB = b.GetCenter();

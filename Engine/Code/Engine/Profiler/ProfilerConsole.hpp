@@ -33,4 +33,11 @@ public:
 	void Open();
 	void Close();
 	bool IsOpen();
+
+private:
+	void Render_Backgroud();
+	void Render_FPSBox();
+	void Render_HotkeysBox();
+	void Render_GraphBox();
+	void Render_ProfilingDetailsBox();
 };

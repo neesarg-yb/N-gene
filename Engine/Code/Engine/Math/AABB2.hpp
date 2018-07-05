@@ -45,6 +45,9 @@ public:
 	AABB2 operator * ( const float multiplyAllBy ) const;
 	AABB2 operator / ( const float divideAllBy ) const;
 
+	// Helper
+	AABB2 GetBoundsFromPercentage( Vector2 const &minPercentFraction, Vector2 const &maxPercentFraction ) const;
+
 	// Static functions
 	static bool DoAABBsOverlap( const AABB2& a, const AABB2& b );
 private:
