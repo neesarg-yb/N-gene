@@ -288,6 +288,12 @@
     <ClCompile Include="Profiler\ProfilerConsole.cpp">
       <Filter>Profiler</Filter>
     </ClCompile>
+    <ClCompile Include="Math\BarGraph.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\DoubleRange.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -553,6 +559,12 @@
     </ClInclude>
     <ClInclude Include="Profiler\ProfilerConsole.hpp">
       <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\BarGraph.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\DoubleRange.hpp">
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

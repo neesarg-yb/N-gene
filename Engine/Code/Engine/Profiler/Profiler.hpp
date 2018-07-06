@@ -68,9 +68,6 @@ public:
 	static double		CalculateSecondsPerClockCycle();
 	static double		GetSecondsFromPerformanceCounter( uint64_t hpc );
 	static double		GetMillliSecondsFromPerformanceCounter( uint64_t hpc );
-
-private:
-	int					ModuloNonNegative( int operatingOn, int moduloBy );			// It is like normal modulo, but on negative values it wraps around the range => (-1) will give you (moduloBy - 1)
 };
 
 struct ProfileMeasurement

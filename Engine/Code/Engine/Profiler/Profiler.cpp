@@ -4,6 +4,7 @@
 
 #include "Profiler.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Math/MathUtil.hpp"
 #include "Engine/Input/Command.hpp"
 #include "Game/EngineBuildPreferences.hpp"
 
@@ -223,12 +224,4 @@ double Profiler::GetSecondsFromPerformanceCounter( uint64_t hpc )
 double Profiler::GetMillliSecondsFromPerformanceCounter( uint64_t hpc )
 {
 	return ( (double)hpc * s_secondsPerClockCycle * 1000.0 );
-}
-
-int Profiler::ModuloNonNegative( int operatingOn, int moduloBy )
-{
-	// ( b + (a % b) ) % b
-	int nnMod = ( moduloBy + ( operatingOn % moduloBy ) ) % moduloBy;
-
-	return nnMod;
 }

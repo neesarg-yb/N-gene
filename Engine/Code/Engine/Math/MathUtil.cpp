@@ -430,3 +430,11 @@ std::vector<std::string> SplitIntoStringsByDelimiter( std::string passedString, 
 
 	return subStringList;
 }
+
+int ModuloNonNegative( int operatingOn, int moduloBy )
+{
+	// ( b + (a % b) ) % b
+	int nnMod = ( moduloBy + ( operatingOn % moduloBy ) ) % moduloBy;
+
+	return nnMod;
+}

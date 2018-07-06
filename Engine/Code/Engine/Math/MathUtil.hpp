@@ -75,3 +75,5 @@ void	SetFromText( std::vector<std::string>& setIt, const char* delimiter, const 
 int		GetIndexFromColumnRowNumberForMatrixOfWidth( int columnNum , int rowNum , int width );		// It assumes that first cell is at ( zero , zero ) & width starts from 1
 
 std::vector<std::string> SplitIntoStringsByDelimiter( std::string passedString, char delimeter );
+
+int	ModuloNonNegative( int operatingOn, int moduloBy );			// It is like normal modulo, but on negative values it wraps around the range => (-1) will give you (moduloBy - 1)
