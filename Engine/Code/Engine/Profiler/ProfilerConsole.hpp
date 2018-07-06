@@ -5,6 +5,7 @@
 
 class Camera;
 class Renderer;
+class BarGraph;
 class BitmapFont;
 class InputSystem;
 
@@ -34,6 +35,8 @@ public:
 	uint64_t		m_lastFramesHPC				= 0;
 	std::string		m_profileReportString		= "";
 	std::string		m_hotkeysInfoString			= "";
+
+	BarGraph		*m_frameGraph				= nullptr;
 
 public:
 	void Update( InputSystem& currentInputSystem );

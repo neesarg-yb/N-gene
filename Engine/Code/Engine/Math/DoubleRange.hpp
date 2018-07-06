@@ -15,4 +15,5 @@ public:
 public:
 	bool	IsValueInRange( double valueToCheck );
 	void	ChangeRangeToInclude( double includeValue );
+	double	GetRangeLength() const;
 };

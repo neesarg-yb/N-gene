@@ -1,5 +1,6 @@
 #pragma once
 #include "ProfilerConsole.hpp"
+#include "Engine/Math/BarGraph.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -50,11 +51,14 @@ ProfileConsole::ProfileConsole( Renderer* currentRenderer )
 	std::string reportFrmt	= Stringf( "  %-*s: Report Format ", 6, "[F]" );
 	std::string flatSort	= Stringf( "  %-*s: Flat Sort Format ", 6, "[S]" );
 	m_hotkeysInfoString		= Stringf( "%s\n%s\n%s\n%s", hkHeading.c_str(), tildeStr.c_str(), reportFrmt.c_str(), flatSort.c_str() );
+
+	// Graph
+	m_frameGraph = new BarGraph( 128 );
 }
 
 ProfileConsole::~ProfileConsole()
 {
-
+	delete m_frameGraph;
 }
 
 ProfileConsole* ProfileConsole::GetInstance()
@@ -87,6 +91,9 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 	ProfileMeasurement* lastFrameMeasure	= Profiler::GetInstance()->GetPreviousFrame();
 	ProfileReport lastFrameReport;
 	lastFrameReport.GenerateReportFromFrame( lastFrameMeasure, currentReportFormat );
+
+	// Add frame to graph
+	m_frameGraph->AppendDataPoint( 100 );
 
 	// Do sorting on flat report
 	if( currentReportFormat == PROFILE_REPORT_FLAT )
@@ -197,6 +204,11 @@ void ProfileConsole::Render_GraphBox()
 	AABB2	actualBounds		= m_drawBounds.GetBoundsFromPercentage( minBoundPercentage, maxBoundPercentage );
 
 	m_currentRenderer->DrawAABB( actualBounds, m_boxBackgroudColor );
+
+	Mesh * graphMesh = m_frameGraph->CreateVisualGraphMesh( actualBounds );
+	m_currentRenderer->SetCurrentDiffuseTexture( nullptr );
+	m_currentRenderer->DrawMesh( *graphMesh );
+	delete graphMesh;
 }
 
 void ProfileConsole::Render_ProfilingDetailsBox()

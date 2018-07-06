@@ -41,3 +41,8 @@ void DoubleRange::ChangeRangeToInclude( double includeValue )
 	min = (includeValue < min) ? includeValue : min;
 	max = (includeValue > max) ? includeValue : max;
 }
+
+double DoubleRange::GetRangeLength() const
+{
+	return ( max - min );
+}
