@@ -3,12 +3,16 @@
 #include "Engine/Math/DoubleRange.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 
+class Mesh;
+class AABB2;
+
 struct DoubleAndVoidPointer
 {
 	double	value	= 0.0;
 	void*	object	= nullptr;
 
-	explicit DoubleAndVoidPointer( double value, void* objectPtr = nullptr )
+	DoubleAndVoidPointer() {}
+	DoubleAndVoidPointer( double value, void* objectPtr = nullptr )
 	{
 		this->value		= value;
 		this->object	= objectPtr;
@@ -34,4 +38,5 @@ private:
 public:
 	void	AppendDataPoint( double const &value, void *objectPointer = nullptr );
 	void	GetPreviousDataPoint( DoubleAndVoidPointer &outDataPoint, int skipCount = 0 );
+	Mesh*	CreateVisualGraphMesh( AABB2 const &bounds );
 };
