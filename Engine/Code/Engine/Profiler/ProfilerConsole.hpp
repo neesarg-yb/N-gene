@@ -30,6 +30,7 @@ public:
 	Rgba	const	m_boxBackgroudColor			= Rgba( 0, 0, 0, 180 );
 
 	int				m_fps						= 0;
+	double			m_frameTime					= 0;
 	uint64_t		m_lastFramesHPC				= 0;
 	std::string		m_profileReportString		= "";
 	std::string		m_hotkeysInfoString			= "";
