@@ -9,6 +9,13 @@ enum eProfileReportType
 	NUM_PROFILE_REPORT_TYPES
 };
 
+enum eProfileReportSort
+{
+	PROFILE_REPORT_SORT_SELF_TIME = 0,
+	PROFILE_REPORT_SORT_TOTAL_TIME,
+	NUM_PROFILE_REPORT_SORTS
+};
+
 class ProfileReport
 {
 public:
@@ -20,9 +27,9 @@ public:
 
 public:
 	void	GenerateReportFromFrame( ProfileMeasurement *root, eProfileReportType reportType = PROFILE_REPORT_TREE );
+	void	SortTree( eProfileReportSort sortType = PROFILE_REPORT_SORT_SELF_TIME );
 	void	SortBySelfTime();
 	void	SortByTotalTime();
-	double	GetTotalFrameTime();
 
 public:
 	void	PrintToDevConsole();

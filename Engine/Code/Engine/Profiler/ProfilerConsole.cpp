@@ -9,7 +9,8 @@
 
 ProfileConsole* ProfileConsole::s_profileConsoleInstance = nullptr;
 
-eProfileReportType currentReportFormat = PROFILE_REPORT_TREE;
+eProfileReportType currentReportFormat	= PROFILE_REPORT_FLAT;
+eProfileReportSort currentFlatSorting	= PROFILE_REPORT_SORT_SELF_TIME;
 
 void ChangeProfileReportDisplayFormat()
 {
@@ -18,6 +19,15 @@ void ChangeProfileReportDisplayFormat()
 	i = i % (int)NUM_PROFILE_REPORT_TYPES;
 
 	currentReportFormat = (eProfileReportType) i;
+}
+
+void ChangeSortingOnFlatReport()
+{
+	int i = (int) currentFlatSorting;
+	i = i + 1;
+	i = i % (int)NUM_PROFILE_REPORT_SORTS;
+
+	currentFlatSorting = (eProfileReportSort) i;
 }
 
 ProfileConsole::ProfileConsole( Renderer* currentRenderer )
@@ -37,8 +47,9 @@ ProfileConsole::ProfileConsole( Renderer* currentRenderer )
 	// Setup Hotkey Info
 	std::string hkHeading	= Stringf( " Hotkeys, " );
 	std::string tildeStr	= Stringf( "  %-*s: DevConsole ", 6, "[~]" );
-	std::string help		= Stringf( "  %-*s: Report Format ", 6, "[F]" );
-	m_hotkeysInfoString		= Stringf( "%s\n%s\n%s", hkHeading.c_str(), tildeStr.c_str(), help.c_str() );
+	std::string reportFrmt	= Stringf( "  %-*s: Report Format ", 6, "[F]" );
+	std::string flatSort	= Stringf( "  %-*s: Flat Sort Format ", 6, "[S]" );
+	m_hotkeysInfoString		= Stringf( "%s\n%s\n%s\n%s", hkHeading.c_str(), tildeStr.c_str(), reportFrmt.c_str(), flatSort.c_str() );
 }
 
 ProfileConsole::~ProfileConsole()
@@ -68,10 +79,23 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 	if( currentInputSystem.WasKeyJustPressed( 'F' ) )
 		ChangeProfileReportDisplayFormat();
 
+	// change sorting
+	if( currentInputSystem.WasKeyJustPressed( 'S' ) )
+		ChangeSortingOnFlatReport();
+
 	// Profile Report
 	ProfileMeasurement* lastFrameMeasure	= Profiler::GetInstance()->GetPreviousFrame();
 	ProfileReport lastFrameReport;
 	lastFrameReport.GenerateReportFromFrame( lastFrameMeasure, currentReportFormat );
+
+	// Do sorting on flat report
+	if( currentReportFormat == PROFILE_REPORT_FLAT )
+	{
+		if( currentFlatSorting == PROFILE_REPORT_SORT_TOTAL_TIME )
+			lastFrameReport.SortByTotalTime();
+		else
+			lastFrameReport.SortBySelfTime();
+	}
 
 	std::vector< std::string > reportInStrings;
 	lastFrameReport.m_root->GetProfileReportAsStringsVector( reportInStrings, 0 );
