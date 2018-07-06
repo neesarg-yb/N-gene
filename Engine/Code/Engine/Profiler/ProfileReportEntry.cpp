@@ -17,19 +17,35 @@ ProfileReportEntry::~ProfileReportEntry()
 	}
 }
 
-void ProfileReportEntry::PopulateTree( ProfileMeasurement* root )
+void ProfileReportEntry::PopulateTree( ProfileMeasurement* node )
 {
 	// We can set totalHPC & callCount for this root
-	CalculateInitialData( root );
+	CalculateInitialData( node );
 
-	for each (ProfileMeasurement* child in root->children)
+	for each (ProfileMeasurement* child in node->children)
 	{
 		ProfileReportEntry *entry = GetOrCreateChild( child->id );
 		entry->PopulateTree( child );
 	}
 
 	// Calculate selfTime & percentages
-	CalculateRemainingData( root );
+	CalculateRemainingData( node );
+}
+
+void ProfileReportEntry::PopulateFlat( ProfileMeasurement* node, ProfileReportEntry* root /* = nullptr */ )
+{
+	CalculateInitialData( node );
+
+	if( root == nullptr )
+		root = this;
+
+	for each (ProfileMeasurement* child in node->children)
+	{
+		ProfileReportEntry *childEntry = root->GetOrCreateChild( child->id );
+		childEntry->PopulateFlat( child, root );
+	}
+
+	CalculateRemainingData( node );
 }
 
 ProfileReportEntry* ProfileReportEntry::GetOrCreateChild( std::string const &childID )

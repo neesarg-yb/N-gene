@@ -26,7 +26,8 @@ public:
 	ProfileReportEntryList	 m_children;
 
 public:
-	void				PopulateTree( ProfileMeasurement* root );
+	void				PopulateTree( ProfileMeasurement* node );
+	void				PopulateFlat( ProfileMeasurement* node, ProfileReportEntry* root = nullptr );
 	ProfileReportEntry* GetOrCreateChild( std::string const &childID );
 	void				CalculateInitialData( ProfileMeasurement* node );		// Sets totalHPC & callCount
 	void				CalculateRemainingData( ProfileMeasurement* node );

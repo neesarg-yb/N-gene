@@ -13,10 +13,14 @@ ProfileReport::~ProfileReport()
 		delete m_root;
 }
 
-void ProfileReport::GenerateReportFromFrame( ProfileMeasurement *root )
+void ProfileReport::GenerateReportFromFrame( ProfileMeasurement *root, eProfileReportType reportType /* = PROFILE_REPORT_TREE */ )
 {
 	m_root = new ProfileReportEntry( root->id );
-	m_root->PopulateTree( root );
+
+	if( reportType == PROFILE_REPORT_FLAT )
+		m_root->PopulateFlat( root );
+	else
+		m_root->PopulateTree( root );
 }
 
 void ProfileReport::PrintToDevConsole()
