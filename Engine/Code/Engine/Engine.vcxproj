@@ -286,8 +286,10 @@
     <ClCompile Include="Input\XboxController.cpp" />
     <ClCompile Include="Math\AABB2.cpp" />
     <ClCompile Include="Math\AABB3.cpp" />
+    <ClCompile Include="Math\BarGraph.cpp" />
     <ClCompile Include="Math\CubicSpline.cpp" />
     <ClCompile Include="Math\Disc2.cpp" />
+    <ClCompile Include="Math\DoubleRange.cpp" />
     <ClCompile Include="Math\FloatRange.cpp" />
     <ClCompile Include="Math\HeatMap2D.cpp" />
     <ClCompile Include="Math\HeatMap3D.cpp" />
@@ -373,8 +375,10 @@
     <ClInclude Include="Input\XboxController.hpp" />
     <ClInclude Include="Math\AABB2.hpp" />
     <ClInclude Include="Math\AABB3.hpp" />
+    <ClInclude Include="Math\BarGraph.hpp" />
     <ClInclude Include="Math\CubicSpline.hpp" />
     <ClInclude Include="Math\Disc2.hpp" />
+    <ClInclude Include="Math\DoubleRange.hpp" />
     <ClInclude Include="Math\FloatRange.hpp" />
     <ClInclude Include="Math\HeatMap2D.hpp" />
     <ClInclude Include="Math\HeatMap3D.hpp" />
