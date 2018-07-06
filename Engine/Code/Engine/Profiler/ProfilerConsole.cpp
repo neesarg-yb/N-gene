@@ -9,7 +9,7 @@
 
 ProfileConsole* ProfileConsole::s_profileConsoleInstance = nullptr;
 
-eProfileReportType currentReportFormat	= PROFILE_REPORT_FLAT;
+eProfileReportType currentReportFormat	= PROFILE_REPORT_TREE;
 eProfileReportSort currentFlatSorting	= PROFILE_REPORT_SORT_SELF_TIME;
 
 void ChangeProfileReportDisplayFormat()
@@ -69,7 +69,7 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 {
 	uint64_t	thisFramesHPC	= Profiler::GetPerformanceCounter();
 	uint64_t	deltaHPC		= thisFramesHPC - m_lastFramesHPC;
-	double		deltaSeconds	= Profiler::GetSecondsFromPerformanceCounter( deltaHPC );
+	m_frameTime					= Profiler::GetSecondsFromPerformanceCounter( deltaHPC );
 	m_lastFramesHPC				= thisFramesHPC;
 
 	if( IsOpen() == false )
@@ -106,7 +106,7 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 		m_profileReportString += ( reportInStrings[i] + "\n " );
 
 	// FPS
-	m_fps = (int) ( 1.0 / deltaSeconds );
+	m_fps = (int) ( 1.0 / m_frameTime );
 }
 
 void ProfileConsole::Render()
@@ -161,8 +161,12 @@ void ProfileConsole::Render_FPSBox()
 	m_currentRenderer->DrawAABB( actualBounds, m_boxBackgroudColor );
 
 	// Draw FPS
-	std::string fpsStr = Stringf( "FPS: %03d", m_fps );
-	m_currentRenderer->DrawTextInBox2D( fpsStr.c_str(), Vector2( 0.5f, 0.5f ), actualBounds, 0.1f, m_accentColor, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+	std::string fpsNum			= Stringf( "%03d", m_fps );
+	std::string frameTimeNum	= Stringf( "%07.3f", m_frameTime * 1000.0  );
+	std::string fpsStr			= Stringf( " %*s: %*s ",	-15, "FPS",				-7, fpsNum.c_str() );
+	std::string frameTimeStr	= Stringf( " %*s: %*s ",	-15, "Frame Time(MS)",	-7, frameTimeNum.c_str() );
+	std::string finalStr		= Stringf( "%s\n%s", fpsStr.c_str(), frameTimeStr.c_str() );
+	m_currentRenderer->DrawTextInBox2D( finalStr.c_str(), Vector2( 0.5f, 0.5f ), actualBounds, 0.1f, m_accentColor, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
 void ProfileConsole::Render_HotkeysBox()
