@@ -5,8 +5,20 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Profiler/ProfilerReport.hpp"
+#include "Engine/Input/Command.hpp"
 
 ProfileConsole* ProfileConsole::s_profileConsoleInstance = nullptr;
+
+eProfileReportType currentReportFormat = PROFILE_REPORT_TREE;
+
+void ChangeProfileReportDisplayFormat()
+{
+	int i = (int) currentReportFormat;
+	i = i + 1;
+	i = i % (int)NUM_PROFILE_REPORT_TYPES;
+
+	currentReportFormat = (eProfileReportType) i;
+}
 
 ProfileConsole::ProfileConsole( Renderer* currentRenderer )
 	: m_currentRenderer( currentRenderer )
@@ -25,7 +37,7 @@ ProfileConsole::ProfileConsole( Renderer* currentRenderer )
 	// Setup Hotkey Info
 	std::string hkHeading	= Stringf( " Hotkeys, " );
 	std::string tildeStr	= Stringf( "  %-*s: DevConsole ", 6, "[~]" );
-	std::string help		= Stringf( "  %-*s: All Commands ", 6, "help" );
+	std::string help		= Stringf( "  %-*s: Report Format ", 6, "[F]" );
 	m_hotkeysInfoString		= Stringf( "%s\n%s\n%s", hkHeading.c_str(), tildeStr.c_str(), help.c_str() );
 }
 
@@ -44,15 +56,22 @@ ProfileConsole* ProfileConsole::GetInstance()
 
 void ProfileConsole::Update( InputSystem& currentInputSystem )
 {
+	uint64_t	thisFramesHPC	= Profiler::GetPerformanceCounter();
+	uint64_t	deltaHPC		= thisFramesHPC - m_lastFramesHPC;
+	double		deltaSeconds	= Profiler::GetSecondsFromPerformanceCounter( deltaHPC );
+	m_lastFramesHPC				= thisFramesHPC;
+
 	if( IsOpen() == false )
 		return;
 
-	UNUSED( currentInputSystem );
+	// change report format
+	if( currentInputSystem.WasKeyJustPressed( 'F' ) )
+		ChangeProfileReportDisplayFormat();
 
 	// Profile Report
 	ProfileMeasurement* lastFrameMeasure	= Profiler::GetInstance()->GetPreviousFrame();
 	ProfileReport lastFrameReport;
-	lastFrameReport.GenerateReportFromFrame( lastFrameMeasure );
+	lastFrameReport.GenerateReportFromFrame( lastFrameMeasure, currentReportFormat );
 
 	std::vector< std::string > reportInStrings;
 	lastFrameReport.m_root->GetProfileReportAsStringsVector( reportInStrings, 0 );
@@ -63,8 +82,7 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 		m_profileReportString += ( reportInStrings[i] + "\n " );
 
 	// FPS
-	double	secondsPerFrame = Profiler::GetSecondsFromPerformanceCounter( lastFrameReport.m_root->m_totalHPC );
-	m_fps					= (int) ( 1.0 / secondsPerFrame );
+	m_fps = (int) ( 1.0 / deltaSeconds );
 }
 
 void ProfileConsole::Render()
