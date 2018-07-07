@@ -44,16 +44,15 @@ void BarGraph::GetPreviousDataPoint( DoubleAndVoidPointer &outDataPoint, int ski
 	outDataPoint = m_dataPoints[ actualIndex ];
 }
 
-Mesh* BarGraph::CreateVisualGraphMesh( AABB2 const &bounds )
+Mesh* BarGraph::CreateVisualGraphMesh( AABB2 const &bounds, Rgba const &barColor /* = RGBA_BLUE_COLOR */ )
 {
 	MeshBuilder graphMB;
 	graphMB.Begin( PRIMITIVE_TRIANGES, true );
 
 	// We'll need it to draw each bar
 	double rangeLength = m_valueRange.GetRangeLength();
-	GUARANTEE_RECOVERABLE( rangeLength != 0.f, "Error Case: Division by ZERO!!" );
 
-	float	barWidth			= ( bounds.maxs.x - bounds.mins.x );
+	float	barWidth			= ( bounds.maxs.x - bounds.mins.x ) / m_maxDataPoints;
 	float	barHeight			= ( bounds.maxs.y - bounds.mins.y );
 	Vector2 barHalfDimension	= Vector2( barWidth * 0.5f, barHeight * 0.5f );
 	Vector2 centerOfFirstBar	= bounds.mins + barHalfDimension;
@@ -69,11 +68,10 @@ Mesh* BarGraph::CreateVisualGraphMesh( AABB2 const &bounds )
 
 		float	valueAsFraction		= (float)( dataPoint.value / rangeLength );
 		Vector2 centerOfThisBar		= centerOfFirstBar + Vector2( barWidth * i, 0.f );
-		Vector3 centerXYZ			= Vector3( centerOfThisBar.x, 0.f, centerOfThisBar.y );
 		Vector2 dimensionOfThisBar	= Vector2( barWidth, barHeight * valueAsFraction );
 
 		AABB2	thisBarsBound		= AABB2( centerOfThisBar, dimensionOfThisBar.x, dimensionOfThisBar.y );
-		graphMB.AddPlane( dimensionOfThisBar, centerXYZ, RGBA_BLUE_COLOR );
+		graphMB.AddPlane( dimensionOfThisBar, centerOfThisBar.GetAsVector3(), barColor );
 	}
 
 	graphMB.End();

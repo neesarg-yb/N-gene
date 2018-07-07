@@ -36,6 +36,9 @@ public:
 	std::string		m_profileReportString		= "";
 	std::string		m_hotkeysInfoString			= "";
 
+private:
+	uint const		 m_skipFramesForGraph		= 10U;
+	uint			 m_frameCountUptoSkip		= 0U;
 	BarGraph		*m_frameGraph				= nullptr;
 
 public:

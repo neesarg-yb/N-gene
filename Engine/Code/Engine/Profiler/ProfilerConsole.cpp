@@ -93,7 +93,10 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 	lastFrameReport.GenerateReportFromFrame( lastFrameMeasure, currentReportFormat );
 
 	// Add frame to graph
-	m_frameGraph->AppendDataPoint( 100 );
+	if( m_frameCountUptoSkip < m_skipFramesForGraph )	// Skipping frames: Because several initial frames can produce very high totalFrameTimes
+		m_frameCountUptoSkip++;
+	else
+		m_frameGraph->AppendDataPoint( Profiler::GetMillliSecondsFromPerformanceCounter( lastFrameReport.m_root->m_totalHPC ) );
 
 	// Do sorting on flat report
 	if( currentReportFormat == PROFILE_REPORT_FLAT )
@@ -201,11 +204,11 @@ void ProfileConsole::Render_GraphBox()
 	minBoundPercentage			+= padding;
 	maxBoundPercentage			-= padding;
 
-	AABB2	actualBounds		= m_drawBounds.GetBoundsFromPercentage( minBoundPercentage, maxBoundPercentage );
-
+	AABB2	actualBounds = m_drawBounds.GetBoundsFromPercentage( minBoundPercentage, maxBoundPercentage );
 	m_currentRenderer->DrawAABB( actualBounds, m_boxBackgroudColor );
-
-	Mesh * graphMesh = m_frameGraph->CreateVisualGraphMesh( actualBounds );
+	
+	AABB2	graphBounds	= actualBounds.GetBoundsFromPercentage( Vector2( 0.01f, 0.05f ), Vector2( 0.99f, 0.95f ) );
+	Mesh *	graphMesh	= m_frameGraph->CreateVisualGraphMesh( graphBounds, m_accentColor );
 	m_currentRenderer->SetCurrentDiffuseTexture( nullptr );
 	m_currentRenderer->DrawMesh( *graphMesh );
 	delete graphMesh;

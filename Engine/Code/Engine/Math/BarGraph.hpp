@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Engine/Math/DoubleRange.hpp"
+#include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 
 class Mesh;
@@ -38,5 +39,5 @@ private:
 public:
 	void	AppendDataPoint( double const &value, void *objectPointer = nullptr );
 	void	GetPreviousDataPoint( DoubleAndVoidPointer &outDataPoint, int skipCount = 0 );
-	Mesh*	CreateVisualGraphMesh( AABB2 const &bounds );
+	Mesh*	CreateVisualGraphMesh( AABB2 const &bounds, Rgba const &barColor = RGBA_BLUE_COLOR );
 };
