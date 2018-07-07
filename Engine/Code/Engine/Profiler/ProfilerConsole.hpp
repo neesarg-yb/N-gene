@@ -32,7 +32,6 @@ public:
 
 	int				m_fps						= 0;
 	double			m_frameTime					= 0;
-	uint64_t		m_lastFramesHPC				= 0;
 	std::string		m_profileReportString		= "";
 	std::string		m_hotkeysInfoString			= "";
 

@@ -55,6 +55,7 @@ public:
 	void				MarkFrame();
 	void				Pause();
 	void				Resume();
+	bool inline			IsPaused() const { return m_paused; }
 	
 public:
 	ProfileMeasurement* CreateMeasurement( std::string const &id );
