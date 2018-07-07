@@ -46,6 +46,12 @@ void InputSystem::EndFrame() {
 
 void InputSystem::UpdateMouse()
 {
+	// Clear all just-changed flags, in preparation for the next round of WM_*BUTTONDOWN, etc. message
+	for( int buttonCode = 0; buttonCode < NUM_MOUSE_BUTTONS; buttonCode++) {
+		m_mouseButtonStates[ buttonCode ].keyJustPressed = false;
+		m_mouseButtonStates[ buttonCode ].keyJustReleasesd = false;
+	}
+
 	// Absolute Mode - I get mouse position and I can potentially lock to the screen
 	m_mousePositionLastFrame = m_mousePositionThisFrame;
 	m_mousePositionThisFrame = GetMouseClientPosition();
@@ -60,7 +66,7 @@ void InputSystem::UpdateMouse()
 
 void InputSystem::UpdateKeyboard() {
 	// Clear all just-changed flags, in preparation for the next round of WM_KEYDOWN, etc. message
-	for( int keyCode = 0; keyCode < InputSystem::NUM_KEYS; keyCode++) {
+	for( int keyCode = 0; keyCode < InputSystem::NUM_KEYBOARD_KEYS; keyCode++) {
 		m_keyStates[ keyCode ].keyJustPressed = false;
 		m_keyStates[ keyCode ].keyJustReleasesd = false;
 	}
@@ -99,6 +105,37 @@ bool InputSystem::WasKeyJustPressed( unsigned char keyCode ) const {
 
 bool InputSystem::WasKeyJustReleased( unsigned char keyCode ) const {
 	return m_keyStates[ keyCode ].keyJustReleasesd;
+}
+
+void InputSystem::OnMouseButtonPressed( eMouseButtons buttonCode )
+{
+	if( m_mouseButtonStates[ buttonCode ].keyIsDown != true ) {			// Update keyJustPressed
+		m_mouseButtonStates[ buttonCode ].keyJustPressed = true;
+	}
+	m_mouseButtonStates[ buttonCode ].keyIsDown = true;				// Update keyIsDown
+}
+
+void InputSystem::OnMouseButtonReleased( eMouseButtons buttonCode )
+{
+	if( m_mouseButtonStates[ buttonCode ].keyIsDown == true ) {			// Update keyJustReleased
+		m_mouseButtonStates[ buttonCode ].keyJustReleasesd = true;
+	}
+	m_mouseButtonStates[ buttonCode ].keyIsDown = false;				// Update keyIsDown
+}
+
+bool InputSystem::IsMouseButtonPressed( eMouseButtons buttonToCheck ) const
+{
+	return m_mouseButtonStates[ buttonToCheck ].keyIsDown;
+}
+
+bool InputSystem::WasMousButtonJustPressed( eMouseButtons buttonToCheck ) const
+{
+	return m_mouseButtonStates[ buttonToCheck ].keyJustPressed;
+}
+
+bool InputSystem::WasMouseButtonJustReleased( eMouseButtons buttonToCheck ) const
+{
+	return m_mouseButtonStates[ buttonToCheck ].keyJustReleasesd;
 }
 
 Vector2 InputSystem::GetMouseDelta()

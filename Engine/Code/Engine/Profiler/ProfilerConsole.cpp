@@ -83,8 +83,8 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 		ChangeSortingOnFlatReport();
 
 	// Profile Report
-	ProfileMeasurement* lastFrameMeasure	= Profiler::GetInstance()->GetPreviousFrame();
-	ProfileReport lastFrameReport;
+	ProfileMeasurement* lastFrameMeasure = Profiler::GetInstance()->GetPreviousFrame();
+	ProfileReport		lastFrameReport;
 	lastFrameReport.GenerateReportFromFrame( lastFrameMeasure, currentReportFormat );
 
 	// Add frame to graph, if not paused
