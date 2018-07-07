@@ -71,11 +71,6 @@ ProfileConsole* ProfileConsole::GetInstance()
 
 void ProfileConsole::Update( InputSystem& currentInputSystem )
 {
-	uint64_t	thisFramesHPC	= Profiler::GetPerformanceCounter();
-	uint64_t	deltaHPC		= thisFramesHPC - m_lastFramesHPC;
-	m_frameTime					= Profiler::GetSecondsFromPerformanceCounter( deltaHPC );
-	m_lastFramesHPC				= thisFramesHPC;
-
 	if( IsOpen() == false )
 		return;
 
@@ -92,11 +87,14 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 	ProfileReport lastFrameReport;
 	lastFrameReport.GenerateReportFromFrame( lastFrameMeasure, currentReportFormat );
 
-	// Add frame to graph
-	if( m_frameCountUptoSkip < m_skipFramesForGraph )	// Skipping frames: Because several initial frames can produce very high totalFrameTimes
-		m_frameCountUptoSkip++;
-	else
-		m_frameGraph->AppendDataPoint( Profiler::GetMillliSecondsFromPerformanceCounter( lastFrameReport.m_root->m_totalHPC ) );
+	// Add frame to graph, if not paused
+	if( Profiler::GetInstance()->IsPaused() == false )
+	{
+		if( m_frameCountUptoSkip < m_skipFramesForGraph )	// Skipping frames: Because several initial frames can produce very high totalFrameTimes
+			m_frameCountUptoSkip++;
+		else
+			m_frameGraph->AppendDataPoint( Profiler::GetMillliSecondsFromPerformanceCounter( lastFrameReport.m_root->m_totalHPC ) );
+	}
 
 	// Do sorting on flat report
 	if( currentReportFormat == PROFILE_REPORT_FLAT )
@@ -116,7 +114,9 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 		m_profileReportString += ( reportInStrings[i] + "\n " );
 
 	// FPS
-	m_fps = (int) ( 1.0 / m_frameTime );
+	uint64_t lastFrameHPC	= lastFrameReport.m_root->m_totalHPC;
+	m_frameTime				= Profiler::GetSecondsFromPerformanceCounter( lastFrameHPC );
+	m_fps					= (int) ( 1.0 / m_frameTime );
 }
 
 void ProfileConsole::Render()
