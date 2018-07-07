@@ -3,6 +3,13 @@
 #include "Engine/Input/KeyButtonState.hpp"
 #include "Engine/Input/XboxController.hpp"
 
+enum eMouseButtons
+{
+	MOUSE_BUTTON_LEFT = 0,
+	MOUSE_BUTTON_RIGHT,
+	NUM_MOUSE_BUTTONS
+};
+
 enum eMouseModes
 {
 	MOUSE_MODE_ABSOLUTE = 0,
@@ -32,6 +39,7 @@ enum VK_Codes
 	ENTER		= 0x0D				/* VK_RETURN */
 };
 
+typedef KeyButtonState MouseButtonState;
 
 class InputSystem
 {
@@ -50,6 +58,12 @@ public:
 	bool	WasKeyJustReleased	( unsigned char keyCode ) const;
 
 	// Mouse
+	void	OnMouseButtonPressed	( eMouseButtons buttonCode );
+	void	OnMouseButtonReleased	( eMouseButtons buttonCode );
+	bool	IsMouseButtonPressed	( eMouseButtons buttonToCheck ) const;
+	bool	WasMousButtonJustPressed	( eMouseButtons buttonToCheck ) const;
+	bool	WasMouseButtonJustReleased	( eMouseButtons buttonToCheck ) const;
+
 	void	ShowCursor( bool show );
 	void	MouseLockToScreen( bool lock );
 
@@ -67,11 +81,12 @@ protected:
 	void	UpdateController();
 
 public:
-	static const int	NUM_KEYS   = 256;
+	static const int	NUM_KEYBOARD_KEYS   = 256;
 	XboxController		m_controller[ 4 ];
 
 protected:
-	KeyButtonState		m_keyStates[ NUM_KEYS ];
+	KeyButtonState		m_keyStates[ NUM_KEYBOARD_KEYS ];
+	MouseButtonState	m_mouseButtonStates[ NUM_MOUSE_BUTTONS ];
 
 private:
 	eMouseModes			m_mouseMode				 = MOUSE_MODE_ABSOLUTE;
