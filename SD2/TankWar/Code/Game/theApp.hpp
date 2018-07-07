@@ -31,6 +31,8 @@ public:
 	bool IsQuitting();
 	void HandleKeyDown( unsigned char KEY_CODE );
 	void HandleKeyUp( unsigned char KEY_CODE );
+	void HandleMouseButtonDown( eMouseButtons buttonCode );
+	void HandleMouseButtonUp( eMouseButtons buttonCode );
 
 	 theApp();
 	~theApp();

@@ -155,3 +155,13 @@ void theApp::HandleKeyUp( unsigned char KEY_CODE )
 	
 	g_theInput->OnKeyReleased(KEY_CODE);
 }
+
+void theApp::HandleMouseButtonDown( eMouseButtons buttonCode )
+{
+	g_theInput->OnMouseButtonPressed( buttonCode );
+}
+
+void theApp::HandleMouseButtonUp( eMouseButtons buttonCode )
+{
+	g_theInput->OnMouseButtonReleased( buttonCode );
+}

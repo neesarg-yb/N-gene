@@ -32,35 +32,68 @@ bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam
 	switch( wmMessageCode )
 	{
 		// App close requested via "X" button, or right-click "Close Window" on task bar, or "Close" from system menu, or Alt-F4
-	case WM_CLOSE:		
-	{
-		g_theApp->m_isQuitting = true;
-		return false; // "Consumes" this message (tells Windows "okay, we handled it")
-	}
-
-	// Raw physical keyboard "key-was-just-depressed" event (case-insensitive, not translated)
-	case WM_KEYDOWN:
-	{
-		unsigned char asKey = (unsigned char) wParam;
-		g_theApp->HandleKeyDown(asKey);
-
-		// If ESC, Quit the app
-		if(asKey == VK_ESCAPE) {
-			// g_theApp->m_isQuitting = true;
-			// return false;
+		case WM_CLOSE:		
+		{
+			g_theApp->m_isQuitting = true;
+			return false; // "Consumes" this message (tells Windows "okay, we handled it")
 		}
 
-		break;
-	}
+		// Mouse Scrollwheel
+		case WM_MOUSEWHEEL:
+		{
 
-	// Raw physical keyboard "key-was-just-released" event (case-insensitive, not translated)
-	case WM_KEYUP:
-	{
-		unsigned char asKey = (unsigned char) wParam;
-		g_theApp->HandleKeyUp(asKey);
+			break;
+		}
 
-		break;
-	}
+		// Mouse Left Button
+		case WM_LBUTTONDOWN:
+		{
+			g_theApp->HandleMouseButtonDown( MOUSE_BUTTON_LEFT );
+			break;
+		}
+
+		case WM_LBUTTONUP:
+		{
+			g_theApp->HandleMouseButtonUp( MOUSE_BUTTON_LEFT );
+			break;
+		}
+
+		// Mouse Right Button
+		case WM_RBUTTONDOWN:
+		{
+			g_theApp->HandleMouseButtonDown( MOUSE_BUTTON_RIGHT );
+			break;
+		}
+
+		case WM_RBUTTONUP:
+		{
+			g_theApp->HandleMouseButtonUp( MOUSE_BUTTON_RIGHT );
+			break;
+		}
+
+		// Raw physical keyboard "key-was-just-depressed" event (case-insensitive, not translated)
+		case WM_KEYDOWN:
+		{
+			unsigned char asKey = (unsigned char) wParam;
+			g_theApp->HandleKeyDown(asKey);
+
+			// If ESC, Quit the app
+			if(asKey == VK_ESCAPE) {
+				// g_theApp->m_isQuitting = true;
+				// return false;
+			}
+
+			break;
+		}
+
+		// Raw physical keyboard "key-was-just-released" event (case-insensitive, not translated)
+		case WM_KEYUP:
+		{
+			unsigned char asKey = (unsigned char) wParam;
+			g_theApp->HandleKeyUp(asKey);
+
+			break;
+		}
 
 	}
 
