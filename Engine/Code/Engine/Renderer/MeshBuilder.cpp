@@ -90,8 +90,6 @@ void MeshBuilder::AddPlane( Vector2 const &xySize, Vector3 const &centerPos, Rgb
 	// Die
 	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
 
-	this->Begin( PRIMITIVE_TRIANGES, true );
-
 	// Back Face (towards you)
 	this->SetColor( color );
 	this->SetUV( uvBounds.mins.x, uvBounds.mins.y );
@@ -117,6 +115,61 @@ void MeshBuilder::AddPlane( Vector2 const &xySize, Vector3 const &centerPos, Rgb
 	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	this->PushVertex( tlCorner );
 
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
+
+	this->End();
+}
+
+void MeshBuilder::AddPlane( AABB2 const &drawBounds, float const &zPosition, AABB2 const &uvBounds, Rgba const &color /*= RGBA_WHITE_COLOR */ )
+{
+	Vector3 bottomLeftPos	= Vector3( drawBounds.mins.x, drawBounds.mins.y, zPosition );
+	Vector2 bottomLeftUVs	= Vector2( uvBounds.mins.x, uvBounds.mins.y );
+
+	Vector3 bottomRightPos	= Vector3( drawBounds.maxs.x, drawBounds.mins.y, zPosition );
+	Vector2 bottomRightUVs	= Vector2( uvBounds.maxs.x, uvBounds.mins.y );
+
+	Vector3 upperRightPos	= Vector3( drawBounds.maxs.x, drawBounds.maxs.y, zPosition );
+	Vector2 upperRightUVs	= Vector2( uvBounds.maxs.x, uvBounds.maxs.y );
+
+	Vector3 upperLeftPos	= Vector3( drawBounds.mins.x, drawBounds.maxs.y, zPosition );
+	Vector2 upperLeftUVs	= Vector2( uvBounds.mins.x, uvBounds.maxs.y );
+
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
+
+	// Add Vertices
+	this->SetColor( color );
+	this->SetUV( bottomLeftUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	unsigned int idx = this->PushVertex( bottomLeftPos );
+
+	this->SetColor( color );
+	this->SetUV( bottomRightUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( bottomRightPos );
+
+	this->SetColor( color );
+	this->SetUV( upperRightUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( upperRightPos );
+
+	this->SetColor( color );
+	this->SetUV( upperLeftUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( upperLeftPos);
+
+	// Add Faces
 	this->AddFace( idx + 0, idx + 1, idx + 2 );
 	this->AddFace( idx + 2, idx + 3, idx + 0 );
 
@@ -163,8 +216,6 @@ void MeshBuilder::AddCube( Vector3 const &size, Vector3 const &centerPos /* = Ve
 		mbParameterMatches = false;
 	// Die
 	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
-
-	this->Begin( PRIMITIVE_TRIANGES, true );
 
 	// Back Face (towards you)
 	// e f
