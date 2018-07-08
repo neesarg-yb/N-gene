@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include "Engine/Math/AABB2.hpp"
+#include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Renderer/Mesh.hpp"
@@ -62,6 +63,7 @@ public:
 	
 public:
 	void			AddPlane	( Vector2 const &xySize, Vector3 const &centerPos, Rgba const &color = RGBA_WHITE_COLOR, const AABB2 &uvBounds = AABB2::ONE_BY_ONE );	// Adds a plane on existing MeshBuilder
+	void			AddPlane	( AABB2 const &drawBounds, float const &zPosition, AABB2 const &uvBounds, Rgba const &color = RGBA_WHITE_COLOR );
 	void			AddCube		( Vector3 const &size, Vector3 const &centerPos = Vector3::ZERO, Rgba const &color = RGBA_WHITE_COLOR, const AABB2& uvTop = AABB2::ONE_BY_ONE, const AABB2& uvSide = AABB2::ONE_BY_ONE, const AABB2& uvBottom = AABB2::ONE_BY_ONE );	// Adds a cube on existing MeshBuilder
 	void			AddSphere	( float radius, unsigned int wedges, unsigned int slices, Vector3 centerPos = Vector3::ZERO, Rgba const &color = RGBA_WHITE_COLOR );	// Adds a sphere on existing MeshBuilder
 	void			AddMeshFromSurfacePatch ( std::function< Vector3( float , float ) > SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, IntVector2 sampleFrequency, Rgba const &color = RGBA_WHITE_COLOR );

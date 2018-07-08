@@ -1051,22 +1051,37 @@ void Renderer::DrawTexturedCube( const Vector3& center, const Vector3& dimension
 
 void Renderer::DrawText2D( const Vector2& drawMins, const std::string& asciiText, float cellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */ )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	Vector2 newMins = drawMins;
 	float cellWidth = cellHeight * font->GetGlyphAspect( asciiText.at(0) );
 	Vector2 newMaxs = Vector2( drawMins.x + cellWidth , drawMins.y + cellHeight );
 	AABB2 boundForNextCharacter = AABB2( newMins.x , newMins.y , newMaxs.x , newMaxs.y );
+
+	// To construct the Mesh
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_TRIANGES, true );
+
 	// For every character of the string
 	for( unsigned int i = 0; i < asciiText.length(); i++ )
 	{
 		// Draw that character
 		AABB2 textCoords = font->GetUVsForGlyph( asciiText.at(i) );
-		DrawTexturedAABB( boundForNextCharacter , font->m_spriteSheet.m_spriteSheetTexture , textCoords.mins , textCoords.maxs, tint );
+		mb.AddPlane( boundForNextCharacter, 0.f, textCoords, tint );
+//		DrawTexturedAABB( boundForNextCharacter, font->m_spriteSheet.m_spriteSheetTexture , textCoords.mins , textCoords.maxs, tint );
 
 		// Calculate bounds to draw next character
 		newMins = Vector2( newMins.x + cellWidth , newMins.y);
 		newMaxs = Vector2( newMaxs.x + cellWidth , newMaxs.y);
 		boundForNextCharacter = AABB2( newMins.x , newMins.y , newMaxs.x , newMaxs.y );
 	}
+
+	mb.End();
+	
+	Mesh *textMesh = mb.ConstructMesh<Vertex_Lit>();
+	SetCurrentDiffuseTexture( &font->m_spriteSheet.m_spriteSheetTexture );
+	DrawMesh( *textMesh );
+	delete textMesh;
 }
 
 void Renderer::DrawTextInBox2D( const std::string& asciiText, const Vector2& alignment, const AABB2& drawInBox, float desiredCellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */, eTextDrawMode drawMode /* = TEXT_DRAW_OVERRUN */ )
