@@ -36,8 +36,9 @@ public:
 	std::string		m_hotkeysInfoString			= "";
 
 private:
-	uint const		 m_skipFramesForGraph		= 10U;
-	uint			 m_frameCountUptoSkip		= 0U;
+	int				 m_maxGraphRecordsNum		= 128;
+	int				 m_skipIndex				= 0;	// Skip Index relative to last report in the graph
+	AABB2			 m_graphBounds;						// Render_GraphBox() calculates it
 	BarGraph		*m_frameGraph				= nullptr;
 
 public:
@@ -54,4 +55,8 @@ private:
 	void Render_HotkeysBox();
 	void Render_GraphBox();
 	void Render_ProfilingDetailsBox();
+
+private:
+	void	HandleInput( InputSystem& currentInputSystem );
+	int		CalculateSkipCountFromLeftOfBox( AABB2 const &boundsOfGraph, Vector2 const &selectionPosition );
 };
