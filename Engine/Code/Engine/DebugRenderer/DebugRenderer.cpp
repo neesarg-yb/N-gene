@@ -5,6 +5,7 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Input/Command.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 
 Renderer									*debugRenderer				= nullptr;
@@ -43,6 +44,9 @@ void DebugRendererShutdown()
 
 void DebugRendererUpdate( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	DeleteOverdueRenderObjects();
 
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
@@ -51,6 +55,9 @@ void DebugRendererUpdate( float deltaSeconds )
 
 void DebugRendererRender()
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
 		renderObject->Render();
 }
