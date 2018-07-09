@@ -6,7 +6,7 @@
 #include "Engine/Profiler/ProfileLogScoped.hpp"
 #include "Engine/Renderer/External/glcorearb.h"
 
-#define MAX_HISTORY_COUNT 256
+#define MAX_HISTORY_COUNT 300
 
 #define PROFILE_LOG_SCOPE(tag)			ProfileLogScoped __timer__ ##__LINE__ ## (tag)
 #define PROFILE_LOG_SCOPE_FUNCTION()	ProfileLogScoped __timer__ ##__LINE__ ## (__FUNCTION__)
