@@ -2,6 +2,7 @@
 #include "Block.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/World/Tower.hpp"
 
 Block::Block( IntVector3 const &positionInTower, std::string blockDefinitionName, Tower const &parentTower )
@@ -35,6 +36,9 @@ Block::~Block()
 
 void Block::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	UNUSED( deltaSeconds );
 }
 

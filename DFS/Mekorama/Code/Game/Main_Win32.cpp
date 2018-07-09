@@ -20,11 +20,11 @@ HWND g_hWnd = nullptr;							// ...becomes WindowContext::m_windowHandle
 const char* APP_NAME = "Mekorama";				// ...becomes ???
 
 
-//-----------------------------------------------------------------------------------------------
-// Handles Windows (Win32) messages/events; i.e. the OS is trying to tell us something happened.
-// This function is called by Windows whenever we ask it for notifications
-// #SD1ToDo: We will move this function to a more appropriate place when we're ready
-//
+												//-----------------------------------------------------------------------------------------------
+												// Handles Windows (Win32) messages/events; i.e. the OS is trying to tell us something happened.
+												// This function is called by Windows whenever we ask it for notifications
+												// #SD1ToDo: We will move this function to a more appropriate place when we're ready
+												//
 bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam )
 {
 	UNUSED( lParam );
@@ -36,6 +36,39 @@ bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam
 	{
 		g_theApp->m_isQuitting = true;
 		return false; // "Consumes" this message (tells Windows "okay, we handled it")
+	}
+
+	// Mouse Scrollwheel
+	case WM_MOUSEWHEEL:
+	{
+
+		break;
+	}
+
+	// Mouse Left Button
+	case WM_LBUTTONDOWN:
+	{
+		g_theApp->HandleMouseButtonDown( MOUSE_BUTTON_LEFT );
+		break;
+	}
+
+	case WM_LBUTTONUP:
+	{
+		g_theApp->HandleMouseButtonUp( MOUSE_BUTTON_LEFT );
+		break;
+	}
+
+	// Mouse Right Button
+	case WM_RBUTTONDOWN:
+	{
+		g_theApp->HandleMouseButtonDown( MOUSE_BUTTON_RIGHT );
+		break;
+	}
+
+	case WM_RBUTTONUP:
+	{
+		g_theApp->HandleMouseButtonUp( MOUSE_BUTTON_RIGHT );
+		break;
 	}
 
 	// Raw physical keyboard "key-was-just-depressed" event (case-insensitive, not translated)
@@ -108,11 +141,14 @@ void Initialize( HINSTANCE applicationInstanceHandle )
 	g_gameConfigBlackboard = new Blackboard();
 
 	CreateOpenGLWindow( applicationInstanceHandle, g_aspectRatio );
-	Renderer::RendererStartup( g_hWnd );
-	g_theApp = new theApp();		// Creating theApp class instance
 
+	// ENGINE STARTUP
+	EngineStartup();
+
+	g_theApp = new theApp();		// Creating theApp class instance
 	CommandRegister( "quit", QuitTheApp );
 
+	// GAME STARTUP
 	g_theApp->Startup();
 }
 
@@ -124,18 +160,18 @@ void Shutdown()
 	delete g_theApp;
 	g_theApp = nullptr;
 
+	// ENGINE SHUTDOWN
+	EngineShutdown();
+
 	delete g_gameConfigBlackboard;
 	g_gameConfigBlackboard = nullptr;
-
-	Renderer::RendererShutdown();
-	Renderer::GLShutdown();
 }
 
 
 //-----------------------------------------------------------------------------------------------
 int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR commandLineString, int )
 {
-	
+
 	UNUSED( commandLineString );
 	Initialize( applicationInstanceHandle );
 
@@ -152,5 +188,5 @@ int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR comman
 void QuitTheApp( Command& cmd )
 {
 	UNUSED( cmd )
-	g_theApp->m_isQuitting = true;
+		g_theApp->m_isQuitting = true;
 }

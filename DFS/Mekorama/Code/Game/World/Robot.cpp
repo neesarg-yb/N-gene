@@ -3,6 +3,7 @@
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Math/HeatMap3D.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/theGame.hpp"
 #include "Game/Level.hpp"
 #include "Game/World/Tower.hpp"
@@ -34,6 +35,9 @@ Robot::~Robot()
 
 void Robot::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	UNUSED( deltaSeconds );
 	UpdateLocalTransform();
 }

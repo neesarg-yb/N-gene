@@ -2,6 +2,7 @@
 #include "Tower.hpp"
 #include "Engine/Math/HeatMap3D.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 Tower::Tower( Vector3 position, std::string towerDefinitionName )
 	: GameObject( GAMEOBJECT_TYPE_TOWER )
@@ -59,6 +60,9 @@ Tower::~Tower()
 
 void Tower::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	UNUSED( deltaSeconds );
 }
 

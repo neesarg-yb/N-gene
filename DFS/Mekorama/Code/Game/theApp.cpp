@@ -3,8 +3,25 @@
 #include "Engine/Math/IntRange.hpp"
 #include "Engine/Math/FloatRange.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Profiler/Profiler.hpp"
+#include "Engine/Profiler/ProfilerConsole.hpp"
 
 void QuitTheApp( Command& cmd );
+
+void ShowHideProfileConsole( Command& cmd )
+{
+	UNUSED( cmd );
+	if( ProfileConsole::GetInstance()->IsOpen() )
+	{
+		ProfileConsole::GetInstance()->Close();
+		DevConsole::GetInstance()->Close();
+	}
+	else
+	{
+		ProfileConsole::GetInstance()->Open();
+		DevConsole::GetInstance()->Close();
+	}
+}
 
 theApp::theApp()
 {
@@ -32,6 +49,7 @@ theApp::~theApp()
 
 void theApp::Startup()
 {
+	CommandRegister( "profiler", ShowHideProfileConsole );
 	g_theGame->Startup();
 }
 
@@ -46,6 +64,9 @@ void theApp::RunFrame() {
 }
 
 void theApp::BeginFrame() {
+	// Profiler MarkFrame
+	Profiler::GetInstance()->MarkFrame();
+
 	g_theInput->BeginFrame();
 	g_theRenderer->BeginFrame();
 	g_theGame->BeginFrame();
@@ -60,12 +81,16 @@ void theApp::EndFrame() {
 void theApp::Update() {
 	g_theGame->Update();
 
+	ProfileConsole::GetInstance()->Update( *g_theInput );
+
 	if( DevConsole::GetInstance()->IsOpen() )
 		DevConsole::GetInstance()->Update( *g_theInput );
 }
 
 void theApp::Render() {
 	g_theGame->Render();
+
+	ProfileConsole::GetInstance()->Render();
 
 	if( DevConsole::GetInstance()->IsOpen() )
 		DevConsole::GetInstance()->Render();
@@ -92,4 +117,14 @@ void theApp::HandleKeyUp( unsigned char KEY_CODE )
 		return;					// Totally ignore it
 	
 	g_theInput->OnKeyReleased(KEY_CODE);
+}
+
+void theApp::HandleMouseButtonDown( eMouseButtons buttonCode )
+{
+	g_theInput->OnMouseButtonPressed( buttonCode );
+}
+
+void theApp::HandleMouseButtonUp( eMouseButtons buttonCode )
+{
+	g_theInput->OnMouseButtonReleased( buttonCode );
 }

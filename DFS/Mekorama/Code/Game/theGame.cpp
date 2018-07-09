@@ -1,6 +1,7 @@
 #include "theGame.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/theApp.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
@@ -85,18 +86,27 @@ void theGame::Startup()
 
 void theGame::BeginFrame()
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	if( m_currentGameState == LEVEL )
 		m_currentLevel->BeginFrame();
 }
 
 void theGame::EndFrame()
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	if( m_currentGameState == LEVEL )
 		m_currentLevel->EndFrame();
 }
 
 void theGame::Update() 
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Calculating deltaTime
 	float deltaSeconds			= CalculateDeltaTime();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
@@ -151,6 +161,9 @@ void theGame::Update()
 
 void theGame::Render() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	switch (m_currentGameState)
 	{
 	case ATTRACT:
@@ -197,12 +210,18 @@ void theGame::ConfirmTransitionToNextState()
 
 void theGame::Update_Attract( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Menu handles the state transition
 	m_attractMenu->Update( deltaSeconds );
 }
 
 void theGame::Render_Attract() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Title
 	g_theRenderer->BindCamera( m_gameCamera );
 	g_theRenderer->UseShader( nullptr );
@@ -219,6 +238,9 @@ void theGame::Render_Attract() const
 
 void theGame::Update_Menu( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	UNUSED( deltaSeconds );
 
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
@@ -229,6 +251,9 @@ void theGame::Update_Menu( float deltaSeconds )
 
 void theGame::Render_Menu() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	g_theRenderer->BindCamera( m_gameCamera );
 	g_theRenderer->UseShader( nullptr );
 
@@ -244,6 +269,9 @@ void theGame::Render_Menu() const
 
 void theGame::Update_Level( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		StartTransitionToState( MENU );
 
@@ -252,6 +280,9 @@ void theGame::Update_Level( float deltaSeconds )
 
 void theGame::Render_Level() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	m_currentLevel->Render();
 }
 

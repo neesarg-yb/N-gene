@@ -8,6 +8,7 @@
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
 #include "Engine/Math/HeatMap3D.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 
@@ -109,16 +110,21 @@ void Level::Startup()
 
 void Level::BeginFrame()
 {
-
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
 }
 
 void Level::EndFrame()
 {
-
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
 }
 
 void Level::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
@@ -157,6 +163,9 @@ void Level::Update( float deltaSeconds )
 
 void Level::Render() const
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	// Bind all the Uniforms
 	g_theRenderer->UseShader( g_theRenderer->CreateOrGetShader( "lit" ) );
 	g_theRenderer->SetUniform( "EYE_POSITION", m_camera->GetCameraModelMatrix().GetTColumn() );
@@ -249,7 +258,7 @@ void Level::ChangeTargetBlockOnMouseClick()
 	DebugRender2DText( 0.f, Vector2(-850.f, -420.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, pickedObjectStr.c_str() );
 
 	// Selected Game Object
-	bool selectButtonJustPressed = g_theInput->WasKeyJustPressed( SPACE );
+	bool selectButtonJustPressed = g_theInput->WasMousButtonJustPressed( MOUSE_BUTTON_LEFT );
 	if( selectedGameObject != nullptr && selectButtonJustPressed )
 	{
 		selectedGameObject->ObjectSelected();
