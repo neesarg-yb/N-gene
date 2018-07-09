@@ -88,13 +88,15 @@ LightData Light::GetLightDataForUBO() const
 {
 	LightData lightData;
 	
-	lightData.colorAndIntensity	= m_lightColorAndIntensity;
-	lightData.position			= m_transform.GetWorldPosition();
-	lightData.direction			= m_direction;
-	lightData.directionFactor	= m_directionFactor;
-	lightData.attenuation		= m_attenuation;
-	lightData.dotInnerAngle		= m_dotInnerAngle;
-	lightData.dotOuterAngle		= m_dotOuterAngle;
+	lightData.colorAndIntensity		= m_lightColorAndIntensity;
+	lightData.position				= m_transform.GetWorldPosition();
+	lightData.direction				= m_direction;
+	lightData.directionFactor		= m_directionFactor;
+	lightData.attenuation			= m_attenuation;
+	lightData.dotInnerAngle			= m_dotInnerAngle;
+	lightData.dotOuterAngle			= m_dotOuterAngle;
+	lightData.isUsingShadow			= m_isUsingShadowMap == true ? 1.f : 0.f;
+	lightData.viewProjectionMatrix	= m_viewProjectionMat;
 
 	return lightData;
 }
@@ -221,4 +223,14 @@ void Light::SetUpForDirectionalLight( float intensity, Vector3 const &attenuatio
 
 	m_dotInnerAngle				= 0.f;
 	m_dotOuterAngle				= 360.f;
+}
+
+void Light::UsesShadowMap( bool usesShadowMap )
+{
+	m_isUsingShadowMap	= usesShadowMap;
+}
+
+void Light::SetViewProjectionForShadowMap( Matrix44 const &viewProjMatrix )
+{
+	m_viewProjectionMat	= viewProjMatrix;
 }

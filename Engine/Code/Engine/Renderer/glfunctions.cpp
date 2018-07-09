@@ -115,3 +115,6 @@ PFNGLDELETETEXTURESPROC					glDeleteTextures			= nullptr;
 PFNGLTEXSTORAGE2DPROC					glTexStorage2D				= nullptr;
 PFNGLTEXSUBIMAGE2DPROC					glTexSubImage2D				= nullptr;
 PFNGLREADPIXELSPROC						glReadPixels				= nullptr;
+
+PFNGLVIEWPORTPROC						glViewport					= nullptr;
+PFNGLSAMPLERPARAMETERFVPROC				glSamplerParameterfv		= nullptr;

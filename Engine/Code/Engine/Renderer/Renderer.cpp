@@ -10,6 +10,8 @@
 #include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Math/Transform.hpp"
+#include "Engine/Core/Window.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 Renderer*	Renderer::s_renderer				= nullptr;
 
@@ -43,9 +45,9 @@ void BindGLFunctions();
 // Rendering startup - called after we have created our window
 // error checking has been removed for brevity, but you should check
 // the return values at each step.
-bool Renderer::RendererStartup( void* hwnd_voidptr ) 
+bool Renderer::RendererStartup() 
 {
-	HWND hwnd = static_cast<HWND>( hwnd_voidptr );
+	HWND hwnd = static_cast<HWND>( Window::GetInstance()->m_hwnd );
 
 	// load and get a handle to the opengl dll (dynamic link library)
 	gGLLibrary = ::LoadLibraryA( "opengl32.dll" ); 
@@ -542,7 +544,10 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glTexStorage2D );
 	GL_BIND_FUNCTION( glTexSubImage2D );
 	GL_BIND_FUNCTION( glReadPixels );
-}	
+
+	GL_BIND_FUNCTION( glViewport );
+	GL_BIND_FUNCTION( glSamplerParameterfv );
+}
 	
 //------------------------------------------------------------------------
 // Creates a real context as a specific version (major.minor)
@@ -726,6 +731,8 @@ void Renderer::BeginFrame()
 
 void Renderer::EndFrame() 
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// copies the default camera's framebuffer to the "null" framebuffer, 
 	// also known as the back buffer.
 	if( s_current_camera != nullptr )
@@ -845,6 +852,13 @@ void Renderer::BindCamera( Camera *camera )
 	s_current_camera->UpdateUBO();															// Update UBO
 	glBindBufferBase( GL_UNIFORM_BUFFER, 2, s_current_camera->m_cameraUBO->GetHandle() );	// Bind UBO
 	
+	// Set glVewPort
+	uint minX	= 0U;
+	uint minY	= 0U;
+	uint width	= s_current_camera->m_outputFramebuffer.GetWidth();
+	uint height = s_current_camera->m_outputFramebuffer.GetHeight();
+	glViewport( minX, minY, width, height );
+
 	GL_CHECK_ERROR();
 }
 
@@ -1037,22 +1051,37 @@ void Renderer::DrawTexturedCube( const Vector3& center, const Vector3& dimension
 
 void Renderer::DrawText2D( const Vector2& drawMins, const std::string& asciiText, float cellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */ )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	Vector2 newMins = drawMins;
 	float cellWidth = cellHeight * font->GetGlyphAspect( asciiText.at(0) );
 	Vector2 newMaxs = Vector2( drawMins.x + cellWidth , drawMins.y + cellHeight );
 	AABB2 boundForNextCharacter = AABB2( newMins.x , newMins.y , newMaxs.x , newMaxs.y );
+
+	// To construct the Mesh
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_TRIANGES, true );
+
 	// For every character of the string
 	for( unsigned int i = 0; i < asciiText.length(); i++ )
 	{
 		// Draw that character
 		AABB2 textCoords = font->GetUVsForGlyph( asciiText.at(i) );
-		DrawTexturedAABB( boundForNextCharacter , font->m_spriteSheet.m_spriteSheetTexture , textCoords.mins , textCoords.maxs, tint );
+		mb.AddPlane( boundForNextCharacter, 0.f, textCoords, tint );
+//		DrawTexturedAABB( boundForNextCharacter, font->m_spriteSheet.m_spriteSheetTexture , textCoords.mins , textCoords.maxs, tint );
 
 		// Calculate bounds to draw next character
 		newMins = Vector2( newMins.x + cellWidth , newMins.y);
 		newMaxs = Vector2( newMaxs.x + cellWidth , newMaxs.y);
 		boundForNextCharacter = AABB2( newMins.x , newMins.y , newMaxs.x , newMaxs.y );
 	}
+
+	mb.End();
+	
+	Mesh *textMesh = mb.ConstructMesh<Vertex_Lit>();
+	SetCurrentDiffuseTexture( &font->m_spriteSheet.m_spriteSheetTexture );
+	DrawMesh( *textMesh );
+	delete textMesh;
 }
 
 void Renderer::DrawTextInBox2D( const std::string& asciiText, const Vector2& alignment, const AABB2& drawInBox, float desiredCellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */, eTextDrawMode drawMode /* = TEXT_DRAW_OVERRUN */ )
@@ -1204,6 +1233,21 @@ void Renderer::BindTexture2D( unsigned int bindIndex, const Texture& theTexture,
 	// Bind the texture
 	glActiveTexture( GL_TEXTURE0 + textureIndex ); 
 	glBindTexture( GL_TEXTURE_2D, theTexture.m_textureID ); 
+}
+
+void Renderer::BindTexture2D( unsigned int bindIndex, const uint textureHandle, Sampler const *theSampler /*= nullptr */ )
+{
+	GLuint textureIndex = bindIndex; // to see how they tie together
+
+	// Bind the sampler;
+	if( theSampler == nullptr )
+		glBindSampler( textureIndex, s_defaultNearestSampler->GetHandle() ); 
+	else
+		glBindSampler( textureIndex, theSampler->GetHandle() );
+
+	// Bind the texture
+	glActiveTexture( GL_TEXTURE0 + textureIndex ); 
+	glBindTexture( GL_TEXTURE_2D, textureHandle ); 
 }
 
 void Renderer::BindTextureCube( unsigned int bindIndex, const TextureCube& texCube, Sampler const *theSampler /*= nullptr */ )
@@ -1383,11 +1427,13 @@ void Renderer::ClearDepth( float depth /* = 1.0f */ )
 
 void Renderer::SetCullingMode( eCullMode newCullMode )
 {
-	TODO("Cull mode none, glDisable()");
-
-	glEnable( GL_CULL_FACE );
 	if (newCullMode != CULLMODE_NONE)
+	{
+		glEnable( GL_CULL_FACE );
 		glCullFace( GetAsOpenGLDataType( newCullMode ) );
+	}
+	else
+		glDisable( GL_CULL_FACE );
 }
 
 Texture* Renderer::CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt /* = TEXTURE_FORMAT_RGBA8 */ )

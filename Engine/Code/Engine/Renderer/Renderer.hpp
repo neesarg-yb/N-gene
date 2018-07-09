@@ -35,6 +35,7 @@
 		0 = Color Target
 		1 = Bloom Texture ( from Camera )
 		3 = Pick Buffer Target
+		4 = ShadowMap
 */
 
 struct LoadedTexturesData {
@@ -106,7 +107,7 @@ public:
 	void			BeginFrame();
 	void			EndFrame();
 
-	static bool		RendererStartup( void* hwnd );
+	static bool		RendererStartup();
 	static void		RendererShutdown();
 	static void		GLShutdown();
 
@@ -152,6 +153,7 @@ public:
 	void BindCamera			( Camera *camera );
 	void BindMeshToProgram	( ShaderProgram const *shaderProgram, Mesh const *mesh );
 	void BindTexture2D		( unsigned int bindIndex, const Texture& theTexture, Sampler const *theSampler = nullptr );
+	void BindTexture2D		( unsigned int bindIndex, const uint textureHandle, Sampler const *theSampler = nullptr );
 	void BindTextureCube	( unsigned int bindIndex, const TextureCube& texCube, Sampler const *theSampler = nullptr );
 
 	void DrawTexturedCube	( const Vector3& center, const Vector3& dimensions,		// width, height, depth
