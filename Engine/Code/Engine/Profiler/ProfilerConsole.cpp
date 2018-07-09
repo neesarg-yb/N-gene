@@ -89,7 +89,7 @@ void ProfileConsole::Update( InputSystem& currentInputSystem )
 	}
 
 	// Get skipIndex, if clicked on graph
-	if( currentInputSystem.WasMousButtonJustPressed( MOUSE_BUTTON_LEFT ) )
+	if( currentInputSystem.IsMouseButtonPressed( MOUSE_BUTTON_LEFT ) )
 	{
 		// Calculate skip count for mouse position
 		Vector2 mouseClientPosition		= currentInputSystem.GetMouseClientPosition();

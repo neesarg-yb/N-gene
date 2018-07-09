@@ -36,7 +36,7 @@ public:
 	std::string		m_hotkeysInfoString			= "";
 
 private:
-	int				 m_maxGraphRecordsNum		= 128;
+	int				 m_maxGraphRecordsNum		= 256;
 	int				 m_skipIndex				= 0;	// Skip Index relative to last report in the graph
 	AABB2			 m_graphBounds;						// Render_GraphBox() calculates it
 	BarGraph		*m_frameGraph				= nullptr;
