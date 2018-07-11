@@ -1,12 +1,15 @@
 #pragma once
 #include "Level.hpp"
+#include <thread>
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/File/File.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Material.hpp"
+#include "Engine/Input/Command.hpp"
 #include "Engine/Math/HeatMap3D.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Game/World/BlockDefinition.hpp"
@@ -14,12 +17,43 @@
 
 using namespace tinyxml2;
 
+void WriteTheGarbageFile( void * )
+{
+	File garbageFile;
+	if( garbageFile.Open( "garbage.txt", FILE_OPEN_MODE_APPEND ) == false )
+		return;
+
+	for( uint i = 0; i < 1200000; i++ )
+	{
+		std::string randomNumber = Stringf( "%f\n", GetRandomFloatZeroToOne() );
+		garbageFile.Write( randomNumber );
+	}
+
+	garbageFile.Close();
+}
+
+void NonThreadedTestWork( Command &cmd )
+{
+	UNUSED( cmd );
+
+	WriteTheGarbageFile( nullptr );
+}
+
+void ThreadedTestWork( Command &cmd )
+{
+	UNUSED( cmd );
+
+	std::thread writerThread( WriteTheGarbageFile, nullptr );
+	writerThread.detach();
+}
+
 Level::Level( std::string definitionName, Robot &playerRobot )
 	: m_pickBuffer( *g_theRenderer )
 	, m_definition( *LevelDefinition::s_definitions[ definitionName ] )
 	, m_playerRobot( playerRobot )
 {
-
+	CommandRegister( "non_threaded_test", NonThreadedTestWork );
+	CommandRegister( "threaded_test", ThreadedTestWork );
 }
 
 Level::~Level()
