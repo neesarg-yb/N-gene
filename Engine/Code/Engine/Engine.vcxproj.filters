@@ -49,6 +49,9 @@
     <Filter Include="Profiler">
       <UniqueIdentifier>{c8785f69-4265-4c14-b759-139182ccefbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LogSystem">
+      <UniqueIdentifier>{d1ac2fd2-bfb1-4ebd-9045-ad442178b345}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Math\Vector2.cpp">
@@ -293,6 +296,9 @@
     </ClCompile>
     <ClCompile Include="Math\DoubleRange.cpp">
       <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="LogSystem\Logger.cpp">
+      <Filter>LogSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -565,6 +571,9 @@
     </ClInclude>
     <ClInclude Include="Math\DoubleRange.hpp">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSystem\Logger.hpp">
+      <Filter>LogSystem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
