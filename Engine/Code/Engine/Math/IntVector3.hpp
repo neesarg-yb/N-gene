@@ -23,10 +23,11 @@ public:
 
 
 	// Operators
-	const IntVector3 operator + ( const IntVector3& vecToAdd ) const;			// vec2 + vec2
-	const IntVector3 operator - ( const IntVector3& vecToSubtract ) const;		// vec2 - vec2
-	const IntVector3 operator * ( int uniformScale ) const;						// vec2 * int
-	const IntVector3 operator / ( int inverseScale ) const;						// vec2 / int
+	const IntVector3 operator + ( const IntVector3& vecToAdd ) const;			// vec3 + vec3
+	const IntVector3 operator - ( const IntVector3& vecToSubtract ) const;		// vec3 - vec3
+	const IntVector3 operator * ( int uniformScale ) const;						// vec3 * int
+	const IntVector3 operator / ( int inverseScale ) const;						// vec3 / int
+	const bool		 operator ==( const IntVector3& vecToCompare ) const;		// vec3 == vec3
 
 	float		GetLength() const;
 	Vector3		GetNormalized() const;
