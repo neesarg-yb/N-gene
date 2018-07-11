@@ -71,5 +71,6 @@ private:
 
 	// Gameplay Specific
 	void	ChangeTargetBlockOnMouseClick();
+	Block*	GetBlockFromMousePosition();
 	
 };

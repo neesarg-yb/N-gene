@@ -10,7 +10,8 @@
 
 Robot::Robot( IntVector3 const &posInTower, Tower *parentTower )
 	: GameObject( GAMEOBJECT_TYPE_ROBOT )
-	, m_posInTower( posInTower )
+	, m_targetPosition( posInTower )
+	, m_nextStepPosition( posInTower )
 	, m_parentTower( parentTower )
 {
 	// PickID
@@ -24,6 +25,7 @@ Robot::Robot( IntVector3 const &posInTower, Tower *parentTower )
 
 	// Transform Parenting
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
+	SetPositionInTower( posInTower );
 
 	Vector3 worldPos = m_transform.GetWorldPosition();
 }
@@ -38,8 +40,40 @@ void Robot::Update( float deltaSeconds )
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	UNUSED( deltaSeconds );
-	UpdateLocalTransform();
+	Vector3 targetPosVec3 = Vector3( m_targetPosition );
+	if( targetPosVec3 != m_transform.GetPosition() )
+	{
+		// If not in middle of moving to next block
+		Vector3 nextBlockPosVec3 = Vector3( m_nextStepPosition );
+		if( nextBlockPosVec3 != m_transform.GetPosition() )
+		{
+			MoveTowardsPosition( nextBlockPosVec3, deltaSeconds );
+			return;
+		}
+
+		// To get next block's position to move towards
+		// Get HeatMap
+		HeatMap3D* heatMap = m_parentTower->GetNewHeatMapForTargetPosition( m_targetPosition );
+
+		// Get next block position to move at
+		std::vector< IntVector3 > neighbourBlocksPos = m_parentTower->GetNeighbourBlocksPos( GetPositionInTower() );
+
+		IntVector3 currentTargetPos = GetPositionInTower();
+		for each (IntVector3 neighbourPos in neighbourBlocksPos)
+		{
+			// If HeatValue is less than currentHeat
+			float currentMinimumHeat = heatMap->GetHeat( currentTargetPos );
+			float neighbourBlockHeat = heatMap->GetHeat( neighbourPos );
+
+			// Change the target position
+			if( neighbourBlockHeat < currentMinimumHeat )
+				currentTargetPos = neighbourPos;
+		}
+
+		m_nextStepPosition = currentTargetPos;
+
+		delete heatMap;
+	}
 }
 
 void Robot::ObjectSelected()
@@ -56,36 +90,40 @@ void Robot::SetParentTower( Tower &parent )
 
 	// Transform
 	m_transform.SetParentAs( &m_parentTower->m_transform );
-	UpdateLocalTransform();
 }
 
-void Robot::MoveAtBlock( Block &targetBlock )
+void Robot::SetTargetBlock( Block &targetBlock )
 {
-	// Get HeatMap
-	HeatMap3D* heatMap = m_parentTower->GetNewHeatMapForTargetPosition( targetBlock.GetMyPositionInTower() );
+	m_targetPosition	= targetBlock.GetMyPositionInTower();
+}
 
-	// Get next block position to move at
-	std::vector< IntVector3 > neighbourBlocksPos = m_parentTower->GetNeighbourBlocksPos( m_posInTower );
+IntVector3 Robot::GetPositionInTower() const
+{
+	return IntVector3( m_transform.GetPosition() );
+}
 
-	IntVector3 currentTargetPos = m_posInTower;
-	for each (IntVector3 neighbourPos in neighbourBlocksPos)
+void Robot::SetPositionInTower( IntVector3 const &posInTower )
+{
+	m_transform.SetPosition( posInTower );
+
+	m_targetPosition	= posInTower;
+	m_nextStepPosition	= posInTower;
+}
+
+void Robot::MoveTowardsPosition( Vector3 const &destination, float deltaSeconds )
+{
+	Vector3 towardsDest		= destination - m_transform.GetPosition();
+	float	distance		= towardsDest.GetLength();
+	float	nextStepLength	= deltaSeconds * m_speed;
+	
+	if( distance <= nextStepLength )					// If distance is smaller than next step, clip to destination
+		m_transform.SetPosition( destination );
+	else												// Else do the normal walk
 	{
-		// If HeatValue is less than currentHeat
-		float currentMinimumHeat = heatMap->GetHeat( currentTargetPos );
-		float neighbourBlockHeat = heatMap->GetHeat( neighbourPos );
+		towardsDest			= towardsDest.GetNormalized();
+		Vector3 newPosition = m_transform.GetPosition();	
+		newPosition			= newPosition + ( towardsDest * nextStepLength );
 
-		// Change the target position
-		if( neighbourBlockHeat < currentMinimumHeat )
-			currentTargetPos = neighbourPos;
+		m_transform.SetPosition( newPosition );
 	}
-
-	m_posInTower = currentTargetPos;
-
-	delete heatMap;
-}
-
-void Robot::UpdateLocalTransform()
-{
-	Vector3 localPosition = Vector3( m_posInTower );
-	m_transform.SetPosition( localPosition );
 }

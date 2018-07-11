@@ -133,7 +133,7 @@ void Level::Startup()
 	// Setup the Player Robot
 	IntVector3 playerActualPos = m_definition.m_spawnPlayerOn + IntVector3::UP;		// Note: to spawn on top of that block, not at it!
 	m_playerRobot.SetParentTower( *m_tower );
-	m_playerRobot.m_posInTower = playerActualPos;
+	m_playerRobot.SetPositionInTower( playerActualPos );
 
 	m_levelScene->AddRenderable( *m_playerRobot.m_renderable );
 
@@ -162,19 +162,20 @@ void Level::Update( float deltaSeconds )
 	// Battle::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
-	// Target Block
-	ChangeTargetBlockOnMouseClick();
+	// Mouse click
+	if( g_theInput->WasMousButtonJustPressed( MOUSE_BUTTON_LEFT ) )
+	{
+		Block* clickedBlock = GetBlockFromMousePosition();
+		if( clickedBlock != nullptr )
+		{
+			Block* targetBlock = m_tower->GetBlockOnTopOfMe( *clickedBlock );
+			m_playerRobot.SetTargetBlock( *targetBlock );
+		}
+	}
 
 	// Show selected block
 	if( m_targetBlock != nullptr )
 		m_targetBlock->ObjectSelected();
-
-	// Tell Robot to move at target blocks
-	if( m_targetBlock != nullptr )	
-	{
-		Block* targetBlock = m_tower->GetBlockOnTopOfMe( *m_targetBlock );
-		m_playerRobot.MoveAtBlock( *targetBlock );
-	}
 
 	// Update Robot
 	m_playerRobot.Update( deltaSeconds );
@@ -315,4 +316,24 @@ void Level::ChangeTargetBlockOnMouseClick()
 		}
 	}
 
+}
+
+Block* Level::GetBlockFromMousePosition()
+{
+	// Mouse Position
+	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();
+
+	// Pick buffer
+	m_pickBuffer.GeneratePickBuffer( *m_camera, *m_levelScene );
+	uint		pickID				= m_pickBuffer.GetPickID( mousClientPos );
+	GameObject *selectedGameObject	= GameObject::GetFromPickID( pickID );
+
+	// If it is a Block
+	if( selectedGameObject != nullptr && selectedGameObject->m_type == GAMEOBJECT_TYPE_BLOCK )
+	{
+		m_targetBlock = (Block*)selectedGameObject;
+		return m_targetBlock;
+	}
+
+	return nullptr;
 }
