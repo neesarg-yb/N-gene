@@ -40,6 +40,10 @@ private:
 	Scene*						m_levelScene				= nullptr;
 	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.7f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
+	Camera*						m_uiCamera					= nullptr;
+	AABB2 const					m_uiDrawBounds				= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
+	Rgba const					m_uiBackgroundColor			= Rgba( 0, 0, 0, 200 );
+	bool						m_puzzleSolved				= false;
 
 public:
 	// Lights
@@ -73,4 +77,6 @@ private:
 	void	ChangeTargetBlockOnMouseClick();
 	Block*	GetBlockFromMousePosition();
 	
+	IntVector3	GetFinishPositionInTower() const;
+	void		ShowPuzzleSolved() const;
 };

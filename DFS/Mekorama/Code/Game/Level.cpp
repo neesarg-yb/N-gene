@@ -83,7 +83,13 @@ Level::~Level()
 
 void Level::Startup()
 {
-	// Setup the camera
+	// Setup the UI Camera
+	m_uiCamera = new Camera();
+	m_uiCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
+	m_uiCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
+	m_uiCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );
+
+	// Setup the Orbitcamera
 	m_camera = new OrbitCamera( Vector3::ZERO );
 	// Set Color Targets
 	m_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
@@ -158,8 +164,16 @@ void Level::Update( float deltaSeconds )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
+	
+	// If reached to final position
+	IntVector3 posInTower	= m_playerRobot.GetPositionInTower();
+	IntVector3 finishPos	= GetFinishPositionInTower();
+	m_puzzleSolved			= (finishPos == posInTower);
+	
+	if( m_puzzleSolved )
+		return;
 
-	// Battle::Update
+	// Level::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
 	// Mouse click
@@ -220,6 +234,10 @@ void Level::Render() const
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 	DebugRendererRender();
+
+	// If puzzle solved, show the message
+	if( m_puzzleSolved )
+		ShowPuzzleSolved();
 }
 
 double Level::GetTimeSinceBattleStarted() const
@@ -336,4 +354,23 @@ Block* Level::GetBlockFromMousePosition()
 	}
 
 	return nullptr;
+}
+
+IntVector3 Level::GetFinishPositionInTower() const
+{
+	return (m_definition.m_spawnFinishAt + IntVector3::UP);
+}
+
+void Level::ShowPuzzleSolved() const
+{
+	// Setup the renderer with uiCamera
+	g_theRenderer->BindCamera( m_uiCamera );
+
+	g_theRenderer->UseShader( nullptr );
+	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
+
+	BitmapFont *font = g_theRenderer->CreateOrGetBitmapFont( "SquirrelFixedFont" );
+	g_theRenderer->DrawAABB( m_uiDrawBounds, m_uiBackgroundColor );
+	g_theRenderer->DrawTextInBox2D( "Puzzle Solved!", Vector2( 0.5f, 0.5f ), m_uiDrawBounds, 0.1f, RGBA_GREEN_COLOR, font, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "(Hit ESC to go back to level selection)", Vector2( 0.5f, 0.02f ), m_uiDrawBounds, 0.03f, RGBA_GREEN_COLOR, font, TEXT_DRAW_SHRINK_TO_FIT );;
 }
