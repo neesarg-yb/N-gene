@@ -53,6 +53,17 @@ const IntVector3 IntVector3::operator / ( int inverseScale ) const
 	return IntVector3( x / inverseScale, y / inverseScale, z / inverseScale );
 }
 
+const bool IntVector3::operator==( const IntVector3& vecToCompare ) const
+{
+	bool allComponentsMatches = this->x == vecToCompare.x && 
+								this->y == vecToCompare.y && 
+								this->z == vecToCompare.z;
+	if( allComponentsMatches )
+		return true;
+	else
+		return false;
+}
+
 float IntVector3::GetLength() const
 {
 	const float squaredLength	= (float)( (x*x) + (y*y) + (z*z) );
