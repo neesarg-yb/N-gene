@@ -54,10 +54,10 @@ bool File::Open( std::string const &filePath, eFileOpenMode mode )
 		m_fileStream.open( m_path.c_str(), std::fstream::in );
 		break;
 	case FILE_OPEN_MODE_APPEND:
-		m_fileStream.open( m_path.c_str(), std::fstream::app );
+		m_fileStream.open( m_path.c_str(), std::fstream::out | std::fstream::app );
 		break;
 	case FILE_OPEN_MODE_TRUNCATE:
-		m_fileStream.open( m_path.c_str(), std::fstream::trunc );
+		m_fileStream.open( m_path.c_str(), std::fstream::out | std::fstream::trunc );
 		break;
 	default:
 		GUARANTEE_OR_DIE( false, "File: invalid open mode passed!" );

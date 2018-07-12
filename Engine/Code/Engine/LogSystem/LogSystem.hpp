@@ -3,15 +3,17 @@
 #include "Engine/LogSystem/SpinLock.hpp"
 #include "Engine/LogSystem/ThreadSafeQueue.hpp"
 
-#define DEFAULT_LOG_NAME ("log")
+#define DEFAULT_LOG_NAME ("systemLog.txt")
+
+struct LogData;
+
+typedef void ( *log_cb ) ( LogData const *log, void *argument );
 
 struct LogData
 {
 	std::string tag;
 	std::string text;
 };
-
-typedef void ( *log_cb ) ( LogData const &log, void *argument );
 
 struct LogHookData
 {
@@ -24,7 +26,6 @@ struct LogHookData
 		userArgument	= userArg;
 	}
 };
-
 
 class LogSystem
 {

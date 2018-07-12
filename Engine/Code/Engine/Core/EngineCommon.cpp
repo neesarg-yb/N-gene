@@ -7,7 +7,7 @@
 void EngineStartup()
 {
 	// LogSystem Startup
-	LogSystem::GetInstance()->LoggerStartup( "log" );
+	LogSystem::GetInstance()->LoggerStartup();
 
 	// Renderer Startup
 	Renderer::RendererStartup();

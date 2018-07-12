@@ -6,8 +6,19 @@
 #include <thread>
 
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Core/StringUtils.hpp"
+#include "Engine/File/File.hpp"
 
 LogSystem	*g_logSystem	= nullptr;
+File		*g_logFile		= nullptr;
+
+void WriteToFile( LogData const *logData, void *filePointer )
+{
+	File *fp = (File*) filePointer;
+	
+	std::string logStr = Stringf( "%s: %s", logData->tag.c_str(), logData->text.c_str() );
+	fp->Write( logStr );
+}
 
 LogSystem::LogSystem()
 {
@@ -30,7 +41,22 @@ LogSystem* LogSystem::GetInstance()
 void LogSystem::LoggerStartup( char const *fileRootName /*= DEFAULT_LOG_NAME */ )
 {
 	m_isRunning = true;
+	
+	// Get ready the log file
+	g_logFile			= new File();
+	bool fileGotOpened	= g_logFile->Open( fileRootName, FILE_OPEN_MODE_TRUNCATE );
 
+	// Hook it if got opened successfully
+	if( fileGotOpened )
+		LogHook( WriteToFile, g_logFile );
+	else
+	{
+		delete g_logFile;
+		g_logFile = nullptr;
+		GUARANTEE_RECOVERABLE( false, "LogSystem: Can't open default log file!" );
+	}
+
+	// Start the log thread
 	if( m_loggerThread == nullptr )
 	{
 		m_loggerThread = new std::thread( [](){ g_logSystem->LogThread( nullptr ); } );
@@ -41,12 +67,21 @@ void LogSystem::LoggerShutdown()
 {
 	m_isRunning = false;
 
+	// Join the logging thread
 	if( m_loggerThread != nullptr )
 	{
 		m_loggerThread->join();
 
 		delete m_loggerThread;
 		m_loggerThread = nullptr;
+	}
+
+	// Close the log file
+	if( g_logFile != nullptr )
+	{
+		g_logFile->Close();
+		delete g_logFile;
+		g_logFile = nullptr;
 	}
 }
 
@@ -95,14 +130,14 @@ void LogSystem::LogThread( void * )
 
 void LogSystem::FlushMessages()
 {
-	LogData *log;
+	LogData *log = nullptr;
 
 	while ( m_messageQueue.Dequeue(&log) ) 
 	{
 		m_hookLock.Enter();
 		for each (LogHookData hook in m_hooks) 
 		{
-			hook.callback( *log, hook.userArgument ); 
+			hook.callback( log, hook.userArgument ); 
 		}
 		m_hookLock.Leave(); 
 
