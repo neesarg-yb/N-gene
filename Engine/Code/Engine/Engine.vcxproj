@@ -284,7 +284,9 @@
     <ClCompile Include="Input\InputSystem.cpp" />
     <ClCompile Include="Input\KeyButtonState.cpp" />
     <ClCompile Include="Input\XboxController.cpp" />
-    <ClCompile Include="LogSystem\Logger.cpp" />
+    <ClCompile Include="LogSystem\LogSystem.cpp" />
+    <ClCompile Include="LogSystem\SpinLock.cpp" />
+    <ClCompile Include="LogSystem\ThreadSafeQueue.cpp" />
     <ClCompile Include="Math\AABB2.cpp" />
     <ClCompile Include="Math\AABB3.cpp" />
     <ClCompile Include="Math\BarGraph.cpp" />
@@ -374,7 +376,9 @@
     <ClInclude Include="Input\InputSystem.hpp" />
     <ClInclude Include="Input\KeyButtonState.hpp" />
     <ClInclude Include="Input\XboxController.hpp" />
-    <ClInclude Include="LogSystem\Logger.hpp" />
+    <ClInclude Include="LogSystem\LogSystem.hpp" />
+    <ClInclude Include="LogSystem\SpinLock.hpp" />
+    <ClInclude Include="LogSystem\ThreadSafeQueue.hpp" />
     <ClInclude Include="Math\AABB2.hpp" />
     <ClInclude Include="Math\AABB3.hpp" />
     <ClInclude Include="Math\BarGraph.hpp" />
