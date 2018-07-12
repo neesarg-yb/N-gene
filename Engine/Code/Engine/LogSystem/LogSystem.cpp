@@ -50,6 +50,41 @@ void LogSystem::LoggerShutdown()
 	}
 }
 
+void LogSystem::LogHook( log_cb cb, void *userArg /* = nullptr */ )
+{
+	bool hookAlreadyExists = false;
+	
+	for( uint i = 0; i < m_hooks.size(); i++ )
+	{
+		hookAlreadyExists = ( m_hooks[i].callback == cb ) && 
+							( m_hooks[i].userArgument == userArg );
+	}
+
+	if( hookAlreadyExists == false )
+	{
+		LogHookData newHookData( cb, userArg );
+		m_hooks.push_back( newHookData );
+	}
+}
+
+void LogSystem::LogUnhook( log_cb cb, void *userArg /* = nullptr */ )
+{
+	for( uint i = 0; i < m_hooks.size(); i++ )
+	{
+		bool deleteThisHook =	( m_hooks[i].callback == cb ) &&
+								( m_hooks[i].userArgument == userArg );
+
+		if( deleteThisHook )
+		{
+			// Fast remove
+			std::swap( m_hooks[i], m_hooks.back() );
+			m_hooks.pop_back();
+
+			return;
+		}
+	}
+}
+
 void LogSystem::LogThread( void * )
 {
 	while ( IsRunning() ) {
@@ -65,7 +100,7 @@ void LogSystem::FlushMessages()
 	while ( m_messageQueue.Dequeue(&log) ) 
 	{
 		m_hookLock.Enter();
-		for each (LogHook hook in m_hooks) 
+		for each (LogHookData hook in m_hooks) 
 		{
 			hook.callback( *log, hook.userArgument ); 
 		}
