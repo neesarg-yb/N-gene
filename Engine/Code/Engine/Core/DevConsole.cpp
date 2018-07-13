@@ -3,6 +3,7 @@
 #include "DevConsole.hpp"
 #include "Engine/Core/Time.hpp"
 #include "Engine/Input/Command.hpp"
+#include "Engine/Core/StringUtils.hpp"
 
 int				DevConsole::s_scrollAmount			= 0;
 Camera*			DevConsole::s_devConsoleCamera		= nullptr;
@@ -11,7 +12,9 @@ bool			DevConsole::s_isOpen				= false;
 int				DevConsole::s_blinkerPosition		= 0;
 bool			DevConsole::s_blinkerHidden			= false;
 std::string		DevConsole::s_inputBufferString		= "";
-std::vector< OutputStringsBuffer>					DevConsole::s_outputBuffer;
+
+SpinLock							DevConsole::s_outputBufferLock;
+std::vector< OutputStringsBuffer>	DevConsole::s_outputBuffer;
 
 void echo_with_color	( Command& cmd );
 void clear_console		( Command& cmd );
@@ -277,7 +280,13 @@ void DevConsole::KeyActions_HandleEnterKey()
 void DevConsole::WriteToOutputBuffer( std::string line_str, Rgba line_color /*= RGBA_WHITE_COLOR*/ )
 {
 	if( line_str != "" )
+	{
+		s_outputBufferLock.Enter();
+
 		s_outputBuffer.push_back( OutputStringsBuffer(line_str, line_color) );
+
+		s_outputBufferLock.Leave();
+	}
 }
 
 std::vector< std::string > DevConsole::GetOutputBufferLines()
@@ -315,13 +324,12 @@ bool DevConsoleIsOpen()
 void ConsolePrintf( Rgba const &color, char const *format, ... )
 {
 	va_list args;
+
 	va_start( args, format );
-
-	char buffer[1000];
-	vsnprintf_s( buffer, 1000, format, args );
-
+	std::string buffer = Stringv( format, args );
 	va_end( args );
-	DevConsole::GetInstance()->WriteToOutputBuffer( buffer, color );
+
+	DevConsole::GetInstance()->WriteToOutputBuffer( buffer.c_str(), color );
 }
 
 void ConsolePrintf( char const *format, ... )
