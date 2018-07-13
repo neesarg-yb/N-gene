@@ -297,9 +297,6 @@
     <ClCompile Include="Math\DoubleRange.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="LogSystem\ThreadSafeQueue.cpp">
-      <Filter>LogSystem</Filter>
-    </ClCompile>
     <ClCompile Include="LogSystem\SpinLock.cpp">
       <Filter>LogSystem</Filter>
     </ClCompile>
@@ -585,6 +582,9 @@
       <Filter>LogSystem</Filter>
     </ClInclude>
     <ClInclude Include="LogSystem\LogSystem.hpp">
+      <Filter>LogSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSystem\ThreadSafeVector.hpp">
       <Filter>LogSystem</Filter>
     </ClInclude>
   </ItemGroup>

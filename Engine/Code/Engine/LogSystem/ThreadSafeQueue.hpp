@@ -1,6 +1,6 @@
 #pragma once
 #include <queue>
-#include "SpinLock.hpp"
+#include "Engine/LogSystem/SpinLock.hpp"
 
 template <typename T>
 class ThreadSafeQueue
