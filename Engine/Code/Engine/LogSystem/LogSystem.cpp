@@ -16,7 +16,7 @@ void WriteToFile( LogData const *logData, void *filePointer )
 {
 	File *fp = (File*) filePointer;
 	
-	std::string logStr = Stringf( "%s: %s", logData->tag.c_str(), logData->text.c_str() );
+	std::string logStr = Stringf( "%s: %s\n", logData->tag.c_str(), logData->text.c_str() );
 	fp->Write( logStr );
 }
 
@@ -118,6 +118,26 @@ void LogSystem::LogUnhook( log_cb cb, void *userArg /* = nullptr */ )
 			return;
 		}
 	}
+}
+
+void LogSystem::LogTaggedPrintv( char const *tag, char const *format, va_list args )
+{
+	std::string tagStr	= Stringf( tag );
+	std::string textStr = Stringf( format, args );
+
+	// Add data to the message queue
+	LogData *newData = new LogData( tagStr, textStr );
+	m_messageQueue.Enqueue( newData );
+}
+
+void LogSystem::LogTaggedPrintf( char const *tag, char const *format, ... )
+{
+	va_list args;
+	va_start( args, format );
+
+	LogTaggedPrintv( tag, format, args );
+
+	va_end( args );
 }
 
 void LogSystem::LogThread( void * )
