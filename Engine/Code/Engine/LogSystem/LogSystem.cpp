@@ -123,7 +123,7 @@ void LogSystem::LogUnhook( log_cb cb, void *userArg /* = nullptr */ )
 void LogSystem::LogTaggedPrintv( char const *tag, char const *format, va_list args )
 {
 	std::string tagStr	= Stringf( tag );
-	std::string textStr = Stringf( format, args );
+	std::string textStr = Stringv( format, args );
 
 	// Add data to the message queue
 	LogData *newData = new LogData( tagStr, textStr );

@@ -8,6 +8,7 @@
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/AABB2.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/LogSystem/SpinLock.hpp"
 
 class Command;
 
@@ -77,6 +78,7 @@ private:
 	static	int			s_blinkerPosition;
 	static	bool		s_blinkerHidden;
 	static	std::string	s_inputBufferString;
+	static	SpinLock	s_outputBufferLock;
 	static	std::vector< OutputStringsBuffer >	s_outputBuffer;
 
 public:
