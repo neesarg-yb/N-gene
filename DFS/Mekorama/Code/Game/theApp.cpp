@@ -5,6 +5,7 @@
 #include "Engine/Core/Window.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Profiler/ProfilerConsole.hpp"
+#include "Engine/LogSystem/LogSystem.hpp"
 
 void QuitTheApp( Command& cmd );
 
@@ -21,6 +22,14 @@ void ShowHideProfileConsole( Command& cmd )
 		ProfileConsole::GetInstance()->Open();
 		DevConsole::GetInstance()->Close();
 	}
+}
+
+void LogTextFromCommand( Command& cmd )
+{
+	std::string logTag	= cmd.GetName();
+	std::string logText	= cmd.GetNextString();
+
+	LogSystem::GetInstance()->LogTaggedPrintf( logTag.c_str(), logText.c_str() );
 }
 
 theApp::theApp()
@@ -50,6 +59,7 @@ theApp::~theApp()
 void theApp::Startup()
 {
 	CommandRegister( "profiler", ShowHideProfileConsole );
+	CommandRegister( "log_text", LogTextFromCommand );
 	g_theGame->Startup();
 }
 

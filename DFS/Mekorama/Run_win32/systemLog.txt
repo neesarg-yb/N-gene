@@ -1,0 +1,3 @@
+log_text: h1
+log_text: h2
+log_text: hhheeellllllooo!!!
