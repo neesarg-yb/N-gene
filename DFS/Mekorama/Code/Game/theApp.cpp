@@ -32,6 +32,16 @@ void LogTextFromCommand( Command& cmd )
 	LogSystem::GetInstance()->LogTaggedPrintf( logTag.c_str(), logText.c_str() );
 }
 
+void ForceFlushTest ( Command &cmd )
+{
+	LogSystem::GetInstance()->LogPrintf( "LogFlushTest" );
+	LogSystem::GetInstance()->LogWarningf( "WarningTest" );
+	LogSystem::GetInstance()->LogErrorf( "ErrorTest" );
+	LogSystem::ForceFlush();
+
+	UNUSED( cmd );
+}
+
 theApp::theApp()
 {
 	g_theRenderer = new Renderer();
@@ -60,7 +70,10 @@ void theApp::Startup()
 {
 	CommandRegister( "profiler", ShowHideProfileConsole );
 	CommandRegister( "log_text", LogTextFromCommand );
+	CommandRegister( "log_force_flush", ForceFlushTest );
 	g_theGame->Startup();
+
+	DebuggerPrintf( "theApp::Startup()" );
 }
 
 void theApp::RunFrame() {
