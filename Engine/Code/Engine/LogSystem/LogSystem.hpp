@@ -60,11 +60,16 @@ public:
 	void LogHook	( log_cb cb, void *userArg = nullptr ); 
 	void LogUnhook	( log_cb cb, void *userArg = nullptr );
 	
-	// Logging Call (Master call - most functions will feed through this)
-	// Notice we take a va_list, so we can forward other functions that
-	// take variable arguments to this; 
+	// Logging Call
 	void LogTaggedPrintv( char const *tag, char const *format, va_list args ); 
-	void LogTaggedPrintf( char const *tag, char const *format, ... ); 
+	void LogTaggedPrintf( char const *tag, char const *format, ... );
+
+	// HELPERS
+	void LogPrintf	( char const *format, ... ); 
+	void LogWarningf( char const *format, ... ); 
+	void LogErrorf	( char const *format, ... ); 
+
+	static void ForceFlush();
 
 private:
 	void LogThread( void * );

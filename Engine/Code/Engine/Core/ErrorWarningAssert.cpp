@@ -11,6 +11,7 @@
 
 //-----------------------------------------------------------------------------------------------
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include <stdarg.h>
 #include <iostream>
@@ -60,6 +61,9 @@ void DebuggerPrintf( const char* messageFormat, ... )
 #endif
 
 	std::cout << messageLiteral;
+
+	// Forward to LogSystem
+	LogSystem::GetInstance()->LogTaggedPrintv( "debug", messageFormat, variableArgumentList );
 }
 
 

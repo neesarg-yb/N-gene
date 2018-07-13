@@ -140,11 +140,53 @@ void LogSystem::LogTaggedPrintf( char const *tag, char const *format, ... )
 	va_end( args );
 }
 
+void LogSystem::LogPrintf( char const *format, ... )
+{
+	va_list args;
+	va_start( args, format );
+
+	LogTaggedPrintv( "log", format, args );
+
+	va_end( args );
+}
+
+void LogSystem::LogWarningf( char const *format, ... )
+{
+	va_list args;
+	va_start( args, format );
+
+	LogTaggedPrintv( "warning", format, args );
+
+	va_end( args );
+}
+
+void LogSystem::LogErrorf( char const *format, ... )
+{
+	va_list args;
+	va_start( args, format );
+
+	LogTaggedPrintv( "error", format, args );
+
+	va_end( args );
+}
+
+void LogSystem::ForceFlush()
+{
+	if( g_logSystem == nullptr )
+		return;
+
+	// Make sure you flush the message queue
+	g_logSystem->FlushMessages();
+
+	// Make sure everything is written to file
+	g_logFile->Flush();
+}
+
 void LogSystem::LogThread( void * )
 {
 	while ( IsRunning() ) {
 		FlushMessages(); 
-		Sleep(10); // Better yet, you can use a signal or semaphore that signaled when a message is logged; 
+		std::this_thread::sleep_for( std::chrono::microseconds(10) ); // Better yet, you can use a signal or semaphore that signaled when a message is logged; 
 	}
 }
 
@@ -159,7 +201,7 @@ void LogSystem::FlushMessages()
 		{
 			hook.callback( log, hook.userArgument ); 
 		}
-		m_hookLock.Leave(); 
+		m_hookLock.Leave();
 
 		// free up the log;
 		delete log; 
