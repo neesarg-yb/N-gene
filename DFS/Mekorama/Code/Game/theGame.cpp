@@ -52,7 +52,7 @@ void theGame::Startup()
 
 	// Console stuffs
 	CommandRegister( "echo", EchoTestCommand );
-	ConsolePrintf( RGBA_GREEN_COLOR, "%d Hello World!", 1 );
+	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Seting up the Attract Menu
 	m_attractMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.45f, 0.45f, 0.55f, 0.55f ) );
