@@ -81,3 +81,8 @@ void File::Write( std::string const &dataString )
 	// Write with append mode
 	m_fileStream << dataString;
 }
+
+void File::Flush()
+{
+	m_fileStream << std::flush;
+}

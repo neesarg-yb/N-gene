@@ -24,6 +24,7 @@ public:
 	bool inline	IsOpen() { return m_fileStream.is_open(); }
 
 	void		Write( std::string const &dataString );
+	void		Flush();
 };
 
 void*	FileReadToNewBuffer( char const *filename );
