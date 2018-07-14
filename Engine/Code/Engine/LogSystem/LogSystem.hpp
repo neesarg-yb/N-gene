@@ -2,6 +2,7 @@
 #include <string>
 #include "Engine/LogSystem/SpinLock.hpp"
 #include "Engine/LogSystem/ThreadSafeQueue.hpp"
+#include "Engine/LogSystem/ThreadSafeVector.hpp"
 
 #define DEFAULT_LOG_NAME ("systemLog.txt")
 
@@ -31,6 +32,14 @@ struct LogHookData
 		callback		= cb;
 		userArgument	= userArg;
 	}
+
+	bool operator == ( LogHookData const &compareWith )
+	{
+		bool allMembersMatches =	( callback		== compareWith.callback ) &&
+									( userArgument	== compareWith.userArgument );
+
+		return allMembersMatches;
+	}
 };
 
 class LogSystem
@@ -40,11 +49,10 @@ public:
 	~LogSystem();
 
 private:
-	bool						 m_isRunning	= false;
-	std::thread					*m_loggerThread	= nullptr;
-	SpinLock					 m_hookLock;
-	std::vector< LogHookData >	 m_hooks;
-	ThreadSafeQueue< LogData* >	 m_messageQueue;
+	bool							 m_isRunning	= false;
+	std::thread						*m_loggerThread	= nullptr;
+	ThreadSafeVector< LogHookData >	 m_hooks;
+	ThreadSafeQueue< LogData* >		 m_messageQueue;
 
 public:
 	static LogSystem* GetInstance();

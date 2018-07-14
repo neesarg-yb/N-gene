@@ -89,32 +89,29 @@ void LogSystem::LogHook( log_cb cb, void *userArg /* = nullptr */ )
 {
 	bool hookAlreadyExists = false;
 	
-	for( uint i = 0; i < m_hooks.size(); i++ )
+	for( uint i = 0; i < m_hooks.GetSize(); i++ )
 	{
-		hookAlreadyExists = ( m_hooks[i].callback == cb ) && 
-							( m_hooks[i].userArgument == userArg );
+		hookAlreadyExists = ( m_hooks.GetAtIndex(i).callback == cb ) && 
+							( m_hooks.GetAtIndex(i).userArgument == userArg );
 	}
 
 	if( hookAlreadyExists == false )
 	{
 		LogHookData newHookData( cb, userArg );
-		m_hooks.push_back( newHookData );
+		m_hooks.Add( newHookData );
 	}
 }
 
 void LogSystem::LogUnhook( log_cb cb, void *userArg /* = nullptr */ )
 {
-	for( uint i = 0; i < m_hooks.size(); i++ )
+	for( uint i = 0; i < m_hooks.GetSize(); i++ )
 	{
-		bool deleteThisHook =	( m_hooks[i].callback == cb ) &&
-								( m_hooks[i].userArgument == userArg );
+		bool deleteThisHook =	( m_hooks.GetAtIndex(i).callback == cb ) &&
+								( m_hooks.GetAtIndex(i).userArgument == userArg );
 
 		if( deleteThisHook )
 		{
-			// Fast remove
-			std::swap( m_hooks[i], m_hooks.back() );
-			m_hooks.pop_back();
-
+			m_hooks.RemoveAtIndex(i);
 			return;
 		}
 	}
@@ -196,13 +193,12 @@ void LogSystem::FlushMessages()
 
 	while ( m_messageQueue.Dequeue(&log) ) 
 	{
-		m_hookLock.Enter();
-		for each (LogHookData hook in m_hooks) 
+		for ( uint idx = 0; idx < m_hooks.GetSize(); idx++ )
 		{
+			LogHookData hook = m_hooks.GetAtIndex( idx );
 			hook.callback( log, hook.userArgument ); 
 		}
-		m_hookLock.Leave();
-
+		
 		// free up the log;
 		delete log; 
 	}

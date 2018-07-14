@@ -4,6 +4,7 @@
 #include "Engine/Core/Time.hpp"
 #include "Engine/Input/Command.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/LogSystem/LogSystem.hpp"
 
 int				DevConsole::s_scrollAmount			= 0;
 Camera*			DevConsole::s_devConsoleCamera		= nullptr;
@@ -20,6 +21,12 @@ void echo_with_color	( Command& cmd );
 void clear_console		( Command& cmd );
 void save_log_to_file	( Command& cmd );
 void print_all_registered_commands	( Command& cmd );
+
+void LogHookWritesToConsole( LogData const *logData, void * )
+{
+	std::string logStr = Stringf( "%s: %s", logData->tag.c_str(), logData->text.c_str() );
+	DevConsole::GetInstance()->WriteToOutputBuffer( logStr, RGBA_GRAY_COLOR );
+}
 
 DevConsole::DevConsole( Renderer* currentRenderer )
 	: m_currentRenderer( currentRenderer )
@@ -127,6 +134,9 @@ DevConsole* DevConsole::InitalizeSingleton( Renderer& currentRenderer )
 	s_devConsoleCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	s_devConsoleCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	s_devConsoleCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );			// Make an NDC
+
+	// Add it to logSystem's hook
+	LogSystem::GetInstance()->LogHook( LogHookWritesToConsole );
 
 	return s_devConsoleInstance;
 }

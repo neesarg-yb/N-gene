@@ -86,7 +86,7 @@ public:
 	static void			DestroySingleton();
 	static DevConsole*	GetInstance();
 	static bool			ConsoleMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam );
-	static	void		WriteToOutputBuffer( std::string line_str, Rgba line_color = RGBA_WHITE_COLOR );
+	static void			WriteToOutputBuffer( std::string line_str, Rgba line_color = RGBA_WHITE_COLOR );
 	
 	static std::vector< std::string >	GetOutputBufferLines();
 };
