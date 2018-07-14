@@ -12,6 +12,7 @@
 #include "Engine/Input/Command.hpp"
 #include "Engine/Math/HeatMap3D.hpp"
 #include "Engine/Profiler/Profiler.hpp"
+#include "Engine/LogSystem/LogSystem.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 
@@ -47,6 +48,42 @@ void ThreadedTestWork( Command &cmd )
 	writerThread.detach();
 }
 
+void StartLoggingFromFile( char const *srcFilePath, int threadID )
+{
+	File sourceFile;
+	sourceFile.Open( srcFilePath, FILE_OPEN_MODE_READ );
+	if( sourceFile.IsOpen() )
+	{
+		uint		lineNum = 0;
+		std::string lineStr;
+		while( sourceFile.ReadNextLine( lineStr ) )
+		{
+			lineNum++;
+
+			lineStr = Stringf( "[%d: %u] %s", threadID, lineNum, lineStr.c_str() );
+			LogSystem::GetInstance()->LogPrintf( lineStr.c_str() );
+		}
+
+		sourceFile.Close();
+	}
+}
+
+void LogBigTestCommand( Command &cmd )
+{
+	std::string fileName		= cmd.GetNextString();
+	std::string threadCountStr	= cmd.GetNextString();
+	
+	int threadCount = 10;
+	if( threadCountStr != "" )
+		SetFromText( threadCount, threadCountStr.c_str() );
+
+	for( int i = 0; i < threadCount; i++ )
+	{
+		std::thread readerThread( [ fileName, i ](){ StartLoggingFromFile( fileName.c_str(), i ); } );
+		readerThread.detach();
+	}
+}
+
 Level::Level( std::string definitionName, Robot &playerRobot )
 	: m_pickBuffer( *g_theRenderer )
 	, m_definition( *LevelDefinition::s_definitions[ definitionName ] )
@@ -54,6 +91,7 @@ Level::Level( std::string definitionName, Robot &playerRobot )
 {
 	CommandRegister( "non_threaded_test", NonThreadedTestWork );
 	CommandRegister( "threaded_test", ThreadedTestWork );
+	CommandRegister( "log_print_file_thread_count", LogBigTestCommand );
 }
 
 Level::~Level()
