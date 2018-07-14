@@ -21,6 +21,8 @@ void echo_with_color	( Command& cmd );
 void clear_console		( Command& cmd );
 void save_log_to_file	( Command& cmd );
 void print_all_registered_commands	( Command& cmd );
+void HookDevConsoleToLogSystem( Command &cmd );
+void UnhookDevConsoleToLogSystem( Command &cmd );
 
 void LogHookWritesToConsole( LogData const *logData, void * )
 {
@@ -41,6 +43,8 @@ DevConsole::DevConsole( Renderer* currentRenderer )
 	CommandRegister( "save_log", save_log_to_file );
 	CommandRegister( "help", print_all_registered_commands );
 	CommandRegister( "scroll_bottom", DevConsole::ResetTheScroll );
+	CommandRegister( "hook_dev_console", HookDevConsoleToLogSystem );
+	CommandRegister( "unhook_dev_console", UnhookDevConsoleToLogSystem );
 }
 
 DevConsole::~DevConsole()
@@ -116,7 +120,9 @@ bool DevConsole::IsOpen()
 
 void DevConsole::ClearOutputBuffer()
 {
+	s_outputBufferLock.Enter();
 	s_outputBuffer.clear();
+	s_outputBufferLock.Leave();
 }
 
 DevConsole* DevConsole::InitalizeSingleton( Renderer& currentRenderer )
@@ -134,9 +140,6 @@ DevConsole* DevConsole::InitalizeSingleton( Renderer& currentRenderer )
 	s_devConsoleCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	s_devConsoleCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	s_devConsoleCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );			// Make an NDC
-
-	// Add it to logSystem's hook
-	LogSystem::GetInstance()->LogHook( LogHookWritesToConsole );
 
 	return s_devConsoleInstance;
 }
@@ -292,9 +295,7 @@ void DevConsole::WriteToOutputBuffer( std::string line_str, Rgba line_color /*= 
 	if( line_str != "" )
 	{
 		s_outputBufferLock.Enter();
-
 		s_outputBuffer.push_back( OutputStringsBuffer(line_str, line_color) );
-
 		s_outputBufferLock.Leave();
 	}
 }
@@ -302,22 +303,26 @@ void DevConsole::WriteToOutputBuffer( std::string line_str, Rgba line_color /*= 
 std::vector< std::string > DevConsole::GetOutputBufferLines()
 {
 	std::vector< std::string > toReturn;
-
+	
+	s_outputBufferLock.Enter();
 	for each (OutputStringsBuffer op_line in s_outputBuffer )
 	{
 		toReturn.push_back( op_line.m_line_str );
 	}
+	s_outputBufferLock.Leave();
 
 	return toReturn;
 }
 
 void DevConsole::PrintTheOutputBuffer( int scrollAmount /* = 0 */ )
 {
+	s_outputBufferLock.Enter();
 	for( size_t opIndex = 0; opIndex < s_outputBuffer.size(); opIndex++ )
 	{
 		Vector2 drawMins = m_outputAreaTextBox.mins + Vector2( 0.f, m_textHeight * (1 + scrollAmount) * ( s_outputBuffer.size() - opIndex ) );
 		m_currentRenderer->DrawText2D( drawMins, s_outputBuffer[opIndex].m_line_str, m_textHeight, s_outputBuffer[opIndex].m_line_color, m_fonts );
 	}
+	s_outputBufferLock.Leave();
 }
 
 void DevConsole::ResetTheScroll( Command& cmd )
@@ -414,4 +419,16 @@ void print_all_registered_commands( Command& cmd )
 
 		ConsolePrintf( RGBA_GRAY_COLOR, lineStr.c_str() );
 	}
+}
+
+void HookDevConsoleToLogSystem( Command &cmd )
+{
+	UNUSED( cmd );
+	LogSystem::GetInstance()->LogHook( LogHookWritesToConsole, nullptr );
+}
+
+void UnhookDevConsoleToLogSystem( Command &cmd )
+{
+	UNUSED( cmd );
+	LogSystem::GetInstance()->LogUnhook( LogHookWritesToConsole, nullptr );
 }

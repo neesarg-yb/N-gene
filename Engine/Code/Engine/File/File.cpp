@@ -86,3 +86,11 @@ void File::Flush()
 {
 	m_fileStream << std::flush;
 }
+
+bool File::ReadNextLine( std::string &out_line )
+{
+	if( std::getline( m_fileStream, out_line ) )
+		return true;
+	else
+		return false;
+}
