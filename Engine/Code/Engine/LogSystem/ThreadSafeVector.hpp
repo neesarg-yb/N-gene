@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Engine/LogSystem/SpinLock.hpp"
+#include "Engine/Core/EngineCommon.hpp"
 
 template <typename T>
 class ThreadSafeVector
@@ -10,6 +11,24 @@ private:
 	SpinLock		m_lock;
 
 public:
+
+	uint GetSize()		// Returns count of elements in vector
+	{
+		m_lock.Enter();
+		uint size = (uint) m_vector.size();
+		m_lock.Leave();
+
+		return size;
+	}
+
+	T GetAtIndex( uint idx )		// Gets element at index
+	{
+		m_lock.Enter();
+		T elementAtIdx = m_vector.at( idx );
+		m_lock.Leave();
+
+		return elementAtIdx;
+	}
 
 	bool Contains( T const &v )
 	{
@@ -25,6 +44,17 @@ public:
 	void Add( T const &v )
 	{
 		m_vector.push_back( v );
+	}
+
+	void RemoveAtIndex( uint idx )
+	{
+		m_lock.Enter();
+
+		// Fast remove
+		std::swap( m_vector[idx], m_vector.back() );
+		m_vector.pop_back();
+
+		m_lock.Leave();
 	}
 
 	void Remove( T const &v )
