@@ -25,6 +25,8 @@ public:
 
 	void		Write( std::string const &dataString );
 	void		Flush();
+
+	bool		ReadNextLine( std::string &out_line );
 };
 
 void*	FileReadToNewBuffer( char const *filename );
