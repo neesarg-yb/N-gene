@@ -2,8 +2,9 @@
 // Time.hpp
 //
 #pragma once
+#include <string>
 
 
 //-----------------------------------------------------------------------------------------------
-double GetCurrentTimeSeconds();
-
+double		GetCurrentTimeSeconds();
+std::string GetCurrentTimestamp();

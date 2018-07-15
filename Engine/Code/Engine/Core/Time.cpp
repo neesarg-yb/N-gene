@@ -6,6 +6,7 @@
 #include "Engine/Core/Time.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <time.h>
 
 
 //-----------------------------------------------------------------------------------------------
@@ -31,4 +32,18 @@ double GetCurrentTimeSeconds()
 	return currentSeconds;
 }
 
+std::string GetCurrentTimestamp()
+{
+	tm		tstruct;
+	char	buf[80];
+
+	time_t	now = time(0);
+	localtime_s( &tstruct, &now );
+
+	// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+	// for more information about date/time format
+	strftime(buf, sizeof(buf), "%m-%d-%Y(%Hh %Mm %S)", &tstruct);
+
+	return buf;
+}
 

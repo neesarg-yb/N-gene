@@ -4,6 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <stdlib.h>
+#include <filesystem>
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/DevConsole.hpp"
 
@@ -119,4 +120,9 @@ bool File::ReadNextLine( std::string &out_line )
 		return true;
 	else
 		return false;
+}
+
+bool File::Copy( std::string const &sourceFile, std::string const &destFile )
+{
+	return CopyFileA( sourceFile.c_str(), destFile.c_str(), false );
 }

@@ -4,7 +4,8 @@
 #include "Engine/LogSystem/ThreadSafeQueue.hpp"
 #include "Engine/LogSystem/ThreadSafeVector.hpp"
 
-#define DEFAULT_LOG_NAME ("Log/log.txt")
+#define DEFAULT_LOG_FILE_PATH ("Log/log.txt")
+#define DEFAULT_LOG_HISTORY_FOLDER ("Log/History/")
 
 struct LogData;
 
@@ -59,7 +60,7 @@ public:
 
 public:
 	// Startup & Shutdown
-	void		LoggerStartup( char const *fileRootName = DEFAULT_LOG_NAME );
+	void		LoggerStartup( char const *fileRootName = DEFAULT_LOG_FILE_PATH );
 	void		LoggerShutdown();
 	bool inline IsRunning() { return m_isRunning; }
 
