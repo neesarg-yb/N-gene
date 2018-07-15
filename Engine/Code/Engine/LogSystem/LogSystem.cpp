@@ -1,9 +1,14 @@
 #pragma once
 #include "LogSystem.hpp"
 
-#define WIN32_LEAN_AND_MEAN		// Always #define this before #including <windows.h>
-#include <windows.h>			// #include this (massive, platform-specific) header in very few places
+#ifdef _WIN32
+#define PLATFORM_WINDOWS
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include <thread>
+#include <iostream>
 
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/StringUtils.hpp"
@@ -16,8 +21,28 @@ void WriteToFile( LogData const *logData, void *filePointer )
 {
 	File *fp = (File*) filePointer;
 	
-	std::string logStr = Stringf( "%s: %s\n", logData->tag.c_str(), logData->text.c_str() );
+	std::string logStr;
+	LogSystem::GetFormattedMessageFromLogData( logStr, logData );
+
 	fp->Write( logStr );
+}
+
+void WriteToIDE( LogData const *logData, void* )
+{
+	// Get log message as string
+	std::string messageStr;
+	LogSystem::GetFormattedMessageFromLogData( messageStr, logData );
+
+	// If it is windows, print of its custom debug output
+#if defined( PLATFORM_WINDOWS )
+	if( IsDebuggerAvailable() )
+	{
+		OutputDebugStringA( messageStr.c_str() );
+	}
+#endif
+
+	// Print as normal cout, as well
+	std::cout << messageStr;
 }
 
 LogSystem::LogSystem()
@@ -55,6 +80,9 @@ void LogSystem::LoggerStartup( char const *fileRootName /*= DEFAULT_LOG_NAME */ 
 		g_logFile = nullptr;
 		GUARANTEE_RECOVERABLE( false, "LogSystem: Can't open default log file!" );
 	}
+
+	// Hook IDE output tab
+	LogHook( WriteToIDE, nullptr );
 
 	// Start the log thread
 	if( m_loggerThread == nullptr )
@@ -179,11 +207,16 @@ void LogSystem::ForceFlush()
 	g_logFile->Flush();
 }
 
+void LogSystem::GetFormattedMessageFromLogData( std::string &out_logMessage, LogData const *logData )
+{
+	out_logMessage = Stringf( "%s: %s\n", logData->tag.c_str(), logData->text.c_str() );
+}
+
 void LogSystem::LogThread( void * )
 {
 	while ( IsRunning() ) {
 		FlushMessages(); 
-		std::this_thread::sleep_for( std::chrono::microseconds(10) ); // Better yet, you can use a signal or semaphore that signaled when a message is logged; 
+		std::this_thread::sleep_for( std::chrono::milliseconds(10) ); // Better yet, you can use a signal or semaphore that signaled when a message is logged; 
 	}
 }
 
