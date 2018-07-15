@@ -27,6 +27,7 @@ public:
 	void		Flush();
 
 	bool		ReadNextLine( std::string &out_line );
+	static bool	Copy( std::string const &sourceFile, std::string const &destFile );	// returns true if succeeded. Note: Directory has to exists already!
 };
 
 void*	FileReadToNewBuffer( char const *filename );

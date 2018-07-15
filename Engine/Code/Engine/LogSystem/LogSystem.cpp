@@ -10,6 +10,7 @@
 #include <thread>
 #include <iostream>
 
+#include "Engine/Core/Time.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/File/File.hpp"
@@ -110,6 +111,14 @@ void LogSystem::LoggerShutdown()
 		g_logFile->Close();
 		delete g_logFile;
 		g_logFile = nullptr;
+
+		// Make a duplicate_timestamped file as a copy
+		std::string timestamp			= GetCurrentTimestamp();
+		std::string logHistoryFileName	= Stringf( "log_%s.txt", timestamp.c_str() );
+		std::string fullFilePath		= Stringf( "Log/%s", logHistoryFileName.c_str() );
+
+		bool success = File::Copy( DEFAULT_LOG_FILE_PATH, fullFilePath.c_str() );
+		GUARANTEE_RECOVERABLE( success, "LogSystem: Failed to copy log file in history folder!" );
 	}
 }
 
