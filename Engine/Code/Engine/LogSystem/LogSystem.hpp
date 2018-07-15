@@ -4,7 +4,7 @@
 #include "Engine/LogSystem/ThreadSafeQueue.hpp"
 #include "Engine/LogSystem/ThreadSafeVector.hpp"
 
-#define DEFAULT_LOG_NAME ("systemLog.txt")
+#define DEFAULT_LOG_NAME ("Log/log.txt")
 
 struct LogData;
 
@@ -78,6 +78,7 @@ public:
 	void LogErrorf	( char const *format, ... ); 
 
 	static void ForceFlush();
+	static void GetFormattedMessageFromLogData( std::string &out_logMessage, LogData const *logData );
 
 private:
 	void LogThread( void * );

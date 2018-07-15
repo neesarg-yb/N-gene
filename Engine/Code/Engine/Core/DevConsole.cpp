@@ -389,7 +389,7 @@ void save_log_to_file( Command& cmd )
 		toWrite += "\n";
 	}
 
-	std::ofstream fileWriter("outputLog.txt");
+	std::ofstream fileWriter("DevConsoleOutput.txt");
 	
 	if( fileWriter.is_open() )
 	{

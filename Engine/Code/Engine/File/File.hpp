@@ -18,7 +18,7 @@ private:
 	std::fstream	m_fileStream;
 
 public:
-	bool		Open( std::string const &filePath, eFileOpenMode mode );
+	bool		Open( std::string const &filePath, eFileOpenMode mode );		// Creates a directory and file if it doesn't exists
 	void		Close();
 
 	bool inline	IsOpen() { return m_fileStream.is_open(); }

@@ -1,6 +1,12 @@
 #pragma once
 #include "File.hpp"
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <stdlib.h>
+#include "Engine/Core/StringUtils.hpp"
+#include "Engine/Core/DevConsole.hpp"
+
 void* FileReadToNewBuffer( char const *filename )
 {
 	FILE *fp = nullptr;
@@ -46,6 +52,26 @@ bool File::Open( std::string const &filePath, eFileOpenMode mode )
 
 	// Set the path
 	m_path = filePath;
+
+	// To extract path from filename
+	char path_buffer[ _MAX_PATH ];
+	char drive[ _MAX_DRIVE ];
+	char dir[ _MAX_DIR ];
+	char filename[ _MAX_FNAME ];
+	char ext[ _MAX_EXT ];
+	errno_t err;
+
+	err = strncpy_s(path_buffer, m_path.c_str(), _MAX_PATH - 1);
+	GUARANTEE_RECOVERABLE( err == 0, Stringf("File::Open filePath's length seems grater than %i!", _MAX_PATH) );
+	path_buffer[_MAX_PATH - 1] = '\0';
+
+	err = _splitpath_s( path_buffer, drive, _MAX_DRIVE, dir, _MAX_DIR, filename, _MAX_FNAME, ext, _MAX_EXT );
+	GUARANTEE_RECOVERABLE( err == 0, "File::Open error splitting the filePath!!" );
+
+	std::string fileDirectory = Stringf( "%s%s", drive, dir );
+	err = CreateDirectoryA( fileDirectory.c_str(), NULL );
+	bool directoryIsInPlace = (err != 0) || (ERROR_ALREADY_EXISTS == GetLastError() );
+	GUARANTEE_RECOVERABLE( directoryIsInPlace, Stringf("File::Open File directory %s isn't in place!!", fileDirectory.c_str()) );
 	
 	// try to open it
 	switch ( mode )
