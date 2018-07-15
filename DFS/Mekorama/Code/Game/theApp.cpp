@@ -29,7 +29,7 @@ void LogTextFromCommand( Command& cmd )
 	std::string logTag	= cmd.GetName();
 	std::string logText	= cmd.GetNextString();
 
-	LogSystem::GetInstance()->LogTaggedPrintf( logTag.c_str(), logText.c_str() );
+	LogSystem::GetInstance()->LogTaggedPrintf( logTag.c_str(), RGBA_BLACK_COLOR, logText.c_str() );
 }
 
 void ForceFlushTest ( Command &cmd )
