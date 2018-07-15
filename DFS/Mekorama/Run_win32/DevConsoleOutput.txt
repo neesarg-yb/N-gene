@@ -1,0 +1,49 @@
+1 Hello World!
+Command: help
+Registered commands:
+ (0) clear
+ (1) echo
+ (2) echo_with_color
+ (3) help
+ (4) log_force_flush
+ (5) log_hide_all
+ (6) log_hide_tag
+ (7) log_hook_devconsole
+ (8) log_show_all
+ (9) log_show_tag
+ (10) log_text
+ (11) log_unhook_devconsole
+ (12) profiler
+ (13) profiler_pause
+ (14) profiler_resume
+ (15) quit
+ (16) save_log
+ (17) scroll_bottom
+Command: help
+Registered commands:
+ (0) clear
+ (1) clear_debug
+ (2) echo
+ (3) echo_with_color
+ (4) enable_debug
+ (5) help
+ (6) log_force_flush
+ (7) log_hide_all
+ (8) log_hide_tag
+ (9) log_hook_devconsole
+ (10) log_print_file_thread_count
+ (11) log_show_all
+ (12) log_show_tag
+ (13) log_text
+ (14) log_unhook_devconsole
+ (15) non_threaded_test
+ (16) profiler
+ (17) profiler_pause
+ (18) profiler_resume
+ (19) quit
+ (20) save_log
+ (21) scroll_bottom
+ (22) threaded_test
+Command: threaded_test
+Command: non_threaded_test
+Command: save_log

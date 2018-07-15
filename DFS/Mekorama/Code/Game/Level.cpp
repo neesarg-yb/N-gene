@@ -21,7 +21,7 @@ using namespace tinyxml2;
 void WriteTheGarbageFile( void * )
 {
 	File garbageFile;
-	if( garbageFile.Open( "garbage.txt", FILE_OPEN_MODE_APPEND ) == false )
+	if( garbageFile.Open( "ThreadTest/garbage.txt", FILE_OPEN_MODE_APPEND ) == false )
 		return;
 
 	for( uint i = 0; i < 1200000; i++ )
