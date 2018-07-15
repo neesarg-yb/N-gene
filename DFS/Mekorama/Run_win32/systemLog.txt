@@ -1,8 +1,0 @@
-debug: Failed to set the format: 2000
-debug: Failed to set the format: 2000
-debug: theApp::Startup()
-log_text: 123
-log_text: withoutDevConsole
-debug: 
-ERROR: Command quir not registered..
-
