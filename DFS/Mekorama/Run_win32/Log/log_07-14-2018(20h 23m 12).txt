@@ -1,0 +1,3 @@
+debug: Failed to set the format: 2000
+debug: Failed to set the format: 2000
+debug: theApp::Startup()
