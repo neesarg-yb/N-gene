@@ -62,7 +62,7 @@ void DebuggerPrintf( const char* messageFormat, ... )
 	std::cout << messageLiteral;
 
 	// Forward to LogSystem
-	LogSystem::GetInstance()->LogTaggedPrintv( "debug", messageFormat, variableArgumentList );
+	LogSystem::GetInstance()->LogTaggedPrintv( "debug", RGBA_GRAY_COLOR, messageFormat, variableArgumentList );
 
 	va_end( variableArgumentList );
 }

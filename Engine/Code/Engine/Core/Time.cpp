@@ -32,6 +32,11 @@ double GetCurrentTimeSeconds()
 	return currentSeconds;
 }
 
+time_t GetCurrentRawTime()
+{
+	return time(0);
+}
+
 std::string GetCurrentTimestamp()
 {
 	tm		tstruct;
@@ -45,5 +50,19 @@ std::string GetCurrentTimestamp()
 	strftime(buf, sizeof(buf), "%m-%d-%Y(%Hh %Mm %S)", &tstruct);
 
 	return buf;
+}
+
+std::string GetTimeAsString( time_t const &time )
+{
+	tm		tstruct;
+	char	buf[20];
+
+	localtime_s( &tstruct, &time );
+
+	// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+	// for more information about date/time format
+	strftime(buf, sizeof(buf), "(%H:%M:%S)", &tstruct);
+
+	return std::string(buf);
 }
 

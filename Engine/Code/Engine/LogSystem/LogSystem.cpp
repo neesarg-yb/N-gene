@@ -14,6 +14,7 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/File/File.hpp"
+#include "Engine/Math/MathUtil.hpp"
 
 LogSystem	*g_logSystem	= nullptr;
 File		*g_logFile		= nullptr;
@@ -23,7 +24,7 @@ void WriteToFile( LogData const *logData, void *filePointer )
 	File *fp = (File*) filePointer;
 	
 	std::string logStr;
-	LogSystem::GetFormattedMessageFromLogData( logStr, logData );
+	LogSystem::GetAsHTMLTagFromLogData( logStr, logData );
 
 	fp->Write( logStr );
 }
@@ -32,7 +33,7 @@ void WriteToIDE( LogData const *logData, void* )
 {
 	// Get log message as string
 	std::string messageStr;
-	LogSystem::GetFormattedMessageFromLogData( messageStr, logData );
+	LogSystem::GetAsStringFromLogData( messageStr, logData );
 
 	// If it is windows, print of its custom debug output
 #if defined( PLATFORM_WINDOWS )
@@ -74,7 +75,14 @@ void LogSystem::LoggerStartup( char const *fileRootName /*= DEFAULT_LOG_NAME */ 
 
 	// Hook it if got opened successfully
 	if( fileGotOpened )
+	{
+		// Write HTML heading tags
+		std::string htmlUptoBodyStr = Stringf( "<html>\n<head>\n<title> %s </title>\n</head>\n\n<body>\n", fileRootName );
+		g_logFile->Write( htmlUptoBodyStr );
+
+		// Set it as a Hook
 		LogHook( WriteToFile, g_logFile );
+	}
 	else
 	{
 		delete g_logFile;
@@ -108,13 +116,18 @@ void LogSystem::LoggerShutdown()
 	// Close the log file
 	if( g_logFile != nullptr )
 	{
+		// Write end of the HTML header tags
+		std::string htmlEndTagStr = Stringf( "</body>\n</html>" );
+		g_logFile->Write( htmlEndTagStr );
+
+		// Close the file
 		g_logFile->Close();
 		delete g_logFile;
 		g_logFile = nullptr;
 
 		// Make a duplicate_timestamped file as a copy
 		std::string timestamp			= GetCurrentTimestamp();
-		std::string logHistoryFileName	= Stringf( "log_%s.txt", timestamp.c_str() );
+		std::string logHistoryFileName	= Stringf( "log_%s.html", timestamp.c_str() );
 		std::string fullFilePath		= Stringf( "Log/%s", logHistoryFileName.c_str() );
 
 		bool success = File::Copy( DEFAULT_LOG_FILE_PATH, fullFilePath.c_str() );
@@ -154,22 +167,22 @@ void LogSystem::LogUnhook( log_cb cb, void *userArg /* = nullptr */ )
 	}
 }
 
-void LogSystem::LogTaggedPrintv( char const *tag, char const *format, va_list args )
+void LogSystem::LogTaggedPrintv( char const *tag, Rgba const &color, char const *format, va_list args )
 {
 	std::string tagStr	= Stringf( tag );
 	std::string textStr = Stringv( format, args );
 
 	// Add data to the message queue
-	LogData *newData = new LogData( tagStr, textStr );
+	LogData *newData = new LogData( tagStr, textStr, GetCurrentRawTime(), color );
 	m_messageQueue.Enqueue( newData );
 }
 
-void LogSystem::LogTaggedPrintf( char const *tag, char const *format, ... )
+void LogSystem::LogTaggedPrintf( char const *tag, Rgba const &color, char const *format, ... )
 {
 	va_list args;
 	va_start( args, format );
 
-	LogTaggedPrintv( tag, format, args );
+	LogTaggedPrintv( tag, color, format, args );
 
 	va_end( args );
 }
@@ -179,7 +192,7 @@ void LogSystem::LogPrintf( char const *format, ... )
 	va_list args;
 	va_start( args, format );
 
-	LogTaggedPrintv( "log", format, args );
+	LogTaggedPrintv( "log", RGBA_BLACK_COLOR, format, args );
 
 	va_end( args );
 }
@@ -189,7 +202,7 @@ void LogSystem::LogWarningf( char const *format, ... )
 	va_list args;
 	va_start( args, format );
 
-	LogTaggedPrintv( "warning", format, args );
+	LogTaggedPrintv( "warning", RGBA_BLUE_COLOR, format, args );
 
 	va_end( args );
 }
@@ -199,7 +212,7 @@ void LogSystem::LogErrorf( char const *format, ... )
 	va_list args;
 	va_start( args, format );
 
-	LogTaggedPrintv( "error", format, args );
+	LogTaggedPrintv( "error", RGBA_RED_COLOR, format, args );
 
 	va_end( args );
 }
@@ -216,9 +229,25 @@ void LogSystem::ForceFlush()
 	g_logFile->Flush();
 }
 
-void LogSystem::GetFormattedMessageFromLogData( std::string &out_logMessage, LogData const *logData )
+void LogSystem::GetAsStringFromLogData( std::string &out_logMessage, LogData const *logData )
 {
-	out_logMessage = Stringf( "%s: %s\n", logData->tag.c_str(), logData->text.c_str() );
+	std::string timeStamp = GetTimeAsString( logData->time );
+	out_logMessage = Stringf( "%s %s: %s\n", timeStamp.c_str(), logData->tag.c_str(), logData->text.c_str() );
+}
+
+void LogSystem::GetAsHTMLTagFromLogData( std::string &out_logMessage, LogData const *logData )
+{
+	Rgba const	&tagColor		= logData->color;
+	std::string	 cssTagStr		= Stringf( "color: rgb(%i,%i,%i)", tagColor.r, tagColor.g, tagColor.b );
+	std::string	 styleTagStr	= Stringf( "style=\"%s\"", cssTagStr.c_str() );
+	std::string	 fontStartStr	= Stringf( "<font %s>", styleTagStr.c_str() );
+	std::string	 fontEndStr		= Stringf( "</font>" );
+	std::string	 logMessageStr;
+	LogSystem::GetAsStringFromLogData( logMessageStr, logData );
+	
+	ReplaceAllInString( logMessageStr, "\n", "<br/>" );
+
+	out_logMessage				= Stringf( "%s%s%s\n", fontStartStr.c_str(), logMessageStr.c_str(), fontEndStr.c_str() );
 }
 
 void LogSystem::ShowAllTags()
