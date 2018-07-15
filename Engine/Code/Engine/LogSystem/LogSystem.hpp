@@ -55,6 +55,10 @@ private:
 	ThreadSafeVector< LogHookData >	 m_hooks;
 	ThreadSafeQueue< LogData* >		 m_messageQueue;
 
+	// Filter list ( Blacklist / Whitelist )
+	bool							 m_IsFilterListBlack = true;
+	ThreadSafeVector< std::string >	 m_filterList;
+
 public:
 	static LogSystem* GetInstance();
 
@@ -80,6 +84,17 @@ public:
 
 	static void ForceFlush();
 	static void GetFormattedMessageFromLogData( std::string &out_logMessage, LogData const *logData );
+
+	// Filter list
+	void ShowAllTags();
+	void HideAllTags();
+	void ShowTag( std::string const &tagName );
+	void HideTag( std::string const &tagName );
+
+private:
+	void AddTagToFilterList		( std::string const &tagName );
+	void RemoveTagFromFilterList( std::string const &tagName );
+	bool TagIsNotHidden( std::string const &tagName );
 
 private:
 	void LogThread( void * );

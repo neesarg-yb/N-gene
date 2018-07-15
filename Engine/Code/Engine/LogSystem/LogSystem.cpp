@@ -221,6 +221,42 @@ void LogSystem::GetFormattedMessageFromLogData( std::string &out_logMessage, Log
 	out_logMessage = Stringf( "%s: %s\n", logData->tag.c_str(), logData->text.c_str() );
 }
 
+void LogSystem::ShowAllTags()
+{
+	// Convert the filter to black list
+	m_IsFilterListBlack = true;
+	
+	// Empty the blacklist
+	m_filterList.Clear();
+}
+
+void LogSystem::HideAllTags()
+{
+	// Convert the filter to white list
+	m_IsFilterListBlack = false;
+
+	// Empty the whitelist
+	m_filterList.Clear();
+}
+
+void LogSystem::AddTagToFilterList( std::string const &tagName )
+{
+	m_filterList.AddUnique( tagName );
+}
+
+void LogSystem::RemoveTagFromFilterList( std::string const &tagName )
+{
+	m_filterList.RemoveAll( tagName );
+}
+
+bool LogSystem::TagIsNotHidden( std::string const &tagName )
+{
+	bool tagIsInList = m_filterList.Contains( tagName );
+	bool isWhiteList = !m_IsFilterListBlack;
+
+	return (isWhiteList) ? (tagIsInList) : (!tagIsInList);
+}
+
 void LogSystem::LogThread( void * )
 {
 	while ( IsRunning() ) {
@@ -238,7 +274,10 @@ void LogSystem::FlushMessages()
 		for ( uint idx = 0; idx < m_hooks.GetSize(); idx++ )
 		{
 			LogHookData hook = m_hooks.GetAtIndex( idx );
-			hook.callback( log, hook.userArgument ); 
+
+			// call only if tag is not filtered out
+			if( TagIsNotHidden( log->tag ) )
+				hook.callback( log, hook.userArgument ); 
 		}
 		
 		// free up the log;
