@@ -43,8 +43,8 @@ DevConsole::DevConsole( Renderer* currentRenderer )
 	CommandRegister( "save_log", save_log_to_file );
 	CommandRegister( "help", print_all_registered_commands );
 	CommandRegister( "scroll_bottom", DevConsole::ResetTheScroll );
-	CommandRegister( "hook_dev_console", HookDevConsoleToLogSystem );
-	CommandRegister( "unhook_dev_console", UnhookDevConsoleToLogSystem );
+	CommandRegister( "log_hook_devconsole", HookDevConsoleToLogSystem );
+	CommandRegister( "log_unhook_devconsole", UnhookDevConsoleToLogSystem );
 }
 
 DevConsole::~DevConsole()

@@ -239,6 +239,22 @@ void LogSystem::HideAllTags()
 	m_filterList.Clear();
 }
 
+void LogSystem::ShowTag( std::string const &tagName )
+{
+	if( m_IsFilterListBlack )
+		RemoveTagFromFilterList( tagName );		// Remove	if Blacklist
+	else
+		AddTagToFilterList( tagName );			// Add		if Whitelist
+}
+
+void LogSystem::HideTag( std::string const &tagName )
+{
+	if( m_IsFilterListBlack )
+		AddTagToFilterList( tagName );			// Add		if Blacklist
+	else
+		RemoveTagFromFilterList( tagName );		// Remove	if Whitelist
+}
+
 void LogSystem::AddTagToFilterList( std::string const &tagName )
 {
 	m_filterList.AddUnique( tagName );
