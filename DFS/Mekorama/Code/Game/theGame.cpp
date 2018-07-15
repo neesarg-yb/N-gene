@@ -2,6 +2,7 @@
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Profiler/Profiler.hpp"
+#include "Engine/LogSystem/LogSystem.hpp"
 #include "Game/theApp.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
@@ -10,6 +11,18 @@
 void EchoTestCommand( Command& cmd )
 {
 	ConsolePrintf( "%s", cmd.GetNextString().c_str() );
+}
+
+void ShowAllLogTags( Command& cmd )
+{
+	UNUSED( cmd );
+	LogSystem::GetInstance()->ShowAllTags();
+}
+
+void HideAllLogTags( Command& cmd )
+{
+	UNUSED( cmd );
+	LogSystem::GetInstance()->HideAllTags();
 }
 
 theGame::theGame()
@@ -52,6 +65,8 @@ void theGame::Startup()
 
 	// Console stuffs
 	CommandRegister( "echo", EchoTestCommand );
+	CommandRegister( "log_show_all", ShowAllLogTags );
+	CommandRegister( "log_hide_all", HideAllLogTags );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Seting up the Attract Menu
