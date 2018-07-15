@@ -32,18 +32,27 @@ public:
 
 	bool Contains( T const &v )
 	{
+		bool isInVector = false;
+
+		m_lock.Enter();
 		for( uint i = 0; i < m_vector.size(); i++ )
 		{
 			if( m_vector[i] == v )
-				return true;
+			{
+				isInVector = true;
+				break;
+			}
 		}
-
-		return false;
+		m_lock.Leave();
+		
+		return isInVector;
 	}
 
 	void Add( T const &v )
 	{
+		m_lock.Enter();
 		m_vector.push_back( v );
+		m_lock.Leave();
 	}
 
 	void RemoveAtIndex( uint idx )
@@ -59,15 +68,20 @@ public:
 
 	void Remove( T const &v )
 	{
+		m_lock.Enter();
+
 		for( uint i = 0; i < m_vector.size(); i++ )
 		{
 			if( m_vector[i] == v )
 			{
 				std::swap( m_vector[i], m_vector.back() );
 				m_vector.pop_back();
-				return;
+
+				break;
 			}
 		}
+
+		m_lock.Leave();
 	}
 
 	void AddUnique( T const &v )	// Makes sure that there is just one copy of this value
@@ -80,6 +94,8 @@ public:
 
 	void RemoveAll( T const &v )	// Removes all the entries having this value
 	{
+		m_lock.Enter();
+
 		// Remove every entries of v in the vector
 		for( uint i = 0; i < m_vector.size(); i++ )
 		{
@@ -89,5 +105,14 @@ public:
 				m_vector.pop_back();
 			}
 		}
+
+		m_lock.Leave();
+	}
+
+	void Clear()
+	{
+		m_lock.Enter();
+		m_vector.clear();
+		m_lock.Leave();
 	}
 };
