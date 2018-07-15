@@ -25,6 +25,18 @@ void HideAllLogTags( Command& cmd )
 	LogSystem::GetInstance()->HideAllTags();
 }
 
+void ShowLogTag( Command& cmd )
+{
+	std::string tagName = cmd.GetNextString();
+	LogSystem::GetInstance()->ShowTag( tagName );
+}
+
+void HideLogTag( Command& cmd )
+{
+	std::string tagName = cmd.GetNextString();
+	LogSystem::GetInstance()->HideTag( tagName );
+}
+
 theGame::theGame()
 {
 	// Set global variable
@@ -67,6 +79,8 @@ void theGame::Startup()
 	CommandRegister( "echo", EchoTestCommand );
 	CommandRegister( "log_show_all", ShowAllLogTags );
 	CommandRegister( "log_hide_all", HideAllLogTags );
+	CommandRegister( "log_show_tag", ShowLogTag );
+	CommandRegister( "log_hide_tag", HideLogTag );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Seting up the Attract Menu
