@@ -431,6 +431,19 @@ std::vector<std::string> SplitIntoStringsByDelimiter( std::string passedString, 
 	return subStringList;
 }
 
+void ReplaceAllInString( std::string &stringToModify, std::string const &replaceFrom, std::string const &replaceTo )
+{
+	if( replaceFrom.empty() )
+		return;
+
+	size_t startPos = 0;
+	while( (startPos = stringToModify.find( replaceFrom, startPos )) != std::string::npos )
+	{
+		stringToModify.replace( startPos, replaceFrom.length(), replaceTo );
+		startPos += replaceTo.length();
+	}
+}
+
 int ModuloNonNegative( int operatingOn, int moduloBy )
 {
 	// ( b + (a % b) ) % b

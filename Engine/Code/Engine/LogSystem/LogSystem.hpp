@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
+#include "Engine/Core/Rgba.hpp"
 #include "Engine/LogSystem/SpinLock.hpp"
 #include "Engine/LogSystem/ThreadSafeQueue.hpp"
 #include "Engine/LogSystem/ThreadSafeVector.hpp"
 
-#define DEFAULT_LOG_FILE_PATH ("Log/log.txt")
+#define DEFAULT_LOG_FILE_PATH ("Log/log.html")
 #define DEFAULT_LOG_HISTORY_FOLDER ("Log/History/")
 
 struct LogData;
@@ -15,11 +16,15 @@ struct LogData
 {
 	std::string tag;
 	std::string text;
+	Rgba		color;
+	time_t		time;
 
-	LogData( std::string &inTag, std::string &inText )
+	LogData( std::string &inTag, std::string &inText, time_t const &entryTime, Rgba const &textColor = RGBA_BLACK_COLOR )
 	{
 		tag		= inTag;
 		text	= inText;
+		color	= textColor;
+		time	= entryTime;
 	}
 };
 
@@ -74,8 +79,8 @@ public:
 	void LogUnhook	( log_cb cb, void *userArg = nullptr );
 	
 	// Logging Call
-	void LogTaggedPrintv( char const *tag, char const *format, va_list args ); 
-	void LogTaggedPrintf( char const *tag, char const *format, ... );
+	void LogTaggedPrintv( char const *tag, Rgba const &color, char const *format, va_list args ); 
+	void LogTaggedPrintf( char const *tag, Rgba const &color, char const *format, ... );
 
 	// HELPERS
 	void LogPrintf	( char const *format, ... ); 
@@ -83,7 +88,8 @@ public:
 	void LogErrorf	( char const *format, ... ); 
 
 	static void ForceFlush();
-	static void GetFormattedMessageFromLogData( std::string &out_logMessage, LogData const *logData );
+	static void GetAsStringFromLogData	( std::string &out_logMessage, LogData const *logData );
+	static void GetAsHTMLTagFromLogData	( std::string &out_logMessage, LogData const *logData );
 
 	// Filter list
 	void ShowAllTags();
