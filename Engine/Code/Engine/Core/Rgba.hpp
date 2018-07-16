@@ -34,8 +34,9 @@ const Rgba Interpolate( const Rgba& start, const Rgba& end, float fractionToward
 const Rgba		RGBA_BLACK_COLOR (   0,   0,   0, 255 );
 const Rgba		RGBA_WHITE_COLOR ( 255, 255, 255, 255 );
 const Rgba		RGBA_GRAY_COLOR  ( 180, 180, 180, 255 );
-const Rgba		RGBA_RED_COLOR	 ( 255,   0,   0, 255 );
+const Rgba		RGBA_RED_COLOR   ( 255,   0,   0, 255 );
 const Rgba		RGBA_GREEN_COLOR (   0, 255,   0, 255 );
 const Rgba		RGBA_BLUE_COLOR  (   0,   0, 255, 255 );
 const Rgba		RGBA_PURPLE_COLOR( 128,   0, 128, 255 );
 const Rgba		RGBA_YELLOW_COLOR( 255, 255,   0, 255 );
+const Rgba		RGBA_KHAKI_COLOR ( 240, 230, 140, 255 );

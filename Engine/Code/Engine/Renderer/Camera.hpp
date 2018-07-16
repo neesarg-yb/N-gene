@@ -66,12 +66,14 @@ public:
 
 	// Screen to World
 	Vector3	GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ = 0.f );
+	// World to Screen
+	Vector2 GetScreenPositionFromWorld( Vector3 const &worldPoint, float w );			// Assumes that center of screen is ( 0, 0 )
 
 public:
 	Transform		 m_cameraTransform;
 private:
 	Matrix44		 m_viewMatrix;		// inverse of cameraMatrix (used for shader) (World to Camera)
-	Matrix44		 m_projMatrix;		// projection, identity by default..
+	Matrix44		 m_projMatrix;		// projection, identity by default.. (Camera to Clip)
 
 public:
 	UniformBuffer	*m_cameraUBO		= nullptr;
