@@ -36,6 +36,10 @@
 		<Block type = "Brick Red" />
 	</Layer>
 	<Layer>
+		<pipes>
+			<pipe startPos="5,4" towards="left" length="4" />
+		</pipes>
+
 		<Block type = "Brick Red" />
 		<Block type = "Water" />
 		<Block type = "Stairs" />

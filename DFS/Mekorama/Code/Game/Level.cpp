@@ -15,6 +15,7 @@
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
+#include "Game/World/Pipe.hpp"
 
 using namespace tinyxml2;
 
@@ -101,8 +102,6 @@ Level::~Level()
 	delete m_renderingPath;
 	delete m_levelScene;
 
-	delete m_sphere;
-	
 	DebugRendererShutdown();
 
 	// Lights
@@ -147,20 +146,15 @@ void Level::Startup()
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, m_camera );
 
-	// Placeholder sphere for Tank
-	m_sphereMesh		= MeshBuilder::CreateSphere( 1.f, 30, 30 );
-	m_sphereMaterial	= Material::CreateNewFromFile( "Data\\Materials\\stone_sphere.material" );
-	m_sphere			= new Renderable( Vector3( 10.f, 3.2f, 20.f) );
-
-	m_sphere->SetBaseMesh( m_sphereMesh );
-	m_sphere->SetBaseMaterial( m_sphereMaterial );
+	// Placeholder cylinder
+	Pipe *tempPipe = new Pipe( Vector3( 5.f, 1.f, 4.f ), PIPE_DIR_WORLD_UP, 2.f );
 
 	// Battle Scene
 	m_levelScene = new Scene();
 
 	m_levelScene->AddLight( *m_lightSources[0] );
 
-	m_levelScene->AddRenderable( *m_sphere );
+	m_levelScene->AddRenderable( *tempPipe->m_renderable );
 	m_levelScene->AddRenderable( *m_lightSources[0]->m_renderable );
 
 	m_levelScene->AddCamera( *m_camera );

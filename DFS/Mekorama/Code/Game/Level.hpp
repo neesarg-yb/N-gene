@@ -58,9 +58,6 @@ public:
 private:
 	// Local
 	double						m_timeSinceStartOfTheBattle	= 0;
-	Renderable*					m_sphere					= nullptr;
-	Material*					m_sphereMaterial			= nullptr;
-	Mesh*						m_sphereMesh				= nullptr;
 
 	// PickBuffer
 	PickBuffer					m_pickBuffer;

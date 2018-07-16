@@ -58,6 +58,9 @@
     <ClCompile Include="World\LevelDefinition.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="World\Pipe.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -94,6 +97,9 @@
       <Filter>World</Filter>
     </ClInclude>
     <ClInclude Include="World\LevelDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Pipe.hpp">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>

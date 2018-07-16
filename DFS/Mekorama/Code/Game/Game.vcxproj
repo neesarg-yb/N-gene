@@ -289,6 +289,7 @@
     <ClCompile Include="World\Block.cpp" />
     <ClCompile Include="World\BlockDefinition.cpp" />
     <ClCompile Include="World\LevelDefinition.cpp" />
+    <ClCompile Include="World\Pipe.cpp" />
     <ClCompile Include="World\Robot.cpp" />
     <ClCompile Include="World\Tower.cpp" />
     <ClCompile Include="World\TowerDefinition.cpp" />
@@ -308,6 +309,7 @@
     <ClInclude Include="World\Block.hpp" />
     <ClInclude Include="World\BlockDefinition.hpp" />
     <ClInclude Include="World\LevelDefinition.hpp" />
+    <ClInclude Include="World\Pipe.hpp" />
     <ClInclude Include="World\Robot.hpp" />
     <ClInclude Include="World\Tower.hpp" />
     <ClInclude Include="World\TowerDefinition.hpp" />
