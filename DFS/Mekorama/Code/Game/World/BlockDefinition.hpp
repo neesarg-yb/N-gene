@@ -19,6 +19,7 @@ public:
 	// Properties
 	std::string	m_typeName				= "Name not assigned!";
 	bool		m_isSelectable			= true;
+	bool		m_isDraggable			= false;
 	bool		m_isSolid				= true;
 
 	// Material

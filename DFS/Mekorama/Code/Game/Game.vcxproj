@@ -319,6 +319,7 @@
     <None Include="..\..\Run_win32\Data\Materials\Block_Brick Red.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Finish.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Grass.material" />
+    <None Include="..\..\Run_win32\Data\Materials\Block_Metal.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Stairs.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Void.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Water.material" />

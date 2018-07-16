@@ -12,6 +12,7 @@ BlockDefinition::BlockDefinition( const XMLElement& root )
 	m_typeName		= ParseXmlAttribute( root, "name", m_typeName );
 	m_isSolid		= ParseXmlAttribute( root, "isSolid", m_isSolid );
 	m_isSelectable	= ParseXmlAttribute( root, "isSelectable", m_isSelectable );
+	m_isDraggable	= ParseXmlAttribute( root, "isDraggable", m_isDraggable );
 
 	// Material
 	std::string matFileName	= ParseXmlAttribute( root, "materialFileName", "" );

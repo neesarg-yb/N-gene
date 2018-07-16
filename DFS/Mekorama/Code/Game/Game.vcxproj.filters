@@ -227,6 +227,9 @@
     <None Include="..\..\Run_win32\Data\Materials\Block_Stairs.material">
       <Filter>Materials</Filter>
     </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Metal.material">
+      <Filter>Materials</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader">
