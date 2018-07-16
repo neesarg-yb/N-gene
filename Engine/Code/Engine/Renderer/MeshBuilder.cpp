@@ -413,7 +413,8 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 			float tx			= -1.f * CosDegree( altitude90 ) * SinDegree( rotation ) * radius;
 			float ty			= 0.f;
 			float tz			= CosDegree( altitude90 ) * CosDegree( rotation ) * radius;
-			Vector4 tangent		= Vector4( tx, ty, tz, 1.f ).GetNormalized();
+			Vector3 tangentXYZ	= Vector3( tx, ty, tz ).GetNormalized();
+			Vector4 tangent		= Vector4( tangentXYZ.x, tangentXYZ.y, tangentXYZ.z, 1.f );
 
 			this->SetUV( u, v );
 			this->SetNormal( normal );
@@ -434,6 +435,64 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 
 			this->AddFace( myVerticesStartsFrom + bottomLeftIdx,	myVerticesStartsFrom + bottomRightIdx,	myVerticesStartsFrom + topRightIdx );
 			this->AddFace( myVerticesStartsFrom + topRightIdx,		myVerticesStartsFrom + topLeftIdx,		myVerticesStartsFrom + bottomLeftIdx );
+		}
+	}
+
+	this->End();
+}
+
+void MeshBuilder::AddCylinder( float radius, uint cuts, float length, Vector3 const &centerPos, Rgba const &color /*= RGBA_WHITE_COLOR */ )
+{
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
+
+	// Vertex count to determine start index
+	uint const		myVerticesStartsFrom	= (uint) m_vertices.size();
+
+	uint const		pointsOnRadius			= cuts;
+	uint const		slices					= 1U;
+	float const		halfLength				= length * 0.5f;
+	Vector3 const	startPosition			= centerPos - Vector3( 0.f, 0.f, halfLength );
+	
+	for( unsigned int sliceIdx = 0; sliceIdx <= slices; sliceIdx++ )
+	{
+		float v = (float)sliceIdx / (float)slices;
+
+		for( unsigned int radiusPointIdx = 0; radiusPointIdx <= pointsOnRadius; radiusPointIdx++ )
+		{
+			float u				= (float)radiusPointIdx / (float)pointsOnRadius;
+			float rotation		= 360.f * u;
+			Vector2 xyPos		= Vector2( radius * CosDegree(rotation), radius * SinDegree(rotation) );
+			Vector3 position	= startPosition + Vector3( xyPos.x, xyPos.y, v * length );					// (v * length): we are at that much of the length
+			Vector3 normal		= ( position - Vector3( centerPos.x, centerPos.y, position.z ) ).GetNormalized();
+			Vector4 tangent		= Vector4( 0.f, 0.f, 1.f, 1.f );
+
+			this->SetUV( u, v );
+			this->SetNormal( normal );
+			this->SetTangent4( tangent );
+			this->SetColor( color );
+			this->PushVertex( position );
+		}
+	}
+
+	for( unsigned int sliceIdx = 0; sliceIdx < slices; sliceIdx++ )
+	{
+		for( unsigned int radPointIdx = 0; radPointIdx < pointsOnRadius; radPointIdx++ )
+		{
+			unsigned int bottomLeftIdx	= ( ( radPointIdx + 1 ) * sliceIdx ) + radPointIdx;
+			unsigned int topLeftIdx		= bottomLeftIdx + pointsOnRadius + 1;
+			unsigned int bottomRightIdx = bottomLeftIdx + 1;
+			unsigned int topRightIdx	= topLeftIdx + 1;
+
+			TODO( "Recalculate AddFace for this function. It seems i'm doing cw idexing but in reality it's ccw." );
+			this->AddFace( myVerticesStartsFrom + topRightIdx,		myVerticesStartsFrom + bottomRightIdx,	myVerticesStartsFrom + bottomLeftIdx );
+			this->AddFace( myVerticesStartsFrom + bottomLeftIdx,	myVerticesStartsFrom + topLeftIdx,		myVerticesStartsFrom + topRightIdx );
 		}
 	}
 
