@@ -207,15 +207,51 @@ void Level::Update( float deltaSeconds )
 	// Level::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
-	// Mouse click
+	// Mouse click - start
 	if( g_theInput->WasMousButtonJustPressed( MOUSE_BUTTON_LEFT ) )
 	{
 		Block* clickedBlock = GetBlockFromMousePosition();
+
+		// Set Target Block - for move operation on Robot
 		if( clickedBlock != nullptr )
 		{
 			Block* targetBlock = m_tower->GetBlockOnTopOfMe( *clickedBlock );
 			m_playerRobot.SetTargetBlock( *targetBlock );
 		}
+
+		// Set Drag Block
+		if( clickedBlock->IsDraggable() )
+		{
+			Pipe	*blockOnPipe		= m_tower->GetAnchorPipeForBlock( *clickedBlock );
+			Vector2  mouseInitialPos	= g_theInput->GetMouseClientPosition();
+			Vector3  blockInitialPos	= Vector3( clickedBlock->GetMyPositionInTower() );
+			
+			m_dragBlock					= clickedBlock;
+			m_dragDataAtStart			= BlockDragData( blockOnPipe, mouseInitialPos, blockInitialPos );
+		}
+		else
+			m_dragBlock = nullptr;
+	}
+
+	// Mouse click - ongoing (dragging gesture)
+	if( g_theInput->IsMouseButtonPressed( MOUSE_BUTTON_LEFT ) )
+	{
+		if( m_dragBlock != nullptr )
+		{
+			Vector2	currentMousePos	= g_theInput->GetMouseClientPosition();
+			float	dragDistance	= GetDragDistanceOnPipe( *m_dragBlock, currentMousePos, m_dragDataAtStart );
+
+//			// Draw debug drag box - KHAKI
+//			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragDataAtStart.anchorPipe->m_forwardDirection * dragDistance );
+//			DebugRenderWireCube( 0.f, debugBoxPos - Vector3( -0.5f, -0.5f, -0.5f ), debugBoxPos + Vector3( 0.5f, 0.5f, 0.5f ), RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+		}
+	}
+
+	// Mouse click - end
+	if( g_theInput->WasMouseButtonJustReleased( MOUSE_BUTTON_LEFT ) )
+	{
+		// Reset the Drag Block to nullptr
+		m_dragBlock = nullptr;
 	}
 
 	// Show selected block
@@ -385,6 +421,21 @@ Block* Level::GetBlockFromMousePosition()
 	}
 
 	return nullptr;
+}
+
+float Level::GetDragDistanceOnPipe( Block &dragableBlock, Vector2 const &mousePos, BlockDragData const &startDragData )
+{
+	// Get pipe's forward direction in screen space
+	Vector3 pipeStartPos	= startDragData.anchorPipe->m_startPosition;
+ 	Vector3 pipeDirection	= startDragData.anchorPipe->m_forwardDirection;
+ 	Vector2 pipeDirOnScreen	= m_camera->GetScreenPositionFromWorld( pipeStartPos + pipeDirection, 1.f );
+	Vector2 pipeStartScreen = m_camera->GetScreenPositionFromWorld( pipeStartPos, 1.f );
+
+	AABB2 boundsScreenQuad = AABB2( pipeStartScreen, 5.f, 5.f );
+	DebugRender2DQuad( 0.f, boundsScreenQuad, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR );
+	DebugRender2DLine( 0.f, pipeStartScreen, RGBA_RED_COLOR, pipeDirOnScreen, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+
+	return 0.f;
 }
 
 IntVector3 Level::GetFinishPositionInTower() const

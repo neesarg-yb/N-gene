@@ -5,11 +5,13 @@
 
 Pipe::Pipe( IntVector3 const &startPos, ePipeForwardDirection pipeForward, float length, Tower const &parentTower )
 	: GameObject( GAMEOBJECT_TYPE_PIPE )
+	, m_startPosition( startPos )
+	, m_forwardDirection( Pipe::GetDirectionAsVector3( pipeForward ) )
+	, m_length( length )
 	, m_parentTower( parentTower )
 {
 	// Setup the transform
-	Vector3 forwardDir	= Pipe::GetDirectionAsVector3( pipeForward );
-	Vector3 position	= Vector3(startPos) + ( forwardDir * length * 0.5f );
+	Vector3 position	= Vector3(startPos) + ( m_forwardDirection * length * 0.5f );
 	Vector3 rotation	= GetRotationFromForward( pipeForward );
 	m_transform.SetPosition( position );
 	m_transform.SetRotation( rotation );

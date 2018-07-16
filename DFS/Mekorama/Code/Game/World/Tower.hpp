@@ -25,6 +25,7 @@ public:
 
 	Block*	GetBlockAt( IntVector3 const &blockPos );
 	Block*	GetBlockOnTopOfMe( Block &baseBlock );
+	Pipe*	GetAnchorPipeForBlock( Block const &block );
 
 	std::vector< IntVector3 > GetNeighbourBlocksPos( IntVector3 const &myPosition );
 

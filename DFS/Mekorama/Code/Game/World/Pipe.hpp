@@ -39,6 +39,11 @@ private:
 	Tower const &m_parentTower;
 
 public:
+	IntVector3	const m_startPosition;
+	Vector3		const m_forwardDirection;
+	float		const m_length;
+
+public:
 	void Update( float deltaSeconds );
 	void ObjectSelected();
 

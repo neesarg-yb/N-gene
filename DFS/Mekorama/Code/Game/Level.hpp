@@ -15,9 +15,24 @@
 #include "Game/World/Robot.hpp"
 #include "Game/World/LevelDefinition.hpp"
 
-class Material;
-
 typedef std::vector< GameObject* > GameObjectList;
+
+struct BlockDragData
+{
+	Pipe*		anchorPipe		= nullptr;
+	Vector2		startMousePos	= Vector2::ZERO;
+	Vector3		startBlockPos	= Vector3::ZERO;
+
+	BlockDragData() { }
+	BlockDragData( Pipe *isOnPipe, Vector2 &mousePos, Vector3 &blockPos )
+	{
+		anchorPipe		= isOnPipe;
+		startMousePos	= mousePos;
+		startBlockPos	= blockPos;
+	}
+};
+
+class Material;
 
 class Level
 {
@@ -64,6 +79,8 @@ private:
 
 	// Gameplay Specific
 	Block*						m_targetBlock				= nullptr;
+	Block*						m_dragBlock					= nullptr;
+	BlockDragData				m_dragDataAtStart;
 
 private:
 	double	GetTimeSinceBattleStarted() const;
@@ -73,6 +90,7 @@ private:
 	// Gameplay Specific
 	void	ChangeTargetBlockOnMouseClick();
 	Block*	GetBlockFromMousePosition();
+	float	GetDragDistanceOnPipe( Block &dragableBlock, Vector2 const &mousePos, BlockDragData const &startDragData );
 	
 	IntVector3	GetFinishPositionInTower() const;
 	void		ShowPuzzleSolved() const;

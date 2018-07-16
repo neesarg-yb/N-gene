@@ -127,6 +127,34 @@ Block* Tower::GetBlockOnTopOfMe( Block &baseBlock )
 	return targetBlock;
 }
 
+Pipe* Tower::GetAnchorPipeForBlock( Block const &block )
+{
+	for each (Pipe* pipe in m_allPipes)
+	{
+		float	pipeLength		= pipe->m_length;
+		Vector3 pipeStartPos	= pipe->m_startPosition;
+		Vector3 pipeEndPos		= pipeStartPos + ( pipe->m_forwardDirection * pipeLength );
+		Vector3 blockPos		= Vector3( block.GetMyPositionInTower() );
+
+		Vector3 middleFromStart	= blockPos - pipeStartPos;
+		Vector3 middleFromEnd	= blockPos - pipeEndPos;
+		Vector3 crossProduct	= Vector3::CrossProduct( middleFromStart, middleFromEnd );
+		float	threePointArea	= crossProduct.GetLength();
+
+		// Block is on the same line of the pipe..
+		if( threePointArea == 0 )
+		{
+			// Check if block is in between start and end point
+			float endToMiddleDist	= middleFromEnd.GetLength();
+			float startToMiddleDist = middleFromStart.GetLength();
+			if( startToMiddleDist <= pipeLength && endToMiddleDist <= pipeLength )
+				return pipe;
+		}
+	}
+
+	return nullptr;
+}
+
 std::vector< IntVector3 > Tower::GetNeighbourBlocksPos( IntVector3 const &myPosition )
 {
 	std::vector< IntVector3 > neighbourPositions;

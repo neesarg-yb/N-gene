@@ -23,7 +23,8 @@ public:
 	void ObjectSelected();
 	void ChangeBlockTypeTo( std::string definitionName );
 
-	IntVector3 GetMyPositionInTower() const;
+	IntVector3	GetMyPositionInTower() const;
+	inline bool IsDraggable() const { return m_definition->m_isDraggable; }
 
 private:
 	void		UpdateLocalTransformPosition();
