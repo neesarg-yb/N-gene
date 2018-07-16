@@ -146,15 +146,11 @@ void Level::Startup()
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, m_camera );
 
-	// Placeholder cylinder
-	Pipe *tempPipe = new Pipe( Vector3( 5.f, 1.f, 4.f ), PIPE_DIR_WORLD_UP, 2.f );
-
 	// Battle Scene
 	m_levelScene = new Scene();
 
 	m_levelScene->AddLight( *m_lightSources[0] );
 
-	m_levelScene->AddRenderable( *tempPipe->m_renderable );
 	m_levelScene->AddRenderable( *m_lightSources[0]->m_renderable );
 
 	m_levelScene->AddCamera( *m_camera );
@@ -167,6 +163,9 @@ void Level::Startup()
 
 	for( uint i = 0; i < m_tower->m_allBlocks.size(); i++ )
 		m_levelScene->AddRenderable( *m_tower->m_allBlocks[i]->m_renderable );
+
+	for( uint i = 0; i < m_tower->m_allPipes.size(); i++ )
+		m_levelScene->AddRenderable( *m_tower->m_allPipes[i]->m_renderable );
 
 	// Setup the Player Robot
 	IntVector3 playerActualPos = m_definition.m_spawnPlayerOn + IntVector3::UP;		// Note: to spawn on top of that block, not at it!

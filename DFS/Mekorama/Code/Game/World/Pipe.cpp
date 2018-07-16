@@ -1,16 +1,19 @@
 #pragma once
 #include "Pipe.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Game/World/Tower.hpp"
 
-Pipe::Pipe( Vector3 const &startPos, ePipeForwardDirection pipeForward, float length )
+Pipe::Pipe( IntVector3 const &startPos, ePipeForwardDirection pipeForward, float length, Tower const &parentTower )
 	: GameObject( GAMEOBJECT_TYPE_PIPE )
+	, m_parentTower( parentTower )
 {
 	// Setup the transform
 	Vector3 forwardDir	= Pipe::GetDirectionAsVector3( pipeForward );
-	Vector3 position	= startPos + ( forwardDir * length * 0.5f );
+	Vector3 position	= Vector3(startPos) + ( forwardDir * length * 0.5f );
 	Vector3 rotation	= GetRotationFromForward( pipeForward );
 	m_transform.SetPosition( position );
 	m_transform.SetRotation( rotation );
+	m_transform.SetParentAs( &parentTower.m_transform );
 
 	// Setup the Renderable
 	float radius = 0.15f;

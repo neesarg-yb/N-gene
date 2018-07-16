@@ -13,6 +13,7 @@ public:
 
 public:
 	std::vector< Block* >	 m_allBlocks;
+	std::vector< Pipe* >	 m_allPipes;
 	TowerDefinition const	&m_definition;
 	IntVector3				 m_dimensionXYZ;
 

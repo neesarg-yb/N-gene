@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Math/IntVector3.hpp"
 #include "Game/GameObject.hpp"
 
 enum ePipeForwardDirection
@@ -12,11 +13,30 @@ enum ePipeForwardDirection
 	NUM_PIPE_DIRECTIONS
 };
 
+struct PipeSpawnData
+{
+	IntVector3				positionInTower;
+	ePipeForwardDirection	forwardDirection;
+	float					length;
+
+	PipeSpawnData( IntVector3 const &posInTower, ePipeForwardDirection forwardDir, float length )
+	{
+		this->positionInTower	= posInTower;
+		this->forwardDirection	= forwardDir;
+		this->length			= length;
+	}
+};
+
+class Tower;
+
 class Pipe: public GameObject
 {
 public:
-	 Pipe( Vector3 const &startPos, ePipeForwardDirection pipeForward, float length );
+	 Pipe( IntVector3 const &startPos, ePipeForwardDirection pipeForward, float length, Tower const &parentTower );
 	~Pipe();
+
+private:
+	Tower const &m_parentTower;
 
 public:
 	void Update( float deltaSeconds );

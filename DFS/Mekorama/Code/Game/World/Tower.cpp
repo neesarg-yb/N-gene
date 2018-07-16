@@ -48,10 +48,20 @@ Tower::Tower( Vector3 position, std::string towerDefinitionName )
 			m_allBlocks.push_back( thiBlock );
 		}
 	}
+
+	// Generate the pipes
+	for each (PipeSpawnData const &pipeData in m_definition.m_pipeSpawnDataList)
+	{
+		Pipe *newPipe = new Pipe( pipeData.positionInTower, pipeData.forwardDirection, pipeData.length, *this );
+		m_allPipes.push_back( newPipe );
+	}
 }
 
 Tower::~Tower()
 {
+	for( uint i = 0; i < m_allPipes.size(); i++ )
+		delete m_allPipes[i];
+
 	for( uint i = 0; i < m_allBlocks.size(); i++ )
 		delete m_allBlocks[i];
 
