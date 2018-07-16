@@ -69,11 +69,17 @@ bool File::Open( std::string const &filePath, eFileOpenMode mode )
 	err = _splitpath_s( path_buffer, drive, _MAX_DRIVE, dir, _MAX_DIR, filename, _MAX_FNAME, ext, _MAX_EXT );
 	GUARANTEE_RECOVERABLE( err == 0, "File::Open error splitting the filePath!!" );
 
+	// Create file directory if it doesn't exists
 	std::string fileDirectory = Stringf( "%s%s", drive, dir );
-	err = CreateDirectoryA( fileDirectory.c_str(), NULL );
-	bool directoryIsInPlace = (err != 0) || (ERROR_ALREADY_EXISTS == GetLastError() );
-	GUARANTEE_RECOVERABLE( directoryIsInPlace, Stringf("File::Open File directory %s isn't in place!!", fileDirectory.c_str()) );
-	
+	if( fileDirectory != "" )
+	{
+		err = CreateDirectoryA( fileDirectory.c_str(), NULL );
+		bool directoryIsInPlace = (err != 0) || (ERROR_ALREADY_EXISTS == GetLastError() );
+		GUARANTEE_RECOVERABLE( directoryIsInPlace, Stringf("File::Open File directory %s isn't in place!!", fileDirectory.c_str()) );
+	}
+	// else
+		// you are in current directory. No need to create it.
+
 	// try to open it
 	switch ( mode )
 	{
