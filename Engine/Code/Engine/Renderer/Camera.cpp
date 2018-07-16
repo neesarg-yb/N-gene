@@ -277,6 +277,27 @@ Vector3 Camera::GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ /
 	return worldPos;
 }
 
+Vector2 Camera::GetScreenPositionFromWorld( Vector3 const &worldPoint, float w )
+{
+	// World to Camera
+	Vector4 posInCamera = m_viewMatrix.Multiply( Vector4( worldPoint, w ) );
+
+	// Camera to Clip
+	Vector4 posInClip = m_projMatrix.Multiply( posInCamera );
+
+	// Clip to NDC
+	Vector3 posInNDC = Vector3( posInClip.x / posInClip.w,
+								posInClip.y / posInClip.w,
+								posInClip.z / posInClip.w );
+
+	// Scale NDC according to Camera's width & height
+	float	halfHeight			= (float) Window::GetInstance()->GetHeight() * 0.5f;
+	float	halfWidth			= (float) Window::GetInstance()->GetWidth() * 0.5f;
+	Vector2 screenPosition	= Vector2( posInNDC.x * halfWidth, posInNDC.y * halfHeight );
+	
+	return screenPosition;
+}
+
 void Camera::ApplyEffect( Shader *fullScreenEffect, Renderer &theRenderer, uint totalPasses /* = 1 */ )
 {
 	Texture *secondaryTexture = m_outputFramebuffer.m_color_targets[1];		// Camera's secondary bound Texture
