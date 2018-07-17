@@ -241,9 +241,9 @@ void Level::Update( float deltaSeconds )
 			Vector2	currentMousePos	= g_theInput->GetMouseClientPosition();
 			float	dragDistance	= GetDragDistanceOnPipe( *m_dragBlock, currentMousePos, m_dragDataAtStart );
 
-//			// Draw debug drag box - KHAKI
-//			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragDataAtStart.anchorPipe->m_forwardDirection * dragDistance );
-//			DebugRenderWireCube( 0.f, debugBoxPos - Vector3( -0.5f, -0.5f, -0.5f ), debugBoxPos + Vector3( 0.5f, 0.5f, 0.5f ), RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+			// Draw debug drag box - KHAKI
+			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragDataAtStart.anchorPipe->m_forwardDirection * dragDistance );
+			DebugRenderPoint( 0.f, 1.f, debugBoxPos, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 		}
 	}
 
@@ -426,16 +426,29 @@ Block* Level::GetBlockFromMousePosition()
 float Level::GetDragDistanceOnPipe( Block &dragableBlock, Vector2 const &mousePos, BlockDragData const &startDragData )
 {
 	// Get pipe's forward direction in screen space
-	Vector3 pipeStartPos	= startDragData.anchorPipe->m_startPosition;
- 	Vector3 pipeDirection	= startDragData.anchorPipe->m_forwardDirection;
- 	Vector2 pipeDirOnScreen	= m_camera->GetScreenPositionFromWorld( pipeStartPos + pipeDirection, 1.f );
-	Vector2 pipeStartScreen = m_camera->GetScreenPositionFromWorld( pipeStartPos, 1.f );
+	Vector3 pipeStartPos		= startDragData.anchorPipe->m_startPosition;
+ 	Vector3 pipeDirection		= startDragData.anchorPipe->m_forwardDirection;
 
-	AABB2 boundsScreenQuad = AABB2( pipeStartScreen, 5.f, 5.f );
-	DebugRender2DQuad( 0.f, boundsScreenQuad, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR );
-	DebugRender2DLine( 0.f, pipeStartScreen, RGBA_RED_COLOR, pipeDirOnScreen, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	Vector2 pipeStartOnScreen	= m_camera->GetScreenPositionFromWorld( pipeStartPos, 1.f );
+ 	Vector2 pipeDirEndOnScreen	= m_camera->GetScreenPositionFromWorld( pipeStartPos + pipeDirection, 1.f );
+	Vector2 pipeDirOnScreen		= pipeDirEndOnScreen - pipeStartOnScreen;
 
-	return 0.f;
+	Vector2 mousePosThisFrame	= g_theInput->GetMouseClientPosition();
+	Vector2 mouseDisplacement	= mousePosThisFrame - startDragData.startMousePos;
+	mouseDisplacement.y			= -1.f * mouseDisplacement.y;										// Note: Top-left it Vec2::ZERO in screen space, so Y-Displacement is inverted
+
+	// Project pipe direction on mouse's displacement
+	float	pipeDirLength		= pipeDirOnScreen.GetLength();
+	Vector2	pipeNormalizedDir	= pipeDirOnScreen.GetNormalized();
+	float	projection			= Vector2::DotProduct( pipeNormalizedDir, mouseDisplacement );
+	float	unitsMoved			= projection / pipeDirLength;
+
+	DebugRender2DLine( 0.f, Vector2::ZERO, RGBA_RED_COLOR, pipeNormalizedDir, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	DebugRender2DLine( 0.f, Vector2::ZERO, RGBA_RED_COLOR, mouseDisplacement, RGBA_BLACK_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+
+	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "Units Moved: %f", unitsMoved ) );
+
+	return unitsMoved;
 }
 
 IntVector3 Level::GetFinishPositionInTower() const
