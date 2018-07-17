@@ -22,6 +22,7 @@ struct BlockDragData
 	Pipe*		anchorPipe		= nullptr;
 	Vector2		startMousePos	= Vector2::ZERO;
 	Vector3		startBlockPos	= Vector3::ZERO;
+	Vector3		endBlockPos		= Vector3::ZERO;
 
 	BlockDragData() { }
 	BlockDragData( Pipe *isOnPipe, Vector2 &mousePos, Vector3 &blockPos )
@@ -80,7 +81,7 @@ private:
 	// Gameplay Specific
 	Block*						m_targetBlock				= nullptr;
 	Block*						m_dragBlock					= nullptr;
-	BlockDragData				m_dragDataAtStart;
+	BlockDragData				m_dragData;
 
 private:
 	double	GetTimeSinceBattleStarted() const;
@@ -90,7 +91,7 @@ private:
 	// Gameplay Specific
 	void	ChangeTargetBlockOnMouseClick();
 	Block*	GetBlockFromMousePosition();
-	float	GetDragDistanceOnPipe( Block &dragableBlock, Vector2 const &mousePos, BlockDragData const &startDragData );
+	float	GetDragDistanceOnPipe( Vector2 const &mousePos, BlockDragData const &startDragData );
 	
 	IntVector3	GetFinishPositionInTower() const;
 	void		ShowPuzzleSolved() const;

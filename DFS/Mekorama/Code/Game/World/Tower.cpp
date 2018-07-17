@@ -1,5 +1,6 @@
 #pragma once
 #include "Tower.hpp"
+#include <algorithm>
 #include "Engine/Math/HeatMap3D.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
@@ -153,6 +154,22 @@ Pipe* Tower::GetAnchorPipeForBlock( Block const &block )
 	}
 
 	return nullptr;
+}
+
+void Tower::SwapTwoBlocksAt( IntVector3 const &aPos, IntVector3 const &bPos )
+{
+	uint	aIdx	= GetIndexOfBlockAt( aPos );
+	uint	bIdx	= GetIndexOfBlockAt( bPos );
+
+	Block* aBlock	= m_allBlocks[ aIdx ];
+	Block* bBlock	= m_allBlocks[ bIdx ];
+
+	// Change position
+	aBlock->SetPositionInTower( bPos );
+	bBlock->SetPositionInTower( aPos );
+
+	// Change their index in m_allBlocks
+	iter_swap( m_allBlocks.begin() + aIdx, m_allBlocks.begin() + bIdx );
 }
 
 std::vector< IntVector3 > Tower::GetNeighbourBlocksPos( IntVector3 const &myPosition )

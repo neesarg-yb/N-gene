@@ -22,6 +22,7 @@ public:
 	void Update( float deltaSeconds );
 	void ObjectSelected();
 	void ChangeBlockTypeTo( std::string definitionName );
+	void SetPositionInTower( IntVector3 const &posInTower );
 
 	IntVector3	GetMyPositionInTower() const;
 	inline bool IsDraggable() const { return m_definition->m_isDraggable; }

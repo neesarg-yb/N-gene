@@ -103,7 +103,7 @@
 		<Block type = "Air" />
 		<Block type = "Air" />
 		<Block type = "Air" />
-		<Block type = "Air" />
+		<Block type = "Metal" />
 
 		<Block type = "Stairs" />
 		<Block type = "Air" />

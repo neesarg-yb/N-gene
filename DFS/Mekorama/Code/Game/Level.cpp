@@ -227,7 +227,7 @@ void Level::Update( float deltaSeconds )
 			Vector3  blockInitialPos	= Vector3( clickedBlock->GetMyPositionInTower() );
 			
 			m_dragBlock					= clickedBlock;
-			m_dragDataAtStart			= BlockDragData( blockOnPipe, mouseInitialPos, blockInitialPos );
+			m_dragData					= BlockDragData( blockOnPipe, mouseInitialPos, blockInitialPos );
 		}
 		else
 			m_dragBlock = nullptr;
@@ -236,20 +236,30 @@ void Level::Update( float deltaSeconds )
 	// Mouse click - ongoing (dragging gesture)
 	if( g_theInput->IsMouseButtonPressed( MOUSE_BUTTON_LEFT ) )
 	{
-		if( m_dragBlock != nullptr )
+		if( m_dragBlock != nullptr && m_dragData.anchorPipe != nullptr )
 		{
 			Vector2	currentMousePos	= g_theInput->GetMouseClientPosition();
-			float	dragDistance	= GetDragDistanceOnPipe( *m_dragBlock, currentMousePos, m_dragDataAtStart );
+			float	dragDistance	= GetDragDistanceOnPipe( currentMousePos, m_dragData );
 
 			// Draw debug drag box - KHAKI
-			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragDataAtStart.anchorPipe->m_forwardDirection * dragDistance );
+			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragData.anchorPipe->m_forwardDirection * dragDistance );
 			DebugRenderPoint( 0.f, 1.f, debugBoxPos, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+
+			m_dragData.endBlockPos	= debugBoxPos;
 		}
 	}
 
 	// Mouse click - end
 	if( g_theInput->WasMouseButtonJustReleased( MOUSE_BUTTON_LEFT ) )
 	{
+		// Put the dragable block at release position
+		if( m_dragBlock != nullptr && m_dragData.anchorPipe != nullptr )
+		{
+			IntVector3	releasePosInTower	= IntVector3( m_dragData.endBlockPos );
+			IntVector3	startPosInTower		= IntVector3( m_dragData.startBlockPos );
+			m_tower->SwapTwoBlocksAt( releasePosInTower, startPosInTower );
+		}
+
 		// Reset the Drag Block to nullptr
 		m_dragBlock = nullptr;
 	}
@@ -423,8 +433,12 @@ Block* Level::GetBlockFromMousePosition()
 	return nullptr;
 }
 
-float Level::GetDragDistanceOnPipe( Block &dragableBlock, Vector2 const &mousePos, BlockDragData const &startDragData )
+float Level::GetDragDistanceOnPipe( Vector2 const &mousePos, BlockDragData const &startDragData )
 {
+	// If Block is not on a pipe, it can't move
+	if( startDragData.anchorPipe == nullptr )
+		return 0.f;
+
 	// Get pipe's forward direction in screen space
 	Vector3 pipeStartPos		= startDragData.anchorPipe->m_startPosition;
  	Vector3 pipeDirection		= startDragData.anchorPipe->m_forwardDirection;
@@ -433,22 +447,25 @@ float Level::GetDragDistanceOnPipe( Block &dragableBlock, Vector2 const &mousePo
  	Vector2 pipeDirEndOnScreen	= m_camera->GetScreenPositionFromWorld( pipeStartPos + pipeDirection, 1.f );
 	Vector2 pipeDirOnScreen		= pipeDirEndOnScreen - pipeStartOnScreen;
 
-	Vector2 mousePosThisFrame	= g_theInput->GetMouseClientPosition();
+	Vector2 mousePosThisFrame	= mousePos;
 	Vector2 mouseDisplacement	= mousePosThisFrame - startDragData.startMousePos;
-	mouseDisplacement.y			= -1.f * mouseDisplacement.y;										// Note: Top-left it Vec2::ZERO in screen space, so Y-Displacement is inverted
+	mouseDisplacement.y			= -1.f * mouseDisplacement.y;						// Note: Top-left it Vec2::ZERO in screen space, so Y-Displacement is inverted
 
 	// Project pipe direction on mouse's displacement
 	float	pipeDirLength		= pipeDirOnScreen.GetLength();
 	Vector2	pipeNormalizedDir	= pipeDirOnScreen.GetNormalized();
 	float	projection			= Vector2::DotProduct( pipeNormalizedDir, mouseDisplacement );
 	float	unitsMoved			= projection / pipeDirLength;
-
-	DebugRender2DLine( 0.f, Vector2::ZERO, RGBA_RED_COLOR, pipeNormalizedDir, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
-	DebugRender2DLine( 0.f, Vector2::ZERO, RGBA_RED_COLOR, mouseDisplacement, RGBA_BLACK_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
-
+	
 	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "Units Moved: %f", unitsMoved ) );
 
-	return unitsMoved;
+	// Clamp the unitMoved so it doesn't go outside the boundary of pipe
+	float	distFromStartOfPipe	= ( startDragData.startBlockPos - pipeStartPos ).GetLength();
+	float	minMoveAllowed		= -distFromStartOfPipe;
+	float	maxMoveAllowed		=  startDragData.anchorPipe->m_length - distFromStartOfPipe;
+	float	unitsAllowedToMove	= ClampFloat( unitsMoved, minMoveAllowed, maxMoveAllowed );
+
+	return unitsAllowedToMove;
 }
 
 IntVector3 Level::GetFinishPositionInTower() const

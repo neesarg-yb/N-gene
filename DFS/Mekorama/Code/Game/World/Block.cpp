@@ -65,6 +65,12 @@ void Block::ChangeBlockTypeTo( std::string definitionName )
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 }
 
+void Block::SetPositionInTower( IntVector3 const &posInTower )
+{
+	m_posInTower = posInTower;
+	UpdateLocalTransformPosition();
+}
+
 IntVector3 Block::GetMyPositionInTower() const
 {
 	return m_posInTower;
