@@ -41,7 +41,7 @@ void Robot::Update( float deltaSeconds )
 	PROFILE_SCOPE_FUNCTION();
 
 	Vector3 targetPosVec3 = Vector3( m_targetPosition );
-	if( targetPosVec3 != m_transform.GetPosition() )
+	if( m_stopPathFinding != true && targetPosVec3 != m_transform.GetPosition() )
 	{
 		// If not in middle of moving to next block
 		Vector3 nextBlockPosVec3 = Vector3( m_nextStepPosition );
@@ -92,6 +92,19 @@ void Robot::SetParentTower( Tower &parent )
 	m_transform.SetParentAs( &m_parentTower->m_transform );
 }
 
+void Robot::StopPathFinding()
+{
+	m_stopPathFinding = true;
+}
+
+
+void Robot::ResetPathFinding()
+{
+	m_stopPathFinding	= false;
+	m_nextStepPosition	= IntVector3( m_transform.GetPosition() + Vector3( 0.5f, 0.5f, 0.5f ) );	// set current position as next step position
+	m_targetPosition	= m_nextStepPosition;
+}
+
 void Robot::SetTargetBlock( Block &targetBlock )
 {
 	m_targetPosition	= targetBlock.GetMyPositionInTower();
@@ -101,7 +114,6 @@ IntVector3 Robot::GetPositionInTower() const
 {
 	return IntVector3( m_transform.GetPosition() );
 }
-
 void Robot::SetPositionInTower( IntVector3 const &posInTower )
 {
 	m_transform.SetPosition( posInTower );

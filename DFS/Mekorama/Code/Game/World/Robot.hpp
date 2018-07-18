@@ -18,6 +18,9 @@ public:
 	IntVector3		 m_nextStepPosition	= IntVector3::ZERO;
 	Tower			*m_parentTower		= nullptr;
 
+private:
+	bool			 m_stopPathFinding	= false;
+
 public:
 	void		Update( float deltaSeconds );
 	void		ObjectSelected();
@@ -26,6 +29,8 @@ public:
 	void		SetPositionInTower( IntVector3 const &posInTower );
 	IntVector3	GetPositionInTower() const;
 
+	void		StopPathFinding();
+	void		ResetPathFinding();
 	void		SetTargetBlock( Block &targetBlock );
 	void		MoveTowardsPosition( Vector3 const &destination, float deltaSeconds );
 };

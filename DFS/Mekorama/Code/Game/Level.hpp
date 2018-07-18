@@ -83,6 +83,7 @@ private:
 	Block*						m_selectedBlock				= nullptr;
 	Block*						m_dragBlock					= nullptr;
 	BlockDragData				m_dragData;
+	bool						m_robotIsLockedOnDragBlock	= false;
 
 private:
 	double	GetTimeSinceBattleStarted() const;

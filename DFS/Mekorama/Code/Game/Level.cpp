@@ -236,6 +236,15 @@ void Level::Update( float deltaSeconds )
 				// Add new renderable
 				m_levelScene->AddRenderable( *newBlock->m_renderable );
 			}
+
+			// If Robot is on Drag Block
+			IntVector3 dragBlockPosInTower = IntVector3( m_dragData.startBlockPos + Vector3( 0.5f, 0.5f, 0.5f ) );
+			IntVector3 robotPositionInTower = IntVector3( m_playerRobot.m_transform.GetPosition() + Vector3( 0.5f, 0.5f, 0.5f ) );
+			if( robotPositionInTower ==  dragBlockPosInTower + IntVector3::UP )
+			{
+				m_playerRobot.StopPathFinding();
+				m_robotIsLockedOnDragBlock = true;
+			}
 		}
 		else
 			m_dragBlock = nullptr;
@@ -249,12 +258,21 @@ void Level::Update( float deltaSeconds )
 			Vector2	currentMousePos	= g_theInput->GetMouseClientPosition();
 			float	dragDistance	= GetDragDistanceOnPipe( currentMousePos, m_dragData );
 
-			// Draw debug drag box - KHAKI
+			// Draw debug drag point
 			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragData.anchorPipe->m_forwardDirection * dragDistance );
 			DebugRenderPoint( 0.f, 1.f, debugBoxPos, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
+			// Update the dragData
 			m_dragData.endBlockPos	= debugBoxPos;
+
+			// Move the renderable of dragBox
 			m_dragBlock->m_transform.SetPosition( debugBoxPos );
+
+			// Move the Robot if it is on dragBlock
+			if( m_robotIsLockedOnDragBlock == true )
+			{
+				m_playerRobot.m_transform.SetPosition( debugBoxPos + Vector3::UP );
+			}
 		}
 	}
 
@@ -290,18 +308,23 @@ void Level::Update( float deltaSeconds )
 			m_levelScene->RemoveRenderable( *detachedBlock->m_renderable );
 			delete detachedBlock;
 			detachedBlock = nullptr;
+			
+			// Reset the Drag Block to nullptr
+			m_dragBlock = nullptr;
+			if( m_robotIsLockedOnDragBlock == true )
+			{
+				m_robotIsLockedOnDragBlock = false;
+				m_playerRobot.ResetPathFinding();
+			}
 		}
-
-		// Reset the Drag Block to nullptr
-		m_dragBlock = nullptr;
 	}
+	
+	// Update Robot
+	m_playerRobot.Update( deltaSeconds );
 
 	// Show selected block
 	if( m_selectedBlock != nullptr )
 		m_selectedBlock->ObjectSelected();
-
-	// Update Robot
-	m_playerRobot.Update( deltaSeconds );
 
 	// Camera Movement
 	RotateTheCameraAccordingToPlayerInput( deltaSeconds );
