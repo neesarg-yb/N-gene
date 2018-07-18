@@ -260,7 +260,7 @@ void Level::Update( float deltaSeconds )
 
 			// Draw debug drag point
 			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragData.anchorPipe->m_forwardDirection * dragDistance );
-			DebugRenderPoint( 0.f, 1.f, debugBoxPos, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+			// DebugRenderPoint( 0.f, 1.f, debugBoxPos, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 			// Update the dragData
 			m_dragData.endBlockPos	= debugBoxPos;
@@ -362,9 +362,6 @@ void Level::Render() const
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
 	
-	// Basis at Origin
-	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-
 	DebugRendererRender();
 
 	// If puzzle solved, show the message
