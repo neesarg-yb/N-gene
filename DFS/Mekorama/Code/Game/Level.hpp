@@ -79,7 +79,8 @@ private:
 	PickBuffer					m_pickBuffer;
 
 	// Gameplay Specific
-	Block*						m_targetBlock				= nullptr;
+	Vector2						m_mouseClickStartPos		= Vector2::ZERO;
+	Block*						m_selectedBlock				= nullptr;
 	Block*						m_dragBlock					= nullptr;
 	BlockDragData				m_dragData;
 
@@ -89,7 +90,6 @@ private:
 	void	ChnageLightAsPerInput					( float deltaSeconds );
 
 	// Gameplay Specific
-	void	ChangeTargetBlockOnMouseClick();
 	Block*	GetBlockFromMousePosition();
 	float	GetDragDistanceOnPipe( Vector2 const &mousePos, BlockDragData const &startDragData );
 	

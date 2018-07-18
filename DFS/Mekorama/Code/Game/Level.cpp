@@ -210,17 +210,14 @@ void Level::Update( float deltaSeconds )
 	// Mouse click - start
 	if( g_theInput->WasMousButtonJustPressed( MOUSE_BUTTON_LEFT ) )
 	{
+		// Note the start position on mouse
+		m_mouseClickStartPos = g_theInput->GetMouseClientPosition();
+
+		// Start of the drag gesture
 		Block* clickedBlock = GetBlockFromMousePosition();
 
-		// Set Target Block - for move operation on Robot
-		if( clickedBlock != nullptr )
-		{
-			Block* targetBlock = m_tower->GetBlockOnTopOfMe( *clickedBlock );
-			m_playerRobot.SetTargetBlock( *targetBlock );
-		}
-
 		// Set Drag Block
-		if( clickedBlock->IsDraggable() )
+		if( clickedBlock != nullptr && clickedBlock->IsDraggable() )
 		{
 			Pipe	*blockOnPipe		= m_tower->GetAnchorPipeForBlock( *clickedBlock );
 			Vector2  mouseInitialPos	= g_theInput->GetMouseClientPosition();
@@ -252,10 +249,28 @@ void Level::Update( float deltaSeconds )
 	// Mouse click - end
 	if( g_theInput->WasMouseButtonJustReleased( MOUSE_BUTTON_LEFT ) )
 	{
+		// If it was a click
+		Vector2 mousePosAtEnd		= g_theInput->GetMouseClientPosition();
+		float	mouseMovedPixels	= ( mousePosAtEnd - m_mouseClickStartPos ).GetLength();
+		if( mouseMovedPixels < 5 )
+		{
+			// Set Target Block - for move operation on Robot
+			Block* clickedBlock = GetBlockFromMousePosition();
+			if( clickedBlock != nullptr )
+			{
+				m_selectedBlock = clickedBlock;
+				Block *targetBlock = m_tower->GetBlockOnTopOfMe( *clickedBlock );
+				m_playerRobot.SetTargetBlock( *targetBlock );
+			}
+		}
+		else
+			m_selectedBlock = nullptr;
+
+		// End of the drag operation
 		// Put the dragable block at release position
 		if( m_dragBlock != nullptr && m_dragData.anchorPipe != nullptr )
 		{
-			IntVector3	releasePosInTower	= IntVector3( m_dragData.endBlockPos );
+			IntVector3	releasePosInTower	= IntVector3( m_dragData.endBlockPos + Vector3( 0.5f, 0.5f, 0.5f ));		// + Vec3(0.5f) because otherwise normal conversion will just do the floor operation
 			IntVector3	startPosInTower		= IntVector3( m_dragData.startBlockPos );
 			m_tower->SwapTwoBlocksAt( releasePosInTower, startPosInTower );
 		}
@@ -265,8 +280,8 @@ void Level::Update( float deltaSeconds )
 	}
 
 	// Show selected block
-	if( m_targetBlock != nullptr )
-		m_targetBlock->ObjectSelected();
+	if( m_selectedBlock != nullptr )
+		m_selectedBlock->ObjectSelected();
 
 	// Update Robot
 	m_playerRobot.Update( deltaSeconds );
@@ -373,46 +388,6 @@ void Level::ChnageLightAsPerInput(float deltaSeconds)
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 }
 
-void Level::ChangeTargetBlockOnMouseClick()
-{
-	// Mouse Position
-	Vector2 mousClientPos = g_theInput->GetMouseClientPosition();
-	std::string posString = Stringf( "Mouse Pos: ( %f, %f )", mousClientPos.x, mousClientPos.y );
-	DebugRender2DText( 0.f, Vector2(-850.f, -460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, posString.c_str() );
-
-	// PickBuffer
-	m_pickBuffer.GeneratePickBuffer( *m_camera, *m_levelScene );
-	uint		pickID				= m_pickBuffer.GetPickID( mousClientPos );
-	GameObject *selectedGameObject	= GameObject::GetFromPickID( pickID );
-	std::string pickedObjectStr		= Stringf( "Selected PickID: %u", pickID );
-	DebugRender2DText( 0.f, Vector2(-850.f, -420.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, pickedObjectStr.c_str() );
-
-	// Selected Game Object
-	bool selectButtonJustPressed = g_theInput->WasMousButtonJustPressed( MOUSE_BUTTON_LEFT );
-	if( selectedGameObject != nullptr && selectButtonJustPressed )
-	{
-		selectedGameObject->ObjectSelected();
-
-		switch ( selectedGameObject->m_type )
-		{
-		case GAMEOBJECT_TYPE_BLOCK: {	// Change the targetBlock
-			Block* selectedBlock	= (Block*) selectedGameObject;
-			m_targetBlock			= selectedBlock;
-			}
-			break;
-
-		case GAMEOBJECT_TYPE_ROBOT:
-			break;
-		
-		default:
-			// If TOWER or NUM_GAMEOBJECT_TYPES got selected
-			GUARANTEE_RECOVERABLE( false, "Invalid GameObject got selected!" );
-			break;
-		}
-	}
-
-}
-
 Block* Level::GetBlockFromMousePosition()
 {
 	// Mouse Position
@@ -426,8 +401,7 @@ Block* Level::GetBlockFromMousePosition()
 	// If it is a Block
 	if( selectedGameObject != nullptr && selectedGameObject->m_type == GAMEOBJECT_TYPE_BLOCK )
 	{
-		m_targetBlock = (Block*)selectedGameObject;
-		return m_targetBlock;
+		return (Block*)selectedGameObject;
 	}
 
 	return nullptr;
