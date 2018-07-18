@@ -21,6 +21,7 @@ private:
 public:
 	void Update( float deltaSeconds );
 	void ObjectSelected();
+	void HighlightForSeconds( float seconds );
 	void ChangeBlockTypeTo( std::string definitionName );
 	void SetPositionInTower( IntVector3 const &posInTower );
 

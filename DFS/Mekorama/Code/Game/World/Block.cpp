@@ -50,6 +50,14 @@ void Block::ObjectSelected()
 	DebugRenderWireCube( 0.f, bottomLeft, topRight, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }
 
+void Block::HighlightForSeconds( float seconds )
+{
+	Vector3 centerPos	= m_transform.GetWorldPosition();
+	Vector3 bottomLeft	= centerPos - ( Vector3::ONE_ALL * 0.5f );
+	Vector3 topRight	= centerPos + ( Vector3::ONE_ALL * 0.5f );
+	DebugRenderWireCube( seconds, bottomLeft, topRight, RGBA_BLACK_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+}
+
 void Block::ChangeBlockTypeTo( std::string definitionName )
 {
 	if( m_definition->m_typeName == definitionName )

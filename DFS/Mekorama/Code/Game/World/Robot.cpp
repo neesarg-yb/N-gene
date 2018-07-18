@@ -53,7 +53,7 @@ void Robot::Update( float deltaSeconds )
 
 		// To get next block's position to move towards
 		// Get HeatMap
-		HeatMap3D* heatMap = m_parentTower->GetNewHeatMapForTargetPosition( m_targetPosition );
+		HeatMap3D* heatMap = m_parentTower->GetNewHeatMapForTargetPosition( m_targetPosition );																		// TALK ABOUT IT IN PRESENTATION 
 
 		// Get next block position to move at
 		std::vector< IntVector3 > neighbourBlocksPos = m_parentTower->GetNeighbourBlocksPos( GetPositionInTower() );

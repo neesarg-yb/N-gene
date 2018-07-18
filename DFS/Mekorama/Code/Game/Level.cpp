@@ -214,7 +214,7 @@ void Level::Update( float deltaSeconds )
 		m_mouseClickStartPos = g_theInput->GetMouseClientPosition();
 
 		// Start of the drag gesture
-		Block* clickedBlock = GetBlockFromMousePosition();
+		Block* clickedBlock = GetBlockFromMousePosition();																											// TALK ABOUT IT IN PRESENTATION 
 
 		// Start of drag operation
 		if( clickedBlock != nullptr && clickedBlock->IsDraggable() )
@@ -256,7 +256,7 @@ void Level::Update( float deltaSeconds )
 		if( m_dragBlock != nullptr && m_dragData.anchorPipe != nullptr )
 		{
 			Vector2	currentMousePos	= g_theInput->GetMouseClientPosition();
-			float	dragDistance	= GetDragDistanceOnPipe( currentMousePos, m_dragData );
+			float	dragDistance	= GetDragDistanceOnPipe( currentMousePos, m_dragData );																			// TALK ABOUT IT IN PRESENTATION 
 
 			// Draw debug drag point
 			Vector3 debugBoxPos		= Vector3( m_dragBlock->GetMyPositionInTower() ) + ( m_dragData.anchorPipe->m_forwardDirection * dragDistance );
@@ -291,6 +291,7 @@ void Level::Update( float deltaSeconds )
 				m_selectedBlock = clickedBlock;
 				Block *targetBlock = m_tower->GetBlockOnTopOfMe( *clickedBlock );
 				m_playerRobot.SetTargetBlock( *targetBlock );
+				clickedBlock->HighlightForSeconds( 0.5f );
 			}
 		}
 		else
@@ -321,10 +322,6 @@ void Level::Update( float deltaSeconds )
 	
 	// Update Robot
 	m_playerRobot.Update( deltaSeconds );
-
-	// Show selected block
-	if( m_selectedBlock != nullptr )
-		m_selectedBlock->ObjectSelected();
 
 	// Camera Movement
 	RotateTheCameraAccordingToPlayerInput( deltaSeconds );

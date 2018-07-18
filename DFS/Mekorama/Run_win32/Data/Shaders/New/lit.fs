@@ -9,6 +9,7 @@
 layout(binding = 0) uniform sampler2D gTexDiffuse;
 layout(binding = 1) uniform sampler2D gTexNormal;
 layout(binding = 2) uniform sampler2D gTexEmissive;
+layout(binding = 4) uniform sampler2DShadow gTexShadow;
 
 struct LightData 
 {
@@ -25,6 +26,11 @@ struct LightData
 
    vec3     padding_02;
    float    dot_outer_angle; 
+
+   vec3     padding_03;
+   float    uses_shadow;
+
+   mat4     shadow_vp;
 };
 
 struct LightFactor
@@ -70,17 +76,18 @@ layout(location = 1) out vec4 outBloom;
 LightFactor CalculateLighting( vec3 world_pos, vec3 eye_dir, vec3 normal, float spec_factor, float spec_power );
 LightFactor CalculateLightFactor( vec3 position, vec3 eye_dir, vec3 normal, LightData light, float spec_factor, float spec_power );
 float       GetAttenuation( float lightIntensity, float distanceFromLight, vec3 attenuationFactors );
+float       GetShadowFactor( vec3 position, vec3 normal, LightData light );
 
 // Entry Point
 void main( void )
 {
    // Get the surface colour
-   vec4 tex_color 		    = texture( gTexDiffuse, passUV ); 
+   vec4 tex_color 		    = texture( gTexDiffuse, passUV ) * passColor; 
    vec3 normal_color 	    = texture( gTexNormal, passUV ).xyz;
    vec4 emissive_color    = texture( gTexEmissive, passUV ); 
 
    // Interpolation is linear, so normals become not normal
-   // over a surface, so renormalize it. 
+   // over a surface, so renormalize it. * passColor.w
    vec3 world_vnormal    	= normalize(passWorldNormal);
    vec3 world_vtan    		= normalize(passWorldTangent);
    vec3 world_vbitan  		= normalize(passWorldBitangent);
@@ -106,7 +113,7 @@ void main( void )
 
    // Lit outColor
    final_color 	= clamp( final_color, vec4(0), vec4(1) ); // not necessary - but overflow should go to bloom target (bloom effect)
-   outColor 	= final_color * passColor;
+   outColor 	= final_color;
    outColor		= clamp( outColor, vec4(0), vec4(1) );
 
 
@@ -131,6 +138,8 @@ void main( void )
     vec3 debug_color = vec3( passUV, 0.f );
     outColor = vec4( debug_color, 1 );
    #endif
+
+//   outColor = vec4( GetShadowFactor( passWorldPos, world_normal, LIGHTS[0] ) );
 }
 
 
@@ -176,6 +185,9 @@ LightFactor CalculateLightFactor( vec3 position,
    float dist = length(light_dir); 
    light_dir /= dist; 
 
+
+   float shadowing = GetShadowFactor( position, normal, light ); 
+
    // 
    vec3 light_forward = normalize(light.direction); 
 
@@ -204,8 +216,8 @@ LightFactor CalculateLightFactor( vec3 position,
    float spec_amount = max(dot(r, eye_dir), 0.0f); 
    float spec_intensity = (spec_attenuation * spec_factor) * pow(spec_amount, spec_power); 
 
-   lf.diffuse = light_color * diffuse_factor;
-   lf.specular = light_color * spec_intensity; 
+   lf.diffuse = shadowing * light_color * diffuse_factor;
+   lf.specular = shadowing * light_color * spec_intensity; 
 
    return lf; 
 }
@@ -218,4 +230,43 @@ float GetAttenuation( float lightIntensity, float distanceFromLight, vec3 attenu
   float c = distanceFromLight * distanceFromLight * attenuationFactors.z;
 
   return lightIntensity / ( a + b + c );
+}
+
+//--------------------------------------------------------------------------------------
+// return 1 if fully lit, 0 if should be fully in shadow (ignores light)
+float GetShadowFactor( vec3 position, vec3 normal, LightData light )
+{
+   float shadow = light.uses_shadow;
+   if (shadow == 0.0f) {
+      return 1.0f; 
+   }
+
+   // so, we're lit, so we will use the shadow sampler
+   float bias_factor = max( dot( light.direction, normal ), 0.0f ); 
+   bias_factor = sqrt(1 - (bias_factor * bias_factor)); 
+   position -= light.direction * bias_factor * .25f; 
+
+   vec4 clip_pos = light.shadow_vp * vec4(position, 1.0f);
+   vec3 ndc_pos = clip_pos.xyz / clip_pos.w; 
+
+   // put from -1 to 1 range to 0 to 1 range
+   ndc_pos = (ndc_pos + vec3(1)) * .5f;
+   
+   // can give this a "little" bias
+   // treat every surface as "slightly" closer"
+   // returns how many times I'm pass (GL_LESSEQUAL)
+   float is_lit = texture( gTexShadow, ndc_pos ).r; 
+   // float my_depth = ndc_pos.z; 
+   
+   // use this to feathre shadows near the border
+   float min_uv = min( ndc_pos.x, ndc_pos.y ); 
+   float max_uv = max( ndc_pos.x, ndc_pos.y ); 
+   float blend = 1.0f - min( smoothstep(0.0f, .05f, min_uv), smoothstep(1.0, .95, max_uv) ); 
+
+   // step returns 0 if nearest_depth is less than my_depth, 1 otherwise.
+   // if (nearest_depth) is less (closer) than my depth, that is shadow, so 0 -> shaded, 1 implies light
+   // float is_lit = step( my_depth, nearest_depth ); // 
+
+   // scale by shadow amount
+   return mix( light.uses_shadow * is_lit, 1.0f, blend );  
 }
