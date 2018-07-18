@@ -54,7 +54,7 @@ private:
 	// Rendering Specific
 	OrbitCamera*				m_camera					= nullptr;
 	Scene*						m_levelScene				= nullptr;
-	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.7f );
+	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.5f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
 	Camera*						m_uiCamera					= nullptr;
 	AABB2 const					m_uiDrawBounds				= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );

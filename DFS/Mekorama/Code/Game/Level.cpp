@@ -139,9 +139,9 @@ void Level::Startup()
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
 	// Setup the Lighting
-	m_lightSources.push_back( new Light( Vector3::ZERO ) );
-	m_lightSources[0]->SetUpForPointLight( 20.f, Vector3( 1.f, 0.f, 0.f), RGBA_WHITE_COLOR );
-	m_lightSources[0]->EnablePerimeterRotationAround( Vector3( 0.f, 0.f, 5.f ), 10.f );
+	m_lightSources.push_back( new Light( Vector3( 0.f, 10.f, -10.f ), Vector3( -45.f, 0.f, 0.f ) ) );
+	m_lightSources[0]->SetUpForDirectionalLight( 20.f, Vector3( 1.f, 0.f, 0.f), RGBA_WHITE_COLOR );
+	m_lightSources[0]->UsesShadowMap( false );
 
 	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, m_camera );
