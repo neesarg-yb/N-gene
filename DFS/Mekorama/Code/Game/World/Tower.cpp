@@ -172,6 +172,33 @@ void Tower::SwapTwoBlocksAt( IntVector3 const &aPos, IntVector3 const &bPos )
 	iter_swap( m_allBlocks.begin() + aIdx, m_allBlocks.begin() + bIdx );
 }
 
+Block* Tower::DetachAndReplaceWithNewBlockType( Block const &detachBlock, std::string const &replaceDefinition )
+{
+	// Create a new block from definition
+	IntVector3	 pos		= detachBlock.GetMyPositionInTower();
+	Block		*newBlock	= new Block( pos, replaceDefinition, *this );
+
+	// Replace it with detachBlock
+	uint idx = GetIndexOfBlockAt( pos );
+	m_allBlocks[ idx ] = newBlock;
+
+	return newBlock;
+}
+
+Block* Tower::DetachBlockAtAndReplaceWith( IntVector3 const &detachBlockAt, Block *replaceWithBlock )
+{
+	// Detach
+	Block*	detachedBlock	= nullptr;
+	uint	idx				= GetIndexOfBlockAt( detachBlockAt );
+	detachedBlock			= m_allBlocks[ idx ];
+
+	// Replace
+	replaceWithBlock->SetPositionInTower( detachBlockAt );
+	m_allBlocks[idx] = replaceWithBlock;
+
+	return detachedBlock;
+}
+
 std::vector< IntVector3 > Tower::GetNeighbourBlocksPos( IntVector3 const &myPosition )
 {
 	std::vector< IntVector3 > neighbourPositions;
@@ -214,6 +241,30 @@ std::vector< IntVector3 > Tower::GetNeighbourBlocksPos( IntVector3 const &myPosi
 		neighbourPositions.push_back( neighbourBlock->GetMyPositionInTower() );
 
 	return neighbourPositions;
+}
+
+std::string Tower::GetSurroundingNonSolidBlockDefinitionInSameLayer( Block const &theBlock )
+{
+	IntVector3 currentBlockAt = theBlock.GetMyPositionInTower();
+	
+	IntVector3 newsSurroundingBlocks[4] = {		currentBlockAt + IntVector3::FRONT,			// North on this layer
+												currentBlockAt + IntVector3::RIGHT,			// East
+												currentBlockAt + IntVector3::LEFT,			// West
+												currentBlockAt + IntVector3::BACK	};		// South
+
+	for( int i = 0; i < 4; i++ )
+	{
+		// Skip if surrounding block is out of bounds
+		if( IsPositionOutsideTowersBounds( newsSurroundingBlocks[i] ) )
+			continue;
+
+		Block* surroundingBlock = GetBlockAt( newsSurroundingBlocks[i] );
+		if( surroundingBlock->m_definition->m_isSolid == false )
+			return surroundingBlock->m_definition->m_typeName;
+	}
+
+	// If we have no clue, let's assume that it was air
+	return "Air";
 }
 
 HeatMap3D* Tower::GetNewHeatMapForTargetPosition( IntVector3 targetPos ) const

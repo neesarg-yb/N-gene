@@ -27,8 +27,11 @@ public:
 	Block*	GetBlockOnTopOfMe( Block &baseBlock );
 	Pipe*	GetAnchorPipeForBlock( Block const &block );
 	void	SwapTwoBlocksAt( IntVector3 const &aPos, IntVector3 const &bPos );
+	Block*	DetachAndReplaceWithNewBlockType( Block const &detachBlock, std::string const &replaceDefinition );
+	Block*	DetachBlockAtAndReplaceWith( IntVector3 const &detachBlockAt, Block *replaceWithBlock );
 
-	std::vector< IntVector3 > GetNeighbourBlocksPos( IntVector3 const &myPosition );
+	std::vector< IntVector3 >	GetNeighbourBlocksPos( IntVector3 const &myPosition );
+	std::string					GetSurroundingNonSolidBlockDefinitionInSameLayer( Block const &theBlock );
 
 public:
 	HeatMap3D*	GetNewHeatMapForTargetPosition( IntVector3 targetPos ) const;

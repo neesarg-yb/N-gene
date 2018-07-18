@@ -216,15 +216,26 @@ void Level::Update( float deltaSeconds )
 		// Start of the drag gesture
 		Block* clickedBlock = GetBlockFromMousePosition();
 
-		// Set Drag Block
+		// Start of drag operation
 		if( clickedBlock != nullptr && clickedBlock->IsDraggable() )
 		{
+			// Setup dragData and dragBlock
 			Pipe	*blockOnPipe		= m_tower->GetAnchorPipeForBlock( *clickedBlock );
 			Vector2  mouseInitialPos	= g_theInput->GetMouseClientPosition();
 			Vector3  blockInitialPos	= Vector3( clickedBlock->GetMyPositionInTower() );
 			
 			m_dragBlock					= clickedBlock;
 			m_dragData					= BlockDragData( blockOnPipe, mouseInitialPos, blockInitialPos );
+
+			// Spawn a new non solid block at the position of Metal Block
+			std::string nonSolidSurroundingBlockDef = m_tower->GetSurroundingNonSolidBlockDefinitionInSameLayer( *clickedBlock );
+			if( nonSolidSurroundingBlockDef != "" )
+			{
+				Block *newBlock = m_tower->DetachAndReplaceWithNewBlockType( *clickedBlock, nonSolidSurroundingBlockDef );
+
+				// Add new renderable
+				m_levelScene->AddRenderable( *newBlock->m_renderable );
+			}
 		}
 		else
 			m_dragBlock = nullptr;
@@ -243,6 +254,7 @@ void Level::Update( float deltaSeconds )
 			DebugRenderPoint( 0.f, 1.f, debugBoxPos, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 			m_dragData.endBlockPos	= debugBoxPos;
+			m_dragBlock->m_transform.SetPosition( debugBoxPos );
 		}
 	}
 
@@ -272,7 +284,12 @@ void Level::Update( float deltaSeconds )
 		{
 			IntVector3	releasePosInTower	= IntVector3( m_dragData.endBlockPos + Vector3( 0.5f, 0.5f, 0.5f ));		// + Vec3(0.5f) because otherwise normal conversion will just do the floor operation
 			IntVector3	startPosInTower		= IntVector3( m_dragData.startBlockPos );
-			m_tower->SwapTwoBlocksAt( releasePosInTower, startPosInTower );
+			
+			// Replace with the block at releasePos
+			Block *detachedBlock = m_tower->DetachBlockAtAndReplaceWith( releasePosInTower, m_dragBlock );
+			m_levelScene->RemoveRenderable( *detachedBlock->m_renderable );
+			delete detachedBlock;
+			detachedBlock = nullptr;
 		}
 
 		// Reset the Drag Block to nullptr
