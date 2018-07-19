@@ -2,7 +2,7 @@
 
 	<PuzzleTower name="Tower2" />
 	
-	<SpawnPlayer onBlock="0,1" inLayer="0" />
-	<FinishPoint atBlock="4,5" inLayer="0" />
+	<SpawnPlayer onBlock="3,0" inLayer="13" />
+	<FinishPoint atBlock="0,5" inLayer="2" />
 
 </LevelDefinition>

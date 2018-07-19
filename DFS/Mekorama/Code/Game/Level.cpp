@@ -134,7 +134,7 @@ void Level::Startup()
 	// Projection Matrix
 	m_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.5f, 500.f ); 
 	// Orbit Camera
-	m_camera->SetSphericalCoordinate( 10.f, -90.f, 90.f );
+	m_camera->SetSphericalCoordinate( 12.f, -90.f, 90.f );
 	// Skybox
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
@@ -358,7 +358,7 @@ void Level::Render() const
 	// DebugText for Lighting and Shader..
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) + " [ UP, DOWN ]" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
-	
+
 	DebugRendererRender();
 
 	// If puzzle solved, show the message

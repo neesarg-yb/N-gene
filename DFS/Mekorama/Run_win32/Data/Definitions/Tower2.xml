@@ -1,5 +1,5 @@
 <TowerDefinition name = "Tower2" xzDimension = "6,6">
-	<Layer>
+	<Layer num="0">
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
@@ -41,5 +41,658 @@
 		<Block type = "Grass" />
 		<Block type = "Grass" />
 		<Block type = "Grass" />
+	</Layer>
+	<Layer num="1">
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="2">
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Water" />
+		<Block type = "Water" />
+		
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Water" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="3">
+		<Pipes>
+			<Pipe startPos="0,2" towards="up" length="7" />
+		</Pipes>
+		
+		<Block type = "Brick Red" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Brick Red" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Stairs" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="4">
+		<Block type = "Air" />
+		<Block type = "Stairs" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Stairs" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="5">
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Stairs" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Stairs" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="6">
+		<Pipes>
+			<Pipe startPos="2,5" towards="right" length="2" />
+		</Pipes>
+
+		<Block type = "Brick Red" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Stairs" />
+		<Block type = "Brick Red" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Stairs" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Metal" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="7">
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		
+		<Block type = "Metal" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Brick Red" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+	</Layer>
+	<Layer num="8">
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+	</Layer>
+	<Layer num="9">
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+	</Layer>
+	<Layer num="10">
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="11">
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Air" />
+		<Block type = "Stairs" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+	</Layer>
+	<Layer num="12">
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Stairs" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Air" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Air" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+	</Layer>
+	<Layer num="13">
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Stairs" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Air" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Brick Red" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Brick Red" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+	</Layer>
+	<Layer num="14">
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+		<Block type = "Brick Red" />
+	</Layer>
+	<Layer num="15">
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		<Block type = "Air" />
+		
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Grass" />
+		<Block type = "Air" />
+		<Block type = "Air" />
 	</Layer>
 </TowerDefinition>
