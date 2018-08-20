@@ -3,6 +3,7 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
+#include "Engine/Network/Network.hpp"
 
 void EngineStartup()
 {
@@ -14,10 +15,14 @@ void EngineStartup()
 
 	// Profiler Startup
 	Profiler::Startup();
+
+	// Network Startup
+	Network::Startup();
 }
 
 void EngineShutdown()
 {
+	Network::Shutdown();
 	Profiler::Shutdown();
 
 	Renderer::RendererShutdown();
