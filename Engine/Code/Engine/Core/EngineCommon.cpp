@@ -18,6 +18,8 @@ void EngineStartup()
 
 	// Network Startup
 	Network::Startup();
+
+	GetAddressExample();
 }
 
 void EngineShutdown()
