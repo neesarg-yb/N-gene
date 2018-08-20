@@ -52,6 +52,9 @@
     <Filter Include="LogSystem">
       <UniqueIdentifier>{d1ac2fd2-bfb1-4ebd-9045-ad442178b345}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{f0e6767e-bcc8-488d-820b-d91a1d08a5b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Math\Vector2.cpp">
@@ -586,6 +589,9 @@
     </ClInclude>
     <ClInclude Include="LogSystem\ThreadSafeVector.hpp">
       <Filter>LogSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Network.hpp">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

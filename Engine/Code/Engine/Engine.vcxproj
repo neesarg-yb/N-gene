@@ -399,6 +399,7 @@
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Math\Vector4.hpp" />
+    <ClInclude Include="Network\Network.hpp" />
     <ClInclude Include="Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Profiler\Profiler.hpp" />
     <ClInclude Include="Profiler\ProfilerConsole.hpp" />
