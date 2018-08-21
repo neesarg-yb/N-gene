@@ -1,7 +1,7 @@
 #pragma once
 #include "XboxController.hpp"
 
-#include <Windows.h>
+#include "Engine/Internal/WindowsCommon.hpp"
 #include <Xinput.h> // include the Xinput API
 #pragma comment( lib, "xinput9_1_0" ) // Link in the xinput.lib static library // #Eiserloh: Xinput 1_4 doesn't work in Windows 7; use 9_1_0 explicitly for broadest compatibility
 

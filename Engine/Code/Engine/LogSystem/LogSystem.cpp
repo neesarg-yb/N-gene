@@ -5,11 +5,10 @@
 #define PLATFORM_WINDOWS
 #endif
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
 #include <thread>
 #include <iostream>
 
+#include "Engine/Internal/WindowsCommon.hpp"
 #include "Engine/Core/Time.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/StringUtils.hpp"

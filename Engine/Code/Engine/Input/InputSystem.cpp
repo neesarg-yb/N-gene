@@ -1,9 +1,7 @@
 #pragma once
 #include "Engine/Core/Window.hpp"
 #include "Engine/Input/InputSystem.hpp"
-
-#define WIN32_LEAN_AND_MEAN		// Always #define this before #including <windows.h>
-#include <windows.h>			// #include this (massive, platform-specific) header in very few places
+#include "Engine/Internal/WindowsCommon.hpp"
 
 void RunMessagePump() {			// NOTE: standalone function in InputSystem.cpp (not an InputSystem method)
 

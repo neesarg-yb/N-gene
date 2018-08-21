@@ -1,18 +1,12 @@
-// Add
-// Engine/Code/Engine/Net/Net.hpp
+#include <string>
 
-// Order of following includes matters..
-// That's why better have it under WindowsCommon.h file & replace all #include <Windows.h> with WindowsCommon.h
-//
-// Engine/Internal/WindowsCommon.h
-#define WIN32_LEAN_AND_MEAN
-#include <WinSock2.h>
-#include <WS2tcpip.h>	// upv6 (optional)
-#include <Windows.h>
-
+#include "Engine/Internal/WindowsCommon.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Input/Command.hpp"
 
-#pragma comment(lib, "ws2_32.lib" )	// winsock libraries
+#pragma comment(lib, "ws2_32.lib" )	// WinSock libraries
+
+void NetworkTestCmd( Command &cmd );
 
 class Network
 {
@@ -23,13 +17,17 @@ public:
 
 bool Network::Startup()
 {
+	// Pick the version we want; 
 	WORD version = MAKEWORD( 2, 2 );
 
+	// Initialize the (W)in(S)ock(A)PI.  
 	WSADATA data;
 	int error = ::WSAStartup( version, &data );
 
-	GUARANTEE_OR_DIE( error == 0, "Networking Error!" );
+	// Console Command
+	CommandRegister( "networkConnectTest", NetworkTestCmd );
 
+	GUARANTEE_RECOVERABLE( error == 0, "Warning: Network starup, failed!" );
 	return ( error == 0 );
 }
 
@@ -59,9 +57,9 @@ void GetAddressExample()
 	addrinfo hints;
 	memset( &hints, 0, sizeof(hints) ); // initalize to all zero
 
-	hints.ai_family = AF_INET;			// IPv4 address
-	hints.ai_socktype = SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
-	hints.ai_flags = AI_PASSIVE;		// An address we can host on
+	hints.ai_family		= AF_INET;		// IPv4 address
+	hints.ai_socktype	= SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
+	hints.ai_flags		= AI_PASSIVE;	// An address we can host on
 //	hints.ai_family |= AI_NUMERICHOST;	// Will speed up this function since it won't have to lookup the address;
 
 	addrinfo *result = nullptr; 
@@ -94,4 +92,94 @@ void GetAddressExample()
 	// freeing up
 	::freeaddrinfo( result ); 
 
+}
+
+// Net/NetAddress.hpp
+bool GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service = "12345" )
+{	
+	/*
+	if( StringIsNullOrEmpty( myName ) )
+	{
+		return;
+	}
+	*/
+
+	addrinfo hints;
+	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
+
+	hints.ai_family = AF_INET;			// IPv4 address
+	hints.ai_socktype = SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
+//	hints.ai_flags = AI_PASSIVE;		// WE DON'T NEED IT HERE, B/C WE'RE CONNECTING TO A HOST
+//	hints.ai_family |= AI_NUMERICHOST;	// Will speed up this function since it won't have to lookup the address;
+
+	addrinfo *result = nullptr; 
+	int status = getaddrinfo( hostname, service, &hints, &result ); 
+	if (status != 0) {
+		return false; 
+	}
+
+	addrinfo *iter = result;
+	bool found_one = false;
+	while (iter != nullptr) {
+
+		if (iter->ai_family == AF_INET) {
+			sockaddr_in* ipv4 = (sockaddr_in*)(iter->ai_addr); 
+			
+			memcpy( out, ipv4, sizeof(sockaddr_in) );
+			*out_addrlen = sizeof( sockaddr_in );
+			found_one = true;
+			break;
+		}
+		iter = iter->ai_next; 
+	}
+
+	// freeing up
+	::freeaddrinfo( result ); 
+
+	return found_one;
+}
+
+
+void NetworkTestCmd( Command &cmd )
+{
+	std::string addr_str = cmd.GetNextString();
+	std::string ip;
+	std::string port;
+
+	char const *msg = cmd.GetNextString().c_str();
+	/*
+	if( StringIsNullOrEmpty(addr_str) || StringIsNullOrEmpty(msg) )
+	{
+		DebuggerPrintf( "\nMust provide an address and a message.\n" );
+		return;
+	}
+	*/
+
+//	addr_str.split( &ip, &port, ':' );
+	std::vector<std::string> splitAddr = SplitIntoStringsByDelimiter( addr_str, ':' );
+	ip = splitAddr[0];
+	port = splitAddr[1];
+
+	sockaddr_storage saddr;
+	int addrlen;
+	if( !GetAddressForHost( (sockaddr*)&saddr, &addrlen, ip.c_str(), port.c_str() ) )
+	{
+		DebuggerPrintf( "ERROR: NET, COULD NOT RESOLVE!!" );
+		return;
+	}
+
+	SOCKET sock = ::socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
+	if( sock == INVALID_SOCKET )
+	{
+		DebuggerPrintf( "Could not create socket." );
+	}
+
+	int result = ::connect( sock, (sockaddr*)&saddr, (int)addrlen);
+	if( result == SOCKET_ERROR )
+	{
+		DebuggerPrintf("ERROR, COULD NOT CONNECT!");
+		return;
+	}
+	else
+		int i = 0;
 }
