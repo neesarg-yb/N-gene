@@ -1,8 +1,7 @@
 //-----------------------------------------------------------------------------------------------
 // Texture.cpp
 //
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "Engine/Internal/WindowsCommon.hpp"
 #include "Engine/Renderer/Texture.hpp"
 #include "ThirdParty/stb/stb_image.h"
 #include "Engine/Renderer/External/glcorearb.h"

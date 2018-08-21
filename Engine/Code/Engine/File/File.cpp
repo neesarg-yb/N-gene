@@ -1,12 +1,11 @@
 #pragma once
 #include "File.hpp"
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
 #include <stdlib.h>
 #include <filesystem>
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Internal/WindowsCommon.hpp"
 
 void* FileReadToNewBuffer( char const *filename )
 {

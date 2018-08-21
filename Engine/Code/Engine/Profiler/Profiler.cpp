@@ -1,8 +1,7 @@
 #pragma once
-#include <windows.h>
-#define  WIN32_LEAN_AND_MEAN
-
 #include "Profiler.hpp"
+
+#include "Engine/Internal/WindowsCommon.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Math/MathUtil.hpp"
 #include "Engine/Input/Command.hpp"

@@ -1,9 +1,8 @@
 #include "Window.hpp"
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#define GAME_WINDOW_CLASS (TEXT( "Simple Window Class" ))
-
+#include "Engine/Internal/WindowsCommon.hpp"
 #include "Engine/Math/IntVector2.hpp"
+
+#define GAME_WINDOW_CLASS (TEXT( "Simple Window Class" ))
 
 static Window* gWindow = nullptr; 
 

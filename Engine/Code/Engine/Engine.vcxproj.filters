@@ -55,6 +55,9 @@
     <Filter Include="Network">
       <UniqueIdentifier>{f0e6767e-bcc8-488d-820b-d91a1d08a5b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Internal">
+      <UniqueIdentifier>{74f38925-1ebc-48fd-806b-c35c698ce261}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Math\Vector2.cpp">
@@ -592,6 +595,9 @@
     </ClInclude>
     <ClInclude Include="Network\Network.hpp">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Internal\WindowsCommon.hpp">
+      <Filter>Internal</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
