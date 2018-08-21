@@ -1,6 +1,7 @@
 #include <string>
 
 #include "Engine/Internal/WindowsCommon.hpp"
+#include "Engine/Network/NetworkAddress.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Input/Command.hpp"
 
