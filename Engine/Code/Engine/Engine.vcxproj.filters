@@ -309,6 +309,9 @@
     <ClCompile Include="LogSystem\LogSystem.cpp">
       <Filter>LogSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Network\NetworkAddress.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -598,6 +601,9 @@
     </ClInclude>
     <ClInclude Include="Internal\WindowsCommon.hpp">
       <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\NetworkAddress.hpp">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
