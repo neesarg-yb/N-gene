@@ -8,7 +8,6 @@
 #pragma comment(lib, "ws2_32.lib" )	// WinSock libraries
 
 void NetworkTestCmd( Command &cmd );
-bool GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service = "12345" );
 
 class Network
 {
@@ -29,8 +28,14 @@ bool Network::Startup()
 	// Console Command
 	CommandRegister( "networkConnectTest", NetworkTestCmd );
 
-	// TEST
-	NetworkAddress na = NetworkAddress( "www.facebook.com:8080" );
+	// TEST CODE
+/*	NetworkAddress testNAArray[4];
+	uint actualLocalNum = NetworkAddress::GetAllLocal( testNAArray, 4 );
+	testNAArray[2]		= NetworkAddress::GetLocal();
+	NetworkAddress testGoogleNAArray[5];
+	uint totalGoogleNum = NetworkAddress::GetAllForHost( testGoogleNAArray, 5, "www.google.com", "8080" );
+	std::string googleAddr1 = testGoogleNAArray[0].ToString();
+*/
 
 	GUARANTEE_RECOVERABLE( error == 0, "Warning: Network starup, failed!" );
 	return ( error == 0 );
@@ -50,7 +55,7 @@ void GetAddressExample()
 		return;
 	}
 
-	char const *service = "80"; // service is like "http" or "ftp", which translates to a port (80 ot 21). We'll jusr use port 80 for this example
+	char const *service = "80"; // service is like "http" or "ftp", which translates to a port (80 or 21). We'll just use port 80 for this example
 	
 	/*
 	if( StringIsNullOrEmpty( myName ) )
@@ -60,7 +65,7 @@ void GetAddressExample()
 	*/
 
 	addrinfo hints;
-	memset( &hints, 0, sizeof(hints) ); // initalize to all zero
+	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
 
 	hints.ai_family		= AF_INET;		// IPv4 address
 	hints.ai_socktype	= SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
@@ -122,7 +127,7 @@ void NetworkTestCmd( Command &cmd )
 
 	sockaddr_storage saddr;
 	int addrlen;
-	if( !GetAddressForHost( (sockaddr*)&saddr, &addrlen, ip.c_str(), port.c_str() ) )
+	if( !NetworkAddress::GetSocketAddressForHost( (sockaddr*)&saddr, &addrlen, ip.c_str(), port.c_str() ) )
 	{
 		DebuggerPrintf( "ERROR: NET, COULD NOT RESOLVE!!" );
 		return;
@@ -152,48 +157,4 @@ void NetworkTestCmd( Command &cmd )
 	}
 	else
 		int i = 0;
-}
-
-bool GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service /* = "12345" */ )
-{	
-	/*
-	if( StringIsNullOrEmpty( myName ) )
-	{
-	return;
-	}
-	*/
-
-	addrinfo hints;
-	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
-
-	hints.ai_family = AF_INET;			// IPv4 address
-	hints.ai_socktype = SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
-										//	hints.ai_flags = AI_PASSIVE;		// WE DON'T NEED IT HERE, B/C WE'RE CONNECTING TO A HOST
-										//	hints.ai_family |= AI_NUMERICHOST;	// Will speed up this function since it won't have to lookup the address;
-
-	addrinfo *result = nullptr; 
-	int status = getaddrinfo( hostname, service, &hints, &result ); 
-	if (status != 0) {
-		return false; 
-	}
-
-	addrinfo *iter = result;
-	bool found_one = false;
-	while (iter != nullptr) {
-
-		if (iter->ai_family == AF_INET) {
-			sockaddr_in* ipv4 = (sockaddr_in*)(iter->ai_addr); 
-
-			memcpy( out, ipv4, sizeof(sockaddr_in) );
-			*out_addrlen = sizeof( sockaddr_in );
-			found_one = true;
-			break;
-		}
-		iter = iter->ai_next; 
-	}
-
-	// freeing up
-	::freeaddrinfo( result ); 
-
-	return found_one;
 }

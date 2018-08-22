@@ -24,6 +24,6 @@ public:
 public:
 	static NetworkAddress	GetLocal();
 	static uint				GetAllLocal( NetworkAddress *out, uint maxCount );
-	static uint				GetAllForHost( NetworkAddress *out, uint maxCount, char const *hostName, char const *serviceName );
-	static bool				GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service = "12345" );
+	static uint				GetAllForHost( NetworkAddress *out, uint maxCount, char const *hostName, char const *serviceName = "12345" );
+	static bool				GetSocketAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service = "12345" );
 };
