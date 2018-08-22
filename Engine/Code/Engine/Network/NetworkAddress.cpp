@@ -3,6 +3,7 @@
 #include "NetworkAddress.hpp"
 #include "Engine/Internal/WindowsCommon.hpp"
 #include "Engine/Math/MathUtil.hpp"
+#include "Engine/Core/StringUtils.hpp"
 
 NetworkAddress::NetworkAddress( sockaddr const *addr )
 {
@@ -29,7 +30,7 @@ NetworkAddress::NetworkAddress( char const *addrString )
 	// Get Address for that host
 	sockaddr	socketAddressOut;
 	int			socketAddressLength;
-	bool success = GetAddressForHost( &socketAddressOut, &socketAddressLength, ipAddress.c_str(), portStr.c_str() );
+	bool success = GetSocketAddressForHost( &socketAddressOut, &socketAddressLength, ipAddress.c_str(), portStr.c_str() );
 
 	GUARANTEE_RECOVERABLE( success, "NetworkAddress: Failed to get socket address!" );
 	FromSocketAddress( &socketAddressOut );
@@ -69,36 +70,98 @@ std::string NetworkAddress::ToString() const
 
 NetworkAddress NetworkAddress::GetLocal()
 {
-	return NetworkAddress();
+	NetworkAddress toReturn;
+	uint numLocal = GetAllLocal( &toReturn, 1U );
+	
+	GUARANTEE_RECOVERABLE( numLocal >= 1U, "Can't get any local addresses!!" );
+	return toReturn;
 }
 
 uint NetworkAddress::GetAllLocal( NetworkAddress *out, uint maxCount )
 {
-	UNUSED( out );
-	UNUSED( maxCount );
-
-	return 0U;
-}
-
-uint NetworkAddress::GetAllForHost( NetworkAddress *out, uint maxCount, char const *hostName, char const *serviceName )
-{
-	UNUSED( out );
-	UNUSED( maxCount );
-	UNUSED( hostName );
-	UNUSED( serviceName );
-
-	return 0U;
-}
-
-bool NetworkAddress::GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service /* = "12345" */ )
-{	
-	/*
+	// Get local host's name and service
+	char		 myName[256];
+	char const	*service = "80";		// service is like "http" or "ftp", which translates to a port (80 or 21). We'll just use port 80 for this example
+	if( SOCKET_ERROR == ::gethostname( myName, 256 ) )
+		return 0U;
 	if( StringIsNullOrEmpty( myName ) )
-	{
-	return;
-	}
-	*/
+		return 0U;
 
+	// Setup hints
+	addrinfo hints;
+	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
+	hints.ai_family		= AF_INET;		// IPv4 address
+	hints.ai_socktype	= SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
+	hints.ai_flags		= AI_PASSIVE;	// An address we can host on
+
+	// Get result
+	addrinfo	*result = nullptr; 
+	int			 status = getaddrinfo( myName, service, &hints, &result ); 
+	if (status != 0) 
+	{
+		GUARANTEE_RECOVERABLE( false, "\nFailed to find addresses for [%s:%s].  Error[%s]\n", myName, service, ::gai_strerror(status) );
+		return 0U;
+	}
+
+	// Result is a linked list of addresses that match our filter
+	addrinfo	*iter		= result;
+	uint		 numResults	= 0U;
+	while ( iter != nullptr ) 
+	{
+		// you can farther filter here if you want, or return all of them and try them in order; 
+		// for example, if you're using VPN, you'll get two unique addresses for yourself; 
+		// if you're using AF_INET, the address is a sockaddr_in; 
+		if ( iter->ai_family == AF_INET  && numResults < maxCount ) 
+		{
+			sockaddr_in* ipv4 = (sockaddr_in*)(iter->ai_addr); 
+			out[ numResults ] = NetworkAddress( (sockaddr*)ipv4 );
+
+			numResults++;
+		}
+
+		iter = iter->ai_next; 
+	}
+
+	// freeing up
+	::freeaddrinfo( result ); 
+
+	return numResults;
+}
+
+uint NetworkAddress::GetAllForHost( NetworkAddress *out, uint maxCount, char const *hostName, char const *serviceName /* = "12345" */ )
+{
+	addrinfo hints;
+	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
+	hints.ai_family		= AF_INET;		// IPv4 address
+	hints.ai_socktype	= SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
+
+	addrinfo *result = nullptr; 
+	int status = getaddrinfo( hostName, serviceName, &hints, &result ); 
+	if (status != 0)
+		return 0U;
+
+	addrinfo	*iter		= result;
+	uint		 numResults	= 0U;
+	while (iter != nullptr) 
+	{
+		if ( iter->ai_family == AF_INET && numResults < maxCount ) 
+		{
+			sockaddr_in* ipv4 = (sockaddr_in*)(iter->ai_addr); 
+			out[ numResults ] = NetworkAddress( (sockaddr*)ipv4 );
+
+			numResults++;
+		}
+		iter = iter->ai_next; 
+	}
+
+	// freeing up
+	::freeaddrinfo( result ); 
+
+	return numResults;
+}
+
+bool NetworkAddress::GetSocketAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service /* = "12345" */ )
+{
 	addrinfo hints;
 	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
 

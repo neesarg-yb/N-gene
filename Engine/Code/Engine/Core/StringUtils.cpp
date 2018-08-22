@@ -49,7 +49,10 @@ const std::string Stringf( const int maxLength, const char* format, ... )
 	return returnValue;
 }
 
-
-
-
-
+const bool StringIsNullOrEmpty( const char *inString )
+{
+	if( inString == nullptr || inString[0] == '\0' )
+		return true;
+	else
+		return false;
+}
