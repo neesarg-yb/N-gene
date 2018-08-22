@@ -1,13 +1,14 @@
 #include <string>
 
 #include "Engine/Internal/WindowsCommon.hpp"
-#include "Engine/Network/NetworkAddress.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Input/Command.hpp"
+#include "Engine/Network/NetworkAddress.hpp"
 
 #pragma comment(lib, "ws2_32.lib" )	// WinSock libraries
 
 void NetworkTestCmd( Command &cmd );
+bool GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service = "12345" );
 
 class Network
 {
@@ -27,6 +28,9 @@ bool Network::Startup()
 
 	// Console Command
 	CommandRegister( "networkConnectTest", NetworkTestCmd );
+
+	// TEST
+	NetworkAddress na = NetworkAddress( "www.facebook.com:8080" );
 
 	GUARANTEE_RECOVERABLE( error == 0, "Warning: Network starup, failed!" );
 	return ( error == 0 );
@@ -95,51 +99,6 @@ void GetAddressExample()
 
 }
 
-// Net/NetAddress.hpp
-bool GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service = "12345" )
-{	
-	/*
-	if( StringIsNullOrEmpty( myName ) )
-	{
-		return;
-	}
-	*/
-
-	addrinfo hints;
-	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
-
-	hints.ai_family = AF_INET;			// IPv4 address
-	hints.ai_socktype = SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
-//	hints.ai_flags = AI_PASSIVE;		// WE DON'T NEED IT HERE, B/C WE'RE CONNECTING TO A HOST
-//	hints.ai_family |= AI_NUMERICHOST;	// Will speed up this function since it won't have to lookup the address;
-
-	addrinfo *result = nullptr; 
-	int status = getaddrinfo( hostname, service, &hints, &result ); 
-	if (status != 0) {
-		return false; 
-	}
-
-	addrinfo *iter = result;
-	bool found_one = false;
-	while (iter != nullptr) {
-
-		if (iter->ai_family == AF_INET) {
-			sockaddr_in* ipv4 = (sockaddr_in*)(iter->ai_addr); 
-			
-			memcpy( out, ipv4, sizeof(sockaddr_in) );
-			*out_addrlen = sizeof( sockaddr_in );
-			found_one = true;
-			break;
-		}
-		iter = iter->ai_next; 
-	}
-
-	// freeing up
-	::freeaddrinfo( result ); 
-
-	return found_one;
-}
-
 
 void NetworkTestCmd( Command &cmd )
 {
@@ -169,6 +128,16 @@ void NetworkTestCmd( Command &cmd )
 		return;
 	}
 
+	NetworkAddress	testSockAddrConst_NA		= NetworkAddress( (sockaddr*)&saddr );
+	std::string		toStringFromAddrConst_NA	= testSockAddrConst_NA.ToString();
+
+	NetworkAddress	testStringConst_NA			= NetworkAddress( "www.google.com:8080" );
+	std::string		toStringFromStringConst_NA	= testStringConst_NA.ToString();
+	
+	sockaddr		testSAOutFromNA;
+	size_t			testSAOutSizeFromNA;
+	testStringConst_NA.ToSocketAddress( &testSAOutFromNA, &testSAOutSizeFromNA );
+
 	SOCKET sock = ::socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
 	if( sock == INVALID_SOCKET )
 	{
@@ -183,4 +152,48 @@ void NetworkTestCmd( Command &cmd )
 	}
 	else
 		int i = 0;
+}
+
+bool GetAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service /* = "12345" */ )
+{	
+	/*
+	if( StringIsNullOrEmpty( myName ) )
+	{
+	return;
+	}
+	*/
+
+	addrinfo hints;
+	memset( &hints, 0, sizeof(hints) ); // initialize to all zero
+
+	hints.ai_family = AF_INET;			// IPv4 address
+	hints.ai_socktype = SOCK_STREAM;	// TCP Socket ( SOCK_DGRAM for UDP )
+										//	hints.ai_flags = AI_PASSIVE;		// WE DON'T NEED IT HERE, B/C WE'RE CONNECTING TO A HOST
+										//	hints.ai_family |= AI_NUMERICHOST;	// Will speed up this function since it won't have to lookup the address;
+
+	addrinfo *result = nullptr; 
+	int status = getaddrinfo( hostname, service, &hints, &result ); 
+	if (status != 0) {
+		return false; 
+	}
+
+	addrinfo *iter = result;
+	bool found_one = false;
+	while (iter != nullptr) {
+
+		if (iter->ai_family == AF_INET) {
+			sockaddr_in* ipv4 = (sockaddr_in*)(iter->ai_addr); 
+
+			memcpy( out, ipv4, sizeof(sockaddr_in) );
+			*out_addrlen = sizeof( sockaddr_in );
+			found_one = true;
+			break;
+		}
+		iter = iter->ai_next; 
+	}
+
+	// freeing up
+	::freeaddrinfo( result ); 
+
+	return found_one;
 }
