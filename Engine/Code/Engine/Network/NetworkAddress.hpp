@@ -16,7 +16,7 @@ public:
 	NetworkAddress( char const *addrString );
 
 public:
-	bool ToSocketAddress( sockaddr *out, size_t *out_addrlen );
+	bool ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const;
 	void FromSocketAddress( sockaddr const *sa );
 
 	std::string ToString() const;
