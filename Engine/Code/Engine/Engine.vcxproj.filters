@@ -312,6 +312,9 @@
     <ClCompile Include="Network\NetworkAddress.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="Network\TCPSocket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -603,6 +606,9 @@
       <Filter>Internal</Filter>
     </ClInclude>
     <ClInclude Include="Network\NetworkAddress.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\TCPSocket.hpp">
       <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>

@@ -36,7 +36,7 @@ NetworkAddress::NetworkAddress( char const *addrString )
 	FromSocketAddress( &socketAddressOut );
 }
 
-bool NetworkAddress::ToSocketAddress( sockaddr *out, size_t *out_addrlen )
+bool NetworkAddress::ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const
 {
 	if( addressIPv4 == 0U && port == 0 )
 		return false;

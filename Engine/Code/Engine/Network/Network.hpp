@@ -1,13 +1,16 @@
 #include <string>
 
-#include "Engine/Internal/WindowsCommon.hpp"
-#include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Engine/Input/Command.hpp"
+#include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Internal/WindowsCommon.hpp"
 #include "Engine/Network/NetworkAddress.hpp"
+#include "Engine/Network/TCPSocket.hpp"
 
 #pragma comment(lib, "ws2_32.lib" )	// WinSock libraries
 
 void NetworkTestCmd( Command &cmd );
+void NetworkTestConnect( Command &cmd );
 
 class Network
 {
@@ -26,7 +29,8 @@ bool Network::Startup()
 	int error = ::WSAStartup( version, &data );
 
 	// Console Command
-	CommandRegister( "networkConnectTest", NetworkTestCmd );
+	CommandRegister( "networkTest", NetworkTestCmd );
+	CommandRegister( "networkTestConnect", NetworkTestConnect );
 
 	// TEST CODE
 /*	NetworkAddress testNAArray[4];
@@ -157,4 +161,30 @@ void NetworkTestCmd( Command &cmd )
 	}
 	else
 		int i = 0;
+}
+
+void NetworkTestConnect( Command &cmd )
+{
+	std::string hostAddressStr	= cmd.GetNextString();
+	std::string msg				= cmd.GetNextString();
+	if( hostAddressStr == "" )
+		return;
+
+	NetworkAddress	hostAddress = NetworkAddress( hostAddressStr.c_str() );
+	TCPSocket		socket;		// defaults to blocking??
+
+	if( socket.Connect( hostAddress ) )
+	{
+		ConsolePrintf( "Connected to %s", hostAddress.ToString().c_str() );
+		socket.Send( msg.c_str(), msg.size() );
+
+		char payload[256];
+		size_t recvd	 = socket.Receive( payload, 256 );
+		payload[ recvd ] = NULL;
+		ConsolePrintf( "Received: %s", payload );
+
+		socket.Close();
+	}
+	else
+		ConsolePrintf( "Could not connect!" );
 }

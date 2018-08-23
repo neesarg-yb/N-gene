@@ -307,6 +307,7 @@
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
     <ClCompile Include="Network\NetworkAddress.cpp" />
+    <ClCompile Include="Network\TCPSocket.cpp" />
     <ClCompile Include="Profiler\ProfileLogScoped.cpp" />
     <ClCompile Include="Profiler\Profiler.cpp" />
     <ClCompile Include="Profiler\ProfilerConsole.cpp" />
@@ -403,6 +404,7 @@
     <ClInclude Include="Math\Vector4.hpp" />
     <ClInclude Include="Network\Network.hpp" />
     <ClInclude Include="Network\NetworkAddress.hpp" />
+    <ClInclude Include="Network\TCPSocket.hpp" />
     <ClInclude Include="Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Profiler\Profiler.hpp" />
     <ClInclude Include="Profiler\ProfilerConsole.hpp" />
