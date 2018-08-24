@@ -42,22 +42,29 @@ bool NetworkAddress::ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const
 		return false;
 
 	sockaddr_in out_in;
+	memset( &out_in, 0, sizeof(sockaddr_in) );
+
 	out_in.sin_addr.S_un.S_addr	= addressIPv4;
-	out_in.sin_port				= port;
+	out_in.sin_port				= ::htons( port );	// Host to Network short
 	out_in.sin_family			= AF_INET;
 
 	memcpy( out, &out_in, sizeof(sockaddr_in) );
-	*out_addrlen = sizeof(sockaddr_in);
+	*out_addrlen = sizeof(sockaddr_in);				// Because we're always doing IPv4
 	
 	return true;
 }
 
-void NetworkAddress::FromSocketAddress( sockaddr const *sa )
+bool NetworkAddress::FromSocketAddress( sockaddr const *sa )
 {
 	sockaddr_in *inAddr = (sockaddr_in*) sa;
 
+	// If not IPv4, return false
+	if( sa->sa_family != AF_INET )
+		return false;
+
 	addressIPv4	= inAddr->sin_addr.S_un.S_addr;
-	port		= inAddr->sin_port;
+	port		= ::ntohs( inAddr->sin_port );		// Network to Host short
+	return true;
 }
 
 std::string NetworkAddress::ToString() const
@@ -195,4 +202,15 @@ bool NetworkAddress::GetSocketAddressForHost( sockaddr *out, int *out_addrlen, c
 	::freeaddrinfo( result ); 
 
 	return found_one;
+}
+
+uint NetworkAddress::GetAllBindableAddresses( NetworkAddress *out, uint maxCount, uint16_t port )
+{
+	uint totalLocal = GetAllLocal( out, maxCount );
+
+	// Change port to desired one..
+	for( uint i = 0; i < maxCount; i++ )
+		out[i].port = port;
+
+	return totalLocal;
 }

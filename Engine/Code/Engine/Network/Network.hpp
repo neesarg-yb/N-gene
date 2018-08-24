@@ -11,6 +11,7 @@
 
 void NetworkTestCmd( Command &cmd );
 void NetworkTestConnect( Command &cmd );
+void NetworkTestServer( Command &cmd );
 
 class Network
 {
@@ -31,6 +32,7 @@ bool Network::Startup()
 	// Console Command
 	CommandRegister( "networkTest", NetworkTestCmd );
 	CommandRegister( "networkTestConnect", NetworkTestConnect );
+	CommandRegister( "networkTestServer", NetworkTestServer );
 
 	// TEST CODE
 /*	NetworkAddress testNAArray[4];
@@ -187,4 +189,17 @@ void NetworkTestConnect( Command &cmd )
 	}
 	else
 		ConsolePrintf( "Could not connect!" );
+}
+
+void NetworkTestServer( Command &cmd )
+{
+	// Fetch port from command!
+	std::string portStr = cmd.GetNextString();
+	uint16_t	port	= 12345;
+	if( portStr != "" )
+		port = (uint16_t) atoi( portStr.c_str() );
+	
+	// Start listening
+	TCPSocket host;
+	host.Listen( port, 16U );
 }
