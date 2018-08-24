@@ -14,10 +14,52 @@ TCPSocket::~TCPSocket()
 
 bool TCPSocket::Listen( uint16_t port, uint maxQueued )
 {
-	UNUSED( port );
-	UNUSED( maxQueued );
+	NetworkAddress networkAddress;
 
-	return false;
+	uint bindableAddressesCount = NetworkAddress::GetAllBindableAddresses( &networkAddress,		// Array to fill
+																			1U,					// max number to return
+																			12345 );			// desired port
+	if( bindableAddressesCount == 0 )
+	{
+		ConsolePrintf( "Couldn't get a bindable address to host on!" );
+		return false;
+	}
+
+	// Now we can try to bind the new host address
+	// To do that, we need to create a new socket
+	SOCKET hostSocket = ::socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
+
+	sockaddr_storage	hostSocketAddress;
+	size_t				hostSocketAddressLength;
+	bool socketAddressIsValid = networkAddress.ToSocketAddress( (sockaddr*)&hostSocketAddress, &hostSocketAddressLength );
+
+	if( !socketAddressIsValid )
+	{
+		ConsolePrintf( "Couldn't get sockaddr from local host address!" );
+		return false;
+	}
+
+	// Tell the OS that this address forwards to this socket
+	int result = ::bind( hostSocket, (sockaddr*)&hostSocketAddress, hostSocketAddressLength );
+	if( result == SOCKET_ERROR )
+	{
+		::closesocket( hostSocket );
+		ConsolePrintf( "Couldn't bind the new socket to host!" );
+		return false;
+	}
+
+	// maxQueued: I can have these many people who can accept the connection
+	result = ::listen( hostSocket, maxQueued );
+	if( result == SOCKET_ERROR )
+	{
+		::closesocket( hostSocket );
+		ConsolePrintf( "Can't start listening on hostSocket!" );
+		return false;
+	}
+
+	// Once you're connected, you can accept the connection..
+	ConsolePrintf( "Listening enabled.." );
+	return true;
 }
 
 TCPSocket* TCPSocket::Accept()
@@ -49,7 +91,6 @@ bool TCPSocket::Connect( NetworkAddress const &networkAddress )
 	int result = ::connect( m_handle, (sockaddr*)&socketAddress, (int)addressLength );
 	if( result == SOCKET_ERROR )
 	{
-		ConsolePrintf( "Error: Could not connect!" );
 		::closesocket( m_handle );
 		m_handle = INVALID_SOCKET;
 		return false;

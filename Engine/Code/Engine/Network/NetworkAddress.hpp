@@ -17,7 +17,7 @@ public:
 
 public:
 	bool ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const;
-	void FromSocketAddress( sockaddr const *sa );
+	bool FromSocketAddress( sockaddr const *sa );
 
 	std::string ToString() const;
 
@@ -26,4 +26,6 @@ public:
 	static uint				GetAllLocal( NetworkAddress *out, uint maxCount );
 	static uint				GetAllForHost( NetworkAddress *out, uint maxCount, char const *hostName, char const *serviceName = "12345" );
 	static bool				GetSocketAddressForHost( sockaddr *out, int *out_addrlen, char const * hostname, char const *service = "12345" );
+
+	static uint				GetAllBindableAddresses( NetworkAddress *out, uint maxCount, uint16_t port );
 };
