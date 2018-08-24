@@ -12,7 +12,7 @@ public:
 public:
 	// Starting and Stopping
 	bool		Listen( uint16_t port, uint maxQueued );
-	TCPSocket*	Accept();
+	TCPSocket*	Accept();											// Returns client's socket, if received anything..
 
 	// For joining
 	bool	Connect( NetworkAddress const &networkAddress );

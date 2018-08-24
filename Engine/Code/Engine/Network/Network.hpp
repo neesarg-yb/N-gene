@@ -9,9 +9,11 @@
 
 #pragma comment(lib, "ws2_32.lib" )	// WinSock libraries
 
+void NetworkMyIP( Command &cmd );
 void NetworkTestCmd( Command &cmd );
 void NetworkTestConnect( Command &cmd );
-void NetworkTestServer( Command &cmd );
+void ThreadedServer( Command &cmd );
+void NetworkTestServer( uint16_t port );
 
 class Network
 {
@@ -30,9 +32,9 @@ bool Network::Startup()
 	int error = ::WSAStartup( version, &data );
 
 	// Console Command
-	CommandRegister( "networkTest", NetworkTestCmd );
+	CommandRegister( "networkMyIP", NetworkMyIP );
 	CommandRegister( "networkTestConnect", NetworkTestConnect );
-	CommandRegister( "networkTestServer", NetworkTestServer );
+	CommandRegister( "networkTestServer", ThreadedServer );
 
 	// TEST CODE
 /*	NetworkAddress testNAArray[4];
@@ -110,6 +112,14 @@ void GetAddressExample()
 
 }
 
+void NetworkMyIP( Command &cmd )
+{
+	NetworkAddress localAddresses[3];
+	uint fetchedLocal = NetworkAddress::GetAllLocal( localAddresses, 3 );
+
+	for( uint i = 0; i < fetchedLocal; i++ )
+		ConsolePrintf( "(%u) My IP: %s", i+1U, localAddresses[i].ToString().c_str() );
+}
 
 void NetworkTestCmd( Command &cmd )
 {
@@ -191,15 +201,44 @@ void NetworkTestConnect( Command &cmd )
 		ConsolePrintf( "Could not connect!" );
 }
 
-void NetworkTestServer( Command &cmd )
+void ThreadedServer( Command &cmd )
 {
 	// Fetch port from command!
 	std::string portStr = cmd.GetNextString();
 	uint16_t	port	= 12345;
 	if( portStr != "" )
 		port = (uint16_t) atoi( portStr.c_str() );
+
+	std::thread readerThread( [ port ](){ NetworkTestServer( port ); } );
+	readerThread.detach();
+}
+
+void NetworkTestServer( uint16_t port )
+{
 	
 	// Start listening
 	TCPSocket host;
 	host.Listen( port, 16U );
+
+	bool isRunning = true;
+	while( isRunning )
+	{
+		TCPSocket *recivedSocket = host.Accept();
+		if( recivedSocket != nullptr )
+		{
+			while (true)
+			{
+				char buffer[256];
+
+				size_t receivedSize = recivedSocket->Receive( buffer, 256 );
+				buffer[ receivedSize ] = '\n';
+
+				std::string sendStr = "We can talk now!";
+				size_t sentBytes = recivedSocket->Send( sendStr.c_str(), sendStr.size() );
+
+				ConsolePrintf( "Received %u bytes: %s", receivedSize, buffer );
+				ConsolePrintf( "Sent %u bytes: %s", sentBytes, sendStr.c_str() );
+			}
+		}
+	}
 }
