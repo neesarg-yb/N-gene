@@ -14,11 +14,17 @@ TCPSocket::~TCPSocket()
 
 bool TCPSocket::Listen( uint16_t port, uint maxQueued )
 {
-	NetworkAddress networkAddress;
+	// If the socket is already being in use, close it
+	if( m_handle != INVALID_SOCKET )
+	{
+		::closesocket( m_handle );
+		m_handle = INVALID_SOCKET;
+	}
 
-	uint bindableAddressesCount = NetworkAddress::GetAllBindableAddresses( &networkAddress,		// Array to fill
-																			1U,					// max number to return
-																			12345 );			// desired port
+	// Get our host address to bind with socket
+	uint bindableAddressesCount = NetworkAddress::GetAllBindableAddresses( &m_address,		// Array to fill
+																			1U,				// max number to return
+																			port );			// desired port
 	if( bindableAddressesCount == 0 )
 	{
 		ConsolePrintf( "Couldn't get a bindable address to host on!" );
@@ -27,32 +33,39 @@ bool TCPSocket::Listen( uint16_t port, uint maxQueued )
 
 	// Now we can try to bind the new host address
 	// To do that, we need to create a new socket
-	SOCKET hostSocket = ::socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
+	m_handle = ::socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
 
 	sockaddr_storage	hostSocketAddress;
 	size_t				hostSocketAddressLength;
-	bool socketAddressIsValid = networkAddress.ToSocketAddress( (sockaddr*)&hostSocketAddress, &hostSocketAddressLength );
+	bool socketAddressIsValid = m_address.ToSocketAddress( (sockaddr*)&hostSocketAddress, &hostSocketAddressLength );
 
 	if( !socketAddressIsValid )
 	{
+		::closesocket( m_handle );
+		m_handle = INVALID_SOCKET;
+
 		ConsolePrintf( "Couldn't get sockaddr from local host address!" );
 		return false;
 	}
 
 	// Tell the OS that this address forwards to this socket
-	int result = ::bind( hostSocket, (sockaddr*)&hostSocketAddress, hostSocketAddressLength );
+	int result = ::bind( m_handle, (sockaddr*)&hostSocketAddress, (int)hostSocketAddressLength );
 	if( result == SOCKET_ERROR )
 	{
-		::closesocket( hostSocket );
+		::closesocket( m_handle );
+		m_handle = INVALID_SOCKET;
+
 		ConsolePrintf( "Couldn't bind the new socket to host!" );
 		return false;
 	}
 
 	// maxQueued: I can have these many people who can accept the connection
-	result = ::listen( hostSocket, maxQueued );
+	result = ::listen( m_handle, maxQueued );
 	if( result == SOCKET_ERROR )
 	{
-		::closesocket( hostSocket );
+		::closesocket( m_handle );
+		m_handle = INVALID_SOCKET;
+
 		ConsolePrintf( "Can't start listening on hostSocket!" );
 		return false;
 	}
@@ -64,14 +77,35 @@ bool TCPSocket::Listen( uint16_t port, uint maxQueued )
 
 TCPSocket* TCPSocket::Accept()
 {
-	return nullptr;
+	if( m_handle == INVALID_SOCKET )
+		return nullptr;
+
+	// Get their socket
+	sockaddr_storage	theirSocketAddress;
+	int					theirSocketAddressLength = sizeof(sockaddr_storage);
+	SOCKET				theirSocket = ::accept( m_handle, (sockaddr*)&theirSocketAddress, &theirSocketAddressLength );
+
+	// If not valid or not IPv4
+	if( theirSocket == INVALID_SOCKET || theirSocketAddress.ss_family != AF_INET )
+	{
+		::closesocket( theirSocket );
+		return nullptr;
+	}
+
+	// If valid
+	TCPSocket *theirTCPSocket	= new TCPSocket();
+	theirTCPSocket->m_handle	= theirSocket;
+	theirTCPSocket->m_address	= NetworkAddress( (sockaddr*)&theirSocketAddress );
+
+	return theirTCPSocket;
 }
 
 bool TCPSocket::Connect( NetworkAddress const &networkAddress )
 {
-	m_handle = ::socket( AF_INET,			// Address Family: IPv4
-						 SOCK_STREAM,		// Type: TCP is stream based packet
-						 IPPROTO_TCP );		// Protocol: TCP
+	m_address	= networkAddress;
+	m_handle	= ::socket( AF_INET,			// Address Family: IPv4
+							SOCK_STREAM,		// Type: TCP is stream based packet
+							IPPROTO_TCP );		// Protocol: TCP
 
 	if( m_handle == INVALID_SOCKET )
 	{
@@ -84,10 +118,10 @@ bool TCPSocket::Connect( NetworkAddress const &networkAddress )
 	// sizeof(sockaddr_storage) >= sizeof(any other sockaddr)
 	sockaddr_storage	socketAddress;
 	size_t				addressLength;
-	bool				success = networkAddress.ToSocketAddress( (sockaddr*)&socketAddress, &addressLength );
+	bool				success = m_address.ToSocketAddress( (sockaddr*)&socketAddress, &addressLength );
 
 	GUARANTEE_RECOVERABLE( success, "Couldn't get a sockaddr!!" );
-
+	
 	int result = ::connect( m_handle, (sockaddr*)&socketAddress, (int)addressLength );
 	if( result == SOCKET_ERROR )
 	{

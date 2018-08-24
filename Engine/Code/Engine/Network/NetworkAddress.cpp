@@ -106,7 +106,7 @@ uint NetworkAddress::GetAllLocal( NetworkAddress *out, uint maxCount )
 	int			 status = getaddrinfo( myName, service, &hints, &result ); 
 	if (status != 0) 
 	{
-		GUARANTEE_RECOVERABLE( false, "\nFailed to find addresses for [%s:%s].  Error[%s]\n", myName, service, ::gai_strerror(status) );
+		GUARANTEE_RECOVERABLE( false, Stringf("\nFailed to find addresses for [%s:%s].  Error[%s]\n", myName, service, ::gai_strerror(status)) );
 		return 0U;
 	}
 
