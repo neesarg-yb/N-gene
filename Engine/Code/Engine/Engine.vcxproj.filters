@@ -315,6 +315,9 @@
     <ClCompile Include="Network\TCPSocket.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="Network\Network.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">

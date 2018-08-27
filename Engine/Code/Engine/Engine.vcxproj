@@ -306,6 +306,7 @@
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
+    <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="Network\NetworkAddress.cpp" />
     <ClCompile Include="Network\TCPSocket.cpp" />
     <ClCompile Include="Profiler\ProfileLogScoped.cpp" />
