@@ -1,5 +1,7 @@
 #pragma once
 #include "Engine/Core/Window.hpp"
+#include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Internal/WindowsCommon.hpp"
 
@@ -31,15 +33,32 @@ InputSystem::~InputSystem()
 
 }
 
-void InputSystem::BeginFrame() {
+void InputSystem::BeginFrame() 
+{
 	UpdateController();
 	UpdateKeyboard();
 	UpdateMouse();
-	RunMessagePump();		// Ask Windows to call our registred WinProc function with WM_KEYDOWN notifications, etc.
+	RunMessagePump();		// Ask Windows to call our registered WinProc function with WM_KEYDOWN notifications, etc.
 }
 
-void InputSystem::EndFrame() {
+void InputSystem::EndFrame() 
+{
 
+}
+
+void InputSystem::GetStringFromClipboard( std::string &outStr )
+{
+	// Make sure that Windows Clipboard is opened
+	GUARANTEE_RECOVERABLE( 0 != OpenClipboard( NULL ), "Error: InputSystem failed to open the clipboard!" );
+
+	// Get the clipboard data
+	HANDLE clipboardData = GetClipboardData( CF_TEXT );
+	if( clipboardData == NULL )								// If there's nothing, return
+		return;
+
+	outStr = (const char *) clipboardData;
+
+	CloseClipboard();
 }
 
 void InputSystem::UpdateMouse()
