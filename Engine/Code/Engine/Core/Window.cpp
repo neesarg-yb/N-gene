@@ -109,7 +109,7 @@ Window::Window( char const *app_name, float clientAspect )
 	SetForegroundWindow( hwnd );
 	SetFocus( hwnd );
 
-	m_hwnd = (void*)hwnd; 
+	m_hwnd = (void*)hwnd;
 }
 
 Window::~Window()

@@ -185,6 +185,14 @@ bool DevConsole::ConsoleMessageHandler( unsigned int wmMessageCode, size_t wPara
 			if( asKey == '`' || asKey == '\b' || asKey == '\r' || asKey == '\x1b' )
 				break;
 
+			// Handle Paste (Ctrl + V)
+			if( asKey == 22 )	// Copy: 3, Paste: 22, Cut: 24, Select All: 1
+			{
+				std::string fromClipboard;
+				InputSystem::GetStringFromClipboard( fromClipboard );
+				ConsolePrintf( "Paste: %s", fromClipboard.c_str() );
+			}
+
 			std::string asKeyStr;											// To safely convert,
 			asKeyStr.push_back( asKey );									//		unsigned char to std::string
 			s_inputBufferString.insert( GetBlinkerPosition(), asKeyStr );	

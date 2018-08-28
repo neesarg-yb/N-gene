@@ -50,6 +50,9 @@ public:
 	void	BeginFrame();
 	void	EndFrame();
 
+	// Clipboard
+	static void GetStringFromClipboard( std::string &outStr );
+
 	// Keyboard
 	void	OnKeyPressed	( unsigned char keyCode );
 	void	OnKeyReleased	( unsigned char keyCode );
