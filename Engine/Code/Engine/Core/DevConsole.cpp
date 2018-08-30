@@ -81,6 +81,10 @@ void DevConsole::Update( InputSystem& currentInputSystem )
 		KeyActions_HandleEscapeKey();
 	if( currentInputSystem.WasKeyJustPressed(ENTER) )
 		KeyActions_HandleEnterKey();
+	if( currentInputSystem.WasKeyJustPressed(UP) )
+		KeyActions_HandleUpArrowKey();
+	if( currentInputSystem.WasKeyJustPressed(DOWN) )
+		KeyActions_HandleDownArroyKey();
 }
 
 void DevConsole::Render()
@@ -299,6 +303,34 @@ void DevConsole::KeyActions_HandleRightArrowKey( float deltaSeconds )
 		s_blinkerPosition++;
 }
 
+void DevConsole::KeyActions_HandleUpArrowKey()
+{
+	ClearInputBuffer();
+
+	IncrementHistorySkipCountBy( 1 );
+
+	int idx = (int)m_commandHistory.size() - m_historySkipCount - 1;
+	if( idx < 0 || idx >= m_commandHistory.size() )
+		return;
+
+	s_inputBufferString = m_commandHistory[ idx ];
+	s_blinkerPosition	= (int) s_inputBufferString.size();
+}
+
+void DevConsole::KeyActions_HandleDownArroyKey()
+{
+	ClearInputBuffer();
+
+	IncrementHistorySkipCountBy( -1 );
+
+	int idx = (int)m_commandHistory.size() - m_historySkipCount - 1;
+	if( idx < 0 || idx >= m_commandHistory.size() )
+		return;
+
+	s_inputBufferString = m_commandHistory[ idx ];
+	s_blinkerPosition	= (int) s_inputBufferString.size();
+}
+
 void DevConsole::KeyActions_HandleDeleteKey( float deltaSeconds )
 {
 	s_blinkerPosition++;
@@ -314,6 +346,8 @@ void DevConsole::KeyActions_HandleEscapeKey()
 		ClearInputBuffer();
 	else
 		Close();
+
+	ResetHistorySkipCount();
 }
 
 void DevConsole::KeyActions_HandleEnterKey()
@@ -330,13 +364,14 @@ void DevConsole::KeyActions_HandleEnterKey()
 	if(s_inputBufferString != "")
 		executionSucceeded = CommandRun( s_inputBufferString.c_str() );
 
-	if( executionSucceeded == false )
-	{
+	if( executionSucceeded )
+		AddStringToTheCommandHistory( s_inputBufferString );
+	else
 		WriteToOutputBuffer( "Invalid Command!", RGBA_RED_COLOR );
-	}
 
 	// Clear the InputBuffer
 	ClearInputBuffer();
+	ResetHistorySkipCount();
 }
 
 void DevConsole::WriteToOutputBuffer( std::string line_str, Rgba line_color /*= RGBA_WHITE_COLOR*/ )
@@ -378,6 +413,26 @@ void DevConsole::ResetTheScroll( Command& cmd )
 {
 	UNUSED( cmd );
 	s_scrollAmount = 0;
+}
+
+void DevConsole::IncrementHistorySkipCountBy( int increment )
+{
+	m_historySkipCount += increment;
+	m_historySkipCount  = ClampInt( m_historySkipCount, 0, (int)m_commandHistory.size() - 1 );
+}
+
+void DevConsole::AddStringToTheCommandHistory( std::string const &commandStr )
+{
+	// Check with last command in the history
+		// Don't add if it is the same
+	if( m_commandHistory.size() != 0 && m_commandHistory.back() == commandStr )
+		return;
+
+	// If already have max history count, erase the first one before adding
+	if( m_commandHistory.size() >= m_maxHistoryCount )
+		m_commandHistory.erase( m_commandHistory.begin() );
+
+	m_commandHistory.push_back( commandStr );
 }
 
 bool DevConsoleIsOpen()

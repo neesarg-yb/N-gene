@@ -50,12 +50,19 @@ private:
 	static	size_t	GetBlinkerPosition();
 			void	KeyActions_HandleLeftArrowKey( float deltaSeconds );
 			void	KeyActions_HandleRightArrowKey( float deltaSeconds );
+			void	KeyActions_HandleUpArrowKey();
+			void	KeyActions_HandleDownArroyKey();
 			bool	KeyActions_HandleBackspace( float deltaSeconds );
 			void	KeyActions_HandleDeleteKey( float deltaSeconds );
 			void	KeyActions_HandleEscapeKey();
 			void	KeyActions_HandleEnterKey ();
 			void	PrintTheOutputBuffer( int scrollAmount = 0 );
 	static	void	ResetTheScroll( Command& cmd );
+
+	// Command History
+	inline	void	ResetHistorySkipCount() { m_historySkipCount = -1; }
+			void	IncrementHistorySkipCountBy( int increment );
+			void	AddStringToTheCommandHistory( std::string const &commandStr );
 
 private: 
 	double lastFramesTime;
@@ -81,6 +88,10 @@ private:
 	static	std::string	s_inputBufferString;
 	static	SpinLock	s_outputBufferLock;
 	static	std::vector< OutputStringsBuffer >	s_outputBuffer;
+
+			int					m_historySkipCount	= -1;
+	const	int					m_maxHistoryCount	= 50;
+	std::vector< std::string >	m_commandHistory;
 
 public:
 	static DevConsole*	InitalizeSingleton( Renderer& currentRenderer );
