@@ -48,10 +48,10 @@ private:
 			void	ClearInputBuffer();
 			void	DrawBlinker();
 	static	size_t	GetBlinkerPosition();
-			void	KeyActions_HandleBackspace();
-			void	KeyActions_HandleLeftArrowKey ();
-			void	KeyActions_HandleRightArrowKey();
-			void	KeyActions_HandleDeleteKey();
+			void	KeyActions_HandleLeftArrowKey( float deltaSeconds );
+			void	KeyActions_HandleRightArrowKey( float deltaSeconds );
+			bool	KeyActions_HandleBackspace( float deltaSeconds );
+			void	KeyActions_HandleDeleteKey( float deltaSeconds );
 			void	KeyActions_HandleEscapeKey();
 			void	KeyActions_HandleEnterKey ();
 			void	PrintTheOutputBuffer( int scrollAmount = 0 );
@@ -75,6 +75,7 @@ private:
 	const	AABB2		m_outputAreaTextBox			= AABB2( Vector2( m_inputAreaTextBox.mins.x, m_inputAreaBox.maxs.y ) + Vector2( 0.01f, 0.f ), m_topRightOrtho - Vector2( 0.01f, 0.f ) );
 	const	float		m_textHeight				= ( m_inputAreaBox.maxs.y - m_inputAreaBox.mins.y ) * 0.5f;
 
+	static	float		s_blinkerMoveSpeed;			// In Characters Per Seconds. ( It is used when Backspace, Delete, and Arrow keys are pressed.. )
 	static	int			s_blinkerPosition;
 	static	bool		s_blinkerHidden;
 	static	std::string	s_inputBufferString;
