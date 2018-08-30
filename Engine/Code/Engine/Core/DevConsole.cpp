@@ -10,6 +10,7 @@ int				DevConsole::s_scrollAmount			= 0;
 Camera*			DevConsole::s_devConsoleCamera		= nullptr;
 DevConsole*		DevConsole::s_devConsoleInstance	= nullptr;
 bool			DevConsole::s_isOpen				= false;
+float			DevConsole::s_blinkerMoveSpeed		= 8.f;
 int				DevConsole::s_blinkerPosition		= 0;
 bool			DevConsole::s_blinkerHidden			= false;
 std::string		DevConsole::s_inputBufferString		= "";
@@ -68,14 +69,14 @@ void DevConsole::Update( InputSystem& currentInputSystem )
 	}
 
 
-	if( currentInputSystem.WasKeyJustPressed(BACK) )
-		KeyActions_HandleBackspace();
-	if( currentInputSystem.WasKeyJustPressed(LEFT) )
-		KeyActions_HandleLeftArrowKey();
-	if( currentInputSystem.WasKeyJustPressed(RIGHT) )
-		KeyActions_HandleRightArrowKey();
-	if( currentInputSystem.WasKeyJustPressed(DELETE_KEY) )
-		KeyActions_HandleDeleteKey();
+	if( currentInputSystem.IsKeyPressed(BACK) )
+		KeyActions_HandleBackspace( deltaSeconds );
+	if( currentInputSystem.IsKeyPressed(LEFT) )
+		KeyActions_HandleLeftArrowKey( deltaSeconds );
+	if( currentInputSystem.IsKeyPressed(RIGHT) )
+		KeyActions_HandleRightArrowKey( deltaSeconds );
+	if( currentInputSystem.IsKeyPressed(DELETE_KEY) )
+		KeyActions_HandleDeleteKey( deltaSeconds );
 	if( currentInputSystem.WasKeyJustPressed(ESCAPE) )
 		KeyActions_HandleEscapeKey();
 	if( currentInputSystem.WasKeyJustPressed(ENTER) )
@@ -190,7 +191,12 @@ bool DevConsole::ConsoleMessageHandler( unsigned int wmMessageCode, size_t wPara
 			{
 				std::string fromClipboard;
 				InputSystem::GetStringFromClipboard( fromClipboard );
-				ConsolePrintf( "Paste: %s", fromClipboard.c_str() );
+				s_inputBufferString.insert( GetBlinkerPosition(), fromClipboard );
+
+				uint pasteStrLength	 = (uint) fromClipboard.length();
+				s_blinkerPosition	+= pasteStrLength;
+
+				break;
 			}
 
 			std::string asKeyStr;											// To safely convert,
@@ -240,31 +246,66 @@ size_t DevConsole::GetBlinkerPosition()
 	return static_cast< size_t >( s_blinkerPosition );
 }
 
-void DevConsole::KeyActions_HandleBackspace()
+bool DevConsole::KeyActions_HandleBackspace( float deltaSeconds )
 {
+	// Check if it is time to handle key press
+	static float timeElapsedSinceLastBlinkerMove = 0.f;
+	timeElapsedSinceLastBlinkerMove += deltaSeconds;
+	
+	if( timeElapsedSinceLastBlinkerMove < (1.f / s_blinkerMoveSpeed) )
+		return false;
+	else
+		timeElapsedSinceLastBlinkerMove = 0.f;
+
+	// Handle the key press
 	if( s_inputBufferString.size() != 0 )
 	{
 		s_blinkerPosition--;
 		s_inputBufferString.erase( GetBlinkerPosition(), 1 );
 	}
+
+	return true;
 }
 
-void DevConsole::KeyActions_HandleLeftArrowKey()
+void DevConsole::KeyActions_HandleLeftArrowKey( float deltaSeconds )
 {
+	// Check if it is time to handle key press
+	static float timeElapsedSinceLastBlinkerMove = 0.f;
+	timeElapsedSinceLastBlinkerMove += deltaSeconds;
+
+	if( timeElapsedSinceLastBlinkerMove < (1.f / s_blinkerMoveSpeed) )
+		return;
+	else
+		timeElapsedSinceLastBlinkerMove = 0.f;
+
+	// Handle the key press
 	if( s_blinkerPosition > 0 )
 		s_blinkerPosition--;
 }
 
-void DevConsole::KeyActions_HandleRightArrowKey()
+void DevConsole::KeyActions_HandleRightArrowKey( float deltaSeconds )
 {
+	// Check if it is time to handle key press
+	static float timeElapsedSinceLastBlinkerMove = 0.f;
+	timeElapsedSinceLastBlinkerMove += deltaSeconds;
+
+	if( timeElapsedSinceLastBlinkerMove < (1.f / s_blinkerMoveSpeed) )
+		return;
+	else
+		timeElapsedSinceLastBlinkerMove = 0.f;
+
+	// Handle the key press
 	if( static_cast<unsigned int>(s_blinkerPosition) < s_inputBufferString.length() )
 		s_blinkerPosition++;
 }
 
-void DevConsole::KeyActions_HandleDeleteKey()
+void DevConsole::KeyActions_HandleDeleteKey( float deltaSeconds )
 {
 	s_blinkerPosition++;
-	KeyActions_HandleBackspace();
+	bool backspaceSuccess = KeyActions_HandleBackspace( deltaSeconds );
+
+	if( backspaceSuccess == false )
+		s_blinkerPosition--;
 }
 
 void DevConsole::KeyActions_HandleEscapeKey()
