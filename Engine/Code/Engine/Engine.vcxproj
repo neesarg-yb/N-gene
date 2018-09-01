@@ -306,6 +306,8 @@
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
+    <ClCompile Include="Network\BytePacker.cpp" />
+    <ClCompile Include="Network\Endianness.cpp" />
     <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="Network\NetworkAddress.cpp" />
     <ClCompile Include="Network\TCPSocket.cpp" />
@@ -403,6 +405,8 @@
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Math\Vector4.hpp" />
+    <ClInclude Include="Network\BytePacker.hpp" />
+    <ClInclude Include="Network\Endianness.hpp" />
     <ClInclude Include="Network\Network.hpp" />
     <ClInclude Include="Network\NetworkAddress.hpp" />
     <ClInclude Include="Network\TCPSocket.hpp" />
