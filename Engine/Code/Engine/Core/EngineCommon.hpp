@@ -5,8 +5,8 @@
 
 typedef tinyxml2::XMLElement XMLElement;
 typedef tinyxml2::XMLAttribute XMLAttribute;
-typedef unsigned int uint;
-typedef char	 byte_t;
+typedef unsigned int	uint;
+typedef unsigned char	byte_t;
 
 #define MAX_LIGHTS 8U
 const  float	   g_aspectRatio = 1.77f;
