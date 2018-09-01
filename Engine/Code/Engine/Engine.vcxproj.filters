@@ -318,6 +318,12 @@
     <ClCompile Include="Network\Network.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="Network\Endianness.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\BytePacker.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -612,6 +618,12 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Network\TCPSocket.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Endianness.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\BytePacker.hpp">
       <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
