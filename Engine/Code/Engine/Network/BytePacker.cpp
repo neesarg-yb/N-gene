@@ -6,7 +6,7 @@ BytePacker::BytePacker( eEndianness byteOrder /* = LITTLE_ENDIAN */ )
 {
 	// BytePacker owns buffer, I can grow it
 	m_settings		= (BYTEPACKER_OWNS_MEMORY | BYTEPACKER_CAN_GROW);
-	ReAllocateBufferOfSizeAndCopy( 8U * 1024U );
+	ReAllocateBufferOfSizeAndCopy( m_bufferSizeUnit );
 }
 
 BytePacker::BytePacker( size_t bufferSize, eEndianness byteOrder /* = LITTLE_ENDIAN */ )
@@ -47,15 +47,7 @@ eEndianness BytePacker::GetEndianness() const
 	return m_endianness;
 }
 
-size_t BytePacker::WriteSize( size_t size )
-{
-	// Writes size_t in compressed way..
-	UNUSED( size );
-
-	return 0U;
-}
-
-bool BytePacker::WriteBytes( size_t byteCount, void const *data )
+bool BytePacker::WriteBytes( size_t byteCount, void const *data, bool changeEndiannessToSettings /* = true */ )
 {
 	size_t requiredMinimumBufferSize = m_writeHead + byteCount;
 
@@ -75,11 +67,73 @@ bool BytePacker::WriteBytes( size_t byteCount, void const *data )
 	// Write new things in the buffer..
 	byte_t	*byteBuffer			= (byte_t *)m_buffer;
 	void	*writeNewDataFrom	= &byteBuffer[ m_writeHead ];
-	
-	memcpy( writeNewDataFrom, data, byteCount );
+
+	// make a duplicate copy of data
+	void *copiedData = malloc( byteCount );
+	memcpy( copiedData, data, byteCount );
+
+	// change endianness if required
+	if( changeEndiannessToSettings )
+		ChangeEndiannessTo( byteCount, copiedData, m_endianness );
+
+	// write to buffer
+	memcpy( writeNewDataFrom, copiedData, byteCount );
 	m_writeHead += byteCount;
 
+	// free duplicated data
+	free( copiedData );
+
 	return true;
+}
+
+size_t BytePacker::WriteSize( size_t size )
+{
+	size_t numBitsRequired	= GetTotalBitsRequiredToRepresent( size ); 
+	size_t numBytesRequired	= (size_t) ceil( (double)numBitsRequired / 7.0 );
+
+	// Check if buffer needs to grow to store new data..
+	size_t minBufferSize = GetWrittenByteCount() + numBytesRequired;
+	if( minBufferSize > m_bufferSize )
+	{
+		// If can't grow, return false
+		if( (m_settings & BYTEPACKER_CAN_GROW) != BYTEPACKER_CAN_GROW )
+			return 0U;
+		else
+		{
+			// Grow the buffer
+			size_t newBufferSize = GetNewBufferSizeToStoreDataOfSize( minBufferSize );
+			ReAllocateBufferOfSizeAndCopy( newBufferSize );
+		}
+	}
+
+	// until we write down all the bits
+	for ( long int numBitsToWrite = (long int)numBitsRequired; numBitsToWrite >= 0; numBitsToWrite -= 7 )
+	{
+		byte_t	anEncodedByte	= 0U;
+
+		// Write 7 bits
+		for( int i = 0; i < 7; i++ )
+		{
+			byte_t bitToWrite = (size & 0b0000'0001) ? 0b1000'0000 : 0b0000'0000;
+			size >>= 1;
+
+			anEncodedByte >>= 1;
+			anEncodedByte = anEncodedByte | bitToWrite;
+		}
+		
+		// Write the the Continue Flag bit
+		bool	numNotFinished	= ( numBitsToWrite - 7 ) > 0;
+		byte_t	continueFlag	= ( numNotFinished ? 0b1000'0000 : 0b0000'0000 );		// notFinished = 1000 0000; finished = 0000 0000
+
+		// Shift to left, and append the Continue Flag bit
+		anEncodedByte >>= 1;
+		anEncodedByte = anEncodedByte | continueFlag;
+		
+		bool written = WriteBytes( 1, &anEncodedByte, false );			// We don't flip order of encoded size
+		GUARANTEE_RECOVERABLE( written == true, "BytePacker: Unexpected write failure!!" );
+	}
+
+	return numBytesRequired;
 }
 
 bool BytePacker::WriteString( char const *str )
@@ -87,13 +141,6 @@ bool BytePacker::WriteString( char const *str )
 	std::string stringToWrite	= str;
 
 	return WriteBytes( stringToWrite.size(), stringToWrite.data() );
-}
-
-size_t BytePacker::ReadSize( size_t *outSize )
-{
-	UNUSED( outSize );
-
-	return 0U;
 }
 
 size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount )
@@ -105,8 +152,15 @@ size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount )
 	byte_t	*byteBuffer			= (byte_t *)m_buffer;
 	void	*readFromPointer	= &byteBuffer[ m_readHead ];
 	memcpy( outData, readFromPointer, bytesToRead );
-	
+
 	return bytesToRead;
+}
+
+size_t BytePacker::ReadSize( size_t *outSize )
+{
+	UNUSED( outSize );
+
+	return 0U;
 }
 
 size_t BytePacker::ReadString( char *outStr, size_t maxByteSize )
@@ -177,7 +231,7 @@ void BytePacker::ReAllocateBufferOfSizeAndCopy( size_t newBufferSize )
 
 	// Re-point the m_buffer to the new one.
 	m_buffer		= newBuffer;
-	m_bufferSize	= copyContentSize;
+	m_bufferSize	= newBufferSize;
 	m_writeHead		= copyContentSize;
 	m_readHead		= 0U;
 }
@@ -189,5 +243,11 @@ size_t BytePacker::GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBuff
 	size_t n		= (size_t)ceil( (double)minimumRequiredBufferSize / m_bufferSizeUnit );
 
 	return m_bufferSizeUnit * n;
+}
+
+size_t BytePacker::GetTotalBitsRequiredToRepresent( size_t number )
+{
+	size_t bitsRequired = (size_t) log2l( (long double)number ) + 1U;
+	return bitsRequired;
 }
 

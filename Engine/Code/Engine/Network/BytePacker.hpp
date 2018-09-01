@@ -42,13 +42,13 @@ public:
 	eEndianness	GetEndianness() const;
 	
 	// Write in buffer
+	bool		WriteBytes	( size_t byteCount, void const *data, bool changeEndiannessToSettings = true );		// Returns false if buffer can't hold the new data in it.. It doesn't write in buffer on failed attempt.
 	size_t		WriteSize	( size_t size );							// Writes a size_t in buffer in a compresses way, returns how many bytes it used to represent passed size_t variable.
-	bool		WriteBytes	( size_t byteCount, void const *data );		// Returns false if buffer can't hold the new data in it.. It doesn't write in buffer on failed attempt.
 	bool		WriteString	( char const *str );						// Returns false if the string is too long to hold by buffer.. It doesn't write anything, in that case.
 
 	// Read from the buffer
-	size_t		ReadSize	( size_t *outSize );						// Returns how many bytes got read to fetch the size_t, fills outSize
 	size_t		ReadBytes	( void *outData, size_t maxByteCount );		// Returns how many actual bytes got read
+	size_t		ReadSize	( size_t *outSize );						// Returns how many bytes got read to fetch the size_t, fills outSize
 	size_t		ReadString	( char *outStr, size_t maxByteSize );		// Note: maxByteSize should be enough to contain the null terminator as well
 
 	// Set buffer variables
@@ -64,4 +64,5 @@ public:
 private:
 	void		ReAllocateBufferOfSizeAndCopy( size_t newBufferSize );
 	size_t		GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBufferSize );		// Gives size of new buffer in stages: 8kb, 16kb, 32kb, 64kb, 128kb, etc..
+	size_t		GetTotalBitsRequiredToRepresent( size_t number );
 };
