@@ -39,7 +39,7 @@ BytePacker::~BytePacker()
 
 void BytePacker::SetEndianness( eEndianness endieanness )
 {
-	UNUSED( endieanness );
+	m_endianness = endieanness;
 }
 
 eEndianness BytePacker::GetEndianness() const
@@ -143,7 +143,7 @@ bool BytePacker::WriteString( char const *str )
 	return WriteBytes( stringToWrite.size(), stringToWrite.data() );
 }
 
-size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount )
+size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEndiannessToMachine /* = true */ )
 {
 	size_t dataLengthInBuffer	= m_writeHead;
 	size_t readableBytes		= (dataLengthInBuffer - m_readHead);
@@ -152,15 +152,58 @@ size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount )
 	byte_t	*byteBuffer			= (byte_t *)m_buffer;
 	void	*readFromPointer	= &byteBuffer[ m_readHead ];
 	memcpy( outData, readFromPointer, bytesToRead );
+	
+	// Progress the readHead
+	m_readHead += bytesToRead;
+
+	// Change Endianness
+	if( changeEndiannessToMachine )
+		ChangeEndiannessFrom( bytesToRead, outData, m_endianness );
 
 	return bytesToRead;
 }
 
 size_t BytePacker::ReadSize( size_t *outSize )
 {
-	UNUSED( outSize );
+	*outSize = 0U;
 
-	return 0U;
+	size_t	totalReadBytes	= 0U;
+	bool	continueReading = true;
+	while ( continueReading )
+	{
+		// Read one byte
+		byte_t nextByte		= 0x00;
+		size_t nextByteSize	= ReadBytes( &nextByte, 1U, false );
+		
+		// If we can't read next byte, it's an unexpected failure
+		if( nextByteSize != 1U )
+		{
+			GUARANTEE_RECOVERABLE( false, "BytePacker: ReadSize() couldn't finish operation!!" );
+			return 0U;
+		}
+		
+		// Read 7 bits
+		byte_t fetchedByte			= ( nextByte & 0b0111'1111 );
+		fetchedByte <<= 1;			// Because first bit is not part of number
+
+		size_t numberMask			= 0U;
+		byte_t *numberMaskBytePtr	= (byte_t *)&numberMask;
+		numberMaskBytePtr[7]		= fetchedByte;
+		
+		// Write it to outSize
+		*outSize >>= 7;
+		*outSize  |= numberMask;
+
+		// Check & continue
+		continueReading = ( (nextByte & 0b1000'0000) == 0b1000'0000 );
+
+		totalReadBytes += 1;
+	}
+
+	size_t needToShiftRightForBytes = (sizeof( size_t ) * 8) - (totalReadBytes * 7) ;
+	*outSize >>= needToShiftRightForBytes;
+
+	return totalReadBytes;
 }
 
 size_t BytePacker::ReadString( char *outStr, size_t maxByteSize )
