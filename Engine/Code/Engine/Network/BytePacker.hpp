@@ -47,7 +47,7 @@ public:
 	bool		WriteString	( char const *str );						// Returns false if the string is too long to hold by buffer.. It doesn't write anything, in that case.
 
 	// Read from the buffer
-	size_t		ReadBytes	( void *outData, size_t maxByteCount );		// Returns how many actual bytes got read
+	size_t		ReadBytes	( void *outData, size_t maxByteCount, bool changeEndiannessToMachine = true );		// Returns how many actual bytes got read
 	size_t		ReadSize	( size_t *outSize );						// Returns how many bytes got read to fetch the size_t, fills outSize
 	size_t		ReadString	( char *outStr, size_t maxByteSize );		// Note: maxByteSize should be enough to contain the null terminator as well
 
