@@ -3,6 +3,7 @@
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
+#include "Engine/Network/BytePacker.hpp"
 #include "Game/theApp.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
@@ -52,6 +53,19 @@ theGame::theGame()
 	m_gameCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
+
+	// TESTING BYTEPACKER
+	BytePacker testBP = BytePacker( LITTLE_ENDIAN );
+	testBP.WriteSize( 987542100 );
+	
+	size_t readSize1; 
+	testBP.ReadSize( &readSize1 );
+
+	testBP.ResetWrite();
+	testBP.WriteSize( 8675309 );
+
+	size_t readSize2; 
+	testBP.ReadSize( &readSize2 );
 }
 
 theGame::~theGame()
