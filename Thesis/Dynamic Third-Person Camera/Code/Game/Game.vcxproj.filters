@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="General">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{e23c0ae8-3cdd-429b-b0d2-7ee0cae33d07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Executable">
+      <UniqueIdentifier>{b6be707c-c495-4a61-b6ad-c0fa1addbf18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Materials">
+      <UniqueIdentifier>{10e2513c-1acf-485b-8d91-bfb6457f4ac0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{6f956215-1f71-4d55-81fa-a672acd14f8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML Definitions">
+      <UniqueIdentifier>{bada9d42-6263-4c91-8805-cc1d840292fd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main_Win32.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="theGame.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="theApp.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="GameCommon.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Block.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\BlockDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="World\TowerDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Tower.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Robot.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\LevelDefinition.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Pipe.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="theGame.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="theApp.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="GameCommon.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineBuildPreferences.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Block.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\BlockDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.hpp">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="World\TowerDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Tower.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Robot.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\LevelDefinition.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Pipe.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Run_win32\Data\Shaders\default.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\default.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\debug.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\debug.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\debug.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_bitangent.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_normal.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_tangent.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_uv.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\stone_sphere.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\couch_cube.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_body.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_lambert.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_a.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_xray_normals.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Protogame.exe">
+      <Filter>Executable</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\combine_fs.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\combine_fs.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\combine_fs.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_alpha.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\default.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\skybox.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\skybox.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\skybox.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Brick Red.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Grass.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Void.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Water.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\pickbuffer.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\bb8.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Finish.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Stairs.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\Block_Metal.material">
+      <Filter>Materials</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Run_win32\Data\Shaders\default.shader">
+      <Filter>Shaders</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Blocks.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Tower1.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Level1.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Level2.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Level3.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Tower2.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+    <Xml Include="..\..\Run_win32\Data\Definitions\Tower3.xml">
+      <Filter>XML Definitions</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>

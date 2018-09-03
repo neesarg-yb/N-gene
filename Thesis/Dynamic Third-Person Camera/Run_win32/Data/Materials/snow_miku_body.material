@@ -1,0 +1,10 @@
+<material id="snow_miku_body">
+	<shadergroup>
+   		<shader fileName="lit" />
+	</shadergroup>
+   
+   	<texture bind="0" src="Data\Models\snow_miku\roomitems_s011.png" />
+
+   	<float bind="SPECULAR_AMOUNT" 	value="1.0" />
+   	<float bind="SPECULAR_POWER" 	value="16.0" />
+</material>

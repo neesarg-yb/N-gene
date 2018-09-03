@@ -1,0 +1,10 @@
+<material id="Block_Stairs">
+	<shadergroup>
+   		<shader fileName="lit" />
+   	</shadergroup>
+
+   	<texture bind="0" src="Data\Images\Blocks\Terrain_32x32.png" />
+
+   	<float bind="SPECULAR_AMOUNT" 	value="1.0" />
+   	<float bind="SPECULAR_POWER" 	value="30.0" />
+</material>
