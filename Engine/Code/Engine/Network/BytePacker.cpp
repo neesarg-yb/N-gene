@@ -139,8 +139,29 @@ size_t BytePacker::WriteSize( size_t size )
 bool BytePacker::WriteString( char const *str )
 {
 	std::string stringToWrite	= str;
+	size_t		stringLength	= stringToWrite.length();
 
-	return WriteBytes( stringToWrite.size(), stringToWrite.data() );
+	// If buffer is smaller..
+	size_t requiredMinBufferSize = GetWritableByteCount() + stringLength;
+	if( requiredMinBufferSize > m_bufferSize )
+	{
+		// If can grow
+		if( (m_settings & BYTEPACKER_CAN_GROW) == BYTEPACKER_CAN_GROW )
+		{
+			size_t newBufferSize = GetNewBufferSizeToStoreDataOfSize( requiredMinBufferSize );
+			ReAllocateBufferOfSizeAndCopy( newBufferSize );
+		}
+		else
+			return false;	// Can't grow the buffer, return
+	}
+
+	for( size_t i = 0; i < stringLength; i++ )
+	{
+		bool success = WriteBytes( 1, &str[i] );
+		GUARANTEE_RECOVERABLE( success, "BytePacker: Unexpected write error!" );
+	}
+
+	return true;
 }
 
 size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEndiannessToMachine /* = true */ )
