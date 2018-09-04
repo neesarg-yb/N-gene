@@ -324,6 +324,9 @@
     <ClCompile Include="Network\BytePacker.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="Math\Quaternions.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -625,6 +628,9 @@
     </ClInclude>
     <ClInclude Include="Network\BytePacker.hpp">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Quaternions.hpp">
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
