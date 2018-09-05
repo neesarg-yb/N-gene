@@ -26,4 +26,7 @@ public:
 	float y = 0.f;
 	float z = 0.f;
 	float w = 0.f;
+
+public:
+	static float DotProduct( Vector4 const &a, Vector4 const &b );
 };
