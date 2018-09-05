@@ -53,34 +53,33 @@ theGame::theGame()
 	m_gameCamera = new Camera();
 	m_gameCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
-	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
+	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );										// To set NDC styled ortho
 
 	// TESTING QUATERNIONS
-	// Test 1
+	// Test 1 - Simple Rotation & GetAsMatrix
 	Quaternions rotateAroundX_Q	= Quaternions( Vector3::FRONT, 45.f );
 	Vector3		rotatedVec1		= rotateAroundX_Q.RotatePoint( Vector3::UP );
 	Matrix44	qRotate1_M		= rotateAroundX_Q.GetAsMatrix44();
 	Vector3		eulerQRotate1_M	= qRotate1_M.GetEulerRotation();
 
-	// Test 2
+	// Test 2 - Rotate with Matrix
 	Matrix44 rotateAroundX_M; 
 	rotateAroundX_M.RotateDegrees3D( Vector3( 0.f, 0.f , 45.f) );
 	Vector3	rotatedVec2				= rotateAroundX_M.Multiply( Vector3::UP, 0.f );
 	Vector3 eulerRotateAroundX_M	= rotateAroundX_M.GetEulerRotation();
 
 	// Test 3 - From Euler
-	Vector3 eulerRotationZXY_Test3	= Vector3( 45.f, 90.f, 45.f);				// Roll counter clock wise => look up => turn right
+	Vector3 eulerRotationZXY_Test3	= Vector3( 45.f, 90.f, 45.f);							// Roll counter clock wise => look up => turn right
 	// My Rotation Matrix applies y & z rotation as left-hand-rule; where quaternions applies it as right-hand-rule => Multiply with -1.f
 	Quaternions test3_Q				= Quaternions::FromEuler( eulerRotationZXY_Test3.x, -1.f * eulerRotationZXY_Test3.y, -1.f * eulerRotationZXY_Test3.z );
 	Matrix44	test3_M				= Matrix44();
 	test3_M.RotateDegrees3D( eulerRotationZXY_Test3 );
 
-	Vector3 test3Vec_M = Vector3::FRONT;
-	Vector3 test3Vec_Q = Vector3::FRONT;
-	test3Vec_M = test3_M.Multiply( test3Vec_M, 0.f );
-	test3Vec_Q = test3_Q.RotatePoint( test3Vec_Q );
+	Vector3 test3Vec_M	= Vector3::FRONT;
+	Vector3 test3Vec_Q	= Vector3::FRONT;
+	test3Vec_M			= test3_M.Multiply( test3Vec_M, 0.f );
+	test3Vec_Q			= test3_Q.RotatePoint( test3Vec_Q );
 	
-
 	// Test 4 - From Matrix
 	Matrix44	rotationMatFromEuler = test3_M;
 	Quaternions	qFromMat			 = Quaternions::FromMatrix( rotationMatFromEuler );		// Is (qFromMat == test3_Q) ?? => YES!
