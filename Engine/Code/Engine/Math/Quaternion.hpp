@@ -4,12 +4,12 @@
 #include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/Matrix44.hpp"
 
-class Quaternions
+class Quaternion
 {
 public:
-	 Quaternions();
-	 Quaternions( Vector3 const &axis, float rotationDegrees );
-	~Quaternions();
+	 Quaternion();
+	 Quaternion( Vector3 const &axis, float rotationDegrees );
+	~Quaternion();
 
 public:
 	float	r = 1.f;			// Scaler Part:		w
@@ -23,8 +23,8 @@ public:
 	bool		IsUnitQuaternion() const;
 
 public:
-	Quaternions GetInverse	() const;
-	Quaternions Multiply	( Quaternions const b ) const;								// Note: q3 = q2.Multiply(q1) => q3 = q2*q1 => rotation by q1 happens first, and then rotation by q2
+	Quaternion	GetInverse	() const;
+	Quaternion	Multiply	( Quaternion const b ) const;								// Note: q3 = q2.Multiply(q1) => q3 = q2*q1 => rotation by q1 happens first, and then rotation by q2
 	Vector3		RotatePoint	( Vector3 const point ) const;
 
 	Vector3		GetAsEuler()	const;
@@ -36,9 +36,9 @@ public:
 	Vector4 inline	GetAsVector4()	const { return Vector4( r, i.x, i.y, i.z ); }		// returns Vec4( r, i.x, i.j, i.z )
 
 public:
-	static Quaternions	FromEuler ( float x, float y, float z );
-	static Quaternions	FromEuler ( Vector3 const &eulerInDegrees );
-	static Quaternions	FromMatrix( Matrix44 const &mat44 );
+	static Quaternion	FromEuler ( float x, float y, float z );
+	static Quaternion	FromEuler ( Vector3 const &eulerInDegrees );
+	static Quaternion	FromMatrix( Matrix44 const &mat44 );
 	
-	static float		DotProduct( Quaternions const &a, Quaternions const &b );
+	static float		DotProduct( Quaternion const &a, Quaternion const &b );
 };
