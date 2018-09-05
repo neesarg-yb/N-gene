@@ -174,46 +174,57 @@ Quaternions Quaternions::FromMatrix( Matrix44 const &mat44 )
 	float const m10	= mat44.Jx;
 	float const m01	= mat44.Iy;
 
+//	Forseth's way
+//
+//	Quaternions q;
+// 	if (tr >= 0.0f) 
+// 	{
+// 		float s		= sqrtf(tr + 1.0f) * 2.0f;
+// 		float is	= 1.0f / s;
+// 
+// 		q.r		= 0.25f * s;
+// 		q.i.x	= (m21 - m12) * is;
+// 		q.i.y	= (m02 - m20) * is;
+// 		q.i.z	= (m10 - m01) * is;
+// 	} 
+// 	else if ((m00 > m11) & (m00 > m22)) 
+// 	{
+// 		float s		= sqrtf( 1.0f + m00 - m11 - m22 ) * 2.0f;
+// 		float is	= 1.0f / s;
+// 
+// 		q.r		= (m21 - m12) * is;
+// 		q.i.x	= 0.25f * s;
+// 		q.i.y	= (m01 + m10) * is;
+// 		q.i.z	= (m02 + m20) * is;
+// 	} 
+// 	else if (m11 > m22) 
+// 	{
+// 		float s		= sqrtf( 1.0f + m11 - m00 - m22 ) * 2.0f;
+// 		float is	= 1.0f / s;
+// 
+// 		q.r		= (m02 - m20) * is;
+// 		q.i.x	= (m01 + m10) * is;
+// 		q.i.y	= 0.25f * s;
+// 		q.i.z	= (m12 + m21) * is;
+// 	} 
+// 	else 
+// 	{
+// 		float s		= sqrtf( 1.0f + m22 - m00 - m11 ) * 2.0f;
+// 		float is	= 1.0f / s;
+// 		q.r		= (m10 - m01) * is;
+// 		q.i.x	= (m02 + m20) * is;
+// 		q.i.y	= (m12 + m21) * is;
+// 		q.i.z	= 0.25f * s;
+// 	}
+
+
+	// From: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
 	Quaternions q;
-	if (tr >= 0.0f) 
-	{
-		float s		= sqrtf(tr + 1.0f) * 2.0f;
-		float is	= 1.0f / s;
 
-		q.r		= 0.25f * s;
-		q.i.x	= (m21 - m12) * is;
-		q.i.y	= (m02 - m20) * is;
-		q.i.z	= (m10 - m01) * is;
-	} 
-	else if ((m00 > m11) & (m00 > m22)) 
-	{
-		float s		= sqrtf( 1.0f + m00 - m11 - m22 ) * 2.0f;
-		float is	= 1.0f / s;
-
-		q.r		= (m21 - m12) * is;
-		q.i.x	= 0.25f * s;
-		q.i.y	= (m01 + m10) * is;
-		q.i.z	= (m02 + m20) * is;
-	} 
-	else if (m11 > m22) 
-	{
-		float s		= sqrtf( 1.0f + m11 - m00 - m22 ) * 2.0f;
-		float is	= 1.0f / s;
-
-		q.r		= (m02 - m20) * is;
-		q.i.x	= (m01 + m10) * is;
-		q.i.y	= 0.25f * s;
-		q.i.z	= (m12 + m21) * is;
-	} 
-	else 
-	{
-		float s		= sqrtf( 1.0f + m22 - m00 - m11 ) * 2.0f;
-		float is	= 1.0f / s;
-		q.r		= (m10 - m01) * is;
-		q.i.x	= (m02 + m20) * is;
-		q.i.y	= (m12 + m21) * is;
-		q.i.z	= 0.25f * s;
-	}
+	q.r		= sqrtf(1 + m00 + m11 + m22) * 0.5f ;
+	q.i.x	= (m21 - m12) / (4.f * q.r);
+	q.i.y	= (m02 - m20) / (4.f * q.r);
+	q.i.z	= (m10 - m01) / (4.f * q.r);
 
 	q.Normalize();
 
