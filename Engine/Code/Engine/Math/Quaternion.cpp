@@ -1,13 +1,13 @@
 #pragma once
-#include "Quaternions.hpp"
+#include "Quaternion.hpp"
 #include "Engine/Math/MathUtil.hpp"
 
-Quaternions::Quaternions()
+Quaternion::Quaternion()
 {
 	// Identity quaternion, by default values
 }
 
-Quaternions::Quaternions( Vector3 const &axis, float rotationDegrees )
+Quaternion::Quaternion( Vector3 const &axis, float rotationDegrees )
 {
 	float halfRotationRadians = DegreeToRadian( rotationDegrees ) * 0.5f;
 
@@ -17,12 +17,12 @@ Quaternions::Quaternions( Vector3 const &axis, float rotationDegrees )
 	i.z	= axis.z * sinf( halfRotationRadians );
 }
 
-Quaternions::~Quaternions()
+Quaternion::~Quaternion()
 {
 
 }
 
-void Quaternions::Normalize()
+void Quaternion::Normalize()
 {
 	float const lengthSquared = GetMagnitudeSquared();
 
@@ -44,24 +44,24 @@ void Quaternions::Normalize()
 	}
 }
 
-float Quaternions::GetMagnitude() const
+float Quaternion::GetMagnitude() const
 {
 	return sqrtf( GetMagnitudeSquared() );
 }
 
-float Quaternions::GetMagnitudeSquared() const
+float Quaternion::GetMagnitudeSquared() const
 {
 	return DotProduct( *this, *this );
 }
 
-bool Quaternions::IsUnitQuaternion() const
+bool Quaternion::IsUnitQuaternion() const
 {
 	return ( 1.f == GetMagnitudeSquared() );
 }
 
-Quaternions Quaternions::GetInverse() const
+Quaternion Quaternion::GetInverse() const
 {
-	Quaternions qInvert;
+	Quaternion qInvert;
 
 	qInvert.r = r;
 	qInvert.i = i * -1.f;
@@ -69,9 +69,9 @@ Quaternions Quaternions::GetInverse() const
 	return qInvert;
 }
 
-Quaternions Quaternions::Multiply( Quaternions const b ) const
+Quaternion Quaternion::Multiply( Quaternion const b ) const
 {
-	Quaternions ab; // = a.Multiply( b )
+	Quaternion ab; // = a.Multiply( b )
 
 	ab.r = ( b.r * r ) - Vector3::DotProduct( i, b.i );
 	ab.i = ( i * b.r ) + ( b.i * r ) + Vector3::CrossProduct( i, b.i );
@@ -79,11 +79,11 @@ Quaternions Quaternions::Multiply( Quaternions const b ) const
 	return ab;
 }
 
-Vector3 Quaternions::RotatePoint( Vector3 const point ) const
+Vector3 Quaternion::RotatePoint( Vector3 const point ) const
 {
 	// Derived equation comes from: Rotation through multiplication of two quaternions
 	//
-	// Quaternions p;
+	// Quaternion p;
 	// p.r = 0.f;
 	// p.i = point;
 	//
@@ -99,27 +99,27 @@ Vector3 Quaternions::RotatePoint( Vector3 const point ) const
 	// return pRotated;
 
 	// But just like how our Rotation Matrix Multiplication gets applied in reverse order (Right to Left)
-	// Quaternions' sandwich multiplication also needs to be flipped..
+	// Quaternion' sandwich multiplication also needs to be flipped..
 	//
 	// Thus: return ( q.GetInverse() * p * q ).i
-	Quaternions p;
+	Quaternion p;
 	p.r = 0.f;
 	p.i = point;
 
-	Quaternions const qInv	=  this->GetInverse();
-	Quaternions const &q	= *this;
+	Quaternion const qInv	=  this->GetInverse();
+	Quaternion const &q	= *this;
 
 	return qInv.Multiply( p ).Multiply( q ).i;
 }
 
-Vector3 Quaternions::GetAsEuler() const
+Vector3 Quaternion::GetAsEuler() const
 {
 	Matrix44 mat44 = GetAsMatrix44();
 
 	return mat44.GetEulerRotation();
 }
 
-Matrix44 Quaternions::GetAsMatrix44() const
+Matrix44 Quaternion::GetAsMatrix44() const
 {
 	float const ix2 = i.x * i.x;
 	float const iy2 = i.y * i.y;
@@ -138,22 +138,22 @@ Matrix44 Quaternions::GetAsMatrix44() const
 	return Matrix44( iBasis, jBasis, kBasis, Vector3::ZERO );
 }
 
-Quaternions Quaternions::FromEuler( float x, float y, float z )
+Quaternion Quaternion::FromEuler( float x, float y, float z )
 {
-	Quaternions rotX = Quaternions( Vector3::RIGHT, x );
-	Quaternions rotY = Quaternions( Vector3::UP, y );
-	Quaternions rotZ = Quaternions( Vector3::FRONT, z );
+	Quaternion rotX = Quaternion( Vector3::RIGHT, x );
+	Quaternion rotY = Quaternion( Vector3::UP, y );
+	Quaternion rotZ = Quaternion( Vector3::FRONT, z );
 
-	Quaternions rotZXY = rotZ.Multiply( rotX ).Multiply( rotY );
+	Quaternion rotZXY = rotZ.Multiply( rotX ).Multiply( rotY );
 	return rotZXY;
 }
 
-Quaternions Quaternions::FromEuler( Vector3 const &eulerInDegrees )
+Quaternion Quaternion::FromEuler( Vector3 const &eulerInDegrees )
 {
 	return FromEuler( eulerInDegrees.x, eulerInDegrees.y, eulerInDegrees.z );
 }
 
-Quaternions Quaternions::FromMatrix( Matrix44 const &mat44 )
+Quaternion Quaternion::FromMatrix( Matrix44 const &mat44 )
 {
 	/*
 	Formula expects matrix,								My matrix is,
@@ -176,7 +176,7 @@ Quaternions Quaternions::FromMatrix( Matrix44 const &mat44 )
 
 //	Forseth's way
 //
-//	Quaternions q;
+//	Quaternion q;
 // 	if (tr >= 0.0f) 
 // 	{
 // 		float s		= sqrtf(tr + 1.0f) * 2.0f;
@@ -219,7 +219,7 @@ Quaternions Quaternions::FromMatrix( Matrix44 const &mat44 )
 
 
 	// From: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
-	Quaternions q;
+	Quaternion q;
 
 	q.r		= sqrtf(1 + m00 + m11 + m22) * 0.5f ;
 	q.i.x	= (m21 - m12) / (4.f * q.r);
@@ -231,7 +231,7 @@ Quaternions Quaternions::FromMatrix( Matrix44 const &mat44 )
 	return q;
 }
 
-float Quaternions::DotProduct( Quaternions const &a, Quaternions const &b )
+float Quaternion::DotProduct( Quaternion const &a, Quaternion const &b )
 {
 	return Vector4::DotProduct( a.GetAsVector4(), b.GetAsVector4() );
 }

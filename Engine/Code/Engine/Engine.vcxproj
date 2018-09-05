@@ -301,7 +301,7 @@
     <ClCompile Include="Math\MathUtil.cpp" />
     <ClCompile Include="Math\Matrix44.cpp" />
     <ClCompile Include="Math\Polygon2.cpp" />
-    <ClCompile Include="Math\Quaternions.cpp" />
+    <ClCompile Include="Math\Quaternion.cpp" />
     <ClCompile Include="Math\Trajectory.cpp" />
     <ClCompile Include="Math\Transform.cpp" />
     <ClCompile Include="Math\Vector2.cpp" />
@@ -401,7 +401,7 @@
     <ClInclude Include="Math\MathUtil.hpp" />
     <ClInclude Include="Math\Matrix44.hpp" />
     <ClInclude Include="Math\Polygon2.hpp" />
-    <ClInclude Include="Math\Quaternions.hpp" />
+    <ClInclude Include="Math\Quaternion.hpp" />
     <ClInclude Include="Math\Trajectory.hpp" />
     <ClInclude Include="Math\Transform.hpp" />
     <ClInclude Include="Math\Vector2.hpp" />

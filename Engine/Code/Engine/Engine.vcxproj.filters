@@ -324,7 +324,7 @@
     <ClCompile Include="Network\BytePacker.cpp">
       <Filter>Network</Filter>
     </ClCompile>
-    <ClCompile Include="Math\Quaternions.cpp">
+    <ClCompile Include="Math\Quaternion.cpp">
       <Filter>Math</Filter>
     </ClCompile>
   </ItemGroup>
@@ -629,7 +629,7 @@
     <ClInclude Include="Network\BytePacker.hpp">
       <Filter>Network</Filter>
     </ClInclude>
-    <ClInclude Include="Math\Quaternions.hpp">
+    <ClInclude Include="Math\Quaternion.hpp">
       <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
