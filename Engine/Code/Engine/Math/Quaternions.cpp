@@ -89,12 +89,27 @@ Vector3 Quaternions::RotatePoint( Vector3 const point ) const
 	//
 	// return ( q * p * q.GetInvert() ).i;				// Order of multiplication goes left to right -->
 
-	Vector3 iPointCross = Vector3::CrossProduct(i, point);
-	Vector3 pRotated	= point 
-						+ ( iPointCross * 2.f * r ) 
-						+ ( Vector3::CrossProduct(i, iPointCross) * 2.f );
+	// This is for q * p * qInverse
+	// 
+	// Vector3 iPointCross = Vector3::CrossProduct(i, point);
+	// Vector3 pRotated	= point 
+	// 					+ ( iPointCross * 2.f * r ) 
+	// 					+ ( Vector3::CrossProduct(i, iPointCross) * 2.f );
+	// 
+	// return pRotated;
 
-	return pRotated;
+	// But just like how our Rotation Matrix Multiplication gets applied in reverse order (Right to Left)
+	// Quaternions' sandwich multiplication also needs to be flipped..
+	//
+	// Thus: return ( q.GetInverse() * p * q ).i
+	Quaternions p;
+	p.r = 0.f;
+	p.i = point;
+
+	Quaternions const qInv	=  this->GetInverse();
+	Quaternions const &q	= *this;
+
+	return qInv.Multiply( p ).Multiply( q ).i;
 }
 
 Vector3 Quaternions::GetAsEuler() const
@@ -109,15 +124,15 @@ Matrix44 Quaternions::GetAsMatrix44() const
 	float const ix2 = i.x * i.x;
 	float const iy2 = i.y * i.y;
 	float const iz2 = i.z * i.z;
-
+	
 	Vector3 iBasis = Vector3( 1.f -	(2.f * iy2)		  - (2.f * iz2),
-									(2.f * i.x * i.y) + (2.f * i.z * r),
-									(2.f * i.x * i.z) - (2.f * i.y * r) );
-	Vector3 jBasis = Vector3(		(2.f * i.x * i.y) - (2.f * i.z * r),
+									(2.f * i.x * i.y) - (2.f * i.z * r),
+									(2.f * i.x * i.z) + (2.f * i.y * r) );
+	Vector3 jBasis = Vector3(		(2.f * i.x * i.y) + (2.f * i.z * r),
 							 1.f -	(2.f * ix2)		  - (2.f * iz2),
-									(2.f * i.y * i.z) + (2.f * i.x * r) );
-	Vector3 kBasis = Vector3(		(2.f * i.x * i.z) + (2.f * i.y * r),
-									(2.f * i.y * i.z) - (2.f * i.x * r),
+									(2.f * i.y * i.z) - (2.f * i.x * r) );
+	Vector3 kBasis = Vector3(		(2.f * i.x * i.z) - (2.f * i.y * r),
+									(2.f * i.y * i.z) + (2.f * i.x * r),
 							 1.f -	(2.f * ix2)		  - (2.f * iy2) );
 	
 	return Matrix44( iBasis, jBasis, kBasis, Vector3::ZERO );
