@@ -8,6 +8,7 @@
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 #include "Game/World/LevelDefinition.hpp"
+#include "Engine/Math/Quaternions.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -54,18 +55,16 @@ theGame::theGame()
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
 
-	// TESTING BYTEPACKER
-	BytePacker testBP = BytePacker( LITTLE_ENDIAN );
-	testBP.WriteSize( 987542100 );
-	
-	size_t readSize1; 
-	testBP.ReadSize( &readSize1 );
+	// TESTING QUATERNIONS
+	Quaternions rotateAroundX_Q	= Quaternions( Vector3::FRONT, 45.f );
+	Vector3		rotatedVec1		= rotateAroundX_Q.RotatePoint( Vector3::UP );
+	Matrix44	qRotate1_M		= rotateAroundX_Q.GetAsMatrix44();
+	Vector3		eulerQRotate1_M	= qRotate1_M.GetEulerRotation();
 
-	testBP.ResetWrite();
-	testBP.WriteSize( 8675309 );
-
-	size_t readSize2; 
-	testBP.ReadSize( &readSize2 );
+	Matrix44 rotateAroundX_M; 
+	rotateAroundX_M.RotateDegrees3D( Vector3( 0.f, 0.f , 45.f) );
+	Vector3	rotatedVec2				= rotateAroundX_M.Multiply( Vector3::UP, 0.f );
+	Vector3 eulerRotateAroundX_M	= rotateAroundX_M.GetEulerRotation();
 }
 
 theGame::~theGame()
