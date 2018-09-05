@@ -8,7 +8,7 @@
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 #include "Game/World/LevelDefinition.hpp"
-#include "Engine/Math/Quaternions.hpp"
+#include "Engine/Math/Quaternion.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -57,7 +57,7 @@ theGame::theGame()
 
 	// TESTING QUATERNIONS
 	// Test 1 - Simple Rotation & GetAsMatrix
-	Quaternions rotateAroundX_Q	= Quaternions( Vector3::FRONT, 45.f );
+	Quaternion	rotateAroundX_Q	= Quaternion( Vector3::FRONT, 45.f );
 	Vector3		rotatedVec1		= rotateAroundX_Q.RotatePoint( Vector3::UP );
 	Matrix44	qRotate1_M		= rotateAroundX_Q.GetAsMatrix44();
 	Vector3		eulerQRotate1_M	= qRotate1_M.GetEulerRotation();
@@ -71,7 +71,7 @@ theGame::theGame()
 	// Test 3 - From Euler
 	Vector3 eulerRotationZXY_Test3	= Vector3( 45.f, 90.f, 45.f);							// Roll counter clock wise => look up => turn right
 	// My Rotation Matrix applies y & z rotation as left-hand-rule; where quaternions applies it as right-hand-rule => Multiply with -1.f
-	Quaternions test3_Q				= Quaternions::FromEuler( eulerRotationZXY_Test3.x, -1.f * eulerRotationZXY_Test3.y, -1.f * eulerRotationZXY_Test3.z );
+	Quaternion	test3_Q				= Quaternion::FromEuler( eulerRotationZXY_Test3.x, -1.f * eulerRotationZXY_Test3.y, -1.f * eulerRotationZXY_Test3.z );
 	Matrix44	test3_M				= Matrix44();
 	test3_M.RotateDegrees3D( eulerRotationZXY_Test3 );
 
@@ -82,7 +82,7 @@ theGame::theGame()
 	
 	// Test 4 - From Matrix
 	Matrix44	rotationMatFromEuler = test3_M;
-	Quaternions	qFromMat			 = Quaternions::FromMatrix( rotationMatFromEuler );		// Is (qFromMat == test3_Q) ?? => YES!
+	Quaternion	qFromMat			 = Quaternion::FromMatrix( rotationMatFromEuler );		// Is (qFromMat == test3_Q) ?? => YES!
 	Vector3		sameAsTest3Vec_Q	 = Vector3::FRONT;
 	sameAsTest3Vec_Q				 = qFromMat.RotatePoint( sameAsTest3Vec_Q );
 	TODO( "sameAsTest3Vec_Q's z-axis is off.. compared to test3Vec_Q" );
