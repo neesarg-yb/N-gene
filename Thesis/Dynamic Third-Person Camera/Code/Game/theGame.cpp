@@ -85,7 +85,7 @@ theGame::theGame()
 	Quaternion	qFromMat			 = Quaternion::FromMatrix( rotationMatFromEuler );		// Is (qFromMat == test3_Q) ?? => YES!
 	Vector3		sameAsTest3Vec_Q	 = Vector3::FRONT;
 	sameAsTest3Vec_Q				 = qFromMat.RotatePoint( sameAsTest3Vec_Q );
-	TODO( "sameAsTest3Vec_Q's z-axis is off.. compared to test3Vec_Q" );
+	TODO( "---" );
 }
 
 theGame::~theGame()
