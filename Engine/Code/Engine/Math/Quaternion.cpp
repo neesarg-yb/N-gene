@@ -33,7 +33,7 @@ void Quaternion::Normalize()
 	if( r < 0.9999f )
 	{
 		float oneBylength = 1.f / sqrtf( lengthSquared );
-		
+		TODO("Do not messup with the read part, here!");
 		r = r * oneBylength;
 		i = i * oneBylength;
 	}
@@ -218,7 +218,10 @@ Quaternion Quaternion::FromMatrix( Matrix44 const &mat44 )
 // 	}
 
 
+	
 	// From: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+	
+	TODO( "This will fail if q.r == 0..! 90 or -90 degrees..!" ); 
 	Quaternion q;
 
 	q.r		= sqrtf(1 + m00 + m11 + m22) * 0.5f ;
