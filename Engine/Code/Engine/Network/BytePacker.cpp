@@ -88,8 +88,8 @@ bool BytePacker::WriteBytes( size_t byteCount, void const *data, bool changeEndi
 
 size_t BytePacker::WriteSize( size_t size )
 {
-	size_t numBitsRequired	= GetTotalBitsRequiredToRepresent( size ); 
-	size_t numBytesRequired	= (size_t) ceil( (double)numBitsRequired / 7.0 );
+	size_t numBitsRequired	= GetTotalBitsRequiredToRepresent( size );		// DOesn't include continue bit
+	size_t numBytesRequired	= GetTotalBytesRequiredToWriteSize( size );		// Does account for continue bit
 
 	// Check if buffer needs to grow to store new data..
 	size_t minBufferSize = GetWrittenByteCount() + numBytesRequired;
@@ -142,7 +142,8 @@ bool BytePacker::WriteString( char const *str )
 	size_t		stringLength	= stringToWrite.length();
 
 	// If buffer is smaller..
-	size_t requiredMinBufferSize = GetWritableByteCount() + stringLength;
+	size_t requiredBytesForStrLength	= GetTotalBytesRequiredToWriteSize( stringLength );
+	size_t requiredMinBufferSize		= GetWritableByteCount() + stringLength + requiredBytesForStrLength;
 	if( requiredMinBufferSize > m_bufferSize )
 	{
 		// If can grow
@@ -155,11 +156,11 @@ bool BytePacker::WriteString( char const *str )
 			return false;	// Can't grow the buffer, return
 	}
 
-	for( size_t i = 0; i < stringLength; i++ )
-	{
-		bool success = WriteBytes( 1, &str[i] );
-		GUARANTEE_RECOVERABLE( success, "BytePacker: Unexpected write error!" );
-	}
+	size_t bytesWritten	= WriteSize( stringLength );
+	GUARANTEE_RECOVERABLE( bytesWritten == requiredBytesForStrLength, "BytePacker: Unexpected error while writing size of string!" );
+
+	bool writtenString	= WriteBytes( stringLength, str );
+	GUARANTEE_RECOVERABLE( writtenString, "BytePacker: Unexpected write error!" );
 
 	return true;
 }
@@ -229,8 +230,25 @@ size_t BytePacker::ReadSize( size_t *outSize )
 
 size_t BytePacker::ReadString( char *outStr, size_t maxByteSize )
 {
-	size_t bytesGotRead			= ReadBytes( outStr, maxByteSize );
-	outStr[ bytesGotRead - 1 ]	= '\0';								// Since it is a string, end it with null terminator
+	size_t stringLength	= 0U;
+	size_t bytesRead	= ReadSize( &stringLength );
+	
+	// If failed to read a size..
+	if( bytesRead == 0U )
+		return 0U;
+
+	// Read full string - locally
+	char	*fullString		= (char *) malloc( stringLength + 1 );
+	size_t	 bytesGotRead	= ReadBytes( fullString, stringLength );
+	GUARANTEE_RECOVERABLE( bytesGotRead == stringLength, "BytePacker ReadString couldn't read the whole string!" );
+
+	// memcpy up to maxByteSize
+	size_t bytesToMemcpy			= ( maxByteSize < (stringLength + 1) ) ? maxByteSize : (stringLength + 1);
+	fullString[ bytesToMemcpy - 1 ] = '\0';
+	memcpy( outStr, fullString, bytesToMemcpy );
+
+	// Free the read string..
+	free( fullString );
 
 	return bytesGotRead;
 }
@@ -300,7 +318,7 @@ void BytePacker::ReAllocateBufferOfSizeAndCopy( size_t newBufferSize )
 	m_readHead		= 0U;
 }
 
-size_t BytePacker::GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBufferSize )
+size_t BytePacker::GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBufferSize ) const
 {
 	// Pattern: 8kb * n => 8, 16, 32, 64, ..
 	//			=> bufferSizeUnit * n
@@ -309,9 +327,16 @@ size_t BytePacker::GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBuff
 	return m_bufferSizeUnit * n;
 }
 
-size_t BytePacker::GetTotalBitsRequiredToRepresent( size_t number )
+size_t BytePacker::GetTotalBitsRequiredToRepresent( size_t number ) const
 {
 	size_t bitsRequired = (size_t) log2l( (long double)number ) + 1U;
 	return bitsRequired;
 }
 
+size_t BytePacker::GetTotalBytesRequiredToWriteSize( size_t number ) const
+{
+	size_t numBitsRequired	= GetTotalBitsRequiredToRepresent( number ); 
+	size_t numBytesRequired	= (size_t) ceil( (double)numBitsRequired / 7.0 );
+
+	return numBytesRequired;
+}

@@ -62,7 +62,8 @@ public:
 	size_t		GetReadableByteCount() const;							// How much more data can I read?
 
 private:
-	void		ReAllocateBufferOfSizeAndCopy( size_t newBufferSize );
-	size_t		GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBufferSize );		// Gives size of new buffer in stages: 8kb, 16kb, 32kb, 64kb, 128kb, etc..
-	size_t		GetTotalBitsRequiredToRepresent( size_t number );
+	void		ReAllocateBufferOfSizeAndCopy		( size_t newBufferSize );
+	size_t		GetNewBufferSizeToStoreDataOfSize	( size_t minimumRequiredBufferSize ) const;		// Gives size of new buffer in stages: 8kb, 16kb, 32kb, 64kb, 128kb, etc..
+	size_t		GetTotalBitsRequiredToRepresent		( size_t number ) const;						// Doesn't count the continue flag of the BytePacker..
+	size_t		GetTotalBytesRequiredToWriteSize	( size_t number ) const;						// Does account for continue bits in each byte
 };
