@@ -311,6 +311,7 @@
     <ClCompile Include="Network\Endianness.cpp" />
     <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="Network\NetworkAddress.cpp" />
+    <ClCompile Include="Network\RemoteCommandService.cpp" />
     <ClCompile Include="Network\TCPSocket.cpp" />
     <ClCompile Include="Profiler\ProfileLogScoped.cpp" />
     <ClCompile Include="Profiler\Profiler.cpp" />
@@ -411,6 +412,7 @@
     <ClInclude Include="Network\Endianness.hpp" />
     <ClInclude Include="Network\Network.hpp" />
     <ClInclude Include="Network\NetworkAddress.hpp" />
+    <ClInclude Include="Network\RemoteCommandService.hpp" />
     <ClInclude Include="Network\TCPSocket.hpp" />
     <ClInclude Include="Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Profiler\Profiler.hpp" />
