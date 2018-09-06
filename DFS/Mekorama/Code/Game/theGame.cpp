@@ -66,6 +66,11 @@ theGame::theGame()
 
 	size_t readSize2; 
 	testBP.ReadSize( &readSize2 );
+
+	testBP.ResetWrite();	TODO("BytePacker fails to read if I remove this line..");
+	testBP.WriteString( "Hello World!" );
+	char stringToRead[ 20 ];
+	testBP.ReadString( stringToRead, 10 );
 }
 
 theGame::~theGame()
