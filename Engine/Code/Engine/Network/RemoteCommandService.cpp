@@ -52,6 +52,8 @@ bool RemoteCommandService::ConnectToHost( NetworkAddress const &hostAddress )
 
 		ConsolePrintf( "RCS: Couldn't connect to host %s", hostAddress.ToString().c_str() );
 	}
+	else
+		ConsolePrintf( "RCS: Connected to host %s", hostAddress.ToString().c_str() );
 
 	return connectedToHost;
 }
@@ -63,20 +65,21 @@ void RemoteCommandService::Update_Initial( float deltaSeconds )
 
 	// TODO: Trying to connect to host every frame is NOT EFFICIENT!
 	if( ConnectToHost( localHostAddress ) )
+	{
 		m_currentState = RCS_STATE_CLIENT;
+		ConsolePrintf( "Is Client!" );
+	}
 	else
 		TryHosting( deltaSeconds );
 }
 
 void RemoteCommandService::Update_Hosting( float deltaSeconds )
 {
-	ConsolePrintf( "Is Hosting!" );
 	UNUSED( deltaSeconds );
 }
 
 void RemoteCommandService::Update_Client( float deltaSeconds )
 {
-	ConsolePrintf( "Is Client!" );
 	UNUSED( deltaSeconds );
 }
 
@@ -93,6 +96,7 @@ void RemoteCommandService::TryHosting( float deltaSeconds )
 		if( isListening )
 		{
 			m_currentState = RCS_STATE_HOSTING;
+			ConsolePrintf( "Is Hosting!" );
 			return;
 		}
 		else														// Failed to start listening
