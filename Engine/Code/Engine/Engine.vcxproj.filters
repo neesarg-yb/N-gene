@@ -327,6 +327,9 @@
     <ClCompile Include="Math\Quaternion.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="Network\RemoteCommandService.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -631,6 +634,9 @@
     </ClInclude>
     <ClInclude Include="Math\Quaternion.hpp">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\RemoteCommandService.hpp">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
