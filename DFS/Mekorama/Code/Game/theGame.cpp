@@ -61,16 +61,19 @@ theGame::theGame()
 	size_t readSize1; 
 	testBP.ReadSize( &readSize1 );
 
-	testBP.ResetWrite();
 	testBP.WriteSize( 8675309 );
 
 	size_t readSize2; 
 	testBP.ReadSize( &readSize2 );
-
-	testBP.ResetWrite();	TODO("BytePacker fails to read if I remove this line..");
+	
+	TODO("BytePacker fails to read if I remove this line..");
 	testBP.WriteString( "Hello World!" );
 	char stringToRead[ 20 ];
 	testBP.ReadString( stringToRead, 10 );
+
+	testBP.WriteString( "12345678" );
+	char stringToRead2[ 20 ];
+	testBP.ReadString( stringToRead2, 20 );
 }
 
 theGame::~theGame()
