@@ -315,7 +315,7 @@ void BytePacker::ReAllocateBufferOfSizeAndCopy( size_t newBufferSize )
 	m_buffer		= newBuffer;
 	m_bufferSize	= newBufferSize;
 	m_writeHead		= copyContentSize;
-	m_readHead		= 0U;
+	m_readHead		= ( m_readHead < newBufferSize ) ? m_readHead : 0U;
 }
 
 size_t BytePacker::GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBufferSize ) const
