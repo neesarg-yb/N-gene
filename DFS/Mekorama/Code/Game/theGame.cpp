@@ -162,6 +162,9 @@ void theGame::Update()
 	float deltaSeconds			= CalculateDeltaTime();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
 
+	// RCS
+	m_rcs.Update( deltaSeconds );
+
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
 	m_timeSinceStartOfTheGame	+=	deltaSeconds;
 	

@@ -103,7 +103,7 @@ void theApp::EndFrame() {
 
 void theApp::Update() {
 	g_theGame->Update();
-
+	
 	ProfileConsole::GetInstance()->Update( *g_theInput );
 
 	if( DevConsole::GetInstance()->IsOpen() )
