@@ -83,7 +83,7 @@ void RemoteCommandService::Render() const
 
 	myAddressString += Stringf( " [%s]", connectionTypeStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( "Remote Command Service:",	Vector2(0.0f, 0.5f), infoBox,		0.030f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
-	m_theRenderer->DrawTextInBox2D( myAddressString.c_str(),	Vector2(1.0f, 0.5f), myAddressBox,	0.025f, RGBA_BLACK_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+	m_theRenderer->DrawTextInBox2D( myAddressString.c_str(),	Vector2(1.0f, 0.5f), myAddressBox,	0.025f, RGBA_GREEN_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	std::string clientConnectionsString = "Connected Clients:";
 	for ( int i = 0; i < m_clientSockets.size(); i++ )
@@ -324,12 +324,11 @@ void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
 		bool isEcho;
 		clientBytePacker->ReadBytes( &isEcho, 1 );
 
-		size_t sizeOfString;
-		clientBytePacker->ReadSize( &sizeOfString );
-
 		char commandString[256];
 		clientBytePacker->ReadString( commandString, 256 );
 
 		clientBytePacker->ResetWrite();
+
+		ConsolePrintf( "Received %d bytes long Command: IsEcho = %d; Message = \"%s\".", commandLength, isEcho, commandString );
 	}
 }
