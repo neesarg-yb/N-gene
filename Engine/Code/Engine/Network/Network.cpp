@@ -48,7 +48,7 @@ void NetworkMyIP( Command &cmd )
 	uint fetchedLocal = NetworkAddress::GetAllLocal( localAddresses, 3 );
 
 	for( uint i = 0; i < fetchedLocal; i++ )
-		ConsolePrintf( "(%u) My IP: %s", i+1U, localAddresses[i].ToString().c_str() );
+		ConsolePrintf( "(%u) My IP: %s", i+1U, localAddresses[i].IPToString().c_str() );
 }
 
 void NetworkStartServer( Command &cmd )
@@ -144,7 +144,7 @@ void NetworkSendMessage( Command &cmd )
 
 	if( socket.Connect( hostAddress ) )
 	{
-		ConsolePrintf( "Sending \"%s\" to %s ..", msg.c_str(), hostAddress.ToString().c_str() );
+		ConsolePrintf( "Sending \"%s\" to %s ..", msg.c_str(), hostAddress.IPToString().c_str() );
 		socket.Send( msg.c_str(), msg.size() );
 
 		char payload[256];
@@ -155,5 +155,5 @@ void NetworkSendMessage( Command &cmd )
 		socket.Close();
 	}
 	else
-		ConsolePrintf( "Error: Could not connect to %s!", hostAddress.ToString().c_str() );
+		ConsolePrintf( "Error: Could not connect to %s!", hostAddress.IPToString().c_str() );
 }
