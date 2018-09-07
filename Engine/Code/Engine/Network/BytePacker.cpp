@@ -239,7 +239,7 @@ size_t BytePacker::ReadString( char *outStr, size_t maxByteSize )
 
 	// Read full string - locally
 	char	*fullString		= (char *) malloc( stringLength + 1 );
-	size_t	 bytesGotRead	= ReadBytes( fullString, stringLength );
+	size_t	 bytesGotRead	= ReadBytes( fullString, stringLength, false );
 	GUARANTEE_RECOVERABLE( bytesGotRead == stringLength, "BytePacker ReadString couldn't read the whole string!" );
 
 	// memcpy up to maxByteSize
