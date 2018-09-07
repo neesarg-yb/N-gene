@@ -42,6 +42,20 @@ void ForceFlushTest ( Command &cmd )
 	UNUSED( cmd );
 }
 
+void SendEchoToClient( Command &cmd )
+{
+	std::string firstArg	= cmd.GetNextString();
+	std::string secondArg	= cmd.GetNextString();
+
+	if( secondArg != "" )
+	{
+		uint idx = (uint) atoi( firstArg.c_str() );
+		g_rcs->SendMessageToClient( idx, true, secondArg.c_str() );
+	}
+	else
+		g_rcs->SendMessageToClient( 0U, true, firstArg.c_str() );
+}
+
 theApp::theApp()
 {
 	g_theRenderer = new Renderer();
@@ -75,6 +89,7 @@ void theApp::Startup()
 	CommandRegister( "profiler", ShowHideProfileConsole );
 	CommandRegister( "log_text", LogTextFromCommand );
 	CommandRegister( "log_force_flush", ForceFlushTest );
+	CommandRegister( "sendEcho", SendEchoToClient );
 	g_theGame->Startup();
 
 	DebuggerPrintf( "theApp::Startup()" );
