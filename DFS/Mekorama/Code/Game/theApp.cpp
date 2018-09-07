@@ -45,6 +45,7 @@ void ForceFlushTest ( Command &cmd )
 theApp::theApp()
 {
 	g_theRenderer = new Renderer();
+	g_rcs = new RemoteCommandService( g_theRenderer );
 	g_theGame = new theGame();
 	g_theInput = new InputSystem();
 
@@ -61,6 +62,9 @@ theApp::~theApp()
 
 	delete g_theGame;
 	g_theGame = nullptr;
+
+	delete g_rcs;
+	g_rcs = nullptr;
 
 	delete g_theRenderer;
 	g_theRenderer = nullptr;
@@ -116,7 +120,10 @@ void theApp::Render() {
 	ProfileConsole::GetInstance()->Render();
 
 	if( DevConsole::GetInstance()->IsOpen() )
+	{
 		DevConsole::GetInstance()->Render();
+		g_rcs->Render();
+	}
 }
 
 bool theApp::IsQuitting() {
