@@ -2,6 +2,8 @@
 #include <vector>
 #include "Engine/Network/TCPSocket.hpp"
 #include "Engine/Network/BytePacker.hpp"
+#include "Engine/Math/AABB2.hpp"
+#include "Engine/Core/Rgba.hpp"
 
 enum eRCSState
 {
@@ -11,10 +13,14 @@ enum eRCSState
 	NUM_RCS_STATES
 };
 
+class Camera;
+class Renderer;
+class BitmapFont;
+
 class RemoteCommandService
 {
 public:
-	 RemoteCommandService( uint16_t port = 29283 );
+	 RemoteCommandService( Renderer *currentRenderer = nullptr, uint16_t port = 29283 );
 	~RemoteCommandService();
 
 public:
@@ -24,8 +30,18 @@ public:
 	TCPSocket*					m_hostSocket		= nullptr;
 	eRCSState					m_currentState		= RCS_STATE_INITIAL;
 
+	Renderer*					m_theRenderer		= nullptr;
+	Camera*						m_uiCamera			= nullptr;
+	BitmapFont*					m_fonts				= nullptr;
+	Vector2 const				m_screenBottomLeft	= Vector2( -g_aspectRatio, -1.f );
+	Vector2 const				m_screenTopRight	= Vector2(  g_aspectRatio,  1.f );
+	AABB2	const				m_screenBounds		= AABB2  ( m_screenBottomLeft, m_screenTopRight );
+	Rgba	const				m_uiBackgroundColor = Rgba( 180, 180, 180, 100 );
+
 public:
 	void Update( float deltaSeconds );
+	void Render() const;
+
 	bool ConnectToHost( NetworkAddress const &hostAddress );
 
 private:

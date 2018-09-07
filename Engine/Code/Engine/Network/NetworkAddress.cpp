@@ -67,12 +67,17 @@ bool NetworkAddress::FromSocketAddress( sockaddr const *sa )
 	return true;
 }
 
-std::string NetworkAddress::ToString() const
+std::string NetworkAddress::IPToString() const
 {
 	char outAddress[256];
 	inet_ntop( AF_INET, &addressIPv4, outAddress, 256 );
 
 	return std::string( outAddress );
+}
+
+std::string NetworkAddress::PortToString() const
+{
+	return std::to_string( port );
 }
 
 NetworkAddress NetworkAddress::GetLocal()
