@@ -5,6 +5,7 @@
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
+#include "Engine/Input/Command.hpp"
 
 RemoteCommandService::RemoteCommandService( Renderer *currentRenderer /* = nullptr */, uint16_t port /* = 29283 */ )
 	: m_defaultPortToHost( port )
@@ -77,22 +78,24 @@ void RemoteCommandService::Render() const
 		connectionTypeStr = "Not Connected";
 		break;
 	}
+
 	std::string myAddressString = "...";
-	if( m_hostSocket != nullptr )
-		myAddressString = m_hostSocket->m_address.IPToString() + ":" + m_hostSocket->m_address.PortToString();
+	myAddressString = NetworkAddress::GetLocal().IPToString();
+	if( m_currentState == RCS_STATE_HOSTING )
+		myAddressString += ":" + std::to_string( m_defaultPortToHost );
 
 	myAddressString += Stringf( " [%s]", connectionTypeStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( "Remote Command Service:",	Vector2(0.0f, 0.5f), infoBox,		0.030f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 	m_theRenderer->DrawTextInBox2D( myAddressString.c_str(),	Vector2(1.0f, 0.5f), myAddressBox,	0.025f, RGBA_GREEN_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
-	std::string clientConnectionsString = "Connected Clients:";
-	for ( int i = 0; i < m_clientSockets.size(); i++ )
+	std::string connectionsString = "Connections:";
+	for ( int i = 0; i < m_connectionSockets.size(); i++ )
 	{
-		std::string clientAddressStr = Stringf("\n (%d) ", i) + m_clientSockets[i]->m_address.IPToString() + ":" + m_clientSockets[i]->m_address.PortToString();
-		clientConnectionsString		+= clientAddressStr;
+		std::string clientAddressStr = Stringf("\n (%d) ", i) + m_connectionSockets[i]->m_address.IPToString() + ":" + m_connectionSockets[i]->m_address.PortToString();
+		connectionsString += clientAddressStr;
 	}
 
-	m_theRenderer->DrawTextInBox2D( clientConnectionsString.c_str(), Vector2(0.f, 1.f), clientListBox, 0.025f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
+	m_theRenderer->DrawTextInBox2D( connectionsString.c_str(), Vector2(0.f, 1.f), clientListBox, 0.025f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 }
 
 bool RemoteCommandService::ConnectToHost( NetworkAddress const &hostAddress )
@@ -153,6 +156,13 @@ void RemoteCommandService::Update_Initial( float deltaSeconds )
 	if( ConnectToHost( localHostAddress ) )
 	{
 		m_currentState = RCS_STATE_CLIENT;
+		
+		// Add that host to connections socket & bytepacker
+		BytePacker *clientsBytePacker = new BytePacker( BIG_ENDIAN );
+
+		m_connectionSockets.push_back( m_hostSocket );
+		m_bytePackers.push_back( clientsBytePacker );
+
 		ConsolePrintf( "Is Client!" );
 	}
 	else
@@ -174,8 +184,8 @@ void RemoteCommandService::Update_Hosting( float deltaSeconds )
 	// Create a new bytepacker for every new connection
 	BytePacker *clientsBytePacker = new BytePacker( BIG_ENDIAN );
 
-	// Store client & its bytepacker
-	m_clientSockets.push_back( newClient );
+	// Store connection & its bytepacker
+	m_connectionSockets.push_back( newClient );
 	m_bytePackers.push_back( clientsBytePacker );
 
 	// Make client socket, non-blocking
@@ -242,17 +252,17 @@ void RemoteCommandService::ClearHostData()
 		m_hostSocket = nullptr;
 	}
 
-	// Deletes all the clients' data
-	while( m_clientSockets.size() > 0 )
+	// Deletes all the connections' data
+	while( m_connectionSockets.size() > 0 )
 	{
 		// Delete client socket
-		delete m_clientSockets[0];
-		m_clientSockets[0] = nullptr;
+		delete m_connectionSockets[0];
+		m_connectionSockets[0] = nullptr;
 
 		// Fast remove
-		uint lastIndex = (uint)m_clientSockets.size() - 1U;
-		std::swap( m_clientSockets[0], m_clientSockets[lastIndex] );
-		m_clientSockets.pop_back();
+		uint lastIndex = (uint)m_connectionSockets.size() - 1U;
+		std::swap( m_connectionSockets[0], m_connectionSockets[lastIndex] );
+		m_connectionSockets.pop_back();
 
 		// Delete its bytepacker
 		delete m_bytePackers[0];
@@ -265,15 +275,15 @@ void RemoteCommandService::ClearHostData()
 
 TCPSocket* RemoteCommandService::GetSocketAtIndex( uint idx )
 {
-	if( idx >= m_clientSockets.size() )
+	if( idx >= m_connectionSockets.size() )
 		return nullptr;
 	else
-		return m_clientSockets[ idx ];
+		return m_connectionSockets[ idx ];
 }
 
 void RemoteCommandService::ServiceClientConnections()
 {
-	for( int i = 0; i < m_clientSockets.size(); i++ )
+	for( int i = 0; i < m_connectionSockets.size(); i++ )
 		PopulateByteBufferForClient( i );
 }
 
@@ -329,6 +339,8 @@ void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
 
 		clientBytePacker->ResetWrite();
 
-		ConsolePrintf( "Received %d bytes long Command: IsEcho = %d; Message = \"%s\".", commandLength, isEcho, commandString );
+		ConsolePrintf( "Received:" );
+		ConsolePrintf( "%d bytes long Command: IsEcho = %d; Message = \"%s\".", commandLength, isEcho, commandString );
+		CommandRun( commandString );
 	}
 }
