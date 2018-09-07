@@ -117,6 +117,33 @@ bool RemoteCommandService::ConnectToHost( NetworkAddress const &hostAddress )
 	return connectedToHost;
 }
 
+void RemoteCommandService::SendMessageToClient( uint idx, bool isEcho, char const *msg )
+{
+	// Get the client socket
+	TCPSocket *socket = GetSocketAtIndex( idx );
+	if( socket == nullptr )
+		return;
+
+	SendMessageUsingSocket( *socket, isEcho, msg );
+}
+
+void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg )
+{
+	BytePacker message( BIG_ENDIAN );
+
+	message.WriteBytes( 1, &isEcho );
+	message.WriteString( msg );
+
+	size_t length = message.GetWritableByteCount();
+	GUARANTEE_RECOVERABLE( length <= 0xffff, "RCS Error: Format doesn't support length larger than unsigned short!" );
+
+	uint16_t usLength = (uint16_t)length;
+	ChangeEndiannessTo( sizeof(usLength), &usLength, BIG_ENDIAN );
+
+	endSocket.Send( &usLength, sizeof(usLength) );
+	endSocket.Send( message.GetBuffer(), length );
+}
+
 void RemoteCommandService::Update_Initial( float deltaSeconds )
 {
 	NetworkAddress localHostAddress	= NetworkAddress::GetLocal();
@@ -230,4 +257,12 @@ void RemoteCommandService::ClearHostData()
 		std::swap( m_bytePackers[0], m_bytePackers[lastIndex] );
 		m_bytePackers.pop_back();
 	}
+}
+
+TCPSocket* RemoteCommandService::GetSocketAtIndex( uint idx )
+{
+	if( idx >= m_clientSockets.size() )
+		return nullptr;
+	else
+		return m_clientSockets[ idx ];
 }
