@@ -24,7 +24,7 @@ public:
 	~RemoteCommandService();
 
 public:
-	std::vector< TCPSocket* >	m_clientSockets;
+	std::vector< TCPSocket* >	m_connectionSockets;
 	std::vector< BytePacker* >	m_bytePackers;
 	uint16_t const				m_defaultPortToHost = 29283;
 	TCPSocket*					m_hostSocket		= nullptr;
