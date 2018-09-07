@@ -58,4 +58,6 @@ private:
 	void		TryHosting( float deltaSeconds );
 	void		ClearHostData();					// deletes host & client connection sockets..
 	TCPSocket*	GetSocketAtIndex( uint idx );
+	void		ServiceClientConnections();
+	void		PopulateByteBufferForClient( uint clientIdx );
 };
