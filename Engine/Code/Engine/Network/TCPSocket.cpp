@@ -160,16 +160,16 @@ bool TCPSocket::DisableNonBlocking()
 	return (zeroOnSuccess == 0);
 }
 
-size_t TCPSocket::Send( void const *data, size_t const dataByteSize )
+int TCPSocket::Send( void const *data, size_t const dataByteSize )
 {
 	int		numBytesSent = ::send( m_handle, (const char*)data, (int)dataByteSize, 0 );
 
-	return (numBytesSent != SOCKET_ERROR) ? (size_t)numBytesSent : 0;
+	return numBytesSent;
 }
 
-size_t TCPSocket::Receive( void *buffer, size_t const maxByteSize )
+int TCPSocket::Receive( void *buffer, size_t const maxByteSize )
 {
-	size_t receivedBytes = ::recv( m_handle, (char *)buffer, (int)maxByteSize - 1, 0 );
+	int receivedBytes = ::recv( m_handle, (char *)buffer, (int)maxByteSize, 0 );
 
 	return receivedBytes;
 }

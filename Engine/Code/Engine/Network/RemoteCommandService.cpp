@@ -163,6 +163,9 @@ void RemoteCommandService::Update_Hosting( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
 
+	// Service every client connections
+	ServiceClientConnections();
+
 	// Accept new connections
 	TCPSocket *newClient = m_hostSocket->Accept();
 	if( newClient == nullptr )
@@ -175,7 +178,8 @@ void RemoteCommandService::Update_Hosting( float deltaSeconds )
 	m_clientSockets.push_back( newClient );
 	m_bytePackers.push_back( clientsBytePacker );
 
-	// TODO: Service every client connections
+	// Make client socket, non-blocking
+	newClient->EnableNonBlocking();
 }
 
 void RemoteCommandService::Update_Client( float deltaSeconds )
@@ -265,4 +269,67 @@ TCPSocket* RemoteCommandService::GetSocketAtIndex( uint idx )
 		return nullptr;
 	else
 		return m_clientSockets[ idx ];
+}
+
+void RemoteCommandService::ServiceClientConnections()
+{
+	for( int i = 0; i < m_clientSockets.size(); i++ )
+		PopulateByteBufferForClient( i );
+}
+
+void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
+{
+	// Get client's socket & bytepacker
+	TCPSocket *clientSocket = GetSocketAtIndex( clientIdx );
+	if( clientSocket == nullptr )
+		return;
+
+	BytePacker *clientBytePacker = m_bytePackers[ clientIdx ];
+
+	if( clientBytePacker->GetWrittenByteCount() < 2 )
+	{
+		byte_t	lengthOfCommand[2];
+		size_t	bytesToReadLength = 2 - clientBytePacker->GetWrittenByteCount();
+		int		read = clientSocket->Receive( lengthOfCommand, bytesToReadLength );
+		if( read > 0 )
+			clientBytePacker->WriteBytes( read, lengthOfCommand, false );
+	}
+
+	bool isReadyToProcess = false;
+	if( clientBytePacker->GetWrittenByteCount() >= 2 )
+	{
+		// Get total length of command, we're expecting to read as one whole instruction!
+		uint16_t lengthInBigEndian = ( (uint16_t *)clientBytePacker->GetBuffer() )[0];
+		ChangeEndiannessFrom( sizeof(uint16_t), &lengthInBigEndian, BIG_ENDIAN );
+		uint16_t lengthOfCommand = lengthInBigEndian;
+
+		uint bytesNeeded = (lengthOfCommand + 2U) - (uint)clientBytePacker->GetWrittenByteCount();
+		if( bytesNeeded > 0 )
+		{
+			byte_t tempBuffer[ 256 ];
+			int read = clientSocket->Receive( tempBuffer, 256 );
+			
+			clientBytePacker->WriteBytes( read, tempBuffer, false );
+			bytesNeeded -= read;
+		}
+
+		isReadyToProcess = ( bytesNeeded == 0 );
+	}
+
+	if( isReadyToProcess )
+	{
+		uint16_t commandLength;
+		clientBytePacker->ReadBytes( &commandLength, 2 );
+
+		bool isEcho;
+		clientBytePacker->ReadBytes( &isEcho, 1 );
+
+		size_t sizeOfString;
+		clientBytePacker->ReadSize( &sizeOfString );
+
+		char commandString[256];
+		clientBytePacker->ReadString( commandString, 256 );
+
+		clientBytePacker->ResetWrite();
+	}
 }

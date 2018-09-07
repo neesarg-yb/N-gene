@@ -23,8 +23,8 @@ public:
 	// Traffic
 	bool	EnableNonBlocking();
 	bool	DisableNonBlocking();
-	size_t	Send( void const *data, size_t const dataByteSize );	// returns "how much got sent?"
-	size_t	Receive( void *buffer, size_t const maxByteSize );		// returns "how much got received?"
+	int		Send( void const *data, size_t const dataByteSize );	// returns "how much got sent?"
+	int		Receive( void *buffer, size_t const maxByteSize );		// returns "how much got received?"
 
 	// Helpers
 	bool	IsClosed() const;
