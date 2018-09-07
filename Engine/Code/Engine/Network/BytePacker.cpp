@@ -159,7 +159,7 @@ bool BytePacker::WriteString( char const *str )
 	size_t bytesWritten	= WriteSize( stringLength );
 	GUARANTEE_RECOVERABLE( bytesWritten == requiredBytesForStrLength, "BytePacker: Unexpected error while writing size of string!" );
 
-	bool writtenString	= WriteBytes( stringLength, str );
+	bool writtenString	= WriteBytes( stringLength, str, false );
 	GUARANTEE_RECOVERABLE( writtenString, "BytePacker: Unexpected write error!" );
 
 	return true;

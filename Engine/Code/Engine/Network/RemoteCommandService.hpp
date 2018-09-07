@@ -43,6 +43,8 @@ public:
 	void Render() const;
 
 	bool ConnectToHost( NetworkAddress const &hostAddress );
+	void SendMessageToClient( uint idx, bool isEcho, char const *msg );
+	void SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg );
 
 private:
 	void Update_Initial( float deltaSeconds );		// Tries to either host local or connect to the new host
@@ -55,4 +57,5 @@ private:
 
 	void		TryHosting( float deltaSeconds );
 	void		ClearHostData();					// deletes host & client connection sockets..
+	TCPSocket*	GetSocketAtIndex( uint idx );
 };
