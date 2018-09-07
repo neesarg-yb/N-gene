@@ -142,6 +142,24 @@ void TCPSocket::Close()
 	}
 }
 
+bool TCPSocket::EnableNonBlocking()
+{
+	// non_blocking = 1, if not blocking
+	u_long nonBlocking = 1;
+	int zeroOnSuccess = ::ioctlsocket( (SOCKET)m_handle, FIONBIO, &nonBlocking );
+
+	return (zeroOnSuccess == 0);
+}
+
+bool TCPSocket::DisableNonBlocking()
+{
+	// non_blocking = 0, if blocking
+	u_long nonBlocking = 0;
+	int zeroOnSuccess = ::ioctlsocket( (SOCKET)m_handle, FIONBIO, &nonBlocking );
+
+	return (zeroOnSuccess == 0);
+}
+
 size_t TCPSocket::Send( void const *data, size_t const dataByteSize )
 {
 	int		numBytesSent = ::send( m_handle, (const char*)data, (int)dataByteSize, 0 );

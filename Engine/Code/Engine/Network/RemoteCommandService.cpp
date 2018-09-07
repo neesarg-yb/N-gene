@@ -88,7 +88,7 @@ void RemoteCommandService::Render() const
 	std::string clientConnectionsString = "Connected Clients:";
 	for ( int i = 0; i < m_clientSockets.size(); i++ )
 	{
-		std::string clientAddressStr = Stringf("\n (%d) ", i) + m_clientSockets[i]->m_address.IPToString();
+		std::string clientAddressStr = Stringf("\n (%d) ", i) + m_clientSockets[i]->m_address.IPToString() + ":" + m_clientSockets[i]->m_address.PortToString();
 		clientConnectionsString		+= clientAddressStr;
 	}
 
@@ -135,7 +135,7 @@ void RemoteCommandService::Update_Initial( float deltaSeconds )
 void RemoteCommandService::Update_Hosting( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
-/*	
+
 	// Accept new connections
 	TCPSocket *newClient = m_hostSocket->Accept();
 	if( newClient == nullptr )
@@ -149,7 +149,6 @@ void RemoteCommandService::Update_Hosting( float deltaSeconds )
 	m_bytePackers.push_back( clientsBytePacker );
 
 	// TODO: Service every client connections
-*/
 }
 
 void RemoteCommandService::Update_Client( float deltaSeconds )
@@ -170,7 +169,9 @@ void RemoteCommandService::TryHosting( float deltaSeconds )
 		if( isListening )
 		{
 			m_currentState = RCS_STATE_HOSTING;
-			ConsolePrintf( "Is Hosting!" );
+			bool isNonBlocking = m_hostSocket->EnableNonBlocking();
+			GUARANTEE_RECOVERABLE( isNonBlocking, "RCS: Couldn't make the hosting socket non-blocking!" );
+			ConsolePrintf( "Is Hosting..! Non-Blocking = %s", (isNonBlocking) ? "YES" : "NO" );
 			return;
 		}
 		else														// Failed to start listening
