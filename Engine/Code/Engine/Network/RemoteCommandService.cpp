@@ -7,6 +7,8 @@
 #include "Engine/Renderer/BitmapFont.hpp"
 #include "Engine/Input/Command.hpp"
 
+#define MAX_PACKET_SIZE (8384)
+
 RemoteCommandService::RemoteCommandService( Renderer *currentRenderer /* = nullptr */, uint16_t port /* = 29283 */ )
 	: m_defaultPortToHost( port )
 	, m_theRenderer( currentRenderer )
@@ -314,11 +316,11 @@ void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
 		uint16_t lengthOfCommand = lengthInBigEndian;
 
 		uint bytesNeeded = (lengthOfCommand + 2U) - (uint)clientBytePacker->GetWrittenByteCount();
-		if( bytesNeeded > 0 )
+		byte_t tempBuffer[ MAX_PACKET_SIZE ];
+		uint receiveBytesForThisPackage = ( MAX_PACKET_SIZE < bytesNeeded ) ? MAX_PACKET_SIZE : bytesNeeded;
+		int read = clientSocket->Receive( tempBuffer, receiveBytesForThisPackage );
+		if( read > 0 )
 		{
-			byte_t tempBuffer[ 256 ];
-			int read = clientSocket->Receive( tempBuffer, 256 );
-			
 			clientBytePacker->WriteBytes( read, tempBuffer, false );
 			bytesNeeded -= read;
 		}
@@ -333,9 +335,10 @@ void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
 
 		bool isEcho;
 		clientBytePacker->ReadBytes( &isEcho, 1 );
-
-		char commandString[256];
-		clientBytePacker->ReadString( commandString, 256 );
+		
+		// Get ready to read the commandString..
+		char *commandString = (char *)malloc( commandLength );
+		clientBytePacker->ReadString( commandString, 8384 );
 
 		clientBytePacker->ResetWrite();
 
@@ -343,6 +346,8 @@ void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
 			ProcessEcho( commandString );
 		else
 			ProcessCommand( commandString );
+
+		free( commandString );
 	}
 }
 
