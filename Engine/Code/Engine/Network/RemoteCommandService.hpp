@@ -45,7 +45,7 @@ public:
 	void Render() const;
 
 	bool ConnectToHost( NetworkAddress const &hostAddress );
-	void SendMessageToClient( uint idx, bool isEcho, char const *msg );
+	void SendMessageToConnection( uint idx, bool isEcho, char const *msg );
 	void SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg );
 
 private:
@@ -60,8 +60,8 @@ private:
 	void		TryHosting( float deltaSeconds );
 	void		ClearHostData();					// deletes host & client connection sockets..
 	TCPSocket*	GetSocketAtIndex( uint idx );
-	void		ServiceClientConnections();
-	void		PopulateByteBufferForClient( uint clientIdx );
+	void		ServiceConnections();
+	void		PopulateByteBufferForConnection( uint connectionIdx );
 
 	void		ProcessEcho( char const *message );
 	void		ProcessCommand( char const *command );
