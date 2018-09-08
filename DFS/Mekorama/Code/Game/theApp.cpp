@@ -50,10 +50,10 @@ void SendEchoToClient( Command &cmd )
 	if( secondArg != "" )
 	{
 		uint idx = (uint) atoi( firstArg.c_str() );
-		g_rcs->SendMessageToClient( idx, true, secondArg.c_str() );
+		g_rcs->SendMessageToConnection( idx, true, secondArg.c_str() );
 	}
 	else
-		g_rcs->SendMessageToClient( 0U, true, firstArg.c_str() );
+		g_rcs->SendMessageToConnection( 0U, true, firstArg.c_str() );
 }
 
 void SendCommand( Command &cmd )
@@ -64,10 +64,10 @@ void SendCommand( Command &cmd )
 	if( secondArg != "" )
 	{
 		uint idx = (uint) atoi( firstArg.c_str() );
-		g_rcs->SendMessageToClient( idx, false, secondArg.c_str() );
+		g_rcs->SendMessageToConnection( idx, false, secondArg.c_str() );
 	}
 	else
-		g_rcs->SendMessageToClient( 0U, false, firstArg.c_str() );
+		g_rcs->SendMessageToConnection( 0U, false, firstArg.c_str() );
 }
 
 theApp::theApp()
