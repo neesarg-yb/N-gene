@@ -12,6 +12,8 @@
 
 class Command;
 
+typedef std::function< void( char const *) > devConsoleHook_cb;
+
 struct OutputStringsBuffer
 {
 	std::string	m_line_str;
@@ -42,6 +44,10 @@ public:
 	void Close(); 
 	bool IsOpen(); 
 	void ClearOutputBuffer();
+
+	// Console Hook
+	void DevConsoleHook		( devConsoleHook_cb *cbToHook );
+	void DevConsoleUnhook	( devConsoleHook_cb *cbToUnhook );
 
 private:
 			float	CalculateDeltaTime();
@@ -89,9 +95,10 @@ private:
 	static	SpinLock	s_outputBufferLock;
 	static	std::vector< OutputStringsBuffer >	s_outputBuffer;
 
-			int					m_historySkipCount	= -1;
-	const	int					m_maxHistoryCount	= 50;
-	std::vector< std::string >	m_commandHistory;
+			int							m_historySkipCount	= -1;
+	const	int							m_maxHistoryCount	= 50;
+	std::vector< std::string >			m_commandHistory;
+	std::vector< devConsoleHook_cb* >	m_consoleHooks;
 
 public:
 	static DevConsole*	InitalizeSingleton( Renderer& currentRenderer );

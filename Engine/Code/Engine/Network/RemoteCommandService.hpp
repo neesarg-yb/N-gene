@@ -1,9 +1,11 @@
 #pragma once
 #include <vector>
+#include <functional>
+#include "Engine/Core/Rgba.hpp"
+#include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Network/TCPSocket.hpp"
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/Math/AABB2.hpp"
-#include "Engine/Core/Rgba.hpp"
 
 enum eRCSState
 {
@@ -60,4 +62,10 @@ private:
 	TCPSocket*	GetSocketAtIndex( uint idx );
 	void		ServiceClientConnections();
 	void		PopulateByteBufferForClient( uint clientIdx );
+
+	void		ProcessEcho( char const *message );
+	void		ProcessCommand( char const *command );
+	void		SendEchoToConnection( char const *message );
+
+	std::function<void( const char* )> m_echoMethod = std::bind( &RemoteCommandService::SendEchoToConnection, this, std::placeholders::_1 );
 };
