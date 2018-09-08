@@ -130,6 +130,34 @@ void DevConsole::ClearOutputBuffer()
 	s_outputBufferLock.Leave();
 }
 
+void DevConsole::DevConsoleHook( devConsoleHook_cb *cbToHook )
+{
+	bool hookAlreadyExists = false;
+
+	for( uint i = 0; i < m_consoleHooks.size(); i++ )
+		hookAlreadyExists = ( cbToHook == m_consoleHooks[i] );
+
+	if( hookAlreadyExists == false )
+		m_consoleHooks.push_back( cbToHook );
+}
+
+void DevConsole::DevConsoleUnhook( devConsoleHook_cb *cbToUnhook )
+{
+	for( uint i = 0; i < m_consoleHooks.size(); i++ )
+	{
+		if( m_consoleHooks[i] == cbToUnhook )
+		{
+			uint lastIdx = (uint)m_consoleHooks.size() - 1;
+
+			// Fast remove..
+			std::swap( m_consoleHooks[i], m_consoleHooks[lastIdx] );
+			m_consoleHooks.pop_back();
+
+			return;
+		}
+	}
+}
+
 DevConsole* DevConsole::InitalizeSingleton( Renderer& currentRenderer )
 {
 	if(s_devConsoleInstance == nullptr)
@@ -378,6 +406,11 @@ void DevConsole::WriteToOutputBuffer( std::string line_str, Rgba line_color /*= 
 {
 	if( line_str != "" )
 	{
+		// Send it to all the hooks
+		for each ( devConsoleHook_cb *hookCallBack in GetInstance()->m_consoleHooks )
+			(*hookCallBack)( line_str.c_str() );
+
+		// Push it to DevConsole's out buffer
 		s_outputBufferLock.Enter();
 		s_outputBuffer.push_back( OutputStringsBuffer(line_str, line_color) );
 		s_outputBufferLock.Leave();

@@ -339,8 +339,27 @@ void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
 
 		clientBytePacker->ResetWrite();
 
-		ConsolePrintf( "Received:" );
-		ConsolePrintf( "%d bytes long Command: IsEcho = %d; Message = \"%s\".", commandLength, isEcho, commandString );
-		CommandRun( commandString );
+		if( isEcho )
+			ProcessEcho( commandString );
+		else
+			ProcessCommand( commandString );
 	}
+}
+
+void RemoteCommandService::ProcessEcho( char const *message )
+{
+	ConsolePrintf( RGBA_GRAY_COLOR, message );
+}
+
+void RemoteCommandService::ProcessCommand( char const *command )
+{
+	DevConsole::GetInstance()->DevConsoleHook( &m_echoMethod );
+	CommandRun( command );
+	DevConsole::GetInstance()->DevConsoleUnhook( &m_echoMethod );
+}
+
+void RemoteCommandService::SendEchoToConnection( char const *message )
+{
+	for each (TCPSocket* receiverSocket in m_connectionSockets)
+		SendMessageUsingSocket( *receiverSocket, true, message );
 }
