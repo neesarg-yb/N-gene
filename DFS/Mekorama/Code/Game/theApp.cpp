@@ -56,6 +56,20 @@ void SendEchoToClient( Command &cmd )
 		g_rcs->SendMessageToClient( 0U, true, firstArg.c_str() );
 }
 
+void SendCommand( Command &cmd )
+{
+	std::string firstArg	= cmd.GetNextString();
+	std::string secondArg	= cmd.GetNextString();
+
+	if( secondArg != "" )
+	{
+		uint idx = (uint) atoi( firstArg.c_str() );
+		g_rcs->SendMessageToClient( idx, false, secondArg.c_str() );
+	}
+	else
+		g_rcs->SendMessageToClient( 0U, false, firstArg.c_str() );
+}
+
 theApp::theApp()
 {
 	g_theRenderer = new Renderer();
@@ -90,6 +104,7 @@ void theApp::Startup()
 	CommandRegister( "log_text", LogTextFromCommand );
 	CommandRegister( "log_force_flush", ForceFlushTest );
 	CommandRegister( "sendEcho", SendEchoToClient );
+	CommandRegister( "sendCommand", SendCommand );
 	g_theGame->Startup();
 
 	DebuggerPrintf( "theApp::Startup()" );
