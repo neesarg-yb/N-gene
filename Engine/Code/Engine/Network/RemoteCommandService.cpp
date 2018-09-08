@@ -122,7 +122,7 @@ bool RemoteCommandService::ConnectToHost( NetworkAddress const &hostAddress )
 	return connectedToHost;
 }
 
-void RemoteCommandService::SendMessageToClient( uint idx, bool isEcho, char const *msg )
+void RemoteCommandService::SendMessageToConnection( uint idx, bool isEcho, char const *msg )
 {
 	// Get the client socket
 	TCPSocket *socket = GetSocketAtIndex( idx );
@@ -162,6 +162,7 @@ void RemoteCommandService::Update_Initial( float deltaSeconds )
 		// Add that host to connections socket & bytepacker
 		BytePacker *clientsBytePacker = new BytePacker( BIG_ENDIAN );
 
+		m_hostSocket->EnableNonBlocking();
 		m_connectionSockets.push_back( m_hostSocket );
 		m_bytePackers.push_back( clientsBytePacker );
 
@@ -176,7 +177,7 @@ void RemoteCommandService::Update_Hosting( float deltaSeconds )
 	UNUSED( deltaSeconds );
 
 	// Service every client connections
-	ServiceClientConnections();
+	ServiceConnections();
 
 	// Accept new connections
 	TCPSocket *newClient = m_hostSocket->Accept();
@@ -197,6 +198,9 @@ void RemoteCommandService::Update_Hosting( float deltaSeconds )
 void RemoteCommandService::Update_Client( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
+
+	// Service every connections => Which should be just one, host.
+	ServiceConnections();
 }
 
 void RemoteCommandService::TryHosting( float deltaSeconds )
@@ -283,20 +287,20 @@ TCPSocket* RemoteCommandService::GetSocketAtIndex( uint idx )
 		return m_connectionSockets[ idx ];
 }
 
-void RemoteCommandService::ServiceClientConnections()
+void RemoteCommandService::ServiceConnections()
 {
 	for( int i = 0; i < m_connectionSockets.size(); i++ )
-		PopulateByteBufferForClient( i );
+		PopulateByteBufferForConnection( i );
 }
 
-void RemoteCommandService::PopulateByteBufferForClient( uint clientIdx )
+void RemoteCommandService::PopulateByteBufferForConnection( uint connectionIdx )
 {
 	// Get client's socket & bytepacker
-	TCPSocket *clientSocket = GetSocketAtIndex( clientIdx );
+	TCPSocket *clientSocket = GetSocketAtIndex( connectionIdx );
 	if( clientSocket == nullptr )
 		return;
 
-	BytePacker *clientBytePacker = m_bytePackers[ clientIdx ];
+	BytePacker *clientBytePacker = m_bytePackers[ connectionIdx ];
 
 	if( clientBytePacker->GetWrittenByteCount() < 2 )
 	{
