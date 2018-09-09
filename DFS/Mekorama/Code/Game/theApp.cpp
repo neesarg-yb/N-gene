@@ -82,6 +82,27 @@ void BroadcastCommand( Command &cmd )
 	g_rcs->SendMessageToAllConnections( false, message.c_str(), false );
 }
 
+void HostAtPort( Command &cmd )
+{
+	std::string portStr = cmd.GetNextString();
+	if( portStr == "" )
+		g_rcs->HostAtPort();		// Host to default predefined port!
+	else
+	{
+		int port = atoi( portStr.c_str() );
+		g_rcs->HostAtPort( (uint16_t) port );
+	}
+}
+
+void ConnectToHost( Command &cmd )
+{
+	std::string hostAddressStr = cmd.GetNextString();
+	if( hostAddressStr == "" )
+		return;
+
+	g_rcs->ConnectToNewHost( hostAddressStr.c_str() );
+}
+
 theApp::theApp()
 {
 	g_theRenderer = new Renderer();
@@ -117,6 +138,8 @@ void theApp::Startup()
 	CommandRegister( "rc", SendCommand );
 	CommandRegister( "rca", SendCommandToAll );
 	CommandRegister( "rcb", BroadcastCommand );
+	CommandRegister( "rc_host", HostAtPort );
+	CommandRegister( "rc_join", ConnectToHost );
 
 	g_theGame->Startup();
 
