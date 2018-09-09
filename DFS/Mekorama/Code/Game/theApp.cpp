@@ -103,6 +103,19 @@ void ConnectToHost( Command &cmd )
 	g_rcs->ConnectToNewHost( hostAddressStr.c_str() );
 }
 
+void RCSSetEcho( Command &cmd )
+{
+	std::string echoBoolStr = cmd.GetNextString();
+	bool		echoBool = true;
+
+	if( echoBoolStr != "" )
+		SetFromText( echoBool, echoBoolStr.c_str() );
+
+	ConsolePrintf( "RCS: %s", !echoBool ? "Echo turned OFF.." : "Echo turned ON.." );
+
+	g_rcs->IgnoreEcho( !echoBool );
+}
+
 theApp::theApp()
 {
 	g_theRenderer = new Renderer();
@@ -140,6 +153,7 @@ void theApp::Startup()
 	CommandRegister( "rcb", BroadcastCommand );
 	CommandRegister( "rc_host", HostAtPort );
 	CommandRegister( "rc_join", ConnectToHost );
+	CommandRegister( "rc_echo", RCSSetEcho );
 
 	g_theGame->Startup();
 
