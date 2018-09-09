@@ -7,6 +7,8 @@
 #include "Engine/Network/TCPSocket.hpp"
 #include "Engine/Network/BytePacker.hpp"
 
+#define RCS_DEFAULT_HOST_PORT (29283)
+
 enum eRCSState
 {
 	RCS_STATE_INITIAL = 0,
@@ -22,13 +24,13 @@ class BitmapFont;
 class RemoteCommandService
 {
 public:
-	 RemoteCommandService( Renderer *currentRenderer = nullptr, uint16_t port = 29283 );
+	 RemoteCommandService( Renderer *currentRenderer = nullptr, uint16_t port = RCS_DEFAULT_HOST_PORT );
 	~RemoteCommandService();
 
 public:
 	std::vector< TCPSocket* >	m_connectionSockets;
 	std::vector< BytePacker* >	m_bytePackers;
-	uint16_t const				m_defaultPortToHost = 29283;
+	NetworkAddress				m_doHostingAtAddress;
 	TCPSocket*					m_hostSocket		= nullptr;
 	eRCSState					m_currentState		= RCS_STATE_INITIAL;
 
@@ -44,7 +46,8 @@ public:
 	void Update( float deltaSeconds );
 	void Render() const;
 
-	bool ConnectToHost( NetworkAddress const &hostAddress );
+	void HostAtPort( uint16_t port = RCS_DEFAULT_HOST_PORT );
+	void ConnectToNewHost( const char *hostAddress );
 	void SendMessageToConnection( uint idx, bool isEcho, char const *msg );
 	void SendMessageToAllConnections( bool isEcho, const char *msg, bool sendToMyself = false );
 	void SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg );
@@ -59,7 +62,8 @@ private:
 	float		m_retryHostingTimeElapased	= 0.f;
 
 	void		TryHosting( float deltaSeconds );
-	void		ClearHostData();					// deletes host & client connection sockets..
+	bool		ConnectToHost( NetworkAddress const &hostAddress );
+	void		ResetConnectionsAndHost();			// Resets: Connections, Host & State
 	TCPSocket*	GetSocketAtIndex( uint idx );
 	void		ServiceConnections();
 	void		PopulateByteBufferForConnection( uint connectionIdx );

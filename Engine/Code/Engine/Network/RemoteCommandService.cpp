@@ -9,10 +9,15 @@
 
 #define MAX_PACKET_SIZE (8384)
 
-RemoteCommandService::RemoteCommandService( Renderer *currentRenderer /* = nullptr */, uint16_t port /* = 29283 */ )
-	: m_defaultPortToHost( port )
-	, m_theRenderer( currentRenderer )
+RemoteCommandService::RemoteCommandService( Renderer *currentRenderer /* = nullptr */, uint16_t port /* = RCS_DEFAULT_HOST_PORT */ )
+	: m_theRenderer( currentRenderer )
 {
+	// Set default hosting details
+	m_doHostingAtAddress		= NetworkAddress::GetLocal();
+	m_doHostingAtAddress.port	= port;
+
+
+	// For UI
 	m_uiCamera = new Camera();
 
 	// Setting up the Camera
@@ -84,7 +89,7 @@ void RemoteCommandService::Render() const
 	std::string myAddressString = "...";
 	myAddressString = NetworkAddress::GetLocal().IPToString();
 	if( m_currentState == RCS_STATE_HOSTING )
-		myAddressString += ":" + std::to_string( m_defaultPortToHost );
+		myAddressString += ":" + std::to_string( m_doHostingAtAddress.port );
 
 	myAddressString += Stringf( " [%s]", connectionTypeStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( "Remote Command Service:",	Vector2(0.0f, 0.5f), infoBox,		0.030f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
@@ -100,26 +105,36 @@ void RemoteCommandService::Render() const
 	m_theRenderer->DrawTextInBox2D( connectionsString.c_str(), Vector2(0.f, 1.f), clientListBox, 0.025f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 }
 
-bool RemoteCommandService::ConnectToHost( NetworkAddress const &hostAddress )
+void RemoteCommandService::HostAtPort( uint16_t port /* = RCS_DEFAULT_HOST_PORT */ )
 {
-	// If connected to different host, Start from fresh! 
-	if( m_hostSocket != nullptr )
-		ClearHostData();
+	if( m_doHostingAtAddress.port == port )
+		return;
 
-	m_hostSocket = new TCPSocket();
-	
-	bool connectedToHost = m_hostSocket->Connect( hostAddress );
-	if( !connectedToHost )
-	{
-		delete m_hostSocket;
-		m_hostSocket = nullptr;
+	// Reset connections, host
+	ResetConnectionsAndHost();
 
-		ConsolePrintf( "RCS: Couldn't connect to host %s", hostAddress.IPToString().c_str() );
-	}
-	else
-		ConsolePrintf( "RCS: Connected to host %s", hostAddress.IPToString().c_str() );
+	// Change state to INITIAL
+	m_currentState = RCS_STATE_INITIAL;
 
-	return connectedToHost;
+	// Change m_hostAtPort
+	m_doHostingAtAddress = NetworkAddress::GetLocal();
+	m_doHostingAtAddress.port = port;
+}
+
+void RemoteCommandService::ConnectToNewHost( const char *hostAddress )
+{
+	NetworkAddress newHostAddress( hostAddress );
+
+	if( newHostAddress == m_doHostingAtAddress )
+		return;
+
+	// Change to new hosting address
+	m_doHostingAtAddress = newHostAddress;
+
+	// Reset connections, host
+	ResetConnectionsAndHost();
+
+	m_currentState = RCS_STATE_INITIAL;
 }
 
 void RemoteCommandService::SendMessageToConnection( uint idx, bool isEcho, char const *msg )
@@ -168,11 +183,8 @@ void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool is
 
 void RemoteCommandService::Update_Initial( float deltaSeconds )
 {
-	NetworkAddress localHostAddress	= NetworkAddress::GetLocal();
-	localHostAddress.port			= m_defaultPortToHost;
-
 	// TODO: Trying to connect to host every frame is NOT EFFICIENT!
-	if( ConnectToHost( localHostAddress ) )
+	if( ConnectToHost( m_doHostingAtAddress ) )
 	{
 		m_currentState = RCS_STATE_CLIENT;
 		
@@ -227,7 +239,7 @@ void RemoteCommandService::TryHosting( float deltaSeconds )
 	{
 		// Start hosting..
 		m_hostSocket		= new TCPSocket();
-		bool isListening	= m_hostSocket->Listen( m_defaultPortToHost, 16U );
+		bool isListening	= m_hostSocket->Listen( m_doHostingAtAddress.port, 16U );
 
 		// Success: Transition to hosting state..
 		if( isListening )
@@ -255,7 +267,7 @@ void RemoteCommandService::TryHosting( float deltaSeconds )
 	}
 	else															// Attempt hosting, enough time has been elapsed
 	{
-		bool isListening = m_hostSocket->Listen( m_defaultPortToHost, 16U );
+		bool isListening = m_hostSocket->Listen( m_doHostingAtAddress.port, 16U );
 		if( isListening )
 			m_currentState = RCS_STATE_HOSTING;
 
@@ -264,17 +276,32 @@ void RemoteCommandService::TryHosting( float deltaSeconds )
 	}
 }
 
-void RemoteCommandService::ClearHostData()
+bool RemoteCommandService::ConnectToHost( NetworkAddress const &hostAddress )
 {
-	// Deletes the host socket
-	if( m_hostSocket == nullptr )
-		return;
-	else
+	// Reset connections, host
+	ResetConnectionsAndHost();
+
+	// Change state to INITIAL
+	m_currentState = RCS_STATE_INITIAL;
+
+	m_hostSocket = new TCPSocket();
+
+	bool connectedToHost = m_hostSocket->Connect( hostAddress );
+	if( !connectedToHost )
 	{
 		delete m_hostSocket;
 		m_hostSocket = nullptr;
-	}
 
+		ConsolePrintf( "RCS: Couldn't connect to host %s", hostAddress.IPToString().c_str() );
+	}
+	else
+		ConsolePrintf( "RCS: Connected to host %s", hostAddress.IPToString().c_str() );
+
+	return connectedToHost;
+}
+
+void RemoteCommandService::ResetConnectionsAndHost()
+{
 	// Deletes all the connections' data
 	while( m_connectionSockets.size() > 0 )
 	{
@@ -294,6 +321,16 @@ void RemoteCommandService::ClearHostData()
 		std::swap( m_bytePackers[0], m_bytePackers[lastIndex] );
 		m_bytePackers.pop_back();
 	}
+	
+	// Deletes the host socket
+	if( m_hostSocket != nullptr && m_currentState != RCS_STATE_CLIENT )
+	{
+		// Only deletes if it wasn't a client, because the client has the host in its m_connectionSockets, already..
+		delete m_hostSocket;
+		m_hostSocket = nullptr;
+	}
+	else
+		m_hostSocket = nullptr;										// It should have got deleted with m_connectionSockets..
 }
 
 TCPSocket* RemoteCommandService::GetSocketAtIndex( uint idx )
