@@ -24,50 +24,62 @@ void ShowHideProfileConsole( Command& cmd )
 	}
 }
 
-void LogTextFromCommand( Command& cmd )
-{
-	std::string logTag	= cmd.GetName();
-	std::string logText	= cmd.GetNextString();
-
-	LogSystem::GetInstance()->LogTaggedPrintf( logTag.c_str(), RGBA_BLACK_COLOR, logText.c_str() );
-}
-
-void ForceFlushTest ( Command &cmd )
-{
-	LogSystem::GetInstance()->LogPrintf( "LogFlushTest" );
-	LogSystem::GetInstance()->LogWarningf( "WarningTest" );
-	LogSystem::GetInstance()->LogErrorf( "ErrorTest" );
-	LogSystem::ForceFlush();
-
-	UNUSED( cmd );
-}
-
 void SendEchoToClient( Command &cmd )
 {
 	std::string firstArg	= cmd.GetNextString();
-	std::string secondArg	= cmd.GetNextString();
+	std::string secondArg	= cmd.GetRemainingCommandInOneString();
 
-	if( secondArg != "" )
+	// If first arg is idx=n, send message to nth connection..
+	if( firstArg.length() > 4 && firstArg.at(0) == 'i' && firstArg.at(1) == 'd' && firstArg.at(2) == 'x' && firstArg.at(3) == '=' )
 	{
-		uint idx = (uint) atoi( firstArg.c_str() );
+		std::string idStr	= std::string( firstArg, 4 );
+		uint		idx		= (uint) atoi( idStr.c_str() );
 		g_rcs->SendMessageToConnection( idx, true, secondArg.c_str() );
 	}
 	else
-		g_rcs->SendMessageToConnection( 0U, true, firstArg.c_str() );
+	{
+		// Send whole message to 0th connection
+		std::string fullMessage = firstArg;
+		if( secondArg != "" )
+			fullMessage += ( " " + secondArg );
+
+		g_rcs->SendMessageToConnection( 0U, true, fullMessage.c_str() );
+	}
 }
 
 void SendCommand( Command &cmd )
 {
 	std::string firstArg	= cmd.GetNextString();
-	std::string secondArg	= cmd.GetNextString();
+	std::string secondArg	= cmd.GetRemainingCommandInOneString();
 
-	if( secondArg != "" )
+	// If first arg is idx=n, send message to nth connection..
+	if( firstArg.length() > 4 && firstArg.at(0) == 'i' && firstArg.at(1) == 'd' && firstArg.at(2) == 'x' && firstArg.at(3) == '=' )
 	{
-		uint idx = (uint) atoi( firstArg.c_str() );
+		std::string idStr	= std::string( firstArg, 4 );
+		uint		idx		= (uint) atoi( idStr.c_str() );
 		g_rcs->SendMessageToConnection( idx, false, secondArg.c_str() );
 	}
 	else
-		g_rcs->SendMessageToConnection( 0U, false, firstArg.c_str() );
+	{
+		// Send whole message to 0th connection
+		std::string fullMessage = firstArg;
+		if( secondArg != "" )
+			fullMessage += ( " " + secondArg );
+
+		g_rcs->SendMessageToConnection( 0U, false, fullMessage.c_str() );
+	}
+}
+
+void SendCommandToAll( Command &cmd )
+{
+	std::string message = cmd.GetRemainingCommandInOneString();
+	g_rcs->SendMessageToAllConnections( false, message.c_str(), true );
+}
+
+void BroadcastCommand( Command &cmd )
+{
+	std::string message = cmd.GetRemainingCommandInOneString();
+	g_rcs->SendMessageToAllConnections( false, message.c_str(), false );
 }
 
 theApp::theApp()
@@ -101,10 +113,11 @@ theApp::~theApp()
 void theApp::Startup()
 {
 	CommandRegister( "profiler", ShowHideProfileConsole );
-	CommandRegister( "log_text", LogTextFromCommand );
-	CommandRegister( "log_force_flush", ForceFlushTest );
-	CommandRegister( "sendEcho", SendEchoToClient );
-	CommandRegister( "sendCommand", SendCommand );
+	CommandRegister( "re", SendEchoToClient );
+	CommandRegister( "rc", SendCommand );
+	CommandRegister( "rca", SendCommandToAll );
+	CommandRegister( "rcb", BroadcastCommand );
+
 	g_theGame->Startup();
 
 	DebuggerPrintf( "theApp::Startup()" );
