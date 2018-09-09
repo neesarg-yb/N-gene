@@ -3,9 +3,9 @@
 #include <functional>
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Math/AABB2.hpp"
 #include "Engine/Network/TCPSocket.hpp"
 #include "Engine/Network/BytePacker.hpp"
-#include "Engine/Math/AABB2.hpp"
 
 enum eRCSState
 {
@@ -64,8 +64,11 @@ private:
 	void		PopulateByteBufferForConnection( uint connectionIdx );
 
 	void		ProcessEcho( char const *message );
-	void		ProcessCommand( char const *command );
+	void		ProcessCommandForConnection( char const *command, uint connectionId );
 	void		SendEchoToConnection( char const *message );
 
-	std::function<void( const char* )> m_echoMethod = std::bind( &RemoteCommandService::SendEchoToConnection, this, std::placeholders::_1 );
+private:
+	// Helpers to respond with echo
+	uint								m_sendEchoToIdx	= 0;
+	std::function<void( const char* )>	m_echoMethod	= std::bind( &RemoteCommandService::SendEchoToConnection, this, std::placeholders::_1 );
 };

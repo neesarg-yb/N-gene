@@ -349,7 +349,7 @@ void RemoteCommandService::PopulateByteBufferForConnection( uint connectionIdx )
 		if( isEcho )
 			ProcessEcho( commandString );
 		else
-			ProcessCommand( commandString );
+			ProcessCommandForConnection( commandString, connectionIdx );
 
 		free( commandString );
 	}
@@ -360,8 +360,10 @@ void RemoteCommandService::ProcessEcho( char const *message )
 	ConsolePrintf( RGBA_GRAY_COLOR, message );
 }
 
-void RemoteCommandService::ProcessCommand( char const *command )
+void RemoteCommandService::ProcessCommandForConnection( char const *command, uint connectionId )
 {
+	m_sendEchoToIdx = connectionId;
+
 	DevConsole::GetInstance()->DevConsoleHook( &m_echoMethod );
 	CommandRun( command );
 	DevConsole::GetInstance()->DevConsoleUnhook( &m_echoMethod );
@@ -369,6 +371,7 @@ void RemoteCommandService::ProcessCommand( char const *command )
 
 void RemoteCommandService::SendEchoToConnection( char const *message )
 {
-	for each (TCPSocket* receiverSocket in m_connectionSockets)
+	TCPSocket *receiverSocket = GetSocketAtIndex( m_sendEchoToIdx );
+	if( receiverSocket != nullptr )
 		SendMessageUsingSocket( *receiverSocket, true, message );
 }
