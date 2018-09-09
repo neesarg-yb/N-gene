@@ -181,6 +181,11 @@ void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool is
 	endSocket.Send( message.GetBuffer(), length );
 }
 
+void RemoteCommandService::IgnoreEcho( bool ignoreIt )
+{
+	m_ignoreEcho = ignoreIt;
+}
+
 void RemoteCommandService::Update_Initial( float deltaSeconds )
 {
 	// TODO: Trying to connect to host every frame is NOT EFFICIENT!
@@ -411,6 +416,9 @@ void RemoteCommandService::PopulateByteBufferForConnection( uint connectionIdx )
 
 void RemoteCommandService::ProcessEcho( char const *message )
 {
+	if( m_ignoreEcho == true )
+		return;
+
 	ConsolePrintf( RGBA_GRAY_COLOR, message );
 }
 
