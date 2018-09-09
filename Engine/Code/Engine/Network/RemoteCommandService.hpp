@@ -52,6 +52,8 @@ public:
 	void SendMessageToAllConnections( bool isEcho, const char *msg, bool sendToMyself = false );
 	void SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg );
 
+	void IgnoreEcho( bool ignoreIt );
+
 private:
 	void Update_Initial( float deltaSeconds );		// Tries to either host local or connect to the new host
 	void Update_Hosting( float deltaSeconds );		// Update as hosting state
@@ -74,6 +76,7 @@ private:
 
 private:
 	// Helpers to respond with echo
+	bool								m_ignoreEcho	= false;
 	uint								m_sendEchoToIdx	= 0;
 	std::function<void( const char* )>	m_echoMethod	= std::bind( &RemoteCommandService::SendEchoToConnection, this, std::placeholders::_1 );
 };
