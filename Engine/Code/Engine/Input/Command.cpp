@@ -1,6 +1,7 @@
 #pragma once
 #include "Command.hpp"
 #include "Engine/Math/MathUtil.hpp"
+#include "Engine/Core/DevConsole.hpp"
 
 // A global-private registry, only to get used by functions of this cpp file 
 std::map< std::string, command_cb >	g_registeredCommands;
@@ -73,6 +74,20 @@ std::string Command::GetNextString()
 	return static_cast<unsigned int>(m_nextCmdArgumentIndex) < m_arguments.size() ? m_arguments[ m_nextCmdArgumentIndex++ ] : std::string("");
 }
 
+std::string Command::GetRemainingCommandInOneString()
+{
+	// Return if empty
+	std::string toReturn = GetNextString();
+	if( toReturn == "" )
+		return toReturn;
+
+	// Stitch together other parts!
+	for( std::string nextStr = GetNextString(); nextStr != ""; nextStr = GetNextString() )
+		toReturn += " " + nextStr;
+
+	return toReturn;
+}
+
 Rgba Command::GetNextColor()
 {
 	std::string rgbaStr = GetNextString();
@@ -121,6 +136,7 @@ bool CommandRun( char const *command )
 	}
 	else
 	{
+		ConsolePrintf( RGBA_RED_COLOR, "\nERROR: Command %s not registered..\n", commandName.c_str() );
 		DebuggerPrintf( "\nERROR: Command %s not registered..\n", commandName.c_str() );
 		return false;
 	}
