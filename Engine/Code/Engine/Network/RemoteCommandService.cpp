@@ -132,6 +132,23 @@ void RemoteCommandService::SendMessageToConnection( uint idx, bool isEcho, char 
 	SendMessageUsingSocket( *socket, isEcho, msg );
 }
 
+void RemoteCommandService::SendMessageToAllConnections( bool isEcho, const char *msg, bool sendToMyself /*= false */ )
+{
+	// Send to connections
+	for each (TCPSocket* receiversSocket in m_connectionSockets)
+		SendMessageUsingSocket( *receiversSocket, isEcho, msg );
+
+	// Send to myself?
+	if( sendToMyself )
+	{
+		// Execute locally!
+		if( isEcho )
+			ConsolePrintf( msg );
+		else
+			CommandRun( msg );
+	}
+}
+
 void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg )
 {
 	BytePacker message( BIG_ENDIAN );
