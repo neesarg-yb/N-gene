@@ -32,7 +32,7 @@ void UDPSendTest( Command& cmd )
 	std::string msg = cmd.GetRemainingCommandInOneString();
 
 	ConsolePrintf( "Sending message \"%s\"...", msg.c_str() );
-	g_udp->SendTo( addr, msg.c_str(), msg.size() );
+	g_udp->SendTo( addr, msg.c_str(), (uint)msg.size() );
 }
 
 void ShowHideProfileConsole( Command& cmd )
