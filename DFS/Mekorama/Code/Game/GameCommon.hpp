@@ -15,6 +15,9 @@ extern theGame* g_theGame;
 class RemoteCommandService;
 extern RemoteCommandService* g_rcs;
 
+class UDPTest;
+extern UDPTest *g_udp;
+
 extern Renderer* g_theRenderer;
 extern InputSystem* g_theInput;
 /*

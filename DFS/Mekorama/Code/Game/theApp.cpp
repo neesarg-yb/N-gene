@@ -6,8 +6,34 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Profiler/ProfilerConsole.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
+#include "Engine/Network/UDPSocket.hpp"
 
 void QuitTheApp( Command& cmd );
+
+void UDPStartTest( Command& cmd )
+{
+	UNUSED( cmd );
+	g_udp->Start();
+}
+
+void UDPStopTest( Command& cmd )
+{
+	UNUSED( cmd );
+	g_udp->Stop();
+}
+
+void UDPSendTest( Command& cmd )
+{
+	UNUSED( cmd );
+	NetworkAddress addr;
+	std::string str = cmd.GetNextString();
+
+	addr = NetworkAddress( str.c_str() );
+	std::string msg = cmd.GetRemainingCommandInOneString();
+
+	ConsolePrintf( "Sending message \"%s\"...", msg.c_str() );
+	g_udp->SendTo( addr, msg.c_str(), msg.size() );
+}
 
 void ShowHideProfileConsole( Command& cmd )
 {
@@ -120,6 +146,7 @@ theApp::theApp()
 {
 	g_theRenderer = new Renderer();
 	g_rcs = new RemoteCommandService( g_theRenderer );
+	g_udp = new UDPTest();
 	g_theGame = new theGame();
 	g_theInput = new InputSystem();
 
@@ -136,6 +163,9 @@ theApp::~theApp()
 
 	delete g_theGame;
 	g_theGame = nullptr;
+
+	delete g_udp;
+	g_udp = nullptr;
 
 	delete g_rcs;
 	g_rcs = nullptr;
@@ -154,6 +184,10 @@ void theApp::Startup()
 	CommandRegister( "rc_host", HostAtPort );
 	CommandRegister( "rc_join", ConnectToHost );
 	CommandRegister( "rc_echo", RCSSetEcho );
+
+	CommandRegister( "udp_start", UDPStartTest );
+	CommandRegister( "udp_stop", UDPStopTest );
+	CommandRegister( "udp_send", UDPSendTest );
 
 	g_theGame->Startup();
 
@@ -186,6 +220,8 @@ void theApp::EndFrame() {
 }
 
 void theApp::Update() {
+	g_udp->Update();
+
 	g_theGame->Update();
 	
 	ProfileConsole::GetInstance()->Update( *g_theInput );
