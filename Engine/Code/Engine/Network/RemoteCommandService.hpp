@@ -53,7 +53,7 @@ public:
 	void SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg );
 
 	void IgnoreEcho( bool ignoreIt );
-
+	
 private:
 	void Update_Initial( float deltaSeconds );		// Tries to either host local or connect to the new host
 	void Update_Hosting( float deltaSeconds );		// Update as hosting state

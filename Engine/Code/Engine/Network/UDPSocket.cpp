@@ -3,6 +3,8 @@
 
 bool UDPSocket::Bind( NetworkAddress const &address, uint16_t portRange /*= 0U */ )
 {
+	UNUSED( portRange );
+
 	// create the socket 
 	SOCKET mySocket = socket(	AF_INET,		// IPv4 to send...
 								SOCK_DGRAM,		// ...Datagrams... 
