@@ -20,6 +20,12 @@
     <Filter Include="XML Definitions">
       <UniqueIdentifier>{bada9d42-6263-4c91-8805-cc1d840292fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Abstract Classes">
+      <UniqueIdentifier>{baa9b867-021f-45a9-aa32-24f1bc5d554e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game States">
+      <UniqueIdentifier>{2a0da71e-fb23-42e6-940e-396b0a3e32b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -32,9 +38,6 @@
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="GameCommon.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject.cpp">
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="World\Block.cpp">
@@ -61,6 +64,18 @@
     <ClCompile Include="World\Pipe.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="Abstract Classes\GameLevel.cpp">
+      <Filter>Abstract Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Abstract Classes\GameState.cpp">
+      <Filter>Abstract Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Abstract Classes\GameObject.cpp">
+      <Filter>Abstract Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Attract.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -73,9 +88,6 @@
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="EngineBuildPreferences.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.hpp">
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="World\Block.hpp">
@@ -101,6 +113,18 @@
     </ClInclude>
     <ClInclude Include="World\Pipe.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Abstract Classes\GameLevel.hpp">
+      <Filter>Abstract Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Abstract Classes\GameState.hpp">
+      <Filter>Abstract Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Abstract Classes\GameObject.hpp">
+      <Filter>Abstract Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Attract.hpp">
+      <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

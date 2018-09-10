@@ -8,17 +8,9 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Network/RemoteCommandService.hpp"
 #include "Game/GameCommon.hpp"
+#include "Game/Abstract Classes/GameState.hpp"
 #include "Game/Level.hpp"
 #include "Game/World/Robot.hpp"
-
-enum GameStates
-{
-	NONE = -1,
-	ATTRACT,
-	MENU,
-	LEVEL,
-	NUM_GAME_STATES
-};
 
 class theGame
 {
@@ -26,6 +18,7 @@ public:
 	 theGame();
 	~theGame();
 
+public:
 	const AABB2			m_default_screen_bounds		= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
 	const Vector3		m_default_screen_center		= Vector3::ZERO;
 	const Rgba			m_default_screen_color		= RGBA_BLACK_COLOR;
@@ -34,6 +27,12 @@ public:
 	Camera*		m_gameCamera	= nullptr;
 	Level*		m_currentLevel	= nullptr;
 
+	// Game States
+	std::vector< GameState* >	 m_gameStates;
+	GameState					*m_currentGameState		= nullptr;
+	std::string					 m_nextGameStateName	= "NONE";
+
+public:
 	void Startup();
 	void BeginFrame();
 	void EndFrame();
@@ -48,31 +47,24 @@ private:
 	const float		m_transitionTime					=	2.5;
 	const float		m_halfTransitionTime				=	m_transitionTime * 0.5f;
 	float			m_fadeEffectAlpha					=	0.f;						// 0 to 1
-	GameStates		m_currentGameState					=	ATTRACT;
-	GameStates		m_nextGameState						=	NONE;
 
 	// Level Selection UI
 	UIMenu*			m_levelSelectionMenu				= nullptr;
 	std::function< void( const char* ) > levelSelectedStdFunc = std::bind( &theGame::LevelSelected, this, std::placeholders::_1 );
-
-	// Menu Specific
-	UIMenu*								 m_attractMenu	= nullptr;
-	std::function< void( const char* ) > quitStdFunc	= std::bind( &theGame::QuitGame,	  this, std::placeholders::_1 );
-	std::function< void( const char* ) > startStdFunc	= std::bind( &theGame::GoToMenuState, this, std::placeholders::_1 );
 	
+private:
 	void GoToMenuState	( char const *actionName );
 	void QuitGame		( char const *actionName );
 	void LevelSelected	( char const *actionName );
 
 	// Game States
-	void StartTransitionToState	( GameStates nextGameState );
-	void ConfirmTransitionToNextState();
+	GameState*	FindGameStateNamed		( std::string const &stateName );
+	void		StartTransitionToState	( std::string const &stateName );
+	void		ConfirmTransitionToNextState();
 
-	void Update_Attract	( float deltaSeconds );
 	void Update_Menu	( float deltaSeconds );
 	void Update_Level	( float deltaSeconds );
 
-	void Render_Attract	() const;
 	void Render_Menu	() const;
 	void Render_Level	() const;
 

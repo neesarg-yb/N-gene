@@ -20,11 +20,11 @@ HWND g_hWnd = nullptr;
 const char* APP_NAME = "Dynamic Third-Person Camera";
 
 
-												//-----------------------------------------------------------------------------------------------
-												// Handles Windows (Win32) messages/events; i.e. the OS is trying to tell us something happened.
-												// This function is called by Windows whenever we ask it for notifications
-												// #SD1ToDo: We will move this function to a more appropriate place when we're ready
-												//
+//-----------------------------------------------------------------------------------------------
+// Handles Windows (Win32) messages/events; i.e. the OS is trying to tell us something happened.
+// This function is called by Windows whenever we ask it for notifications
+// #SD1ToDo: We will move this function to a more appropriate place when we're ready
+//
 bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam )
 {
 	UNUSED( lParam );

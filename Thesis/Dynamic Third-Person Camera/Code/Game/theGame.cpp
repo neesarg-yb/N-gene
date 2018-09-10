@@ -115,13 +115,6 @@ void theGame::Startup()
 	CommandRegister( "log_hide_tag", HideLogTag );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
-	// Seting up the Attract Menu
-	m_attractMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.45f, 0.45f, 0.55f, 0.55f ) );
-
-	m_attractMenu->AddNewMenuAction( MenuAction( "Quit", &quitStdFunc ) );
-	m_attractMenu->AddNewMenuAction( MenuAction( "Start", &startStdFunc ) );
-	m_attractMenu->m_selectionIndex = 1;
-
 	// Setup the LevelSelection UI
 	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.35f, 0.30f, 0.65f, 0.55f ) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(5) Camera Behavior and Controls ", &levelSelectedStdFunc) );
@@ -139,8 +132,7 @@ void theGame::BeginFrame()
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	if( m_currentGameState == LEVEL )
-		m_currentLevel->BeginFrame();
+	m_currentGameState->BeginFrame();
 }
 
 void theGame::EndFrame()
@@ -148,8 +140,7 @@ void theGame::EndFrame()
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	if( m_currentGameState == LEVEL )
-		m_currentLevel->EndFrame();
+	m_currentGameState->EndFrame();
 }
 
 void theGame::Update() 
@@ -171,7 +162,7 @@ void theGame::Update()
 	g_theRenderer->UpdateTime( deltaSeconds, deltaSeconds );
 
 	// If in transition to another gameState
-	if( m_nextGameState != NONE )
+	if( m_nextGameStateName != "NONE" )
 	{
 		// Update the transition effects' alpha ( FADE OUT )
 		float fadeOutFraction	= ClampFloat01( (float)m_timeSinceTransitionBegan / m_halfTransitionTime );		// Goes from 0 to 1
@@ -195,21 +186,7 @@ void theGame::Update()
 		m_fadeEffectAlpha		= 0.f;		
 
 	// Continue updating the currentGameState
-	switch (m_currentGameState)
-	{
-	case ATTRACT:
-		Update_Attract( deltaSeconds );
-		break;
-	case MENU:
-		Update_Menu( deltaSeconds );
-		break;
-	case LEVEL:
-		Update_Level( deltaSeconds );
-		break;
-	default:
-		ERROR_AND_DIE( "Error: No valid gamestate found..! | theGame::Update()" );
-		break;
-	}
+	m_currentGameState->Update( deltaSeconds );
 }
 
 void theGame::Render() const
@@ -217,21 +194,7 @@ void theGame::Render() const
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	switch (m_currentGameState)
-	{
-	case ATTRACT:
-		Render_Attract();
-		break;
-	case MENU:
-		Render_Menu();
-		break;
-	case LEVEL:
-		Render_Level();
-		break;
-	default:
-		ERROR_AND_DIE( "Error: No valid gamestate found..! | theGame::Render()" );
-		break;
-	}
+	m_currentGameState->Render();
 
 	// Render the Transition Effects - according to alpha set by Update()
 	Rgba overlayBoxColor;
@@ -245,9 +208,9 @@ void theGame::Render() const
 	g_theRenderer->DrawAABB( m_default_screen_bounds, overlayBoxColor );
 }
 
-void theGame::StartTransitionToState( GameStates nextGameState )
+void theGame::StartTransitionToState( std::string const &stateName )
 {
-	m_nextGameState	= nextGameState;
+	m_nextGameStateName	= stateName;
 
 	// Reset appropriate variables for the transitionEffect..
 	m_timeSinceTransitionBegan = 0;
@@ -255,38 +218,10 @@ void theGame::StartTransitionToState( GameStates nextGameState )
 
 void theGame::ConfirmTransitionToNextState()
 {
-	m_currentGameState	= m_nextGameState;
-	m_nextGameState		= NONE;
+	m_currentGameState	= FindGameStateNamed( m_nextGameStateName );
+	m_nextGameStateName	= "NONE";
 
 	m_timeSinceTransitionBegan = 0;
-}
-
-void theGame::Update_Attract( float deltaSeconds )
-{
-	// Profiler Test
-	PROFILE_SCOPE_FUNCTION();
-
-	// Menu handles the state transition
-	m_attractMenu->Update( deltaSeconds );
-}
-
-void theGame::Render_Attract() const
-{
-	// Profiler Test
-	PROFILE_SCOPE_FUNCTION();
-
-	// Title
-	g_theRenderer->BindCamera( m_gameCamera );
-	g_theRenderer->UseShader( nullptr );
-
-	g_theRenderer->ClearScreen( m_default_screen_color );
-	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
-	
-	g_theRenderer->DrawTextInBox2D( "Dynamic Third-Person Camera", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-	g_theRenderer->DrawTextInBox2D( "( Use Keyboard )", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-
-	// Menu
-	m_attractMenu->Render();
 }
 
 void theGame::Update_Menu( float deltaSeconds )
@@ -360,6 +295,18 @@ void theGame::LevelSelected( char const *actionName )
 	m_currentLevel->Startup();
 
 	StartTransitionToState( LEVEL );
+}
+
+GameState* theGame::FindGameStateNamed( std::string const &stateName )
+{
+	for( uint i = 0; i < m_gameStates.size(); i++ )
+	{
+		GameState* gameState = m_gameStates[i];
+		if( gameState->m_name == stateName )
+			return gameState;
+	}
+
+	return nullptr;
 }
 
 void theGame::RenderLoadingScreen() const
