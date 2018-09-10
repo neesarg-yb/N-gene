@@ -93,8 +93,6 @@ theGame::~theGame()
 	if( m_currentLevel != nullptr )
 		delete m_currentLevel;
 
-	delete m_playerRobot;
-
 	LevelDefinition::DeleteAllDefinitions();
 	TowerDefinition::DeleteAllDefinitions();
 	BlockDefinition::DeleteAllDefinitions();
@@ -124,27 +122,16 @@ void theGame::Startup()
 	m_attractMenu->AddNewMenuAction( MenuAction( "Start", &startStdFunc ) );
 	m_attractMenu->m_selectionIndex = 1;
 
-
-	// Load All Definitions
-	BlockDefinition::LoadAllDefinitions( "Data\\Definitions\\Blocks.xml" );
-
-	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower1.xml" );
-	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower2.xml" );
-	TowerDefinition::LoadDefinition( "Data\\Definitions\\Tower3.xml" );
-	
-	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level1.xml" );
-	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level2.xml" );
-	LevelDefinition::LoadDefinition( "Data\\Definitions\\Level3.xml" );
-
-	// Setup the Robot
-	m_playerRobot = new Robot( IntVector3::ZERO, nullptr );
-
 	// Setup the LevelSelection UI
-	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.45f, 0.42f, 0.55f, 0.55f ) );
-	for( LevelDefinitionMap::iterator it = LevelDefinition::s_definitions.begin(); it != LevelDefinition::s_definitions.end(); it++ )
-	{
-		m_levelSelectionMenu->AddNewMenuAction( MenuAction(it->first.c_str(), &levelSelectedStdFunc) );
-	}
+	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.35f, 0.30f, 0.65f, 0.55f ) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(5) Camera Behavior and Controls ", &levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(4) Camera Hints, Target Points..", &levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(3) Camera Collision             ", &levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Better Together              ", &levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("7 Degrees of Freedom             ", &levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("Quaternion Cubes                 ", &levelSelectedStdFunc) );
+	m_levelSelectionMenu->m_selectionIndex = 6;
 }
 
 void theGame::BeginFrame()
@@ -295,7 +282,7 @@ void theGame::Render_Attract() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 	
-	g_theRenderer->DrawTextInBox2D( "Mekorama", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "Dynamic Third-Person Camera", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 	g_theRenderer->DrawTextInBox2D( "( Use Keyboard )", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Menu
@@ -326,7 +313,7 @@ void theGame::Render_Menu() const
 	g_theRenderer->ClearScreen( m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
-	g_theRenderer->DrawTextInBox2D( "Jump to..", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "Scenes:", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 	g_theRenderer->DrawTextInBox2D( "(Press ~ for DevConsole )", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 	
 
@@ -369,7 +356,7 @@ void theGame::LevelSelected( char const *actionName )
 	if( m_currentLevel != nullptr )
 		delete m_currentLevel;
 
-	m_currentLevel = new Level( actionName, *m_playerRobot );
+	m_currentLevel = new Level( actionName );
 	m_currentLevel->Startup();
 
 	StartTransitionToState( LEVEL );

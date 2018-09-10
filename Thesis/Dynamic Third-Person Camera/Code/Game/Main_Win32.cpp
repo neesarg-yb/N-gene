@@ -16,8 +16,8 @@ void QuitTheApp( Command& cmd );
 //-----------------------------------------------------------------------------------------------
 // #SD1ToDo: Move each of these items to its proper place, once that place is established
 // 
-HWND g_hWnd = nullptr;							// ...becomes WindowContext::m_windowHandle
-const char* APP_NAME = "Mekorama";				// ...becomes ???
+HWND g_hWnd = nullptr;								
+const char* APP_NAME = "Dynamic Third-Person Camera";
 
 
 												//-----------------------------------------------------------------------------------------------

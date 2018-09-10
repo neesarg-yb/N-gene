@@ -41,9 +41,6 @@ public:
 	void Render() const;
 
 private:
-	// Player
-	Robot*			m_playerRobot						= nullptr;
-
 	// Local
 	double			m_timeSinceStartOfTheGame			=	0;
 	double			m_lastFramesTime;
