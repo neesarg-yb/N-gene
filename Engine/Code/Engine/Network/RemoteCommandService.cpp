@@ -177,11 +177,11 @@ void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool is
 	uint16_t usLength = (uint16_t)length;
 	ChangeEndiannessTo( sizeof(usLength), &usLength, BIG_ENDIAN );
 
-	int sent1 = endSocket.Send( &usLength, sizeof(usLength) );
-	int sent2 = endSocket.Send( message.GetBuffer(), length );
+	endSocket.Send( &usLength, sizeof(usLength) );
+	endSocket.Send( message.GetBuffer(), length );
 
-	bool allDataGotSent = (sent1 < 0 || sent2 < 0);
-	GUARANTEE_RECOVERABLE( allDataGotSent, Stringf( "RCB Warning: Not all the data got sent to \"%s:%s\"..!", endSocket.m_address.IPToString().c_str(), endSocket.m_address.PortToString().c_str() ) );
+// 	bool allDataGotSent = (sent1 < 0 || sent2 < 0);
+// 	GUARANTEE_RECOVERABLE( allDataGotSent, Stringf( "RCB Warning: Not all the data got sent to \"%s:%s\"..!", endSocket.m_address.IPToString().c_str(), endSocket.m_address.PortToString().c_str() ) );
 }
 
 void RemoteCommandService::IgnoreEcho( bool ignoreIt )
