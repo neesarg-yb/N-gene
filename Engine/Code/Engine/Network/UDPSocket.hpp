@@ -66,7 +66,7 @@ public:
 		size_t read = m_socket.ReceiveFrom( &from_addr, buffer, PACKET_MTU ); 
 
 		if (read > 0U) {
-			uint max_bytes = (read < 128) ? read : 128; 
+			uint max_bytes = (read < 128) ? (uint)read : 128; 
 			
 			uint stringSize = ( max_bytes * 2U + 3U ); // .. 0x & null terminator
 			char *outBuffer = (char *)malloc( stringSize );
