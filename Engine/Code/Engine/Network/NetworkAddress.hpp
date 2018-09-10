@@ -16,10 +16,14 @@ public:
 	NetworkAddress( char const *addrString );
 
 public:
+	bool operator == ( NetworkAddress const &secondAddress ) const;
+
+public:
 	bool ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const;
 	bool FromSocketAddress( sockaddr const *sa );
 
-	std::string ToString() const;
+	std::string IPToString() const;
+	std::string PortToString() const;
 
 public:
 	static NetworkAddress	GetLocal();

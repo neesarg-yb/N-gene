@@ -36,6 +36,14 @@ NetworkAddress::NetworkAddress( char const *addrString )
 	FromSocketAddress( &socketAddressOut );
 }
 
+bool NetworkAddress::operator==( NetworkAddress const &secondAddress ) const
+{
+	bool addressMatches	= (addressIPv4 == secondAddress.addressIPv4);
+	bool portMatches	= (port == secondAddress.port );
+
+	return (addressMatches && portMatches);
+}
+
 bool NetworkAddress::ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const
 {
 	if( addressIPv4 == 0U && port == 0 )
@@ -67,12 +75,17 @@ bool NetworkAddress::FromSocketAddress( sockaddr const *sa )
 	return true;
 }
 
-std::string NetworkAddress::ToString() const
+std::string NetworkAddress::IPToString() const
 {
 	char outAddress[256];
 	inet_ntop( AF_INET, &addressIPv4, outAddress, 256 );
 
 	return std::string( outAddress );
+}
+
+std::string NetworkAddress::PortToString() const
+{
+	return std::to_string( port );
 }
 
 NetworkAddress NetworkAddress::GetLocal()

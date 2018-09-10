@@ -142,16 +142,34 @@ void TCPSocket::Close()
 	}
 }
 
-size_t TCPSocket::Send( void const *data, size_t const dataByteSize )
+bool TCPSocket::EnableNonBlocking()
+{
+	// non_blocking = 1, if not blocking
+	u_long nonBlocking = 1;
+	int zeroOnSuccess = ::ioctlsocket( (SOCKET)m_handle, FIONBIO, &nonBlocking );
+
+	return (zeroOnSuccess == 0);
+}
+
+bool TCPSocket::DisableNonBlocking()
+{
+	// non_blocking = 0, if blocking
+	u_long nonBlocking = 0;
+	int zeroOnSuccess = ::ioctlsocket( (SOCKET)m_handle, FIONBIO, &nonBlocking );
+
+	return (zeroOnSuccess == 0);
+}
+
+int TCPSocket::Send( void const *data, size_t const dataByteSize )
 {
 	int		numBytesSent = ::send( m_handle, (const char*)data, (int)dataByteSize, 0 );
 
-	return (numBytesSent != SOCKET_ERROR) ? (size_t)numBytesSent : 0;
+	return numBytesSent;
 }
 
-size_t TCPSocket::Receive( void *buffer, size_t const maxByteSize )
+int TCPSocket::Receive( void *buffer, size_t const maxByteSize )
 {
-	size_t receivedBytes = ::recv( m_handle, (char *)buffer, (int)maxByteSize - 1, 0 );
+	int receivedBytes = ::recv( m_handle, (char *)buffer, (int)maxByteSize, 0 );
 
 	return receivedBytes;
 }

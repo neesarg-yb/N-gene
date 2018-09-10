@@ -47,9 +47,10 @@ public:
 	bool		WriteString	( char const *str );						// Returns false if the string is too long to hold by buffer.. It doesn't write anything, in that case.
 
 	// Read from the buffer
-	size_t		ReadBytes	( void *outData, size_t maxByteCount, bool changeEndiannessToMachine = true );		// Returns how many actual bytes got read
-	size_t		ReadSize	( size_t *outSize );						// Returns how many bytes got read to fetch the size_t, fills outSize
-	size_t		ReadString	( char *outStr, size_t maxByteSize );		// Note: maxByteSize should be enough to contain the null terminator as well
+	size_t		 ReadBytes	( void *outData, size_t maxByteCount, bool changeEndiannessToMachine = true );		// Returns how many actual bytes got read
+	size_t		 ReadSize	( size_t *outSize );						// Returns how many bytes got read to fetch the size_t, fills outSize
+	size_t		 ReadString	( char *outStr, size_t maxByteSize );		// Note: maxByteSize should be enough to contain the null terminator as well
+	inline void* GetBuffer	() { return m_buffer; }						// Access buffer without changing readHead!
 
 	// Set buffer variables
 	bool		SetWrittenByteCountDummy( size_t byteCount );			// Changes the writeHead, DO NOT USE TO MOVE IT BACKWORDS unless you're resetting it
@@ -62,7 +63,8 @@ public:
 	size_t		GetReadableByteCount() const;							// How much more data can I read?
 
 private:
-	void		ReAllocateBufferOfSizeAndCopy( size_t newBufferSize );
-	size_t		GetNewBufferSizeToStoreDataOfSize( size_t minimumRequiredBufferSize );		// Gives size of new buffer in stages: 8kb, 16kb, 32kb, 64kb, 128kb, etc..
-	size_t		GetTotalBitsRequiredToRepresent( size_t number );
+	void		ReAllocateBufferOfSizeAndCopy		( size_t newBufferSize );
+	size_t		GetNewBufferSizeToStoreDataOfSize	( size_t minimumRequiredBufferSize ) const;		// Gives size of new buffer in stages: 8kb, 16kb, 32kb, 64kb, 128kb, etc..
+	size_t		GetTotalBitsRequiredToRepresent		( size_t number ) const;						// Doesn't count the continue flag of the BytePacker..
+	size_t		GetTotalBytesRequiredToWriteSize	( size_t number ) const;						// Does account for continue bits in each byte
 };
