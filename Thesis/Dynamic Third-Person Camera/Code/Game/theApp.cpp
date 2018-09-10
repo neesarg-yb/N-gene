@@ -24,27 +24,102 @@ void ShowHideProfileConsole( Command& cmd )
 	}
 }
 
-void LogTextFromCommand( Command& cmd )
+void SendEchoToClient( Command &cmd )
 {
-	std::string logTag	= cmd.GetName();
-	std::string logText	= cmd.GetNextString();
+	std::string firstArg	= cmd.GetNextString();
+	std::string secondArg	= cmd.GetRemainingCommandInOneString();
 
-	LogSystem::GetInstance()->LogTaggedPrintf( logTag.c_str(), RGBA_BLACK_COLOR, logText.c_str() );
+	// If first arg is idx=n, send message to nth connection..
+	if( firstArg.length() > 4 && firstArg.at(0) == 'i' && firstArg.at(1) == 'd' && firstArg.at(2) == 'x' && firstArg.at(3) == '=' )
+	{
+		std::string idStr	= std::string( firstArg, 4 );
+		uint		idx		= (uint) atoi( idStr.c_str() );
+		g_rcs->SendMessageToConnection( idx, true, secondArg.c_str() );
+	}
+	else
+	{
+		// Send whole message to 0th connection
+		std::string fullMessage = firstArg;
+		if( secondArg != "" )
+			fullMessage += ( " " + secondArg );
+
+		g_rcs->SendMessageToConnection( 0U, true, fullMessage.c_str() );
+	}
 }
 
-void ForceFlushTest ( Command &cmd )
+void SendCommand( Command &cmd )
 {
-	LogSystem::GetInstance()->LogPrintf( "LogFlushTest" );
-	LogSystem::GetInstance()->LogWarningf( "WarningTest" );
-	LogSystem::GetInstance()->LogErrorf( "ErrorTest" );
-	LogSystem::ForceFlush();
+	std::string firstArg	= cmd.GetNextString();
+	std::string secondArg	= cmd.GetRemainingCommandInOneString();
 
-	UNUSED( cmd );
+	// If first arg is idx=n, send message to nth connection..
+	if( firstArg.length() > 4 && firstArg.at(0) == 'i' && firstArg.at(1) == 'd' && firstArg.at(2) == 'x' && firstArg.at(3) == '=' )
+	{
+		std::string idStr	= std::string( firstArg, 4 );
+		uint		idx		= (uint) atoi( idStr.c_str() );
+		g_rcs->SendMessageToConnection( idx, false, secondArg.c_str() );
+	}
+	else
+	{
+		// Send whole message to 0th connection
+		std::string fullMessage = firstArg;
+		if( secondArg != "" )
+			fullMessage += ( " " + secondArg );
+
+		g_rcs->SendMessageToConnection( 0U, false, fullMessage.c_str() );
+	}
+}
+
+void SendCommandToAll( Command &cmd )
+{
+	std::string message = cmd.GetRemainingCommandInOneString();
+	g_rcs->SendMessageToAllConnections( false, message.c_str(), true );
+}
+
+void BroadcastCommand( Command &cmd )
+{
+	std::string message = cmd.GetRemainingCommandInOneString();
+	g_rcs->SendMessageToAllConnections( false, message.c_str(), false );
+}
+
+void HostAtPort( Command &cmd )
+{
+	std::string portStr = cmd.GetNextString();
+	if( portStr == "" )
+		g_rcs->HostAtPort();		// Host to default predefined port!
+	else
+	{
+		int port = atoi( portStr.c_str() );
+		g_rcs->HostAtPort( (uint16_t) port );
+	}
+}
+
+void ConnectToHost( Command &cmd )
+{
+	std::string hostAddressStr = cmd.GetNextString();
+	if( hostAddressStr == "" )
+		return;
+
+	g_rcs->ConnectToNewHost( hostAddressStr.c_str() );
+}
+
+void RCSSetEcho( Command &cmd )
+{
+	std::string echoBoolStr = cmd.GetNextString();
+	bool		echoBool = true;
+
+	if( echoBoolStr != "" )
+		SetFromText( echoBool, echoBoolStr.c_str() );
+
+	ConsolePrintf( "RCS: %s", !echoBool ? "Echo turned OFF.." : "Echo turned ON.." );
+
+	g_rcs->IgnoreEcho( !echoBool );
 }
 
 theApp::theApp()
 {
 	g_theRenderer = new Renderer();
+	g_rcs = new RemoteCommandService( g_theRenderer );
 	g_theGame = new theGame();
 	g_theInput = new InputSystem();
 
@@ -62,6 +137,9 @@ theApp::~theApp()
 	delete g_theGame;
 	g_theGame = nullptr;
 
+	delete g_rcs;
+	g_rcs = nullptr;
+
 	delete g_theRenderer;
 	g_theRenderer = nullptr;
 }
@@ -69,8 +147,13 @@ theApp::~theApp()
 void theApp::Startup()
 {
 	CommandRegister( "profiler", ShowHideProfileConsole );
-	CommandRegister( "log_text", LogTextFromCommand );
-	CommandRegister( "log_force_flush", ForceFlushTest );
+	CommandRegister( "re", SendEchoToClient );
+	CommandRegister( "rc", SendCommand );
+	CommandRegister( "rca", SendCommandToAll );
+	CommandRegister( "rcb", BroadcastCommand );
+	CommandRegister( "rc_host", HostAtPort );
+	CommandRegister( "rc_join", ConnectToHost );
+	CommandRegister( "rc_echo", RCSSetEcho );
 	g_theGame->Startup();
 
 	DebuggerPrintf( "theApp::Startup()" );
@@ -116,7 +199,10 @@ void theApp::Render() {
 	ProfileConsole::GetInstance()->Render();
 
 	if( DevConsole::GetInstance()->IsOpen() )
+	{
 		DevConsole::GetInstance()->Render();
+		g_rcs->Render();
+	}
 }
 
 bool theApp::IsQuitting() {

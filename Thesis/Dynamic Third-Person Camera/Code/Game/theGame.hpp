@@ -6,6 +6,7 @@
 #include "Engine/Math/FloatRange.hpp"
 #include "Engine/Input/Command.hpp"
 #include "Engine/Renderer/Camera.hpp"
+#include "Engine/Network/RemoteCommandService.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Level.hpp"
 #include "Game/World/Robot.hpp"
