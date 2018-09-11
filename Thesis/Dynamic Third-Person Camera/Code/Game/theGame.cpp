@@ -1,6 +1,7 @@
 #include "theGame.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Network/BytePacker.hpp"
@@ -120,12 +121,15 @@ void theGame::Startup()
 	CommandRegister( "log_hide_tag", HideLogTag );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
-	// Setup the current game states
-	m_currentGameState = new Attract();
-	m_gameStates.push_back( m_currentGameState );
-	m_nextGameStateName = "NONE";
+	// Setup the game states
+	GameState* attractGS = new Attract();
+	AddNewGameState( attractGS );
 
-	m_gameStates.push_back( new LevelSelect() );
+	GameState* levelSelectGS = new LevelSelect();
+	AddNewGameState( levelSelectGS );
+
+	// Set game state to begin with
+	SetCurrentGameState( attractGS->m_name );
 }
 
 void theGame::BeginFrame()
@@ -152,12 +156,12 @@ void theGame::Update()
 	// Calculating deltaTime
 	float deltaSeconds			= CalculateDeltaTime();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
-	
-	// Remote Command Service
-	g_rcs->Update( deltaSeconds );
 
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
 	m_timeSinceStartOfTheGame	+=	deltaSeconds;
+
+	// Remote Command Service
+	g_rcs->Update( deltaSeconds );
 	
 	// For UBOTesting..
 	g_theRenderer->UpdateTime( deltaSeconds, deltaSeconds );
@@ -209,6 +213,18 @@ void theGame::Render() const
 	g_theRenderer->DrawAABB( m_default_screen_bounds, overlayBoxColor );
 }
 
+bool theGame::SetCurrentGameState( std::string const &gsName )
+{
+	GameState *gs = nullptr;
+	FindGameStateNamed( gsName, gs );
+	if( gs == nullptr )
+		return false;
+
+	m_currentGameState	= gs;
+	m_nextGameStateName	= "NONE";
+	return true;
+}
+
 void theGame::StartTransitionToState( std::string const &stateName )
 {
 	m_nextGameStateName	= stateName;
@@ -219,9 +235,10 @@ void theGame::StartTransitionToState( std::string const &stateName )
 
 void theGame::ConfirmTransitionToNextState()
 {
-	m_currentGameState	= FindGameStateNamed( m_nextGameStateName );
-	m_nextGameStateName	= "NONE";
+	int idx	= FindGameStateNamed( m_nextGameStateName, m_currentGameState );
+	GUARANTEE_RECOVERABLE( idx >= 0, Stringf("Couldn't find gamestate named \"%s\"", m_nextGameStateName.c_str() ) );
 
+	m_nextGameStateName	= "NONE";
 	m_timeSinceTransitionBegan = 0;
 }
 
@@ -231,16 +248,52 @@ void theGame::QuitGame( char const * actionName )
 	g_theApp->m_isQuitting = true;
 }
 
-GameState* theGame::FindGameStateNamed( std::string const &stateName )
+void theGame::AddNewGameState( GameState* gsToAdd )
 {
-	for( uint i = 0; i < m_gameStates.size(); i++ )
+	if( gsToAdd == nullptr )
+		return;
+
+	GameState* alreadyExists = nullptr;
+	int idx = FindGameStateNamed( gsToAdd->m_name, alreadyExists );
+	
+	if( alreadyExists != nullptr )
+	{
+		// Replace
+		delete m_gameStates[ idx ];
+		m_gameStates[ idx ] = gsToAdd;
+	}
+	else // Add new
+		m_gameStates.push_back( gsToAdd );
+}
+
+GameState* theGame::RemoveGameStateNamed( std::string const &gsName )
+{
+	GameState *gs = nullptr;
+	int idx = FindGameStateNamed( gsName, gs );
+
+	if( gs != nullptr )
+	{
+		// Fast Detach
+		std::swap( m_gameStates[idx], m_gameStates.back() );
+		m_gameStates.pop_back();
+	}
+
+	return gs;
+}
+
+int theGame::FindGameStateNamed( std::string const &stateName, GameState *&outGameState )
+{
+	for( int i = 0; i < m_gameStates.size(); i++ )
 	{
 		GameState* gameState = m_gameStates[i];
 		if( gameState->m_name == stateName )
-			return gameState;
+		{
+			outGameState = gameState;
+			return i;
+		}
 	}
 
-	return nullptr;
+	return -1;
 }
 
 void theGame::RenderLoadingScreen() const

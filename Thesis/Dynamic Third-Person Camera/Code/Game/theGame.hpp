@@ -19,13 +19,12 @@ public:
 	~theGame();
 
 public:
-	const AABB2			m_default_screen_bounds		= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
-	const Vector3		m_default_screen_center		= Vector3::ZERO;
-	const Rgba			m_default_screen_color		= RGBA_BLACK_COLOR;
-
-	BitmapFont*	m_textBmpFont	= nullptr;
-	Camera*		m_gameCamera	= nullptr;
-	Level*		m_currentLevel	= nullptr;
+	// UI & Camera
+	const AABB2			m_default_screen_bounds	= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
+	const Vector3		m_default_screen_center	= Vector3::ZERO;
+	const Rgba			m_default_screen_color	= RGBA_BLACK_COLOR;
+	BitmapFont*			m_textBmpFont			= nullptr;
+	Camera*				m_gameCamera			= nullptr;
 
 	// Game States
 	std::vector< GameState* >	 m_gameStates;
@@ -39,8 +38,14 @@ public:
 	void Update();
 	void Render() const;
 
-	void StartTransitionToState	( std::string const &stateName );
-	void QuitGame				( char const *actionName );
+	void QuitGame( char const *actionName );
+
+public:
+	// Game States
+	bool		SetCurrentGameState		( std::string const &gsName );		// returns false if game state of that name doesn't exists
+	void		StartTransitionToState	( std::string const &stateName );
+	void		AddNewGameState			( GameState* gsToAdd );			// If already exists in list, it replaces with the new one
+	GameState*	RemoveGameStateNamed	( std::string const &gsName );	// Doesn't delete, just removes from the list
 
 private:
 	// Local
@@ -54,15 +59,14 @@ private:
 	
 private:
 	// Game States
-	GameState*	FindGameStateNamed		( std::string const &stateName );
+	int			FindGameStateNamed( std::string const &stateName, GameState *&outGameState );
 	void		ConfirmTransitionToNextState();
 
-	void Update_Menu	( float deltaSeconds );
-	void Render_Menu	() const;
+	// Loading Screen
+	void		RenderLoadingScreen() const;
 
-	void RenderLoadingScreen() const;
-
-	float	CalculateDeltaTime();
-	double	GetTimeSinceGameStarted() const;
+	// Time
+	float		CalculateDeltaTime();
+	double		GetTimeSinceGameStarted() const;
 };
 
