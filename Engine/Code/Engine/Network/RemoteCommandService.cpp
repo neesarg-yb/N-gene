@@ -171,14 +171,17 @@ void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool is
 	message.WriteBytes( 1, &isEcho );
 	message.WriteString( msg );
 
-	size_t length = message.GetWritableByteCount();
+	size_t length = message.GetWrittenByteCount();
 	GUARANTEE_RECOVERABLE( length <= 0xffff, "RCS Error: Format doesn't support length larger than unsigned short!" );
 
 	uint16_t usLength = (uint16_t)length;
 	ChangeEndiannessTo( sizeof(usLength), &usLength, BIG_ENDIAN );
 
-	endSocket.Send( &usLength, sizeof(usLength) );
-	endSocket.Send( message.GetBuffer(), length );
+	int sent1 = endSocket.Send( &usLength, sizeof(usLength) );
+	int sent2 = endSocket.Send( message.GetBuffer(), length );
+
+	bool allDataGotSent = (sent1 < 0 || sent2 < 0);
+	GUARANTEE_RECOVERABLE( allDataGotSent, Stringf( "RCB Warning: Not all the data got sent to \"%s:%s\"..!", endSocket.m_address.IPToString().c_str(), endSocket.m_address.PortToString().c_str() ) );
 }
 
 void RemoteCommandService::IgnoreEcho( bool ignoreIt )
@@ -434,6 +437,8 @@ void RemoteCommandService::ProcessCommandForConnection( char const *command, uin
 void RemoteCommandService::SendEchoToConnection( char const *message )
 {
 	TCPSocket *receiverSocket = GetSocketAtIndex( m_sendEchoToIdx );
-	if( receiverSocket != nullptr )
+	if( receiverSocket != nullptr ) 
+	{
 		SendMessageUsingSocket( *receiverSocket, true, message );
+	}
 }

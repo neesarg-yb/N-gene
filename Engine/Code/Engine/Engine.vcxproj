@@ -312,7 +312,9 @@
     <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="Network\NetworkAddress.cpp" />
     <ClCompile Include="Network\RemoteCommandService.cpp" />
+    <ClCompile Include="Network\Socket.cpp" />
     <ClCompile Include="Network\TCPSocket.cpp" />
+    <ClCompile Include="Network\UDPSocket.cpp" />
     <ClCompile Include="Profiler\ProfileLogScoped.cpp" />
     <ClCompile Include="Profiler\Profiler.cpp" />
     <ClCompile Include="Profiler\ProfilerConsole.cpp" />
@@ -413,7 +415,9 @@
     <ClInclude Include="Network\Network.hpp" />
     <ClInclude Include="Network\NetworkAddress.hpp" />
     <ClInclude Include="Network\RemoteCommandService.hpp" />
+    <ClInclude Include="Network\Socket.hpp" />
     <ClInclude Include="Network\TCPSocket.hpp" />
+    <ClInclude Include="Network\UDPSocket.hpp" />
     <ClInclude Include="Profiler\ProfileLogScoped.hpp" />
     <ClInclude Include="Profiler\Profiler.hpp" />
     <ClInclude Include="Profiler\ProfilerConsole.hpp" />
