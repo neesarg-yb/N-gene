@@ -1,0 +1,12 @@
+<material id="bb8">
+	<shadergroup>
+   		<shader fileName="lit" />
+   	</shadergroup>
+
+   	<texture bind="0" src="Data\Models\bb8\BB8_diffuse.jpg" />
+   	<texture bind="1" src="Data\Models\bb8\BB8_normal.jpg"	/>
+   	<texture bind="2" src="Data\Models\bb8\BB8_emissive.jpg"/>
+
+   	<float bind="SPECULAR_AMOUNT" 	value="1.0" />
+   	<float bind="SPECULAR_POWER" 	value="16.0" />
+</material>

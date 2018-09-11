@@ -7,9 +7,8 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Core/Window.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Game/GameCommon.hpp"
 
-
-theApp* g_theApp = nullptr;
 void QuitTheApp( Command& cmd );
 
 
@@ -17,8 +16,8 @@ void QuitTheApp( Command& cmd );
 //-----------------------------------------------------------------------------------------------
 // #SD1ToDo: Move each of these items to its proper place, once that place is established
 // 
-HWND g_hWnd = nullptr;							// ...becomes WindowContext::m_windowHandle
-const char* APP_NAME = "Protogame3D";			// ...becomes ???
+HWND g_hWnd = nullptr;								
+const char* APP_NAME = "Protogame 3D";
 
 
 //-----------------------------------------------------------------------------------------------
@@ -37,6 +36,39 @@ bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam
 	{
 		g_theApp->m_isQuitting = true;
 		return false; // "Consumes" this message (tells Windows "okay, we handled it")
+	}
+
+	// Mouse Scrollwheel
+	case WM_MOUSEWHEEL:
+	{
+
+		break;
+	}
+
+	// Mouse Left Button
+	case WM_LBUTTONDOWN:
+	{
+		g_theApp->HandleMouseButtonDown( MOUSE_BUTTON_LEFT );
+		break;
+	}
+
+	case WM_LBUTTONUP:
+	{
+		g_theApp->HandleMouseButtonUp( MOUSE_BUTTON_LEFT );
+		break;
+	}
+
+	// Mouse Right Button
+	case WM_RBUTTONDOWN:
+	{
+		g_theApp->HandleMouseButtonDown( MOUSE_BUTTON_RIGHT );
+		break;
+	}
+
+	case WM_RBUTTONUP:
+	{
+		g_theApp->HandleMouseButtonUp( MOUSE_BUTTON_RIGHT );
+		break;
 	}
 
 	// Raw physical keyboard "key-was-just-depressed" event (case-insensitive, not translated)
@@ -64,6 +96,18 @@ bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam
 	}
 
 	}
+
+	TODO("Write cases for WM_ACTIVE, WM_MOVE, WM_SIZE..!");
+	// WM_ACTIVE
+	//	Sets bool in InputManager, 
+	//		so if window goes inactive, you can free the mouse
+	//		&  if windows goes active, you can lock the mouse
+
+	// WM_MOVE
+	//	So you can lock the mouse to new moved rect of the window
+
+	// WM_LOCK
+	//	So you can lock the mouse to new resized rect of the window
 
 	return true; 
 }
@@ -97,10 +141,15 @@ void Initialize( HINSTANCE applicationInstanceHandle )
 	g_gameConfigBlackboard = new Blackboard();
 
 	CreateOpenGLWindow( applicationInstanceHandle, g_aspectRatio );
-	Renderer::RendererStartup( g_hWnd );
-	g_theApp = new theApp();		// Creating theApp class instance
 
+	// ENGINE STARTUP
+	EngineStartup();
+
+	g_theApp = new theApp();		// Creating theApp class instance
 	CommandRegister( "quit", QuitTheApp );
+
+	// GAME STARTUP
+	g_theApp->Startup();
 }
 
 
@@ -111,23 +160,23 @@ void Shutdown()
 	delete g_theApp;
 	g_theApp = nullptr;
 
+	// ENGINE SHUTDOWN
+	EngineShutdown();
+
 	delete g_gameConfigBlackboard;
 	g_gameConfigBlackboard = nullptr;
-
-	Renderer::RendererShutdown();
-	Renderer::GLShutdown();
 }
 
 
 //-----------------------------------------------------------------------------------------------
 int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR commandLineString, int )
 {
-	
+
 	UNUSED( commandLineString );
 	Initialize( applicationInstanceHandle );
 
 	// Program main loop; keep running frames until it's time to quit
-	while( !g_theApp->IsQuitting() ) // #SD1ToDo: ...becomes:  !g_theApp->IsQuitting()
+	while( !g_theApp->IsQuitting() )
 	{
 		RunFrame();
 	}
@@ -139,5 +188,5 @@ int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR comman
 void QuitTheApp( Command& cmd )
 {
 	UNUSED( cmd )
-	g_theApp->m_isQuitting = true;
+		g_theApp->m_isQuitting = true;
 }
