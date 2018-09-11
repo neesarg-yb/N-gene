@@ -14,12 +14,6 @@
     <Filter Include="Materials">
       <UniqueIdentifier>{10e2513c-1acf-485b-8d91-bfb6457f4ac0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="World">
-      <UniqueIdentifier>{6f956215-1f71-4d55-81fa-a672acd14f8e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="XML Definitions">
-      <UniqueIdentifier>{bada9d42-6263-4c91-8805-cc1d840292fd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Abstract Classes">
       <UniqueIdentifier>{baa9b867-021f-45a9-aa32-24f1bc5d554e}</UniqueIdentifier>
     </Filter>
@@ -39,30 +33,6 @@
     </ClCompile>
     <ClCompile Include="GameCommon.cpp">
       <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="World\Block.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
-    <ClCompile Include="World\BlockDefinition.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
-    <ClCompile Include="World\TowerDefinition.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
-    <ClCompile Include="World\Tower.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
-    <ClCompile Include="World\Robot.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
-    <ClCompile Include="World\LevelDefinition.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
-    <ClCompile Include="World\Pipe.cpp">
-      <Filter>World</Filter>
     </ClCompile>
     <ClCompile Include="Abstract Classes\GameState.cpp">
       <Filter>Abstract Classes</Filter>
@@ -92,30 +62,6 @@
     </ClInclude>
     <ClInclude Include="EngineBuildPreferences.hpp">
       <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="World\Block.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
-    <ClInclude Include="World\BlockDefinition.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
-    <ClInclude Include="Level.hpp">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="World\TowerDefinition.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
-    <ClInclude Include="World\Tower.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
-    <ClInclude Include="World\Robot.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
-    <ClInclude Include="World\LevelDefinition.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
-    <ClInclude Include="World\Pipe.hpp">
-      <Filter>World</Filter>
     </ClInclude>
     <ClInclude Include="Abstract Classes\GameState.hpp">
       <Filter>Abstract Classes</Filter>
@@ -169,21 +115,6 @@
     </None>
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_uv.shader">
       <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\..\Run_win32\Data\Materials\stone_sphere.material">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="..\..\Run_win32\Data\Materials\couch_cube.material">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="..\..\Run_win32\Data\Materials\snow_miku_body.material">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="..\..\Run_win32\Data\Materials\snow_miku_lambert.material">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="..\..\Run_win32\Data\Materials\snow_miku_a.material">
-      <Filter>Materials</Filter>
     </None>
     <None Include="..\..\Run_win32\Data\Shaders\lit_xray_normals.shader">
       <Filter>Shaders</Filter>
@@ -265,28 +196,5 @@
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader">
       <Filter>Shaders</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\..\Run_win32\Data\Definitions\Blocks.xml">
-      <Filter>XML Definitions</Filter>
-    </Xml>
-    <Xml Include="..\..\Run_win32\Data\Definitions\Tower1.xml">
-      <Filter>XML Definitions</Filter>
-    </Xml>
-    <Xml Include="..\..\Run_win32\Data\Definitions\Level1.xml">
-      <Filter>XML Definitions</Filter>
-    </Xml>
-    <Xml Include="..\..\Run_win32\Data\Definitions\Level2.xml">
-      <Filter>XML Definitions</Filter>
-    </Xml>
-    <Xml Include="..\..\Run_win32\Data\Definitions\Level3.xml">
-      <Filter>XML Definitions</Filter>
-    </Xml>
-    <Xml Include="..\..\Run_win32\Data\Definitions\Tower2.xml">
-      <Filter>XML Definitions</Filter>
-    </Xml>
-    <Xml Include="..\..\Run_win32\Data\Definitions\Tower3.xml">
-      <Filter>XML Definitions</Filter>
-    </Xml>
   </ItemGroup>
 </Project>

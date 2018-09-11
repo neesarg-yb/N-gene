@@ -1,8 +1,0 @@
-<LevelDefinition name="Level3">
-
-	<PuzzleTower name="Tower3" />
-	
-	<SpawnPlayer onBlock="0,0" inLayer="0" />
-	<FinishPoint atBlock="2,2" inLayer="0" />
-
-</LevelDefinition>

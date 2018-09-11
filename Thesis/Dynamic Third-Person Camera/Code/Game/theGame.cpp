@@ -7,9 +7,6 @@
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/Math/Quaternion.hpp"
 #include "Game/theApp.hpp"
-#include "Game/World/BlockDefinition.hpp"
-#include "Game/World/TowerDefinition.hpp"
-#include "Game/World/LevelDefinition.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
@@ -99,10 +96,6 @@ theGame::~theGame()
 		delete m_gameStates.back();
 		m_gameStates.pop_back();
 	}
-
-	LevelDefinition::DeleteAllDefinitions();
-	TowerDefinition::DeleteAllDefinitions();
-	BlockDefinition::DeleteAllDefinitions();
 
 	delete m_textBmpFont;
 }
