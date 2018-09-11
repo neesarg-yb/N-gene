@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/Math/IntVector3.hpp"
-#include "Game/GameObject.hpp"
+#include "Game/Abstract Classes/GameObject.hpp"
 
 enum ePipeForwardDirection
 {

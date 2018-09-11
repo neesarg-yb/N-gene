@@ -4,11 +4,13 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Network/BytePacker.hpp"
+#include "Engine/Math/Quaternion.hpp"
 #include "Game/theApp.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 #include "Game/World/LevelDefinition.hpp"
-#include "Engine/Math/Quaternion.hpp"
+#include "Game/Game States/Attract.hpp"
+#include "Game/Game States/LevelSelect.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -90,8 +92,11 @@ theGame::theGame()
 
 theGame::~theGame()
 {
-	if( m_currentLevel != nullptr )
-		delete m_currentLevel;
+	while ( m_gameStates.size() > 0 )
+	{
+		delete m_gameStates.back();
+		m_gameStates.pop_back();
+	}
 
 	LevelDefinition::DeleteAllDefinitions();
 	TowerDefinition::DeleteAllDefinitions();
@@ -115,16 +120,12 @@ void theGame::Startup()
 	CommandRegister( "log_hide_tag", HideLogTag );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
-	// Setup the LevelSelection UI
-	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.35f, 0.30f, 0.65f, 0.55f ) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(5) Camera Behavior and Controls ", &levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(4) Camera Hints, Target Points..", &levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(3) Camera Collision             ", &levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Better Together              ", &levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("7 Degrees of Freedom             ", &levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("Quaternion Cubes                 ", &levelSelectedStdFunc) );
-	m_levelSelectionMenu->m_selectionIndex = 6;
+	// Setup the current game states
+	m_currentGameState = new Attract();
+	m_gameStates.push_back( m_currentGameState );
+	m_nextGameStateName = "NONE";
+
+	m_gameStates.push_back( new LevelSelect() );
 }
 
 void theGame::BeginFrame()
@@ -194,7 +195,7 @@ void theGame::Render() const
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	m_currentGameState->Render();
+	m_currentGameState->Render( m_gameCamera );
 
 	// Render the Transition Effects - according to alpha set by Update()
 	Rgba overlayBoxColor;
@@ -224,77 +225,10 @@ void theGame::ConfirmTransitionToNextState()
 	m_timeSinceTransitionBegan = 0;
 }
 
-void theGame::Update_Menu( float deltaSeconds )
-{
-	// Profiler Test
-	PROFILE_SCOPE_FUNCTION();
-
-	UNUSED( deltaSeconds );
-
-	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
-		StartTransitionToState( ATTRACT );
-
-	m_levelSelectionMenu->Update( deltaSeconds );
-}
-
-void theGame::Render_Menu() const
-{
-	// Profiler Test
-	PROFILE_SCOPE_FUNCTION();
-
-	g_theRenderer->BindCamera( m_gameCamera );
-	g_theRenderer->UseShader( nullptr );
-
-	g_theRenderer->ClearScreen( m_default_screen_color );
-	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
-
-	g_theRenderer->DrawTextInBox2D( "Scenes:", Vector2(0.5f, 0.6f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-	g_theRenderer->DrawTextInBox2D( "(Press ~ for DevConsole )", Vector2(0.5f, 0.02f), m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-	
-
-	m_levelSelectionMenu->Render();
-}
-
-void theGame::Update_Level( float deltaSeconds )
-{
-	// Profiler Test
-	PROFILE_SCOPE_FUNCTION();
-
-	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
-		StartTransitionToState( MENU );
-
-	m_currentLevel->Update( deltaSeconds );
-}
-
-void theGame::Render_Level() const
-{
-	// Profiler Test
-	PROFILE_SCOPE_FUNCTION();
-
-	m_currentLevel->Render();
-}
-
-void theGame::GoToMenuState( char const * actionName )
-{
-	UNUSED( actionName );
-	StartTransitionToState( MENU );
-}
-
 void theGame::QuitGame( char const * actionName )
 {
 	UNUSED( actionName );
 	g_theApp->m_isQuitting = true;
-}
-
-void theGame::LevelSelected( char const *actionName )
-{
-	if( m_currentLevel != nullptr )
-		delete m_currentLevel;
-
-	m_currentLevel = new Level( actionName );
-	m_currentLevel->Startup();
-
-	StartTransitionToState( LEVEL );
 }
 
 GameState* theGame::FindGameStateNamed( std::string const &stateName )

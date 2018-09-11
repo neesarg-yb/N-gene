@@ -76,6 +76,9 @@
     <ClCompile Include="Game States\Attract.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\LevelSelect.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -124,6 +127,9 @@
       <Filter>Abstract Classes</Filter>
     </ClInclude>
     <ClInclude Include="Game States\Attract.hpp">
+      <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\LevelSelect.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>

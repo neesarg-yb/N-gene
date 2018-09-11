@@ -10,16 +10,19 @@ public:
 	 Attract();
 	~Attract();
 
-private:
-	// Menu Specific
-	UIMenu*								 m_attractMenu	= nullptr;
-	std::function< void( const char* ) > quitStdFunc	= std::bind( &theGame::QuitGame,	  this, std::placeholders::_1 );
-	std::function< void( const char* ) > startStdFunc	= std::bind( &theGame::GoToMenuState, this, std::placeholders::_1 );
-
 public:
 	void BeginFrame();
 	void EndFrame();
 
 	void Update( float deltaSeconds );
-	void Render( Camera *gameCamera = nullptr ) const;
+	void Render( Camera *gameCamera ) const;
+
+private:
+	// Menu Specific
+	UIMenu*								 m_attractMenu	= nullptr;
+	std::function< void( const char* ) > m_quitStdFunc;
+	std::function< void( const char* ) > m_startStdFunc;
+
+	void TransitionToNextState( char const *stateName );
+
 };

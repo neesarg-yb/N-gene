@@ -39,6 +39,9 @@ public:
 	void Update();
 	void Render() const;
 
+	void StartTransitionToState	( std::string const &stateName );
+	void QuitGame				( char const *actionName );
+
 private:
 	// Local
 	double			m_timeSinceStartOfTheGame			=	0;
@@ -48,25 +51,14 @@ private:
 	const float		m_halfTransitionTime				=	m_transitionTime * 0.5f;
 	float			m_fadeEffectAlpha					=	0.f;						// 0 to 1
 
-	// Level Selection UI
-	UIMenu*			m_levelSelectionMenu				= nullptr;
-	std::function< void( const char* ) > levelSelectedStdFunc = std::bind( &theGame::LevelSelected, this, std::placeholders::_1 );
 	
 private:
-	void GoToMenuState	( char const *actionName );
-	void QuitGame		( char const *actionName );
-	void LevelSelected	( char const *actionName );
-
 	// Game States
 	GameState*	FindGameStateNamed		( std::string const &stateName );
-	void		StartTransitionToState	( std::string const &stateName );
 	void		ConfirmTransitionToNextState();
 
 	void Update_Menu	( float deltaSeconds );
-	void Update_Level	( float deltaSeconds );
-
 	void Render_Menu	() const;
-	void Render_Level	() const;
 
 	void RenderLoadingScreen() const;
 

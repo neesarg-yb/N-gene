@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/GameObject.hpp"
+#include "Game/Abstract Classes/GameObject.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Engine/Math/IntVector3.hpp"
 

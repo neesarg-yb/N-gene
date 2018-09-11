@@ -9,7 +9,7 @@
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Engine/Renderer/PickBuffer.hpp"
-#include "Game/GameObject.hpp"
+#include "Game/Abstract Classes/GameObject.hpp"
 #include "Game/World/Tower.hpp"
 #include "Game/World/Block.hpp"
 #include "Game/World/Robot.hpp"
