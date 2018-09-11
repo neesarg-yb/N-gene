@@ -65,5 +65,6 @@ void LevelSelect::Render( Camera *gameCamera ) const
 
 void LevelSelect::LevelSelected( char const * levelName )
 {
-	UNUSED( levelName );
+	if( std::string(levelName) == "--> Quaternion Cubes             " )
+		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
 }

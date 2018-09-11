@@ -12,6 +12,7 @@
 #include "Game/World/LevelDefinition.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
+#include "Game/Game States/Scene_QuaternionsTest.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -127,6 +128,9 @@ void theGame::Startup()
 
 	GameState* levelSelectGS = new LevelSelect();
 	AddNewGameState( levelSelectGS );
+
+	GameState* quaternionsTest = new Scene_QuaternionsTest();
+	AddNewGameState( quaternionsTest );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );

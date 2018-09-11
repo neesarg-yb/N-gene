@@ -9,6 +9,35 @@
 
 void QuitTheApp( Command& cmd );
 
+void CreateNewAppInstace()
+{
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	ZeroMemory( &si, sizeof(si) );
+	si.cb = sizeof(si);
+	ZeroMemory( &pi, sizeof(pi) );
+
+	wchar_t buffer[MAX_PATH]; 
+	GetModuleFileName(NULL, buffer, MAX_PATH) ;
+	CreateProcess(buffer, 0, 0, FALSE, 0, 0, 0, 0, &si, &pi);
+}
+
+void CloneMyself( Command& cmd )
+{
+	std::string number = cmd.GetNextString();
+	int spawnCount = 1;
+	if( number != "" )
+		spawnCount = ::atoi( number.c_str() );
+
+	// Just for safety
+	if( spawnCount > 10 )
+		spawnCount = 10;
+
+	for( int i = 0; i < spawnCount; i++ )
+		CreateNewAppInstace();
+}
+
 void ShowHideProfileConsole( Command& cmd )
 {
 	UNUSED( cmd );
@@ -154,6 +183,8 @@ void theApp::Startup()
 	CommandRegister( "rc_host", HostAtPort );
 	CommandRegister( "rc_join", ConnectToHost );
 	CommandRegister( "rc_echo", RCSSetEcho );
+	CommandRegister( "clone_process", CloneMyself );
+
 	g_theGame->Startup();
 
 	DebuggerPrintf( "theApp::Startup()" );

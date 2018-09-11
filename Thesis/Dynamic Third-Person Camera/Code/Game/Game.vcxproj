@@ -280,11 +280,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Abstract Classes\GameLevel.cpp" />
     <ClCompile Include="Abstract Classes\GameObject.cpp" />
     <ClCompile Include="Abstract Classes\GameState.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
     <ClCompile Include="Game States\LevelSelect.cpp" />
+    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="GameCommon.cpp" />
     <ClCompile Include="Main_Win32.cpp" />
@@ -304,11 +304,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Abstract Classes\GameLevel.hpp" />
     <ClInclude Include="Abstract Classes\GameObject.hpp" />
     <ClInclude Include="Abstract Classes\GameState.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />
     <ClInclude Include="Game States\LevelSelect.hpp" />
+    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp" />
     <ClInclude Include="Level.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="GameCommon.hpp" />

@@ -64,9 +64,6 @@
     <ClCompile Include="World\Pipe.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="Abstract Classes\GameLevel.cpp">
-      <Filter>Abstract Classes</Filter>
-    </ClCompile>
     <ClCompile Include="Abstract Classes\GameState.cpp">
       <Filter>Abstract Classes</Filter>
     </ClCompile>
@@ -77,6 +74,9 @@
       <Filter>Game States</Filter>
     </ClCompile>
     <ClCompile Include="Game States\LevelSelect.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
   </ItemGroup>
@@ -117,9 +117,6 @@
     <ClInclude Include="World\Pipe.hpp">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="Abstract Classes\GameLevel.hpp">
-      <Filter>Abstract Classes</Filter>
-    </ClInclude>
     <ClInclude Include="Abstract Classes\GameState.hpp">
       <Filter>Abstract Classes</Filter>
     </ClInclude>
@@ -130,6 +127,9 @@
       <Filter>Game States</Filter>
     </ClInclude>
     <ClInclude Include="Game States\LevelSelect.hpp">
+      <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
