@@ -3,6 +3,7 @@
 #include "Vector3.hpp"
 #include "Engine/Math/MathUtil.hpp"
 #include "Engine/Math/Vector2.hpp"
+#include "Engine/Math/IntVector3.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 
@@ -26,6 +27,13 @@ Vector3::Vector3( float initialX, float initialY, float initialZ )
 	this->z = initialZ;
 }
 
+Vector3::Vector3( const IntVector3 &copyFrom )
+{
+	this->x	= (float) copyFrom.x;
+	this->y	= (float) copyFrom.y;
+	this->z	= (float) copyFrom.z;
+}
+
 const Vector3 Vector3::operator + ( const Vector3& vecToAdd ) const
 {
 	return Vector3( x + vecToAdd.x, y + vecToAdd.y, z + vecToAdd.z );
@@ -44,6 +52,16 @@ const Vector3 Vector3::operator * ( float uniformScale ) const
 const Vector3 Vector3::operator / ( float inverseScale ) const
 {
 	return Vector3( x / inverseScale, y / inverseScale, z / inverseScale );
+}
+
+void Vector3::operator-=( const Vector3& vetToSubtract )
+{
+	*this = *this - vetToSubtract;
+}
+
+void Vector3::operator+=( const Vector3& vetToAdd )
+{
+	*this = *this + vetToAdd;
 }
 
 bool Vector3::operator == ( const Vector3& vecToCompare ) const
@@ -158,7 +176,7 @@ Vector3 PolarToCartesian( float radius, float rotation, float altitude )
 	return Vector3( x, y, z );
 }
 
-const Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd )
+Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd )
 {
 	Vector3 resultVec;
 
@@ -167,4 +185,30 @@ const Vector3 Interpolate( const Vector3& start, const Vector3& end, float fract
 	resultVec.z = Interpolate( start.z , end.z , fractionTowardEnd );
 
 	return resultVec;
+}
+
+Vector3 Slerp( Vector3 const &a, Vector3 const &b, float t )
+{
+	float al = a.GetLength();
+	float bl = b.GetLength();
+
+	float len = Interpolate( al, bl, t );
+	Vector3 u = SlerpUnit( a / al, b / bl, t ); 
+
+	return (u * len);
+}
+
+Vector3 SlerpUnit( Vector3 const &a, Vector3 const &b, float t )
+{
+	float cosangle	= ClampFloat( Vector3::DotProduct(a, b), -1.0f, 1.0f );
+	float angle		= acosf(cosangle);
+	if ( angle < std::numeric_limits<float>::epsilon() ) {
+		return Interpolate( a, b, t );
+	} else {
+		float pos_num	= sinf( t * angle );
+		float neg_num	= sinf( (1.0f - t) * angle );
+		float den		= sinf(angle);
+
+		return (a * (neg_num / den)) + (b * (pos_num / den));
+	}
 }

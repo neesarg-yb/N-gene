@@ -16,6 +16,14 @@ Matrix44::Matrix44( const Vector2& iBasis, const Vector2& jBasis, const Vector2&
 	Iw = 0;				Jw = 0;				Kw = 0;		Tw = 1;
 }
 
+Matrix44::Matrix44( const Vector3& iBasis, const Vector3& jBasis, const Vector3& kBasis, const Vector3& translation /* = Vector3::ZERO */ )
+{
+	Ix = iBasis.x;		Jx = jBasis.x;		Kx = kBasis.x;		Tx = translation.x; 
+	Iy = iBasis.y;		Jy = jBasis.y;		Ky = kBasis.y;		Ty = translation.y; 
+	Iz = iBasis.z;		Jz = jBasis.z;		Kz = kBasis.z;		Tz = translation.z;		
+	Iw = 0;				Jw = 0;				Kw = 0;				Tw = 1;
+}
+
 Vector2 Matrix44::TransformPosition2D( const Vector2& position2D )
 {
 	Vector2 transformedPos2D = Vector2( Ix*position2D.x + Jx*position2D.y + Kx*0.f + Tx*1.f, 
@@ -81,11 +89,21 @@ void Matrix44::Transpose()
 
 Vector3 Matrix44::Multiply( const Vector3& vecToMultiply, const float w ) const
 {
-
 	Vector3 toReturn;
 	toReturn.x	= ( Ix * vecToMultiply.x ) + ( Jx * vecToMultiply.y ) + ( Kx * vecToMultiply.z ) + ( Tx * w );
 	toReturn.y	= ( Iy * vecToMultiply.x ) + ( Jy * vecToMultiply.y ) + ( Ky * vecToMultiply.z ) + ( Ty * w );
 	toReturn.z	= ( Iz * vecToMultiply.x ) + ( Jz * vecToMultiply.y ) + ( Kz * vecToMultiply.z ) + ( Tz * w );
+
+	return toReturn;
+}
+
+Vector4 Matrix44::Multiply( const Vector4& vecToMultiply ) const
+{
+	Vector4 toReturn;
+	toReturn.x	= ( Ix * vecToMultiply.x ) + ( Jx * vecToMultiply.y ) + ( Kx * vecToMultiply.z ) + ( Tx * vecToMultiply.w );
+	toReturn.y	= ( Iy * vecToMultiply.x ) + ( Jy * vecToMultiply.y ) + ( Ky * vecToMultiply.z ) + ( Ty * vecToMultiply.w );
+	toReturn.z	= ( Iz * vecToMultiply.x ) + ( Jz * vecToMultiply.y ) + ( Kz * vecToMultiply.z ) + ( Tz * vecToMultiply.w );
+	toReturn.w	= ( Iw * vecToMultiply.x ) + ( Jw * vecToMultiply.y ) + ( Kw * vecToMultiply.z ) + ( Tw * vecToMultiply.w );
 
 	return toReturn;
 }
@@ -120,6 +138,49 @@ void Matrix44::ScaleUniform2D( float scaleXY )
 	Append( scaleMatrix44 );
 }
 
+void Matrix44::SetIColumn( Vector3 iColumn )
+{
+	Ix = iColumn.x;
+	Iy = iColumn.y;
+	Iz = iColumn.z;
+}
+
+void Matrix44::SetJColumn( Vector3 jColumn )
+{
+	Jx = jColumn.x;
+	Jy = jColumn.y;
+	Jz = jColumn.z;
+}
+
+void Matrix44::SetKColumn( Vector3 kColumn )
+{
+	Kx = kColumn.x;
+	Ky = kColumn.y;
+	Kz = kColumn.z;
+}
+
+void Matrix44::SetTColumn( Vector3 tColumn )
+{
+	Tx = tColumn.x;
+	Ty = tColumn.y;
+	Tz = tColumn.z;
+}
+
+void Matrix44::NormalizeIJKColumns()
+{
+	Vector3 iColumn = GetIColumn();
+	Vector3 jColumn = GetJColumn();
+	Vector3 kColumn = GetKColumn();
+
+	iColumn = iColumn.GetNormalized();
+	jColumn = jColumn.GetNormalized();
+	kColumn = kColumn.GetNormalized();
+
+	SetIColumn( iColumn );
+	SetJColumn( jColumn );
+	SetKColumn( kColumn );
+}
+
 void Matrix44::Translate3D( Vector3 const &translation )
 {
 	Matrix44 translateMatrix;
@@ -132,19 +193,19 @@ void Matrix44::Translate3D( Vector3 const &translation )
 
 void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ )
 {
-	Matrix44 rotationAroundZMatrix;			// Clockwise
+	Matrix44 rotationAroundZMatrix;
 	rotationAroundZMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Jx = -SinDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Iy =  SinDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Jy =  CosDegree( rotateAroundAxisYXZ.z );
 
-	Matrix44 rotationAroundXMatrix;			// Clockwise
+	Matrix44 rotationAroundXMatrix;
 	rotationAroundXMatrix.Jy =  CosDegree( rotateAroundAxisYXZ.x );
-	rotationAroundXMatrix.Ky = -SinDegree( rotateAroundAxisYXZ.x );
-	rotationAroundXMatrix.Jz =  SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Ky =  SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Jz = -SinDegree( rotateAroundAxisYXZ.x );
 	rotationAroundXMatrix.Kz =  CosDegree( rotateAroundAxisYXZ.x );
 
-	Matrix44 rotationAroundYMatrix;			// Counter-Clockwise
+	Matrix44 rotationAroundYMatrix;
 	rotationAroundYMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.y );
 	rotationAroundYMatrix.Kx =  SinDegree( rotateAroundAxisYXZ.y );
 	rotationAroundYMatrix.Iz = -SinDegree( rotateAroundAxisYXZ.y );
@@ -374,6 +435,27 @@ Matrix44 Matrix44::MakeLookAtView( const Vector3& target_position, const Vector3
 	return toReturn;
 }
 
+Matrix44 Matrix44::LerpMatrix( Matrix44 const &a, Matrix44 const &b, float t )
+{
+	t = ClampFloat01( t );
+
+	Vector3 a_right			= a.GetIColumn();
+	Vector3 b_right			= b.GetIColumn(); 
+	Vector3 a_up			= a.GetJColumn();
+	Vector3 b_up			= b.GetJColumn(); 
+	Vector3 a_forward		= a.GetKColumn(); 
+	Vector3 b_forward		= b.GetKColumn();
+	Vector3 a_translation	= a.GetTColumn();
+	Vector3 b_translation	= b.GetTColumn();
+
+	Vector3 right			= Slerp( a_right, b_right, t ); 
+	Vector3 up				= Slerp( a_up, b_up, t ); 
+	Vector3 forward			= Slerp( a_forward, b_forward, t ); 
+	Vector3 translation		= Interpolate( a_translation, b_translation, t ); 
+
+	return Matrix44( right, up, forward, translation ); 
+}
+
 Vector3 Matrix44::GetIColumn() const
 {
 	return Vector3( Ix, Iy, Iz );
@@ -394,6 +476,29 @@ Vector3 Matrix44::GetTColumn() const
 	return Vector3( Tx, Ty, Tz );
 }
 
+void Matrix44::GetAsFloats( float (&outArray)[16] ) const
+{
+	outArray[0] = Ix;
+	outArray[1] = Iy;
+	outArray[2] = Iz;
+	outArray[3] = Iw;
+
+	outArray[4] = Jx;
+	outArray[5] = Jy;
+	outArray[6] = Jz;
+	outArray[7] = Jw;
+
+	outArray[8]  = Kx;
+	outArray[9]  = Ky;
+	outArray[10] = Kz;
+	outArray[11] = Kw;
+
+	outArray[12] = Tx;
+	outArray[13] = Ty;
+	outArray[14] = Tz;
+	outArray[15] = Tw;
+}
+
 Vector3 Matrix44::GetEulerRotation() const
 {
 	/*
@@ -405,7 +510,7 @@ Vector3 Matrix44::GetEulerRotation() const
 		|	-sz*cx				 sx			cx*cy			   |     |	Iz	Jz	Kz	|
 		--													  --     --			   --
 	*/
-
+	/*
 	float xRad;
 	float yRad;
 	float zRad;
@@ -428,6 +533,166 @@ Vector3 Matrix44::GetEulerRotation() const
 	return Vector3( RadianToDegree(xRad), 
 					RadianToDegree(yRad), 
 					RadianToDegree(zRad) );
+	*/
+
+	float xDeg = asinf(Ky);
+	float yDeg = 0.f;
+	float zDeg = 0.f;;
+
+	xDeg = ClampFloatNegativeOneToOne(xDeg);
+
+	float cx = cosf(xDeg);
+	if(cx != 0.f)
+	{
+		yDeg = atan2f(Kx, Kz);
+		zDeg = atan2f(Iy, Jy);
+	}
+	else
+	{
+		// Gimble lock case
+		zDeg = 0.f;
+		yDeg = atan2f(-Kx, Ix);
+	}
+
+	return Vector3( RadianToDegree(xDeg), 
+					RadianToDegree(yDeg), 
+					RadianToDegree(zDeg) );
+}
+
+bool Matrix44::GetInverse( Matrix44 &outInvMatrix ) const
+{ 
+	float m[16];
+	GetAsFloats( m );
+
+	float inv[16], det;
+    int i;
+
+    inv[0] = m[5]  * m[10] * m[15] - 
+             m[5]  * m[11] * m[14] - 
+             m[9]  * m[6]  * m[15] + 
+             m[9]  * m[7]  * m[14] +
+             m[13] * m[6]  * m[11] - 
+             m[13] * m[7]  * m[10];
+
+    inv[4] = -m[4]  * m[10] * m[15] + 
+              m[4]  * m[11] * m[14] + 
+              m[8]  * m[6]  * m[15] - 
+              m[8]  * m[7]  * m[14] - 
+              m[12] * m[6]  * m[11] + 
+              m[12] * m[7]  * m[10];
+
+    inv[8] = m[4]  * m[9] * m[15] - 
+             m[4]  * m[11] * m[13] - 
+             m[8]  * m[5] * m[15] + 
+             m[8]  * m[7] * m[13] + 
+             m[12] * m[5] * m[11] - 
+             m[12] * m[7] * m[9];
+
+    inv[12] = -m[4]  * m[9] * m[14] + 
+               m[4]  * m[10] * m[13] +
+               m[8]  * m[5] * m[14] - 
+               m[8]  * m[6] * m[13] - 
+               m[12] * m[5] * m[10] + 
+               m[12] * m[6] * m[9];
+
+    inv[1] = -m[1]  * m[10] * m[15] + 
+              m[1]  * m[11] * m[14] + 
+              m[9]  * m[2] * m[15] - 
+              m[9]  * m[3] * m[14] - 
+              m[13] * m[2] * m[11] + 
+              m[13] * m[3] * m[10];
+
+    inv[5] = m[0]  * m[10] * m[15] - 
+             m[0]  * m[11] * m[14] - 
+             m[8]  * m[2] * m[15] + 
+             m[8]  * m[3] * m[14] + 
+             m[12] * m[2] * m[11] - 
+             m[12] * m[3] * m[10];
+
+    inv[9] = -m[0]  * m[9] * m[15] + 
+              m[0]  * m[11] * m[13] + 
+              m[8]  * m[1] * m[15] - 
+              m[8]  * m[3] * m[13] - 
+              m[12] * m[1] * m[11] + 
+              m[12] * m[3] * m[9];
+
+    inv[13] = m[0]  * m[9] * m[14] - 
+              m[0]  * m[10] * m[13] - 
+              m[8]  * m[1] * m[14] + 
+              m[8]  * m[2] * m[13] + 
+              m[12] * m[1] * m[10] - 
+              m[12] * m[2] * m[9];
+
+    inv[2] = m[1]  * m[6] * m[15] - 
+             m[1]  * m[7] * m[14] - 
+             m[5]  * m[2] * m[15] + 
+             m[5]  * m[3] * m[14] + 
+             m[13] * m[2] * m[7] - 
+             m[13] * m[3] * m[6];
+
+    inv[6] = -m[0]  * m[6] * m[15] + 
+              m[0]  * m[7] * m[14] + 
+              m[4]  * m[2] * m[15] - 
+              m[4]  * m[3] * m[14] - 
+              m[12] * m[2] * m[7] + 
+              m[12] * m[3] * m[6];
+
+    inv[10] = m[0]  * m[5] * m[15] - 
+              m[0]  * m[7] * m[13] - 
+              m[4]  * m[1] * m[15] + 
+              m[4]  * m[3] * m[13] + 
+              m[12] * m[1] * m[7] - 
+              m[12] * m[3] * m[5];
+
+    inv[14] = -m[0]  * m[5] * m[14] + 
+               m[0]  * m[6] * m[13] + 
+               m[4]  * m[1] * m[14] - 
+               m[4]  * m[2] * m[13] - 
+               m[12] * m[1] * m[6] + 
+               m[12] * m[2] * m[5];
+
+    inv[3] = -m[1] * m[6] * m[11] + 
+              m[1] * m[7] * m[10] + 
+              m[5] * m[2] * m[11] - 
+              m[5] * m[3] * m[10] - 
+              m[9] * m[2] * m[7] + 
+              m[9] * m[3] * m[6];
+
+    inv[7] = m[0] * m[6] * m[11] - 
+             m[0] * m[7] * m[10] - 
+             m[4] * m[2] * m[11] + 
+             m[4] * m[3] * m[10] + 
+             m[8] * m[2] * m[7] - 
+             m[8] * m[3] * m[6];
+
+    inv[11] = -m[0] * m[5] * m[11] + 
+               m[0] * m[7] * m[9] + 
+               m[4] * m[1] * m[11] - 
+               m[4] * m[3] * m[9] - 
+               m[8] * m[1] * m[7] + 
+               m[8] * m[3] * m[5];
+
+    inv[15] = m[0] * m[5] * m[10] - 
+              m[0] * m[6] * m[9] - 
+              m[4] * m[1] * m[10] + 
+              m[4] * m[2] * m[9] + 
+              m[8] * m[1] * m[6] - 
+              m[8] * m[2] * m[5];
+
+    det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+    if (det == 0)
+        return false;
+
+    det = 1.0f / det;
+
+	float invOut[16];
+    for (i = 0; i < 16; i++)
+        invOut[i] = inv[i] * det;
+
+	outInvMatrix = Matrix44( invOut );
+
+    return true;
 }
 
 Matrix44 Matrix44::GetOrthonormalInverse() const

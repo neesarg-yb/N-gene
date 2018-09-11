@@ -44,6 +44,9 @@ public:
 								   // bool GetNextVector2( Vector2 *out_val ); 
 								   // bool GetNextVector3( Vector3 *out_val );
 								   // ... 
+
+	std::string GetRemainingCommandInOneString();
+
 	Rgba GetNextColor();
 };
 

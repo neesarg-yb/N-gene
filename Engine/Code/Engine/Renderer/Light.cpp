@@ -7,7 +7,8 @@
 Light::Light()
 {
 	// Setup the Renderable
-	m_renderable	= new Renderable();
+	m_renderable = new Renderable();
+	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 	
 	Mesh* lightMesh		= MeshBuilder::CreateCube( Vector3( 0.25f, 0.25f, 0.25f ) );
 	Shader* defShader	= Shader::CreateNewFromFile( "Data//Shaders//default.shader" );
@@ -26,9 +27,9 @@ Light::Light( Vector3 const &position, Vector3 const &eulerRotation /* = Vector3
 
 
 	// Setup the Renderable
-	m_renderable	= new Renderable();
+	m_renderable = new Renderable();
+	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 
-	m_renderable->SetPosition( position );
 	Mesh* lightMesh		= MeshBuilder::CreateCube( Vector3::ONE_ALL, Vector3::ZERO );
 	Material* lightMat	= Material::CreateNewFromFile( "Data//Materials//default.material" );
 
@@ -45,8 +46,6 @@ void Light::Update( float deltaSeconds )
 {
 	if( m_perimeterMovementEnabled )
 		PerformPerimeterRotation( deltaSeconds );
-
-	m_renderable->m_modelTransform = m_transform;
 }
 
 void Light::Render( Renderer &currentRenderer ) const
@@ -54,7 +53,7 @@ void Light::Render( Renderer &currentRenderer ) const
 	currentRenderer.SetCurrentDiffuseTexture( nullptr );
 	currentRenderer.SetCurrentNormalTexture( nullptr );
 	currentRenderer.SetCurrentEmissiveTexture( nullptr );
-	currentRenderer.DrawMesh( *m_renderable->GetMesh(), m_transform.GetTransformMatrix() );
+	currentRenderer.DrawMesh( *m_renderable->GetMesh(), m_transform.GetWorldTransformMatrix() );
 }
 
 void Light::EnablePerimeterRotationAround( Vector3 const &rotateAround, float withRadius )
@@ -89,46 +88,57 @@ LightData Light::GetLightDataForUBO() const
 {
 	LightData lightData;
 	
-	lightData.colorAndIntensity	= m_lightColorAndIntensity;
-	lightData.position			= m_transform.GetPosition();
-	lightData.direction			= m_direction;
-	lightData.directionFactor	= m_directionFactor;
-	lightData.attenuation		= m_attenuation;
-	lightData.dotInnerAngle		= m_dotInnerAngle;
-	lightData.dotOuterAngle		= m_dotOuterAngle;
+	lightData.colorAndIntensity		= m_lightColorAndIntensity;
+	lightData.position				= m_transform.GetWorldPosition();
+	lightData.direction				= m_direction;
+	lightData.directionFactor		= m_directionFactor;
+	lightData.attenuation			= m_attenuation;
+	lightData.dotInnerAngle			= m_dotInnerAngle;
+	lightData.dotOuterAngle			= m_dotOuterAngle;
+	lightData.isUsingShadow			= m_isUsingShadowMap == true ? 1.f : 0.f;
+	lightData.viewProjectionMatrix	= m_viewProjectionMat;
 
 	return lightData;
 }
 
 float Light::GetAttenuationForRenderableAt( Vector3 const &renderablePos ) const
 {
-	// Direction and Distance
-	Vector3		directionToLight	= m_transform.GetWorldPosition() - renderablePos;
-	float const distanceFromLight	= directionToLight.GetLength();
-				directionToLight	= directionToLight.GetNormalized();
+// 	// Direction and Distance
+// 	Vector3		directionToLight	= m_transform.GetWorldPosition() - renderablePos;
+// 	float const distanceFromLight	= directionToLight.GetLength();
+// 				directionToLight	= directionToLight.GetNormalized();
+// 
+// 	Vector3		lightForwardDir		= m_direction.GetNormalized();
+// 	float		lightPower			= m_lightColorAndIntensity.w;
+// 	
+// 	// Get actual Light Direction
+// 	directionToLight				= Interpolate( lightForwardDir * -1.f, directionToLight, m_directionFactor );
+// 
+// 	// Light Power
+// 	float const dotAngle			= Vector3::DotProduct( lightForwardDir, directionToLight * -1.f );
+// 				lightPower			= lightPower * dotAngle;
+// 	TODO("Ask Forseth and correct this implemntation where inner & outer angles are taken in account");
+// 
+// 	// Main Calculation
+// 	float const a = m_attenuation.x;
+// 	float const b = distanceFromLight * m_attenuation.y;
+// 	float const c = distanceFromLight * distanceFromLight * m_attenuation.z;
+// 
+// 	return lightPower / ( a + b + c );
 
-	Vector3		lightForwardDir		= m_direction.GetNormalized();
-	float		lightPower			= m_lightColorAndIntensity.w;
-	
-	// Get actual Light Direction
-	directionToLight				= Interpolate( lightForwardDir * -1.f, directionToLight, m_directionFactor );
+	float const distanceFromLight	= (m_transform.GetWorldPosition() - renderablePos).GetLength();
+	float const lightIntensity		= m_lightColorAndIntensity.w;
 
-	// Light Power
-	float const dotAngle			= Vector3::DotProduct( lightForwardDir, directionToLight * -1.f );
-				lightPower			= lightPower * dotAngle;
-	TODO("Ask Forseth and correct this implemntation where inner & outer angles are taken in account");
-
-	// Main Calculation
 	float const a = m_attenuation.x;
 	float const b = distanceFromLight * m_attenuation.y;
 	float const c = distanceFromLight * distanceFromLight * m_attenuation.z;
-
-	return lightPower / ( a + b + c );
+	
+	return lightIntensity / ( a + b + c );
 }
 
 Vector3 Light::GetPosition() const
 {
-	return m_transform.GetPosition();
+	return m_transform.GetWorldPosition();
 }
 
 Vector3 Light::GetEulerRotation() const
@@ -139,43 +149,33 @@ Vector3 Light::GetEulerRotation() const
 void Light::SetPosition( Vector3 const &newPosition )
 {
 	m_transform.SetPosition( newPosition );
-
-	// Update Renderable
-	m_renderable->m_modelTransform = m_transform;
 }
 
 void Light::SetPosition( float x, float y, float z )
 {
 	m_transform.SetPosition( Vector3( x, y, z) );
-
-	// Update Renderable
-	m_renderable->m_modelTransform = m_transform;
 }
 
 void Light::SetEulerRotation( Vector3 const &newRotation )
 {
 	m_transform.SetRotation( newRotation );
 	m_direction = m_transform.GetRotation().GetAsDirection();
-
-	// Update Renderable
-	m_renderable->m_modelTransform = m_transform;
 }
 
 void Light::SetEulerRotation( float aroundX, float aroundY, float aroundZ )
 {
 	m_transform.SetRotation( Vector3( aroundX, aroundY, aroundZ ) );
 	m_direction = m_transform.GetRotation().GetAsDirection();
-
-	// Update Renderable
-	m_renderable->m_modelTransform = m_transform;
 }
 
 void Light::SetUpForPointLight( float intensity, Vector3 const &attenuationConstants /*= Vector3( 0.f, 0.f, 1.f )*/, Rgba const &theColor /*= RGBA_WHITE_COLOR */ )
 {
+	m_transform.RemoveChild( &m_renderable->m_modelTransform );
+
 	// Reset the mesh of Renderable, according to Light Type & color
 	delete m_renderable->m_meshes[0];
-	m_renderable->m_meshes[0]		= MeshBuilder::CreateSphere( 1.f, 10, 10, Vector3::ZERO, theColor );
-	m_renderable->m_modelTransform	= m_transform;
+	m_renderable->m_meshes[0]	= MeshBuilder::CreateSphere( 1.f, 10, 10, Vector3::ZERO, theColor );
+	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 
 	m_attenuation				= attenuationConstants;
 	m_lightColorAndIntensity	= Vector4( theColor.GetAsNormalizedRgba().IgnoreW(), intensity );
@@ -189,10 +189,12 @@ void Light::SetUpForPointLight( float intensity, Vector3 const &attenuationConst
 
 void Light::SetUpForSpotLight( float intensity, float innerAngle, float outerAngle, Vector3 const &attenuationConstants /*= Vector3( 0.f, 0.f, 1.f )*/, Rgba const &theColor /*= RGBA_WHITE_COLOR */ )
 {
+	m_transform.RemoveChild( &m_renderable->m_modelTransform );
+
 	// Reset the mesh of Renderable, according to Light Type & color
 	delete m_renderable->m_meshes[0];
 	m_renderable->m_meshes[0]		= MeshBuilder::CreateCube( Vector3( 1.f, 1.f, 0.2f ), Vector3::ZERO, theColor );
-	m_renderable->m_modelTransform	= m_transform;
+	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 
 	m_attenuation					= attenuationConstants;
 	m_lightColorAndIntensity		= Vector4( theColor.GetAsNormalizedRgba().IgnoreW(), intensity );
@@ -206,10 +208,12 @@ void Light::SetUpForSpotLight( float intensity, float innerAngle, float outerAng
 
 void Light::SetUpForDirectionalLight( float intensity, Vector3 const &attenuationConstants /* = Vector3( 0.f, 0.f, 1.f ) */, Rgba const &theColor /* = RGBA_WHITE_COLOR */ )
 {
+	m_transform.RemoveChild( &m_renderable->m_modelTransform );
+
 	// Reset the mesh of Renderable, according to Light Type & color
 	delete m_renderable->m_meshes[0];
-	m_renderable->m_meshes[0]		= MeshBuilder::CreateCube( Vector3( 0.4f, 0.4f, 1.f ), Vector3::ZERO, theColor );
-	m_renderable->m_modelTransform	= m_transform;
+	m_renderable->m_meshes[0]	= MeshBuilder::CreateCube( Vector3( 0.4f, 0.4f, 1.f ), Vector3::ZERO, theColor );
+	m_renderable->m_modelTransform.SetParentAs( &m_transform );
 
 	m_attenuation				= attenuationConstants;
 	m_lightColorAndIntensity	= Vector4( theColor.GetAsNormalizedRgba().IgnoreW(), intensity );
@@ -219,4 +223,14 @@ void Light::SetUpForDirectionalLight( float intensity, Vector3 const &attenuatio
 
 	m_dotInnerAngle				= 0.f;
 	m_dotOuterAngle				= 360.f;
+}
+
+void Light::UsesShadowMap( bool usesShadowMap )
+{
+	m_isUsingShadowMap	= usesShadowMap;
+}
+
+void Light::SetViewProjectionForShadowMap( Matrix44 const &viewProjMatrix )
+{
+	m_viewProjectionMat	= viewProjMatrix;
 }

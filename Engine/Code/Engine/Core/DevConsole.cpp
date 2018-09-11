@@ -3,20 +3,33 @@
 #include "DevConsole.hpp"
 #include "Engine/Core/Time.hpp"
 #include "Engine/Input/Command.hpp"
+#include "Engine/Core/StringUtils.hpp"
+#include "Engine/LogSystem/LogSystem.hpp"
 
 int				DevConsole::s_scrollAmount			= 0;
 Camera*			DevConsole::s_devConsoleCamera		= nullptr;
 DevConsole*		DevConsole::s_devConsoleInstance	= nullptr;
 bool			DevConsole::s_isOpen				= false;
+float			DevConsole::s_blinkerMoveSpeed		= 8.f;
 int				DevConsole::s_blinkerPosition		= 0;
 bool			DevConsole::s_blinkerHidden			= false;
 std::string		DevConsole::s_inputBufferString		= "";
-std::vector< OutputStringsBuffer>					DevConsole::s_outputBuffer;
+
+SpinLock							DevConsole::s_outputBufferLock;
+std::vector< OutputStringsBuffer>	DevConsole::s_outputBuffer;
 
 void echo_with_color	( Command& cmd );
 void clear_console		( Command& cmd );
 void save_log_to_file	( Command& cmd );
 void print_all_registered_commands	( Command& cmd );
+void HookDevConsoleToLogSystem( Command &cmd );
+void UnhookDevConsoleToLogSystem( Command &cmd );
+
+void LogHookWritesToConsole( LogData const *logData, void * )
+{
+	std::string logStr = Stringf( "%s: %s", logData->tag.c_str(), logData->text.c_str() );
+	DevConsole::GetInstance()->WriteToOutputBuffer( logStr, RGBA_GRAY_COLOR );
+}
 
 DevConsole::DevConsole( Renderer* currentRenderer )
 	: m_currentRenderer( currentRenderer )
@@ -31,6 +44,8 @@ DevConsole::DevConsole( Renderer* currentRenderer )
 	CommandRegister( "save_log", save_log_to_file );
 	CommandRegister( "help", print_all_registered_commands );
 	CommandRegister( "scroll_bottom", DevConsole::ResetTheScroll );
+	CommandRegister( "log_hook_devconsole", HookDevConsoleToLogSystem );
+	CommandRegister( "log_unhook_devconsole", UnhookDevConsoleToLogSystem );
 }
 
 DevConsole::~DevConsole()
@@ -54,18 +69,22 @@ void DevConsole::Update( InputSystem& currentInputSystem )
 	}
 
 
-	if( currentInputSystem.WasKeyJustPressed(BACK) )
-		KeyActions_HandleBackspace();
-	if( currentInputSystem.WasKeyJustPressed(LEFT) )
-		KeyActions_HandleLeftArrowKey();
-	if( currentInputSystem.WasKeyJustPressed(RIGHT) )
-		KeyActions_HandleRightArrowKey();
-	if( currentInputSystem.WasKeyJustPressed(DELETE_KEY) )
-		KeyActions_HandleDeleteKey();
+	if( currentInputSystem.IsKeyPressed(BACK) )
+		KeyActions_HandleBackspace( deltaSeconds );
+	if( currentInputSystem.IsKeyPressed(LEFT) )
+		KeyActions_HandleLeftArrowKey( deltaSeconds );
+	if( currentInputSystem.IsKeyPressed(RIGHT) )
+		KeyActions_HandleRightArrowKey( deltaSeconds );
+	if( currentInputSystem.IsKeyPressed(DELETE_KEY) )
+		KeyActions_HandleDeleteKey( deltaSeconds );
 	if( currentInputSystem.WasKeyJustPressed(ESCAPE) )
 		KeyActions_HandleEscapeKey();
 	if( currentInputSystem.WasKeyJustPressed(ENTER) )
 		KeyActions_HandleEnterKey();
+	if( currentInputSystem.WasKeyJustPressed(UP) )
+		KeyActions_HandleUpArrowKey();
+	if( currentInputSystem.WasKeyJustPressed(DOWN) )
+		KeyActions_HandleDownArroyKey();
 }
 
 void DevConsole::Render()
@@ -106,7 +125,37 @@ bool DevConsole::IsOpen()
 
 void DevConsole::ClearOutputBuffer()
 {
+	s_outputBufferLock.Enter();
 	s_outputBuffer.clear();
+	s_outputBufferLock.Leave();
+}
+
+void DevConsole::DevConsoleHook( devConsoleHook_cb *cbToHook )
+{
+	bool hookAlreadyExists = false;
+
+	for( uint i = 0; i < m_consoleHooks.size(); i++ )
+		hookAlreadyExists = ( cbToHook == m_consoleHooks[i] );
+
+	if( hookAlreadyExists == false )
+		m_consoleHooks.push_back( cbToHook );
+}
+
+void DevConsole::DevConsoleUnhook( devConsoleHook_cb *cbToUnhook )
+{
+	for( uint i = 0; i < m_consoleHooks.size(); i++ )
+	{
+		if( m_consoleHooks[i] == cbToUnhook )
+		{
+			uint lastIdx = (uint)m_consoleHooks.size() - 1;
+
+			// Fast remove..
+			std::swap( m_consoleHooks[i], m_consoleHooks[lastIdx] );
+			m_consoleHooks.pop_back();
+
+			return;
+		}
+	}
 }
 
 DevConsole* DevConsole::InitalizeSingleton( Renderer& currentRenderer )
@@ -169,6 +218,19 @@ bool DevConsole::ConsoleMessageHandler( unsigned int wmMessageCode, size_t wPara
 			if( asKey == '`' || asKey == '\b' || asKey == '\r' || asKey == '\x1b' )
 				break;
 
+			// Handle Paste (Ctrl + V)
+			if( asKey == 22 )	// Copy: 3, Paste: 22, Cut: 24, Select All: 1
+			{
+				std::string fromClipboard;
+				InputSystem::GetStringFromClipboard( fromClipboard );
+				s_inputBufferString.insert( GetBlinkerPosition(), fromClipboard );
+
+				uint pasteStrLength	 = (uint) fromClipboard.length();
+				s_blinkerPosition	+= pasteStrLength;
+
+				break;
+			}
+
 			std::string asKeyStr;											// To safely convert,
 			asKeyStr.push_back( asKey );									//		unsigned char to std::string
 			s_inputBufferString.insert( GetBlinkerPosition(), asKeyStr );	
@@ -216,31 +278,94 @@ size_t DevConsole::GetBlinkerPosition()
 	return static_cast< size_t >( s_blinkerPosition );
 }
 
-void DevConsole::KeyActions_HandleBackspace()
+bool DevConsole::KeyActions_HandleBackspace( float deltaSeconds )
 {
+	// Check if it is time to handle key press
+	static float timeElapsedSinceLastBlinkerMove = 0.f;
+	timeElapsedSinceLastBlinkerMove += deltaSeconds;
+	
+	if( timeElapsedSinceLastBlinkerMove < (1.f / s_blinkerMoveSpeed) )
+		return false;
+	else
+		timeElapsedSinceLastBlinkerMove = 0.f;
+
+	// Handle the key press
 	if( s_inputBufferString.size() != 0 )
 	{
 		s_blinkerPosition--;
 		s_inputBufferString.erase( GetBlinkerPosition(), 1 );
 	}
+
+	return true;
 }
 
-void DevConsole::KeyActions_HandleLeftArrowKey()
+void DevConsole::KeyActions_HandleLeftArrowKey( float deltaSeconds )
 {
+	// Check if it is time to handle key press
+	static float timeElapsedSinceLastBlinkerMove = 0.f;
+	timeElapsedSinceLastBlinkerMove += deltaSeconds;
+
+	if( timeElapsedSinceLastBlinkerMove < (1.f / s_blinkerMoveSpeed) )
+		return;
+	else
+		timeElapsedSinceLastBlinkerMove = 0.f;
+
+	// Handle the key press
 	if( s_blinkerPosition > 0 )
 		s_blinkerPosition--;
 }
 
-void DevConsole::KeyActions_HandleRightArrowKey()
+void DevConsole::KeyActions_HandleRightArrowKey( float deltaSeconds )
 {
+	// Check if it is time to handle key press
+	static float timeElapsedSinceLastBlinkerMove = 0.f;
+	timeElapsedSinceLastBlinkerMove += deltaSeconds;
+
+	if( timeElapsedSinceLastBlinkerMove < (1.f / s_blinkerMoveSpeed) )
+		return;
+	else
+		timeElapsedSinceLastBlinkerMove = 0.f;
+
+	// Handle the key press
 	if( static_cast<unsigned int>(s_blinkerPosition) < s_inputBufferString.length() )
 		s_blinkerPosition++;
 }
 
-void DevConsole::KeyActions_HandleDeleteKey()
+void DevConsole::KeyActions_HandleUpArrowKey()
+{
+	ClearInputBuffer();
+
+	IncrementHistorySkipCountBy( 1 );
+
+	int idx = (int)m_commandHistory.size() - m_historySkipCount - 1;
+	if( idx < 0 || idx >= m_commandHistory.size() )
+		return;
+
+	s_inputBufferString = m_commandHistory[ idx ];
+	s_blinkerPosition	= (int) s_inputBufferString.size();
+}
+
+void DevConsole::KeyActions_HandleDownArroyKey()
+{
+	ClearInputBuffer();
+
+	IncrementHistorySkipCountBy( -1 );
+
+	int idx = (int)m_commandHistory.size() - m_historySkipCount - 1;
+	if( idx < 0 || idx >= m_commandHistory.size() )
+		return;
+
+	s_inputBufferString = m_commandHistory[ idx ];
+	s_blinkerPosition	= (int) s_inputBufferString.size();
+}
+
+void DevConsole::KeyActions_HandleDeleteKey( float deltaSeconds )
 {
 	s_blinkerPosition++;
-	KeyActions_HandleBackspace();
+	bool backspaceSuccess = KeyActions_HandleBackspace( deltaSeconds );
+
+	if( backspaceSuccess == false )
+		s_blinkerPosition--;
 }
 
 void DevConsole::KeyActions_HandleEscapeKey()
@@ -249,6 +374,8 @@ void DevConsole::KeyActions_HandleEscapeKey()
 		ClearInputBuffer();
 	else
 		Close();
+
+	ResetHistorySkipCount();
 }
 
 void DevConsole::KeyActions_HandleEnterKey()
@@ -265,46 +392,80 @@ void DevConsole::KeyActions_HandleEnterKey()
 	if(s_inputBufferString != "")
 		executionSucceeded = CommandRun( s_inputBufferString.c_str() );
 
-	if( executionSucceeded == false )
-	{
+	if( executionSucceeded )
+		AddStringToTheCommandHistory( s_inputBufferString );
+	else
 		WriteToOutputBuffer( "Invalid Command!", RGBA_RED_COLOR );
-	}
 
 	// Clear the InputBuffer
 	ClearInputBuffer();
+	ResetHistorySkipCount();
 }
 
 void DevConsole::WriteToOutputBuffer( std::string line_str, Rgba line_color /*= RGBA_WHITE_COLOR*/ )
 {
 	if( line_str != "" )
+	{
+		// Send it to all the hooks
+		for each ( devConsoleHook_cb *hookCallBack in GetInstance()->m_consoleHooks )
+			(*hookCallBack)( line_str.c_str() );
+
+		// Push it to DevConsole's out buffer
+		s_outputBufferLock.Enter();
 		s_outputBuffer.push_back( OutputStringsBuffer(line_str, line_color) );
+		s_outputBufferLock.Leave();
+	}
 }
 
 std::vector< std::string > DevConsole::GetOutputBufferLines()
 {
 	std::vector< std::string > toReturn;
-
+	
+	s_outputBufferLock.Enter();
 	for each (OutputStringsBuffer op_line in s_outputBuffer )
 	{
 		toReturn.push_back( op_line.m_line_str );
 	}
+	s_outputBufferLock.Leave();
 
 	return toReturn;
 }
 
 void DevConsole::PrintTheOutputBuffer( int scrollAmount /* = 0 */ )
 {
+	s_outputBufferLock.Enter();
 	for( size_t opIndex = 0; opIndex < s_outputBuffer.size(); opIndex++ )
 	{
 		Vector2 drawMins = m_outputAreaTextBox.mins + Vector2( 0.f, m_textHeight * (1 + scrollAmount) * ( s_outputBuffer.size() - opIndex ) );
 		m_currentRenderer->DrawText2D( drawMins, s_outputBuffer[opIndex].m_line_str, m_textHeight, s_outputBuffer[opIndex].m_line_color, m_fonts );
 	}
+	s_outputBufferLock.Leave();
 }
 
 void DevConsole::ResetTheScroll( Command& cmd )
 {
 	UNUSED( cmd );
 	s_scrollAmount = 0;
+}
+
+void DevConsole::IncrementHistorySkipCountBy( int increment )
+{
+	m_historySkipCount += increment;
+	m_historySkipCount  = ClampInt( m_historySkipCount, 0, (int)m_commandHistory.size() - 1 );
+}
+
+void DevConsole::AddStringToTheCommandHistory( std::string const &commandStr )
+{
+	// Check with last command in the history
+		// Don't add if it is the same
+	if( m_commandHistory.size() != 0 && m_commandHistory.back() == commandStr )
+		return;
+
+	// If already have max history count, erase the first one before adding
+	if( m_commandHistory.size() >= m_maxHistoryCount )
+		m_commandHistory.erase( m_commandHistory.begin() );
+
+	m_commandHistory.push_back( commandStr );
 }
 
 bool DevConsoleIsOpen()
@@ -315,13 +476,12 @@ bool DevConsoleIsOpen()
 void ConsolePrintf( Rgba const &color, char const *format, ... )
 {
 	va_list args;
+
 	va_start( args, format );
-
-	char buffer[100];
-	vsnprintf_s( buffer, 100, format, args );
-
+	std::string buffer = Stringv( format, args );
 	va_end( args );
-	DevConsole::GetInstance()->WriteToOutputBuffer( buffer, color );
+
+	DevConsole::GetInstance()->WriteToOutputBuffer( buffer.c_str(), color );
 }
 
 void ConsolePrintf( char const *format, ... )
@@ -329,8 +489,8 @@ void ConsolePrintf( char const *format, ... )
 	va_list args;
 	va_start( args, format );
 
-	char buffer[100];
-	vsnprintf_s( buffer, 100, format, args );
+	char buffer[1000];
+	vsnprintf_s( buffer, 1000, format, args );
 
 	va_end( args );
 	DevConsole::GetInstance()->WriteToOutputBuffer( buffer );
@@ -366,7 +526,7 @@ void save_log_to_file( Command& cmd )
 		toWrite += "\n";
 	}
 
-	std::ofstream fileWriter("outputLog.txt");
+	std::ofstream fileWriter("DevConsoleOutput.txt");
 	
 	if( fileWriter.is_open() )
 	{
@@ -396,4 +556,16 @@ void print_all_registered_commands( Command& cmd )
 
 		ConsolePrintf( RGBA_GRAY_COLOR, lineStr.c_str() );
 	}
+}
+
+void HookDevConsoleToLogSystem( Command &cmd )
+{
+	UNUSED( cmd );
+	LogSystem::GetInstance()->LogHook( LogHookWritesToConsole, nullptr );
+}
+
+void UnhookDevConsoleToLogSystem( Command &cmd )
+{
+	UNUSED( cmd );
+	LogSystem::GetInstance()->LogUnhook( LogHookWritesToConsole, nullptr );
 }

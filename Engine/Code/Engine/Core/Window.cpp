@@ -1,7 +1,6 @@
-#include "Engine/Core/Window.hpp"
-
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "Window.hpp"
+#include "Engine/Internal/WindowsCommon.hpp"
+#include "Engine/Math/IntVector2.hpp"
 
 #define GAME_WINDOW_CLASS (TEXT( "Simple Window Class" ))
 
@@ -110,7 +109,7 @@ Window::Window( char const *app_name, float clientAspect )
 	SetForegroundWindow( hwnd );
 	SetFocus( hwnd );
 
-	m_hwnd = (void*)hwnd; 
+	m_hwnd = (void*)hwnd;
 }
 
 Window::~Window()
@@ -178,4 +177,12 @@ unsigned int Window::GetHeight() const
 
 	return height;
 
+}
+
+IntVector2 Window::GetDimensions() const
+{
+	uint width	= GetWidth();
+	uint height	= GetHeight();
+
+	return IntVector2( (int)width, (int)height );
 }

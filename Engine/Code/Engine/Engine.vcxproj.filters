@@ -46,6 +46,18 @@
     <Filter Include="Renderer\Rendering Pipeline">
       <UniqueIdentifier>{59cdb8d0-e565-4e15-b8f1-f70e51e101df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Profiler">
+      <UniqueIdentifier>{c8785f69-4265-4c14-b759-139182ccefbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LogSystem">
+      <UniqueIdentifier>{d1ac2fd2-bfb1-4ebd-9045-ad442178b345}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{f0e6767e-bcc8-488d-820b-d91a1d08a5b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Internal">
+      <UniqueIdentifier>{74f38925-1ebc-48fd-806b-c35c698ce261}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Math\Vector2.cpp">
@@ -128,9 +140,6 @@
     </ClCompile>
     <ClCompile Include="Core\Tags.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Math\HeatMap.cpp">
-      <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="Math\CubicSpline.cpp">
       <Filter>Math</Filter>
@@ -258,6 +267,75 @@
     <ClCompile Include="Renderer\TextureCube.cpp">
       <Filter>Renderer\Texture and Fonts</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\PickBuffer.cpp">
+      <Filter>Renderer\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\HeatMap2D.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\HeatMap3D.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\AABB3.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\ProfileLogScoped.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\Profiler.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\ProfileScoped.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\ProfilerReport.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\ProfileReportEntry.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\ProfilerConsole.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\BarGraph.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\DoubleRange.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="LogSystem\SpinLock.cpp">
+      <Filter>LogSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="LogSystem\LogSystem.cpp">
+      <Filter>LogSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\NetworkAddress.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\TCPSocket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\Network.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\Endianness.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\BytePacker.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Quaternion.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\RemoteCommandService.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\Socket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\UDPSocket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -361,9 +439,6 @@
     </ClInclude>
     <ClInclude Include="Core\Tags.hpp">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Math\HeatMap.hpp">
-      <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Math\CubicSpline.hpp">
       <Filter>Math</Filter>
@@ -496,6 +571,84 @@
     </ClInclude>
     <ClInclude Include="Renderer\TextureCube.hpp">
       <Filter>Renderer\Texture and Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\PickBuffer.hpp">
+      <Filter>Renderer\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\HeatMap2D.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\HeatMap3D.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\AABB3.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ProfileLogScoped.hpp">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\Profiler.hpp">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ProfileScoped.hpp">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ProfilerReport.hpp">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ProfileReportEntry.hpp">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ProfilerConsole.hpp">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\BarGraph.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\DoubleRange.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSystem\ThreadSafeQueue.hpp">
+      <Filter>LogSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSystem\SpinLock.hpp">
+      <Filter>LogSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSystem\LogSystem.hpp">
+      <Filter>LogSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSystem\ThreadSafeVector.hpp">
+      <Filter>LogSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Network.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Internal\WindowsCommon.hpp">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\NetworkAddress.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\TCPSocket.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Endianness.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\BytePacker.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Quaternion.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\RemoteCommandService.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Socket.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\UDPSocket.hpp">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

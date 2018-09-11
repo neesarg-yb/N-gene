@@ -5,6 +5,7 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Input/Command.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 
 Renderer									*debugRenderer				= nullptr;
@@ -43,6 +44,9 @@ void DebugRendererShutdown()
 
 void DebugRendererUpdate( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	DeleteOverdueRenderObjects();
 
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
@@ -51,6 +55,9 @@ void DebugRendererUpdate( float deltaSeconds )
 
 void DebugRendererRender()
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
 		renderObject->Render();
 }
@@ -124,6 +131,47 @@ void AddTexturedAABBToMeshBuilder( MeshBuilder& mb, AABB2 const &bounds, Vector2
 	mb.SetUV( bottomRightUVs );
 	mb.PushVertex( bottomRightPos );
 	
+	mb.SetColor( tintColor );
+	mb.SetUV( upperRightUVs );
+	mb.PushVertex( upperRightPos );
+
+	// Upper Triangle
+	mb.SetColor( tintColor );
+	mb.SetUV( upperRightUVs );
+	mb.PushVertex( upperRightPos );
+
+	mb.SetColor( tintColor );
+	mb.SetUV( upperLeftUVs );
+	mb.PushVertex( upperLeftPos);
+
+	mb.SetColor( tintColor );
+	mb.SetUV( bottomLeftUVs );
+	mb.PushVertex( bottomLeftPos );
+}
+
+void AddTexturedAABBToMeshBuilder( MeshBuilder& mb, Vector3 const &mins, float height ,float cellWidth, Vector3 upDirection, Vector3 rightDirection, Vector2 const &texCoordsAtMins, Vector2 const &texCoordsAtMaxs, Rgba const &tintColor )
+{
+	Vector3 bottomLeftPos	= mins;
+	Vector2 bottomLeftUVs	= Vector2( texCoordsAtMins.x, texCoordsAtMins.y );
+
+	Vector3 bottomRightPos	= bottomLeftPos + ( rightDirection * cellWidth );
+	Vector2 bottomRightUVs	= Vector2( texCoordsAtMaxs.x, texCoordsAtMins.y );
+
+	Vector3 upperRightPos	= bottomRightPos + ( upDirection * height );
+	Vector2 upperRightUVs	= Vector2( texCoordsAtMaxs.x, texCoordsAtMaxs.y );
+
+	Vector3 upperLeftPos	= bottomLeftPos + ( upDirection * height );
+	Vector2 upperLeftUVs	= Vector2( texCoordsAtMins.x, texCoordsAtMaxs.y );
+
+	// Bottom Triangle
+	mb.SetColor( tintColor );
+	mb.SetUV( bottomLeftUVs );
+	mb.PushVertex( bottomLeftPos );
+
+	mb.SetColor( tintColor );
+	mb.SetUV( bottomRightUVs );
+	mb.PushVertex( bottomRightPos );
+
 	mb.SetColor( tintColor );
 	mb.SetUV( upperRightUVs );
 	mb.PushVertex( upperRightPos );
@@ -220,12 +268,21 @@ void DebugRender2DText( float lifetime, Vector2 const &position, float const hei
 	debugRenderObjectQueue.push_back( textObject );
 }
 
-void DebugRenderPoint( float lifetime, Vector3 const &position, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
+void DebugRenderPoint( float lifetime, float size, Vector3 const &position, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	float halfSize = size * 0.5f;
+
 	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_POINTS, false );
-	mb.SetColor( RGBA_WHITE_COLOR );
-	mb.PushVertex( Vector3::ZERO );
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	mb.PushVertex( Vector3( 0.f,  halfSize, 0.f ) );
+	mb.PushVertex( Vector3( 0.f, -halfSize, 0.f ) );
+
+	mb.PushVertex( Vector3(  halfSize, 0.f, 0.f ) );
+	mb.PushVertex( Vector3( -halfSize, 0.f, 0.f ) );
+
+	mb.PushVertex( Vector3( 0.f, 0.f,  halfSize ) );
+	mb.PushVertex( Vector3( 0.f, 0.f, -halfSize ) );
 	mb.End();
 
 	Transform modelTransform = Transform( position, Vector3::ZERO, Vector3::ONE_ALL );
@@ -317,4 +374,29 @@ void DebugRenderQuad( float lifetime, Vector3 const &pos, Vector3 const &eulerRo
 
 	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), quadMesh, texture, startColor, endColor, mode, FRONT_AND_BACK_FILL );
 	debugRenderObjectQueue.push_back( quadObject );
+}
+
+void DebugRenderTag( float lifetime, float const height, Vector3 const &startPos, Vector3 const &upDirection, Vector3 const &rightDirection, Rgba const &startColor, Rgba const &endColor, std::string asciiText )
+{
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_TRIANGES, false );
+
+	Vector3 newMins = Vector3::ZERO;
+	float cellWidth = height * debugFont->GetGlyphAspect( asciiText.at(0) );
+	// For every character of the string
+	for( unsigned int i = 0; i < asciiText.length(); i++ )
+	{
+		// Draw that character
+		AABB2 textCoords = debugFont->GetUVsForGlyph( asciiText.at(i) );
+		AddTexturedAABBToMeshBuilder( mb, newMins, height, cellWidth, upDirection, rightDirection, textCoords.mins , textCoords.maxs, RGBA_WHITE_COLOR );
+
+		// Calculate bounds to draw next character
+		newMins = newMins + (rightDirection * cellWidth);
+	}
+
+	mb.End();
+
+	Transform modelTransform = Transform( startPos, Vector3::ZERO, Vector3::ONE_ALL );
+	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	debugRenderObjectQueue.push_back( textObject );
 }

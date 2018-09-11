@@ -15,6 +15,8 @@ public:
 	virtual void	Bind		( unsigned int programHandle ) = 0;
 	virtual void	SetData		( void const *data ) = 0;
 	virtual size_t	GetByteSize	() const = 0;
+	
+	virtual MaterialProperty* Clone() const = 0;
 
 public:
 	std::string m_name;
@@ -31,6 +33,8 @@ public:
 	void	SetData		( void const *data ) override;
 	size_t	GetByteSize	() const override;
 
+	virtual MaterialProperty* Clone() const;
+
 public:
 	float m_data;
 };
@@ -45,6 +49,8 @@ public:
 	void	Bind		( unsigned int programHandle ) override;
 	void	SetData		( void const *data ) override;
 	size_t	GetByteSize	() const override;
+
+	virtual MaterialProperty* Clone() const;
 
 public:
 	Vector2 m_data;
@@ -61,6 +67,8 @@ public:
 	void	SetData		( void const *data ) override;
 	size_t	GetByteSize	() const override;
 
+	virtual MaterialProperty* Clone() const;
+
 public:
 	Vector3 m_data;
 };
@@ -76,6 +84,8 @@ public:
 	void	SetData		( void const *data ) override;
 	size_t	GetByteSize	() const override;
 
+	virtual MaterialProperty* Clone() const;
+
 public:
 	Vector4 m_data;
 };
@@ -90,6 +100,8 @@ public:
 	void	Bind		( unsigned int programHandle ) override;
 	void	SetData		( void const *data ) override;
 	size_t	GetByteSize	() const override;
+
+	virtual MaterialProperty* Clone() const;
 
 public:
 	Rgba m_data;

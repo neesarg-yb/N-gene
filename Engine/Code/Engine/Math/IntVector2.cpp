@@ -1,6 +1,7 @@
 #include "IntVector2.hpp"
 
 const IntVector2 IntVector2::ZERO			= IntVector2(  0,  0 );
+const IntVector2 IntVector2::ONE_ONE		= IntVector2(  1,  1 );
 const IntVector2 IntVector2::MINUS_ONE_XY	= IntVector2( -1, -1 );
 
 IntVector2::IntVector2()

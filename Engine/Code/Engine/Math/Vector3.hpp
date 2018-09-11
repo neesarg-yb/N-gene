@@ -1,6 +1,7 @@
 #pragma once
 
 class Vector2;
+class IntVector3;
 
 class Vector3
 {
@@ -13,16 +14,19 @@ public:
 
 public:
 			  Vector3() {};
+			  Vector3( const IntVector3 &copyFrom );
 			  Vector3( const Vector3& copyFrom );			
 	 explicit Vector3( float initialX, float initialY, float initialZ );		
 			 ~Vector3() {};
 
 
 	// Operators
-	const Vector3 operator +  ( const Vector3& vecToAdd ) const;			// vec2 + vec2
-	const Vector3 operator -  ( const Vector3& vecToSubtract ) const;		// vec2 - vec2
-	const Vector3 operator *  ( float uniformScale ) const;					// vec2 * float
-	const Vector3 operator /  ( float inverseScale ) const;					// vec2 / float
+	const Vector3 operator +  ( const Vector3& vecToAdd ) const;			// vec3 + vec3
+	const Vector3 operator -  ( const Vector3& vecToSubtract ) const;		// vec3 - vec3
+	const Vector3 operator *  ( float uniformScale ) const;					// vec3 * float
+	const Vector3 operator /  ( float inverseScale ) const;					// vec3 / float
+		  void	  operator += ( const Vector3& vetToAdd );					// vec3_a = vec3_a + vec3_b
+		  void	  operator -= ( const Vector3& vetToSubtract );				// vec3_a = vec3_a - vec3_b
 		  bool	  operator == ( const Vector3& vecToCompare ) const;		// vec2 == vec2
 		  bool	  operator != ( const Vector3& vecToCompare ) const;		// vec2 != vec2
 
@@ -47,4 +51,6 @@ public:
 Vector3 PolarToCartesian( float radius, float rotation, float altitude );	// rotation = 0 starts at x-axis arrow; altitude = 0 starts at y-axis arrow
 
 
-const Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd );
+Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd );
+Vector3 Slerp( Vector3 const &a, Vector3 const &b, float t );
+Vector3 SlerpUnit( Vector3 const &a, Vector3 const &b, float t );

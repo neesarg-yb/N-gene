@@ -47,7 +47,7 @@ void DebugRender2DText( float lifetime,
 //////////////////////
 // 3D Render System //
 //////////////////////
-void DebugRenderPoint( float lifetime, 
+void DebugRenderPoint( float lifetime, float size,
 	Vector3 const	&position, 
 	Rgba const		&startColor, 
 	Rgba const		&endColor, 
@@ -95,3 +95,12 @@ void DebugRenderQuad( float lifetime,
 	Rgba const &startColor, 
 	Rgba const &endColor, 
 	eDebugRenderMode mode ); 
+
+void DebugRenderTag( float lifetime,
+	float	const height,
+	Vector3 const &startPos,
+	Vector3 const &upDirection,
+	Vector3 const &rightDirection,
+	Rgba	const &startColor,
+	Rgba	const &endColor,
+	std::string	asciiText );

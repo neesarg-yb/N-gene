@@ -8,8 +8,11 @@
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/AABB2.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/LogSystem/SpinLock.hpp"
 
 class Command;
+
+typedef std::function< void( char const *) > devConsoleHook_cb;
 
 struct OutputStringsBuffer
 {
@@ -42,19 +45,30 @@ public:
 	bool IsOpen(); 
 	void ClearOutputBuffer();
 
+	// Console Hook
+	void DevConsoleHook		( devConsoleHook_cb *cbToHook );
+	void DevConsoleUnhook	( devConsoleHook_cb *cbToUnhook );
+
 private:
 			float	CalculateDeltaTime();
 			void	ClearInputBuffer();
 			void	DrawBlinker();
 	static	size_t	GetBlinkerPosition();
-			void	KeyActions_HandleBackspace();
-			void	KeyActions_HandleLeftArrowKey ();
-			void	KeyActions_HandleRightArrowKey();
-			void	KeyActions_HandleDeleteKey();
+			void	KeyActions_HandleLeftArrowKey( float deltaSeconds );
+			void	KeyActions_HandleRightArrowKey( float deltaSeconds );
+			void	KeyActions_HandleUpArrowKey();
+			void	KeyActions_HandleDownArroyKey();
+			bool	KeyActions_HandleBackspace( float deltaSeconds );
+			void	KeyActions_HandleDeleteKey( float deltaSeconds );
 			void	KeyActions_HandleEscapeKey();
 			void	KeyActions_HandleEnterKey ();
 			void	PrintTheOutputBuffer( int scrollAmount = 0 );
 	static	void	ResetTheScroll( Command& cmd );
+
+	// Command History
+	inline	void	ResetHistorySkipCount() { m_historySkipCount = -1; }
+			void	IncrementHistorySkipCountBy( int increment );
+			void	AddStringToTheCommandHistory( std::string const &commandStr );
 
 private: 
 	double lastFramesTime;
@@ -74,17 +88,24 @@ private:
 	const	AABB2		m_outputAreaTextBox			= AABB2( Vector2( m_inputAreaTextBox.mins.x, m_inputAreaBox.maxs.y ) + Vector2( 0.01f, 0.f ), m_topRightOrtho - Vector2( 0.01f, 0.f ) );
 	const	float		m_textHeight				= ( m_inputAreaBox.maxs.y - m_inputAreaBox.mins.y ) * 0.5f;
 
+	static	float		s_blinkerMoveSpeed;			// In Characters Per Seconds. ( It is used when Backspace, Delete, and Arrow keys are pressed.. )
 	static	int			s_blinkerPosition;
 	static	bool		s_blinkerHidden;
 	static	std::string	s_inputBufferString;
+	static	SpinLock	s_outputBufferLock;
 	static	std::vector< OutputStringsBuffer >	s_outputBuffer;
+
+			int							m_historySkipCount	= -1;
+	const	int							m_maxHistoryCount	= 50;
+	std::vector< std::string >			m_commandHistory;
+	std::vector< devConsoleHook_cb* >	m_consoleHooks;
 
 public:
 	static DevConsole*	InitalizeSingleton( Renderer& currentRenderer );
 	static void			DestroySingleton();
 	static DevConsole*	GetInstance();
 	static bool			ConsoleMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam );
-	static	void		WriteToOutputBuffer( std::string line_str, Rgba line_color = RGBA_WHITE_COLOR );
+	static void			WriteToOutputBuffer( std::string line_str, Rgba line_color = RGBA_WHITE_COLOR );
 	
 	static std::vector< std::string >	GetOutputBufferLines();
 };

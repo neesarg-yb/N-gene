@@ -1,10 +1,12 @@
 #pragma once
 #include "Camera.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/TextureCube.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 Camera::Camera()
 {
@@ -46,8 +48,11 @@ void Camera::Finalize()
 
 void Camera::UpdateUBO()
 {
+	// Update viewMatrix if transform has a parent
+	m_viewMatrix = m_cameraTransform.GetWorldTransformMatrix().GetOrthonormalInverse();
+
 	*m_cameraUBO->As<UBOCameraMatrices>() = GetUBOCameraMatrices();
-	m_cameraUBO->UpdateGPU();
+	 m_cameraUBO->UpdateGPU();
 }
 
 unsigned int Camera::GetFrameBufferHandle() const
@@ -57,8 +62,12 @@ unsigned int Camera::GetFrameBufferHandle() const
 
 void Camera::PreRender( Renderer &theRenderer )
 {
-	// Clear Targets..
-	TODO("If camera should, clear the target!");
+	TODO( "Decide when you'll bind Bloom and other textures, again!" );
+	// Unbind all other color targets except main one..
+	for( uint i = 1; i < MAX_COLOR_TARGETS; i++ )
+		m_outputFramebuffer.SetColorTarget( nullptr, i );
+
+	m_outputFramebuffer.Finalize();
 
 	// Render SkyBox if enabled
 	if( m_skyboxEnabled )
@@ -98,6 +107,28 @@ void Camera::LookAt( Vector3 position, Vector3 target, Vector3 up /* = Vector3::
 	m_viewMatrix = cameraMatrix.GetOrthonormalInverse();
 }
 
+Matrix44 Camera::UpdateViewMatrix()
+{
+	m_viewMatrix = m_cameraTransform.GetWorldTransformMatrix().GetOrthonormalInverse();
+
+	return m_viewMatrix;
+}
+
+Matrix44 Camera::GetViewMatrix() const
+{
+	return m_viewMatrix;
+}
+
+Matrix44 Camera::GetProjectionMatrix() const
+{
+	return m_projMatrix;
+}
+
+void Camera::SetProjectionMatrix( Matrix44 const &projMatrix )
+{
+	m_projMatrix = projMatrix;
+}
+
 void Camera::SetProjectionOrtho( float size, float screen_near, float screen_far )
 {
 	m_size		  = size;
@@ -121,39 +152,34 @@ void Camera::SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspec
 	m_projMatrix = Matrix44::MakePerspective3D( fovDegrees, aspectRatio, nearZ, farZ );
 }
 
+void Camera::CopyTransformViewAndProjection( Camera const &referenceCamera )
+{
+	m_cameraTransform	= referenceCamera.m_cameraTransform;
+	m_projMatrix		= referenceCamera.m_projMatrix;
+	m_viewMatrix		= referenceCamera.m_viewMatrix;
+}
+
 void Camera::SetCameraPositionTo( Vector3 const &newPosition )
 {
 	m_cameraTransform.SetPosition( newPosition );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 void Camera::SetCameraEulerRotationTo( Vector3 const &newEulerRotation )
 {
 	m_cameraTransform.SetRotation( newEulerRotation );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 void Camera::MoveCameraPositionBy( Vector3 const &localTranslation )
 {
-	Vector3 worldTranslation	= m_cameraTransform.GetTransformMatrix().Multiply( localTranslation, 0.f );
+	Vector3 worldTranslation	= m_cameraTransform.GetWorldTransformMatrix().Multiply( localTranslation, 0.f );
 	Vector3 currentPosition		= m_cameraTransform.GetPosition();
 	m_cameraTransform.SetPosition( currentPosition + worldTranslation );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 void Camera::RotateCameraBy( Vector3 const &localRotation )
 {
 	Vector3 currentRotation = m_cameraTransform.GetRotation();
 	m_cameraTransform.SetRotation( currentRotation + localRotation );
-
-	// Modify the View Matrix, which is inverse of the Camera Matrix
-	m_viewMatrix = m_cameraTransform.GetTransformMatrix().GetOrthonormalInverse();
 }
 
 Vector3 Camera::GetForwardVector() const 
@@ -174,6 +200,7 @@ Matrix44 Camera::GetCameraModelMatrix() const
 UBOCameraMatrices Camera::GetUBOCameraMatrices() const
 {
 	UBOCameraMatrices toReturn;
+
 	toReturn.viewMatrix			= m_viewMatrix;
 	toReturn.projectionMatrix	= m_projMatrix;
 
@@ -214,6 +241,61 @@ void Camera::RenderSkyBox( Renderer &theRenderer )
 
 	// Draw Cube
 	theRenderer.DrawMesh( *m_skyboxMesh, m_skyboxModel );
+}
+
+Vector3 Camera::GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ /* = 0.f */ )
+{
+	// Screen to NDC
+	Vector3 ndcXYZ;
+	ndcXYZ.x	= RangeMapFloat( screenPosition.x, 0.f, (float)Window::GetInstance()->GetWidth(),  -1.f,  1.f );
+	ndcXYZ.y	= RangeMapFloat( screenPosition.y, 0.f, (float)Window::GetInstance()->GetHeight(),  1.f, -1.f );
+	ndcXYZ.z	= ClampFloat( ndcZ, -1.f, 1.f );
+// 
+// 	std::string ndcString = Stringf( "NDC: ( %f, %f, %f )", ndcXYZ.x, ndcXYZ.y, ndcXYZ.z );
+// 	DebugRender2DText( 0.f, Vector2(-380.f, -400.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, ndcString.c_str() );
+
+	// NDC to View
+	Matrix44 invProjMatrix;	
+	bool valid			= m_projMatrix.GetInverse( invProjMatrix );
+	Vector4	 viewPos	= invProjMatrix.Multiply( Vector4( ndcXYZ, 1.f ) );
+	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
+// 
+// 	std::string viewString = Stringf( "View: ( %f, %f, %f, %f )", viewPos.x, viewPos.y, viewPos.z, viewPos.w );
+// 	DebugRender2DText( 0.f, Vector2(-380.f, -380.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, viewString.c_str() );
+
+	// View to World
+	Matrix44 invViewMatrix;
+	valid				= m_viewMatrix.GetInverse( invViewMatrix );
+	Vector4 worldPos4	= invViewMatrix.Multiply( viewPos );
+	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
+
+	Vector3 worldPos	= Vector3( worldPos4.x, worldPos4.y, worldPos4.z ) / worldPos4.w;
+// 
+// 	std::string worldString = Stringf( "World: ( %f, %f, %f )", worldPos.x, worldPos.y, worldPos.z );
+// 	DebugRender2DText( 0.f, Vector2(-380.f, -360.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, worldString.c_str() );
+
+	return worldPos;
+}
+
+Vector2 Camera::GetScreenPositionFromWorld( Vector3 const &worldPoint, float w )
+{
+	// World to Camera
+	Vector4 posInCamera = m_viewMatrix.Multiply( Vector4( worldPoint, w ) );
+
+	// Camera to Clip
+	Vector4 posInClip = m_projMatrix.Multiply( posInCamera );
+
+	// Clip to NDC
+	Vector3 posInNDC = Vector3( posInClip.x / posInClip.w,
+								posInClip.y / posInClip.w,
+								posInClip.z / posInClip.w );
+
+	// Scale NDC according to Camera's width & height
+	float	halfHeight			= (float) Window::GetInstance()->GetHeight() * 0.5f;
+	float	halfWidth			= (float) Window::GetInstance()->GetWidth() * 0.5f;
+	Vector2 screenPosition	= Vector2( posInNDC.x * halfWidth, posInNDC.y * halfHeight );
+	
+	return screenPosition;
 }
 
 void Camera::ApplyEffect( Shader *fullScreenEffect, Renderer &theRenderer, uint totalPasses /* = 1 */ )

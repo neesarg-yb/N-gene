@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Math/Vector4.hpp"
 #include "Engine/Math/MathUtil.hpp"
 
 class Matrix44
@@ -29,6 +30,7 @@ public:
 	Matrix44() {} // Identity matrix
 	explicit Matrix44( const float* sixteenValuesBasisMajor ); // float[16] array in order Ix, Iy...
 	explicit Matrix44( const Vector2& iBasis, const Vector2& jBasis, const Vector2& translation = Vector2(0.f,0.f) );
+	explicit Matrix44( const Vector3& iBasis, const Vector3& jBasis, const Vector3& kBasis, const Vector3& translation = Vector3::ZERO );
 
 	// Accessors
 	Vector2 TransformPosition2D( const Vector2& position2D );				// Written assuming z=0, w=1
@@ -41,12 +43,20 @@ public:
 	void Transpose	();
 	
 	Vector3 Multiply	( const Vector3& vecToMultiply, const float w ) const;	// Mat44 * Vec4( x, y, z, w )
+	Vector4	Multiply	( const Vector4& vecToMultiply ) const;
 
 	// Modifiers
 	void Translate2D	( const Vector2& translation );
 	void RotateDegrees2D( float rotationDegreesAboutZ );
 	void Scale2D		( float scaleX, float scaleY );
 	void ScaleUniform2D	( float scaleXY );
+
+	// Column Operations
+	void SetIColumn( Vector3 iColumn );
+	void SetJColumn( Vector3 jColumn );
+	void SetKColumn( Vector3 kColumn );
+	void SetTColumn( Vector3 tColumn );
+	void NormalizeIJKColumns();
 
 	void Translate3D	( Vector3 const &translation );
 	void RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ );				// Rotation Order, Around Axis:  Z(Roll, clockwise) --> X(Pitch, clockwise) --> Y(Yaw, counter-clockwise)
@@ -62,15 +72,19 @@ public:
 	static Matrix44 MakeOrtho3D				( float screen_width, float screen_height, float screen_near, float screen_far );		// Center will be (0, 0, 0)
 	static Matrix44 MakePerspective3D		( float fovDegrees, float aspectRatio, float nearZ, float farZ );		// Makes the Projection Matrix for Perspective Camera
 	static Matrix44 MakeLookAtView			( const Vector3& target_position, const Vector3& camera_position, const Vector3& camera_up_vector = Vector3( 0.f, 1.f, 0.f ) );	// Returns View Matrix, according to provided Look At arguments
-	
+	static Matrix44 LerpMatrix				( Matrix44 const &a, Matrix44 const &b, float t );						// Lerps from a to b
+
 	// Column Accessors
 	Vector3	GetIColumn() const;
 	Vector3 GetJColumn() const;
 	Vector3 GetKColumn() const;
 	Vector3 GetTColumn() const;
 
+	void	GetAsFloats( float (&outArray)[16] ) const;
+
 	// Information Fetchers
 	Vector3		GetEulerRotation() const;
+	bool		GetInverse( Matrix44 &outInvMatrix ) const;
 	Matrix44	GetOrthonormalInverse() const;
 private:
 

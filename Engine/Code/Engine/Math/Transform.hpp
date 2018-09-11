@@ -29,9 +29,10 @@ public:
 	Vector3		GetScale   () const;										// Gets local scale
 	Matrix44	GetTransformMatrix() const;
 
-	void		SetPosition( Vector3 const &position );
-	void		SetRotation( Vector3 const &rotation );						// rotation = Vec3(Pitch, Yaw, Roll); but the order the rotation is applied is: Roll_Z -> Pitch_X -> Yaw_Y
-	void		SetScale   ( Vector3 const &scale	 );
+	void		SetPosition		( Vector3 const &position );
+	void		SetRotation		( Vector3 const &rotation );						// rotation = Vec3(Pitch, Yaw, Roll); but the order the rotation is applied is: Roll_Z -> Pitch_X -> Yaw_Y
+	void		SetScale		( Vector3 const &scale	 );
+	void		SetFromMatrix	( Matrix44 model );
 
 	void		SetParentAs	( Transform const *parent );
 	void		AddChild	( Transform *child );

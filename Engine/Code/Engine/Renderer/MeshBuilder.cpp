@@ -90,8 +90,6 @@ void MeshBuilder::AddPlane( Vector2 const &xySize, Vector3 const &centerPos, Rgb
 	// Die
 	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
 
-	this->Begin( PRIMITIVE_TRIANGES, true );
-
 	// Back Face (towards you)
 	this->SetColor( color );
 	this->SetUV( uvBounds.mins.x, uvBounds.mins.y );
@@ -117,6 +115,61 @@ void MeshBuilder::AddPlane( Vector2 const &xySize, Vector3 const &centerPos, Rgb
 	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	this->PushVertex( tlCorner );
 
+	this->AddFace( idx + 0, idx + 1, idx + 2 );
+	this->AddFace( idx + 2, idx + 3, idx + 0 );
+
+	this->End();
+}
+
+void MeshBuilder::AddPlane( AABB2 const &drawBounds, float const &zPosition, AABB2 const &uvBounds, Rgba const &color /*= RGBA_WHITE_COLOR */ )
+{
+	Vector3 bottomLeftPos	= Vector3( drawBounds.mins.x, drawBounds.mins.y, zPosition );
+	Vector2 bottomLeftUVs	= Vector2( uvBounds.mins.x, uvBounds.mins.y );
+
+	Vector3 bottomRightPos	= Vector3( drawBounds.maxs.x, drawBounds.mins.y, zPosition );
+	Vector2 bottomRightUVs	= Vector2( uvBounds.maxs.x, uvBounds.mins.y );
+
+	Vector3 upperRightPos	= Vector3( drawBounds.maxs.x, drawBounds.maxs.y, zPosition );
+	Vector2 upperRightUVs	= Vector2( uvBounds.maxs.x, uvBounds.maxs.y );
+
+	Vector3 upperLeftPos	= Vector3( drawBounds.mins.x, drawBounds.maxs.y, zPosition );
+	Vector2 upperLeftUVs	= Vector2( uvBounds.mins.x, uvBounds.maxs.y );
+
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
+
+	// Add Vertices
+	this->SetColor( color );
+	this->SetUV( bottomLeftUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	unsigned int idx = this->PushVertex( bottomLeftPos );
+
+	this->SetColor( color );
+	this->SetUV( bottomRightUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( bottomRightPos );
+
+	this->SetColor( color );
+	this->SetUV( upperRightUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( upperRightPos );
+
+	this->SetColor( color );
+	this->SetUV( upperLeftUVs );
+	this->SetNormal( 0.f, 0.f, -1.f );
+	this->SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	this->PushVertex( upperLeftPos);
+
+	// Add Faces
 	this->AddFace( idx + 0, idx + 1, idx + 2 );
 	this->AddFace( idx + 2, idx + 3, idx + 0 );
 
@@ -163,8 +216,6 @@ void MeshBuilder::AddCube( Vector3 const &size, Vector3 const &centerPos /* = Ve
 		mbParameterMatches = false;
 	// Die
 	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
-
-	this->Begin( PRIMITIVE_TRIANGES, true );
 
 	// Back Face (towards you)
 	// e f
@@ -341,8 +392,9 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 		mbParameterMatches = false;
 	// Die
 	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
-	
-	this->Begin( PRIMITIVE_TRIANGES, true );
+
+	// Vertex count to determine start index
+	uint myVerticesStartsFrom = (uint) m_vertices.size();
 
 	for( unsigned int sliceIdx = 0; sliceIdx <= slices; sliceIdx++ )
 	{
@@ -361,7 +413,8 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 			float tx			= -1.f * CosDegree( altitude90 ) * SinDegree( rotation ) * radius;
 			float ty			= 0.f;
 			float tz			= CosDegree( altitude90 ) * CosDegree( rotation ) * radius;
-			Vector4 tangent		= Vector4( tx, ty, tz, 1.f ).GetNormalized();
+			Vector3 tangentXYZ	= Vector3( tx, ty, tz ).GetNormalized();
+			Vector4 tangent		= Vector4( tangentXYZ.x, tangentXYZ.y, tangentXYZ.z, 1.f );
 
 			this->SetUV( u, v );
 			this->SetNormal( normal );
@@ -380,12 +433,133 @@ void MeshBuilder::AddSphere( float radius, unsigned int wedges, unsigned int sli
 			unsigned int bottomRightIdx = bottomLeftIdx + 1;
 			unsigned int topRightIdx	= topLeftIdx + 1;
 
+			this->AddFace( myVerticesStartsFrom + bottomLeftIdx,	myVerticesStartsFrom + bottomRightIdx,	myVerticesStartsFrom + topRightIdx );
+			this->AddFace( myVerticesStartsFrom + topRightIdx,		myVerticesStartsFrom + topLeftIdx,		myVerticesStartsFrom + bottomLeftIdx );
+		}
+	}
+
+	this->End();
+}
+
+void MeshBuilder::AddCylinder( float radius, uint cuts, float length, Vector3 const &centerPos, Rgba const &color /*= RGBA_WHITE_COLOR */ )
+{
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
+
+	// Vertex count to determine start index
+	uint const		myVerticesStartsFrom	= (uint) m_vertices.size();
+
+	uint const		pointsOnRadius			= cuts;
+	uint const		slices					= 1U;
+	float const		halfLength				= length * 0.5f;
+	Vector3 const	startPosition			= centerPos - Vector3( 0.f, 0.f, halfLength );
+	
+	for( unsigned int sliceIdx = 0; sliceIdx <= slices; sliceIdx++ )
+	{
+		float v = (float)sliceIdx / (float)slices;
+
+		for( unsigned int radiusPointIdx = 0; radiusPointIdx <= pointsOnRadius; radiusPointIdx++ )
+		{
+			float u				= (float)radiusPointIdx / (float)pointsOnRadius;
+			float rotation		= 360.f * u;
+			Vector2 xyPos		= Vector2( radius * CosDegree(rotation), radius * SinDegree(rotation) );
+			Vector3 position	= startPosition + Vector3( xyPos.x, xyPos.y, v * length );					// (v * length): we are at that much of the length
+			Vector3 normal		= ( position - Vector3( centerPos.x, centerPos.y, position.z ) ).GetNormalized();
+			Vector4 tangent		= Vector4( 0.f, 0.f, 1.f, 1.f );
+
+			this->SetUV( u, v );
+			this->SetNormal( normal );
+			this->SetTangent4( tangent );
+			this->SetColor( color );
+			this->PushVertex( position );
+		}
+	}
+
+	for( unsigned int sliceIdx = 0; sliceIdx < slices; sliceIdx++ )
+	{
+		for( unsigned int radPointIdx = 0; radPointIdx < pointsOnRadius; radPointIdx++ )
+		{
+			unsigned int bottomLeftIdx	= ( ( radPointIdx + 1 ) * sliceIdx ) + radPointIdx;
+			unsigned int topLeftIdx		= bottomLeftIdx + pointsOnRadius + 1;
+			unsigned int bottomRightIdx = bottomLeftIdx + 1;
+			unsigned int topRightIdx	= topLeftIdx + 1;
+
+			TODO( "Recalculate AddFace for this function. It seems i'm doing cw idexing but in reality it's ccw." );
+			this->AddFace( myVerticesStartsFrom + topRightIdx,		myVerticesStartsFrom + bottomRightIdx,	myVerticesStartsFrom + bottomLeftIdx );
+			this->AddFace( myVerticesStartsFrom + bottomLeftIdx,	myVerticesStartsFrom + topLeftIdx,		myVerticesStartsFrom + topRightIdx );
+		}
+	}
+
+	this->End();
+}
+
+void MeshBuilder::AddMeshFromSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, Vector2 uvRangeMin, Vector2 uvRangeMax, IntVector2 sampleFrequency, Rgba const &color /* = RGBA_WHITE_COLOR */ )
+{
+	// If parameters doesn't match with current operation
+	bool mbParameterMatches = true;
+	if( this->m_drawInstruction.isUsingIndices != true )
+		mbParameterMatches = false;
+	else if( this->m_drawInstruction.primitiveType != PRIMITIVE_TRIANGES )
+		mbParameterMatches = false;
+	// Die
+	GUARANTEE_OR_DIE( mbParameterMatches, "Meshbuilder: drawInstruction parameters isUsingIndices or primitiveType doesn't match with current operation!" );
+
+	
+	Vector2 step;
+	step.x = ( uvRangeMax.x - uvRangeMin.x ) / sampleFrequency.x;
+	step.y = ( uvRangeMax.y - uvRangeMin.y ) / sampleFrequency.y;
+
+	for( float v = uvRangeMin.y; v <= uvRangeMax.y; v += step.y )
+	{
+		for( float u = uvRangeMin.x; u <= uvRangeMax.x; u += step.x )
+		{
+			Vector3 position			= SurfacePatch( u, v );
+
+			Vector3 positionTowardU		= SurfacePatch( u + step.x, v );
+			Vector3 positionTowardV		= SurfacePatch( u, v + step.y );
+			Vector3 directionTowardU	= positionTowardU - position;
+			Vector3 directionTowardV	= positionTowardV - position;
+			Vector3 normal				= Vector3::CrossProduct( directionTowardV, directionTowardU ).GetNormalized();
+
+			this->SetUV( u, v );
+			this->SetNormal( normal );
+			this->SetTangent4( Vector4( directionTowardU.GetNormalized(), 1.f) );
+			this->SetColor( color );
+			this->PushVertex( position );
+		}
+	}
+
+	for( int vIdx = 0; vIdx < sampleFrequency.y; vIdx++ )
+	{
+		for( int uIdx = 0; uIdx < sampleFrequency.x; uIdx++ )
+		{
+			int bottomLeftIdx	= ( ( sampleFrequency.x + 1 ) * vIdx ) + uIdx;
+			int topLeftIdx		= bottomLeftIdx + sampleFrequency.x + 1;
+			int bottomRightIdx	= bottomLeftIdx + 1;
+			int topRightIdx		= topLeftIdx + 1;
+
 			this->AddFace( bottomLeftIdx,	bottomRightIdx, topRightIdx );
 			this->AddFace( topRightIdx,		topLeftIdx,		bottomLeftIdx );
 		}
 	}
 
 	this->End();
+}
+
+void MeshBuilder::SetVertexPositionsRelativeTo( Vector3 pivotPosition )
+{
+	// For all vertices
+		// Assuming that every positions were set relative to Vector3::ZERO
+		// Subtract the pivotPosition
+
+	for( uint i = 0; i < m_vertices.size(); i++ )
+		m_vertices[i].m_position -= pivotPosition;
 }
 
 Mesh* MeshBuilder::CreatePlane( Vector2 const &xySize, Vector3 const &centerPos, Rgba const &color /*= RGBA_WHITE_COLOR*/, const AABB2 &uvBounds /*= AABB2::ONE_BY_ONE */ )

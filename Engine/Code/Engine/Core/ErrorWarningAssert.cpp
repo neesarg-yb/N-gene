@@ -5,12 +5,12 @@
 //-----------------------------------------------------------------------------------------------
 #ifdef _WIN32
 #define PLATFORM_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "Engine/Internal/WindowsCommon.hpp"
 #endif
 
 //-----------------------------------------------------------------------------------------------
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include <stdarg.h>
 #include <iostream>
@@ -49,7 +49,6 @@ void DebuggerPrintf( const char* messageFormat, ... )
 	va_list variableArgumentList;
 	va_start( variableArgumentList, messageFormat );
 	vsnprintf_s( messageLiteral, MESSAGE_MAX_LENGTH, _TRUNCATE, messageFormat, variableArgumentList );
-	va_end( variableArgumentList );
 	messageLiteral[ MESSAGE_MAX_LENGTH - 1 ] = '\0'; // In case vsnprintf overran (doesn't auto-terminate)
 
 #if defined( PLATFORM_WINDOWS )
@@ -60,6 +59,11 @@ void DebuggerPrintf( const char* messageFormat, ... )
 #endif
 
 	std::cout << messageLiteral;
+
+	// Forward to LogSystem
+	LogSystem::GetInstance()->LogTaggedPrintv( "debug", RGBA_GRAY_COLOR, messageFormat, variableArgumentList );
+
+	va_end( variableArgumentList );
 }
 
 
