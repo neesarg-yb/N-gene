@@ -2,9 +2,17 @@
 #include "Quaternion.hpp"
 #include "Engine/Math/MathUtil.hpp"
 
+Quaternion Quaternion::IDENTITY = Quaternion( 1.f, Vector3::ZERO );
+
 Quaternion::Quaternion()
 {
 	// Identity quaternion, by default values
+}
+
+Quaternion::Quaternion( float r, Vector3 const &i )
+{
+	this->r = r;
+	this->i = i;
 }
 
 Quaternion::Quaternion( Vector3 const &axis, float rotationDegrees )

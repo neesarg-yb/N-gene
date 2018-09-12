@@ -7,7 +7,8 @@
 class Quaternion
 {
 public:
-	 Quaternion();
+	 Quaternion();				// r = 1.f, i = ( 0, 0, 0 )
+	 Quaternion( float r, Vector3 const &i );
 	 Quaternion( Vector3 const &axis, float rotationDegrees );
 	~Quaternion();
 
@@ -41,4 +42,7 @@ public:
 	static Quaternion	FromMatrix( Matrix44 const &mat44 );
 	
 	static float		DotProduct( Quaternion const &a, Quaternion const &b );
+
+public:
+	static Quaternion	IDENTITY;
 };
