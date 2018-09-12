@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Renderer/Scene.hpp"
-#include "Engine/Renderer/OrbitCamera.hpp"
+#include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Renderer/Camera.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/Abstract Classes/GameObject.hpp"
@@ -22,7 +23,7 @@ public:
 
 private:
 	// Rendering Specific
-	OrbitCamera*				m_camera					= nullptr;
+	Camera*						m_camera					= nullptr;
 	Scene*						m_levelScene				= nullptr;
 	Vector4						m_ambientLight				= Vector4( 1.f, 1.f, 1.f, 0.5f );
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
@@ -37,4 +38,8 @@ public:
 private:
 	// Local
 	double						m_timeSinceStartOfTheBattle	= 0;
+
+private:
+	void QuaternionsTestCode() const;
+	void RenderMeshUsingEuler() const;
 };

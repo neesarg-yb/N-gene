@@ -4,8 +4,6 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
-#include "Engine/Network/BytePacker.hpp"
-#include "Engine/Math/Quaternion.hpp"
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
@@ -56,37 +54,6 @@ theGame::theGame()
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );										// To set NDC styled ortho
 
-	// TESTING QUATERNIONS
-	// Test 1 - Simple Rotation & GetAsMatrix
-	Quaternion	rotateAroundX_Q	= Quaternion( Vector3::FRONT, 45.f );
-	Vector3		rotatedVec1		= rotateAroundX_Q.RotatePoint( Vector3::UP );
-	Matrix44	qRotate1_M		= rotateAroundX_Q.GetAsMatrix44();
-	Vector3		eulerQRotate1_M	= qRotate1_M.GetEulerRotation();
-
-	// Test 2 - Rotate with Matrix
-	Matrix44 rotateAroundX_M; 
-	rotateAroundX_M.RotateDegrees3D( Vector3( 0.f, 0.f , 45.f) );
-	Vector3	rotatedVec2				= rotateAroundX_M.Multiply( Vector3::UP, 0.f );
-	Vector3 eulerRotateAroundX_M	= rotateAroundX_M.GetEulerRotation();
-
-	// Test 3 - From Euler
-	Vector3 eulerRotationZXY_Test3	= Vector3( 45.f, 90.f, 45.f);							// Roll counter clock wise => look up => turn right
-	// My Rotation Matrix applies y & z rotation as left-hand-rule; where quaternions applies it as right-hand-rule => Multiply with -1.f
-	Quaternion	test3_Q				= Quaternion::FromEuler( eulerRotationZXY_Test3.x, -1.f * eulerRotationZXY_Test3.y, -1.f * eulerRotationZXY_Test3.z );
-	Matrix44	test3_M				= Matrix44();
-	test3_M.RotateDegrees3D( eulerRotationZXY_Test3 );
-
-	Vector3 test3Vec_M	= Vector3::FRONT;
-	Vector3 test3Vec_Q	= Vector3::FRONT;
-	test3Vec_M			= test3_M.Multiply( test3Vec_M, 0.f );
-	test3Vec_Q			= test3_Q.RotatePoint( test3Vec_Q );
-	
-	// Test 4 - From Matrix
-	Matrix44	rotationMatFromEuler = test3_M;
-	Quaternion	qFromMat			 = Quaternion::FromMatrix( rotationMatFromEuler );		// Is (qFromMat == test3_Q) ?? => YES!
-	Vector3		sameAsTest3Vec_Q	 = Vector3::FRONT;
-	sameAsTest3Vec_Q				 = qFromMat.RotatePoint( sameAsTest3Vec_Q );
-	TODO( "---" );
 }
 
 theGame::~theGame()
