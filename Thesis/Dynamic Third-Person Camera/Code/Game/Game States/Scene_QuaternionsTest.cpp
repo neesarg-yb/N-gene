@@ -86,14 +86,30 @@ void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
 	// ------ //
 	// Render //
 	// ------ //
-	RenderMeshUsingEuler( m_eulerBasisWorldPos, m_currentEulerRotation );
+	Vector3 eulerBasisPos		= m_eulerBasisWorldPos;
+	Vector3 quaternionBasisPos	= m_quaternionBasisWorldPos;
+	if( g_theInput->IsKeyPressed( SPACE ) )
+	{
+		eulerBasisPos		= Vector3::ZERO;
+		quaternionBasisPos	= Vector3::ZERO;
+	}
+
+	RenderMeshUsingEuler( eulerBasisPos, m_currentEulerRotation );
+	RenderMeshUsingQuaternion( quaternionBasisPos, m_currentEulerRotation );
 	
 	// Post-Rendering Effects: Bloom?
 	m_camera->PostRender( *g_theRenderer );
 
 	// DebugText: Ambient Light
-	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) );
-	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
+	std::string rotationInfo	= std::string( "Pitch:(W, S)  Yaw:(A, D) Roll:(Q, E)" );
+	std::string compareInfo		= std::string( "Press SPACE to compare!" );
+	std::string descriptionCmp	= std::string( "(Both basis gets snapped to Vector3::ZERO)" );
+	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, rotationInfo.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, compareInfo.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, descriptionCmp.c_str() );
+
+	DebugRenderTag( 0.f, 1.f, m_eulerBasisWorldPos		- Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "EULER ANGLE");
+	DebugRenderTag( 0.f, 1.f, m_quaternionBasisWorldPos - Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "QUATERNIONS");
 
 	// Debug Render
 	DebugRendererRender();
@@ -151,6 +167,39 @@ void Scene_QuaternionsTest::RenderMeshUsingEuler( Vector3 const &position, Vecto
 	Matrix44	*eulerModelMatrix	= new Matrix44();
 	eulerModelMatrix->Translate3D( position );
 	eulerModelMatrix->RotateDegrees3D( rotationInDegrees );
+	eulerModelMatrix->Scale3D( Vector3::ONE_ALL );
+
+	// Draw
+	g_theRenderer->BindMaterialForShaderIndex( *defaultMaterial );
+	g_theRenderer->DrawMesh( *basisMesh, *eulerModelMatrix );
+
+	delete basisMesh;
+	delete defaultMaterial;
+	delete eulerModelMatrix;
+}
+
+void Scene_QuaternionsTest::RenderMeshUsingQuaternion( Vector3 const &position, Vector3 const &rotationInDegrees ) const
+{
+	// Mesh Builder
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_TRIANGES, true );
+	mb.AddCube( Vector3( 4.0f, 0.3f, 0.3f ), Vector3( 2.f, 0.f, 0.f ), RGBA_RED_COLOR );
+	mb.AddCube( Vector3( 0.3f, 4.0f, 0.3f ), Vector3( 0.f, 2.f, 0.f ), RGBA_GREEN_COLOR );
+	mb.AddCube( Vector3( 0.3f, 0.3f, 4.0f ), Vector3( 0.f, 0.f, 2.f ), RGBA_BLUE_COLOR );
+	mb.End();
+
+	// Mesh & Material
+	Mesh		*basisMesh			= mb.ConstructMesh< Vertex_Lit >();
+	Material	*defaultMaterial	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
+
+	// Quaternions
+	Vector3		 adjustedEuler		= Vector3( rotationInDegrees.x, -1.f * rotationInDegrees.y, -1.f * rotationInDegrees.z );
+	Quaternion	 quaternionRotation	= Quaternion::FromEuler( adjustedEuler );
+	
+	// Model Matrix
+	Matrix44	*eulerModelMatrix	= new Matrix44();
+	eulerModelMatrix->Translate3D( position );
+	eulerModelMatrix->Append( quaternionRotation.GetAsMatrix44() );
 	eulerModelMatrix->Scale3D( Vector3::ONE_ALL );
 
 	// Draw

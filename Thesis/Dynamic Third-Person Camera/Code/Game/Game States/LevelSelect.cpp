@@ -15,7 +15,7 @@ LevelSelect::LevelSelect()
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Better Together              ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> 7 Degrees of Freedom         ", &m_levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Cubes             ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->m_selectionIndex = 6;
 }
 
@@ -59,12 +59,11 @@ void LevelSelect::Render( Camera *gameCamera ) const
 	g_theRenderer->DrawTextInBox2D( "Scenes", Vector2(0.5f, 0.6f), g_theGame->m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 	g_theRenderer->DrawTextInBox2D( "(Press ~ for DevConsole )", Vector2(0.5f, 0.02f), g_theGame->m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 
-
 	m_levelSelectionMenu->Render();
 }
 
 void LevelSelect::LevelSelected( char const * levelName )
 {
-	if( std::string(levelName) == "--> Quaternion Cubes             " )
+	if( std::string(levelName) == "--> Quaternion Basis             " )
 		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
 }

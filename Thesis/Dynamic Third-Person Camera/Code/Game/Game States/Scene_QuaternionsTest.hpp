@@ -42,5 +42,6 @@ private:
 private:
 	void QuaternionsTestCode() const;
 	void RenderMeshUsingEuler( Vector3 const &position, Vector3 const &rotationInDegrees ) const;
+	void RenderMeshUsingQuaternion( Vector3 const &position, Vector3 const &rotationInDegrees ) const;
 	void UpdateEulerRotationAccordingToInput( float deltaSeconds );
 };
