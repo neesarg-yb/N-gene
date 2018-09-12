@@ -200,6 +200,12 @@ void Scene_QuaternionsTest::RenderMeshUsingQuaternion( Vector3 const &position, 
 	Matrix44	*eulerModelMatrix	= new Matrix44();
 	eulerModelMatrix->Translate3D( position );
 	eulerModelMatrix->Append( quaternionRotation.GetAsMatrix44() );
+
+//	Test: From Matrix
+//	Matrix44	 fromEulerM;
+//	fromEulerM.RotateDegrees3D( rotationInDegrees );
+//	eulerModelMatrix->Append( Quaternion::FromMatrix( fromEulerM ).GetAsMatrix44() );
+	
 	eulerModelMatrix->Scale3D( Vector3::ONE_ALL );
 
 	// Draw
