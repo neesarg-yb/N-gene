@@ -14,48 +14,19 @@ Scene_QuaternionsTest::Scene_QuaternionsTest()
 	m_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.1f, 100.f );
-	m_camera->LookAt( Vector3( 10.f, 10.f, -10.f ), Vector3::ZERO );
+	m_camera->LookAt( Vector3( 0.f, 5.f, -20.f ), Vector3::ZERO );
 
 	// Skybox
-//	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
+	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 
-	// Setup the Lighting
-	m_lightSources.push_back( new Light( Vector3( 0.f, 10.f, -10.f ), Vector3( -45.f, 0.f, 0.f ) ) );
-	m_lightSources[0]->SetUpForDirectionalLight( 20.f, Vector3( 1.f, 0.f, 0.f), RGBA_WHITE_COLOR );
-	m_lightSources[0]->UsesShadowMap( false );
-
-	// Setup the DebugRenderer
 	DebugRendererStartup( g_theRenderer, m_camera );
-
-	// Battle Scene
-	m_levelScene = new Scene();
-	m_levelScene->AddLight( *m_lightSources[0] );
-	m_levelScene->AddRenderable( *m_lightSources[0]->m_renderable );
-	m_levelScene->AddCamera( *m_camera );
-
-	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 
 	QuaternionsTestCode();
 }
 
 Scene_QuaternionsTest::~Scene_QuaternionsTest()
 {
-	delete m_renderingPath;
-	delete m_levelScene;
-
 	DebugRendererShutdown();
-
-	// Lights
-	for( unsigned int i = 0; i < m_lightSources.size(); i++ )
-		delete m_lightSources[i];
-	m_lightSources.clear();
-
-	// GameObject Pool
-	for( unsigned int i = 0; i < m_allGameObjects.size(); i++ )
-		delete m_allGameObjects[i];
-
-	m_allGameObjects.clear();
-
 	delete m_camera;
 }
 
@@ -79,9 +50,7 @@ void Scene_QuaternionsTest::Update( float deltaSeconds )
 	// Level::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
-	// Game Objects
-	for each( GameObject* go in m_allGameObjects )
-		go->Update( deltaSeconds );
+	UpdateEulerRotationAccordingToInput( deltaSeconds );
 
 	// Debug Renderer
 	DebugRendererUpdate( deltaSeconds );
@@ -97,23 +66,36 @@ void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	// Bind all the Uniforms
-	g_theRenderer->UseShader( g_theRenderer->CreateOrGetShader( "lit" ) );
-	g_theRenderer->SetUniform( "EYE_POSITION", m_camera->GetCameraModelMatrix().GetTColumn() );
+	// Light
+	Light mainLight = Light( Vector3( 20.f, 20.f, -10.f ), Vector3::ZERO );
+	mainLight.SetUpForPointLight( 1000.f, Vector3( 1.f, 0.f, 0.f) );
 
-	////////////////////////////////
-	// 							  //
-	//  START DRAWING FROM HERE.. //
-	//							  //
-	////////////////////////////////
-//	m_renderingPath->RenderSceneForCamera( *m_camera, *m_levelScene );
+	g_theRenderer->EnableLight( 0, mainLight );
+	g_theRenderer->SetAmbientLight( m_ambientLight );
+	g_theRenderer->UpdateLightUBOs();
 
-	RenderMeshUsingEuler();
+	// Camera
+	g_theRenderer->BindCamera( m_camera );
+	g_theRenderer->ClearColor( RGBA_BLACK_COLOR );
+	g_theRenderer->ClearDepth( 1.0f ); 
+	g_theRenderer->EnableDepth( COMPARE_LESS, true );
 
-	// DebugText for Lighting and Shader..
+	// Pre-Rendering Effects: Skybox
+	m_camera->PreRender( *g_theRenderer );
+	
+	// ------ //
+	// Render //
+	// ------ //
+	RenderMeshUsingEuler( m_eulerBasisWorldPos, m_currentEulerRotation );
+	
+	// Post-Rendering Effects: Bloom?
+	m_camera->PostRender( *g_theRenderer );
+
+	// DebugText: Ambient Light
 	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) );
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
 
+	// Debug Render
 	DebugRendererRender();
 }
 
@@ -151,51 +133,54 @@ void Scene_QuaternionsTest::QuaternionsTestCode() const
 	sameAsTest3Vec_Q				 = qFromMat.RotatePoint( sameAsTest3Vec_Q );
 }
 
-void Scene_QuaternionsTest::RenderMeshUsingEuler() const
+void Scene_QuaternionsTest::RenderMeshUsingEuler( Vector3 const &position, Vector3 const &rotationInDegrees ) const
 {
-	// Get Mesh, Material & Model Matrix
+	// Mesh Builder
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, true );
-	mb.AddCube( Vector3( 4.f, 1.f, 1.f ), Vector3( 2.f, 0.f, 0.f ), RGBA_RED_COLOR );
-	mb.AddCube( Vector3( 1.f, 4.f, 1.f ), Vector3( 0.f, 2.f, 0.f ), RGBA_GREEN_COLOR );
-	mb.AddCube( Vector3( 1.f, 1.f, 4.f ), Vector3( 0.f, 0.f, 2.f ), RGBA_BLUE_COLOR );
+	mb.AddCube( Vector3( 4.0f, 0.3f, 0.3f ), Vector3( 2.f, 0.f, 0.f ), RGBA_RED_COLOR );
+	mb.AddCube( Vector3( 0.3f, 4.0f, 0.3f ), Vector3( 0.f, 2.f, 0.f ), RGBA_GREEN_COLOR );
+	mb.AddCube( Vector3( 0.3f, 0.3f, 4.0f ), Vector3( 0.f, 0.f, 2.f ), RGBA_BLUE_COLOR );
 	mb.End();
 
+	// Mesh & Material
 	Mesh		*basisMesh			= mb.ConstructMesh< Vertex_Lit >();
-	Material	*defaultMaterial	= Material::CreateNewFromFile( "Data\\Materials\\Block_Water.material" );
+	Material	*defaultMaterial	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
+	
+	// Model Matrix
 	Matrix44	*eulerModelMatrix	= new Matrix44();
+	eulerModelMatrix->Translate3D( position );
+	eulerModelMatrix->RotateDegrees3D( rotationInDegrees );
+	eulerModelMatrix->Scale3D( Vector3::ONE_ALL );
 
-	Light		mainLight = Light( Vector3( 20.f, 20.f, -10.f ), Vector3::ZERO );
-	mainLight.SetUpForPointLight( 1000.f, Vector3( 1.f, 0.f, 0.f) );
-
-
-	g_theRenderer->EnableLight( 0, mainLight );
-	g_theRenderer->SetAmbientLight( m_ambientLight );
-	g_theRenderer->UpdateLightUBOs();
-
-	// Draw for each Shaders present in ShaderGroup
-	g_theRenderer->BindCamera( m_camera/*g_theGame->m_gameCamera*/ );
-
-	g_theRenderer->ClearColor( RGBA_BLACK_COLOR );
-	g_theRenderer->ClearDepth();
-	g_theRenderer->EnableDepth( COMPARE_ALWAYS, true );
-
+	// Draw
 	g_theRenderer->BindMaterialForShaderIndex( *defaultMaterial );
 	g_theRenderer->DrawMesh( *basisMesh, *eulerModelMatrix );
-
-
-// WORKS:
-//
-//	g_theRenderer->UseShader( g_theRenderer->CreateOrGetShader( "default" ) );
-//	g_theRenderer->EnableDepth( COMPARE_ALWAYS, true );
-//	g_theRenderer->SetUniform( "EYE_POSITION", m_camera->GetCameraModelMatrix().GetTColumn() );
-//	g_theRenderer->SetCurrentDiffuseTexture( defaultMaterial->m_textureBindingPairs[0] );
-//	g_theRenderer->BindCamera( m_camera );
-//	g_theRenderer->DrawMesh( *basisMesh, *eulerModelMatrix );
-
-	DebugRenderLineSegment( 0.f, Vector3::ZERO, RGBA_RED_COLOR, Vector3( 4.f, 0.f, 0.f), RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 	delete basisMesh;
 	delete defaultMaterial;
 	delete eulerModelMatrix;
+}
+
+void Scene_QuaternionsTest::UpdateEulerRotationAccordingToInput( float deltaSeconds )
+{
+	float rotateAroundX  = g_theInput->IsKeyPressed( 'W' ) ? -1.f : 0.f;
+	rotateAroundX		+= g_theInput->IsKeyPressed( 'S' ) ?  1.f : 0.f;
+
+	float rotateAroundY  = g_theInput->IsKeyPressed( 'A' ) ? -1.f : 0.f;
+	rotateAroundY		+= g_theInput->IsKeyPressed( 'D' ) ?  1.f : 0.f;
+
+	float rotateAroundZ  = g_theInput->IsKeyPressed( 'Q' ) ?  1.f : 0.f;
+	rotateAroundZ		+= g_theInput->IsKeyPressed( 'E' ) ? -1.f : 0.f;
+
+	m_currentEulerRotation += Vector3( rotateAroundX, rotateAroundY, rotateAroundZ ) * m_rotationSpeed * deltaSeconds;
+
+
+	// Making sure that degrees is in range [ -360, 360 ]
+	if( m_currentEulerRotation.x > 360.f || m_currentEulerRotation.x < -360.f )
+		m_currentEulerRotation.x = fmodf( m_currentEulerRotation.x, 360.f );
+	if( m_currentEulerRotation.y > 360.f || m_currentEulerRotation.y < -360.f )
+		m_currentEulerRotation.y = fmodf( m_currentEulerRotation.y, 360.f );
+	if( m_currentEulerRotation.z > 360.f || m_currentEulerRotation.z < -360.f )
+		m_currentEulerRotation.z = fmodf( m_currentEulerRotation.z, 360.f );
 }
