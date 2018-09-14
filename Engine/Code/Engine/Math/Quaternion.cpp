@@ -230,3 +230,77 @@ float Quaternion::DotProduct( Quaternion const &a, Quaternion const &b )
 	return Vector4::DotProduct( a.GetAsVector4(), b.GetAsVector4() );
 }
 
+Quaternion Quaternion::Slerp( Quaternion a, Quaternion const &b, float t )
+{
+	// References:
+	//			(1) Book "3D Math Primer for Graphics and Game Development" by Fletcher Dunn and Ian Parberry
+	//				-> Topic: [10.4.13] Quaternion Interpolation
+	//			(2) YouTube Video: https://www.youtube.com/watch?v=x1aCcyD0hqE
+
+
+	// Interpolation using solution: Qt = k0(Qa) + k1(Qb)
+	float k0;
+	float k1;
+
+	// q and -q represents the same angle,
+	// but we need both quaternions having positive dot product => Not in opposite directions
+	// Determine that with dot product and if necessary, flip the direction of one of the quaternions..
+
+	// DotProduct( a, b ) = Cos( omega )
+	//
+	//         .
+	//        /|             
+	//       / |             Projection of a on b =  Cos( omega )
+	//    a /  |             
+	//     /   |                    ( b/c length of both is ONE )
+	//    /    |             
+	//   /omega|             
+	//  /)_____|__________   
+	//         b
+	float cosOmega = Quaternion::DotProduct( a, b );
+	if( cosOmega < 0.f )
+	{
+		a.r		= -1.f * a.r;
+		a.i.x	= -1.f * a.i.x;
+		a.i.y	= -1.f * a.i.y;
+		a.i.z	= -1.f * a.i.z;
+		
+		cosOmega = -1.f * cosOmega;
+	}
+
+	// If both quaternions are very close together => Dot Product is near ONE
+	// Do normal lerp to overcome divide by zero risk
+	float const dotProduct = cosOmega;
+	if( dotProduct > 0.9999f )
+	{
+		// Do linear interpolation
+		k0 = 1.f - t;
+		k1 = t;
+	}
+	else
+	{
+		// Do spherical interpolation
+		//
+		// Get sin(omega)
+		// Using trig identity: sin^2(omega) + cos^2(omega) = 1
+		float sinOmega = sqrtf( 1.f - (cosOmega * cosOmega) );
+
+		// Get angle omega using inverse of tan(omega)
+		float omega = atan2f( sinOmega, cosOmega );
+
+		// Value of 1 / sin(omega); we're gonna use it twice
+		float oneOverSinOmega = 1.f / sinOmega;
+
+		k0 = sinf( (1.f - t) * omega ) * oneOverSinOmega;
+		k1 = sinf( t * omega ) * oneOverSinOmega;
+	}
+
+	// Interpolation
+	Quaternion c;
+	c.r		= (k0 * a.r)   + (k1 * b.r);
+	c.i.x	= (k0 * a.i.x) + (k1 * b.i.x);
+	c.i.y	= (k0 * a.i.y) + (k1 * b.i.y);
+	c.i.z	= (k0 * a.i.z) + (k1 * b.i.z);
+
+	return c;
+}
