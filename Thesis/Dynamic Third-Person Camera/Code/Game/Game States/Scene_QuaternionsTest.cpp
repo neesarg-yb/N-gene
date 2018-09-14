@@ -44,6 +44,13 @@ void Scene_QuaternionsTest::EndFrame()
 
 void Scene_QuaternionsTest::Update( float deltaSeconds )
 {
+	if( m_t >= 1.f )
+	{
+		m_currentEulerRotation	= m_targetSlerpEulerRotation;
+		m_performSlerpOperation	= false;
+		m_t						= 0.f;
+	}
+
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
@@ -57,6 +64,17 @@ void Scene_QuaternionsTest::Update( float deltaSeconds )
 
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
+	if( g_theInput->WasKeyJustPressed( 'T' ) )
+		StoreTheTargetEulerRotationForSlerp();
+	if( g_theInput->WasKeyJustPressed( VK_Codes::ENTER ) )
+		StartTheSlerp();
+
+	// For Slerp
+	if( m_performSlerpOperation )
+	{
+		m_t = (float)( m_timeSinceStartOfTheBattle - m_timeWhenSlerpStarted ) / m_slerpDurationSeconds;
+		ClampFloat01( m_t );
+	}
 }
 
 void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
@@ -168,6 +186,17 @@ void Scene_QuaternionsTest::RenderMeshUsingEuler( Vector3 const &position, Vecto
 	eulerModelMatrix->Translate3D( position );
 	eulerModelMatrix->RotateDegrees3D( rotationInDegrees );
 	eulerModelMatrix->Scale3D( Vector3::ONE_ALL );
+	
+	// Slerp
+	if( m_performSlerpOperation )
+	{
+		Matrix44 targetModelMatrix;
+		targetModelMatrix.Translate3D( position );
+		targetModelMatrix.RotateDegrees3D( m_targetSlerpEulerRotation );
+		targetModelMatrix.Scale3D( Vector3::ONE_ALL );
+
+		*eulerModelMatrix = Matrix44::LerpMatrix( *eulerModelMatrix, targetModelMatrix, m_t );
+	}
 
 	// Draw
 	g_theRenderer->BindMaterialForShaderIndex( *defaultMaterial );
@@ -193,18 +222,20 @@ void Scene_QuaternionsTest::RenderMeshUsingQuaternion( Vector3 const &position, 
 	Material	*defaultMaterial	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 
 	// Quaternions
-	Vector3		 adjustedEuler		= Vector3( rotationInDegrees.x, -1.f * rotationInDegrees.y, -1.f * rotationInDegrees.z );
-	Quaternion	 quaternionRotation	= Quaternion::FromEuler( adjustedEuler );
-	
+	Vector3		adjustedEuler		= Vector3( rotationInDegrees.x, -1.f * rotationInDegrees.y, -1.f * rotationInDegrees.z );
+	Quaternion	quaternionRotation	= Quaternion::FromEuler( adjustedEuler );
+
+	// Slerp
+	if( m_performSlerpOperation )
+	{
+		Quaternion slerpRoation = Quaternion::Slerp( quaternionRotation, Quaternion::FromEuler( m_targetSlerpEulerRotation ),  m_t );
+		quaternionRotation = slerpRoation;
+	}
+
 	// Model Matrix
 	Matrix44	*eulerModelMatrix	= new Matrix44();
 	eulerModelMatrix->Translate3D( position );
 	eulerModelMatrix->Append( quaternionRotation.GetAsMatrix44() );
-
-//	Test: From Matrix
-//	Matrix44	 fromEulerM;
-//	fromEulerM.RotateDegrees3D( rotationInDegrees );
-//	eulerModelMatrix->Append( Quaternion::FromMatrix( fromEulerM ).GetAsMatrix44() );
 	
 	eulerModelMatrix->Scale3D( Vector3::ONE_ALL );
 
@@ -230,7 +261,6 @@ void Scene_QuaternionsTest::UpdateEulerRotationAccordingToInput( float deltaSeco
 
 	m_currentEulerRotation += Vector3( rotateAroundX, rotateAroundY, rotateAroundZ ) * m_rotationSpeed * deltaSeconds;
 
-
 	// Making sure that degrees is in range [ -360, 360 ]
 	if( m_currentEulerRotation.x > 360.f || m_currentEulerRotation.x < -360.f )
 		m_currentEulerRotation.x = fmodf( m_currentEulerRotation.x, 360.f );
@@ -238,4 +268,18 @@ void Scene_QuaternionsTest::UpdateEulerRotationAccordingToInput( float deltaSeco
 		m_currentEulerRotation.y = fmodf( m_currentEulerRotation.y, 360.f );
 	if( m_currentEulerRotation.z > 360.f || m_currentEulerRotation.z < -360.f )
 		m_currentEulerRotation.z = fmodf( m_currentEulerRotation.z, 360.f );
+}
+
+void Scene_QuaternionsTest::StartTheSlerp()
+{
+	// Store time
+	m_timeWhenSlerpStarted = m_timeSinceStartOfTheBattle;
+
+	m_performSlerpOperation = true;
+}
+
+void Scene_QuaternionsTest::StoreTheTargetEulerRotationForSlerp()
+{
+	// Store target rotation
+	m_targetSlerpEulerRotation = m_currentEulerRotation;
 }
