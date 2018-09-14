@@ -122,9 +122,13 @@ void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
 	std::string rotationInfo	= std::string( "Pitch:(W, S)  Yaw:(A, D) Roll:(Q, E)" );
 	std::string compareInfo		= std::string( "Press SPACE to compare!" );
 	std::string descriptionCmp	= std::string( "(Both basis gets snapped to Vector3::ZERO)" );
+	std::string slerpString1	= std::string( "Slerp: Press T to set target position.." );
+	std::string slerpString2	= std::string( "       & then press ENTER to slerp the quaternion to the target!" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, rotationInfo.c_str() );
 	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, compareInfo.c_str() );
-	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, descriptionCmp.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_GRAY_COLOR,  RGBA_GRAY_COLOR, descriptionCmp.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, slerpString1.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 380.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, slerpString2.c_str() );
 
 	DebugRenderTag( 0.f, 1.f, m_eulerBasisWorldPos		- Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "EULER ANGLE");
 	DebugRenderTag( 0.f, 1.f, m_quaternionBasisWorldPos - Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "QUATERNIONS");
@@ -228,7 +232,8 @@ void Scene_QuaternionsTest::RenderMeshUsingQuaternion( Vector3 const &position, 
 	// Slerp
 	if( m_performSlerpOperation )
 	{
-		Quaternion slerpRoation = Quaternion::Slerp( quaternionRotation, Quaternion::FromEuler( m_targetSlerpEulerRotation ),  m_t );
+		Vector3 adjustedTargetSlerpEulerRotation = Vector3( m_targetSlerpEulerRotation.x, -1.f * m_targetSlerpEulerRotation.y, -1.f * m_targetSlerpEulerRotation.z );
+		Quaternion slerpRoation = Quaternion::Slerp( quaternionRotation, Quaternion::FromEuler( adjustedTargetSlerpEulerRotation ),  m_t );
 		quaternionRotation = slerpRoation;
 	}
 
