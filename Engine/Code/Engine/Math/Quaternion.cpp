@@ -248,15 +248,15 @@ Quaternion Quaternion::Slerp( Quaternion a, Quaternion const &b, float t )
 
 	// DotProduct( a, b ) = Cos( omega )
 	//
-	//         .
+	//         .             
 	//        /|             
 	//       / |             Projection of a on b =  Cos( omega )
-	//    a /  |             
+	//    a /  |                                                 
 	//     /   |                    ( b/c length of both is ONE )
-	//    /    |             
+	//    /    |                                                 
 	//   /omega|             
 	//  /)_____|__________   
-	//         b
+	//         b             
 	float cosOmega = Quaternion::DotProduct( a, b );
 	if( cosOmega < 0.f )
 	{
