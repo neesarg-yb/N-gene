@@ -20,6 +20,9 @@
     <Filter Include="XML Definitions">
       <UniqueIdentifier>{bada9d42-6263-4c91-8805-cc1d840292fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Session">
+      <UniqueIdentifier>{932ba773-f374-487c-969a-52aca44af72d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -61,6 +64,12 @@
     <ClCompile Include="World\Pipe.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="Session\NetworkSession.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="Session\NetworkMessage.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -101,6 +110,12 @@
     </ClInclude>
     <ClInclude Include="World\Pipe.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Session\NetworkSession.hpp">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="Session\NetworkMessage.hpp">
+      <Filter>Session</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

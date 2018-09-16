@@ -10,6 +10,7 @@
 #include "Game/GameCommon.hpp"
 #include "Game/Level.hpp"
 #include "Game/World/Robot.hpp"
+#include "Game/Session/NetworkSession.hpp"
 
 enum GameStates
 {
@@ -42,7 +43,10 @@ public:
 
 private:
 	// RCS
-	RemoteCommandService m_rcs;
+	RemoteCommandService	 m_rcs;
+
+	// Network Session
+	NetworkSession			*m_session = nullptr;
 
 	// Player
 	Robot*			m_playerRobot						= nullptr;

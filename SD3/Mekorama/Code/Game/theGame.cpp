@@ -4,10 +4,12 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Network/BytePacker.hpp"
+#include "Engine/Network/UDPSocket.hpp"
 #include "Game/theApp.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 #include "Game/World/LevelDefinition.hpp"
+#include "Game/Session/NetworkMessage.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -38,6 +40,42 @@ void HideLogTag( Command& cmd )
 	LogSystem::GetInstance()->HideTag( tagName );
 }
 
+bool OnPing( NetworkMessage const &msg, NetworkSender const &from )
+{
+	std::string str; 
+	msg.Read( str ); 
+
+	ConsolePrintf( "Received ping from %s: %s", from.connection.IPToString().c_str(), str.c_str() ); 
+
+	// ping responds with pong
+	NetworkMessage pong( "pong" ); 
+	from.Send( pong ); 
+
+	// all messages serve double duty
+	// do some work, and also validate
+	// if a message ends up being malformed, we return false
+	// to notify the session we may want to kick this connection; 
+	return true; 
+}
+
+bool OnAdd( NetworkMessage const &msg, NetworkSender const &from )
+{
+	float val0;
+	float val1;
+	float sum;
+
+	if( !msg.Read( val0 ) || msg.Read( val1 ) )
+		return false;
+
+	sum = val0 + val1;
+	ConsolePrintf( "Add: %f + %f = %f", val0, val1, sum );
+
+	// Send back a response here, if you want..
+	UNUSED( from );
+
+	return true;
+}
+
 theGame::theGame()
 {
 	// Set global variable
@@ -54,30 +92,22 @@ theGame::theGame()
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
 
-	// TESTING BYTEPACKER
-	BytePacker testBP = BytePacker( LITTLE_ENDIAN );
-	testBP.WriteSize( 987542100 );
-	
-	size_t readSize1; 
-	testBP.ReadSize( &readSize1 );
+	// Network Session
+	m_session = new NetworkSession();
+	m_session->RegisterMessage( "ping", OnPing );
+//	m_session->RegisterMessage( "pong", OnPong );
+	m_session->RegisterMessage( "add", OnAdd );
 
-	testBP.WriteSize( 8675309 );
-
-	size_t readSize2; 
-	testBP.ReadSize( &readSize2 );
-	
-	TODO("BytePacker fails to read if I remove this line..");
-	testBP.WriteString( "Hello World!" );
-	char stringToRead[ 20 ];
-	testBP.ReadString( stringToRead, 10 );
-
-	testBP.WriteString( "12345678" );
-	char stringToRead2[ 20 ];
-	testBP.ReadString( stringToRead2, 20 );
+	// For now we'll just shortcut to being a HOST
+	// "bound" state
+	// This creates the socket(s) we can communicate on..
+	m_session->AddBinding( GAME_PORT );
 }
 
 theGame::~theGame()
 {
+	delete m_session;
+
 	if( m_currentLevel != nullptr )
 		delete m_currentLevel;
 
@@ -165,6 +195,9 @@ void theGame::Update()
 	// Remote Command Service
 	g_rcs->Update( deltaSeconds );
 
+	// Network Session
+	m_session->ProcessIncoming();
+
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
 	m_timeSinceStartOfTheGame	+=	deltaSeconds;
 	
@@ -211,6 +244,9 @@ void theGame::Update()
 		ERROR_AND_DIE( "Error: No valid gamestate found..! | theGame::Update()" );
 		break;
 	}
+
+	// Network Session
+	m_session->ProcessOutgoing();
 }
 
 void theGame::Render() const
