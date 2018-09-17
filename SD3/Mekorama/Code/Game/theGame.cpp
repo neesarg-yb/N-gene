@@ -125,7 +125,7 @@ void SessionSendAdd( Command &cmd )
 	receiver->Send( msg );
 }
 
-bool OnPing( NetworkMessage const &msg, NetworkConnection const &from )
+bool OnPing( NetworkMessage const &msg, NetworkConnection &from )
 {
 	std::string str; 
 	msg.Read( str ); 
@@ -143,7 +143,7 @@ bool OnPing( NetworkMessage const &msg, NetworkConnection const &from )
 	return true; 
 }
 
-bool OnPong( NetworkMessage const &msg, NetworkConnection const &from )
+bool OnPong( NetworkMessage const &msg, NetworkConnection &from )
 {
 	UNUSED( msg );
 
@@ -151,7 +151,7 @@ bool OnPong( NetworkMessage const &msg, NetworkConnection const &from )
 	return false;
 }
 
-bool OnAdd( NetworkMessage const &msg, NetworkConnection const &from )
+bool OnAdd( NetworkMessage const &msg, NetworkConnection &from )
 {
 	float val0;
 	float val1;
