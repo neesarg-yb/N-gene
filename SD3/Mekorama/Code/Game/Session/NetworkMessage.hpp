@@ -8,6 +8,9 @@ public:
 	~NetworkMessage();
 
 public:
-	bool Read( std::string &outString ) const;
 	bool Read( float &outFloat ) const;
+	bool Read( std::string &outString ) const;
+
+	void Write( float number );
+	void Write( std::string &message );
 };

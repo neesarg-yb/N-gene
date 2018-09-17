@@ -12,15 +12,25 @@ NetworkMessage::~NetworkMessage()
 
 }
 
+bool NetworkMessage::Read( float &outFloat ) const
+{
+	UNUSED( outFloat );
+	return false;
+}
+
 bool NetworkMessage::Read( std::string &outString ) const
 {
 	UNUSED( outString );
 	return false;
 }
 
-bool NetworkMessage::Read( float &outFloat ) const
+void NetworkMessage::Write( float number )
 {
-	UNUSED( outFloat );
-	return false;
+	UNUSED( number );
+}
+
+void NetworkMessage::Write( std::string &message )
+{
+	UNUSED( message );
 }
 

@@ -40,12 +40,97 @@ void HideLogTag( Command& cmd )
 	LogSystem::GetInstance()->HideTag( tagName );
 }
 
-bool OnPing( NetworkMessage const &msg, NetworkSender const &from )
+void AddSessionConnection( Command &cmd )
+{
+	int				idx;
+	NetworkAddress	addr;
+
+	std::string arg1 = cmd.GetNextString();
+	std::string arg2 = cmd.GetNextString();
+	if( arg1 == "" || arg2 == "" )
+	{
+		ConsolePrintf( "Error: Command needs two valid argument!" );
+		return;
+	}
+
+	idx	 = atoi( arg1.c_str() );
+	addr = NetworkAddress( arg2.c_str() );
+
+	NetworkSession		*session	= theGame::GetSession();
+	NetworkConnection	*connection	= session->AddConnection( idx, addr );
+	if( connection == nullptr )
+		ConsolePrintf( "Failed to add connection!" );
+	else
+		ConsolePrintf( "Connection added at index [%d]", idx );
+}
+
+void SessionSendPing( Command &cmd )
+{
+	int idx;
+
+	std::string arg1 = cmd.GetNextString();
+	std::string arg2 = cmd.GetRemainingCommandInOneString();
+	if( arg1 == "" )
+	{
+		ConsolePrintf( "Provide a valid index" );
+		return;
+	}
+	else
+		idx = atoi( arg1.c_str() );
+
+	NetworkSession		*session  = theGame::GetSession();
+	NetworkConnection	*receiver = session->GetConnection( idx );
+	if( receiver == nullptr )
+	{
+		ConsolePrintf( "No connection at index %d", idx );
+		return;
+	}
+	
+	NetworkMessage msg( "ping" );
+	msg.Write( arg2 );
+
+	receiver->Send( msg );
+}
+
+void SessionSendAdd( Command &cmd )
+{
+	int		idx;
+	float	value1;
+	float	value2;
+
+	std::string arg1 = cmd.GetNextString();
+	std::string arg2 = cmd.GetNextString();
+	std::string arg3 = cmd.GetNextString();
+	if( arg1 == "" || arg2 == "" || arg3 == "" )
+	{
+		ConsolePrintf( "Not all arguments are provided.." );
+		return;
+	}
+
+	idx		= atoi( arg1.c_str() );
+	value1	= (float) atof( arg2.c_str() );
+	value2	= (float) atof( arg3.c_str() );
+
+	NetworkSession		*session	= theGame::GetSession();
+	NetworkConnection	*receiver	= session->GetConnection( idx );
+	if( receiver == nullptr )
+	{
+		ConsolePrintf( "No connection at index %d", idx );
+		return;
+	}
+
+	NetworkMessage msg( "add" );
+	msg.Write( value1 );
+	msg.Write( value2 );
+	receiver->Send( msg );
+}
+
+bool OnPing( NetworkMessage const &msg, NetworkConnection const &from )
 {
 	std::string str; 
 	msg.Read( str ); 
 
-	ConsolePrintf( "Received ping from %s: %s", from.connection.IPToString().c_str(), str.c_str() ); 
+	ConsolePrintf( "Received ping from %s: %s", from.connection.AddressToString().c_str(), str.c_str() ); 
 
 	// ping responds with pong
 	NetworkMessage pong( "pong" ); 
@@ -58,7 +143,15 @@ bool OnPing( NetworkMessage const &msg, NetworkSender const &from )
 	return true; 
 }
 
-bool OnAdd( NetworkMessage const &msg, NetworkSender const &from )
+bool OnPong( NetworkMessage const &msg, NetworkConnection const &from )
+{
+	UNUSED( msg );
+
+	ConsolePrintf( "PONG! Received from %s", from.connection.AddressToString().c_str() );
+	return false;
+}
+
+bool OnAdd( NetworkMessage const &msg, NetworkConnection const &from )
 {
 	float val0;
 	float val1;
@@ -95,8 +188,8 @@ theGame::theGame()
 	// Network Session
 	m_session = new NetworkSession();
 	m_session->RegisterMessage( "ping", OnPing );
-//	m_session->RegisterMessage( "pong", OnPong );
-	m_session->RegisterMessage( "add", OnAdd );
+	m_session->RegisterMessage( "pong", OnPong );
+	m_session->RegisterMessage( "add",  OnAdd );
 
 	// For now we'll just shortcut to being a HOST
 	// "bound" state
@@ -133,6 +226,9 @@ void theGame::Startup()
 	CommandRegister( "log_hide_all", HideAllLogTags );
 	CommandRegister( "log_show_tag", ShowLogTag );
 	CommandRegister( "log_hide_tag", HideLogTag );
+	CommandRegister( "netexp_addConnection", AddSessionConnection );
+	CommandRegister( "netexp_sendPing", SessionSendPing );
+	CommandRegister( "netexp_sendAdd", SessionSendAdd );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Seting up the Attract Menu
@@ -280,6 +376,11 @@ void theGame::Render() const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	g_theRenderer->DrawAABB( m_default_screen_bounds, overlayBoxColor );
+}
+
+NetworkSession* theGame::GetSession()
+{
+	return g_theGame->m_session;
 }
 
 void theGame::StartTransitionToState( GameStates nextGameState )

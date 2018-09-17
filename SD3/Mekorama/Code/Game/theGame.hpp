@@ -41,6 +41,9 @@ public:
 	void Update();
 	void Render() const;
 
+public:
+	static NetworkSession* GetSession();
+
 private:
 	// RCS
 	RemoteCommandService	 m_rcs;

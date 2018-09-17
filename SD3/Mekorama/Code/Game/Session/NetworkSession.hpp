@@ -3,7 +3,7 @@
 
 class NetworkMessage;
 
-struct NetworkSender
+struct NetworkConnection
 {
 public:
 	NetworkAddress const connection;
@@ -12,7 +12,7 @@ public:
 	bool Send( NetworkMessage &msgToSend ) const;
 };
 
-typedef bool (*sessionMessage_cb) ( NetworkMessage const &, NetworkSender const & );
+typedef bool (*sessionMessage_cb) ( NetworkMessage const &, NetworkConnection const & );
 
 class NetworkSession
 {
@@ -23,6 +23,9 @@ public:
 public:
 	void AddBinding( uint16_t port );
 	void RegisterMessage( char const *messageName, sessionMessage_cb cb );
+
+	NetworkConnection* AddConnection( int idx, NetworkAddress &addr );
+	NetworkConnection* GetConnection( int idx );
 
 	void ProcessIncoming();
 	void ProcessOutgoing();
