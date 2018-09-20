@@ -42,8 +42,8 @@ public:
 	// Game States
 	bool		SetCurrentGameState		( std::string const &gsName );		// returns false if game state of that name doesn't exists
 	void		StartTransitionToState	( std::string const &stateName );
-	void		AddNewGameState			( GameState* gsToAdd );			// If already exists in list, it replaces with the new one
-	GameState*	RemoveGameStateNamed	( std::string const &gsName );	// Doesn't delete, just removes from the list
+	void		AddNewGameState			( GameState* gsToAdd );				// If already exists in list, it replaces with the new one
+	GameState*	RemoveGameStateNamed	( std::string const &gsName );		// Doesn't delete, just removes from the list
 
 private:
 	// Local

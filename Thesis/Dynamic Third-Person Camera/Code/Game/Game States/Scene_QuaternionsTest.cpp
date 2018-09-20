@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene_QuaternionsTest.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Math/Quaternion.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
@@ -129,6 +130,7 @@ void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
 	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_GRAY_COLOR,  RGBA_GRAY_COLOR, descriptionCmp.c_str() );
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, slerpString1.c_str() );
 	DebugRender2DText( 0.f, Vector2(-850.f, 380.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, slerpString2.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 360.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, Stringf("Rotation ( %f, %f, %f )", m_currentEulerRotation.x, m_currentEulerRotation.y, m_currentEulerRotation.z ) );
 
 	DebugRenderTag( 0.f, 1.f, m_eulerBasisWorldPos		- Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "EULER ANGLE");
 	DebugRenderTag( 0.f, 1.f, m_quaternionBasisWorldPos - Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "QUATERNIONS");
@@ -155,7 +157,7 @@ void Scene_QuaternionsTest::QuaternionsTestCode() const
 	// Test 3 - From Euler
 	Vector3 eulerRotationZXY_Test3	= Vector3( 45.f, 90.f, 45.f);							// Roll counter clock wise => look up => turn right
 																							// My Rotation Matrix applies y & z rotation as left-hand-rule; where quaternions applies it as right-hand-rule => Multiply with -1.f
-	Quaternion	test3_Q				= Quaternion::FromEuler( eulerRotationZXY_Test3.x, -1.f * eulerRotationZXY_Test3.y, -1.f * eulerRotationZXY_Test3.z );
+	Quaternion	test3_Q				= Quaternion::FromEuler( eulerRotationZXY_Test3.x, eulerRotationZXY_Test3.y, eulerRotationZXY_Test3.z );
 	Matrix44	test3_M				= Matrix44();
 	test3_M.RotateDegrees3D( eulerRotationZXY_Test3 );
 
@@ -226,14 +228,15 @@ void Scene_QuaternionsTest::RenderMeshUsingQuaternion( Vector3 const &position, 
 	Material	*defaultMaterial	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 
 	// Quaternions
-	Vector3		adjustedEuler		= Vector3( rotationInDegrees.x, -1.f * rotationInDegrees.y, -1.f * rotationInDegrees.z );
-	Quaternion	quaternionRotation	= Quaternion::FromEuler( adjustedEuler );
+	Matrix44	eulerRotationMatrix = Matrix44();
+//	eulerRotationMatrix.RotateDegrees3D( rotationInDegrees );
+//	Quaternion	quaternionRotation	= Quaternion::FromMatrix( eulerRotationMatrix );
+	Quaternion	quaternionRotation	= Quaternion::FromEuler( rotationInDegrees );
 
 	// Slerp
 	if( m_performSlerpOperation )
 	{
-		Vector3 adjustedTargetSlerpEulerRotation = Vector3( m_targetSlerpEulerRotation.x, -1.f * m_targetSlerpEulerRotation.y, -1.f * m_targetSlerpEulerRotation.z );
-		Quaternion slerpRoation = Quaternion::Slerp( quaternionRotation, Quaternion::FromEuler( adjustedTargetSlerpEulerRotation ),  m_t );
+		Quaternion slerpRoation = Quaternion::Slerp( quaternionRotation, Quaternion::FromEuler( m_targetSlerpEulerRotation ),  m_t );
 		quaternionRotation = slerpRoation;
 	}
 
@@ -255,8 +258,8 @@ void Scene_QuaternionsTest::RenderMeshUsingQuaternion( Vector3 const &position, 
 
 void Scene_QuaternionsTest::UpdateEulerRotationAccordingToInput( float deltaSeconds )
 {
-	float rotateAroundX  = g_theInput->IsKeyPressed( 'W' ) ? -1.f : 0.f;
-	rotateAroundX		+= g_theInput->IsKeyPressed( 'S' ) ?  1.f : 0.f;
+	float rotateAroundX  = g_theInput->IsKeyPressed( 'W' ) ?  1.f : 0.f;
+	rotateAroundX		+= g_theInput->IsKeyPressed( 'S' ) ? -1.f : 0.f;
 
 	float rotateAroundY  = g_theInput->IsKeyPressed( 'A' ) ? -1.f : 0.f;
 	rotateAroundY		+= g_theInput->IsKeyPressed( 'D' ) ?  1.f : 0.f;
