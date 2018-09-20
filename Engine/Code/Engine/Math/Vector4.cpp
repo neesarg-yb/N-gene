@@ -90,6 +90,11 @@ Vector4 Vector4::GetNormalized() const
 	return Vector4( x/lengthOfVec, y/lengthOfVec, z/lengthOfVec, w/lengthOfVec );
 }
 
+bool Vector4::operator == ( Vector4 const b ) const
+{
+	return (x == b.x) && (y == b.y) && (z == b.z) && (w == b.w);
+}
+
 float Vector4::DotProduct( Vector4 const &a, Vector4 const &b )
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
