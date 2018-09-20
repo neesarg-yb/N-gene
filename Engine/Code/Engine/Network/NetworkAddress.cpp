@@ -88,6 +88,13 @@ std::string NetworkAddress::PortToString() const
 	return std::to_string( port );
 }
 
+std::string NetworkAddress::AddressToString() const
+{
+	std::string fullAddress = IPToString() + ":" + PortToString();
+	
+	return fullAddress;
+}
+
 NetworkAddress NetworkAddress::GetLocal()
 {
 	NetworkAddress toReturn;

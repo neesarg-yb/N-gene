@@ -24,6 +24,7 @@ public:
 
 	std::string IPToString() const;
 	std::string PortToString() const;
+	std::string AddressToString() const;		// returns full address=> "ipAddress:port"
 
 public:
 	static NetworkAddress	GetLocal();
