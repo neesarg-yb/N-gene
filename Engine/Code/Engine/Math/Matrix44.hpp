@@ -63,6 +63,8 @@ public:
 	void Scale3D		( Vector3 const &scale );
 	void ScaleUniform3D	( float uniformScale );
 
+	bool operator == ( Matrix44 const &b ) const;
+
 	// Producers
 	static Matrix44 MakeRotationDegrees2D	( float rotationDegreesAboutZ );
 	static Matrix44 MakeTranslation2D		( const Vector2& translation );
