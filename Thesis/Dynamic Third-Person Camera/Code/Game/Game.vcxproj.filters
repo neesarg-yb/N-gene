@@ -55,6 +55,9 @@
     <ClCompile Include="Game States\Scene_DegreesOfFreedom.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="World\Terrain.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -86,6 +89,9 @@
     </ClInclude>
     <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp">
       <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Terrain.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

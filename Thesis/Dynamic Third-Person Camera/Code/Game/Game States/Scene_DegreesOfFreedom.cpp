@@ -1,7 +1,8 @@
 #pragma once
 #include "Scene_DegreesOfFreedom.hpp"
-#include "Game/theGame.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/theGame.hpp"
+#include "Game/World/Terrain.hpp"
 
 Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	: GameState( "DEGREES OF FREEDOM" )
@@ -25,13 +26,16 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 
 	// Add to Scene
 	AddNewLightToScene( directionalLight );
+
+	// Terrain
+	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmapt.png" );
+	AddNewGameObjectToScene( m_terrain );
 }
 
 Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 {
-	// Camera
-	delete m_camera;
-	m_camera = nullptr;
+	// Terrain
+	m_terrain = nullptr;										// It will get deleted from m_gameObjects
 
 	// GameObjects
 	for each (GameObject* go in m_gameObjects)
@@ -52,10 +56,15 @@ Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 		lastLight = nullptr;
 	}
 
+	// Camera
+	delete m_camera;
+	m_camera = nullptr;
+
 	// Scene
 	delete m_scene;
 	m_scene = nullptr;
 
+	// Forward Rendering Path
 	delete m_renderingPath;
 	m_renderingPath = nullptr;
 }
@@ -92,7 +101,7 @@ void Scene_DegreesOfFreedom::Render( Camera *gameCamera ) const
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene );
 
-	// Debug Rendere
+	// Debug Renderer
 	TODO( "DebugRenderer getting started from Scene_QuaternionTets.. This is a hot fix for now." );
 	DebugRendererChange3DCamera( m_camera );
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );

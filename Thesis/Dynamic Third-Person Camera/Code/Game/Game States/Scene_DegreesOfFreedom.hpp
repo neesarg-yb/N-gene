@@ -5,6 +5,7 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/World/GameObject.hpp"
+#include "Game/World/Terrain.hpp"
 
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
@@ -25,6 +26,7 @@ public:
 
 	// Game Specific
 	GameObjectList			 m_gameObjects;
+	Terrain					*m_terrain			= nullptr;
 
 public:
 	void BeginFrame();

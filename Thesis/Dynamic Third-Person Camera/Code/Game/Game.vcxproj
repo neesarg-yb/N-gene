@@ -290,6 +290,7 @@
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
     <ClCompile Include="World\GameObject.cpp" />
+    <ClCompile Include="World\Terrain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
@@ -307,6 +308,7 @@
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
     <ClInclude Include="World\GameObject.hpp" />
+    <ClInclude Include="World\Terrain.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Run_win32\Data\Materials\bb8.material" />
