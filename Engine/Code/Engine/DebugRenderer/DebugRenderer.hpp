@@ -12,7 +12,7 @@ class Command;
 ////////////////////////
 void DebugRendererStartup( Renderer *activeRenderer, Camera *camera3D );	// Uses windowSize to create a camera2D. Where (0,0) is center
 void DebugRendererShutdown();
-
+void DebugRendererChange3DCamera( Camera *camera3D );
 
 /////////////////////
 // Update & Render //
