@@ -228,10 +228,11 @@ void Scene_QuaternionsTest::RenderMeshUsingQuaternion( Vector3 const &position, 
 	Material	*defaultMaterial	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 
 	// Quaternions
-	Matrix44	eulerRotationMatrix = Matrix44();
+//	Matrix44	eulerRotationMatrix = Matrix44();
 //	eulerRotationMatrix.RotateDegrees3D( rotationInDegrees );
 //	Quaternion	quaternionRotation	= Quaternion::FromMatrix( eulerRotationMatrix );
 	Quaternion	quaternionRotation	= Quaternion::FromEuler( rotationInDegrees );
+//	Matrix44	quaternionRotMatrix	= quaternionRotation.GetAsMatrix44();
 
 	// Slerp
 	if( m_performSlerpOperation )
