@@ -1,0 +1,27 @@
+#pragma once
+#include "Engine/Math/Transform.hpp"
+#include "Engine/Renderer/Renderable.hpp"
+#include "Game/GameCommon.hpp"
+
+class Scene;
+
+class GameObject
+{
+public:
+			 GameObject();
+	virtual ~GameObject();
+
+public:
+	// Raw Data
+	Transform	 m_transform;
+	Renderable	*m_renderable	= nullptr;
+
+	// Physics Related
+	Vector3		 m_velocity		= Vector3::ZERO;
+
+public:
+	virtual void Update( float deltaSeconds );
+	virtual void AddRenderablesToScene( Scene &activeScene )	= 0;
+	virtual void RemoveRenderablesFromScene( Scene &activeScene ) = 0;
+
+};

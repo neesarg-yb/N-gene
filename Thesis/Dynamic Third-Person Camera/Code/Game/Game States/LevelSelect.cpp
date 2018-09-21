@@ -66,4 +66,6 @@ void LevelSelect::LevelSelected( char const * levelName )
 {
 	if( std::string(levelName) == "--> Quaternion Basis             " )
 		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
+	else if( std::string(levelName) == "--> 7 Degrees of Freedom         " )
+		g_theGame->StartTransitionToState( "DEGREES OF FREEDOM" );
 }

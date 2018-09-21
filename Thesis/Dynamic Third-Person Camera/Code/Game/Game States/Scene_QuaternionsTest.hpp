@@ -4,9 +4,6 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
-#include "Game/Abstract Classes/GameObject.hpp"
-
-typedef std::vector< GameObject* > GameObjectList;
 
 class Scene_QuaternionsTest : public GameState
 {

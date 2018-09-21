@@ -8,6 +8,7 @@
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
+#include "Game/Game States/Scene_DegreesOfFreedom.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -91,6 +92,9 @@ void theGame::Startup()
 
 	GameState* quaternionsTest = new Scene_QuaternionsTest();
 	AddNewGameState( quaternionsTest );
+
+	GameState* degreesOfFreedom = new Scene_DegreesOfFreedom();
+	AddNewGameState( degreesOfFreedom );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );
