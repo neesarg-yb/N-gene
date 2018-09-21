@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/Matrix44.hpp"
+#include "Engine/Math/Quaternion.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 
 class Transform
@@ -13,7 +14,7 @@ private:
 	mutable bool		 m_isDirty			=	false;
 	mutable Matrix44	 m_transformMatrix;									// Initializes as Identity Matrix
 	Vector3				 m_position			= Vector3::ZERO;
-	Vector3				 m_rotation			= Vector3::ZERO;				// TODO: Change it to ( Roll-Pitch-Yaw ); Euler should be ZXY.
+	Quaternion			 m_rotation			= Quaternion::IDENTITY;
 	Vector3				 m_scale			= Vector3::ONE_ALL;
 
 public:
@@ -24,13 +25,15 @@ public:
 	Vector3		GetWorldPosition() const;									// Gives position relative to its parent
 	Matrix44	GetWorldTransformMatrix() const;
 
-	Vector3		GetPosition() const;										// Gets local position
-	Vector3		GetRotation() const;										// Gets local rotation
-	Vector3		GetScale   () const;										// Gets local scale
+	Vector3		GetPosition	 () const;										// Gets local position
+	Vector3		GetRotation	 () const;										// Gets local rotation
+	Quaternion	GetQuaternion() const;
+	Vector3		GetScale	 () const;										// Gets local scale
 	Matrix44	GetTransformMatrix() const;
 
 	void		SetPosition		( Vector3 const &position );
-	void		SetRotation		( Vector3 const &rotation );						// rotation = Vec3(Pitch, Yaw, Roll); but the order the rotation is applied is: Roll_Z -> Pitch_X -> Yaw_Y
+	void		SetRotation		( Vector3 const &rotation );				// rotation = Vec3(Pitch, Yaw, Roll); but the order the rotation is applied is: Roll_Z -> Pitch_X -> Yaw_Y
+	void		SetQuaternion	( Quaternion const &quaternion );
 	void		SetScale		( Vector3 const &scale	 );
 	void		SetFromMatrix	( Matrix44 model );
 

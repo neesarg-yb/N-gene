@@ -3,7 +3,7 @@
 
 Transform::Transform( Vector3 const &position, Vector3 const &rotation, Vector3 const &scale )
 	: m_position( position )
-	, m_rotation( rotation )
+	, m_rotation( Quaternion::FromEuler(rotation) )
 	, m_scale( scale )
 	, m_isDirty( true )
 {
@@ -29,6 +29,11 @@ Vector3 Transform::GetPosition() const
 }
 
 Vector3 Transform::GetRotation() const
+{
+	return m_rotation.GetAsEuler();
+}
+
+Quaternion Transform::GetQuaternion() const
 {
 	return m_rotation;
 }
@@ -57,8 +62,13 @@ void Transform::SetPosition( Vector3 const &position )
 
 void Transform::SetRotation( Vector3 const &rotation )
 {
-	m_rotation	= rotation;
+	m_rotation	= Quaternion::FromEuler( rotation );
 	m_isDirty	= true;
+}
+
+void Transform::SetQuaternion( Quaternion const &quaternion )
+{
+	m_rotation = quaternion;
 }
 
 void Transform::SetScale( Vector3 const &scale )
@@ -72,7 +82,7 @@ void Transform::SetFromMatrix( Matrix44 model )
 	m_position	= model.GetTColumn();
 	m_scale		= Vector3( model.GetIColumn().GetLength(), model.GetJColumn().GetLength(), model.GetKColumn().GetLength() );
 	model.NormalizeIJKColumns();
-	m_rotation	= model.GetEulerRotation();
+	m_rotation	= Quaternion::FromMatrix( model );
 	
 	m_isDirty	= true;
 }
@@ -100,9 +110,9 @@ void Transform::RecalculateTheMatrix() const
 {
 	// Set current Transform Matrix to Identity
 	m_transformMatrix.SetIdentity();
-	m_transformMatrix.Translate3D( m_position );		// Append the Translate Matrix
-	m_transformMatrix.RotateDegrees3D( m_rotation );	// Append the Rotation	Matrix
-	m_transformMatrix.Scale3D( m_scale );				// Append the Scale		Matrix
+	m_transformMatrix.Translate3D( m_position );			// Append the Translate Matrix
+	m_transformMatrix.Append( m_rotation.GetAsMatrix44() );	// Append the Rotation	Matrix
+	m_transformMatrix.Scale3D( m_scale );					// Append the Scale		Matrix
 
 	m_isDirty = false;
 }
