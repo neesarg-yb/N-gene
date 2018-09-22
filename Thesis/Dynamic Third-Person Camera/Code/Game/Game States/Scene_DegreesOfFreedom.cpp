@@ -11,12 +11,12 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	m_scene			= new Scene();
 
 	// Setting up the Camera
-	m_camera = new Camera();
+	m_camera = new OrbitCamera( Vector3::ZERO );
+	m_camera->SetSphericalCoordinate( 4.f, -90.f, 90.f );
 	m_camera->SetColorTarget( g_theRenderer->GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( 45.f, g_aspectRatio, 1.f, 1000.f );
-	m_camera->LookAt( Vector3( 1.f, 1.f, -5.f ), Vector3( 0.f, 0.f, 100.f ) );
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
@@ -91,9 +91,15 @@ void Scene_DegreesOfFreedom::EndFrame()
 
 void Scene_DegreesOfFreedom::Update( float deltaSeconds )
 {
+	// Move the Character
+	ProcessControllerInput( deltaSeconds );
+
 	// Update Game Objects
 	for each (GameObject* go in m_gameObjects)
 		go->Update( deltaSeconds );
+
+	// Update OrbitCamera
+	UpdateOrbitCameraTargetPosition();
 
 	// Update Debug Renderer Objects
 	DebugRendererUpdate( deltaSeconds );
@@ -137,4 +143,22 @@ void Scene_DegreesOfFreedom::AddNewLightToScene( Light *light )
 
 	// Add its renderable
 	m_scene->AddRenderable( *light->m_renderable );
+}
+
+void Scene_DegreesOfFreedom::ProcessControllerInput( float deltaSeconds )
+{
+	XboxController &controller = g_theInput->m_controller[0];
+	
+	// Right Stick - Camera Rotation
+	Vector2 leftStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
+	m_camera->IncrementInSphericalCoordinate( 0.f, leftStick.x * deltaSeconds * 30.f, -leftStick.y * deltaSeconds * 30.f );
+
+	// Left Stick - Player Movement
+	Vector2 movementDirection = controller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	m_player->AddVelocity( movementDirection.x, 0.f, movementDirection.y );
+}
+
+void Scene_DegreesOfFreedom::UpdateOrbitCameraTargetPosition()
+{
+	m_camera->m_target = m_player->m_transform.GetWorldPosition();
 }

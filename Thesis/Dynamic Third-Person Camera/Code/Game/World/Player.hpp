@@ -10,19 +10,14 @@ public:
 	~Player();
 
 public:
-	// What a player will do?
-	// (1) Roam Around the Terrain
-	//		-> Needs a pointer to Terrain
-	// (2) Gets velocity according to input
-	//		-> Goes in Update()
-	// (3) Jump
-	//		-> Y-Velocity & Gravity
-	// (4) It is a sphere for now
-	//		-> Renderable
-	Terrain const *m_terrain = nullptr;			// The terrain this player is on
+	float	const  m_maxSpeed	= 20.f;			// units per seconds
+	Terrain const *m_terrain	= nullptr;		// The terrain this player is on
 
 public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
+
+	void AddVelocity( Vector3 velocity );				// Move towards the given direction with my speed
+	void AddVelocity( float x, float y, float z );		// Move towards the given direction with my speed
 };

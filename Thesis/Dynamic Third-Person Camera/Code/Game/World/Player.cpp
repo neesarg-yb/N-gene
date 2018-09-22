@@ -28,6 +28,11 @@ Player::~Player()
 
 void Player::Update( float deltaSeconds )
 {
+	// Get the velocity under max speed
+	float currentSpeed = m_velocity.GetLength();
+	if( currentSpeed != 0.f )
+		m_velocity = m_velocity.GetNormalized() * ( currentSpeed > m_maxSpeed ? m_maxSpeed : currentSpeed );
+
 	// Updates the position based on velocity
 	GameObject::Update( deltaSeconds );
 }
@@ -48,4 +53,14 @@ void Player::RemoveRenderablesFromScene( Scene &activeScene )
 		return;
 
 	activeScene.RemoveRenderable( *m_renderable );
+}
+
+void Player::AddVelocity( Vector3 velocity )
+{
+	m_velocity += velocity;
+}
+
+void Player::AddVelocity( float x, float y, float z )
+{
+	AddVelocity( Vector3( x, y, z) );
 }
