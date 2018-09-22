@@ -9,6 +9,7 @@ class GameObject
 {
 public:
 			 GameObject();
+			 GameObject( Vector3 position, Vector3 rotation, Vector3 scale );
 	virtual ~GameObject();
 
 public:

@@ -6,6 +6,7 @@
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/World/GameObject.hpp"
 #include "Game/World/Terrain.hpp"
+#include "Game/World/Player.hpp"
 
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
@@ -27,6 +28,7 @@ public:
 	// Game Specific
 	GameObjectList			 m_gameObjects;
 	Terrain					*m_terrain			= nullptr;
+	Player					*m_player			= nullptr;
 
 public:
 	void BeginFrame();

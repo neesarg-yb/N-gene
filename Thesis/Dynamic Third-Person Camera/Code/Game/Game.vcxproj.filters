@@ -58,6 +58,9 @@
     <ClCompile Include="World\Terrain.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="World\Player.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -91,6 +94,9 @@
       <Filter>Game States</Filter>
     </ClInclude>
     <ClInclude Include="World\Terrain.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Player.hpp">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
@@ -204,6 +210,9 @@
       <Filter>Materials</Filter>
     </None>
     <None Include="..\..\Run_win32\Data\Materials\Block_Metal.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\terrain.material">
       <Filter>Materials</Filter>
     </None>
   </ItemGroup>

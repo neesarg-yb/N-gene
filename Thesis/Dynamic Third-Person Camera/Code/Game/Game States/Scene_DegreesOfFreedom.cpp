@@ -28,14 +28,24 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	AddNewLightToScene( directionalLight );
 
 	// Terrain
-	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmapt.png" );
+	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png" );
 	AddNewGameObjectToScene( m_terrain );
+
+	// Player
+	Vector3 inFrontOfCamera  = m_camera->m_cameraTransform.GetWorldPosition();
+	inFrontOfCamera.y		-= 0.f;
+	inFrontOfCamera.z		+= 5.f;
+	m_player = new Player( inFrontOfCamera, *m_terrain );
+	AddNewGameObjectToScene( m_player );
 }
 
 Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 {
+	// Player
+	m_player = nullptr;		// Gets deleted from m_gameObjects
+
 	// Terrain
-	m_terrain = nullptr;										// It will get deleted from m_gameObjects
+	m_terrain = nullptr;	// Gets deleted from m_gameObjects
 
 	// GameObjects
 	for each (GameObject* go in m_gameObjects)
