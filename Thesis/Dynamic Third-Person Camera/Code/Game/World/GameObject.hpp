@@ -18,7 +18,9 @@ public:
 	Renderable	*m_renderable	= nullptr;
 
 	// Physics Related
-	Vector3		 m_velocity		= Vector3::ZERO;
+	Vector3 m_acceleration	= Vector3::ZERO;
+	Vector3 m_velocity		= Vector3::ZERO;
+	float	m_maxSpeed		= 10.f;
 
 public:
 	virtual void Update( float deltaSeconds );

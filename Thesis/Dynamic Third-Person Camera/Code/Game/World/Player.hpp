@@ -10,14 +10,18 @@ public:
 	~Player();
 
 public:
-	float	const  m_maxSpeed	= 20.f;			// units per seconds
-	Terrain const *m_terrain	= nullptr;		// The terrain this player is on
+	float	const	 m_mass		= 1.f;
+	Terrain const	*m_terrain	= nullptr;		// The terrain this player is on
 
 public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
 
-	void AddVelocity( Vector3 velocity );				// Move towards the given direction with my speed
-	void AddVelocity( float x, float y, float z );		// Move towards the given direction with my speed
+	void MotionDragUpdate	( float deltaSeonds );
+	void MovementUpdate		( float deltaSeconds );
+	void CheckAndSnapOnTerrainSurface();
+
+	void ApplyForce( float x, float y, float z );
+	inline void ApplyForce( Vector3 force ) { ApplyForce( force.x, force.y, force.z ); }
 };

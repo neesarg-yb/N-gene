@@ -152,17 +152,6 @@ void Scene_DegreesOfFreedom::ProcessControllerInput( float deltaSeconds )
 	// Right Stick - Camera Rotation
 	Vector2 leftStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	m_camera->IncrementInSphericalCoordinate( 0.f, leftStick.x * deltaSeconds * 30.f, -leftStick.y * deltaSeconds * 30.f );
-
-	// Left Stick - Player Movement
-	Vector2 movementDirection = controller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
-	m_player->AddVelocity( movementDirection.x * 10.f * deltaSeconds, 0.f, movementDirection.y * 10.f * deltaSeconds );
-
-	// A Button - Jump
-	bool jump = controller.m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed;
-	Vector3 jumpVelocity;
-	if( jump )
-		jumpVelocity.y = 10.f;
-	m_player->AddVelocity( jumpVelocity );
 }
 
 void Scene_DegreesOfFreedom::UpdateOrbitCameraTargetPosition()
