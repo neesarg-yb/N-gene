@@ -2,6 +2,7 @@
 #include "Player.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Renderer/Scene.hpp"
+#include "Game/World/Terrain.hpp"
 
 Player::Player( Vector3 worldPosition, Terrain const &parentTerrain )
 	: GameObject( worldPosition, Vector3::ZERO, Vector3::ONE_ALL )
@@ -32,6 +33,21 @@ void Player::Update( float deltaSeconds )
 	float currentSpeed = m_velocity.GetLength();
 	if( currentSpeed != 0.f )
 		m_velocity = m_velocity.GetNormalized() * ( currentSpeed > m_maxSpeed ? m_maxSpeed : currentSpeed );
+
+	// Apply gravity
+	m_velocity.y -= (9.8f * deltaSeconds);
+
+	// If going below terrain, bring it on the terrain
+	Vector3 worldPosition	= m_transform.GetPosition();
+	float	terrainYCoord	= m_terrain->GetYCoordinateForMyPositionAt( worldPosition.x, worldPosition.z, 0.5f );
+
+	if( worldPosition.y < terrainYCoord )
+	{
+		m_velocity.y = 0.f;
+		worldPosition.y = terrainYCoord;
+
+		m_transform.SetPosition( worldPosition );
+	}
 
 	// Updates the position based on velocity
 	GameObject::Update( deltaSeconds );

@@ -51,8 +51,8 @@ public:
 	void			RemoveRenderablesFromScene( Scene &activeScene );
 
 	// Fetching the Position
-	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f );
-	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f );
+	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f ) const;
+	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f ) const;
 	Matrix44		GetModelMatrixForMyPositionAt	( Vector2 myXZPosition, Vector2 uvForwardDirection, Vector2 uvRightDirection );
 
 	// Raycast
@@ -61,8 +61,8 @@ public:
 private:
 	// Surface Patch
 	Vector3			SinWavePlane( float u, float v );
-	Vector3			GetVertexPositionUsingHeightMap( float u, float v );
-	Vector3			GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQuadVetrex cornerVertex );
+	Vector3			GetVertexPositionUsingHeightMap( float u, float v ) const;
+	Vector3			GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQuadVetrex cornerVertex ) const;
 
 	// Chunking
 	ChunkList		MakeChunksUsingSurfacePatch( std::function<Vector3( float, float )> SurfacePatch, IntVector2 maxChunkDimension );
@@ -71,6 +71,6 @@ private:
 	inline Vector3	SinWavePlane( Vector2 uv ) { return SinWavePlane( uv.x, uv.y ); }
 
 public:
-	inline float	GetYCoordinateForMyPositionAt( float x, float z ) { return GetYCoordinateForMyPositionAt( Vector2( x, z ) ); }
-	inline Vector3	GetVertexPositionUsingHeightMap( Vector2 uv ) { return GetVertexPositionUsingHeightMap( uv.x, uv.y ); }
+	inline float	GetYCoordinateForMyPositionAt( float x, float z, float yOffset = 0.f ) const { return GetYCoordinateForMyPositionAt( Vector2( x, z ), yOffset ); }
+	inline Vector3	GetVertexPositionUsingHeightMap( Vector2 uv ) const { return GetVertexPositionUsingHeightMap( uv.x, uv.y ); }
 };

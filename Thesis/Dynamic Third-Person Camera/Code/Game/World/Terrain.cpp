@@ -59,7 +59,7 @@ void Terrain::RemoveRenderablesFromScene( Scene &activeScene )
 		activeScene.RemoveRenderable( *m_chunks[i] );
 }
 
-float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ )
+float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ ) const
 {
 	// Note: myXZPosition is in World Space
 	// You'll get corner's position in Terrain Space by passing corresponding local XZCoord
@@ -98,7 +98,7 @@ float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffse
 	return myHeight + yOffset;
 }
 
-Vector3 Terrain::Get3DCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ )
+Vector3 Terrain::Get3DCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ ) const
 {
 	float yCoord = GetYCoordinateForMyPositionAt( myXZPosition, yOffset );
 
@@ -187,7 +187,7 @@ Vector3 Terrain::SinWavePlane( float u, float v )
 	return outPos;
 }
 
-Vector3 Terrain::GetVertexPositionUsingHeightMap( float u, float v )
+Vector3 Terrain::GetVertexPositionUsingHeightMap( float u, float v ) const
 {
 	Vector3 outPos	= Vector3( u, 0.f, v );
 	
@@ -203,7 +203,7 @@ Vector3 Terrain::GetVertexPositionUsingHeightMap( float u, float v )
 	return outPos;
 }
 
-Vector3 Terrain::GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQuadVetrex cornerVertex )
+Vector3 Terrain::GiveQuadVertexForMyPositionAt( Vector2 myXZPosition, eTerrainQuadVetrex cornerVertex ) const
 {
 	// Get coords for Bottom Left Corner
 	myXZPosition.x			= floorf( myXZPosition.x );
