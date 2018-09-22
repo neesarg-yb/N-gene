@@ -27,7 +27,6 @@ void GameObject::Update( float deltaSeconds )
 	Vector3 currentPosition = m_transform.GetPosition();
 	
 	m_velocity += m_acceleration * deltaSeconds;			// Velocity from acceleration
-	m_velocity.LimitLengthTo( m_maxSpeed );
 
 	currentPosition += m_velocity * deltaSeconds;			// Position from velocity
 	m_transform.SetPosition( currentPosition );				// Set the position

@@ -10,8 +10,11 @@ public:
 	~Player();
 
 public:
-	float	const	 m_mass		= 1.f;
-	Terrain const	*m_terrain	= nullptr;		// The terrain this player is on
+	float	const	 m_bodyRadius	= 0.25f;
+	float	const	 m_mass			= 1.f;
+	Terrain const	*m_terrain		= nullptr;		// The terrain this player is on
+
+	bool m_isPlayerOnTerrainSurface = false;
 
 public:
 	void Update( float deltaSeconds );
