@@ -18,9 +18,9 @@ public:
 	Renderable	*m_renderable	= nullptr;
 
 	// Physics Related
-	Vector3 m_acceleration	= Vector3::ZERO;
-	Vector3 m_velocity		= Vector3::ZERO;
-	float	m_maxSpeed		= 10.f;
+	Vector3 m_acceleration	= Vector3::ZERO;		// Gets reset, ever frame
+	Vector3 m_velocity		= Vector3::ZERO;		// Does not gets reset, every frame
+	float	m_maxSpeed		= 10.f;					// Velocity will get limited by max speed
 
 public:
 	virtual void Update( float deltaSeconds );

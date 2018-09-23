@@ -10,8 +10,8 @@ public:
 	~Player();
 
 public:
-	float	const	 m_bodyRadius	= 0.25f;
-	float	const	 m_mass			= 1.f;
+	float	const	 m_bodyRadius	= 0.5f;
+	float	const	 m_mass			= 10.f;
 	Terrain const	*m_terrain		= nullptr;		// The terrain this player is on
 
 	bool m_isPlayerOnTerrainSurface = false;
@@ -21,8 +21,8 @@ public:
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
 
-	void MotionDragUpdate	( float deltaSeonds );
-	void MovementUpdate		( float deltaSeconds );
+	void ApplyResistantForces();
+	void ApplyMovementForces();
 	void CheckAndSnapOnTerrainSurface();
 
 	void ApplyForce( float x, float y, float z );
