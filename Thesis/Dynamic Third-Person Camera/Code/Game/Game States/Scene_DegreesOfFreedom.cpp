@@ -16,7 +16,7 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	m_camera->SetColorTarget( g_theRenderer->GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
-	m_camera->SetPerspectiveCameraProjectionMatrix( 45.f, g_aspectRatio, 1.f, 1000.f );
+	m_camera->SetPerspectiveCameraProjectionMatrix( m_currentFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
@@ -152,6 +152,13 @@ void Scene_DegreesOfFreedom::ProcessControllerInput( float deltaSeconds )
 	// Right Stick - Camera Rotation
 	Vector2 leftStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	m_camera->IncrementInSphericalCoordinate( 0.f, leftStick.x * deltaSeconds * 30.f, -leftStick.y * deltaSeconds * 30.f );
+
+	// LT & RT - Zoom out & Zoom in
+	float leftTrigger	= controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];
+	float rightTrigger	= controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
+
+	m_currentFOV += ( leftTrigger - rightTrigger ) * m_changeFOVSpeed * deltaSeconds;
+	m_camera->SetPerspectiveCameraProjectionMatrix( m_currentFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
 }
 
 void Scene_DegreesOfFreedom::UpdateOrbitCameraTargetPosition()
