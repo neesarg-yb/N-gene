@@ -27,27 +27,28 @@ CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
 	distanceChange += upButtonPressed	? ( -1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
 	distanceChange += downButtonPressed	? (  1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
 
-	float rotationChange = rightStick.x * m_rotationSpeed * deltaSeconds;
-	float altitudeChange = rightStick.y * m_rotationSpeed * deltaSeconds;
+	float rotationChange =  1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
+	float altitudeChange = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
 
 	// Calculate Camera's Position
 	Vector3 anchorWorldPosition		= m_anchor->m_transform.GetWorldPosition();
 	float	clampedAltitude			= ClampFloat( m_spehicalCoordinates.z + altitudeChange, m_pitchRange.min, m_pitchRange.max );
-	Vector3 relativeCameraPosition	= GetPositionFromSpericalCoordinate( m_spehicalCoordinates.x + distanceChange, m_spehicalCoordinates.y + rotationChange, clampedAltitude );
+	m_spehicalCoordinates			+= Vector3( distanceChange, rotationChange, 0.f );
+	m_spehicalCoordinates.z			= clampedAltitude;
+	Vector3 relativeCameraPosition	= GetPositionFromSpericalCoordinate( m_spehicalCoordinates.x, m_spehicalCoordinates.y, m_spehicalCoordinates.z );
 	Vector3 worldCameraPosition		= anchorWorldPosition + relativeCameraPosition;
 
 	// Calculate Camera's Orientation
 	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition, worldCameraPosition );
-	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix );
+	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix ).GetInverse();
+	TODO( "Find out: Why cameraOrientation.GetInverse() works?!" );
 
 	return CameraTargetPoint( worldCameraPosition, cameraOrientation, 45.f );
 }
 
 Vector3 CB_DegreesOfFreedom::GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude )
 {
-	UNUSED( radius );
-	UNUSED( rotation );
-	UNUSED( altitude );
+	float roationRelativeToXAxis = rotation - 90.f;
 
-	return Vector3();
+	return PolarToCartesian( radius, roationRelativeToXAxis, altitude);
 }

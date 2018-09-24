@@ -14,7 +14,7 @@ LevelSelect::LevelSelect()
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(3) Camera Collision             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Better Together              ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &m_levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> 7 Degrees of Freedom         ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Degrees of Freedom           ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->m_selectionIndex = 6;
 }
@@ -66,6 +66,6 @@ void LevelSelect::LevelSelected( char const * levelName )
 {
 	if( std::string(levelName) == "--> Quaternion Basis             " )
 		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
-	else if( std::string(levelName) == "--> 7 Degrees of Freedom         " )
+	else if( std::string(levelName) == "--> Degrees of Freedom           " )
 		g_theGame->StartTransitionToState( "DEGREES OF FREEDOM" );
 }

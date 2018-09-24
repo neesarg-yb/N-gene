@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene_DegreesOfFreedom.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Terrain.hpp"
 
@@ -12,7 +13,6 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 
 	// Setting up the Camera
 	m_camera = new OrbitCamera( Vector3::ZERO );
-	m_camera->SetSphericalCoordinate( 4.f, -90.f, 90.f );
 	m_camera->SetColorTarget( g_theRenderer->GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
@@ -38,10 +38,25 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	inFrontOfCamera.z		+= 5.f;
 	m_player = new Player( inFrontOfCamera, *m_terrain );
 	AddNewGameObjectToScene( m_player );
+
+	// Camera Manager
+	m_cameraManager = new CameraManager( *m_camera, *g_theInput );
+	m_cameraManager->SetAnchor( m_player );
+
+	// Degrees of Freedom - Camera Behavior
+	CameraBehaviour* dofBehaviour = new CB_DegreesOfFreedom( 5.f, 20.f, 30.f, 100.f, "DegreesOfFreedom" );
+	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
+	m_cameraManager->SetActiveCameraBehaviourTo( "DegreesOfFreedom" );
 }
 
 Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 {
+	m_cameraManager->DeleteCameraBehaviour( "DegreesOfFreedom" );
+
+	// Camera Manager
+	delete m_cameraManager;
+	m_cameraManager = nullptr;
+
 	// Player
 	m_player = nullptr;		// Gets deleted from m_gameObjects
 
@@ -82,25 +97,23 @@ Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 
 void Scene_DegreesOfFreedom::BeginFrame()
 {
-
+	m_cameraManager->PostUpdate();
 }
 
 void Scene_DegreesOfFreedom::EndFrame()
 {
-
+	m_cameraManager->PostUpdate();
 }
 
 void Scene_DegreesOfFreedom::Update( float deltaSeconds )
 {
-	// Move the Character
-	ProcessControllerInput( deltaSeconds );
-
 	// Update Game Objects
 	for each (GameObject* go in m_gameObjects)
 		go->Update( deltaSeconds );
 
-	// Update OrbitCamera
-	UpdateOrbitCameraTargetPosition();
+	// Update Camera Stuffs
+	UpdateCameraFOV( deltaSeconds );
+	m_cameraManager->Update( deltaSeconds );
 
 	// Update Debug Renderer Objects
 	DebugRendererUpdate( deltaSeconds );
@@ -146,13 +159,9 @@ void Scene_DegreesOfFreedom::AddNewLightToScene( Light *light )
 	m_scene->AddRenderable( *light->m_renderable );
 }
 
-void Scene_DegreesOfFreedom::ProcessControllerInput( float deltaSeconds )
+void Scene_DegreesOfFreedom::UpdateCameraFOV( float deltaSeconds )
 {
 	XboxController &controller = g_theInput->m_controller[0];
-	
-	// Right Stick - Camera Rotation
-	Vector2 leftStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
-	m_camera->IncrementInSphericalCoordinate( 0.f, leftStick.x * deltaSeconds * 30.f, -leftStick.y * deltaSeconds * 30.f );
 
 	// LT & RT - Zoom out & Zoom in
 	float leftTrigger	= controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];
@@ -160,9 +169,4 @@ void Scene_DegreesOfFreedom::ProcessControllerInput( float deltaSeconds )
 
 	m_currentFOV += ( leftTrigger - rightTrigger ) * m_changeFOVSpeed * deltaSeconds;
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_currentFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
-}
-
-void Scene_DegreesOfFreedom::UpdateOrbitCameraTargetPosition()
-{
-	m_camera->m_target = m_player->m_transform.GetWorldPosition();
 }

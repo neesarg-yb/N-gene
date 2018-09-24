@@ -5,6 +5,7 @@
 #include "Engine/Renderer/OrbitCamera.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
+#include "Game/Potential Engine/CameraManager.hpp"
 #include "Game/World/Terrain.hpp"
 #include "Game/World/Player.hpp"
 
@@ -21,7 +22,7 @@ public:
 	// Rendering Specific
 	ForwardRenderingPath	*m_renderingPath	= nullptr;
 	Scene					*m_scene			= nullptr;
-	OrbitCamera				*m_camera			= nullptr;
+	Camera					*m_camera			= nullptr;
 	Lights					 m_lights;
 	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.6f );
 
@@ -31,6 +32,8 @@ public:
 	Player					*m_player			= nullptr;
 
 private:
+	// Camera
+	CameraManager			*m_cameraManager	= nullptr;
 	float					 m_currentFOV		= 45.f;			// Degrees
 	float const				 m_changeFOVSpeed	= 10.f;			// Degrees per seconds
 	float const				 m_cameraNear		= 1.f;
@@ -46,6 +49,5 @@ private:
 	void AddNewGameObjectToScene( GameObject *go );
 	void AddNewLightToScene( Light *light );
 
-	void ProcessControllerInput( float deltaSeconds );
-	void UpdateOrbitCameraTargetPosition();
+	void UpdateCameraFOV( float deltaSeconds );
 };
