@@ -193,6 +193,10 @@ void Matrix44::Translate3D( Vector3 const &translation )
 
 void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ )
 {
+	// My coordinate system is left hand coordinate system
+	// And,
+	// Rotation is also by Left Hand Rule
+	//
 	Matrix44 rotationAroundZMatrix;
 	rotationAroundZMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Jx = -SinDegree( rotateAroundAxisYXZ.z );

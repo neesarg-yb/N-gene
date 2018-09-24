@@ -164,6 +164,11 @@ void Camera::SetCameraPositionTo( Vector3 const &newPosition )
 	m_cameraTransform.SetPosition( newPosition );
 }
 
+void Camera::SetCameraQuaternionRotationTo( Quaternion const &newQuaternionRotation )
+{
+	m_cameraTransform.SetQuaternion( newQuaternionRotation );
+}
+
 void Camera::SetCameraEulerRotationTo( Vector3 const &newEulerRotation )
 {
 	m_cameraTransform.SetRotation( newEulerRotation );

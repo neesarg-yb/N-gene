@@ -59,7 +59,7 @@ public:
 	void NormalizeIJKColumns();
 
 	void Translate3D	( Vector3 const &translation );
-	void RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ );				// Rotation Order, Around Axis:  Z(Roll, clockwise) --> X(Pitch, clockwise) --> Y(Yaw, counter-clockwise)
+	void RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ );				// Rotation Order, Around Axis:  Z(Roll, leftHandRule) --> X(Pitch, leftHandRule) --> Y(Yaw, leftHandRule)
 	void Scale3D		( Vector3 const &scale );
 	void ScaleUniform3D	( float uniformScale );
 
