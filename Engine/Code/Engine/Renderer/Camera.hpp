@@ -49,10 +49,11 @@ public:
 	void CopyTransformViewAndProjection( Camera const &referenceCamera );						// Caution!: Copies View and Projection Matrices from referenceCamera
 
 	// Camera's movement and rotation
-	void SetCameraPositionTo		( Vector3 const &newPosition );						// Reset the position
-	void SetCameraEulerRotationTo	( Vector3 const &newEulerRotation );				// Reset the rotation (in degrees)
-	void MoveCameraPositionBy		( Vector3 const &localTranslation );				// Modification to the existing position
-	void RotateCameraBy				( Vector3 const &localRotation );					// Modification to the existing rotation (in degrees)
+	void SetCameraPositionTo			( Vector3 const &newPosition );						// Reset the position
+	void SetCameraQuaternionRotationTo	( Quaternion const &newQuaternionRotation );
+	void SetCameraEulerRotationTo		( Vector3 const &newEulerRotation );				// Reset the rotation (in degrees)
+	void MoveCameraPositionBy			( Vector3 const &localTranslation );				// Modification to the existing position
+	void RotateCameraBy					( Vector3 const &localRotation );					// Modification to the existing rotation (in degrees)
 
 	// Information Fetchers
 	Vector3				GetForwardVector() const;

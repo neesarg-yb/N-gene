@@ -19,10 +19,12 @@ Quaternion::Quaternion( Vector3 const &axis, float rotationDegrees )
 {
 	float halfRotationRadians = DegreeToRadian( rotationDegrees ) * 0.5f;
 
-	r	= cosf( halfRotationRadians );
-	i.x	= axis.x * sinf( halfRotationRadians );
-	i.y	= axis.y * sinf( halfRotationRadians );
-	i.z	= axis.z * sinf( halfRotationRadians );
+	// using -halfRotationRadians because we want it to rotate by Left Hand Rule..
+	//	By default, Quaternions rotates using Right Hand Rule
+	r	= cosf( -halfRotationRadians );
+	i.x	= axis.x * sinf( -halfRotationRadians );
+	i.y	= axis.y * sinf( -halfRotationRadians );
+	i.z	= axis.z * sinf( -halfRotationRadians );
 }
 
 Quaternion::~Quaternion()

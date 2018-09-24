@@ -21,6 +21,8 @@ public:
 	Vector3 IgnoreW() const;
 	Vector4 GetNormalized() const;
 
+	bool operator == ( Vector4 const b ) const;
+
 public:
 	float x = 0.f;
 	float y = 0.f;
