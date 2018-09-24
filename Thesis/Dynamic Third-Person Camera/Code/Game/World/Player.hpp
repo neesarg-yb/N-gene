@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/World/GameObject.hpp"
+#include "Game/Potential Engine/GameObject.hpp"
 
 class Terrain;
 

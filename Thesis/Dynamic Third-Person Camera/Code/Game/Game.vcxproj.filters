@@ -23,6 +23,9 @@
     <Filter Include="World">
       <UniqueIdentifier>{89c136ec-ef1b-4b81-9238-ce5fce072008}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PotentialEngine">
+      <UniqueIdentifier>{9b2525ea-9641-42a5-8200-f0d14e714844}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -49,9 +52,6 @@
     <ClCompile Include="Game States\Scene_QuaternionsTest.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="World\GameObject.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Scene_DegreesOfFreedom.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
@@ -60,6 +60,18 @@
     </ClCompile>
     <ClCompile Include="World\Player.cpp">
       <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraBehaviour.cpp">
+      <Filter>PotentialEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraManager.cpp">
+      <Filter>PotentialEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraTargetPoint.cpp">
+      <Filter>PotentialEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\GameObject.cpp">
+      <Filter>PotentialEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -87,9 +99,6 @@
     <ClInclude Include="Game States\Scene_QuaternionsTest.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="World\GameObject.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
@@ -98,6 +107,18 @@
     </ClInclude>
     <ClInclude Include="World\Player.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraBehaviour.hpp">
+      <Filter>PotentialEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraTargetPoint.hpp">
+      <Filter>PotentialEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\GameObject.hpp">
+      <Filter>PotentialEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraManager.hpp">
+      <Filter>PotentialEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

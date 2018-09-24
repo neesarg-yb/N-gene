@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include "Engine/Math/AABB3.hpp"
-#include "Game/World/GameObject.hpp"
+#include "Game/Potential Engine/GameObject.hpp"
 
 class Scene;
 typedef std::vector< Renderable* > ChunkList;
