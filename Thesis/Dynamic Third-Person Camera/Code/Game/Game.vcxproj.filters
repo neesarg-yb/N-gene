@@ -26,6 +26,12 @@
     <Filter Include="PotentialEngine">
       <UniqueIdentifier>{9b2525ea-9641-42a5-8200-f0d14e714844}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PotentialEngine\CameraSystem">
+      <UniqueIdentifier>{3ea93443-e06e-4890-867e-8c8ddfeaf6eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PotentialEngine\CameraBehaviours">
+      <UniqueIdentifier>{4579e831-70ce-41ac-a6c4-ebbcddcbc309}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -61,17 +67,20 @@
     <ClCompile Include="World\Player.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\CameraBehaviour.cpp">
-      <Filter>PotentialEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CameraManager.cpp">
-      <Filter>PotentialEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CameraTargetPoint.cpp">
-      <Filter>PotentialEngine</Filter>
-    </ClCompile>
     <ClCompile Include="Potential Engine\GameObject.cpp">
       <Filter>PotentialEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraBehaviour.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraManager.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraTargetPoint.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CB_DegreesOfFreedom.cpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -108,17 +117,20 @@
     <ClInclude Include="World\Player.hpp">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\CameraBehaviour.hpp">
-      <Filter>PotentialEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CameraTargetPoint.hpp">
-      <Filter>PotentialEngine</Filter>
-    </ClInclude>
     <ClInclude Include="Potential Engine\GameObject.hpp">
       <Filter>PotentialEngine</Filter>
     </ClInclude>
+    <ClInclude Include="Potential Engine\CameraTargetPoint.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraBehaviour.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
     <ClInclude Include="Potential Engine\CameraManager.hpp">
-      <Filter>PotentialEngine</Filter>
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CB_DegreesOfFreedom.hpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

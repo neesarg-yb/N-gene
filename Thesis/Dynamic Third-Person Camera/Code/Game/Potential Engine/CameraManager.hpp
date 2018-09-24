@@ -28,12 +28,12 @@ public:
 
 public:
 	void SetAnchor					( GameObject *anchor );
-	void AddCameraBehaviour			( CameraBehaviour *newCameraBehaviour );
-	void RemoveCameraBehaviour		( CameraBehaviour *cameraBehaviourToRemove );
-	void RemoveCameraBehaviour		( std::string const &behaviourName );
+	int  AddNewCameraBehaviour		( CameraBehaviour *newCameraBehaviour );		// Now I'll manage this behavior, including deletion
+	void DeleteCameraBehaviour		( CameraBehaviour *cameraBehaviourToDelete );	// Deletes it
+	void DeleteCameraBehaviour		( std::string const &behaviourName );			// Deletes it
 	void SetActiveCameraBehaviourTo	( std::string const &behaviourName );
 
 private:
 	int GetCameraBehaviourIndex( CameraBehaviour *cb );					// Returns -1 if couldn't fine it in the list
-	int GetCameraBehaviourIndex( std::string const &behaviourName );		// Returns -1 if couldn't fine it in the list
+	int GetCameraBehaviourIndex( std::string const &behaviourName );	// Returns -1 if couldn't fine it in the list
 };

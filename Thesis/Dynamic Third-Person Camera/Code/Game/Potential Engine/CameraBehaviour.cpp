@@ -12,19 +12,9 @@ CameraBehaviour::~CameraBehaviour()
 
 }
 
-void CameraBehaviour::PreUpdate()
+void CameraBehaviour::SetCameraAnchorAndInputSystemTo( Camera *camera, GameObject *anchor, InputSystem *input )
 {
-
+	m_camera = camera;
+	m_anchor = anchor;
+	m_inputSystem = input;
 }
-
-void CameraBehaviour::PostUpdate()
-{
-
-}
-
-CameraTargetPoint CameraBehaviour::Update( float deltaSeconds )
-{
-	UNUSED( deltaSeconds );
-	return CameraTargetPoint();
-}
-

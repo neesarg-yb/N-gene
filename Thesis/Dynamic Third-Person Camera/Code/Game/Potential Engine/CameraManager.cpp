@@ -10,7 +10,16 @@ CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem )
 
 CameraManager::~CameraManager()
 {
+	// Delete all the camera behaviors
+	while( m_cameraBehaviours.size() > 0 )
+	{
+		// Fast delete
+		std::swap( m_cameraBehaviours.front(), m_cameraBehaviours.back() );
+		delete m_cameraBehaviours.back();
+		m_cameraBehaviours.back() = nullptr;
 
+		m_cameraBehaviours.pop_back();
+	}
 }
 
 void CameraManager::Update( float deltaSeconds )
@@ -39,7 +48,7 @@ void CameraManager::SetAnchor( GameObject *anchor )
 	m_anchor = anchor;
 }
 
-void CameraManager::AddCameraBehaviour( CameraBehaviour *newCameraBehaviour )
+int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )
 {
 	int idx = GetCameraBehaviourIndex( newCameraBehaviour );
 	if( idx >= 0 )
@@ -50,10 +59,16 @@ void CameraManager::AddCameraBehaviour( CameraBehaviour *newCameraBehaviour )
 		m_cameraBehaviours[ idx ] = newCameraBehaviour;
 	}
 	else // If not, add a new behavior
+	{
 		m_cameraBehaviours.push_back( newCameraBehaviour );
+		idx = (int)m_cameraBehaviours.size() - 1;
+	}
+
+	m_cameraBehaviours[idx]->SetCameraAnchorAndInputSystemTo( &m_camera, m_anchor, &m_inputSystem );
+	return idx;
 }
 
-void CameraManager::RemoveCameraBehaviour( std::string const &behaviourName )
+void CameraManager::DeleteCameraBehaviour( std::string const &behaviourName )
 {
 	int idx = GetCameraBehaviourIndex( behaviourName );
 	
@@ -61,16 +76,19 @@ void CameraManager::RemoveCameraBehaviour( std::string const &behaviourName )
 	if( idx < 0 )
 		return;
 
-	// Fast remove
+	// Remove Camera & Anchor References
+	m_cameraBehaviours[idx]->SetCameraAnchorAndInputSystemTo( nullptr, nullptr, nullptr );
+
+	// Fast Delete
 	std::swap( m_cameraBehaviours.back(), m_cameraBehaviours[idx] );
 	delete m_cameraBehaviours.back();
 	m_cameraBehaviours.back() = nullptr;
 	m_cameraBehaviours.pop_back();
 }
 
-void CameraManager::RemoveCameraBehaviour( CameraBehaviour *cameraBehaviourToRemove )
+void CameraManager::DeleteCameraBehaviour( CameraBehaviour *cameraBehaviourToDelete )
 {
-	RemoveCameraBehaviour( cameraBehaviourToRemove->m_name );
+	DeleteCameraBehaviour( cameraBehaviourToDelete->m_name );
 }
 
 void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName )
