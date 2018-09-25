@@ -15,9 +15,6 @@ class TextureCube;
 class Camera
 {
 public:
-	const float m_aspectRatio = g_aspectRatio;
-
-public:
 			 Camera();
 	virtual ~Camera();
 
@@ -42,11 +39,11 @@ public:
 	Matrix44 GetProjectionMatrix() const;
 
 	// projection settings
-	void SetProjectionMatrix( Matrix44 const &projMatrix );
 	void SetProjectionOrtho( float size, float screen_near, float screen_far ); 
 	void IncrementCameraSizeBy( float sizeIncrement );									// If using Orthographic Camera
 	void SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspectRatio, float nearZ, float farZ );
-	void CopyTransformViewAndProjection( Camera const &referenceCamera );						// Caution!: Copies View and Projection Matrices from referenceCamera
+	void CopyTransformViewAndProjection( Camera const &referenceCamera );				// Caution!: Copies View and Projection Matrices from referenceCamera
+	void SetProjectionMatrixUnsafe( Matrix44 const &projMatrix );						// Caution!: It doesn't set internal variables like: m_size, m_fov, etc..
 
 	// Camera's movement and rotation
 	void SetCameraPositionTo			( Vector3 const &newPosition );						// Reset the position
@@ -81,11 +78,26 @@ public:
 	FrameBuffer		 m_outputFramebuffer;
 
 private:
-	// Used only if camera is orthographic
-	float			m_size				=  2.f;
-	float			m_screen_near		= -1.f;
-	float			m_screen_far		=  1.f;
-					
+	// Camera Properties
+	float			m_aspectRatio		=  g_aspectRatio;	// Screen aspect ratio
+	float			m_fov				=  45.f;			// Field of View
+	float			m_size				=  2.f;				// Orthographic Camera Size
+	float			m_screen_near		= -1.f;				// Camera Near Plane
+	float			m_screen_far		=  1.f;				// Camera Far Plane
+
+public:
+	inline float GetAspectRatio()	const { return m_aspectRatio; }		// Aspect Ratio of the Camera
+	inline float GetFOV()			const { return m_fov; }				// Field of View of Perspective Camera
+	inline float GetSize()			const { return m_size; }			// Size of Orthographic Camera
+	inline float GetCameraNear()	const { return m_screen_near; }		// Near plane of the Camera
+	inline float GetCameraFar()		const { return m_screen_far; }		// Far plane of the Camera
+
+	void SetAspectRatioForPerspective	( float aspectRatio );
+	void SetFOVForPerspective			( float fov );
+	void SetNearAndFarForPerspective	( float cameraNear, float cameraFar );
+	
+private:
+	// Post Processing 
 	Texture*		m_bloomTexture		= nullptr;
 
 	// Skybox
