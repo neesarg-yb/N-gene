@@ -28,8 +28,8 @@ void CameraManager::Update( float deltaSeconds )
 	CameraTargetPoint suggestedTargetPoint = m_aciveBehaviour->Update( deltaSeconds );
 
 	// Snap to suggested target point, for now
-	TODO( "Set Camera FOV!" );
-	m_camera.SetCameraPositionTo( suggestedTargetPoint.m_position );
+	m_camera.SetFOVForPerspective( suggestedTargetPoint.m_fov );
+	m_camera.SetCameraPositionTo ( suggestedTargetPoint.m_position );
 	m_camera.SetCameraQuaternionRotationTo( suggestedTargetPoint.m_orientation );
 }
 

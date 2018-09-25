@@ -34,7 +34,7 @@ public:
 private:
 	// Camera
 	CameraManager			*m_cameraManager	= nullptr;
-	float					 m_currentFOV		= 45.f;			// Degrees
+	float const				 m_initialFOV		= 45.f;			// Degrees
 	float const				 m_changeFOVSpeed	= 10.f;			// Degrees per seconds
 	float const				 m_cameraNear		= 1.f;
 	float const				 m_cameraFar		= 1000.f;
@@ -48,6 +48,4 @@ public:
 private:
 	void AddNewGameObjectToScene( GameObject *go );
 	void AddNewLightToScene( Light *light );
-
-	void UpdateCameraFOV( float deltaSeconds );
 };
