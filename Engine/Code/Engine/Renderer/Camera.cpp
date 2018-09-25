@@ -124,9 +124,28 @@ Matrix44 Camera::GetProjectionMatrix() const
 	return m_projMatrix;
 }
 
-void Camera::SetProjectionMatrix( Matrix44 const &projMatrix )
+void Camera::SetProjectionMatrixUnsafe( Matrix44 const &projMatrix )
 {
 	m_projMatrix = projMatrix;
+}
+
+void Camera::SetAspectRatioForPerspective( float aspectRatio )
+{
+	m_aspectRatio = aspectRatio;
+	m_projMatrix = Matrix44::MakePerspective3D( m_fov, m_aspectRatio, m_screen_near, m_screen_far );
+}
+
+void Camera::SetFOVForPerspective( float fov )
+{
+	m_fov = fov;
+	m_projMatrix = Matrix44::MakePerspective3D( m_fov, m_aspectRatio, m_screen_near, m_screen_far );
+}
+
+void Camera::SetNearAndFarForPerspective( float cameraNear, float cameraFar )
+{
+	m_screen_far = cameraFar;
+	m_screen_near = cameraNear;
+	m_projMatrix = Matrix44::MakePerspective3D( m_fov, m_aspectRatio, m_screen_near, m_screen_far );
 }
 
 void Camera::SetProjectionOrtho( float size, float screen_near, float screen_far )
@@ -149,14 +168,27 @@ void Camera::IncrementCameraSizeBy( float sizeIncrement )
 
 void Camera::SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspectRatio, float nearZ, float farZ )
 {
+	m_fov			= fovDegrees;
+	m_aspectRatio	= aspectRatio;
+	m_screen_near	= nearZ;
+	m_screen_far	= farZ;
+
 	m_projMatrix = Matrix44::MakePerspective3D( fovDegrees, aspectRatio, nearZ, farZ );
 }
 
 void Camera::CopyTransformViewAndProjection( Camera const &referenceCamera )
 {
+	// Copy Transform, View & Projection Matrix
 	m_cameraTransform	= referenceCamera.m_cameraTransform;
 	m_projMatrix		= referenceCamera.m_projMatrix;
 	m_viewMatrix		= referenceCamera.m_viewMatrix;
+
+	// Copy all the private properties which are dependent of these matrices
+	m_aspectRatio		= referenceCamera.m_aspectRatio;
+	m_fov				= referenceCamera.m_fov;
+	m_size				= referenceCamera.m_size;
+	m_screen_near		= referenceCamera.m_screen_near;
+	m_screen_far		= referenceCamera.m_screen_far;
 }
 
 void Camera::SetCameraPositionTo( Vector3 const &newPosition )
