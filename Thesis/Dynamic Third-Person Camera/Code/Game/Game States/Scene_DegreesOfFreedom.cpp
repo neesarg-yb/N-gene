@@ -107,6 +107,8 @@ void Scene_DegreesOfFreedom::EndFrame()
 
 void Scene_DegreesOfFreedom::Update( float deltaSeconds )
 {
+	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
+
 	// Update Game Objects
 	for each (GameObject* go in m_gameObjects)
 		go->Update( deltaSeconds );

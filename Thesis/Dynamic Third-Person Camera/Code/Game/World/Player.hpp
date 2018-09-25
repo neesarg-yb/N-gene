@@ -16,10 +16,14 @@ public:
 
 	bool m_isPlayerOnTerrainSurface = false;
 
+private:
+	Vector3 m_cameraForward = Vector3::FRONT;
+
 public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
+	void InformAboutCameraForward( Vector3 const &cameraForward );
 
 	void ApplyResistantForces();
 	void ApplyMovementForces();

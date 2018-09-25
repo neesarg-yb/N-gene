@@ -71,6 +71,11 @@ void Player::RemoveRenderablesFromScene( Scene &activeScene )
 	activeScene.RemoveRenderable( *m_renderable );
 }
 
+void Player::InformAboutCameraForward( Vector3 const &cameraForward )
+{
+	m_cameraForward = cameraForward;
+}
+
 void Player::ApplyResistantForces()
 {
 	// Applying the gravity
@@ -98,15 +103,30 @@ void Player::ApplyMovementForces()
 	if( m_isPlayerOnTerrainSurface == false )
 		return;
 
+	// Move relative to camera forward
+	Vector3 cameraForward = m_cameraForward;
+	cameraForward.y = 0.f;
+	if( cameraForward.GetLength() != 0.f )
+	{
+		cameraForward	 = cameraForward.GetNormalized();
+		cameraForward.x *= -1.f;
+		TODO( "Figureout why I need to flip the x-coordinate sign!" );
+	}
+	else
+		cameraForward = Vector3::FRONT;
+
+	Vector3 cameraRight = Vector3::CrossProduct( Vector3::UP, cameraForward );
+
 	// Get input from Xbox Controller
 	XboxController &controller			= g_theInput->m_controller[0];
 	Vector2			inputDirectionXZ	= controller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
 	bool			jump				= controller.m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed;
 
 	// Applying input force
-	float	xzMovementForce = 100.f;
-	Vector2 forceXZ			= inputDirectionXZ * xzMovementForce;
-	ApplyForce( forceXZ.x, 0.f, forceXZ.y );
+	float	xzMovementForce			= 100.f;
+	Vector2 forceXZ					= inputDirectionXZ * xzMovementForce;
+	Vector3 forceRelativeToCamera	= ( cameraForward * forceXZ.y ) + ( cameraRight * forceXZ.x );
+	ApplyForce( forceRelativeToCamera );
 
 	// Apply Jump
 	if( jump == true )
