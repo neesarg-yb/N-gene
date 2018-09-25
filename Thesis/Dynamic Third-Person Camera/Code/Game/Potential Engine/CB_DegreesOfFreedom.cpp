@@ -1,5 +1,6 @@
 #pragma once
 #include "CB_DegreesOfFreedom.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 CB_DegreesOfFreedom::CB_DegreesOfFreedom( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name /* = "DegreesOfFreedom" */ )
 	: CameraBehaviour( name )
@@ -19,16 +20,31 @@ CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
 {
 	// Get input from Xbox Controller
 	XboxController &controller	= m_inputSystem->m_controller[0];
+	// For Rotation of the Camera
 	Vector2 rightStick			= controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
-	bool upButtonPressed		= controller.m_xboxButtonStates[ XBOX_BUTTON_UP ].keyIsDown;
-	bool downButtonPressed		= controller.m_xboxButtonStates[ XBOX_BUTTON_DOWN ].keyIsDown;
+	// For change in Distance from Anchor
+	bool leftShoulderPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown;
+	bool rightShoulder			= controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
+	// For Offset Change
+	bool dPadUp					= controller.m_xboxButtonStates[ XBOX_BUTTON_UP ].keyIsDown;
+	bool dPadDown				= controller.m_xboxButtonStates[ XBOX_BUTTON_DOWN ].keyIsDown;
+	bool dPadRight				= controller.m_xboxButtonStates[ XBOX_BUTTON_RIGHT ].keyIsDown;
+	bool dPadLeft				= controller.m_xboxButtonStates[ XBOX_BUTTON_LEFT ].keyIsDown;
 
 	float distanceChange = 0.f;
-	distanceChange += upButtonPressed	? ( -1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
-	distanceChange += downButtonPressed	? (  1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
+	distanceChange += rightShoulder			? ( -1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
+	distanceChange += leftShoulderPressed	? (  1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
 
 	float rotationChange =  1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
 	float altitudeChange = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
+	
+	float verticalOffsetChange = 0.f;
+	verticalOffsetChange += dPadUp	 ? (  1.f * m_distanceChangeSpeed * 0.3f * deltaSeconds ) : 0.f;
+	verticalOffsetChange += dPadDown ? ( -1.f * m_distanceChangeSpeed * 0.3f * deltaSeconds ) : 0.f;
+
+	float horizontalOffsetChange = 0.f;
+	horizontalOffsetChange += dPadRight	? (  1.f * m_distanceChangeSpeed * 0.3f * deltaSeconds ) : 0.f;
+	horizontalOffsetChange += dPadLeft	? ( -1.f * m_distanceChangeSpeed * 0.3f * deltaSeconds ) : 0.f;
 
 	// Calculate Camera's Position
 	Vector3 anchorWorldPosition		= m_anchor->m_transform.GetWorldPosition();
@@ -43,7 +59,13 @@ CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
 	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix ).GetInverse();
 	TODO( "Find out: Why cameraOrientation.GetInverse() works?!" );
 
-	return CameraTargetPoint( worldCameraPosition, cameraOrientation, 45.f );
+	// Offset from Center
+	Vector3		rightOfCameraInWorld = cameraOrientation.RotatePoint( Vector3::RIGHT );
+	Vector3		upOfCameraInWorld	 = cameraOrientation.RotatePoint( Vector3::UP );
+				m_offsetFromCenter	+= Vector2( horizontalOffsetChange, verticalOffsetChange );
+	Vector3		worldPositionOffset	 = ( rightOfCameraInWorld * m_offsetFromCenter.x ) + ( upOfCameraInWorld * m_offsetFromCenter.y );
+
+	return CameraTargetPoint( worldCameraPosition + worldPositionOffset, cameraOrientation, 45.f );
 }
 
 Vector3 CB_DegreesOfFreedom::GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude )

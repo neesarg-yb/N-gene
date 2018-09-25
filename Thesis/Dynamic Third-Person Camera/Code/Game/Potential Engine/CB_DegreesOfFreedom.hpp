@@ -8,12 +8,13 @@ public:
 	~CB_DegreesOfFreedom();
 
 public:
-	float 		m_rotationSpeed		 = 20.f;							// Degrees per Second
-	FloatRange	m_pitchRange		 = FloatRange( -60.f, 35.f );		// In Degrees
+	float 		m_rotationSpeed			= 20.f;							// Degrees per Second
+	FloatRange	m_pitchRange			= FloatRange( -60.f, 35.f );		// In Degrees
 
 private:
-	float const	m_distanceChangeSpeed = 3.5f;
-	Vector3		m_spehicalCoordinates = Vector3( 10.f, 0.f, 0.f );		// ( radius, rotation, altitude )
+	float const	m_distanceChangeSpeed	= 3.5f;
+	Vector3		m_spehicalCoordinates	= Vector3( 10.f, 0.f, 0.f );		// ( radius, rotation, altitude )
+	Vector2		m_offsetFromCenter		= Vector2::ZERO;
 
 public:
 	void				PreUpdate () { }
