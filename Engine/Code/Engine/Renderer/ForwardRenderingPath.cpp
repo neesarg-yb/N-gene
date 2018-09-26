@@ -115,7 +115,7 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const 
 		// Setup the camera at that light
 		m_shadowCamera->m_cameraTransform.SetFromMatrix( lightsWorldMatrix );
 		Matrix44 projectionMatrix	= Matrix44::MakeOrtho3D( 128, 128, -100, 100 );
-		m_shadowCamera->SetProjectionMatrix( projectionMatrix );
+		m_shadowCamera->SetProjectionMatrixUnsafe( projectionMatrix );
 		m_shadowCamera->UpdateViewMatrix();
 
 		// Set viewProjection Matrix
