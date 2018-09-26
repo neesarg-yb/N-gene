@@ -24,31 +24,26 @@ CameraManager::~CameraManager()
 
 void CameraManager::Update( float deltaSeconds )
 {
-	// Normal Update
-	if( m_behaviourTransitionTimeRemaining <= 0.f )
-	{
-		// Get suggested target point from active Camera Behavior
-		m_lastSuggestedPoint = m_aciveBehaviour->Update( deltaSeconds );
+	m_lastSuggestedPoint = m_aciveBehaviour->Update( deltaSeconds );
 
-		// Snap to suggested target point, for now
-		m_camera.SetFOVForPerspective( m_lastSuggestedPoint.m_fov );
-		m_camera.SetCameraPositionTo ( m_lastSuggestedPoint.m_position );
-		m_camera.SetCameraQuaternionRotationTo( m_lastSuggestedPoint.m_orientation );
-	}
-	else // Interpolate to target point
+	// This might change if in transition
+	CameraTargetPoint updatedTargetPoint = m_lastSuggestedPoint;
+
+	// Camera Behavior Transition
+	if( m_behaviourTransitionTimeRemaining > 0.f )
 	{
 		float t = ( m_behaviourTransitionSeconds - m_behaviourTransitionTimeRemaining ) / m_behaviourTransitionSeconds;
 		t = ClampFloat01(t);
 
+		// Interpolate slowly to the suggested position, over time
+		updatedTargetPoint = CameraTargetPoint::Interpolate( m_targetPointOnTransitionBegin, m_lastSuggestedPoint, t );
 		m_behaviourTransitionTimeRemaining -= deltaSeconds;
-		m_lastSuggestedPoint				= m_aciveBehaviour->Update( deltaSeconds );
-
-		CameraTargetPoint interTargetPoint = CameraTargetPoint::Interpolate( m_targetPointOnTransitionBegin, m_lastSuggestedPoint, t );
-
-		m_camera.SetFOVForPerspective( interTargetPoint.m_fov );
-		m_camera.SetCameraPositionTo ( interTargetPoint.m_position );
-		m_camera.SetCameraQuaternionRotationTo( interTargetPoint.m_orientation );
 	}
+
+	// Sets properties of the camera
+	m_camera.SetFOVForPerspective( updatedTargetPoint.m_fov );
+	m_camera.SetCameraPositionTo ( updatedTargetPoint.m_position );
+	m_camera.SetCameraQuaternionRotationTo( updatedTargetPoint.m_orientation );
 }
 
 void CameraManager::PreUpdate()
@@ -111,15 +106,17 @@ void CameraManager::DeleteCameraBehaviour( CameraBehaviour *cameraBehaviourToDel
 
 void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName )
 {
-	int idx = GetCameraBehaviourIndex( behaviourName );
-	m_aciveBehaviour = m_cameraBehaviours[ idx ];
-
-	TODO( "Fix it!" );
-	if( m_cameraBehaviours.size() > 1U )
+	// If there is a camera behavior already active
+	if( m_aciveBehaviour != nullptr )
 	{
+		// Start interpolation towards new behavior
 		m_targetPointOnTransitionBegin		= m_lastSuggestedPoint;
 		m_behaviourTransitionTimeRemaining	= m_behaviourTransitionSeconds;
 	}
+	
+	// Sets the new camera behavior to active
+	int idx = GetCameraBehaviourIndex( behaviourName );
+	m_aciveBehaviour = m_cameraBehaviours[ idx ];
 }
 
 int CameraManager::GetCameraBehaviourIndex( CameraBehaviour *cb )
