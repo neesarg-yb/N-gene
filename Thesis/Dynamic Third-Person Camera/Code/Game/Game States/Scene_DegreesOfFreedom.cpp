@@ -48,8 +48,8 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	CameraBehaviour* dofBehaviour		= new CB_DegreesOfFreedom( 5.f, 40.f, 30.f, 100.f, "DegreesOfFreedom" );
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
 	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
-	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 	m_cameraManager->SetActiveCameraBehaviourTo( "DegreesOfFreedom" );
+	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 }
 
 Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
@@ -179,7 +179,7 @@ void Scene_DegreesOfFreedom::ChangeCameraBehaviour()
 		m_cameraManager->SetActiveCameraBehaviourTo( behaviourToActivate );
 
 		std::string activeBehaviourMessage = Stringf( "Active Camera Behavior: \"%s\"", behaviourToActivate.c_str() );
-		DebugRender2DText( 10.f, Vector2(-850.f, 460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, activeBehaviourMessage.c_str() );
+		DebugRender2DText( 5.f, Vector2(-850.f, 460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, activeBehaviourMessage.c_str() );
 	}
 
 }

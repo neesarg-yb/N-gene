@@ -20,6 +20,11 @@ private:
 	GameObject				*m_anchor = nullptr;		// Anchor GameObject
 	CameraBehaviourList		 m_cameraBehaviours;		// All the behaviors that can be run on Camera
 	CameraBehaviour*		 m_aciveBehaviour = nullptr;
+	CameraTargetPoint		 m_lastSuggestedPoint;
+	CameraTargetPoint		 m_targetPointOnTransitionBegin;
+	
+	float const m_behaviourTransitionSeconds = 1.f;
+	float m_behaviourTransitionTimeRemaining = 0.f;
 
 public:
 	void Update( float deltaSeconds );

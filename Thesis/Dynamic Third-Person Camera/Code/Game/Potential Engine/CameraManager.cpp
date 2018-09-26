@@ -24,13 +24,31 @@ CameraManager::~CameraManager()
 
 void CameraManager::Update( float deltaSeconds )
 {
-	// Get suggested target point from active Camera Behavior
-	CameraTargetPoint suggestedTargetPoint = m_aciveBehaviour->Update( deltaSeconds );
+	// Normal Update
+	if( m_behaviourTransitionTimeRemaining <= 0.f )
+	{
+		// Get suggested target point from active Camera Behavior
+		m_lastSuggestedPoint = m_aciveBehaviour->Update( deltaSeconds );
 
-	// Snap to suggested target point, for now
-	m_camera.SetFOVForPerspective( suggestedTargetPoint.m_fov );
-	m_camera.SetCameraPositionTo ( suggestedTargetPoint.m_position );
-	m_camera.SetCameraQuaternionRotationTo( suggestedTargetPoint.m_orientation );
+		// Snap to suggested target point, for now
+		m_camera.SetFOVForPerspective( m_lastSuggestedPoint.m_fov );
+		m_camera.SetCameraPositionTo ( m_lastSuggestedPoint.m_position );
+		m_camera.SetCameraQuaternionRotationTo( m_lastSuggestedPoint.m_orientation );
+	}
+	else // Interpolate to target point
+	{
+		float t = ( m_behaviourTransitionSeconds - m_behaviourTransitionTimeRemaining ) / m_behaviourTransitionSeconds;
+		t = ClampFloat01(t);
+
+		m_behaviourTransitionTimeRemaining -= deltaSeconds;
+		m_lastSuggestedPoint				= m_aciveBehaviour->Update( deltaSeconds );
+
+		CameraTargetPoint interTargetPoint = CameraTargetPoint::Interpolate( m_targetPointOnTransitionBegin, m_lastSuggestedPoint, t );
+
+		m_camera.SetFOVForPerspective( interTargetPoint.m_fov );
+		m_camera.SetCameraPositionTo ( interTargetPoint.m_position );
+		m_camera.SetCameraQuaternionRotationTo( interTargetPoint.m_orientation );
+	}
 }
 
 void CameraManager::PreUpdate()
@@ -95,6 +113,13 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 {
 	int idx = GetCameraBehaviourIndex( behaviourName );
 	m_aciveBehaviour = m_cameraBehaviours[ idx ];
+
+	TODO( "Fix it!" );
+	if( m_cameraBehaviours.size() > 1U )
+	{
+		m_targetPointOnTransitionBegin		= m_lastSuggestedPoint;
+		m_behaviourTransitionTimeRemaining	= m_behaviourTransitionSeconds;
+	}
 }
 
 int CameraManager::GetCameraBehaviourIndex( CameraBehaviour *cb )
