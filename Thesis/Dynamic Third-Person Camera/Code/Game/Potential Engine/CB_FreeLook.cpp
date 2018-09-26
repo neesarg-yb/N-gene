@@ -33,7 +33,7 @@ CameraTargetPoint CB_FreeLook::Update( float deltaSeconds )
 	Vector2			rightStick	 = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	float			leftTrigger	 = controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];
 	float			rightTrigger = controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
-	float			yAxisChange	 = rightTrigger - leftTrigger;
+	float			yAxisChange	 = leftTrigger - rightTrigger;
 
 	// Position Change
 	Vector3  cameraPosition	 = m_camera->m_cameraTransform.GetWorldPosition();

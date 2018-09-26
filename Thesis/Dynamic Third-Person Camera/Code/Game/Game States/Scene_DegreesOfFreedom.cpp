@@ -30,7 +30,8 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	AddNewLightToScene( directionalLight );
 
 	// Terrain
-	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png" );
+//	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png" );
+	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_rivers.png" );
 	AddNewGameObjectToScene( m_terrain );
 
 	// Player
