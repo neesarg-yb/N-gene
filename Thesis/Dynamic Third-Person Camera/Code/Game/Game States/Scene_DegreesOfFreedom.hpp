@@ -48,4 +48,6 @@ public:
 private:
 	void AddNewGameObjectToScene( GameObject *go );
 	void AddNewLightToScene( Light *light );
+
+	void ChangeCameraBehaviour();
 };

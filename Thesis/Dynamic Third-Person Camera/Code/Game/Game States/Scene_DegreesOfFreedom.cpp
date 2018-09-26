@@ -1,7 +1,9 @@
 #pragma once
 #include "Scene_DegreesOfFreedom.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
+#include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Terrain.hpp"
 
@@ -44,7 +46,9 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 
 	// Degrees of Freedom - Camera Behavior
 	CameraBehaviour* dofBehaviour = new CB_DegreesOfFreedom( 5.f, 20.f, 30.f, 100.f, "DegreesOfFreedom" );
+	CameraBehaviour* freelookBehaviour = new CB_FreeLook( "FreeLook" );
 	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
+	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 	m_cameraManager->SetActiveCameraBehaviourTo( "DegreesOfFreedom" );
 }
 
@@ -96,7 +100,9 @@ Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 
 void Scene_DegreesOfFreedom::BeginFrame()
 {
-	m_cameraManager->PostUpdate();
+	ChangeCameraBehaviour();
+
+	m_cameraManager->PreUpdate();
 }
 
 void Scene_DegreesOfFreedom::EndFrame()
@@ -157,4 +163,23 @@ void Scene_DegreesOfFreedom::AddNewLightToScene( Light *light )
 
 	// Add its renderable
 	m_scene->AddRenderable( *light->m_renderable );
+}
+
+void Scene_DegreesOfFreedom::ChangeCameraBehaviour()
+{
+	XboxController &controller	= g_theInput->m_controller[0];
+	bool leftStickJustPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_LS ].keyJustPressed;
+
+	static bool dofBehaviourActive = true;
+	if( leftStickJustPressed )
+	{
+		std::string behaviourToActivate = dofBehaviourActive ? "FreeLook" : "DegreesOfFreedom";
+		dofBehaviourActive = !dofBehaviourActive;
+
+		m_cameraManager->SetActiveCameraBehaviourTo( behaviourToActivate );
+
+		std::string activeBehaviourMessage = Stringf( "Active Camera Behaviour: \"%s\"", behaviourToActivate.c_str() );
+		DebugRender2DText( 10.f, Vector2(-850.f, 460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, activeBehaviourMessage.c_str() );
+	}
+
 }

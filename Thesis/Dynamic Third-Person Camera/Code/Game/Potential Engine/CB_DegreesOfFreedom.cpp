@@ -24,7 +24,7 @@ CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
 	Vector2 rightStick			= controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
 	// For change in Distance from Anchor
 	bool leftShoulderPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown;
-	bool rightShoulder			= controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
+	bool rightShoulderPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
 	// For Offset change
 	bool dPadUp					= controller.m_xboxButtonStates[ XBOX_BUTTON_UP ].keyIsDown;
 	bool dPadDown				= controller.m_xboxButtonStates[ XBOX_BUTTON_DOWN ].keyIsDown;
@@ -35,8 +35,8 @@ CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
 	float rightTrigger			= controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
 
 	float distanceChange = 0.f;
-	distanceChange += rightShoulder			? ( -1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
-	distanceChange += leftShoulderPressed	? (  1.f * m_distanceChangeSpeed * deltaSeconds ) : 0.f;
+	distanceChange += rightTrigger * -1.f * m_distanceChangeSpeed * deltaSeconds;
+	distanceChange += leftTrigger  *  1.f * m_distanceChangeSpeed * deltaSeconds;
 
 	float rotationChange =  1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
 	float altitudeChange = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
@@ -70,7 +70,8 @@ CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
 
 	// Field of View
 	float cameraFOV = m_camera->GetFOV();
-	cameraFOV += ( leftTrigger - rightTrigger ) * m_fovChangeSpeed * deltaSeconds;
+	cameraFOV += leftShoulderPressed  ?  1.f * m_fovChangeSpeed * deltaSeconds : 0.f;
+	cameraFOV += rightShoulderPressed ? -1.f * m_fovChangeSpeed * deltaSeconds : 0.f;
 
 	return CameraTargetPoint( worldCameraPosition + worldPositionOffset, cameraOrientation, cameraFOV );
 }

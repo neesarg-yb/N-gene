@@ -82,6 +82,9 @@
     <ClCompile Include="Potential Engine\CB_DegreesOfFreedom.cpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
+    <ClCompile Include="Potential Engine\CB_FreeLook.cpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -130,6 +133,9 @@
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClInclude>
     <ClInclude Include="Potential Engine\CB_DegreesOfFreedom.hpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CB_FreeLook.hpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClInclude>
   </ItemGroup>
