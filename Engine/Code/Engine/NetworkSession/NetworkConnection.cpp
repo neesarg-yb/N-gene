@@ -2,9 +2,10 @@
 #include "NetworkConnection.hpp"
 #include "Engine/NetworkSession/NetworkSession.hpp"
 
-NetworkConnection::NetworkConnection( NetworkAddress &addr, NetworkSession &parentSession )
-	: connection( addr )
-	, session( parentSession )
+NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSession &parentSession )
+	: m_indexInSession( idx )
+	, m_parentSession( parentSession )
+	, m_address( addr )
 {
 
 }
@@ -14,15 +15,7 @@ NetworkConnection::~NetworkConnection()
 
 }
 
-MessageQueueElement::MessageQueueElement( NetworkAddress &connectionAddr, NetworkMessage &msg )
-	: connection( connectionAddr )
-	, message( msg )
-	, operationComplete( false )
+void NetworkConnection::ProcessOutgoing()
 {
 
-}
-
-void NetworkConnection::Send( NetworkMessage &msgToSend )
-{
-	session.QueueMessageToSend( msgToSend, connection );
 }

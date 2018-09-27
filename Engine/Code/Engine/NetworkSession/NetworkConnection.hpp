@@ -1,29 +1,25 @@
-#pragma once
+#pragma once#
+#include <vector>
 #include "Engine/Network/NetworkAddress.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 
 class NetworkSession;
 
-struct NetworkConnection
+typedef std::vector< NetworkMessage* > NetworkMessages;
+
+class NetworkConnection
 {
 public:
-	NetworkConnection( NetworkAddress &addr, NetworkSession &parentSession );
+	 NetworkConnection( int idx, NetworkAddress &addr, NetworkSession &parentSession );
 	~NetworkConnection();
 
 public:
-	NetworkAddress  connection;
-	NetworkSession &session;
+	NetworkAddress		 m_address;
+	NetworkSession		&m_parentSession;
+	int					 m_indexInSession;
+
+	NetworkMessages		 m_outgoingMessages;		// Unreliable messages, for now
 
 public:
-	void Send( NetworkMessage &msgToSend );
-};
-
-struct MessageQueueElement
-{
-public:
-	MessageQueueElement( NetworkAddress &connectionAddr, NetworkMessage &msg );
-
-	NetworkAddress	connection;
-	NetworkMessage	message;
-	bool			operationComplete = false;		// Can be used to denote "Sent one time", or "Received the full message"
+	void ProcessOutgoing();
 };

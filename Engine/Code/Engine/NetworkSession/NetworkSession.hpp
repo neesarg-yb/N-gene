@@ -6,15 +6,14 @@
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 #include "Engine/NetworkSession/NetworkConnection.hpp"
 
-
 // Session Message Callbacks
-typedef bool (*sessionMessage_cb) ( NetworkMessage const &, NetworkConnection & );
-typedef std::vector< sessionMessage_cb > SessionMessageCallbacks;
+typedef std::vector< NetworkConnection* >					NetworkConnections;
+typedef std::map< std::string, NetworkMessageDefinition >	NetworkMessageDefinitionsMap;
 
 class NetworkSession
 {
 public:
-	NetworkSession();
+	 NetworkSession();
 	~NetworkSession();
 
 public:
@@ -22,26 +21,18 @@ public:
 	UDPSocket *m_mySocket = nullptr;
 
 	// Connections - clients or host
-	std::vector< NetworkConnection* > m_connections;
+	NetworkConnections			 m_connections;			// Vector of all the connections
+	NetworkMessageDefinitionsMap m_registeredMessages;	// Map of < name, NetworkMessageInfo >
 
-	// Message Queue
-	std::vector< MessageQueueElement > m_outgoingMessages;
-	std::vector< MessageQueueElement > m_incomingMessages;
+public:
+	bool BindPort( uint16_t port, uint range );
 
-	// Registered Message Callbacks
-	std::map< std::string, SessionMessageCallbacks > m_registeredMessages;
+	void ProcessIncoming();
+	void ProcessOutgoing();
 
 public:
 	NetworkConnection* AddConnection( int idx, NetworkAddress &addr );	// Adds a new client
 	NetworkConnection* GetConnection( int idx );
 
-	void RegisterMessage( char const *messageName, sessionMessage_cb cb );
-
-public:
-	// Hosting, Message Handling
-	bool AddBinding( uint16_t port );
-
-	void QueueMessageToSend( NetworkMessage &msgToSend, NetworkAddress &receiver );
-	void ProcessIncoming();
-	void ProcessOutgoing();
+	void RegisterNetworkMessage( char const *messageName, networkMessage_cb cb );
 };
