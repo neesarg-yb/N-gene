@@ -307,6 +307,10 @@
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
+    <ClCompile Include="NetworkSession\NetworkConnection.cpp" />
+    <ClCompile Include="NetworkSession\NetworkMessage.cpp" />
+    <ClCompile Include="NetworkSession\NetworkPacket.cpp" />
+    <ClCompile Include="NetworkSession\NetworkSession.cpp" />
     <ClCompile Include="Network\BytePacker.cpp" />
     <ClCompile Include="Network\Endianness.cpp" />
     <ClCompile Include="Network\Network.cpp" />
@@ -410,6 +414,10 @@
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Math\Vector4.hpp" />
+    <ClInclude Include="NetworkSession\NetworkConnection.hpp" />
+    <ClInclude Include="NetworkSession\NetworkMessage.hpp" />
+    <ClInclude Include="NetworkSession\NetworkPacket.hpp" />
+    <ClInclude Include="NetworkSession\NetworkSession.hpp" />
     <ClInclude Include="Network\BytePacker.hpp" />
     <ClInclude Include="Network\Endianness.hpp" />
     <ClInclude Include="Network\Network.hpp" />
