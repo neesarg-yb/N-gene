@@ -86,10 +86,10 @@ void SessionSendPing( Command &cmd )
 		return;
 	}
 	
-	NetworkMessage msg( "ping" );
-	msg.Write( arg2 );
+//	NetworkMessage msg( "ping" );
+//	msg.Write( arg2 );
 
-	receiver->Send( msg );
+	// receiver->Send( msg );
 }
 
 void SessionSendAdd( Command &cmd )
@@ -119,22 +119,22 @@ void SessionSendAdd( Command &cmd )
 		return;
 	}
 
-	NetworkMessage msg( "add" );
-	msg.Write( value1 );
-	msg.Write( value2 );
-	receiver->Send( msg );
+//	NetworkMessage msg( "add" );
+//	msg.Write( value1 );
+//	msg.Write( value2 );
+//	receiver->Send( msg );
 }
 
 bool OnPing( NetworkMessage const &msg, NetworkConnection &from )
 {
 	std::string str; 
-	msg.Read( str ); 
+//	msg.Read( str ); 
 
-	ConsolePrintf( "Received ping from %s: %s", from.connection.AddressToString().c_str(), str.c_str() ); 
+//	ConsolePrintf( "Received ping from %s: %s", from.connection.AddressToString().c_str(), str.c_str() ); 
 
 	// ping responds with pong
-	NetworkMessage pong( "pong" ); 
-	from.Send( pong ); 
+//	NetworkMessage pong( "pong" ); 
+//	from.Send( pong ); 
 
 	// all messages serve double duty
 	// do some work, and also validate
@@ -147,18 +147,18 @@ bool OnPong( NetworkMessage const &msg, NetworkConnection &from )
 {
 	UNUSED( msg );
 
-	ConsolePrintf( "PONG! Received from %s", from.connection.AddressToString().c_str() );
+//	ConsolePrintf( "PONG! Received from %s", from.connection.AddressToString().c_str() );
 	return false;
 }
 
 bool OnAdd( NetworkMessage const &msg, NetworkConnection &from )
 {
-	float val0;
-	float val1;
+	float val0 = 0;
+	float val1 = 0;
 	float sum;
 
-	if( !msg.Read( val0 ) || msg.Read( val1 ) )
-		return false;
+//	if( !msg.Read( val0 ) || msg.Read( val1 ) )
+//		return false;
 
 	sum = val0 + val1;
 	ConsolePrintf( "Add: %f + %f = %f", val0, val1, sum );
@@ -187,14 +187,14 @@ theGame::theGame()
 
 	// Network Session
 	m_session = new NetworkSession();
-	m_session->RegisterMessage( "ping", OnPing );
-	m_session->RegisterMessage( "pong", OnPong );
-	m_session->RegisterMessage( "add",  OnAdd );
+//	m_session->RegisterNetworkMessage( "ping", OnPing );
+//	m_session->RegisterNetworkMessage( "pong", OnPong );
+//	m_session->RegisterNetworkMessage( "add",  OnAdd );
 
 	// For now we'll just shortcut to being a HOST
 	// "bound" state
 	// This creates the socket(s) we can communicate on..
-	m_session->AddBinding( GAME_PORT );
+	m_session->BindPort( GAME_PORT, 1U );
 }
 
 theGame::~theGame()
