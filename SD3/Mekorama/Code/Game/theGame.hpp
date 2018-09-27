@@ -7,10 +7,10 @@
 #include "Engine/Input/Command.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Network/RemoteCommandService.hpp"
+#include "Engine/NetworkSession/NetworkSession.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Level.hpp"
 #include "Game/World/Robot.hpp"
-#include "Game/Session/NetworkSession.hpp"
 
 enum GameStates
 {

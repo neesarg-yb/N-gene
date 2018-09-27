@@ -284,8 +284,6 @@
     <ClCompile Include="GameCommon.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Main_Win32.cpp" />
-    <ClCompile Include="Session\NetworkMessage.cpp" />
-    <ClCompile Include="Session\NetworkSession.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
     <ClCompile Include="World\Block.cpp" />
@@ -306,8 +304,6 @@
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="GameCommon.hpp" />
     <ClInclude Include="GameObject.hpp" />
-    <ClInclude Include="Session\NetworkMessage.hpp" />
-    <ClInclude Include="Session\NetworkSession.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
     <ClInclude Include="World\Block.hpp" />

@@ -5,11 +5,11 @@
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/Network/UDPSocket.hpp"
+#include "Engine/NetworkSession/NetworkMessage.hpp"
 #include "Game/theApp.hpp"
 #include "Game/World/BlockDefinition.hpp"
 #include "Game/World/TowerDefinition.hpp"
 #include "Game/World/LevelDefinition.hpp"
-#include "Game/Session/NetworkMessage.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
