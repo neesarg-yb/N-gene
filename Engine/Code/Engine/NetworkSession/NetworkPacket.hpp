@@ -11,12 +11,30 @@ struct PacketHeader
 class NetworkPacket : public BytePacker
 {
 public:
+	 NetworkPacket();
+	~NetworkPacket();
+
+public:
 	PacketHeader m_header;
+
+//	Buffer:
+//	                                                                                total size <= MTU
+//	|------------------------------------------------------------------------------------------------
+//	| 1 byte: SenderIdx  | 1 byte: UnreliableMessageCount | PackedMessage_1 | PackedMessage_2.. | ..
+//	|------------------------------------------------------------------------------------------------
+//
+//  Packed Message:
+//	|----------------------------------------------------------------------------------
+//	| 2 bytes: Total Size after these two bytes | 1 byte: *(Message Header) | Message |
+//	|----------------------------------------------------------------------------------
+//
 
 public:
 	void WriteHeader( PacketHeader const &header );
-	bool ReadHeader( PacketHeader const &header );
+	bool ReadHeader ( PacketHeader &outHeader );
 
-	bool WriteMessage( NetworkMessage const &msg );
-	bool ReadMessage( NetworkMessage &outMessage );
+	bool WriteMessage( NetworkMessage const &msg, int idx = -1 );
+	bool ReadMessage ( NetworkMessage &outMessage );
+
+	bool IsValid() const;
 };

@@ -11,6 +11,10 @@ typedef unsigned char	byte_t;
 #define MAX_LIGHTS 8U
 const  float	   g_aspectRatio = 1.77f;
 
+#define GAME_PORT 10084
+#define ETHERNET_MTU 1500  // maximum transmission unit - determined by hardware part of OSI model.
+// 1500 is the MTU of EthernetV2, and is the minimum one - so we use it; 
+#define PACKET_MTU (ETHERNET_MTU - 40 - 8) 
 
 #define UNUSED(x) (void)(x);
 #define ARRAY_LENGTH(array) (sizeof((array))/sizeof((array)[0]))
