@@ -165,7 +165,7 @@ bool BytePacker::WriteString( char const *str )
 	return true;
 }
 
-size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEndiannessToMachine /* = true */ )
+size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEndiannessToMachine /* = true */ ) const
 {
 	size_t dataLengthInBuffer	= m_writeHead;
 	size_t readableBytes		= (dataLengthInBuffer - m_readHead);
@@ -185,7 +185,7 @@ size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEnd
 	return bytesToRead;
 }
 
-size_t BytePacker::ReadSize( size_t *outSize )
+size_t BytePacker::ReadSize( size_t *outSize ) const
 {
 	*outSize = 0U;
 
@@ -228,7 +228,7 @@ size_t BytePacker::ReadSize( size_t *outSize )
 	return totalReadBytes;
 }
 
-size_t BytePacker::ReadString( char *outStr, size_t maxByteSize )
+size_t BytePacker::ReadString( char *outStr, size_t maxByteSize ) const
 {
 	size_t stringLength	= 0U;
 	size_t bytesRead	= ReadSize( &stringLength );
@@ -273,7 +273,7 @@ void BytePacker::ResetWrite()
 	m_readHead	= 0U;
 }
 
-void BytePacker::ResetRead()
+void BytePacker::ResetRead() const
 {
 	m_readHead = 0U;
 }
