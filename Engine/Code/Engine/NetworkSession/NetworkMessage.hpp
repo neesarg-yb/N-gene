@@ -57,4 +57,13 @@ public:
 	std::string						 m_name;
 	NetworkMessageHeader			 m_header;					// NetworkConnection fills the header when it adds to outgoing queue..
 	NetworkMessageDefinition const	*m_definition	= nullptr;	// NetworkSession fills the header & definition when it receives the Packet
+
+public:
+	bool Write( int number );
+	bool Write( float number );
+	bool Write( std::string const &string );
+
+	bool	Raad( int &outNumber ) const;
+	bool	Read( float &outNumber ) const;
+	size_t	Read( char *outString, size_t maxSize ) const;
 };
