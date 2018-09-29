@@ -33,7 +33,7 @@ public:
 	void WriteHeader( PacketHeader const &header );
 	bool ReadHeader ( PacketHeader &outHeader );
 
-	bool WriteMessage( NetworkMessage const &msg, int idx = -1 );
+	bool WriteMessage( NetworkMessage const &msg );			// Writes the message and updates the header
 	bool ReadMessage ( NetworkMessage &outMessage );
 
 	bool IsValid() const;
