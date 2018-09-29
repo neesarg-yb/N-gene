@@ -4,7 +4,8 @@
 NetworkPacket::NetworkPacket()
 	: BytePacker( PACKET_MTU, LITTLE_ENDIAN )
 {
-
+	// Write a dummy header!
+	WriteHeader( m_header );
 }
 
 NetworkPacket::~NetworkPacket()
@@ -14,10 +15,9 @@ NetworkPacket::~NetworkPacket()
 
 void NetworkPacket::WriteHeader( PacketHeader const &header )
 {
-	uint8_t *headerOnBuffer = (uint8_t *)m_buffer;
+	PacketHeader *headerOnBuffer = (PacketHeader *)m_buffer;
 
-	headerOnBuffer[0] = header.senderConnectionIndex;
-	headerOnBuffer[1] = header.unreliableMessageCount;
+	headerOnBuffer[0] = header;
 }
 
 bool NetworkPacket::ReadHeader( PacketHeader &outHeader )
@@ -25,7 +25,7 @@ bool NetworkPacket::ReadHeader( PacketHeader &outHeader )
 	ResetRead();
 
 	size_t expectedBytes	= sizeof( PacketHeader );
-	size_t readHeaderBytes	= ReadBytes( &outHeader, expectedBytes );
+	size_t readHeaderBytes	= ReadBytes( &outHeader, expectedBytes, false );
 
 	return (expectedBytes == readHeaderBytes);
 }
