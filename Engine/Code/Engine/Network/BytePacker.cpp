@@ -253,6 +253,18 @@ size_t BytePacker::ReadString( char *outStr, size_t maxByteSize ) const
 	return bytesGotRead;
 }
 
+bool BytePacker::MoveReadheadBy( double bytes ) const
+{
+	double newReadHead = (double)m_readHead + bytes;
+
+	// If less than ZERO or more than the bytes written in buffer
+	if( newReadHead < 0.f || newReadHead >= m_writeHead )
+		return false;
+
+	m_readHead = (size_t)newReadHead;
+	return true;
+}
+
 bool BytePacker::SetWrittenByteCountDummy( size_t byteCount )
 {
 	// I don't see use case for this function, yet..

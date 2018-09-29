@@ -32,8 +32,8 @@ private:
 protected:
 	void				*m_buffer		= nullptr;
 	size_t				 m_bufferSize	= 0U;							// Max bytes this buffer can store
-	size_t mutable		 m_readHead		= 0U;
-	size_t				 m_writeHead	= 0U;							// You can get total readable data size from this variable, as well.
+	size_t mutable		 m_readHead		= 0U;							// Tells from where you're reading.
+	size_t				 m_writeHead	= 0U;							// Tells from where you're writing. You can get total readable data size from this variable, as well.
 
 	size_t const		 m_bufferSizeUnit = 8U * 1024U;					// Used by GetNewBufferSizeToStoreDataOfSize() & Reset()
 
@@ -52,6 +52,9 @@ public:
 	size_t				ReadSize	( size_t *outSize ) const;					// Returns how many bytes got read to fetch the size_t, fills outSize
 	size_t				ReadString	( char *outStr, size_t maxByteSize ) const;	// Note: maxByteSize should be enough to contain the null terminator as well
 	inline void const*	GetBuffer() const { return m_buffer; }					// Access buffer without changing readHead!
+
+	// Move the Read head
+	bool		MoveReadheadBy( double bytes ) const;					// Returns true on success, false on failure
 
 	// Set buffer variables
 	bool		SetWrittenByteCountDummy( size_t byteCount );			// Changes the writeHead, DO NOT USE TO MOVE IT BACKWORDS unless you're resetting it
