@@ -119,10 +119,10 @@ void SessionSendAdd( Command &cmd )
 		return;
 	}
 
-//	NetworkMessage msg( "add" );
-//	msg.Write( value1 );
-//	msg.Write( value2 );
-//	receiver->Send( msg );
+	NetworkMessage msg( "add" );
+	msg.Write( value1 );
+	msg.Write( value2 );
+	receiver->Send( msg );
 }
 
 bool OnPing( NetworkMessage const &msg, NetworkConnection &from )
