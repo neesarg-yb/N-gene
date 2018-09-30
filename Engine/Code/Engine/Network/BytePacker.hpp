@@ -23,6 +23,7 @@ public:
 	 BytePacker( eEndianness byteOrder = LITTLE_ENDIAN );									// BytePacker owns buffer, I can grow it
 	 BytePacker( size_t bufferSize, eEndianness byteOrder = LITTLE_ENDIAN );				// BytePacker owns buffer, I can't grow it
 	 BytePacker( size_t bufferSize, void *buffer, eEndianness byteOrder = LITTLE_ENDIAN );	// BytePacker don't own buffer, I can't grow it
+	 BytePacker( BytePacker const &src );
 	~BytePacker(); 
 
 private:
