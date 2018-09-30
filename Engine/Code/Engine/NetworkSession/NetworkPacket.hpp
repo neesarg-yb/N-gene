@@ -54,5 +54,5 @@ public:
 	bool WriteMessage( NetworkMessage const &msg );			// Writes the message and updates the header
 	bool ReadMessage ( NetworkMessage &outMessage );		// Fills the m_header for you!
 
-	bool IsValid() const;
+	bool IsValid() const;									// Read Head doesn't get affected after this operation
 };
