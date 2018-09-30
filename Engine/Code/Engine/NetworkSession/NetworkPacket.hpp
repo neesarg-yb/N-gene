@@ -1,17 +1,35 @@
 #pragma once
+#include <vector>
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 
+class NetworkPacket;
+typedef std::vector< NetworkPacket* > NetworkPacketList;
+
 struct NetworkPacketHeader
 {
-	uint8_t senderConnectionIndex;
-	uint8_t unreliableMessageCount;
+public:
+	uint8_t senderConnectionIndex	= 0xff;
+	uint8_t unreliableMessageCount	= 0x00;
+
+public:
+	NetworkPacketHeader() { }
+	NetworkPacketHeader( uint8_t connectionIdx )
+	{
+		senderConnectionIndex = connectionIdx;
+	}
+	NetworkPacketHeader( uint8_t connectionIdx, uint8_t unreliableMsgCount )
+	{
+		senderConnectionIndex  = connectionIdx;
+		unreliableMessageCount = unreliableMsgCount;
+	}
 };
 
 class NetworkPacket : public BytePacker
 {
 public:
 	 NetworkPacket();
+	 NetworkPacket( uint8_t connectionIdx );
 	~NetworkPacket();
 
 public:

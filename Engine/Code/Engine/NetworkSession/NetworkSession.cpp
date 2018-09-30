@@ -83,6 +83,8 @@ void NetworkSession::ProcessIncoming()
 			receivedMessage.m_definition->callback( receivedMessage, *m_connections[ receivedPacket.m_header.senderConnectionIndex ] );
 		}
 	}
+	else if( receivedBytes > 0 )
+		ConsolePrintf( RGBA_KHAKI_COLOR, "Bad Packet Received from %s", sender.AddressToString().c_str() );
 
 	// Free the temp buffer
 	free( buffer );
@@ -102,14 +104,25 @@ void NetworkSession::SendPacket( NetworkPacket const &packetToSend )
 
 NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )
 {
-	// Delete the existing one
+	TODO( "Make it such that you can skip indices while adding a new conncetion!" );
+
+	NetworkConnection* thisConnection = new NetworkConnection( idx, addr, *this );
 	if( idx < m_connections.size() )
 	{
+		// Delete the existing one
 		delete m_connections[idx];
 		m_connections[idx] = nullptr;
+
+		// Replace it with the new one
+		m_connections[idx] = thisConnection;
+	}
+	else
+	{
+		// Add a new connection at the end
+		thisConnection->m_indexInSession = (int)m_connections.size();		// Set the new index
+		m_connections.push_back( thisConnection );
 	}
 
-	m_connections[idx] = new NetworkConnection( idx, addr, *this );
 	return m_connections[idx];
 }
 
