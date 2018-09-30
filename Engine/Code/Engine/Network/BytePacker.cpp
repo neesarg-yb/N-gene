@@ -272,7 +272,7 @@ bool BytePacker::MoveReadheadBy( double bytes ) const
 	double newReadHead = (double)m_readHead + bytes;
 
 	// If less than ZERO or more than the bytes written in buffer
-	if( newReadHead < 0.f || newReadHead >= m_writeHead )
+	if( newReadHead < 0.f || newReadHead > m_writeHead )
 		return false;
 
 	m_readHead = (size_t)newReadHead;

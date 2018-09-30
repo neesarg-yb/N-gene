@@ -61,30 +61,33 @@ void NetworkSession::ProcessIncoming()
 	NetworkPacket receivedPacket;
 	receivedPacket.WriteBytes( receivedBytes, buffer, false );
 
-	if( receivedPacket.IsValid() )
+	if( receivedBytes > 0 )
 	{
-		bool headerReadingSuccess = receivedPacket.ReadHeader( receivedPacket.m_header );
-		GUARANTEE_RECOVERABLE( headerReadingSuccess, "Couldn't read the Packet Header successfully!" );
-
-		NetworkMessage receivedMessage;
-		for( int i = 0; i < receivedPacket.m_header.unreliableMessageCount; i++ )
+		if( receivedPacket.IsValid() )
 		{
-			bool messageReadSuccess = receivedPacket.ReadMessage( receivedMessage );
-			GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
+			bool headerReadingSuccess = receivedPacket.ReadHeader( receivedPacket.m_header );
+			GUARANTEE_RECOVERABLE( headerReadingSuccess, "Couldn't read the Packet Header successfully!" );
 
-			// To get Message Definition from index
-			NetworkMessageDefinitionsMap::iterator it = m_registeredMessages.begin();
-			std::advance( it, receivedMessage.m_header.networkMessageDefinitionIndex );
+			NetworkMessage receivedMessage;
+			for( int i = 0; i < receivedPacket.m_header.unreliableMessageCount; i++ )
+			{
+				bool messageReadSuccess = receivedPacket.ReadMessage( receivedMessage );
+				GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
 
-			// Set the pointer to that definition
-			receivedMessage.m_definition = &it->second;
+				// To get Message Definition from index
+				NetworkMessageDefinitionsMap::iterator it = m_registeredMessages.begin();
+				std::advance( it, receivedMessage.m_header.networkMessageDefinitionIndex );
 
-			// Do a callback!
-			receivedMessage.m_definition->callback( receivedMessage, *m_connections[ receivedPacket.m_header.senderConnectionIndex ] );
+				// Set the pointer to that definition
+				receivedMessage.m_definition = &it->second;
+
+				// Do a callback!
+				receivedMessage.m_definition->callback( receivedMessage, *m_connections[ receivedPacket.m_header.senderConnectionIndex ] );
+			}
 		}
+		else
+			ConsolePrintf( RGBA_KHAKI_COLOR, "Bad Packet Received from %s", sender.AddressToString().c_str() );
 	}
-	else if( receivedBytes > 0 )
-		ConsolePrintf( RGBA_KHAKI_COLOR, "Bad Packet Received from %s", sender.AddressToString().c_str() );
 
 	// Free the temp buffer
 	free( buffer );
