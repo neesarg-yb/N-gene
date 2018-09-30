@@ -4,9 +4,9 @@
 
 NetworkMessage::NetworkMessage( const char *name )
 	: BytePacker( PACKET_MTU - sizeof(NetworkPacketHeader) - 2U , LITTLE_ENDIAN )
+	, m_name( name )
 {
-	UNUSED( name );
-	TODO( "Set the definition!" );
+
 }
 
 NetworkMessage::~NetworkMessage()
