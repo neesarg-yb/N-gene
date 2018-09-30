@@ -13,18 +13,18 @@ NetworkPacket::~NetworkPacket()
 
 }
 
-void NetworkPacket::WriteHeader( PacketHeader const &header )
+void NetworkPacket::WriteHeader( NetworkPacketHeader const &header )
 {
-	PacketHeader *headerOnBuffer = (PacketHeader *)m_buffer;
+	NetworkPacketHeader *headerOnBuffer = (NetworkPacketHeader *)m_buffer;
 
 	headerOnBuffer[0] = header;
 }
 
-bool NetworkPacket::ReadHeader( PacketHeader &outHeader )
+bool NetworkPacket::ReadHeader( NetworkPacketHeader &outHeader )
 {
 	ResetRead();
 
-	size_t expectedBytes	= sizeof( PacketHeader );
+	size_t expectedBytes	= sizeof( NetworkPacketHeader );
 	size_t readHeaderBytes	= ReadBytes( &outHeader, expectedBytes, false );
 
 	return (expectedBytes == readHeaderBytes);

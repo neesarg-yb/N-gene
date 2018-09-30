@@ -6,7 +6,7 @@
 class UDPSocket : public Socket
 {
 public:
-	bool Bind( NetworkAddress const &address, uint16_t portRange = 0U );
+	bool Bind( NetworkAddress &address, uint16_t portRange = 0U );
 
 	size_t SendTo( NetworkAddress const &address, void const *data, size_t const byteCount );
 	size_t ReceiveFrom( NetworkAddress *outAddress, void *buffer, size_t const maxReadSize );

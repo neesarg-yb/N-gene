@@ -15,7 +15,7 @@ NetworkConnection::~NetworkConnection()
 
 }
 
-void NetworkConnection::ProcessOutgoing()
+void NetworkConnection::FlushMessages()
 {
 
 }
