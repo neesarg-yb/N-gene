@@ -21,5 +21,5 @@ public:
 	NetworkMessages		 m_outgoingMessages;		// Unreliable messages, for now
 
 public:
-	void ProcessOutgoing();
+	void FlushMessages();
 };

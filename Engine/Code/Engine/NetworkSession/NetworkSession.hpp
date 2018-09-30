@@ -10,6 +10,8 @@
 typedef std::vector< NetworkConnection* >					NetworkConnections;
 typedef std::map< std::string, NetworkMessageDefinition >	NetworkMessageDefinitionsMap;
 
+class NetworkPacket;
+
 class NetworkSession
 {
 public:
@@ -25,10 +27,12 @@ public:
 	NetworkMessageDefinitionsMap m_registeredMessages;	// Map of < name, NetworkMessageInfo >
 
 public:
-	bool BindPort( uint16_t port, uint range );
+	bool BindPort( uint16_t port, uint16_t range );
 
 	void ProcessIncoming();
 	void ProcessOutgoing();
+
+	void SendPacket( NetworkPacket const &packetToSend );
 
 public:
 	NetworkConnection* AddConnection( int idx, NetworkAddress &addr );	// Adds a new client

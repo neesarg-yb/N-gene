@@ -42,7 +42,8 @@ public:
 class NetworkMessage : public BytePacker
 {
 public:
-	 NetworkMessage( std::string &name );
+	 NetworkMessage() { }
+	 NetworkMessage( const char *name );
 	~NetworkMessage();
 
 public:
@@ -54,7 +55,6 @@ public:
 //	
 
 public:
-	std::string						 m_name;
 	NetworkMessageHeader			 m_header;					// NetworkConnection fills the header when it adds to outgoing queue..
 	NetworkMessageDefinition const	*m_definition	= nullptr;	// NetworkSession fills the header & definition when it receives the Packet
 

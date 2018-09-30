@@ -2,7 +2,7 @@
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 
-struct PacketHeader
+struct NetworkPacketHeader
 {
 	uint8_t senderConnectionIndex;
 	uint8_t unreliableMessageCount;
@@ -15,7 +15,7 @@ public:
 	~NetworkPacket();
 
 public:
-	PacketHeader m_header;
+	NetworkPacketHeader m_header;
 
 //	Buffer:
 //	                                                                                total size <= MTU
@@ -30,11 +30,11 @@ public:
 //
 
 public:
-	void WriteHeader( PacketHeader const &header );
-	bool ReadHeader ( PacketHeader &outHeader );
+	void WriteHeader( NetworkPacketHeader const &header );
+	bool ReadHeader ( NetworkPacketHeader &outHeader );
 
 	bool WriteMessage( NetworkMessage const &msg );			// Writes the message and updates the header
-	bool ReadMessage ( NetworkMessage &outMessage );
+	bool ReadMessage ( NetworkMessage &outMessage );		// Fills the m_header for you!
 
 	bool IsValid() const;
 };
