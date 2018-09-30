@@ -26,6 +26,20 @@ BytePacker::BytePacker( size_t bufferSize, void *buffer, eEndianness byteOrder /
 	m_bufferSize	= bufferSize;
 }
 
+BytePacker::BytePacker( BytePacker const &src )
+{
+	// copy all the properties
+	m_endianness		= src.m_endianness;
+	m_settings			= src.m_settings;
+	m_bufferSize		= src.m_bufferSize;
+	m_readHead			= src.m_readHead;
+	m_writeHead			= src.m_writeHead;
+
+	// memcpy buffer
+	m_buffer = malloc( m_bufferSize );
+	memcpy( m_buffer, src.GetBuffer(), m_bufferSize );
+}
+
 BytePacker::~BytePacker()
 {
 	// If byte packer owns the memory, free it!
