@@ -4,7 +4,15 @@
 NetworkPacket::NetworkPacket()
 	: BytePacker( PACKET_MTU, LITTLE_ENDIAN )
 {
-	// Write a dummy header!
+	// Write dummy header
+	WriteHeader( m_header );
+}
+
+NetworkPacket::NetworkPacket( uint8_t connectionIdx )
+	: BytePacker( PACKET_MTU, LITTLE_ENDIAN )
+	, m_header( connectionIdx )
+{
+	// Write the header with proper index
 	WriteHeader( m_header );
 }
 
