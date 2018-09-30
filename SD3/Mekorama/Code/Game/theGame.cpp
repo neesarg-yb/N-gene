@@ -157,7 +157,7 @@ bool OnAdd( NetworkMessage const &msg, NetworkConnection &from )
 	float val1 = 0;
 	float sum;
 
-	if( !msg.Read( val0 ) || msg.Read( val1 ) )
+	if( !msg.Read( val0 ) || !msg.Read( val1 ) )
 		return false;
 
 	sum = val0 + val1;
