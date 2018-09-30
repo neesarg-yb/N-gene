@@ -9,7 +9,6 @@ theGame*				g_theGame				= nullptr;
 Renderer*				g_theRenderer			= nullptr;
 InputSystem*			g_theInput				= nullptr;
 RemoteCommandService*	g_rcs					= nullptr;
-UDPTest*				g_udp					= nullptr;
 /*
 AudioSystem* g_theAudio = nullptr;
 */

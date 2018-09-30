@@ -86,10 +86,10 @@ void SessionSendPing( Command &cmd )
 		return;
 	}
 	
-//	NetworkMessage msg( "ping" );
-//	msg.Write( arg2 );
+	NetworkMessage msg( "ping" );
+	msg.Write( arg2 );
 
-	// receiver->Send( msg );
+	receiver->Send( msg );
 }
 
 void SessionSendAdd( Command &cmd )
@@ -127,14 +127,14 @@ void SessionSendAdd( Command &cmd )
 
 bool OnPing( NetworkMessage const &msg, NetworkConnection &from )
 {
-	std::string str; 
-//	msg.Read( str ); 
+	char str[256];
+	msg.Read( str, 256 );
 
-//	ConsolePrintf( "Received ping from %s: %s", from.connection.AddressToString().c_str(), str.c_str() ); 
+	ConsolePrintf( "Received ping from %s", from.m_address.AddressToString().c_str() ); 
 
 	// ping responds with pong
-//	NetworkMessage pong( "pong" ); 
-//	from.Send( pong ); 
+	NetworkMessage pong( "pong" ); 
+	from.Send( pong ); 
 
 	// all messages serve double duty
 	// do some work, and also validate
@@ -147,7 +147,7 @@ bool OnPong( NetworkMessage const &msg, NetworkConnection &from )
 {
 	UNUSED( msg );
 
-//	ConsolePrintf( "PONG! Received from %s", from.connection.AddressToString().c_str() );
+	ConsolePrintf( "PONG! Received from %s", from.m_address.AddressToString().c_str() );
 	return false;
 }
 
@@ -157,8 +157,8 @@ bool OnAdd( NetworkMessage const &msg, NetworkConnection &from )
 	float val1 = 0;
 	float sum;
 
-//	if( !msg.Read( val0 ) || msg.Read( val1 ) )
-//		return false;
+	if( !msg.Read( val0 ) || msg.Read( val1 ) )
+		return false;
 
 	sum = val0 + val1;
 	ConsolePrintf( "Add: %f + %f = %f", val0, val1, sum );
@@ -184,17 +184,6 @@ theGame::theGame()
 	m_gameCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );							// To set NDC styled ortho
-
-	// Network Session
-	m_session = new NetworkSession();
-//	m_session->RegisterNetworkMessage( "ping", OnPing );
-//	m_session->RegisterNetworkMessage( "pong", OnPong );
-//	m_session->RegisterNetworkMessage( "add",  OnAdd );
-
-	// For now we'll just shortcut to being a HOST
-	// "bound" state
-	// This creates the socket(s) we can communicate on..
-	m_session->BindPort( GAME_PORT, 1U );
 }
 
 theGame::~theGame()
@@ -259,12 +248,28 @@ void theGame::Startup()
 	{
 		m_levelSelectionMenu->AddNewMenuAction( MenuAction(it->first.c_str(), &levelSelectedStdFunc) );
 	}
+
+	// Network Session
+	m_session = new NetworkSession();
+	m_session->RegisterNetworkMessage( "ping", OnPing );
+	m_session->RegisterNetworkMessage( "pong", OnPong );
+	m_session->RegisterNetworkMessage( "add",  OnAdd );
+
+	// For now we'll just shortcut to being a HOST
+	// "bound" state
+	// This creates the socket(s) we can communicate on..
+	bool bindSuccess = m_session->BindPort( GAME_PORT, 1U );
+	ConsolePrintf( RGBA_KHAKI_COLOR, "Network Session Bind Succes = %d; Address = %s", (int)bindSuccess, m_session->m_mySocket->m_address.AddressToString().c_str() );
+	m_session->m_mySocket->EnableNonBlocking();
 }
 
 void theGame::BeginFrame()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
+
+	// Network Session
+	m_session->ProcessIncoming();
 
 	if( m_currentGameState == LEVEL )
 		m_currentLevel->BeginFrame();
@@ -277,6 +282,9 @@ void theGame::EndFrame()
 
 	if( m_currentGameState == LEVEL )
 		m_currentLevel->EndFrame();
+
+	// Network Session
+	m_session->ProcessOutgoing();
 }
 
 void theGame::Update() 
