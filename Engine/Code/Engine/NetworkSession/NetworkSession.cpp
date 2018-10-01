@@ -78,11 +78,17 @@ void NetworkSession::ProcessIncoming()
 				NetworkMessageDefinitionsMap::iterator it = m_registeredMessages.begin();
 				std::advance( it, receivedMessage.m_header.networkMessageDefinitionIndex );
 
-				// Set the pointer to that definition
-				receivedMessage.m_definition = &it->second;
+				// If that's a valid definition index
+				if( it != m_registeredMessages.end() )
+				{
+					// Set the pointer to that definition
+					receivedMessage.m_definition = &it->second;
 
-				// Do a callback!
-				receivedMessage.m_definition->callback( receivedMessage, *m_connections[ receivedPacket.m_header.senderConnectionIndex ] );
+					// Do a callback!
+					receivedMessage.m_definition->callback( receivedMessage, *m_connections[ receivedPacket.m_header.senderConnectionIndex ] );
+				}
+				else
+					ConsolePrintf( "Received invalid messageDefinition Index: %d", receivedMessage.m_header.networkMessageDefinitionIndex );
 			}
 		}
 		else

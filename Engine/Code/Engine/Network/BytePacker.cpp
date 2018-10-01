@@ -157,7 +157,7 @@ bool BytePacker::WriteString( char const *str )
 
 	// If buffer is smaller..
 	size_t requiredBytesForStrLength	= GetTotalBytesRequiredToWriteSize( stringLength );
-	size_t requiredMinBufferSize		= GetWritableByteCount() + stringLength + requiredBytesForStrLength;
+	size_t requiredMinBufferSize		= GetWrittenByteCount() + stringLength + requiredBytesForStrLength;
 	if( requiredMinBufferSize > m_bufferSize )
 	{
 		// If can grow
@@ -211,12 +211,9 @@ size_t BytePacker::ReadSize( size_t *outSize ) const
 		byte_t nextByte		= 0x00;
 		size_t nextByteSize	= ReadBytes( &nextByte, 1U, false );
 		
-		// If we can't read next byte, it's an unexpected failure
+		// If we can't read next byte, there is not anything more to read..
 		if( nextByteSize != 1U )
-		{
-			GUARANTEE_RECOVERABLE( false, "BytePacker: ReadSize() couldn't finish operation!!" );
-			return 0U;
-		}
+			return 0U;				// Consider it as failed read
 		
 		// Read 7 bits
 		byte_t fetchedByte			= ( nextByte & 0b0111'1111 );
@@ -249,7 +246,10 @@ size_t BytePacker::ReadString( char *outStr, size_t maxByteSize ) const
 	
 	// If failed to read a size..
 	if( bytesRead == 0U )
+	{
+		outStr[0] = '\0';		// out a valid empty string!
 		return 0U;
+	}
 
 	// Read full string - locally
 	char	*fullString		= (char *) malloc( stringLength + 1 );
