@@ -1,6 +1,7 @@
 #include "theGame.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Network/BytePacker.hpp"
@@ -130,7 +131,7 @@ bool OnPing( NetworkMessage const &msg, NetworkConnection &from )
 	char str[256];
 	msg.Read( str, 256 );
 
-	ConsolePrintf( "Received ping from %s", from.m_address.AddressToString().c_str() ); 
+	ConsolePrintf( "Received ping from %s => %s", from.m_address.AddressToString().c_str(), str ); 
 
 	// ping responds with pong
 	NetworkMessage pong( "pong" ); 
@@ -161,10 +162,14 @@ bool OnAdd( NetworkMessage const &msg, NetworkConnection &from )
 		return false;
 
 	sum = val0 + val1;
-	ConsolePrintf( "Add: %f + %f = %f", val0, val1, sum );
+	std::string additionResponse = Stringf( "Add: %f + %f = %f", val0, val1, sum );
+	ConsolePrintf( additionResponse.c_str() );
 
 	// Send back a response here, if you want..
-	UNUSED( from );
+	NetworkMessage replyMsg( "ping" );
+	replyMsg.Write( additionResponse );
+
+	from.Send( replyMsg );
 
 	return true;
 }
