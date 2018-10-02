@@ -32,8 +32,10 @@ public:
 	void ProcessIncoming();
 	void ProcessOutgoing();
 
-	void SendPacket( NetworkPacket const &packetToSend );
+	void SendPacket( NetworkPacket &packetToSend );		// Replaces connectionIndex by sender's index
 	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
+
+	uint8_t GetMyConnectionIndex() const;				// Returns 0xff if not found
 
 public:
 	NetworkConnection* AddConnection( int idx, NetworkAddress &addr );	// Adds a new client

@@ -86,9 +86,9 @@ void NetworkSession::ProcessIncoming()
 					
 					// Create a NetworkSender
 					NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
-					uint8_t receivedConnIdx = receivedPacket.m_header.senderConnectionIndex;
+					uint8_t receivedConnIdx = receivedPacket.m_header.connectionIndex;
 					if( receivedConnIdx != 0xff )
-						thisSender.connection = m_connections[ receivedPacket.m_header.senderConnectionIndex ];		// If sender has a valid connection, fill it in
+						thisSender.connection = m_connections[ receivedPacket.m_header.connectionIndex ];		// If sender has a valid connection, fill it in
 
 					// Do a callback!
 					receivedMessage.m_definition->callback( receivedMessage, thisSender );
@@ -111,9 +111,12 @@ void NetworkSession::ProcessOutgoing()
 		connection->FlushMessages();
 }
 
-void NetworkSession::SendPacket( NetworkPacket const &packetToSend )
+void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 {
-	uint8_t idx = packetToSend.m_header.senderConnectionIndex;
+	uint8_t idx = packetToSend.m_header.connectionIndex;
+	packetToSend.m_header.connectionIndex = GetMyConnectionIndex();
+	packetToSend.WriteHeader( packetToSend.m_header );
+
 	m_mySocket->SendTo( m_connections[idx]->m_address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
 }
 
@@ -124,6 +127,27 @@ void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, Network
 	packetToSend.WriteMessage( messageToSend );
 
 	m_mySocket->SendTo( address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
+}
+
+uint8_t NetworkSession::GetMyConnectionIndex() const
+{
+	// defaults to INVALID index
+	uint8_t idx = 0xff;
+
+	for( uint i = 0; i < m_connections.size(); i++ )
+	{
+		// If connection found..
+		if( m_connections[i]->m_address == m_mySocket->m_address )
+		{
+			// If it is under max indices allowed
+			if( i < 0xff )
+				idx = (uint8_t)i;
+
+			break;
+		}
+	}
+
+	return idx;
 }
 
 NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )

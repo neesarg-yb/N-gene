@@ -9,18 +9,18 @@ typedef std::vector< NetworkPacket* > NetworkPacketList;
 struct NetworkPacketHeader
 {
 public:
-	uint8_t senderConnectionIndex	= 0xff;
+	uint8_t connectionIndex			= 0xff;		// When creating a NetworkPacket Idx = receiver's; When NetworkSession sends this packet, it gets replaced by sender's idx
 	uint8_t unreliableMessageCount	= 0x00;
 
 public:
 	NetworkPacketHeader() { }
 	NetworkPacketHeader( uint8_t connectionIdx )
 	{
-		senderConnectionIndex = connectionIdx;
+		connectionIndex = connectionIdx;
 	}
 	NetworkPacketHeader( uint8_t connectionIdx, uint8_t unreliableMsgCount )
 	{
-		senderConnectionIndex  = connectionIdx;
+		connectionIndex  = connectionIdx;
 		unreliableMessageCount = unreliableMsgCount;
 	}
 };
