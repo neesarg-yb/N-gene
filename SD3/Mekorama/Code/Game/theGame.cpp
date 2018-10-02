@@ -244,9 +244,9 @@ void theGame::Startup()
 	CommandRegister( "log_hide_all", HideAllLogTags );
 	CommandRegister( "log_show_tag", ShowLogTag );
 	CommandRegister( "log_hide_tag", HideLogTag );
-	CommandRegister( "netexp_addConnection", AddSessionConnection );
-	CommandRegister( "netexp_sendPing", SessionSendPing );
-	CommandRegister( "netexp_sendAdd", SessionSendAdd );
+	CommandRegister( "add_connection", AddSessionConnection );
+	CommandRegister( "send_ping", SessionSendPing );
+	CommandRegister( "send_add", SessionSendAdd );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Seting up the Attract Menu
