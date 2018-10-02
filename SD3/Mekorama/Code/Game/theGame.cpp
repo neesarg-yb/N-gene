@@ -126,16 +126,36 @@ void SessionSendAdd( Command &cmd )
 	receiver->Send( msg );
 }
 
-bool OnPing( NetworkMessage const &msg, NetworkConnection &from )
+bool OnAddResponse( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( from );
+
+	float val1 = 0.f;
+	float val2 = 0.f;
+	float sum  = 0.f;
+
+	msg.Read( val1 );
+	msg.Read( val2 );
+	msg.Read( sum );
+
+	ConsolePrintf( "AddResponse: %f + %f = %f", val1, val2, sum );
+
+	return true;
+}
+
+bool OnPing( NetworkMessage const &msg, NetworkSender &from )
 {
 	char str[256];
 	msg.Read( str, 256 );
 
-	ConsolePrintf( "Received ping from %s => %s", from.m_address.AddressToString().c_str(), str ); 
+	ConsolePrintf( "Received ping from %s => %s", from.address.AddressToString().c_str(), str ); 
 
 	// ping responds with pong
 	NetworkMessage pong( "pong" ); 
-	from.Send( pong ); 
+	if( from.connection != nullptr )
+		from.connection->Send( pong );
+	else
+		from.session.SendDirectMessageTo( pong, from.address );
 
 	// all messages serve double duty
 	// do some work, and also validate
@@ -144,15 +164,15 @@ bool OnPing( NetworkMessage const &msg, NetworkConnection &from )
 	return true; 
 }
 
-bool OnPong( NetworkMessage const &msg, NetworkConnection &from )
+bool OnPong( NetworkMessage const &msg, NetworkSender &from )
 {
 	UNUSED( msg );
 
-	ConsolePrintf( "PONG! Received from %s", from.m_address.AddressToString().c_str() );
+	ConsolePrintf( "PONG! Received from %s", from.address.AddressToString().c_str() );
 	return false;
 }
 
-bool OnAdd( NetworkMessage const &msg, NetworkConnection &from )
+bool OnAdd( NetworkMessage const &msg, NetworkSender &from )
 {
 	float val0 = 0;
 	float val1 = 0;
@@ -166,10 +186,14 @@ bool OnAdd( NetworkMessage const &msg, NetworkConnection &from )
 	ConsolePrintf( additionResponse.c_str() );
 
 	// Send back a response here, if you want..
-	NetworkMessage replyMsg( "ping" );
-	replyMsg.Write( additionResponse );
-
-	from.Send( replyMsg );
+	NetworkMessage replyMsg( "add_response" );
+	replyMsg.Write( val0 );
+	replyMsg.Write( val1 );
+	replyMsg.Write( sum );
+	if( from.connection != nullptr )
+		from.connection->Send( replyMsg );
+	else
+		from.session.SendDirectMessageTo( replyMsg, from.address );
 
 	return true;
 }
@@ -259,6 +283,7 @@ void theGame::Startup()
 	m_session->RegisterNetworkMessage( "ping", OnPing );
 	m_session->RegisterNetworkMessage( "pong", OnPong );
 	m_session->RegisterNetworkMessage( "add",  OnAdd );
+	m_session->RegisterNetworkMessage( "add_response",  OnAddResponse );
 
 	// For now we'll just shortcut to being a HOST
 	// "bound" state
