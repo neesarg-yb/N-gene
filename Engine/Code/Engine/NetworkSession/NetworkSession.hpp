@@ -33,6 +33,7 @@ public:
 	void ProcessOutgoing();
 
 	void SendPacket( NetworkPacket const &packetToSend );
+	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
 
 public:
 	NetworkConnection* AddConnection( int idx, NetworkAddress &addr );	// Adds a new client

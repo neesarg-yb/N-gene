@@ -1,11 +1,30 @@
 #pragma once
 #include <string>
 #include "Engine/Network/BytePacker.hpp"
+#include "Engine/Network/NetworkAddress.hpp"
 
-class NetworkMessage;
-class NetworkConnection;
+class  NetworkMessage;
+class  NetworkConnection;
+class  NetworkSession;
+struct NetworkSender;
 
-typedef bool (*networkMessage_cb) ( NetworkMessage const &, NetworkConnection & );
+typedef bool (*networkMessage_cb) ( NetworkMessage const &, NetworkSender & );
+
+struct NetworkSender
+{
+public:
+	NetworkSession		&session;
+	NetworkAddress		 address;
+	NetworkConnection	*connection;
+
+public:
+	NetworkSender( NetworkSession &parentSesion, NetworkAddress &netAddress, NetworkConnection *netConnection )
+		: session( parentSesion )
+	{
+		address		= netAddress;
+		connection	= netConnection;
+	}
+};
 
 struct NetworkMessageHeader
 {
