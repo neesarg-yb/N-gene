@@ -83,9 +83,15 @@ void NetworkSession::ProcessIncoming()
 				{
 					// Set the pointer to that definition
 					receivedMessage.m_definition = &it->second;
+					
+					// Create a NetworkSender
+					NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
+					uint8_t receivedConnIdx = receivedPacket.m_header.senderConnectionIndex;
+					if( receivedConnIdx != 0xff )
+						thisSender.connection = m_connections[ receivedPacket.m_header.senderConnectionIndex ];		// If sender has a valid connection, fill it in
 
 					// Do a callback!
-					receivedMessage.m_definition->callback( receivedMessage, *m_connections[ receivedPacket.m_header.senderConnectionIndex ] );
+					receivedMessage.m_definition->callback( receivedMessage, thisSender );
 				}
 				else
 					ConsolePrintf( "Received invalid messageDefinition Index: %d", receivedMessage.m_header.networkMessageDefinitionIndex );
@@ -109,6 +115,15 @@ void NetworkSession::SendPacket( NetworkPacket const &packetToSend )
 {
 	uint8_t idx = packetToSend.m_header.senderConnectionIndex;
 	m_mySocket->SendTo( m_connections[idx]->m_address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
+}
+
+void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address )
+{
+	NetworkPacket packetToSend;
+	messageToSend.m_header.networkMessageDefinitionIndex = (uint8_t) m_registeredMessages[ messageToSend.m_name ].id;
+	packetToSend.WriteMessage( messageToSend );
+
+	m_mySocket->SendTo( address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
 }
 
 NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )
