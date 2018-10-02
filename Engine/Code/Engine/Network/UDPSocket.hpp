@@ -6,18 +6,11 @@
 class UDPSocket : public Socket
 {
 public:
-	bool Bind( NetworkAddress const &address, uint16_t portRange = 0U );
+	bool Bind( NetworkAddress &address, uint16_t portRange = 0U );
 
 	size_t SendTo( NetworkAddress const &address, void const *data, size_t const byteCount );
 	size_t ReceiveFrom( NetworkAddress *outAddress, void *buffer, size_t const maxReadSize );
 };
-
-
-// class test
-#define GAME_PORT 10084
-#define ETHERNET_MTU 1500  // maximum transmission unit - determined by hardware part of OSI model.
-// 1500 is the MTU of EthernetV2, and is the minimum one - so we use it; 
-#define PACKET_MTU (ETHERNET_MTU - 40 - 8) 
 
 // IPv4 Header Size: 20B
 // IPv6 Header Size: 40B

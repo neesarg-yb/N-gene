@@ -50,7 +50,7 @@ public:
 	void ConnectToNewHost( const char *hostAddress );
 	void SendMessageToConnection( uint idx, bool isEcho, char const *msg );
 	void SendMessageToAllConnections( bool isEcho, const char *msg, bool sendToMyself = false );
-	void SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg );
+	bool SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg );
 
 	void IgnoreEcho( bool ignoreIt );
 	
