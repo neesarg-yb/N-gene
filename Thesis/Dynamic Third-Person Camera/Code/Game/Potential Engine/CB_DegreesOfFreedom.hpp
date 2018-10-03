@@ -21,7 +21,7 @@ private:
 public:
 	void				PreUpdate () { }
 	void				PostUpdate() { }
-	CameraTargetPoint	Update( float deltaSeconds );
+	CameraDestination	Update( float deltaSeconds );
 
 private:
 	Vector3 GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude );

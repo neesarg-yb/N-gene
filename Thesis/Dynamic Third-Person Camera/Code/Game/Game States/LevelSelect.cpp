@@ -68,4 +68,6 @@ void LevelSelect::LevelSelected( char const * levelName )
 		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
 	else if( std::string(levelName) == "--> Degrees of Freedom           " )
 		g_theGame->StartTransitionToState( "DEGREES OF FREEDOM" );
+	else if( std::string(levelName) == "(1) Follow Camera                " )
+		g_theGame->StartTransitionToState( "FOLLOW CAMERA" );
 }

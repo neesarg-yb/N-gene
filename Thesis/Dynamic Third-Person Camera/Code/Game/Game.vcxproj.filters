@@ -76,14 +76,20 @@
     <ClCompile Include="Potential Engine\CameraManager.cpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\CameraTargetPoint.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
     <ClCompile Include="Potential Engine\CB_DegreesOfFreedom.cpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
     <ClCompile Include="Potential Engine\CB_FreeLook.cpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraDestination.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CameraConstrain.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_FollowCamera.cpp">
+      <Filter>Game States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -123,9 +129,6 @@
     <ClInclude Include="Potential Engine\GameObject.hpp">
       <Filter>PotentialEngine</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\CameraTargetPoint.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
     <ClInclude Include="Potential Engine\CameraBehaviour.hpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClInclude>
@@ -137,6 +140,15 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CB_FreeLook.hpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraDestination.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraConstrain.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_FollowCamera.hpp">
+      <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

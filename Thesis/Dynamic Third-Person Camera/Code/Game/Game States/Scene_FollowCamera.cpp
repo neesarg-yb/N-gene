@@ -1,23 +1,21 @@
 #pragma once
-#include "Scene_DegreesOfFreedom.hpp"
+#include "Scene_FollowCamera.hpp"
+#include "Engine/Renderer/Scene.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Engine/Core/StringUtils.hpp"
-#include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/theGame.hpp"
-#include "Game/World/Terrain.hpp"
 
-Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
-	: GameState( "DEGREES OF FREEDOM" )
+Scene_FollowCamera::Scene_FollowCamera()
+	: GameState( "FOLLOW CAMERA" )
 {
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 	m_scene			= new Scene();
 
 	// Setting up the Camera
-	m_camera = new OrbitCamera( Vector3::ZERO );
+	m_camera = new Camera();
 	m_camera->SetColorTarget( g_theRenderer->GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
-	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
+	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\galaxy1.png" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
@@ -30,43 +28,38 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	AddNewLightToScene( directionalLight );
 
 	// Terrain
-	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png" );
+	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_rivers.png" );
 	AddNewGameObjectToScene( m_terrain );
 
 	// Player
-	Vector3 inFrontOfCamera  = m_camera->m_cameraTransform.GetWorldPosition();
-	inFrontOfCamera.y		-= 0.f;
-	inFrontOfCamera.z		+= 5.f;
-	m_player = new Player( inFrontOfCamera, *m_terrain );
+	m_player = new Player( Vector3( 0.f, 0.f, 15.f ), *m_terrain );
 	AddNewGameObjectToScene( m_player );
-
+	
 	// Camera Manager
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput );
 	m_cameraManager->SetAnchor( m_player );
 
-	// Degrees of Freedom - Camera Behavior
-	CameraBehaviour* dofBehaviour		= new CB_DegreesOfFreedom( 5.f, 40.f, 30.f, 100.f, "DegreesOfFreedom" );
+	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
-	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
-	m_cameraManager->SetActiveCameraBehaviourTo( "DegreesOfFreedom" );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
+	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );
 }
 
-Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
+Scene_FollowCamera::~Scene_FollowCamera()
 {
+	// Camera Behaviour
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
-	m_cameraManager->DeleteCameraBehaviour( "DegreesOfFreedom" );
 
 	// Camera Manager
 	delete m_cameraManager;
 	m_cameraManager = nullptr;
-
+	
 	// Player
 	m_player = nullptr;		// Gets deleted from m_gameObjects
-
+	
 	// Terrain
 	m_terrain = nullptr;	// Gets deleted from m_gameObjects
-
+	
 	// GameObjects
 	for each (GameObject* go in m_gameObjects)
 		go->RemoveRenderablesFromScene( *m_scene );
@@ -80,7 +73,7 @@ Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 
 		// Remove its renderable
 		m_scene->RemoveRenderable( *lastLight->m_renderable );
-		
+
 		// Delete the light
 		delete lastLight;
 		lastLight = nullptr;
@@ -99,19 +92,19 @@ Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 	m_renderingPath = nullptr;
 }
 
-void Scene_DegreesOfFreedom::BeginFrame()
+void Scene_FollowCamera::BeginFrame()
 {
 	ChangeCameraBehaviour();
 
 	m_cameraManager->PreUpdate();
 }
 
-void Scene_DegreesOfFreedom::EndFrame()
+void Scene_FollowCamera::EndFrame()
 {
 	m_cameraManager->PostUpdate();
 }
 
-void Scene_DegreesOfFreedom::Update( float deltaSeconds )
+void Scene_FollowCamera::Update( float deltaSeconds )
 {
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 
@@ -130,10 +123,10 @@ void Scene_DegreesOfFreedom::Update( float deltaSeconds )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
 }
 
-void Scene_DegreesOfFreedom::Render( Camera *gameCamera ) const
+void Scene_FollowCamera::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
-	
+
 	// Render the Scene
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene );
@@ -145,7 +138,7 @@ void Scene_DegreesOfFreedom::Render( Camera *gameCamera ) const
 	DebugRendererRender();
 }
 
-void Scene_DegreesOfFreedom::AddNewGameObjectToScene( GameObject *go )
+void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go )
 {
 	// Add game object which gets updated every frame
 	m_gameObjects.push_back( go );
@@ -154,7 +147,7 @@ void Scene_DegreesOfFreedom::AddNewGameObjectToScene( GameObject *go )
 	go->AddRenderablesToScene( *m_scene );
 }
 
-void Scene_DegreesOfFreedom::AddNewLightToScene( Light *light )
+void Scene_FollowCamera::AddNewLightToScene( Light *light )
 {
 	// Add to list, so we can delete it at deconstruction
 	m_lights.push_back( light );
@@ -166,21 +159,8 @@ void Scene_DegreesOfFreedom::AddNewLightToScene( Light *light )
 	m_scene->AddRenderable( *light->m_renderable );
 }
 
-void Scene_DegreesOfFreedom::ChangeCameraBehaviour()
+void Scene_FollowCamera::ChangeCameraBehaviour()
 {
-	XboxController &controller	= g_theInput->m_controller[0];
-	bool leftStickJustPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_LS ].keyJustPressed;
-
-	static bool dofBehaviourActive = true;
-	if( leftStickJustPressed )
-	{
-		std::string behaviourToActivate = dofBehaviourActive ? "FreeLook" : "DegreesOfFreedom";
-		dofBehaviourActive = !dofBehaviourActive;
-
-		m_cameraManager->SetActiveCameraBehaviourTo( behaviourToActivate );
-
-		std::string activeBehaviourMessage = Stringf( "Active Camera Behavior: \"%s\"", behaviourToActivate.c_str() );
-		DebugRender2DText( 5.f, Vector2(-850.f, 460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, activeBehaviourMessage.c_str() );
-	}
-
+	return;
 }
+

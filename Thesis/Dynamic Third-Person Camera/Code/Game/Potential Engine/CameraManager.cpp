@@ -27,7 +27,7 @@ void CameraManager::Update( float deltaSeconds )
 	m_lastSuggestedPoint = m_aciveBehaviour->Update( deltaSeconds );
 
 	// This might change if in transition
-	CameraTargetPoint updatedTargetPoint = m_lastSuggestedPoint;
+	CameraDestination updatedTargetPoint = m_lastSuggestedPoint;
 
 	// Camera Behavior Transition
 	if( m_behaviourTransitionTimeRemaining > 0.f )
@@ -36,7 +36,7 @@ void CameraManager::Update( float deltaSeconds )
 		t = ClampFloat01(t);
 
 		// Interpolate slowly to the suggested position, over time
-		updatedTargetPoint = CameraTargetPoint::Interpolate( m_targetPointOnTransitionBegin, m_lastSuggestedPoint, t );
+		updatedTargetPoint = CameraDestination::Interpolate( m_targetPointOnTransitionBegin, m_lastSuggestedPoint, t );
 		m_behaviourTransitionTimeRemaining -= deltaSeconds;
 	}
 
@@ -117,6 +117,39 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 	// Sets the new camera behavior to active
 	int idx = GetCameraBehaviourIndex( behaviourName );
 	m_aciveBehaviour = m_cameraBehaviours[ idx ];
+}
+
+void CameraManager::RegisterConstrain( char const *name, CameraConstrain *newConstrain )
+{
+	CameraConstrainMap::iterator it = m_registeredConstrains.find( name );
+	if( it != m_registeredConstrains.end() )
+	{
+		// If this constrain already exists, erase the it
+		delete it->second;
+		it->second = nullptr;
+
+		m_registeredConstrains.erase( it );
+	}
+
+	// Add new constrain
+	m_registeredConstrains[ name ] = newConstrain;
+}
+
+void CameraManager::DeregisterConstrain( char const *name )
+{
+	CameraConstrainMap::iterator it = m_registeredConstrains.find( name );
+
+	// Not found? => return
+	if( it == m_registeredConstrains.end() )
+		return;
+	else
+	{
+		// Found, delete it!
+		delete it->second;
+		it->second = nullptr;
+
+		m_registeredConstrains.erase( it );
+	}
 }
 
 int CameraManager::GetCameraBehaviourIndex( CameraBehaviour *cb )

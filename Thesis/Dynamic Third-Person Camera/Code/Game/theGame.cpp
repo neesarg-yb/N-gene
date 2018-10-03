@@ -7,6 +7,7 @@
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
+#include "Game/Game States/Scene_FollowCamera.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
 #include "Game/Game States/Scene_DegreesOfFreedom.hpp"
 
@@ -95,6 +96,9 @@ void theGame::Startup()
 
 	GameState* degreesOfFreedom = new Scene_DegreesOfFreedom();
 	AddNewGameState( degreesOfFreedom );
+
+	GameState* followCamera = new Scene_FollowCamera();
+	AddNewGameState( followCamera );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );

@@ -25,7 +25,7 @@ void CB_FreeLook::PostUpdate()
 
 }
 
-CameraTargetPoint CB_FreeLook::Update( float deltaSeconds )
+CameraDestination CB_FreeLook::Update( float deltaSeconds )
 {
 	// Input from Xbox Controller
 	XboxController &controller	 = m_inputSystem->m_controller[0];
@@ -62,5 +62,5 @@ CameraTargetPoint CB_FreeLook::Update( float deltaSeconds )
 	// FOV Change
 	float fov = m_camera->GetFOV();
 
-	return CameraTargetPoint( cameraPosition, cameraOrientation, fov );
+	return CameraDestination( cameraPosition, cameraOrientation, fov );
 }

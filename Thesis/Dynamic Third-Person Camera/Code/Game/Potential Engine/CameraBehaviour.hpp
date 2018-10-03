@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
+#include "Engine/Core/Tags.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/CameraTargetPoint.hpp"
+#include "Game/Potential Engine/CameraDestination.hpp"
 
 class CameraBehaviour
 {
@@ -15,11 +16,12 @@ public:
 	Camera		const	*m_camera		= nullptr;
 	GameObject	const	*m_anchor		= nullptr;
 	InputSystem			*m_inputSystem	= nullptr;
+	Tags				 m_constrains;	// Which constrains to apply by Camera Manager
 
 public:
 	virtual void				PreUpdate () = 0;
 	virtual void				PostUpdate() = 0;
-	virtual CameraTargetPoint	Update( float deltaSeconds ) = 0;
+	virtual CameraDestination	Update( float deltaSeconds ) = 0;
 
 public:
 	void SetCameraAnchorAndInputSystemTo( Camera *camera, GameObject *anchor, InputSystem *input );

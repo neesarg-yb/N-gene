@@ -16,7 +16,7 @@ CB_DegreesOfFreedom::~CB_DegreesOfFreedom()
 
 }
 
-CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
+CameraDestination CB_DegreesOfFreedom::Update( float deltaSeconds )
 {
 	// Get input from Xbox Controller
 	XboxController &controller	= m_inputSystem->m_controller[0];
@@ -73,7 +73,7 @@ CameraTargetPoint CB_DegreesOfFreedom::Update( float deltaSeconds )
 	cameraFOV += leftShoulderPressed  ?  1.f * m_fovChangeSpeed * deltaSeconds : 0.f;
 	cameraFOV += rightShoulderPressed ? -1.f * m_fovChangeSpeed * deltaSeconds : 0.f;
 
-	return CameraTargetPoint( worldCameraPosition + worldPositionOffset, cameraOrientation, cameraFOV );
+	return CameraDestination( worldCameraPosition + worldPositionOffset, cameraOrientation, cameraFOV );
 }
 
 Vector3 CB_DegreesOfFreedom::GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude )
