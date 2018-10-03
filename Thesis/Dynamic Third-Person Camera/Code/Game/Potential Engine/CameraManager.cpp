@@ -26,6 +26,10 @@ void CameraManager::Update( float deltaSeconds )
 {
 	m_lastSuggestedPoint = m_aciveBehaviour->Update( deltaSeconds );
 
+	// Apply all the constrains
+	for each (CameraConstrain* constrain in m_activeConstrains)
+		constrain->Execute( m_lastSuggestedPoint );
+
 	// This might change if in transition
 	CameraDestination updatedTargetPoint = m_lastSuggestedPoint;
 
@@ -117,6 +121,10 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 	// Sets the new camera behavior to active
 	int idx = GetCameraBehaviourIndex( behaviourName );
 	m_aciveBehaviour = m_cameraBehaviours[ idx ];
+
+	// Update Active Constrains
+	Tags const &constrainsToActivate = m_aciveBehaviour->m_constrains;
+	ResetActivateConstrainsFromTags( constrainsToActivate );
 }
 
 void CameraManager::RegisterConstrain( char const *name, CameraConstrain *newConstrain )
@@ -149,6 +157,22 @@ void CameraManager::DeregisterConstrain( char const *name )
 		it->second = nullptr;
 
 		m_registeredConstrains.erase( it );
+	}
+}
+
+void CameraManager::ResetActivateConstrainsFromTags( Tags const &constrainsToActivate )
+{
+	// Remove all the active constrains
+	m_activeConstrains.clear();
+
+	// Add constrains which needs to be active
+	Strings allConstrains;
+	constrainsToActivate.GetTags( allConstrains );
+	for each (std::string constrainName in allConstrains)
+	{
+		CameraConstrainMap::iterator it = m_registeredConstrains.find( constrainName );
+		if( it != m_registeredConstrains.end() )
+			m_activeConstrains.push_back( it->second );
 	}
 }
 

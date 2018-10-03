@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <vector>
+#include "Engine/Core/Tags.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
@@ -9,6 +10,7 @@
 #include "Game/Potential Engine/CameraDestination.hpp"
 
 typedef std::vector< CameraBehaviour* >				CameraBehaviourList;
+typedef std::vector< CameraConstrain* >				CameraConstrainList;
 typedef std::map< std::string, CameraConstrain* >	CameraConstrainMap;
 
 class CameraManager
@@ -34,6 +36,7 @@ private:
 
 	// Camera Constrains
 	CameraConstrainMap		m_registeredConstrains;
+	CameraConstrainList		m_activeConstrains;
 
 public:
 	void Update( float deltaSeconds );
@@ -51,8 +54,9 @@ public:
 	void SetActiveCameraBehaviourTo	( std::string const &behaviourName );
 
 	// Constrains
-	void RegisterConstrain			( char const *name, CameraConstrain *newConstrain );
-	void DeregisterConstrain		( char const *name );
+	void RegisterConstrain				 ( char const *name, CameraConstrain *newConstrain );
+	void DeregisterConstrain			 ( char const *name );
+	void ResetActivateConstrainsFromTags ( Tags const &constrainsToActivate );
 
 private:
 	int GetCameraBehaviourIndex( CameraBehaviour *cb );					// Returns -1 if couldn't fine it in the list
