@@ -7,6 +7,11 @@ Tags::Tags()
 
 }
 
+void Tags::GetTags( Strings &outTags ) const
+{
+	outTags = m_tags;
+}
+
 void Tags::SetOrRemoveTags( const std::string& commaSeparatedTagNames )
 {
 	// Get vector of separated strings
