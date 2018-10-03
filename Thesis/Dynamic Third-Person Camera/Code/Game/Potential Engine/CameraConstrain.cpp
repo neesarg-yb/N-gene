@@ -1,8 +1,14 @@
 #pragma once
 #include "CameraConstrain.hpp"
 
-void CameraConstrain::Execute( CameraDestination &suggestedDestination )
+CameraConstrain::CameraConstrain( char const *name, CameraManager &manager )
+	: m_name( name )
+	, m_manager( manager )
 {
-	UNUSED( suggestedDestination );
+
 }
 
+CameraConstrain::~CameraConstrain()
+{
+
+}
