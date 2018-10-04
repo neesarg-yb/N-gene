@@ -2,12 +2,14 @@
 #include <map>
 #include <vector>
 #include "Engine/Core/Tags.hpp"
+#include "Engine/Core/RaycastResult.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
 #include "Game/Potential Engine/CameraBehaviour.hpp"
 #include "Game/Potential Engine/CameraConstrain.hpp"
 #include "Game/Potential Engine/CameraDestination.hpp"
+#include "Game/Potential Engine/CameraContext.hpp"
 
 typedef std::vector< CameraBehaviour* >				CameraBehaviourList;
 typedef std::vector< CameraConstrain* >				CameraConstrainList;
@@ -45,7 +47,8 @@ public:
 
 public:
 	// Context
-	void SetAnchor					( GameObject *anchor );
+	void			SetAnchor( GameObject *anchor );
+	CameraContext	GetCameraContext() const;
 	
 	// Behaviours
 	int  AddNewCameraBehaviour		( CameraBehaviour *newCameraBehaviour );		// Now I'll manage this behavior, including deletion

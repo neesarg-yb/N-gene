@@ -65,6 +65,11 @@ void CameraManager::SetAnchor( GameObject *anchor )
 	m_anchor = anchor;
 }
 
+CameraContext CameraManager::GetCameraContext() const
+{
+	return CameraContext();
+}
+
 int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )
 {
 	int idx = GetCameraBehaviourIndex( newCameraBehaviour );

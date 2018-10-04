@@ -290,6 +290,7 @@
     <ClCompile Include="Main_Win32.cpp" />
     <ClCompile Include="Potential Engine\CameraBehaviour.cpp" />
     <ClCompile Include="Potential Engine\CameraConstrain.cpp" />
+    <ClCompile Include="Potential Engine\CameraContext.cpp" />
     <ClCompile Include="Potential Engine\CameraManager.cpp" />
     <ClCompile Include="Potential Engine\CameraDestination.cpp" />
     <ClCompile Include="Potential Engine\CB_DegreesOfFreedom.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="GameCommon.hpp" />
     <ClInclude Include="Potential Engine\CameraBehaviour.hpp" />
     <ClInclude Include="Potential Engine\CameraConstrain.hpp" />
+    <ClInclude Include="Potential Engine\CameraContext.hpp" />
     <ClInclude Include="Potential Engine\CameraManager.hpp" />
     <ClInclude Include="Potential Engine\CameraDestination.hpp" />
     <ClInclude Include="Potential Engine\CB_DegreesOfFreedom.hpp" />

@@ -9,10 +9,10 @@ public:
 	 CameraConstrain( char const *name, CameraManager &manager );
 	~CameraConstrain();
 
-private:
+protected:
 	std::string const	&m_name		= "NAME NOT ASSIGNED!";
 	CameraManager		&m_manager;
 
 public:
-	virtual void Execute( CameraDestination &suggestedDestination ) = 0;
+	virtual void Execute( CameraDestination &suggestedDestination ) = 0;	// Applies the constrain on suggestedDestination
 };

@@ -97,6 +97,9 @@
     <ClCompile Include="Potential Engine\CC_LineOfSight.cpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
     </ClCompile>
+    <ClCompile Include="Potential Engine\CameraContext.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -158,6 +161,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CC_LineOfSight.hpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraContext.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

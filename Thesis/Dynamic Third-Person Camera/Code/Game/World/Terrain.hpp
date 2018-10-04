@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include "Engine/Math/AABB3.hpp"
+#include "Engine/Core/RaycastResult.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
 
 class Scene;
@@ -13,21 +14,6 @@ enum eTerrainQuadVetrex
 	TERRAIN_QUAD_TOP_LEFT,
 	TERRAIN_QUAD_TOP_RIGHT,
 	NUM_TERRAIN_QUAD_VERTICES
-};
-
-struct RaycastResult
-{
-	RaycastResult( Vector3 startPosition )
-	{
-		// Set values as if impact didn't happen at startPosition
-		didImpact			= false;
-		impactPosition		= startPosition;
-		fractionTravelled	= 0.f;
-	}
-
-	bool	didImpact;
-	Vector3	impactPosition;
-	float	fractionTravelled;
 };
 
 class Terrain : public GameObject
