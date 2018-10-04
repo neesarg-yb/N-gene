@@ -100,6 +100,18 @@ Vector3 Vector3::GetNormalized() const
 	return Vector3( x/lengthOfVec, y/lengthOfVec, z/lengthOfVec );
 }
 
+float Vector3::NormalizeAndGetLength()
+{
+	// Get Length
+	float length = GetLength();
+
+	// Normalize
+	if( length > 0.f )
+		*this = *this / length;
+
+	return length;
+}
+
 Vector3 Vector3::GetAsDirection() const
 {
 	Matrix44 rotationMatrix;
