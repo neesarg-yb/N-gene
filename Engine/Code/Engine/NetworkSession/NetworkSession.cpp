@@ -4,20 +4,21 @@
 
 NetworkSession::NetworkSession()
 {
-
+	
 }
 
 NetworkSession::~NetworkSession()
 {
 	// Delete all connections
-	while ( m_connections.size() > 0U )
+	for( size_t i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
-		// Fast delete
-		std::swap( m_connections.front(), m_connections.back() );
-		delete m_connections.back();
-		m_connections.back() = nullptr;
+		// If nullptr, skip
+		if( m_connections[i] == nullptr )
+			continue;
 
-		m_connections.pop_back();
+		// Delete
+		delete m_connections[i];
+		m_connections[i] = nullptr;
 	}
 
 	// Delete my UDP Socket
@@ -107,8 +108,14 @@ void NetworkSession::ProcessIncoming()
 
 void NetworkSession::ProcessOutgoing()
 {
-	for each (NetworkConnection* connection in m_connections)
-		connection->FlushMessages();
+	for( int i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		// If nullptr, skip
+		if( m_connections[i] == nullptr )
+			continue;
+
+		m_connections[i]->FlushMessages();
+	}
 }
 
 void NetworkSession::SendPacket( NetworkPacket &packetToSend )
@@ -134,8 +141,11 @@ uint8_t NetworkSession::GetMyConnectionIndex() const
 	// defaults to INVALID index
 	uint8_t idx = 0xff;
 
-	for( uint i = 0; i < m_connections.size(); i++ )
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
+		if( m_connections[i] == nullptr )
+			continue;
+
 		// If connection found..
 		if( m_connections[i]->m_address == m_mySocket->m_address )
 		{
@@ -152,31 +162,27 @@ uint8_t NetworkSession::GetMyConnectionIndex() const
 
 NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )
 {
-	TODO( "Make it such that you can skip indices while adding a new conncetion!" );
+	// If idx is not in range
+	if( idx < 0 || idx >= MAX_SESSION_CONNECTIONS )
+		return nullptr;
 
-	NetworkConnection* thisConnection = new NetworkConnection( idx, addr, *this );
-	if( idx < m_connections.size() )
+	// If there's a connection there already, delete it
+	if( m_connections[idx] != nullptr )
 	{
-		// Delete the existing one
 		delete m_connections[idx];
 		m_connections[idx] = nullptr;
+	}
 
-		// Replace it with the new one
-		m_connections[idx] = thisConnection;
-	}
-	else
-	{
-		// Add a new connection at the end
-		thisConnection->m_indexInSession = (int)m_connections.size();		// Set the new index
-		m_connections.push_back( thisConnection );
-	}
+	// Set new connection to that index
+	NetworkConnection* thisConnection = new NetworkConnection( idx, addr, *this );
+	m_connections[idx] = thisConnection;
 
 	return m_connections[idx];
 }
 
 NetworkConnection* NetworkSession::GetConnection( int idx )
 {
-	if( idx >= m_connections.size() )
+	if( idx < 0 || idx >= MAX_SESSION_CONNECTIONS )
 		return nullptr;
 	else
 		return m_connections[idx];
