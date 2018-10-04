@@ -6,9 +6,11 @@
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 #include "Engine/NetworkSession/NetworkConnection.hpp"
 
+#define MAX_SESSION_CONNECTIONS (0xff)
+
 // Session Message Callbacks
-typedef std::vector< NetworkConnection* >					NetworkConnections;
-typedef std::map< std::string, NetworkMessageDefinition >	NetworkMessageDefinitionsMap;
+typedef NetworkConnection*		NetworkConnections[ MAX_SESSION_CONNECTIONS ];
+typedef std::map< std::string,	NetworkMessageDefinition >	NetworkMessageDefinitionsMap;
 
 class NetworkPacket;
 
@@ -23,8 +25,8 @@ public:
 	UDPSocket *m_mySocket = nullptr;
 
 	// Connections - clients or host
-	NetworkConnections			 m_connections;			// Vector of all the connections
-	NetworkMessageDefinitionsMap m_registeredMessages;	// Map of < name, NetworkMessageInfo >
+	NetworkConnections			 m_connections = { nullptr };	// Vector of all the connections
+	NetworkMessageDefinitionsMap m_registeredMessages;			// Map of < name, NetworkMessageInfo >
 
 public:
 	bool BindPort( uint16_t port, uint16_t range );
