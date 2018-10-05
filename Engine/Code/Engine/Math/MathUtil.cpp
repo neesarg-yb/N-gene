@@ -152,6 +152,14 @@ int RoundToNearestInt( float inValue ) {
 
 }
 
+float GetSign( float number )
+{
+	if( number >= 0.f )
+		return +1.f;
+	else
+		return -1.f;
+}
+
 void NewSeedForRandom() {
 	srand( (unsigned int) time(NULL) );
 }
