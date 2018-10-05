@@ -35,6 +35,7 @@ private:
 	float const				 m_changeFOVSpeed	= 10.f;			// Degrees per seconds
 	float const				 m_cameraNear		= 1.f;
 	float const				 m_cameraFar		= 1000.f;
+	bool					 m_constrainsActive = true;
 
 public:
 	void BeginFrame();
@@ -47,4 +48,5 @@ private:
 	void AddNewLightToScene( Light *light );
 
 	void ChangeCameraBehaviour();
+	void EnableDisableCameraConstrains();
 };

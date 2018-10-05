@@ -26,9 +26,13 @@ void CameraManager::Update( float deltaSeconds )
 {
 	m_lastSuggestedPoint = m_aciveBehaviour->Update( deltaSeconds );
 
-	// Apply all the constrains
-	for each (CameraConstrain* constrain in m_activeConstrains)
-		constrain->Execute( m_lastSuggestedPoint );
+	// Constrains, if enabled
+	if( m_constrainsEnabled == true )
+	{
+		// Apply all
+		for each (CameraConstrain* constrain in m_activeConstrains)
+			constrain->Execute( m_lastSuggestedPoint );
+	}
 
 	// This might change if in transition
 	CameraDestination updatedTargetPoint = m_lastSuggestedPoint;
@@ -168,6 +172,11 @@ void CameraManager::DeregisterConstrain( char const *name )
 
 		m_registeredConstrains.erase( it );
 	}
+}
+
+void CameraManager::EnableConstrains( bool enable /*= true */ )
+{
+	m_constrainsEnabled = enable;
 }
 
 void CameraManager::ResetActivateConstrainsFromTags( Tags const &constrainsToActivate )

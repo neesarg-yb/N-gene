@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene_FollowCamera.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
@@ -134,6 +135,7 @@ void Scene_FollowCamera::Update( float deltaSeconds )
 		go->Update( deltaSeconds );
 
 	// Update Camera Stuffs
+	EnableDisableCameraConstrains();
 	m_cameraManager->Update( deltaSeconds );
 
 	// Update Debug Renderer Objects
@@ -183,5 +185,37 @@ void Scene_FollowCamera::AddNewLightToScene( Light *light )
 void Scene_FollowCamera::ChangeCameraBehaviour()
 {
 	return;
+}
+
+void Scene_FollowCamera::EnableDisableCameraConstrains()
+{
+	XboxController &controller = g_theInput->m_controller[0];
+	bool toggleConstrainButton = controller.m_xboxButtonStates[ XBOX_BUTTON_X ].keyJustPressed;
+
+	if( toggleConstrainButton == true )
+	{
+		// Toggle the constrain
+		m_constrainsActive = !m_constrainsActive;
+		m_cameraManager->EnableConstrains( m_constrainsActive );
+
+		// Debug Print
+		float		yOffset;
+		Rgba		constarinsColor;
+		std::string constrainsActiveStr = Stringf( "Camera Constrains: ", m_constrainsActive );
+		if( m_constrainsActive )
+		{
+			constrainsActiveStr += "ENABLED";
+			constarinsColor		 = RGBA_PURPLE_COLOR;
+			yOffset				 = 0.f;
+		}
+		else
+		{
+			constrainsActiveStr += "DISABLED";
+			constarinsColor		 = RGBA_RED_COLOR;
+			yOffset				 = 15.f;
+		}
+
+		DebugRender2DText( 3.f, Vector2(-850.f, 460.f - yOffset), 15.f, constarinsColor, constarinsColor, constrainsActiveStr.c_str() );
+	}
 }
 

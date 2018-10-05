@@ -38,6 +38,7 @@ private:
 	float		m_behaviourTransitionTimeRemaining = 0.f;
 
 	// Camera Constrains
+	bool					m_constrainsEnabled = true;
 	CameraConstrainMap		m_registeredConstrains;
 	CameraConstrainList		m_activeConstrains;
 
@@ -59,8 +60,11 @@ public:
 	void SetActiveCameraBehaviourTo	( std::string const &behaviourName );
 
 	// Constrains
-	void RegisterConstrain				 ( char const *name, CameraConstrain *newConstrain );
-	void DeregisterConstrain			 ( char const *name );
+	void RegisterConstrain	( char const *name, CameraConstrain *newConstrain );
+	void DeregisterConstrain( char const *name );
+	void EnableConstrains	( bool enable = true );
+
+private:
 	void ResetActivateConstrainsFromTags ( Tags const &constrainsToActivate );
 
 private:
