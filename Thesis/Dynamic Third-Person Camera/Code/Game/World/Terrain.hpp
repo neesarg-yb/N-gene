@@ -19,6 +19,8 @@ enum eTerrainQuadVetrex
 class Terrain : public GameObject
 {
 public:
+	 // Terrain is always generated with 1x1 squares
+	 // Texture used to render the terrain gets repeated on each of these 1x1 square
 	 Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath );
 	~Terrain();
 
@@ -42,7 +44,7 @@ public:
 	Matrix44		GetModelMatrixForMyPositionAt	( Vector2 myXZPosition, Vector2 uvForwardDirection, Vector2 uvRightDirection );
 
 	// Raycast
-	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance );
+	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy );
 
 private:
 	// Surface Patch

@@ -136,6 +136,21 @@ void Scene_FollowCamera::Render( Camera *gameCamera ) const
 	DebugRendererChange3DCamera( m_camera );
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRendererRender();
+
+	// Debugging the Raycast
+	Vector3 cameraPosition	= m_camera->m_cameraTransform.GetWorldPosition();
+	Vector3 cameraForward	= m_camera->m_cameraTransform.GetWorldTransformMatrix().GetKColumn();
+	cameraForward.NormalizeAndGetLength();
+
+	RaycastResult result = m_terrain->Raycast( cameraPosition, cameraForward, 100.f, 0.05f );
+	if( result.didImpact )
+	{
+		// Draw the point
+		DebugRenderPoint( 0.f, 0.5f, result.impactPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+		
+		// Draw the Normal
+		DebugRenderLineSegment( 0.f, result.impactPosition, RGBA_BLUE_COLOR, result.impactPosition + (result.impactNormal * 2.f), RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	}
 }
 
 void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go )

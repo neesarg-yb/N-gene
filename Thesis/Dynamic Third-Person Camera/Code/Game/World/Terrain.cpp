@@ -1,9 +1,10 @@
 #pragma once
 #include "Terrain.hpp"
-#include "Engine/Renderer/MeshBuilder.hpp"
-#include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Core/Ray3.hpp"
 #include "Engine/Core/Image.hpp"
 #include "Engine/Renderer/Scene.hpp"
+#include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 
 Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath )
@@ -22,7 +23,7 @@ Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, s
 
 	// Set Chunks
 	m_chunks = MakeChunksUsingSurfacePatch( [this]( float u, float v ) { return this->GetVertexPositionUsingHeightMap(u,v); }, 
-								 IntVector2( 50, 52 ) );
+											IntVector2( 50, 52 ) );
 
 	Vector3 boundsMin	= m_transform.GetWorldPosition() + Vector3::ZERO;
 	Vector3 boundsMax	= m_transform.GetWorldPosition() + Vector3( (float)m_sampleSize.x, maxHeight, (float)m_sampleSize.y );
@@ -128,55 +129,73 @@ Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition, Vector2 F
 	return newModel;
 }
 
-RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance )
+RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy )
 {
-	// LOGIC:
+	float const sampleSize = 1.f;
+	// Logic:
 	//
-	// For each Step size
-		// Move Forward
-			// If myY <= terrainY
-				// return RaycastResult
-			// Else, 
-				// If max distance is reached, return noHit Result
-				// Else continue..
+	//	Start moving in the direction from start point, until you're on the other side of the terrain
+	//	Once you're on the other side,
+	//		Start doing the Ray March until we reach the accuracy
+	float distanceFromTerrain	= startPosition.y - GetYCoordinateForMyPositionAt(startPosition.x, startPosition.z);
+	float aboveBelowSign		= GetSign( distanceFromTerrain );
 	
-	RaycastResult	hitReasult	= RaycastResult( startPosition );
-					direction	= direction.GetNormalized();
-	Vector3			step		= direction * 1.f;
+	// Ray
+	Ray3 ray = Ray3( startPosition, direction );
 
-	GUARANTEE_OR_DIE( maxDistance != 0,				"Error: maxDistance can't be ZERO!!" );
-	GUARANTEE_OR_DIE( direction.GetLength() != 0.f, "Error: Infinite Raycast; the direction is ZERO!" );
-
-	// While we reached maxDistance
-	float	distanceTravelled	= 0.f;
-	Vector3 currentPos			= startPosition;
-
-	while ( distanceTravelled <= maxDistance )
+	Vector3 position;
+	bool	didImpact = false;
+	for ( float t = 0.f; (t <= maxDistance) && (didImpact == false); t += sampleSize )
 	{
-		// Set loop condition: distanceTravelled
-		currentPos			+= step;
-		distanceTravelled	 = ( currentPos - startPosition ).GetLength();
+		position	= ray.Evaluate( t );
+		distanceFromTerrain	= position.y - GetYCoordinateForMyPositionAt( position.x, position.z );
 
-		// If we just went under the Terrain
-		float terrainHeight	 = GetYCoordinateForMyPositionAt( currentPos.x, currentPos.z );
-		if( currentPos.y <= terrainHeight )
+		// If we just crossed the terrain
+		if( aboveBelowSign != GetSign( distanceFromTerrain ) )
 		{
-			hitReasult.didImpact			= true;
-			hitReasult.impactPosition		= currentPos;
-			hitReasult.fractionTravelled	= distanceTravelled / maxDistance;
+			didImpact		= true;		// i.e. we did impact in this step
+			aboveBelowSign *= -1.f;		// thus this sign also gets changed!
 			
-			return hitReasult;
-		}
-		else
-		{
-			// Set the hit result if we reach maxDistance on next step
-			hitReasult.didImpact			= false;
-			hitReasult.impactPosition		= currentPos;
-			hitReasult.fractionTravelled	= distanceTravelled / maxDistance;
+			// Assuming that you are now above the terrain
+			Vector3 abovePoint = position;				// A point above the terrain
+			Vector3 belowPoint = position - direction;	// A point below the terrain
+										
+			// But in reality, if you're now below the terrain
+			if( aboveBelowSign == -1.f )
+				std::swap( abovePoint, belowPoint );
+
+			// Ray March until appropriate accuracy
+			while ( abs(distanceFromTerrain) > accuracy )
+			{
+				// Set Middle Point as our new position
+				position = (abovePoint + belowPoint) * 0.5f;
+
+				// Check distance from Terrain
+				distanceFromTerrain = position.y - GetYCoordinateForMyPositionAt( position.x, position.z );
+				aboveBelowSign		= GetSign( distanceFromTerrain );
+
+				// Change one of these two points to Middle Point
+				if( aboveBelowSign == 1.f )
+					abovePoint = position;
+				else
+					belowPoint = position;
+			}
 		}
 	}
 
-	return hitReasult;
+	if( didImpact == false )
+		return RaycastResult( startPosition );			// Returns as if it did not hit!
+	else
+	{
+		// Fill up the Raycast Result
+		Vector3 impactPosition		= position;
+		Vector2 impactPositionXZ	= Vector2( impactPosition.x, impactPosition.z );
+		Vector3 impactNormal		= GetModelMatrixForMyPositionAt( impactPositionXZ, Vector2::TOP_DIR, Vector2::RIGHT_DIR ).GetJColumn();
+		float	distanceTravelled	= ( startPosition - impactPosition ).GetLength();
+		float	fractionTravelled	= distanceTravelled / maxDistance;
+
+		return RaycastResult( impactPosition, impactNormal, fractionTravelled );
+	}
 }
 
 Vector3 Terrain::SinWavePlane( float u, float v )
