@@ -33,7 +33,7 @@ private:
 	CameraManager			*m_cameraManager	= nullptr;
 	float const				 m_initialFOV		= 45.f;			// Degrees
 	float const				 m_changeFOVSpeed	= 10.f;			// Degrees per seconds
-	float const				 m_cameraNear		= 1.f;
+	float const				 m_cameraNear		= 0.001f;
 	float const				 m_cameraFar		= 1000.f;
 	bool					 m_constrainsActive = true;
 
