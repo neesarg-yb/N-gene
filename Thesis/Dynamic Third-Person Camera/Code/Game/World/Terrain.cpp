@@ -2,6 +2,7 @@
 #include "Terrain.hpp"
 #include "Engine/Core/Ray3.hpp"
 #include "Engine/Core/Image.hpp"
+#include "Engine/Core/ContactPoint.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
@@ -187,14 +188,19 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 		return RaycastResult( startPosition );			// Returns as if it did not hit!
 	else
 	{
-		// Fill up the Raycast Result
-		Vector3 impactPosition		= position;
-		Vector2 impactPositionXZ	= Vector2( impactPosition.x, impactPosition.z );
-		Vector3 impactNormal		= GetModelMatrixForMyPositionAt( impactPositionXZ, Vector2::TOP_DIR, Vector2::RIGHT_DIR ).GetJColumn();
-		float	distanceTravelled	= ( startPosition - impactPosition ).GetLength();
-		float	fractionTravelled	= distanceTravelled / maxDistance;
+		Vector2 impactPositionXZ	= Vector2( position.x, position.z );
+		float	distanceTravelled	= ( startPosition - position ).GetLength();
 
-		return RaycastResult( impactPosition, impactNormal, fractionTravelled );
+		// Impact point
+		ContactPoint impactPoint;
+		impactPoint.position		= position;
+		impactPoint.normal			= GetModelMatrixForMyPositionAt( impactPositionXZ, Vector2::TOP_DIR, Vector2::RIGHT_DIR ).GetJColumn();
+		
+		// Fraction traveled
+		float fractionTravelled		= distanceTravelled / maxDistance;
+
+		// Return the result
+		return RaycastResult( impactPoint.position, impactPoint.normal, fractionTravelled );
 	}
 }
 

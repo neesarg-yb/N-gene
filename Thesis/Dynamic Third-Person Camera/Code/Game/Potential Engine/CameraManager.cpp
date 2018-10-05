@@ -65,9 +65,14 @@ void CameraManager::SetAnchor( GameObject *anchor )
 	m_anchor = anchor;
 }
 
+void CameraManager::SetRaycastCallback( raycast_cb raycastFunction )
+{
+	m_raycastCB = raycastFunction;
+}
+
 CameraContext CameraManager::GetCameraContext() const
 {
-	return CameraContext();
+	return CameraContext( m_anchor->m_transform.GetWorldPosition(), m_raycastCB );
 }
 
 int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )

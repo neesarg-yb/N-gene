@@ -25,7 +25,8 @@ private:
 	// Camera Context
 	InputSystem				&m_inputSystem;				// Current input system
 	Camera					&m_camera;					// Possessed Camera
-	GameObject				*m_anchor = nullptr;		// Anchor GameObject
+	GameObject				*m_anchor	 = nullptr;		// Anchor GameObject
+	raycast_cb				 m_raycastCB = nullptr;		// Raycast function provided from Game Side
 
 	// Camera Behaviours
 	CameraBehaviourList		 m_cameraBehaviours;		// All the behaviors that can be run on Camera
@@ -48,6 +49,7 @@ public:
 public:
 	// Context
 	void			SetAnchor( GameObject *anchor );
+	void			SetRaycastCallback( raycast_cb raycastFunction );
 	CameraContext	GetCameraContext() const;
 	
 	// Behaviours

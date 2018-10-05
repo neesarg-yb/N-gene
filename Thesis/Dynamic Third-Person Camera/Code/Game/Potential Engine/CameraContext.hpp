@@ -9,4 +9,7 @@ struct CameraContext
 public:
 	Vector3		playerPosition;
 	raycast_cb	raycastCallback;
+
+public:
+	CameraContext( Vector3 const &playerPosition, raycast_cb raycastCallback );
 };

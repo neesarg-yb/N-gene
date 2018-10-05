@@ -2,8 +2,8 @@
 #include "CC_LineOfSight.hpp"
 #include "Game/Potential Engine/CameraManager.hpp"
 
-CC_LineOfSight::CC_LineOfSight( CameraManager &manager )
-	: CameraConstrain( "LineOfSight", manager )
+CC_LineOfSight::CC_LineOfSight( CameraManager &manager, const char *name )
+	: CameraConstrain( name, manager )
 {
 
 }

@@ -4,7 +4,7 @@
 class CC_LineOfSight : public CameraConstrain
 {
 public:
-	 CC_LineOfSight( CameraManager &manager );
+	 CC_LineOfSight( CameraManager &manager, const char *name );
 	~CC_LineOfSight();
 
 public:

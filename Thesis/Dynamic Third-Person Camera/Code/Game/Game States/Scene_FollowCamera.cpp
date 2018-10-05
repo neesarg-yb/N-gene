@@ -2,8 +2,17 @@
 #include "Scene_FollowCamera.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/Potential Engine/CC_LineOfSight.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
+#include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
 #include "Game/theGame.hpp"
+
+Scene_FollowCamera *lastCreatedScene = nullptr;
+
+RaycastResult TerrainRaycast( Vector3 const &startPosition, Vector3 const &rayDirection, float maxDistance )
+{
+	return lastCreatedScene->m_terrain->Raycast( startPosition, rayDirection, maxDistance, 0.05f );
+}
 
 Scene_FollowCamera::Scene_FollowCamera()
 	: GameState( "FOLLOW CAMERA" )
@@ -38,11 +47,23 @@ Scene_FollowCamera::Scene_FollowCamera()
 	// Camera Manager
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput );
 	m_cameraManager->SetAnchor( m_player );
+	m_cameraManager->SetRaycastCallback( TerrainRaycast );
 
 	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
+	CameraBehaviour* dofBehaviour		= new CB_DegreesOfFreedom( 5.f, 40.f, 30.f, 100.f, "DegreesOfFreedom" );
+	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
-	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );
+
+	// Camera Constrains
+	CC_LineOfSight* losConstarin = new CC_LineOfSight( *m_cameraManager, "LineOfSight" );
+	m_cameraManager->RegisterConstrain( "LineOfSight", losConstarin );
+	dofBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
+
+	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
+	m_cameraManager->SetActiveCameraBehaviourTo( "DegreesOfFreedom" );
+	
+	lastCreatedScene = this;
 }
 
 Scene_FollowCamera::~Scene_FollowCamera()
@@ -136,21 +157,6 @@ void Scene_FollowCamera::Render( Camera *gameCamera ) const
 	DebugRendererChange3DCamera( m_camera );
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRendererRender();
-
-	// Debugging the Raycast
-	Vector3 cameraPosition	= m_camera->m_cameraTransform.GetWorldPosition();
-	Vector3 cameraForward	= m_camera->m_cameraTransform.GetWorldTransformMatrix().GetKColumn();
-	cameraForward.NormalizeAndGetLength();
-
-	RaycastResult result = m_terrain->Raycast( cameraPosition, cameraForward, 100.f, 0.05f );
-	if( result.didImpact )
-	{
-		// Draw the point
-		DebugRenderPoint( 0.f, 0.5f, result.impactPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-		
-		// Draw the Normal
-		DebugRenderLineSegment( 0.f, result.impactPosition, RGBA_BLUE_COLOR, result.impactPosition + (result.impactNormal * 2.f), RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	}
 }
 
 void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go )
