@@ -28,7 +28,8 @@ public:
 	float Tw = 1.0f;
 
 	Matrix44() {} // Identity matrix
-	explicit Matrix44( const float* sixteenValuesBasisMajor ); // float[16] array in order Ix, Iy...
+	explicit Matrix44( const float* sixteenValuesBasisMajor );			// float[16] array in order Ix, Iy...
+	explicit Matrix44( const Vector3 &translation, float tw = 1.f );	// Translation added on an identity matrix
 	explicit Matrix44( const Vector2& iBasis, const Vector2& jBasis, const Vector2& translation = Vector2(0.f,0.f) );
 	explicit Matrix44( const Vector3& iBasis, const Vector3& jBasis, const Vector3& kBasis, const Vector3& translation = Vector3::ZERO );
 

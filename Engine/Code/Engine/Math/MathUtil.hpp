@@ -29,6 +29,7 @@ float	ClampFloat01(float number);													// Clamps the number in range  [ 0
 float	ClampFloat(float inValue, float minInclusive, float maxInclusive);			// Clamps the inValue in range [ minInclusive, maxInclusive ]
 float	ClampFloatNegativeOneToOne( float inValue );
 int		RoundToNearestInt( float inValue );											// 0.5 rounds up to 1; -0.5 rounds up to 0
+float	GetSign( float number );													// If number >= 0, returns +1.f; else returns -1.f
 
 // For a value in [inStart,inEnd], finds the corresponding value in [outStart,outEnd].
 float	RangeMapFloat( float inValue, float inStart, float inEnd, float outStart, float outEnd );
