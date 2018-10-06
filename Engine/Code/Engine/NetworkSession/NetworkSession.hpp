@@ -37,6 +37,8 @@ public:
 	Vector2 const				m_screenTopRight	= Vector2(  g_aspectRatio,  1.f );
 	AABB2	const				m_screenBounds		= AABB2  ( m_screenBottomLeft, m_screenTopRight );
 	Rgba	const				m_uiBackgroundColor = Rgba   ( 0, 0, 0, 100 );
+	float	const				m_uiTitleFontSize	= 0.03f;
+	float	const				m_uiBodyFontSize	= 0.025f;
 
 public:
 	void Render() const;
