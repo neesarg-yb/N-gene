@@ -106,9 +106,9 @@ void Level1::Render( Camera *gameCamera ) const
 	////////////////////////////////
 	m_renderingPath->RenderSceneForCamera( *m_camera, *m_levelScene );
 
-	// DebugText for Lighting and Shader..
-	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) );
-	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
+//	// DebugText for Lighting and Shader..
+//	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) );
+//	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
 
 	DebugRendererRender();
 }

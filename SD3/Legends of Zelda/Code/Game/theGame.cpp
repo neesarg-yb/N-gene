@@ -259,7 +259,7 @@ void theGame::Startup()
 	SetCurrentGameState( attractGS->m_name );
 
 	// Network Session
-	m_session = new NetworkSession();
+	m_session = new NetworkSession( g_theRenderer );
 	m_session->RegisterNetworkMessage( "ping", OnPing );
 	m_session->RegisterNetworkMessage( "pong", OnPong );
 	m_session->RegisterNetworkMessage( "add",  OnAdd );
@@ -358,6 +358,9 @@ void theGame::Render() const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	g_theRenderer->DrawAABB( m_default_screen_bounds, overlayBoxColor );
+
+	// Network Session UI
+	m_session->Render();
 }
 
 bool theGame::SetCurrentGameState( std::string const &gsName )
