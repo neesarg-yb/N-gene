@@ -32,7 +32,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Asteroids</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
-    <ProjectName>Game</ProjectName>
+    <ProjectName>Legends of Zelda</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -284,7 +284,7 @@
     <ClCompile Include="Abstract Classes\GameState.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
     <ClCompile Include="Game States\LevelSelect.cpp" />
-    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp" />
+    <ClCompile Include="Game States\Level1.cpp" />
     <ClCompile Include="GameCommon.cpp" />
     <ClCompile Include="Main_Win32.cpp" />
     <ClCompile Include="theApp.cpp" />
@@ -300,7 +300,7 @@
     <ClInclude Include="Abstract Classes\GameState.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />
     <ClInclude Include="Game States\LevelSelect.hpp" />
-    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp" />
+    <ClInclude Include="Game States\Level1.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="GameCommon.hpp" />
     <ClInclude Include="theApp.hpp" />

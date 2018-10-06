@@ -9,7 +9,7 @@
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
-#include "Game/Game States/Scene_QuaternionsTest.hpp"
+#include "Game/Game States/Level1.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -90,7 +90,7 @@ void theGame::Startup()
 	GameState* levelSelectGS = new LevelSelect();
 	AddNewGameState( levelSelectGS );
 
-	GameState* quaternionsTest = new Scene_QuaternionsTest();
+	GameState* quaternionsTest = new Level1();
 	AddNewGameState( quaternionsTest );
 
 	// Set game state to begin with

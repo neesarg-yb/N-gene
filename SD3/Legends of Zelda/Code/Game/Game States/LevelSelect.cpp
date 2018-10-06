@@ -8,9 +8,9 @@ LevelSelect::LevelSelect()
 	: GameState( "LEVEL SELECT" )
 {
 	// Setup the LevelSelection UI
-	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.35f, 0.45f, 0.65f, 0.55f ) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> 7 Degrees of Freedom         ", &m_levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Cubes             ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.43f, 0.47f, 0.57f, 0.53f ) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("-> Level 2", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("-> Level 1", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->m_selectionIndex = 1;
 }
 
@@ -51,7 +51,7 @@ void LevelSelect::Render( Camera *gameCamera ) const
 	g_theRenderer->ClearScreen( g_theGame->m_default_screen_color );
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
-	g_theRenderer->DrawTextInBox2D( "Scenes", Vector2(0.5f, 0.6f), g_theGame->m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "Jump into..", Vector2(0.5f, 0.6f), g_theGame->m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 	g_theRenderer->DrawTextInBox2D( "(Press ~ for DevConsole )", Vector2(0.5f, 0.02f), g_theGame->m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 
 
@@ -60,6 +60,6 @@ void LevelSelect::Render( Camera *gameCamera ) const
 
 void LevelSelect::LevelSelected( char const * levelName )
 {
-	if( std::string(levelName) == "--> Quaternion Cubes             " )
-		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
+	if( std::string(levelName) == "-> Level 1" )
+		g_theGame->StartTransitionToState( "LEVEL 1" );
 }

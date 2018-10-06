@@ -1,11 +1,11 @@
 #pragma once
-#include "Scene_QuaternionsTest.hpp"
+#include "Level1.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
 
-Scene_QuaternionsTest::Scene_QuaternionsTest()
-	: GameState( "QUATERNIONS TEST" )
+Level1::Level1()
+	: GameState( "LEVEL 1" )
 {
 	// Setup the Orbit camera
 	m_camera = new OrbitCamera( Vector3::ZERO );
@@ -36,7 +36,7 @@ Scene_QuaternionsTest::Scene_QuaternionsTest()
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 }
 
-Scene_QuaternionsTest::~Scene_QuaternionsTest()
+Level1::~Level1()
 {
 	delete m_renderingPath;
 	delete m_levelScene;
@@ -57,19 +57,19 @@ Scene_QuaternionsTest::~Scene_QuaternionsTest()
 	delete m_camera;
 }
 
-void Scene_QuaternionsTest::BeginFrame()
+void Level1::BeginFrame()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 }
 
-void Scene_QuaternionsTest::EndFrame()
+void Level1::EndFrame()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 }
 
-void Scene_QuaternionsTest::Update( float deltaSeconds )
+void Level1::Update( float deltaSeconds )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
@@ -88,7 +88,7 @@ void Scene_QuaternionsTest::Update( float deltaSeconds )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
 }
 
-void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
+void Level1::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
 

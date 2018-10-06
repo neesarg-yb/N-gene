@@ -7,11 +7,11 @@
 
 typedef std::vector< GameObject* > GameObjectList;
 
-class Scene_QuaternionsTest : public GameState
+class Level1 : public GameState
 {
 public:
-	 Scene_QuaternionsTest();
-	~Scene_QuaternionsTest();
+	 Level1();
+	~Level1();
 
 public:
 	void BeginFrame();

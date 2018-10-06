@@ -17,7 +17,7 @@ void QuitTheApp( Command& cmd );
 // #SD1ToDo: Move each of these items to its proper place, once that place is established
 // 
 HWND g_hWnd = nullptr;								
-const char* APP_NAME = "Protogame 3D";
+const char* APP_NAME = "Legends of Zelda";
 
 
 //-----------------------------------------------------------------------------------------------
