@@ -40,6 +40,163 @@ void HideLogTag( Command& cmd )
 	LogSystem::GetInstance()->HideTag( tagName );
 }
 
+void AddSessionConnection( Command &cmd )
+{
+	int				idx;
+	NetworkAddress	addr;
+
+	std::string arg1 = cmd.GetNextString();
+	std::string arg2 = cmd.GetNextString();
+	if( arg1 == "" || arg2 == "" )
+	{
+		ConsolePrintf( "Error: Command needs two valid argument!" );
+		return;
+	}
+
+	idx	 = atoi( arg1.c_str() );
+	addr = NetworkAddress( arg2.c_str() );
+
+	NetworkSession		*session	= theGame::GetSession();
+	NetworkConnection	*connection	= session->AddConnection( idx, addr );
+	if( connection == nullptr )
+		ConsolePrintf( "Failed to add connection!" );
+	else
+		ConsolePrintf( "Connection added at index [%d]", idx );
+}
+
+void SessionSendPing( Command &cmd )
+{
+	int idx;
+
+	std::string arg1 = cmd.GetNextString();
+	std::string arg2 = cmd.GetRemainingCommandInOneString();
+	if( arg1 == "" )
+	{
+		ConsolePrintf( "Provide a valid index" );
+		return;
+	}
+	else
+		idx = atoi( arg1.c_str() );
+
+	NetworkSession		*session  = theGame::GetSession();
+	NetworkConnection	*receiver = session->GetConnection( idx );
+	if( receiver == nullptr )
+	{
+		ConsolePrintf( "No connection at index %d", idx );
+		return;
+	}
+
+	NetworkMessage msg( "ping" );
+	msg.Write( arg2 );
+
+	receiver->Send( msg );
+}
+
+void SessionSendAdd( Command &cmd )
+{
+	int		idx;
+	float	value1;
+	float	value2;
+
+	std::string arg1 = cmd.GetNextString();
+	std::string arg2 = cmd.GetNextString();
+	std::string arg3 = cmd.GetNextString();
+	if( arg1 == "" || arg2 == "" || arg3 == "" )
+	{
+		ConsolePrintf( "Not all arguments are provided.." );
+		return;
+	}
+
+	idx		= atoi( arg1.c_str() );
+	value1	= (float) atof( arg2.c_str() );
+	value2	= (float) atof( arg3.c_str() );
+
+	NetworkSession		*session	= theGame::GetSession();
+	NetworkConnection	*receiver	= session->GetConnection( idx );
+	if( receiver == nullptr )
+	{
+		ConsolePrintf( "No connection at index %d", idx );
+		return;
+	}
+
+	NetworkMessage msg( "add" );
+	msg.Write( value1 );
+	msg.Write( value2 );
+	receiver->Send( msg );
+}
+
+bool OnAddResponse( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( from );
+
+	float val1 = 0.f;
+	float val2 = 0.f;
+	float sum  = 0.f;
+
+	msg.Read( val1 );
+	msg.Read( val2 );
+	msg.Read( sum );
+
+	ConsolePrintf( "AddResponse: %f + %f = %f", val1, val2, sum );
+
+	return true;
+}
+
+bool OnPing( NetworkMessage const &msg, NetworkSender &from )
+{
+	char str[256];
+	msg.Read( str, 256 );
+
+	ConsolePrintf( "Received ping from %s => %s", from.address.AddressToString().c_str(), str ); 
+
+	// ping responds with pong
+	NetworkMessage pong( "pong" ); 
+	if( from.connection != nullptr )
+		from.connection->Send( pong );
+	else
+		from.session.SendDirectMessageTo( pong, from.address );
+
+	// all messages serve double duty
+	// do some work, and also validate
+	// if a message ends up being malformed, we return false
+	// to notify the session we may want to kick this connection; 
+	return true; 
+}
+
+bool OnPong( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( msg );
+
+	ConsolePrintf( "PONG! Received from %s", from.address.AddressToString().c_str() );
+	return false;
+}
+
+bool OnAdd( NetworkMessage const &msg, NetworkSender &from )
+{
+	float val0 = 0;
+	float val1 = 0;
+	float sum;
+
+	if( !msg.Read( val0 ) || !msg.Read( val1 ) )
+		return false;
+
+	sum = val0 + val1;
+	std::string additionResponse = Stringf( "Add: %f + %f = %f", val0, val1, sum );
+	ConsolePrintf( additionResponse.c_str() );
+
+	// Send back a response here, if you want..
+	NetworkMessage replyMsg( "add_response" );
+	replyMsg.Write( val0 );
+	replyMsg.Write( val1 );
+	replyMsg.Write( sum );
+	if( from.connection != nullptr )
+		from.connection->Send( replyMsg );
+	else
+		from.session.SendDirectMessageTo( replyMsg, from.address );
+
+	return true;
+}
+
 theGame::theGame()
 {
 	// Set global variable
@@ -59,6 +216,8 @@ theGame::theGame()
 
 theGame::~theGame()
 {
+	delete m_session;
+
 	while ( m_gameStates.size() > 0 )
 	{
 		delete m_gameStates.back();
@@ -81,6 +240,9 @@ void theGame::Startup()
 	CommandRegister( "log_hide_all", HideAllLogTags );
 	CommandRegister( "log_show_tag", ShowLogTag );
 	CommandRegister( "log_hide_tag", HideLogTag );
+	CommandRegister( "add_connection", AddSessionConnection );
+	CommandRegister( "send_ping", SessionSendPing );
+	CommandRegister( "send_add", SessionSendAdd );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
@@ -95,12 +257,29 @@ void theGame::Startup()
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );
+
+	// Network Session
+	m_session = new NetworkSession();
+	m_session->RegisterNetworkMessage( "ping", OnPing );
+	m_session->RegisterNetworkMessage( "pong", OnPong );
+	m_session->RegisterNetworkMessage( "add",  OnAdd );
+	m_session->RegisterNetworkMessage( "add_response",  OnAddResponse );
+
+	// For now we'll just shortcut to being a HOST
+	// "bound" state
+	// This creates the socket(s) we can communicate on..
+	bool bindSuccess = m_session->BindPort( GAME_PORT, 1U );
+	ConsolePrintf( RGBA_KHAKI_COLOR, "Network Session Bind Succes = %d; Address = %s", (int)bindSuccess, m_session->m_mySocket->m_address.AddressToString().c_str() );
+	m_session->m_mySocket->EnableNonBlocking();
 }
 
 void theGame::BeginFrame()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
+
+	// Network Session
+	m_session->ProcessIncoming();
 
 	m_currentGameState->BeginFrame();
 }
@@ -111,6 +290,9 @@ void theGame::EndFrame()
 	PROFILE_SCOPE_FUNCTION();
 
 	m_currentGameState->EndFrame();
+
+	// Network Session
+	m_session->ProcessOutgoing();
 }
 
 void theGame::Update() 
@@ -211,6 +393,11 @@ void theGame::QuitGame( char const * actionName )
 {
 	UNUSED( actionName );
 	g_theApp->m_isQuitting = true;
+}
+
+NetworkSession* theGame::GetSession()
+{
+	return g_theGame->m_session;
 }
 
 void theGame::AddNewGameState( GameState* gsToAdd )

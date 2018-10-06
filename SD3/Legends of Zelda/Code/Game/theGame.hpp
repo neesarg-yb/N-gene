@@ -7,6 +7,7 @@
 #include "Engine/Input/Command.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Network/RemoteCommandService.hpp"
+#include "Engine/NetworkSession/NetworkSession.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 
@@ -17,6 +18,9 @@ public:
 	~theGame();
 
 public:
+	// Network Session
+	NetworkSession		*m_session = nullptr;
+
 	// UI & Camera
 	const AABB2			m_default_screen_bounds	= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
 	const Vector3		m_default_screen_center	= Vector3::ZERO;
@@ -37,6 +41,9 @@ public:
 	void Render() const;
 
 	void QuitGame( char const *actionName );
+
+	// Network Session
+	static NetworkSession* GetSession();
 
 public:
 	// Game States
