@@ -2,9 +2,19 @@
 #include "NetworkSession.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
-NetworkSession::NetworkSession()
+NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
+	: m_theRenderer( currentRenderer )
 {
-	
+	// For UI
+	m_uiCamera = new Camera();
+
+	// Setting up the Camera
+	m_uiCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
+	m_uiCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
+	m_uiCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );			// Make an NDC
+
+	if( currentRenderer != nullptr )
+		m_fonts = currentRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
 }
 
 NetworkSession::~NetworkSession()
@@ -24,6 +34,19 @@ NetworkSession::~NetworkSession()
 	// Delete my UDP Socket
 	delete m_mySocket;
 	m_mySocket = nullptr;
+}
+
+void NetworkSession::Render() const
+{
+	m_theRenderer->BindCamera( m_uiCamera );
+
+	// To form an overlay: do not clear screen, make depth of every pixel 1.f, do not write new depth..
+	m_theRenderer->UseShader( nullptr );
+	m_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
+
+	// Draw overlay
+	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.2f, 1.f ) );
+	m_theRenderer->DrawAABB( backgroundBox, m_uiBackgroundColor );
 }
 
 bool NetworkSession::BindPort( uint16_t port, uint16_t range )
