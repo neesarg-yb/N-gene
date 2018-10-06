@@ -1,5 +1,6 @@
 #pragma once
 #include "NetworkSession.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
@@ -47,6 +48,30 @@ void NetworkSession::Render() const
 	// Draw overlay
 	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.2f, 1.f ) );
 	m_theRenderer->DrawAABB( backgroundBox, m_uiBackgroundColor );
+
+	// Title Box
+	AABB2		titleBox = backgroundBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.f ) );
+	std::string	titleStr = "NETWORK SESSION";
+	m_theRenderer->DrawTextInBox2D( titleStr.c_str(), Vector2( 0.f, 0.5f ), titleBox, 0.03f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+
+	// Simulated Rate, Lag & Loss
+	AABB2		srllBox = backgroundBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.6f ), Vector2( 1.f, 0.9f ) );
+	std::string srllStr = Stringf( "%-8s:%s\n%-8s:%s\n%-8s:%s", "rate", "XX hz", "sim_lag", "X ms-X ms", "sim_loss", "X.XX %" );
+	m_theRenderer->DrawTextInBox2D( srllStr.c_str(), Vector2( 0.f, 1.f ), srllBox, 0.025f, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+
+	// My Socket Address
+	AABB2		myAddressBaseBox	= backgroundBox.GetBoundsFromPercentage   ( Vector2( 0.0f, 0.5f ), Vector2( 1.f, 0.7f ) );
+	AABB2		myAddressTitleBox	= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.0f, 0.5f ), Vector2( 1.f, 1.0f ) );
+	AABB2		myAddressBox		= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.0f ), Vector2( 1.f, 0.5f ) );
+	std::string myAddressTitle		= "My Socket Address:";
+	std::string socketAddrStr		= m_mySocket->m_address.AddressToString();
+	m_theRenderer->DrawTextInBox2D( myAddressTitle.c_str(), Vector2( 0.f, 0.5f ), myAddressTitleBox, 0.025f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+	m_theRenderer->DrawTextInBox2D( socketAddrStr.c_str(),  Vector2( 0.f, 0.5f ), myAddressBox,      0.025f, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+
+	// Connections Heading
+	AABB2		connectionsHeadingBox = backgroundBox.GetBoundsFromPercentage( Vector2( 0.0f, 0.4f ), Vector2( 1.f, 0.5f ) );
+	std::string connectionsHeadingStr = "Connections:";
+	m_theRenderer->DrawTextInBox2D( connectionsHeadingStr.c_str(), Vector2( 0.f, 0.5f ), connectionsHeadingBox, 0.025f, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 }
 
 bool NetworkSession::BindPort( uint16_t port, uint16_t range )
