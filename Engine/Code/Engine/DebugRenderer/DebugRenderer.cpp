@@ -42,6 +42,11 @@ void DebugRendererShutdown()
 	EmptyTheRenderObjectQueue();
 }
 
+void DebugRendererChange3DCamera( Camera *camera3D )
+{
+	debugCamera3D = camera3D;
+}
+
 void DebugRendererUpdate( float deltaSeconds )
 {
 	// Profiler Test

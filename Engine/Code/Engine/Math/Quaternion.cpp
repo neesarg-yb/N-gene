@@ -2,19 +2,29 @@
 #include "Quaternion.hpp"
 #include "Engine/Math/MathUtil.hpp"
 
+Quaternion Quaternion::IDENTITY = Quaternion( 1.f, Vector3::ZERO );
+
 Quaternion::Quaternion()
 {
 	// Identity quaternion, by default values
+}
+
+Quaternion::Quaternion( float r, Vector3 const &i )
+{
+	this->r = r;
+	this->i = i;
 }
 
 Quaternion::Quaternion( Vector3 const &axis, float rotationDegrees )
 {
 	float halfRotationRadians = DegreeToRadian( rotationDegrees ) * 0.5f;
 
-	r	= cosf( halfRotationRadians );
-	i.x	= axis.x * sinf( halfRotationRadians );
-	i.y	= axis.y * sinf( halfRotationRadians );
-	i.z	= axis.z * sinf( halfRotationRadians );
+	// using -halfRotationRadians because we want it to rotate by Left Hand Rule..
+	//	By default, Quaternions rotates using Right Hand Rule
+	r	= cosf( -halfRotationRadians );
+	i.x	= axis.x * sinf( -halfRotationRadians );
+	i.y	= axis.y * sinf( -halfRotationRadians );
+	i.z	= axis.z * sinf( -halfRotationRadians );
 }
 
 Quaternion::~Quaternion()
@@ -32,10 +42,11 @@ void Quaternion::Normalize()
 
 	if( r < 0.9999f )
 	{
-		float oneBylength = 1.f / sqrtf( lengthSquared );
-		TODO("Do not messup with the read part, here!");
-		r = r * oneBylength;
-		i = i * oneBylength;
+		float rSquare = r * r;
+		float iLength = sqrtf( 1.f - rSquare );
+		
+		i = i.GetNormalized();
+		i = i * iLength;
 	}
 	else
 	{
@@ -155,6 +166,8 @@ Quaternion Quaternion::FromEuler( Vector3 const &eulerInDegrees )
 
 Quaternion Quaternion::FromMatrix( Matrix44 const &mat44 )
 {
+	// From: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+
 	/*
 	Formula expects matrix,								My matrix is,
 		| m00  m01  m02 |   | Ix  Iy  Iz |						| Ix  Jx  Kx |
@@ -174,60 +187,40 @@ Quaternion Quaternion::FromMatrix( Matrix44 const &mat44 )
 	float const m10	= mat44.Jx;
 	float const m01	= mat44.Iy;
 
-//	Forseth's way
-//
-//	Quaternion q;
-// 	if (tr >= 0.0f) 
-// 	{
-// 		float s		= sqrtf(tr + 1.0f) * 2.0f;
-// 		float is	= 1.0f / s;
-// 
-// 		q.r		= 0.25f * s;
-// 		q.i.x	= (m21 - m12) * is;
-// 		q.i.y	= (m02 - m20) * is;
-// 		q.i.z	= (m10 - m01) * is;
-// 	} 
-// 	else if ((m00 > m11) & (m00 > m22)) 
-// 	{
-// 		float s		= sqrtf( 1.0f + m00 - m11 - m22 ) * 2.0f;
-// 		float is	= 1.0f / s;
-// 
-// 		q.r		= (m21 - m12) * is;
-// 		q.i.x	= 0.25f * s;
-// 		q.i.y	= (m01 + m10) * is;
-// 		q.i.z	= (m02 + m20) * is;
-// 	} 
-// 	else if (m11 > m22) 
-// 	{
-// 		float s		= sqrtf( 1.0f + m11 - m00 - m22 ) * 2.0f;
-// 		float is	= 1.0f / s;
-// 
-// 		q.r		= (m02 - m20) * is;
-// 		q.i.x	= (m01 + m10) * is;
-// 		q.i.y	= 0.25f * s;
-// 		q.i.z	= (m12 + m21) * is;
-// 	} 
-// 	else 
-// 	{
-// 		float s		= sqrtf( 1.0f + m22 - m00 - m11 ) * 2.0f;
-// 		float is	= 1.0f / s;
-// 		q.r		= (m10 - m01) * is;
-// 		q.i.x	= (m02 + m20) * is;
-// 		q.i.y	= (m12 + m21) * is;
-// 		q.i.z	= 0.25f * s;
-// 	}
-
-
-	
-	// From: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
-	
-	TODO( "This will fail if q.r == 0..! 90 or -90 degrees..!" ); 
 	Quaternion q;
-
-	q.r		= sqrtf(1 + m00 + m11 + m22) * 0.5f ;
-	q.i.x	= (m21 - m12) / (4.f * q.r);
-	q.i.y	= (m02 - m20) / (4.f * q.r);
-	q.i.z	= (m10 - m01) / (4.f * q.r);
+	
+	if ( tr > 0 ) 
+	{ 
+		float S = sqrtf(tr + 1.f) * 2.f;			// S = 4*qw
+		q.r		= 0.25f * S;
+		q.i.x	= (m21 - m12) / S;
+		q.i.y	= (m02 - m20) / S;
+		q.i.z	= (m10 - m01) / S;
+	}
+	else if ( (m00 > m11)&(m00 > m22) ) 
+	{ 
+		float S	= sqrt(1.f + m00 - m11 - m22) * 2; // S = 4*qx 
+		q.r		= (m21 - m12) / S;
+		q.i.x	= 0.25f * S;
+		q.i.y	= (m01 + m10) / S;
+		q.i.z	= (m02 + m20) / S;
+	} 
+	else if (m11 > m22) 
+	{ 
+		float S	= sqrt(1.f + m11 - m00 - m22) * 2; // S = 4*qy
+		q.r		= (m02 - m20) / S;
+		q.i.x	= (m01 + m10) / S; 
+		q.i.y	= 0.25f * S;
+		q.i.z	= (m12 + m21) / S; 
+	} 
+	else 
+	{ 
+		float S	= sqrt(1.f + m22 - m00 - m11) * 2; // S = 4*qz
+		q.r		= (m10 - m01) / S;
+		q.i.x	= (m02 + m20) / S;
+		q.i.y	= (m12 + m21) / S;
+		q.i.z	= 0.25f * S;
+	}
 
 	q.Normalize();
 
@@ -239,3 +232,77 @@ float Quaternion::DotProduct( Quaternion const &a, Quaternion const &b )
 	return Vector4::DotProduct( a.GetAsVector4(), b.GetAsVector4() );
 }
 
+Quaternion Quaternion::Slerp( Quaternion a, Quaternion const &b, float t )
+{
+	// References:
+	//			(1) Book "3D Math Primer for Graphics and Game Development" by Fletcher Dunn and Ian Parberry
+	//				-> Topic: [10.4.13] Quaternion Interpolation
+	//			(2) YouTube Video: https://www.youtube.com/watch?v=x1aCcyD0hqE
+
+
+	// Interpolation using solution: Qt = k0(Qa) + k1(Qb)
+	float k0;
+	float k1;
+
+	// q and -q represents the same angle,
+	// but we need both quaternions having positive dot product => Not in opposite directions
+	// Determine that with dot product and if necessary, flip the direction of one of the quaternions..
+
+	// DotProduct( a, b ) = Cos( omega )
+	//
+	//         .             
+	//        /|             
+	//       / |             Projection of a on b =  Cos( omega )
+	//    a /  |                                                 
+	//     /   |                    ( b/c length of both is ONE )
+	//    /    |                                                 
+	//   /omega|             
+	//  /)_____|__________   
+	//         b             
+	float cosOmega = Quaternion::DotProduct( a, b );
+	if( cosOmega < 0.f )
+	{
+		a.r		= -1.f * a.r;
+		a.i.x	= -1.f * a.i.x;
+		a.i.y	= -1.f * a.i.y;
+		a.i.z	= -1.f * a.i.z;
+		
+		cosOmega = -1.f * cosOmega;
+	}
+
+	// If both quaternions are very close together => Dot Product is near ONE
+	// Do normal lerp to overcome divide by zero risk
+	float const dotProduct = cosOmega;
+	if( dotProduct > 0.9999f )
+	{
+		// Do linear interpolation
+		k0 = 1.f - t;
+		k1 = t;
+	}
+	else
+	{
+		// Do spherical interpolation
+		//
+		// Get sin(omega)
+		// Using trig identity: sin^2(omega) + cos^2(omega) = 1
+		float sinOmega = sqrtf( 1.f - (cosOmega * cosOmega) );
+
+		// Get angle omega using inverse of tan(omega)
+		float omega = atan2f( sinOmega, cosOmega );
+
+		// Value of 1 / sin(omega); we're gonna use it twice
+		float oneOverSinOmega = 1.f / sinOmega;
+
+		k0 = sinf( (1.f - t) * omega ) * oneOverSinOmega;
+		k1 = sinf( t * omega ) * oneOverSinOmega;
+	}
+
+	// Interpolation
+	Quaternion c;
+	c.r		= (k0 * a.r)   + (k1 * b.r);
+	c.i.x	= (k0 * a.i.x) + (k1 * b.i.x);
+	c.i.y	= (k0 * a.i.y) + (k1 * b.i.y);
+	c.i.z	= (k0 * a.i.z) + (k1 * b.i.z);
+
+	return c;
+}

@@ -30,8 +30,10 @@ public:
 		  bool	  operator == ( const Vector3& vecToCompare ) const;		// vec2 == vec2
 		  bool	  operator != ( const Vector3& vecToCompare ) const;		// vec2 != vec2
 
+	void			LimitLengthTo( float const maxLength );
 	float			GetLength() const;
 	Vector3			GetNormalized() const;
+	float			NormalizeAndGetLength();	// Returns length of the vector and then normalizes it
 	Vector3			GetAsDirection() const;		// From Euler Rotation to Direction Vector
 	void			GetTangentAndBitangent( Vector3 *tangent, Vector3 *bitangent = nullptr ) const;	// If passed nullptr, it ignores that argument
 	Vector2			IgnoreZ() const;
