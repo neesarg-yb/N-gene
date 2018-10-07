@@ -9,7 +9,8 @@
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
-#include "Game/Game States/Scene_QuaternionsTest.hpp"
+#include "Game/Game States/Level1.hpp"
+#include "Game/Game States/LevelStopwatchTest.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -44,6 +45,9 @@ theGame::theGame()
 {
 	// Set global variable
 	g_theGame = this;
+
+	// Initialize the game clock
+	g_gameClock = new Clock( GetMasterClock() );
 
 	m_lastFramesTime = GetCurrentTimeSeconds();
 
@@ -90,8 +94,11 @@ void theGame::Startup()
 	GameState* levelSelectGS = new LevelSelect();
 	AddNewGameState( levelSelectGS );
 
-	GameState* quaternionsTest = new Scene_QuaternionsTest();
-	AddNewGameState( quaternionsTest );
+	GameState* level1 = new Level1();
+	AddNewGameState( level1 );
+
+	GameState* stopwatchTest = new LevelStopwatchTest();
+	AddNewGameState( stopwatchTest );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );
@@ -119,7 +126,7 @@ void theGame::Update()
 	PROFILE_SCOPE_FUNCTION();
 
 	// Calculating deltaTime
-	float deltaSeconds			= CalculateDeltaTime();
+	float deltaSeconds			= (float) g_gameClock->GetFrameDeltaSeconds();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
 
 	m_timeSinceTransitionBegan	+=	deltaSeconds;

@@ -3,6 +3,9 @@
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 
+class GameObject;
+typedef std::vector< GameObject* > GameObjectList;
+
 enum eGameObjectType
 {
 	GAMEOBJECT_TYPE_BLOCK = 0,

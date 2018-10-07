@@ -5,13 +5,11 @@
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/Abstract Classes/GameObject.hpp"
 
-typedef std::vector< GameObject* > GameObjectList;
-
-class Scene_QuaternionsTest : public GameState
+class Level1 : public GameState
 {
 public:
-	 Scene_QuaternionsTest();
-	~Scene_QuaternionsTest();
+	 Level1();
+	~Level1();
 
 public:
 	void BeginFrame();
@@ -28,8 +26,6 @@ private:
 	ForwardRenderingPath*		m_renderingPath				= nullptr;
 
 public:
-	std::string					m_levelName;
-
 	// Lights
 	std::vector< Light* >		m_lightSources;
 	GameObjectList				m_allGameObjects;

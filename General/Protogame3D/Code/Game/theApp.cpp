@@ -201,6 +201,9 @@ void theApp::RunFrame() {
 }
 
 void theApp::BeginFrame() {
+	// Inform the Clock about frame
+	TickMasterClock();
+
 	// Profiler MarkFrame
 	Profiler::GetInstance()->MarkFrame();
 

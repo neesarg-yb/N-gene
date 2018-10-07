@@ -1,20 +1,20 @@
 #pragma once
 
 #include "theGame.hpp"
-#include "Game/GameCommon.hpp"
 #include "Engine/Core/EngineCommon.hpp"
-#include "Engine/../ThirdParty/tinyxml/tinyxml2.h"
 #include "Engine/Core/XMLUtilities.hpp"
 #include "Engine/Core/Blackboard.hpp"
 #include "Engine/Core/Image.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/Clock.hpp"
+#include "ThirdParty/tinyxml/tinyxml2.h"
+#include "Game/GameCommon.hpp"
 
 using namespace tinyxml2;
 
 class theApp
 {
 public:
-	theGame* g_theGame = nullptr;
 	bool m_isQuitting = false;
 
 	bool IKeyIsPressed = false;
