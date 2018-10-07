@@ -4,7 +4,7 @@
 #include <windows.h>
 #define WIN32_LEAN_AND_MEAN
 
-Clock::Clock( Clock* parent /* = nullptr */ )
+Clock::Clock( Clock const * parent /* = nullptr */ )
 	: m_parent( parent )
 {
 	InitalizeSecondsPerClockCycle();
@@ -99,7 +99,7 @@ unsigned int Clock::GetMillliSecondsFromPerformanceCounter( uint64_t hpc )
 	return (unsigned int)( (double)hpc * m_secondsPerClockCycle * 1000.0 );
 }
 
-void Clock::AddChild( Clock* childClock )
+void Clock::AddChild( Clock* childClock ) const
 {
 	bool thisChildAlreadyExist = false;
 

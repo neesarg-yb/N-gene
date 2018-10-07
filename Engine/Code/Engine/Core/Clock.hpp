@@ -40,11 +40,11 @@ private:
 	unsigned int			m_frameCount	= 0;
 	bool					m_isPaused		= false;
 
-	Clock*					m_parent		= nullptr;
-	std::vector< Clock* >	m_childrenClocks;
+	Clock const*					m_parent			= nullptr;
+	std::vector< Clock* > mutable 	m_childrenClocks;
 
 public:
-	 Clock( Clock* parent = nullptr );
+	 Clock( Clock const* parent = nullptr );
 	 Clock( Clock const & copy ) = delete;
 	~Clock();
 
@@ -55,12 +55,11 @@ public:
 	
 	double	GetFrameDeltaSeconds();										// FrameTime is deltaSeconds
 	
-	void	AddChild( Clock* childClock );
+	void	AddChild( Clock* childClock ) const;
 
 private:
 	void			InitalizeSecondsPerClockCycle();
 	uint64_t		GetPerformanceCounter();							// Uses a MSDN Function
 	double			GetSecondsFromPerformanceCounter( uint64_t hpc );
 	unsigned int	GetMillliSecondsFromPerformanceCounter( uint64_t hpc );
-
 };
