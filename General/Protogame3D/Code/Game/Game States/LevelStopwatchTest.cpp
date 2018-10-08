@@ -6,12 +6,13 @@
 LevelStopwatchTest::LevelStopwatchTest()
 	: GameState( "LEVEL STOPWATCH" )
 {
-
+	m_levelClock = new Clock( GetMasterClock() );
 }
 
 LevelStopwatchTest::~LevelStopwatchTest()
 {
-
+	delete m_levelClock;
+	m_levelClock = nullptr;
 }
 
 void LevelStopwatchTest::BeginFrame()
@@ -36,7 +37,10 @@ void LevelStopwatchTest::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
 
-	DebugRender2DText( 0.f, Vector2::ZERO, 15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, "Testing the Stopwatch" );
+	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, "Testing the Stopwatch" );
+	
+//	std::string currentLevelTimeStr = m_levelClock->GetCurrentTimeStamp();
+//	DebugRender2DText( 0.f, Vector2( -850.f, 440.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, currentLevelTimeStr.c_str() );
 
 	DebugRendererRender();
 }
