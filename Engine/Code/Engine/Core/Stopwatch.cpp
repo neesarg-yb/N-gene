@@ -9,7 +9,8 @@ Stopwatch::Stopwatch( Clock const *referenceClock /*= nullptr */ )
 	if( m_referenceClock == nullptr )
 		m_referenceClock = GetMasterClock();
 
-	m_startHPC = m_referenceClock->GetCurrentHPC();
+	// Sets the reference HPC
+	m_referenceTotalHPC = m_referenceClock->total.hpc;
 }
 
 Stopwatch::~Stopwatch()
@@ -21,7 +22,7 @@ Stopwatch::~Stopwatch()
 void Stopwatch::SetClock( Clock const *refClock )
 {
 	// Store it to maintain (even after the clock change)
-	uint64_t elapsedTime = m_referenceClock->GetCurrentHPC() - m_startHPC;
+	uint64_t elapsedHPC = GetElapsedHPC();
 
 	// Change the clock
 	if( refClock != nullptr )
@@ -29,28 +30,33 @@ void Stopwatch::SetClock( Clock const *refClock )
 	else
 		m_referenceClock = GetMasterClock();
 
-	m_startHPC  = m_referenceClock->GetCurrentHPC();			// Set startHPC to current time
-	m_startHPC -= elapsedTime;									// Maintain the elapsed time
+	m_referenceTotalHPC  = m_referenceClock->total.hpc;		// Sets the reference HPC to new clock's total
+	m_referenceTotalHPC -= elapsedHPC;						// We maintain the elapsed time
 }
 
 void Stopwatch::SetTimer( double seconds )
 {
-	m_startHPC		= m_referenceClock->GetCurrentHPC();
-	m_intervalHPC	= Clock::GetHPCFromSeconds( seconds );
+	// Makes the elapsed time ZERO
+	Reset();
+
+	// Set the new interval
+	m_intervalHPC = Clock::GetHPCFromSeconds( seconds );
 }
 
 void Stopwatch::Reset()
 {
-	m_startHPC = m_referenceClock->GetCurrentHPC();
+	// Set reference HPC to current total; i.e. starting the timer from this moment
+	// i.e. Elapsed Time will be ZERO
+	m_referenceTotalHPC = m_referenceClock->total.hpc;
 }
 
 bool Stopwatch::CheckAndReset()
 {
-	uint64_t elapsedTime = m_referenceClock->GetCurrentHPC() - m_startHPC;
+	uint64_t elapsedHPC = GetElapsedHPC();
 
-	if( elapsedTime >= m_intervalHPC )
+	if( elapsedHPC >= m_intervalHPC )
 	{
-		m_startHPC = m_referenceClock->GetCurrentHPC();		// i.e. Elapsed Time is now reset to ZERO
+		Reset();											// i.e. Elapsed Time is now reset to ZERO
 		return true;
 	}
 	else
@@ -62,11 +68,11 @@ bool Stopwatch::Decrement()
 	if( m_intervalHPC == 0U )
 		return false;
 
-	uint64_t elapsedTime = m_referenceClock->GetCurrentHPC() - m_startHPC;
+	uint64_t elapsedHPC = GetElapsedHPC();
 
-	if( elapsedTime >= m_intervalHPC )
+	if( elapsedHPC >= m_intervalHPC )
 	{
-		m_startHPC += m_intervalHPC;								// Adding to startHPC => Decrementing the elapsed time
+		m_referenceTotalHPC += m_intervalHPC;				// Adding to referenceTotalHPC => Decrementing the elapsed time
 		return true;
 	}
 	else
@@ -78,11 +84,11 @@ uint Stopwatch::DecrementAll()
 	if( m_intervalHPC == 0U )
 		return 0U;
 
-	uint64_t elapsedTime		= m_referenceClock->GetCurrentHPC() - m_startHPC;
-	uint	 numTimesElapsed	= (uint)(elapsedTime / m_intervalHPC);
+	uint64_t elapsedHPC		 = GetElapsedHPC();
+	uint	 numTimesElapsed = (uint)(elapsedHPC / m_intervalHPC);
 
 	// Decrement elapsed time, all at once!
-	m_startHPC += ( numTimesElapsed * m_intervalHPC );
+	m_referenceTotalHPC += ( numTimesElapsed * m_intervalHPC );
 
 	return numTimesElapsed;
 }
@@ -92,28 +98,21 @@ double Stopwatch::GetIntervalSeconds() const
 	return Clock::GetSecondsFromHPC( m_intervalHPC );
 }
 
-double Stopwatch::GetElapsedTime() const
-{
-	uint64_t elapsedHPC = m_referenceClock->GetCurrentHPC() - m_startHPC;
-
-	return Clock::GetSecondsFromHPC( elapsedHPC );
-}
-
 float Stopwatch::GetNormalizedElapsedTime() const
 {
 	// Safety Check
 	if( m_intervalHPC == 0 )
 		return 1.f;
 
-	uint64_t elapsedHPC				= m_referenceClock->GetCurrentHPC() - m_startHPC;
-	float	 normalizedElapsedHPC	= (float) (elapsedHPC / m_intervalHPC);
+	uint64_t elapsedHPC				= GetElapsedHPC();
+	float	 normalizedElapsedHPC	= (float)((double)elapsedHPC / (double)m_intervalHPC);
 
 	return normalizedElapsedHPC;
 }
 
 bool Stopwatch::HasElapsed() const
 {
-	uint64_t elapsedHPC = m_referenceClock->GetCurrentHPC() - m_startHPC;
+	uint64_t elapsedHPC = GetElapsedHPC();
 
 	if( elapsedHPC >= m_intervalHPC )
 		return true;
