@@ -53,14 +53,16 @@ void LevelStopwatchTest::Render( Camera *gameCamera ) const
 	DebugRender2DText( 0.f, Vector2( -850.f, 420.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[P] : Pause the Level Clock" );
 	DebugRender2DText( 0.f, Vector2( -850.f, 400.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[R] : Reset the Stopwatch" );
 	DebugRender2DText( 0.f, Vector2( -850.f, 380.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[D] : Decrement Stopwatch, Once!" );
-	DebugRender2DText( 0.f, Vector2( -850.f, 360.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[SHIFT] + [D] : Decrement Stopwatch, All!" );
+	DebugRender2DText( 0.f, Vector2( -850.f, 360.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[SHIFT] + [D]  : Decrement Stopwatch, All!" );
+	DebugRender2DText( 0.f, Vector2( -850.f, 340.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[UP] or [DOWN] : Change the TimeScale of Level Clock!" );
 
 	double	intervalSeconds			= m_stopwatch->GetIntervalSeconds();
 	double	elapsedTime				= m_stopwatch->GetElapsedTime();
 	float	normalizedElapsedTime	= m_stopwatch->GetNormalizedElapsedTime();
 	bool	hasElapsed				= m_stopwatch->HasElapsed();
 
-	DebugRender2DText( 0.f, Vector2( -850.f, -320.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Level Clock             : %s", (m_levelClock->IsPaused() ? "Paused" : "Running..")) );
+	DebugRender2DText( 0.f, Vector2( -850.f, -300.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Level Clock             : %s", (m_levelClock->IsPaused() ? "Paused" : "Running..")) );
+	DebugRender2DText( 0.f, Vector2( -850.f, -320.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Level Clock TimeScale   : %f",  m_levelClock->GetTimeScale()) );
 	DebugRender2DText( 0.f, Vector2( -850.f, -340.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Reference Clock         : %s", (isOnLevelClock ? "Level Clock" : "Master Clock")) );
 	DebugRender2DText( 0.f, Vector2( -850.f, -360.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Interval(s)             : %s", std::to_string(intervalSeconds).c_str()) );
 	DebugRender2DText( 0.f, Vector2( -850.f, -380.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Elapsed Time(s)         : %s", std::to_string(elapsedTime).c_str()) );
@@ -72,18 +74,37 @@ void LevelStopwatchTest::Render( Camera *gameCamera ) const
 
 void LevelStopwatchTest::ProcessInput( float deltaSeconds )
 {
-	UNUSED( deltaSeconds );
-
 	if( g_theInput->WasKeyJustPressed( 'S' ) )
 		SwitchTheReferenceClock();
 	if( g_theInput->WasKeyJustPressed( 'P' ) )
 		PauseTheLevelClock();
 	if( g_theInput->WasKeyJustPressed( 'R' ) )
 		ResetTheStopwatch();
-	if( g_theInput->WasKeyJustPressed( 'D' ) && !g_theInput->IsKeyPressed( SHIFT ) )		// Just D
+	if( g_theInput->WasKeyJustPressed( 'D' ) && !g_theInput->IsKeyPressed( VK_Codes::SHIFT ) )		// Just D
 		DecrementTheStopwatch();
-	if( g_theInput->WasKeyJustPressed( 'D' ) && g_theInput->IsKeyPressed( SHIFT ) )			// Shift + D
+	if( g_theInput->WasKeyJustPressed( 'D' ) && g_theInput->IsKeyPressed( VK_Codes::SHIFT ) )		// Shift + D
 		DecrementAllTheStopwatch();
+	if( g_theInput->IsKeyPressed( VK_Codes::UP ) )
+		IncrementLevelClockTimeScale( deltaSeconds );
+	if( g_theInput->IsKeyPressed( VK_Codes::DOWN ) )
+		DecrementLevelClockTimeScale( deltaSeconds );
+}
+
+float timescaleChangePerSeconds = 0.15f;
+void LevelStopwatchTest::IncrementLevelClockTimeScale( float deltaSeconds )
+{
+	double currentTS = m_levelClock->GetTimeScale();
+	currentTS		+= timescaleChangePerSeconds * deltaSeconds;
+
+	m_levelClock->SetTimeSclae( currentTS );
+}
+
+void LevelStopwatchTest::DecrementLevelClockTimeScale( float deltaSeconds )
+{
+	double currentTS = m_levelClock->GetTimeScale();
+	currentTS		-= timescaleChangePerSeconds * deltaSeconds;
+
+	m_levelClock->SetTimeSclae( currentTS );
 }
 
 void LevelStopwatchTest::SwitchTheReferenceClock()

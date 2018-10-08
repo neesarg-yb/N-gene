@@ -22,6 +22,8 @@ public:
 
 private:
 	void ProcessInput( float deltaSeconds );
+	void IncrementLevelClockTimeScale( float deltaSeconds );
+	void DecrementLevelClockTimeScale( float deltaSeconds );
 	void SwitchTheReferenceClock();
 	void PauseTheLevelClock();
 	void ResetTheStopwatch();
