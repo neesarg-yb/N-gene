@@ -54,6 +54,7 @@ public:
 	void	AdvanceClock( uint64_t const hpcElapsed );
 
 	uint64_t	GetCurrentHPC() const;					// Gets HPC. Uses a MSDN Function
+	std::string GetCurrentTimeStamp() const;
 	double		GetFrameDeltaSeconds() const;			// FrameTime is deltaSeconds
 	
 	void		AddChild( Clock* childClock ) const;
@@ -62,6 +63,8 @@ private:
 	static void	CheckInitalizeSecondsPerClockCycle();	// If s_secondsPerClockCycle is not initialized, it initializes it
 
 public:
+	static std::string	GetTimestampFromHPC( uint64_t hpc );
+
 	// From HPC
 	static double		GetSecondsFromHPC( uint64_t hpc );
 	static unsigned int	GetMilliSecondsFromHPC( uint64_t hpc );
