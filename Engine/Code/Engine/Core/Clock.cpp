@@ -1,5 +1,6 @@
 #pragma once
 #include "Clock.hpp"
+#include "Engine/Core/Time.hpp"
 
 #include <windows.h>
 #define WIN32_LEAN_AND_MEAN
@@ -75,6 +76,11 @@ double Clock::GetFrameDeltaSeconds() const
 	return frame.seconds;
 }
 
+std::string Clock::GetTimestampFromHPC( uint64_t hpc )
+{
+	return GetTimeAsString( (time_t)hpc );
+}
+
 double Clock::GetSecondsFromHPC( uint64_t hpc )
 {
 	CheckInitalizeSecondsPerClockCycle();
@@ -109,6 +115,11 @@ uint64_t Clock::GetCurrentHPC() const
 	QueryPerformanceCounter( &hpc );
 
 	return *( (uint64_t*) &hpc );
+}
+
+std::string Clock::GetCurrentTimeStamp() const
+{
+	return GetTimestampFromHPC( GetCurrentHPC() );
 }
 
 void Clock::AddChild( Clock* childClock ) const
