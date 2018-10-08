@@ -4,12 +4,15 @@
 #include <windows.h>
 #define WIN32_LEAN_AND_MEAN
 
+uint64_t	Clock::s_frequency				= 0U;
+double		Clock::s_secondsPerClockCycle	= 0;
+
 Clock::Clock( Clock const * parent /* = nullptr */ )
 	: m_parent( parent )
 {
-	InitalizeSecondsPerClockCycle();
+	CheckInitalizeSecondsPerClockCycle();
 
-	m_startHPC		= GetPerformanceCounter();
+	m_startHPC		= GetCurrentHPC();
 	m_lastFrameHPC	= m_startHPC;
 	m_timeScale		= 1.0f;
 	m_frameCount	= 0;
@@ -26,7 +29,7 @@ Clock::~Clock()
 
 void Clock::Reset()
 {
-	m_lastFrameHPC = GetPerformanceCounter();
+	m_lastFrameHPC = GetCurrentHPC();
 
 	frame = TimeUnits( 0 );
 	total = TimeUnits( 0 );
@@ -34,7 +37,7 @@ void Clock::Reset()
 
 void Clock::BeginFrame()
 {
-	uint64_t currentHPC = GetPerformanceCounter();
+	uint64_t currentHPC = GetCurrentHPC();
 	uint64_t elapsedHPC = currentHPC - m_lastFrameHPC;
 
 	AdvanceClock( elapsedHPC );
@@ -54,8 +57,8 @@ void Clock::AdvanceClock( uint64_t const hpcElapsed )
 		relativeElapsed = (uint64_t)( (double)hpcElapsed * m_timeScale );
 
 	frame.hpc		= relativeElapsed;
-	frame.seconds	= GetSecondsFromPerformanceCounter( relativeElapsed );
-	frame.ms		= GetMillliSecondsFromPerformanceCounter( relativeElapsed );
+	frame.seconds	= GetSecondsFromHPC( relativeElapsed );
+	frame.ms		= GetMilliSecondsFromHPC( relativeElapsed );
 
 	total.hpc		+= frame.hpc;
 	total.seconds	+= frame.seconds;
@@ -67,36 +70,45 @@ void Clock::AdvanceClock( uint64_t const hpcElapsed )
 	}
 }
 
-double Clock::GetFrameDeltaSeconds()
+double Clock::GetFrameDeltaSeconds() const
 {
 	return frame.seconds;
 }
 
-void Clock::InitalizeSecondsPerClockCycle()
+double Clock::GetSecondsFromHPC( uint64_t hpc )
 {
-	LARGE_INTEGER frq;
-	QueryPerformanceFrequency( &frq );
+	CheckInitalizeSecondsPerClockCycle();
 
-	m_frequency =  *( (uint64_t*) &frq );
-	m_secondsPerClockCycle = 1.0 / m_frequency;
+	return (double)hpc * s_secondsPerClockCycle;
 }
 
-uint64_t Clock::GetPerformanceCounter()
+unsigned int Clock::GetMilliSecondsFromHPC( uint64_t hpc )
+{
+	CheckInitalizeSecondsPerClockCycle();
+
+	return (unsigned int)( (double)hpc * s_secondsPerClockCycle * 1000.0 );
+}
+
+uint64_t Clock::GetHPCFromSeconds( double seconds )
+{
+	CheckInitalizeSecondsPerClockCycle();
+
+	return (uint64_t)(s_frequency * seconds);
+}
+
+uint64_t Clock::GetHPCFromMilliSeconds( unsigned int ms )
+{
+	CheckInitalizeSecondsPerClockCycle();
+
+	return (uint64_t)(s_frequency * (ms/1000));
+}
+
+uint64_t Clock::GetCurrentHPC() const
 {
 	LARGE_INTEGER hpc;
 	QueryPerformanceCounter( &hpc );
 
 	return *( (uint64_t*) &hpc );
-}
-
-double Clock::GetSecondsFromPerformanceCounter( uint64_t hpc )
-{
-	return (double)hpc * m_secondsPerClockCycle;
-}
-
-unsigned int Clock::GetMillliSecondsFromPerformanceCounter( uint64_t hpc )
-{
-	return (unsigned int)( (double)hpc * m_secondsPerClockCycle * 1000.0 );
 }
 
 void Clock::AddChild( Clock* childClock ) const
@@ -111,4 +123,18 @@ void Clock::AddChild( Clock* childClock ) const
 
 	if( !thisChildAlreadyExist )
 		m_childrenClocks.push_back( childClock );
+}
+
+void Clock::CheckInitalizeSecondsPerClockCycle()
+{
+	// If already initialized, return
+	if( s_secondsPerClockCycle != 0 )
+		return;
+
+	// Sets the Frequency & Seconds per Clock Cycle
+	LARGE_INTEGER frq;
+	QueryPerformanceFrequency( &frq );
+
+	s_frequency =  *( (uint64_t*) &frq );
+	s_secondsPerClockCycle = 1.0 / s_frequency;
 }

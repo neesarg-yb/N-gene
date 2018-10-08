@@ -272,6 +272,7 @@
     <ClCompile Include="Core\Ray3.cpp" />
     <ClCompile Include="Core\RaycastResult.cpp" />
     <ClCompile Include="Core\Rgba.cpp" />
+    <ClCompile Include="Core\Stopwatch.cpp" />
     <ClCompile Include="Core\StringUtils.cpp" />
     <ClCompile Include="Core\Tags.cpp" />
     <ClCompile Include="Core\Time.cpp" />
@@ -379,6 +380,7 @@
     <ClInclude Include="Core\Ray3.hpp" />
     <ClInclude Include="Core\RaycastResult.hpp" />
     <ClInclude Include="Core\Rgba.hpp" />
+    <ClInclude Include="Core\Stopwatch.hpp" />
     <ClInclude Include="Core\StringUtils.hpp" />
     <ClInclude Include="Core\Tags.hpp" />
     <ClInclude Include="Core\Time.hpp" />
