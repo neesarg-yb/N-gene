@@ -59,6 +59,9 @@ bool Stopwatch::CheckAndReset()
 
 bool Stopwatch::Decrement()
 {
+	if( m_intervalHPC == 0U )
+		return false;
+
 	uint64_t elapsedTime = m_referenceClock->GetCurrentHPC() - m_startHPC;
 
 	if( elapsedTime >= m_intervalHPC )
@@ -72,13 +75,21 @@ bool Stopwatch::Decrement()
 
 uint Stopwatch::DecrementAll()
 {
+	if( m_intervalHPC == 0U )
+		return 0U;
+
 	uint64_t elapsedTime		= m_referenceClock->GetCurrentHPC() - m_startHPC;
-	uint	 numTimesElapsed	= (uint)(elapsedTime % m_intervalHPC);
+	uint	 numTimesElapsed	= (uint)(elapsedTime / m_intervalHPC);
 
 	// Decrement elapsed time, all at once!
 	m_startHPC += ( numTimesElapsed * m_intervalHPC );
 
 	return numTimesElapsed;
+}
+
+double Stopwatch::GetIntervalSeconds() const
+{
+	return Clock::GetSecondsFromHPC( m_intervalHPC );
 }
 
 double Stopwatch::GetElapsedTime() const

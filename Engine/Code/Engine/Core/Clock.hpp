@@ -49,12 +49,14 @@ public:
 	~Clock();
 
 public:
+	bool	IsPaused() const;
+	void	Resume();
+	void	Pause();
 	void	Reset();
+
 	void	BeginFrame();
 	void	AdvanceClock( uint64_t const hpcElapsed );
 
-	uint64_t	GetCurrentHPC() const;					// Gets HPC. Uses a MSDN Function
-	std::string GetCurrentTimeStamp() const;
 	double		GetFrameDeltaSeconds() const;			// FrameTime is deltaSeconds
 	
 	void		AddChild( Clock* childClock ) const;
@@ -63,6 +65,8 @@ private:
 	static void	CheckInitalizeSecondsPerClockCycle();	// If s_secondsPerClockCycle is not initialized, it initializes it
 
 public:
+	static uint64_t		GetCurrentHPC();					// Gets current HPC. Regardless of the clock being paused or not!
+	static std::string	GetCurrentTimeStamp();				// Gets current timestamp. Regardless of the clock being paused or not!
 	static std::string	GetTimestampFromHPC( uint64_t hpc );
 
 	// From HPC
