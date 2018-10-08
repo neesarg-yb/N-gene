@@ -38,6 +38,8 @@ public:
 	// and decrements all of that time in one shot
 	uint DecrementAll();
 
+	double GetIntervalSeconds() const;
+
 	// If we really wanna use it as timer,
 	// this returns how many SECONDS since the last reset
 	double GetElapsedTime() const;

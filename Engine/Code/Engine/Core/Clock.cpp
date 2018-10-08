@@ -28,6 +28,21 @@ Clock::~Clock()
 
 }
 
+bool Clock::IsPaused() const
+{
+	return m_isPaused;
+}
+
+void Clock::Resume()
+{
+	m_isPaused = false;
+}
+
+void Clock::Pause()
+{
+	m_isPaused = true;
+}
+
 void Clock::Reset()
 {
 	m_lastFrameHPC = GetCurrentHPC();
@@ -109,7 +124,7 @@ uint64_t Clock::GetHPCFromMilliSeconds( unsigned int ms )
 	return (uint64_t)(s_frequency * (ms/1000));
 }
 
-uint64_t Clock::GetCurrentHPC() const
+uint64_t Clock::GetCurrentHPC()
 {
 	LARGE_INTEGER hpc;
 	QueryPerformanceCounter( &hpc );
@@ -117,7 +132,7 @@ uint64_t Clock::GetCurrentHPC() const
 	return *( (uint64_t*) &hpc );
 }
 
-std::string Clock::GetCurrentTimeStamp() const
+std::string Clock::GetCurrentTimeStamp()
 {
 	return GetTimestampFromHPC( GetCurrentHPC() );
 }
