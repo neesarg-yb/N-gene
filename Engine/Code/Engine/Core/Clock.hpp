@@ -33,14 +33,14 @@ public:
 private:
 	uint64_t				m_startHPC				= 0;
 	uint64_t				m_lastFrameHPC			= 0;
-	uint64_t				m_frequency				= 0;
-	double					m_secondsPerClockCycle	= 0;	// Not exactly cycle, it is kinda secondsPerCount
+	static uint64_t			s_frequency;				// Clock Cycles per Second
+	static double			s_secondsPerClockCycle;		// Not exactly cycle, it is kinda secondsPerCount
 
-	double					m_timeScale		= 1;
-	unsigned int			m_frameCount	= 0;
-	bool					m_isPaused		= false;
+	double					m_timeScale				= 1;
+	unsigned int			m_frameCount			= 0;
+	bool					m_isPaused				= false;
 
-	Clock const*					m_parent			= nullptr;
+	Clock const*					m_parent		= nullptr;
 	std::vector< Clock* > mutable 	m_childrenClocks;
 
 public:
@@ -52,14 +52,21 @@ public:
 	void	Reset();
 	void	BeginFrame();
 	void	AdvanceClock( uint64_t const hpcElapsed );
+
+	uint64_t	GetCurrentHPC() const;					// Gets HPC. Uses a MSDN Function
+	double		GetFrameDeltaSeconds() const;			// FrameTime is deltaSeconds
 	
-	double	GetFrameDeltaSeconds();										// FrameTime is deltaSeconds
-	
-	void	AddChild( Clock* childClock ) const;
+	void		AddChild( Clock* childClock ) const;
 
 private:
-	void			InitalizeSecondsPerClockCycle();
-	uint64_t		GetPerformanceCounter();							// Uses a MSDN Function
-	double			GetSecondsFromPerformanceCounter( uint64_t hpc );
-	unsigned int	GetMillliSecondsFromPerformanceCounter( uint64_t hpc );
+	static void	CheckInitalizeSecondsPerClockCycle();	// If s_secondsPerClockCycle is not initialized, it initializes it
+
+public:
+	// From HPC
+	static double		GetSecondsFromHPC( uint64_t hpc );
+	static unsigned int	GetMilliSecondsFromHPC( uint64_t hpc );
+
+	// To HPC
+	static uint64_t		GetHPCFromSeconds( double seconds );
+	static uint64_t		GetHPCFromMilliSeconds( unsigned int ms );
 };
