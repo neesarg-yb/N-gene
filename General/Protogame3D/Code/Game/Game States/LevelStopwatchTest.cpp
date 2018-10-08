@@ -72,6 +72,8 @@ void LevelStopwatchTest::Render( Camera *gameCamera ) const
 
 void LevelStopwatchTest::ProcessInput( float deltaSeconds )
 {
+	UNUSED( deltaSeconds );
+
 	if( g_theInput->WasKeyJustPressed( 'S' ) )
 		SwitchTheReferenceClock();
 	if( g_theInput->WasKeyJustPressed( 'P' ) )
