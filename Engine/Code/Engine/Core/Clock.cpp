@@ -86,6 +86,16 @@ void Clock::AdvanceClock( uint64_t const hpcElapsed )
 	}
 }
 
+void Clock::SetTimeSclae( double timeScale )
+{
+	m_timeScale = timeScale;
+}
+
+double Clock::GetTimeScale() const
+{
+	return m_timeScale;
+}
+
 double Clock::GetFrameDeltaSeconds() const
 {
 	return frame.seconds;

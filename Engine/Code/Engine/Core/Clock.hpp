@@ -33,8 +33,8 @@ public:
 private:
 	uint64_t				m_startHPC				= 0;
 	uint64_t				m_lastFrameHPC			= 0;
-	static uint64_t			s_frequency;				// Clock Cycles per Second
-	static double			s_secondsPerClockCycle;		// Not exactly cycle, it is kinda secondsPerCount
+	static uint64_t			s_frequency;					// Clock Cycles per Second
+	static double			s_secondsPerClockCycle;			// Not exactly cycle, it is kinda secondsPerCount
 
 	double					m_timeScale				= 1;
 	unsigned int			m_frameCount			= 0;
@@ -56,13 +56,14 @@ public:
 
 	void	BeginFrame();
 	void	AdvanceClock( uint64_t const hpcElapsed );
-
-	double		GetFrameDeltaSeconds() const;			// FrameTime is deltaSeconds
+	void	SetTimeSclae( double timeScale );
+	double	GetTimeScale() const;
+	double	GetFrameDeltaSeconds() const;					// FrameTime is deltaSeconds
 	
-	void		AddChild( Clock* childClock ) const;
+	void	AddChild( Clock* childClock ) const;
 
 private:
-	static void	CheckInitalizeSecondsPerClockCycle();	// If s_secondsPerClockCycle is not initialized, it initializes it
+	static void	CheckInitalizeSecondsPerClockCycle();		// If s_secondsPerClockCycle is not initialized, it initializes it
 
 public:
 	static uint64_t		GetCurrentHPC();					// Gets current HPC. Regardless of the clock being paused or not!
