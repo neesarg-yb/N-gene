@@ -46,7 +46,9 @@ void LevelStopwatchTest::Update( float deltaSeconds )
 
 void LevelStopwatchTest::Render( Camera *gameCamera ) const
 {
-	UNUSED( gameCamera );
+	g_theRenderer->BindCamera( gameCamera );
+	g_theRenderer->ClearColor( RGBA_BLACK_COLOR );
+	g_theRenderer->ClearDepth( 1.f );
 
 	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, "Testing the Stopwatch" );
 	DebugRender2DText( 0.f, Vector2( -850.f, 440.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[S] : Switch the Reference Clock" );
