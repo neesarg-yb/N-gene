@@ -4,24 +4,23 @@
 class CB_DegreesOfFreedom : public CameraBehaviour
 {
 public:
-	 CB_DegreesOfFreedom( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name = "DegreesOfFreedom" );
+	 CB_DegreesOfFreedom( char const *name );
 	~CB_DegreesOfFreedom();
 
-public:
-	float 		m_rotationSpeed			= 20.f;							// Degrees per Second
-	FloatRange	m_pitchRange			= FloatRange( -60.f, 35.f );	// In Degrees
-
-private:
-	float const	m_distanceChangeSpeed	= 3.5f;
-	float const m_fovChangeSpeed		= 10.f;
-	float const m_offsetChangeSpeed		= 1.f;
-	Vector3		m_spehicalCoordinates	= Vector3( 10.f, 0.f, 0.f );	// ( radius, rotation, altitude )
-	Vector2		m_offsetFromCenter		= Vector2::ZERO;
+protected:
+	CameraState m_currentState;
 
 public:
-	void				PreUpdate () { }
-	void				PostUpdate() { }
-	CameraState	Update( float deltaSeconds );
+	void		PreUpdate () = 0;
+	void		PostUpdate() = 0;
+	CameraState	Update( float deltaSeconds ) = 0;
+
+protected:
+	// Set the Current CameraState
+	void SetWorldPosition( float distanceFromAnchor, float rotationInDegrees, float altitudeInDegrees );
+	void SetOrientationToLookAtAnchor();
+	void SetOffsetToWorldPosition( float localHorizontalOffset, float localVerticalOffset );
+	void SetFOV( float cameraFOV );
 
 private:
 	Vector3 GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude );

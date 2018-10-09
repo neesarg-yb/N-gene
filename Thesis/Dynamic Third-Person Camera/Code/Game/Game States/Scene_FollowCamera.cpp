@@ -5,7 +5,7 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
-#include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
+#include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/theGame.hpp"
 
 Scene_FollowCamera *lastCreatedScene = nullptr;
@@ -52,7 +52,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 
 	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
-	CameraBehaviour* dofBehaviour		= new CB_DegreesOfFreedom( 5.f, 40.f, 30.f, 100.f, "DegreesOfFreedom" );
+	CameraBehaviour* dofBehaviour		= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow" );
 	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 
@@ -62,7 +62,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 	dofBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "DegreesOfFreedom" );
+	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
 	
 	lastCreatedScene = this;
 }

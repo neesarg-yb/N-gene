@@ -294,6 +294,7 @@
     <ClCompile Include="Potential Engine\CameraManager.cpp" />
     <ClCompile Include="Potential Engine\CameraState.cpp" />
     <ClCompile Include="Potential Engine\CB_DegreesOfFreedom.cpp" />
+    <ClCompile Include="Potential Engine\CB_Follow.cpp" />
     <ClCompile Include="Potential Engine\CB_FreeLook.cpp" />
     <ClCompile Include="Potential Engine\CC_LineOfSight.cpp" />
     <ClCompile Include="Potential Engine\GameObject.cpp" />
@@ -322,6 +323,7 @@
     <ClInclude Include="Potential Engine\CameraManager.hpp" />
     <ClInclude Include="Potential Engine\CameraState.hpp" />
     <ClInclude Include="Potential Engine\CB_DegreesOfFreedom.hpp" />
+    <ClInclude Include="Potential Engine\CB_Follow.hpp" />
     <ClInclude Include="Potential Engine\CB_FreeLook.hpp" />
     <ClInclude Include="Potential Engine\CC_LineOfSight.hpp" />
     <ClInclude Include="Potential Engine\GameObject.hpp" />

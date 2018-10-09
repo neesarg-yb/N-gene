@@ -100,6 +100,9 @@
     <ClCompile Include="Potential Engine\CameraState.cpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Potential Engine\CB_Follow.cpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -164,6 +167,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CameraState.hpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CB_Follow.hpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

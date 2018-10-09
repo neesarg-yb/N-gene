@@ -2,7 +2,7 @@
 #include "Scene_DegreesOfFreedom.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Core/StringUtils.hpp"
-#include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
+#include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Terrain.hpp"
@@ -45,17 +45,17 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	m_cameraManager->SetAnchor( m_player );
 
 	// Degrees of Freedom - Camera Behavior
-	CameraBehaviour* dofBehaviour		= new CB_DegreesOfFreedom( 5.f, 40.f, 30.f, 100.f, "DegreesOfFreedom" );
-	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
+	CameraBehaviour* dofBehaviour		= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow" );
+	CameraBehaviour* followBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
 	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
-	m_cameraManager->SetActiveCameraBehaviourTo( "DegreesOfFreedom" );
-	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
+	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 }
 
 Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 {
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
-	m_cameraManager->DeleteCameraBehaviour( "DegreesOfFreedom" );
+	m_cameraManager->DeleteCameraBehaviour( "Follow" );
 
 	// Camera Manager
 	delete m_cameraManager;
@@ -174,7 +174,7 @@ void Scene_DegreesOfFreedom::ChangeCameraBehaviour()
 	static bool dofBehaviourActive = true;
 	if( leftStickJustPressed )
 	{
-		std::string behaviourToActivate = dofBehaviourActive ? "FreeLook" : "DegreesOfFreedom";
+		std::string behaviourToActivate = dofBehaviourActive ? "FreeLook" : "Follow";
 		dofBehaviourActive = !dofBehaviourActive;
 
 		m_cameraManager->SetActiveCameraBehaviourTo( behaviourToActivate );
