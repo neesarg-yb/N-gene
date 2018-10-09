@@ -74,6 +74,17 @@ bool Vector3::operator != ( const Vector3& vecToCompare ) const
 	return (x != vecToCompare.x) || (y != vecToCompare.y) || (z != vecToCompare.z);
 }
 
+void Vector3::LimitLengthTo( float const maxLength )
+{
+	float length = GetLength();
+	if( length <= 0 )
+		return;
+
+	Vector3 direction = GetNormalized();
+	length = ClampFloat( length, 0.f, maxLength );
+	*this  = direction * length; 
+}
+
 float Vector3::GetLength() const
 {
 	const float squaredLength	= (x*x) + (y*y) + (z*z);
@@ -87,6 +98,18 @@ Vector3 Vector3::GetNormalized() const
 	const float lengthOfVec	= GetLength();
 
 	return Vector3( x/lengthOfVec, y/lengthOfVec, z/lengthOfVec );
+}
+
+float Vector3::NormalizeAndGetLength()
+{
+	// Get Length
+	float length = GetLength();
+
+	// Normalize
+	if( length > 0.f )
+		*this = *this / length;
+
+	return length;
 }
 
 Vector3 Vector3::GetAsDirection() const

@@ -1,32 +1,41 @@
 #pragma once
 #include "UDPSocket.hpp"
 
-bool UDPSocket::Bind( NetworkAddress const &address, uint16_t portRange /*= 0U */ )
+bool UDPSocket::Bind( NetworkAddress &address, uint16_t portRange /*= 0U */ )
 {
-	UNUSED( portRange );
-
-	// create the socket 
-	SOCKET mySocket = socket(	AF_INET,		// IPv4 to send...
-								SOCK_DGRAM,		// ...Datagrams... 
-								IPPROTO_UDP );	// ...using UDP.
-
+	// Create the socket 
+	SOCKET mySocket = socket( AF_INET,			// IPv4 to send...
+							  SOCK_DGRAM,		// ...Datagrams... 
+							  IPPROTO_UDP );	// ...using UDP.
 	GUARANTEE_RECOVERABLE( mySocket != INVALID_SOCKET, "UDPSocket: Invalid socket!!" ); 
-
-	// TODO, try to bind all ports within the range.  
-	// Shown - just trying one; 
-	sockaddr_storage sock_addr;
-	int sock_addr_len;
-	NetworkAddress::GetSocketAddressForHost( (sockaddr*)&sock_addr, &sock_addr_len, address.IPToString().c_str(), address.PortToString().c_str() );
-
-	// try to bind - if it succeeds - great.  If not, try the next port in the range.
-	int result = ::bind( mySocket, (sockaddr*)&sock_addr, (int)sock_addr_len );
-	if (0 == result) 
+	
+	for ( int remainingPorts = portRange; remainingPorts >= 0; remainingPorts-- )
 	{
-		m_handle = mySocket; 
-		m_address = address; 
-		return true; 
-	} 
+		// Check so that the port won't overflow
+		if( address.port == 0xff )
+			break;
+		else
+			address.port++;
 
+		// Get sockaddr
+		sockaddr sock_addr;
+		size_t sock_addr_len;
+		
+		bool success = address.ToSocketAddress( &sock_addr, &sock_addr_len );
+		if( success == false )
+			break;
+
+		// try to bind - if it succeeds - great.  If not, try the next port in the range.
+		int result = ::bind( mySocket, &sock_addr, (int)sock_addr_len );
+		if (0 == result) 
+		{
+			m_handle  = mySocket; 
+			m_address = address; 
+			return true; 
+		} 
+	}
+
+	::closesocket( mySocket );
 	return false; 
 }
 

@@ -26,6 +26,20 @@ BytePacker::BytePacker( size_t bufferSize, void *buffer, eEndianness byteOrder /
 	m_bufferSize	= bufferSize;
 }
 
+BytePacker::BytePacker( BytePacker const &src )
+{
+	// copy all the properties
+	m_endianness		= src.m_endianness;
+	m_settings			= src.m_settings;
+	m_bufferSize		= src.m_bufferSize;
+	m_readHead			= src.m_readHead;
+	m_writeHead			= src.m_writeHead;
+
+	// memcpy buffer
+	m_buffer = malloc( m_bufferSize );
+	memcpy( m_buffer, src.GetBuffer(), m_bufferSize );
+}
+
 BytePacker::~BytePacker()
 {
 	// If byte packer owns the memory, free it!
@@ -143,7 +157,7 @@ bool BytePacker::WriteString( char const *str )
 
 	// If buffer is smaller..
 	size_t requiredBytesForStrLength	= GetTotalBytesRequiredToWriteSize( stringLength );
-	size_t requiredMinBufferSize		= GetWritableByteCount() + stringLength + requiredBytesForStrLength;
+	size_t requiredMinBufferSize		= GetWrittenByteCount() + stringLength + requiredBytesForStrLength;
 	if( requiredMinBufferSize > m_bufferSize )
 	{
 		// If can grow
@@ -165,7 +179,7 @@ bool BytePacker::WriteString( char const *str )
 	return true;
 }
 
-size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEndiannessToMachine /* = true */ )
+size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEndiannessToMachine /* = true */ ) const
 {
 	size_t dataLengthInBuffer	= m_writeHead;
 	size_t readableBytes		= (dataLengthInBuffer - m_readHead);
@@ -185,7 +199,7 @@ size_t BytePacker::ReadBytes( void *outData, size_t maxByteCount, bool changeEnd
 	return bytesToRead;
 }
 
-size_t BytePacker::ReadSize( size_t *outSize )
+size_t BytePacker::ReadSize( size_t *outSize ) const
 {
 	*outSize = 0U;
 
@@ -197,12 +211,9 @@ size_t BytePacker::ReadSize( size_t *outSize )
 		byte_t nextByte		= 0x00;
 		size_t nextByteSize	= ReadBytes( &nextByte, 1U, false );
 		
-		// If we can't read next byte, it's an unexpected failure
+		// If we can't read next byte, there is not anything more to read..
 		if( nextByteSize != 1U )
-		{
-			GUARANTEE_RECOVERABLE( false, "BytePacker: ReadSize() couldn't finish operation!!" );
-			return 0U;
-		}
+			return 0U;				// Consider it as failed read
 		
 		// Read 7 bits
 		byte_t fetchedByte			= ( nextByte & 0b0111'1111 );
@@ -228,14 +239,17 @@ size_t BytePacker::ReadSize( size_t *outSize )
 	return totalReadBytes;
 }
 
-size_t BytePacker::ReadString( char *outStr, size_t maxByteSize )
+size_t BytePacker::ReadString( char *outStr, size_t maxByteSize ) const
 {
 	size_t stringLength	= 0U;
 	size_t bytesRead	= ReadSize( &stringLength );
 	
 	// If failed to read a size..
 	if( bytesRead == 0U )
+	{
+		outStr[0] = '\0';		// out a valid empty string!
 		return 0U;
+	}
 
 	// Read full string - locally
 	char	*fullString		= (char *) malloc( stringLength + 1 );
@@ -251,6 +265,18 @@ size_t BytePacker::ReadString( char *outStr, size_t maxByteSize )
 	free( fullString );
 
 	return bytesGotRead;
+}
+
+bool BytePacker::MoveReadheadBy( double bytes ) const
+{
+	double newReadHead = (double)m_readHead + bytes;
+
+	// If less than ZERO or more than the bytes written in buffer
+	if( newReadHead < 0.f || newReadHead > m_writeHead )
+		return false;
+
+	m_readHead = (size_t)newReadHead;
+	return true;
 }
 
 bool BytePacker::SetWrittenByteCountDummy( size_t byteCount )
@@ -273,7 +299,7 @@ void BytePacker::ResetWrite()
 	m_readHead	= 0U;
 }
 
-void BytePacker::ResetRead()
+void BytePacker::ResetRead() const
 {
 	m_readHead = 0U;
 }

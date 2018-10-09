@@ -15,8 +15,7 @@ RemoteCommandService::RemoteCommandService( Renderer *currentRenderer /* = nullp
 	// Set default hosting details
 	m_doHostingAtAddress		= NetworkAddress::GetLocal();
 	m_doHostingAtAddress.port	= port;
-
-
+	
 	// For UI
 	m_uiCamera = new Camera();
 
@@ -164,7 +163,7 @@ void RemoteCommandService::SendMessageToAllConnections( bool isEcho, const char 
 	}
 }
 
-void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg )
+bool RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool isEcho, char const *msg )
 {
 	BytePacker message( BIG_ENDIAN );
 
@@ -181,7 +180,7 @@ void RemoteCommandService::SendMessageUsingSocket( TCPSocket &endSocket, bool is
 	int sent2 = endSocket.Send( message.GetBuffer(), length );
 
 	bool dataGotSent = (sent1 > 0 && sent2 > 0);
-	GUARANTEE_RECOVERABLE( dataGotSent, Stringf( "RCB Warning: Not all the data got sent to \"%s:%s\"..!", endSocket.m_address.IPToString().c_str(), endSocket.m_address.PortToString().c_str() ) );
+	return dataGotSent;
 }
 
 void RemoteCommandService::IgnoreEcho( bool ignoreIt )

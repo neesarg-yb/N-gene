@@ -28,7 +28,8 @@ public:
 	float Tw = 1.0f;
 
 	Matrix44() {} // Identity matrix
-	explicit Matrix44( const float* sixteenValuesBasisMajor ); // float[16] array in order Ix, Iy...
+	explicit Matrix44( const float* sixteenValuesBasisMajor );			// float[16] array in order Ix, Iy...
+	explicit Matrix44( const Vector3 &translation, float tw = 1.f );	// Translation added on an identity matrix
 	explicit Matrix44( const Vector2& iBasis, const Vector2& jBasis, const Vector2& translation = Vector2(0.f,0.f) );
 	explicit Matrix44( const Vector3& iBasis, const Vector3& jBasis, const Vector3& kBasis, const Vector3& translation = Vector3::ZERO );
 
@@ -59,9 +60,11 @@ public:
 	void NormalizeIJKColumns();
 
 	void Translate3D	( Vector3 const &translation );
-	void RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ );				// Rotation Order, Around Axis:  Z(Roll, clockwise) --> X(Pitch, clockwise) --> Y(Yaw, counter-clockwise)
+	void RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ );				// Rotation Order, Around Axis:  Z(Roll, leftHandRule) --> X(Pitch, leftHandRule) --> Y(Yaw, leftHandRule)
 	void Scale3D		( Vector3 const &scale );
 	void ScaleUniform3D	( float uniformScale );
+
+	bool operator == ( Matrix44 const &b ) const;
 
 	// Producers
 	static Matrix44 MakeRotationDegrees2D	( float rotationDegreesAboutZ );

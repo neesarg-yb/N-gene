@@ -24,6 +24,14 @@ Matrix44::Matrix44( const Vector3& iBasis, const Vector3& jBasis, const Vector3&
 	Iw = 0;				Jw = 0;				Kw = 0;				Tw = 1;
 }
 
+Matrix44::Matrix44( const Vector3 &translation, float tw /* = 1.f */ )
+{
+	Tx = translation.x;
+	Ty = translation.y;
+	Tz = translation.z;
+	Tw = tw;
+}
+
 Vector2 Matrix44::TransformPosition2D( const Vector2& position2D )
 {
 	Vector2 transformedPos2D = Vector2( Ix*position2D.x + Jx*position2D.y + Kx*0.f + Tx*1.f, 
@@ -193,6 +201,10 @@ void Matrix44::Translate3D( Vector3 const &translation )
 
 void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ )
 {
+	// My coordinate system is left hand coordinate system
+	// And,
+	// Rotation is also by Left Hand Rule
+	//
 	Matrix44 rotationAroundZMatrix;
 	rotationAroundZMatrix.Ix =  CosDegree( rotateAroundAxisYXZ.z );
 	rotationAroundZMatrix.Jx = -SinDegree( rotateAroundAxisYXZ.z );
@@ -201,8 +213,8 @@ void Matrix44::RotateDegrees3D( Vector3 const &rotateAroundAxisYXZ )
 
 	Matrix44 rotationAroundXMatrix;
 	rotationAroundXMatrix.Jy =  CosDegree( rotateAroundAxisYXZ.x );
-	rotationAroundXMatrix.Ky =  SinDegree( rotateAroundAxisYXZ.x );
-	rotationAroundXMatrix.Jz = -SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Ky = -SinDegree( rotateAroundAxisYXZ.x );
+	rotationAroundXMatrix.Jz =  SinDegree( rotateAroundAxisYXZ.x );
 	rotationAroundXMatrix.Kz =  CosDegree( rotateAroundAxisYXZ.x );
 
 	Matrix44 rotationAroundYMatrix;
@@ -240,6 +252,16 @@ void Matrix44::ScaleUniform3D( float uniformScale )
 	scaleMatrix.Kz = uniformScale;
 
 	Append( scaleMatrix );
+}
+
+bool Matrix44::operator == ( Matrix44 const &b ) const
+{
+	bool iColumnMatches = GetIColumn() == b.GetIColumn();
+	bool jColumnMatches = GetJColumn() == b.GetJColumn();
+	bool kColumnMatches = GetKColumn() == b.GetKColumn();
+	bool tColumnMatches = GetTColumn() == b.GetTColumn();
+
+	return iColumnMatches && jColumnMatches && kColumnMatches && tColumnMatches;
 }
 
 void Matrix44::Scale2D( float scaleX, float scaleY )
@@ -501,46 +523,12 @@ void Matrix44::GetAsFloats( float (&outArray)[16] ) const
 
 Vector3 Matrix44::GetEulerRotation() const
 {
-	/*
-		ASSUMING THAT ROTATION MATRIX IS,
+	float KyClamped = ClampFloatNegativeOneToOne(Ky);
 
-		--													  --     --			   --
-		|	 cz*cy - sz*sx*sy	-sz*cx		cz*sy + sz*sx*cy   |     |	Ix	Jx	Kx	|
-		|	 sz*cy + cz*sx*sy	 cz*cx		sz*sy - cz*sx*cy   |  =  |	Iy	Jy	Ky	|
-		|	-sz*cx				 sx			cx*cy			   |     |	Iz	Jz	Kz	|
-		--													  --     --			   --
-	*/
-	/*
-	float xRad;
-	float yRad;
-	float zRad;
-
-	float sx = ClampFloat( Jz, -1.f, 1.f );
-	xRad	 = asinf( sx );
-
-	float cx = cosf( xRad );
-	if( cx != 0.f )
-	{
-		yRad = atan2f( -Iz, Kz );
-		zRad = atan2f( -Jx, Jy );
-	}
-	else
-	{
-		zRad = 0.f;
-		yRad = atan2f( Kx, Ix );
-	}
-
-	return Vector3( RadianToDegree(xRad), 
-					RadianToDegree(yRad), 
-					RadianToDegree(zRad) );
-	*/
-
-	float xDeg = asinf(Ky);
+	float xDeg = asinf(-KyClamped);
 	float yDeg = 0.f;
 	float zDeg = 0.f;;
-
-	xDeg = ClampFloatNegativeOneToOne(xDeg);
-
+	
 	float cx = cosf(xDeg);
 	if(cx != 0.f)
 	{
@@ -551,12 +539,12 @@ Vector3 Matrix44::GetEulerRotation() const
 	{
 		// Gimble lock case
 		zDeg = 0.f;
-		yDeg = atan2f(-Kx, Ix);
+		yDeg = atan2f(Kx, Ix);
 	}
 
 	return Vector3( RadianToDegree(xDeg), 
-					RadianToDegree(yDeg), 
-					RadianToDegree(zDeg) );
+		RadianToDegree(yDeg), 
+		RadianToDegree(zDeg) );
 }
 
 bool Matrix44::GetInverse( Matrix44 &outInvMatrix ) const

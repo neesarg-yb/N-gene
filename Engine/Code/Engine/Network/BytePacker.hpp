@@ -23,16 +23,18 @@ public:
 	 BytePacker( eEndianness byteOrder = LITTLE_ENDIAN );									// BytePacker owns buffer, I can grow it
 	 BytePacker( size_t bufferSize, eEndianness byteOrder = LITTLE_ENDIAN );				// BytePacker owns buffer, I can't grow it
 	 BytePacker( size_t bufferSize, void *buffer, eEndianness byteOrder = LITTLE_ENDIAN );	// BytePacker don't own buffer, I can't grow it
+	 BytePacker( BytePacker const &src );
 	~BytePacker(); 
 
 private:
 	eEndianness			 m_endianness	= LITTLE_ENDIAN;
 	eBytePackerOptions	 m_settings		= 0U;							// Doesn't owns the memory, and can't grow the buffer
 
+protected:
 	void				*m_buffer		= nullptr;
 	size_t				 m_bufferSize	= 0U;							// Max bytes this buffer can store
-	size_t				 m_readHead		= 0U;
-	size_t				 m_writeHead	= 0U;							// You can get total readable data size from this variable, as well.
+	size_t mutable		 m_readHead		= 0U;							// Tells from where you're reading.
+	size_t				 m_writeHead	= 0U;							// Tells from where you're writing. You can get total readable data size from this variable, as well.
 
 	size_t const		 m_bufferSizeUnit = 8U * 1024U;					// Used by GetNewBufferSizeToStoreDataOfSize() & Reset()
 
@@ -47,15 +49,18 @@ public:
 	bool		WriteString	( char const *str );						// Returns false if the string is too long to hold by buffer.. It doesn't write anything, in that case.
 
 	// Read from the buffer
-	size_t		 ReadBytes	( void *outData, size_t maxByteCount, bool changeEndiannessToMachine = true );		// Returns how many actual bytes got read
-	size_t		 ReadSize	( size_t *outSize );						// Returns how many bytes got read to fetch the size_t, fills outSize
-	size_t		 ReadString	( char *outStr, size_t maxByteSize );		// Note: maxByteSize should be enough to contain the null terminator as well
-	inline void* GetBuffer	() { return m_buffer; }						// Access buffer without changing readHead!
+	size_t				ReadBytes	( void *outData, size_t maxByteCount, bool changeEndiannessToMachine = true ) const;		// Returns how many actual bytes got read
+	size_t				ReadSize	( size_t *outSize ) const;					// Returns how many bytes got read to fetch the size_t, fills outSize
+	size_t				ReadString	( char *outStr, size_t maxByteSize ) const;	// Note: maxByteSize should be enough to contain the null terminator as well
+	inline void const*	GetBuffer() const { return m_buffer; }					// Access buffer without changing readHead!
+
+	// Move the Read head
+	bool		MoveReadheadBy( double bytes ) const;					// Returns true on success, false on failure
 
 	// Set buffer variables
 	bool		SetWrittenByteCountDummy( size_t byteCount );			// Changes the writeHead, DO NOT USE TO MOVE IT BACKWORDS unless you're resetting it
 	void		ResetWrite();											// Resets witeHead & readHead
-	void		ResetRead();											// Resets just readHead
+	void		ResetRead() const;										// Resets just readHead
 
 	// Get buffer variables
 	size_t		GetWrittenByteCount() const;							// How much have I written to this buffer?

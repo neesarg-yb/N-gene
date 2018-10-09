@@ -58,6 +58,9 @@
     <Filter Include="Internal">
       <UniqueIdentifier>{74f38925-1ebc-48fd-806b-c35c698ce261}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network Session">
+      <UniqueIdentifier>{710287b7-edab-4ec3-94be-a680b93d45ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Math\Vector2.cpp">
@@ -335,6 +338,30 @@
     </ClCompile>
     <ClCompile Include="Network\UDPSocket.cpp">
       <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkSession\NetworkConnection.cpp">
+      <Filter>Network Session</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkSession\NetworkMessage.cpp">
+      <Filter>Network Session</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkSession\NetworkPacket.cpp">
+      <Filter>Network Session</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkSession\NetworkSession.cpp">
+      <Filter>Network Session</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RaycastResult.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ContactPoint.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Ray3.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Stopwatch.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -649,6 +676,30 @@
     </ClInclude>
     <ClInclude Include="Network\UDPSocket.hpp">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkSession\NetworkConnection.hpp">
+      <Filter>Network Session</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkSession\NetworkMessage.hpp">
+      <Filter>Network Session</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkSession\NetworkPacket.hpp">
+      <Filter>Network Session</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkSession\NetworkSession.hpp">
+      <Filter>Network Session</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RaycastResult.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ContactPoint.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Ray3.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Stopwatch.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
