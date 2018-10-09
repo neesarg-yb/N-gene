@@ -13,7 +13,7 @@ CC_LineOfSight::~CC_LineOfSight()
 
 }
 
-void CC_LineOfSight::Execute( CameraDestination &suggestedDestination )
+void CC_LineOfSight::Execute( CameraState &suggestedCameraState )
 {
 	// Get context
 	CameraContext context = m_manager.GetCameraContext();
@@ -21,12 +21,12 @@ void CC_LineOfSight::Execute( CameraDestination &suggestedDestination )
 	// Player's Position
 	Vector3 playerPosition = context.playerPosition;
 
-	// Move the CameraDestination until we get clear line of sight
+	// Move the CameraState until we get clear line of sight
 	bool hasClearLineOfSight = false;
 	while( hasClearLineOfSight == false )
 	{
 		// Camera's Position
-		Vector3 cameraPosition = suggestedDestination.m_position;
+		Vector3 cameraPosition = suggestedCameraState.m_position;
 
 		// Raycast hit result
 		Vector3	towardsPlayer	= ( playerPosition - cameraPosition );
@@ -42,7 +42,7 @@ void CC_LineOfSight::Execute( CameraDestination &suggestedDestination )
 		else
 		{
 			// Move the camera at hit-point
-			suggestedDestination.m_position = hitResult.impactPosition;
+			suggestedCameraState.m_position = hitResult.impactPosition;
 			hasClearLineOfSight = false;
 			continue;
 		}

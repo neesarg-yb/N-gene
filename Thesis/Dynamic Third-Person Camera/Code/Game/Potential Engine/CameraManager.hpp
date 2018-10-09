@@ -8,7 +8,7 @@
 #include "Game/Potential Engine/GameObject.hpp"
 #include "Game/Potential Engine/CameraBehaviour.hpp"
 #include "Game/Potential Engine/CameraConstrain.hpp"
-#include "Game/Potential Engine/CameraDestination.hpp"
+#include "Game/Potential Engine/CameraState.hpp"
 #include "Game/Potential Engine/CameraContext.hpp"
 
 typedef std::vector< CameraBehaviour* >				CameraBehaviourList;
@@ -30,9 +30,9 @@ private:
 
 	// Camera Behaviours
 	CameraBehaviourList		 m_cameraBehaviours;		// All the behaviors that can be run on Camera
-	CameraBehaviour*		 m_aciveBehaviour = nullptr;
-	CameraDestination		 m_lastSuggestedPoint;
-	CameraDestination		 m_targetPointOnTransitionBegin;
+	CameraBehaviour			*m_aciveBehaviour = nullptr;
+	CameraState				 m_lastSuggestedState;
+	CameraState				 m_stateOnTransitionBegin;
 	
 	float const m_behaviourTransitionSeconds = 1.f;
 	float		m_behaviourTransitionTimeRemaining = 0.f;

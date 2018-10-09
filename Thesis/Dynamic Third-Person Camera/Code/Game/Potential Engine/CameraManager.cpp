@@ -24,18 +24,18 @@ CameraManager::~CameraManager()
 
 void CameraManager::Update( float deltaSeconds )
 {
-	m_lastSuggestedPoint = m_aciveBehaviour->Update( deltaSeconds );
+	m_lastSuggestedState = m_aciveBehaviour->Update( deltaSeconds );
 
 	// Constrains, if enabled
 	if( m_constrainsEnabled == true )
 	{
 		// Apply all
 		for each (CameraConstrain* constrain in m_activeConstrains)
-			constrain->Execute( m_lastSuggestedPoint );
+			constrain->Execute( m_lastSuggestedState );
 	}
 
 	// This might change if in transition
-	CameraDestination updatedTargetPoint = m_lastSuggestedPoint;
+	CameraState updatedCameraState = m_lastSuggestedState;
 
 	// Camera Behavior Transition
 	if( m_behaviourTransitionTimeRemaining > 0.f )
@@ -44,14 +44,14 @@ void CameraManager::Update( float deltaSeconds )
 		t = ClampFloat01(t);
 
 		// Interpolate slowly to the suggested position, over time
-		updatedTargetPoint = CameraDestination::Interpolate( m_targetPointOnTransitionBegin, m_lastSuggestedPoint, t );
+		updatedCameraState = CameraState::Interpolate( m_stateOnTransitionBegin, m_lastSuggestedState, t );
 		m_behaviourTransitionTimeRemaining -= deltaSeconds;
 	}
 
 	// Sets properties of the camera
-	m_camera.SetFOVForPerspective( updatedTargetPoint.m_fov );
-	m_camera.SetCameraPositionTo ( updatedTargetPoint.m_position );
-	m_camera.SetCameraQuaternionRotationTo( updatedTargetPoint.m_orientation );
+	m_camera.SetFOVForPerspective( updatedCameraState.m_fov );
+	m_camera.SetCameraPositionTo ( updatedCameraState.m_position );
+	m_camera.SetCameraQuaternionRotationTo( updatedCameraState.m_orientation );
 }
 
 void CameraManager::PreUpdate()
@@ -128,7 +128,7 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 	if( m_aciveBehaviour != nullptr )
 	{
 		// Start interpolation towards new behavior
-		m_targetPointOnTransitionBegin		= m_lastSuggestedPoint;
+		m_stateOnTransitionBegin			= m_lastSuggestedState;
 		m_behaviourTransitionTimeRemaining	= m_behaviourTransitionSeconds;
 	}
 	

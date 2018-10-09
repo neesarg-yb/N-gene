@@ -8,6 +8,6 @@ public:
 	~CC_LineOfSight();
 
 public:
-	void Execute( CameraDestination &suggestedDestination );
+	void Execute( CameraState &suggestedDestination );
 
 };

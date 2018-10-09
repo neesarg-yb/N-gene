@@ -15,5 +15,5 @@ public:
 public:
 	void				PreUpdate();
 	void				PostUpdate();
-	CameraDestination	Update( float deltaSeconds );
+	CameraState	Update( float deltaSeconds );
 };

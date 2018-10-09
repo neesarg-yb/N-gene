@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/Potential Engine/CameraDestination.hpp"
+#include "Game/Potential Engine/CameraState.hpp"
 
 class CameraManager;
 
@@ -14,5 +14,5 @@ protected:
 	CameraManager		&m_manager;
 
 public:
-	virtual void Execute( CameraDestination &suggestedDestination ) = 0;	// Applies the constrain on suggestedDestination
+	virtual void Execute( CameraState &suggestedCameraState ) = 0;	// Applies the constrain on suggestedDestination
 };

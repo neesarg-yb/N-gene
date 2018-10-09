@@ -292,7 +292,7 @@
     <ClCompile Include="Potential Engine\CameraConstrain.cpp" />
     <ClCompile Include="Potential Engine\CameraContext.cpp" />
     <ClCompile Include="Potential Engine\CameraManager.cpp" />
-    <ClCompile Include="Potential Engine\CameraDestination.cpp" />
+    <ClCompile Include="Potential Engine\CameraState.cpp" />
     <ClCompile Include="Potential Engine\CB_DegreesOfFreedom.cpp" />
     <ClCompile Include="Potential Engine\CB_FreeLook.cpp" />
     <ClCompile Include="Potential Engine\CC_LineOfSight.cpp" />
@@ -320,7 +320,7 @@
     <ClInclude Include="Potential Engine\CameraConstrain.hpp" />
     <ClInclude Include="Potential Engine\CameraContext.hpp" />
     <ClInclude Include="Potential Engine\CameraManager.hpp" />
-    <ClInclude Include="Potential Engine\CameraDestination.hpp" />
+    <ClInclude Include="Potential Engine\CameraState.hpp" />
     <ClInclude Include="Potential Engine\CB_DegreesOfFreedom.hpp" />
     <ClInclude Include="Potential Engine\CB_FreeLook.hpp" />
     <ClInclude Include="Potential Engine\CC_LineOfSight.hpp" />
