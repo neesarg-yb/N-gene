@@ -42,9 +42,12 @@ bool Sampler::CreateDefault()
 	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_WRAP_T, GL_REPEAT );  
 	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_WRAP_R, GL_REPEAT );  
 
-	// filtering; 
-	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST ); // For 2D use GL_NEAREST
-	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST ); // For 2D use GL_NEAREST
+	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST );	// Default: GL_LINEAR
+	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST );					// Default: GL_LINEAR
+
+	glSamplerParameterf( m_sampler_handle, GL_TEXTURE_MIN_LOD, m_minMipMap ); 
+	glSamplerParameterf( m_sampler_handle, GL_TEXTURE_MAX_LOD, m_maxMipMap ); 
+
 	return true; 
 }
 
@@ -63,9 +66,12 @@ bool Sampler::CreateLinear()
 	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_WRAP_T, GL_REPEAT );  
 	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_WRAP_R, GL_REPEAT );  
 
-	// filtering; 
-	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR ); // 3D & CubeMap use GL_LINEAR
-	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); // 3D & CubeMap use GL_LINEAR
+	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );	// Default: GL_LINEAR
+	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );					// Default: GL_LINEAR
+
+	glSamplerParameterf( m_sampler_handle, GL_TEXTURE_MIN_LOD, m_minMipMap ); 
+	glSamplerParameterf( m_sampler_handle, GL_TEXTURE_MAX_LOD, m_maxMipMap ); 
+
 	return true; 
 }
 
@@ -94,6 +100,7 @@ bool Sampler::CreateShadow()
 	// filtering; 
 	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR ); // 3D & CubeMap use GL_LINEAR
 	glSamplerParameteri( m_sampler_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); // 3D & CubeMap use GL_LINEAR
+
 	return true; 
 }
 
