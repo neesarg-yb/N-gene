@@ -102,3 +102,5 @@ extern PFNGLREADPIXELSPROC					glReadPixels;
 
 extern PFNGLVIEWPORTPROC					glViewport;
 extern PFNGLSAMPLERPARAMETERFVPROC			glSamplerParameterfv;
+extern PFNGLGENERATEMIPMAPPROC				glGenerateMipmap;
+extern PFNGLSAMPLERPARAMETERFPROC			glSamplerParameterf;
