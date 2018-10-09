@@ -65,6 +65,7 @@ unsigned int Texture::GetHeight() const
 void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texelSize, int numComponents )
 {
 	m_dimensions = texelSize;
+	GLint mipCount = CalculateMipCount( m_dimensions );
 
 	// Tell OpenGL that our pixel data is single-byte aligned
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
@@ -76,10 +77,6 @@ void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texe
 	glActiveTexture( GL_TEXTURE0 );
 	// Tell OpenGL to bind (set) this as the currently active texture
 	glBindTexture( GL_TEXTURE_2D, m_textureID ); 
-
-	// Set magnification (texel > pixel) and minification (texel < pixel) filters
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST ); // one of: GL_NEAREST, GL_LINEAR
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );  // one of: GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR
 	
 	GLenum channels			= GL_RGBA;
 	GLenum internalFormat	= GL_RGBA8;
@@ -92,7 +89,7 @@ void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texe
 	}
 
 	glTexStorage2D( GL_TEXTURE_2D,
-		1,									// number of levels (mip-layers)
+		mipCount,							// number of levels (mip-layers)
 		internalFormat,						// how is the memory stored on the GPU
 		m_dimensions.x, m_dimensions.y );	// dimensions
 											// copies CPU memory to the GPU - needed for texture resources
@@ -104,6 +101,12 @@ void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texe
 		pixelLayout,						// how are those channels stored
 		imageData );						// cpu buffer to copy;
 
+	GL_CHECK_ERROR();
+
+	// Generate the mip chain (generates higher layers from layer 0 loaded above)
+	glActiveTexture( GL_TEXTURE0 ); 
+	glBindTexture( GL_TEXTURE_2D, m_textureID );    // bind our texture to our current texture unit (0)
+	glGenerateMipmap( GL_TEXTURE_2D ); 
 
 	GL_CHECK_ERROR(); 
 }
@@ -144,4 +147,19 @@ bool Texture::CreateRenderTarget( unsigned int width, unsigned int height, eText
 
 					// great, success
 	return true; 
+}
+
+int Texture::CalculateMipCount( IntVector2 dimesions )
+{
+	// Calculate how many layers you need so that 2^mip_count > MaximumDimension
+	
+	int maxDimension = (dimesions.x >= dimesions.y) ? dimesions.x : dimesions.y;
+	int mipCount	 = 0;
+	while(maxDimension > 0)
+	{
+		mipCount++;
+		maxDimension >>= 1;
+	}
+
+	return mipCount;
 }
