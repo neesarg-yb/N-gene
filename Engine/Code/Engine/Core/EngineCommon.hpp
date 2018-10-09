@@ -1,7 +1,9 @@
 #pragma once
 #include <assert.h>
 #include "Engine/Core/ErrorWarningAssert.hpp"
-#include "Engine/../ThirdParty/tinyxml/tinyxml2.h"
+#include "ThirdParty/tinyxml/tinyxml2.h"
+
+class Clock;
 
 typedef tinyxml2::XMLElement XMLElement;
 typedef tinyxml2::XMLAttribute XMLAttribute;
@@ -9,7 +11,7 @@ typedef unsigned int	uint;
 typedef unsigned char	byte_t;
 
 #define MAX_LIGHTS 8U
-const  float	   g_aspectRatio = 1.77f;
+const   float	   g_aspectRatio = 1.77f;
 
 #define GAME_PORT 10084
 #define ETHERNET_MTU 1500  // maximum transmission unit - determined by hardware part of OSI model.
@@ -53,3 +55,6 @@ bool wglGetTypedProcAddress( T *out, char const *name )
 
 void EngineStartup();
 void EngineShutdown();
+
+Clock const*	GetMasterClock();
+void			TickMasterClock();		// Advances the master clock by a frame

@@ -17,7 +17,7 @@ class NetworkPacket;
 class NetworkSession
 {
 public:
-	 NetworkSession();
+	 NetworkSession( Renderer *currentRenderer = nullptr );
 	~NetworkSession();
 
 public:
@@ -29,6 +29,22 @@ public:
 	NetworkMessageDefinitionsMap m_registeredMessages;			// Map of < name, NetworkMessageInfo >
 
 public:
+	// UI
+	Renderer*					m_theRenderer		= nullptr;
+	Camera*						m_uiCamera			= nullptr;
+	BitmapFont*					m_fonts				= nullptr;
+	Vector2 const				m_screenBottomLeft	= Vector2( -g_aspectRatio, -1.f );
+	Vector2 const				m_screenTopRight	= Vector2(  g_aspectRatio,  1.f );
+	AABB2	const				m_screenBounds		= AABB2  ( m_screenBottomLeft, m_screenTopRight );
+	Rgba	const				m_uiBackgroundColor = Rgba   ( 0, 0, 0, 100 );
+	float	const				m_uiTitleFontSize	= 0.03f;
+	float	const				m_uiBodyFontSize	= 0.025f;
+
+public:
+	void Render() const;
+
+public:
+	// Network Operations
 	bool BindPort( uint16_t port, uint16_t range );
 
 	void ProcessIncoming();
@@ -40,6 +56,7 @@ public:
 	uint8_t GetMyConnectionIndex() const;				// Returns 0xff if not found
 
 public:
+	// Connections & Messages
 	NetworkConnection* AddConnection( int idx, NetworkAddress &addr );	// Adds a new client
 	NetworkConnection* GetConnection( int idx );
 

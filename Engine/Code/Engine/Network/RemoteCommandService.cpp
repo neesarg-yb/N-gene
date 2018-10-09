@@ -15,8 +15,7 @@ RemoteCommandService::RemoteCommandService( Renderer *currentRenderer /* = nullp
 	// Set default hosting details
 	m_doHostingAtAddress		= NetworkAddress::GetLocal();
 	m_doHostingAtAddress.port	= port;
-
-
+	
 	// For UI
 	m_uiCamera = new Camera();
 
