@@ -354,6 +354,15 @@
     <ClCompile Include="Core\RaycastResult.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\ContactPoint.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Ray3.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Stopwatch.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -681,6 +690,15 @@
       <Filter>Network Session</Filter>
     </ClInclude>
     <ClInclude Include="Core\RaycastResult.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ContactPoint.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Ray3.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Stopwatch.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

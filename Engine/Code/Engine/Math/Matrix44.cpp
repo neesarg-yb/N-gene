@@ -24,6 +24,14 @@ Matrix44::Matrix44( const Vector3& iBasis, const Vector3& jBasis, const Vector3&
 	Iw = 0;				Jw = 0;				Kw = 0;				Tw = 1;
 }
 
+Matrix44::Matrix44( const Vector3 &translation, float tw /* = 1.f */ )
+{
+	Tx = translation.x;
+	Ty = translation.y;
+	Tz = translation.z;
+	Tw = tw;
+}
+
 Vector2 Matrix44::TransformPosition2D( const Vector2& position2D )
 {
 	Vector2 transformedPos2D = Vector2( Ix*position2D.x + Jx*position2D.y + Kx*0.f + Tx*1.f, 
