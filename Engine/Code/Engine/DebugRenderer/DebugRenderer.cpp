@@ -63,11 +63,6 @@ void DebugRendererRender()
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	// Clear the 2D Camera's color & depth targets
-	debugRenderer->BindCamera( debugCamera2D );
-	debugRenderer->ClearColor( RGBA_BLACK_COLOR );
-	debugRenderer->ClearDepth( 1.f );
-
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
 		renderObject->Render();
 }
