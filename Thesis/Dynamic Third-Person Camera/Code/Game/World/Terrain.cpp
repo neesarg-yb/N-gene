@@ -183,8 +183,16 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 			}
 		}
 	}
+	
+	// To check if the impact point is inside the terrain's bounds
+	bool impactInsideTheBounds	= false;
+	Vector2 positionXZ			= Vector2( position.x, position.z );
+	AABB2	terrainBoundsXZ		= AABB2( m_worldBounds.mins.x, m_worldBounds.mins.z, m_worldBounds.maxs.x, m_worldBounds.maxs.z );
+	if( terrainBoundsXZ.IsPointInside( positionXZ ) )
+		impactInsideTheBounds = true;
 
-	if( didImpact == false )
+	// If it did not impact & did impact but not inside the bounds of the terrain,
+	if( didImpact == false || impactInsideTheBounds == false )
 		return RaycastResult( startPosition );			// Returns as if it did not hit!
 	else
 	{

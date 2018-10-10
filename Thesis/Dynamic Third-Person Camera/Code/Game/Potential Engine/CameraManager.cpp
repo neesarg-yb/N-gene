@@ -69,7 +69,7 @@ void CameraManager::SetAnchor( GameObject *anchor )
 	m_anchor = anchor;
 }
 
-void CameraManager::SetRaycastCallback( raycast_cb raycastFunction )
+void CameraManager::SetRaycastCallback( raycast_std_func raycastFunction )
 {
 	m_raycastCB = raycastFunction;
 }

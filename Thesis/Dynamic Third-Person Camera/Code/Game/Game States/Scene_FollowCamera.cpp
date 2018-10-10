@@ -8,13 +8,6 @@
 #include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/theGame.hpp"
 
-Scene_FollowCamera *lastCreatedScene = nullptr;
-
-RaycastResult TerrainRaycast( Vector3 const &startPosition, Vector3 const &rayDirection, float maxDistance )
-{
-	return lastCreatedScene->m_terrain->Raycast( startPosition, rayDirection, maxDistance, 0.05f );
-}
-
 Scene_FollowCamera::Scene_FollowCamera()
 	: GameState( "FOLLOW CAMERA" )
 {
@@ -48,7 +41,11 @@ Scene_FollowCamera::Scene_FollowCamera()
 	// Camera Manager
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput );
 	m_cameraManager->SetAnchor( m_player );
-	m_cameraManager->SetRaycastCallback( TerrainRaycast );
+
+	// Set the Raycast std::function
+	raycast_std_func terrainRaycastStdFunc;
+	terrainRaycastStdFunc = [ this ]( Vector3 const &startPos, Vector3 const &direction, float maxDistance ) { return m_terrain->Raycast( startPos, direction, maxDistance, 0.05f ); };
+	m_cameraManager->SetRaycastCallback( terrainRaycastStdFunc );
 
 	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
@@ -63,8 +60,6 @@ Scene_FollowCamera::Scene_FollowCamera()
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
-	
-	lastCreatedScene = this;
 }
 
 Scene_FollowCamera::~Scene_FollowCamera()
