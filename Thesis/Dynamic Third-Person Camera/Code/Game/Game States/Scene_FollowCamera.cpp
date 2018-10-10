@@ -49,14 +49,14 @@ Scene_FollowCamera::Scene_FollowCamera()
 
 	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
-	CameraBehaviour* dofBehaviour		= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow" );
-	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
+	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow" );
+	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 
 	// Camera Constrains
-	CC_LineOfSight* losConstarin = new CC_LineOfSight( *m_cameraManager, "LineOfSight" );
-	m_cameraManager->RegisterConstrain( "LineOfSight", losConstarin );
-	dofBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
+	CC_LineOfSight* losConstarin = new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
+	m_cameraManager->RegisterConstrain( losConstarin );
+	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );

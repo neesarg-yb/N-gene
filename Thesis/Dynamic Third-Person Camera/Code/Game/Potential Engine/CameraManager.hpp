@@ -1,5 +1,5 @@
 #pragma once
-#include <map>
+#include <queue>
 #include <vector>
 #include "Engine/Core/Tags.hpp"
 #include "Engine/Core/RaycastResult.hpp"
@@ -11,9 +11,19 @@
 #include "Game/Potential Engine/CameraState.hpp"
 #include "Game/Potential Engine/CameraContext.hpp"
 
-typedef std::vector< CameraBehaviour* >				CameraBehaviourList;
-typedef std::vector< CameraConstrain* >				CameraConstrainList;
-typedef std::map< std::string, CameraConstrain* >	CameraConstrainMap;
+
+struct CustomCameraConstarinCompare
+{
+	// Such that top element is the lowest priority, and bottom is the highest priority
+	bool operator() ( CameraConstrain const *lhs, CameraConstrain const *rhs ) const
+	{
+		return (*lhs > *rhs);
+	}
+};
+
+typedef std::vector< CameraBehaviour* >																CameraBehaviourList;
+typedef std::vector< CameraConstrain* >																CameraConstrainList;
+typedef std::priority_queue< CameraConstrain*, CameraConstrainList, CustomCameraConstarinCompare >	CameraConstrainPriorityQueue;		// Top: lowest priority & Bottom: highest priority
 
 class CameraManager
 {
@@ -38,9 +48,9 @@ private:
 	float		m_behaviourTransitionTimeRemaining = 0.f;
 
 	// Camera Constrains
-	bool					m_constrainsEnabled = true;
-	CameraConstrainMap		m_registeredConstrains;
-	CameraConstrainList		m_activeConstrains;
+	bool							m_constrainsEnabled = true;
+	CameraConstrainList				m_registeredConstrains;		// Stored without any sorting by priority
+	CameraConstrainPriorityQueue	m_activeConstrains;			// Lowest priority at top, highest at bottom
 
 public:
 	void Update( float deltaSeconds );
@@ -60,7 +70,7 @@ public:
 	void SetActiveCameraBehaviourTo	( std::string const &behaviourName );
 
 	// Constrains
-	void RegisterConstrain	( char const *name, CameraConstrain *newConstrain );
+	void RegisterConstrain	( CameraConstrain* newConstrain );
 	void DeregisterConstrain( char const *name );
 	void EnableConstrains	( bool enable = true );
 
@@ -70,4 +80,5 @@ private:
 private:
 	int GetCameraBehaviourIndex( CameraBehaviour *cb );					// Returns -1 if couldn't fine it in the list
 	int GetCameraBehaviourIndex( std::string const &behaviourName );	// Returns -1 if couldn't fine it in the list
+	int GetCameraConstrainIndex( std::string const &constrainName );	// Returns -1 if couldn't fine it in the list
 };
