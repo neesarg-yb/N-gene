@@ -19,6 +19,10 @@ public:
 public:
 	GLuint m_sampler_handle;
 
+private:
+	float m_minMipMap = -1000.f;
+	float m_maxMipMap = +1000.f;
+
 public:
 	GLuint GetHandle() const;
 

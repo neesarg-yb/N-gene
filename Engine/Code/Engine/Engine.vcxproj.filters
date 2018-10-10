@@ -360,6 +360,9 @@
     <ClCompile Include="Core\Ray3.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Stopwatch.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -693,6 +696,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Ray3.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Stopwatch.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

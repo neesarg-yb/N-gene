@@ -59,13 +59,13 @@ unsigned int Texture::GetHeight() const
 	return (unsigned int)m_dimensions.y;
 }
 
-
 //-----------------------------------------------------------------------------------------------
 // Creates a texture identity on the video card, and populates it with the given image texel data
 //
 void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texelSize, int numComponents )
 {
 	m_dimensions = texelSize;
+	GLint mipCount = CalculateMipCount( m_dimensions );
 
 	// Tell OpenGL that our pixel data is single-byte aligned
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
@@ -73,29 +73,42 @@ void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texe
 	// Ask OpenGL for an unused texName (ID number) to use for this texture
 	glGenTextures( 1, (GLuint*) &m_textureID );
 
+	// Copy the texture - first, get use to be using texture unit 0 for this;
+	glActiveTexture( GL_TEXTURE0 );
 	// Tell OpenGL to bind (set) this as the currently active texture
-	glBindTexture( GL_TEXTURE_2D, m_textureID );
-
-	// Set magnification (texel > pixel) and minification (texel < pixel) filters
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST ); // one of: GL_NEAREST, GL_LINEAR
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR ); // one of: GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR
-
-	GLenum bufferFormat = GL_RGBA; // the format our source pixel data is in; any of: GL_RGB, GL_RGBA, GL_LUMINANCE, GL_LUMINANCE_ALPHA, ...
+	glBindTexture( GL_TEXTURE_2D, m_textureID ); 
+	
+	GLenum channels			= GL_RGBA;
+	GLenum internalFormat	= GL_RGBA8;
+	GLenum pixelLayout		= GL_UNSIGNED_BYTE;
 	if( numComponents == 3 )
-		bufferFormat = GL_RGB;
+	{
+		channels		= GL_RGB;
+		internalFormat	= GL_RGB8;
+		pixelLayout		= GL_UNSIGNED_BYTE;
+	}
 
-	GLenum internalFormat = bufferFormat; // the format we want the texture to be on the card; allows us to translate into a different texture format as we upload to OpenGL
+	glTexStorage2D( GL_TEXTURE_2D,
+		mipCount,							// number of levels (mip-layers)
+		internalFormat,						// how is the memory stored on the GPU
+		m_dimensions.x, m_dimensions.y );	// dimensions
+											// copies CPU memory to the GPU - needed for texture resources
+	glTexSubImage2D( GL_TEXTURE_2D,
+		0,									// mip layer we're copying to
+		0, 0,								// offset
+		m_dimensions.x, m_dimensions.y,		// dimensions
+		channels,							// which channels exist in the CPU buffer
+		pixelLayout,						// how are those channels stored
+		imageData );						// cpu buffer to copy;
 
-	glTexImage2D(			// Upload this pixel data to our new OpenGL texture
-		GL_TEXTURE_2D,		// Creating this as a 2d texture
-		0,					// Which mipmap level to use as the "root" (0 = the highest-quality, full-res image), if mipmaps are enabled
-		internalFormat,		// Type of texel format we want OpenGL to use for this texture internally on the video card
-		m_dimensions.x,			// Texel-width of image; for maximum compatibility, use 2^N + 2^B, where N is some integer in the range [3,11], and B is the border thickness [0,1]
-		m_dimensions.y,			// Texel-height of image; for maximum compatibility, use 2^M + 2^B, where M is some integer in the range [3,11], and B is the border thickness [0,1]
-		0,					// Border size, in texels (must be 0 or 1, recommend 0)
-		bufferFormat,		// Pixel format describing the composition of the pixel data in buffer
-		GL_UNSIGNED_BYTE,	// Pixel color components are unsigned bytes (one byte per color channel/component)
-		imageData );		// Address of the actual pixel data bytes/buffer in system memory
+	GL_CHECK_ERROR();
+
+	// Generate the mip chain (generates higher layers from layer 0 loaded above)
+	glActiveTexture( GL_TEXTURE0 ); 
+	glBindTexture( GL_TEXTURE_2D, m_textureID );    // bind our texture to our current texture unit (0)
+	glGenerateMipmap( GL_TEXTURE_2D ); 
+
+	GL_CHECK_ERROR(); 
 }
 
 bool Texture::CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt )
@@ -105,31 +118,20 @@ bool Texture::CreateRenderTarget( unsigned int width, unsigned int height, eText
 	if (m_textureID == NULL) {
 		return false; 
 	}
-
-	// TODO - add a TextureFormatToGLFormats( GLenum*, GLenum*, GLenum*, eTextureFormat )
-	//        when more texture formats are required; 
-	GLenum internal_format = GL_RGBA8; 
-	GLenum channels = GL_RGBA;  
-	GLenum pixel_layout = GL_UNSIGNED_BYTE;  
-	if (fmt == TEXTURE_FORMAT_D24S8) {
-		internal_format = GL_DEPTH_STENCIL; 
-		channels = GL_DEPTH_STENCIL; 
-		pixel_layout = GL_UNSIGNED_INT_24_8;			// Originally GL_UNSIGNED_INT_D24_S8
-	}
+	
+	GLenum internal_format = GL_RGBA8;  
+	if (fmt == TEXTURE_FORMAT_D24S8)
+		internal_format = GL_DEPTH24_STENCIL8;
 
 	// Copy the texture - first, get use to be using texture unit 0 for this; 
 	glActiveTexture( GL_TEXTURE0 ); 
 	glBindTexture( GL_TEXTURE_2D, m_textureID );		// bind our texture to our current texture unit (0)
-
-	// Copy data into it;
-	glTexImage2D( GL_TEXTURE_2D, 0, 
-		internal_format,	// what's the format OpenGL should use
-		width, 
-		height,        
-		0,					// border, use 0
-		channels,			// how many channels are there?
-		pixel_layout,		// how is the data laid out
-		nullptr );			// don't need to pass it initialization data 
+	
+	// Create the GPU buffer
+	glTexStorage2D( GL_TEXTURE_2D,
+		1,               // number of levels (mip-layers)
+		internal_format, // how is the memory stored on the GPU
+		width, height ); // dimensions
 
 	// make sure it succeeded
 	GL_CHECK_ERROR(); 
@@ -145,4 +147,19 @@ bool Texture::CreateRenderTarget( unsigned int width, unsigned int height, eText
 
 					// great, success
 	return true; 
+}
+
+int Texture::CalculateMipCount( IntVector2 dimesions )
+{
+	// Calculate how many layers you need so that 2^mip_count > MaximumDimension
+	
+	int maxDimension = (dimesions.x >= dimesions.y) ? dimesions.x : dimesions.y;
+	int mipCount	 = 0;
+	while(maxDimension > 0)
+	{
+		mipCount++;
+		maxDimension >>= 1;
+	}
+
+	return mipCount;
 }

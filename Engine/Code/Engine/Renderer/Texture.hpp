@@ -26,6 +26,9 @@ private:
 	void PopulateFromData	( unsigned char* imageData, const IntVector2& texelSize, int numComponents );
 	bool CreateRenderTarget	( unsigned int width, unsigned int height, eTextureFormat fmt );
 
+	// Calculate how many layers you need so that 2^mip_count > MaximumDimension
+	int CalculateMipCount( IntVector2 dimesions );
+
 private:
 	unsigned int	m_textureID;
 	IntVector2		m_dimensions	= IntVector2( 0, 0 );
