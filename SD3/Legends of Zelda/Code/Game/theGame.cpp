@@ -49,7 +49,7 @@ void AddSessionConnection( Command &cmd )
 	std::string arg2 = cmd.GetNextString();
 	if( arg1 == "" || arg2 == "" )
 	{
-		ConsolePrintf( "Error: Command needs two valid argument!" );
+		ConsolePrintf( RGBA_RED_COLOR, "Error: Command needs two valid argument!" );
 		return;
 	}
 
@@ -59,9 +59,9 @@ void AddSessionConnection( Command &cmd )
 	NetworkSession		*session	= theGame::GetSession();
 	NetworkConnection	*connection	= session->AddConnection( idx, addr );
 	if( connection == nullptr )
-		ConsolePrintf( "Failed to add connection!" );
+		ConsolePrintf( RGBA_RED_COLOR, "Failed to add connection!" );
 	else
-		ConsolePrintf( "Connection added at index [%d]", idx );
+		ConsolePrintf( RGBA_GREEN_COLOR, "Connection added at index [%d]", idx );
 }
 
 void SessionSendPing( Command &cmd )
@@ -72,7 +72,7 @@ void SessionSendPing( Command &cmd )
 	std::string arg2 = cmd.GetRemainingCommandInOneString();
 	if( arg1 == "" )
 	{
-		ConsolePrintf( "Provide a valid index" );
+		ConsolePrintf( RGBA_RED_COLOR, "Provide a valid index" );
 		return;
 	}
 	else
@@ -82,7 +82,7 @@ void SessionSendPing( Command &cmd )
 	NetworkConnection	*receiver = session->GetConnection( idx );
 	if( receiver == nullptr )
 	{
-		ConsolePrintf( "No connection at index %d", idx );
+		ConsolePrintf( RGBA_RED_COLOR, "No connection at index %d", idx );
 		return;
 	}
 
@@ -103,7 +103,7 @@ void SessionSendAdd( Command &cmd )
 	std::string arg3 = cmd.GetNextString();
 	if( arg1 == "" || arg2 == "" || arg3 == "" )
 	{
-		ConsolePrintf( "Not all arguments are provided.." );
+		ConsolePrintf( RGBA_RED_COLOR, "Not all arguments are provided.." );
 		return;
 	}
 
@@ -115,7 +115,7 @@ void SessionSendAdd( Command &cmd )
 	NetworkConnection	*receiver	= session->GetConnection( idx );
 	if( receiver == nullptr )
 	{
-		ConsolePrintf( "No connection at index %d", idx );
+		ConsolePrintf( RGBA_RED_COLOR, "No connection at index %d", idx );
 		return;
 	}
 
@@ -123,6 +123,43 @@ void SessionSendAdd( Command &cmd )
 	msg.Write( value1 );
 	msg.Write( value2 );
 	receiver->Send( msg );
+}
+
+void NetSimLoss( Command &cmd )
+{
+	std::string lossFractionStr = cmd.GetNextString();
+
+	if( lossFractionStr == "" )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Not all arguments are provided.." );
+		return;
+	}
+
+	float fraction = (float)atof( lossFractionStr.c_str() );
+	fraction = ClampFloat01( fraction );
+
+	theGame::GetSession()->SetSimulationLoss( fraction );
+	ConsolePrintf( RGBA_GREEN_COLOR, "NetSimLoss: loss fraction set to %f", fraction );
+}
+
+void NetSimLag( Command &cmd )
+{
+	std::string minMsStr = cmd.GetNextString();
+	std::string maxMsStr = cmd.GetNextString();
+
+	if( minMsStr == "")
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Not all arguments are provided.." );
+		return;
+	}
+	
+	int minLag_ms = atoi( minMsStr.c_str() );
+	int maxLag_ms = 0;							// Max lag defaults to zero, if not provided
+	if( maxMsStr != "" )
+		maxLag_ms = atoi( maxMsStr.c_str() );
+
+	theGame::GetSession()->SetSimulationLatency( (uint)minLag_ms, (uint)maxLag_ms );
+	ConsolePrintf( RGBA_GREEN_COLOR, "NetSimLag: LagRange [ %d, %d ] set!", minLag_ms, maxLag_ms );
 }
 
 bool OnAddResponse( NetworkMessage const &msg, NetworkSender &from )
@@ -243,6 +280,8 @@ void theGame::Startup()
 	CommandRegister( "add_connection", AddSessionConnection );
 	CommandRegister( "send_ping", SessionSendPing );
 	CommandRegister( "send_add", SessionSendAdd );
+	CommandRegister( "net_sim_loss", NetSimLoss );
+	CommandRegister( "net_sim_lag", NetSimLag );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
