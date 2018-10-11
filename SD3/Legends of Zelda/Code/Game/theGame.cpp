@@ -210,7 +210,26 @@ void SetConnectionSendRate( Command &cmd )
 	}
 
 	connection->SetSendFrequencyTo( (uint8_t)sendRate );
-	ConsolePrintf( RGBA_GREEN_COLOR, "Send Rate of connection [%d] set to %dhz", connectionIdx, connection->GetSendFrequency() );
+	ConsolePrintf( RGBA_GREEN_COLOR, "Send Rate of connection [%d] set to %dhz", connectionIdx, connection->GetCurrentSendFrequency() );
+}
+
+void SetHeartbeatRate( Command &cmd )
+{
+	std::string rateInHzStr = cmd.GetNextString();
+
+	if( rateInHzStr == "" )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Not all arguments are provided.." );
+		return;
+	}
+
+	float rateHz = (float)atof( rateInHzStr.c_str() );
+	bool success = theGame::GetSession()->SetHeartbeatFrequency( rateHz );
+
+	if( success )
+		ConsolePrintf( RGBA_GREEN_COLOR, "Heartbeat rate set to %.4fhz", theGame::GetSession()->GetHeartbeatFrequency() );
+	else
+		ConsolePrintf( RGBA_YELLOW_COLOR, "Can't set that heartrate frequency..!" );
 }
 
 bool OnAddResponse( NetworkMessage const &msg, NetworkSender &from )
@@ -335,6 +354,7 @@ void theGame::Startup()
 	CommandRegister( "net_sim_lag", NetSimLag );
 	CommandRegister( "net_set_session_send_rate", SetSessionSendRate );
 	CommandRegister( "net_set_connection_send_rate", SetConnectionSendRate );
+	CommandRegister( "net_set_heart_rate", SetHeartbeatRate );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
