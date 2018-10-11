@@ -162,6 +162,57 @@ void NetSimLag( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "NetSimLag: LagRange [ %d, %d ] set!", minLag_ms, maxLag_ms );
 }
 
+void SetSessionSendRate( Command &cmd )
+{
+	std::string sendRateStr = cmd.GetNextString();
+
+	if( sendRateStr == "" )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Not all arguments are provided.." );
+		return;
+	}
+
+	int sendRate = atoi( sendRateStr.c_str() );
+	if( sendRate <= 0 || sendRate > 0xff )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Provide send_rate in range (0, 255]..!" );
+		return;
+	}
+
+	theGame::GetSession()->SetSimulationSendFrequency( (uint8_t)sendRate );
+	ConsolePrintf( RGBA_GREEN_COLOR, "Send Rate set to %dhz", theGame::GetSession()->GetSimulatedSendFrequency() );
+}
+
+void SetConnectionSendRate( Command &cmd )
+{
+	std::string connectionIdxStr = cmd.GetNextString();
+	std::string sendRateStr		 = cmd.GetNextString();
+
+	if( sendRateStr == "" || connectionIdxStr == "" )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Not all arguments are provided.." );
+		return;
+	}
+
+	int connectionIdx	= atoi( connectionIdxStr.c_str() );
+	int sendRate		= atoi( sendRateStr.c_str() );
+	if( sendRate <= 0 || sendRate > 0xff )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Provide send_rate in range (0, 255]..!" );
+		return;
+	}
+
+	NetworkConnection *connection = theGame::GetSession()->GetConnection( connectionIdx );
+	if( connection == nullptr )
+	{
+		ConsolePrintf( RGBA_YELLOW_COLOR, "Connection at [%d] doesn't exists!", connectionIdx  );
+		return;
+	}
+
+	connection->SetSendFrequencyTo( (uint8_t)sendRate );
+	ConsolePrintf( RGBA_GREEN_COLOR, "Send Rate of connection [%d] set to %dhz", connectionIdx, connection->GetSendFrequency() );
+}
+
 bool OnAddResponse( NetworkMessage const &msg, NetworkSender &from )
 {
 	UNUSED( from );
@@ -282,6 +333,8 @@ void theGame::Startup()
 	CommandRegister( "send_add", SessionSendAdd );
 	CommandRegister( "net_sim_loss", NetSimLoss );
 	CommandRegister( "net_sim_lag", NetSimLag );
+	CommandRegister( "net_set_session_send_rate", SetSessionSendRate );
+	CommandRegister( "net_set_connection_send_rate", SetConnectionSendRate );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
@@ -340,7 +393,7 @@ void theGame::Update()
 	PROFILE_SCOPE_FUNCTION();
 
 	// Calculating deltaTime
-	float deltaSeconds			= CalculateDeltaTime();
+	float deltaSeconds			= (float) GetMasterClock()->GetFrameDeltaSeconds();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
 
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
@@ -499,14 +552,6 @@ void theGame::RenderLoadingScreen() const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	g_theRenderer->DrawTextInBox2D( "Loading..", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-}
-
-float theGame::CalculateDeltaTime() {
-	double currentTime = GetCurrentTimeSeconds();
-	float deltaSeconds = (float)(currentTime - m_lastFramesTime);
-	m_lastFramesTime = currentTime;
-
-	return deltaSeconds;
 }
 
 double theGame::GetTimeSinceGameStarted() const

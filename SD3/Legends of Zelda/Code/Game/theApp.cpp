@@ -216,6 +216,10 @@ void theApp::EndFrame() {
 }
 
 void theApp::Update() {
+	// Tick the Master Clock
+	TickMasterClock();
+
+	// Update the Game
 	g_theGame->Update();
 
 	ProfileConsole::GetInstance()->Update( *g_theInput );

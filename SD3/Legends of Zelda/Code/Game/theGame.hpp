@@ -71,7 +71,6 @@ private:
 	void		RenderLoadingScreen() const;
 
 	// Time
-	float		CalculateDeltaTime();
 	double		GetTimeSinceGameStarted() const;
 };
 
