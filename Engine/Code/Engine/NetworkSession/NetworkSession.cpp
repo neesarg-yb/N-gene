@@ -4,6 +4,19 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
+bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( msg );
+	
+	if( from.connection == nullptr )
+		return false;
+	else
+	{
+		ConsolePrintf( "Heartbeat Received from [%d] connection.", from.connection->m_indexInSession );
+		return true;
+	}
+}
+
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 	: m_theRenderer( currentRenderer )
 {
@@ -17,6 +30,8 @@ NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 
 	if( currentRenderer != nullptr )
 		m_fonts = currentRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
+	
+	RegisterCoreMessages();
 }
 
 NetworkSession::~NetworkSession()
@@ -47,7 +62,7 @@ void NetworkSession::Render() const
 	m_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	// Draw overlay
-	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.8f, 1.f ) );
+	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.95f, 1.f ) );
 	m_theRenderer->DrawAABB( backgroundBox, m_uiBackgroundColor );
 
 	// Title Box
@@ -59,8 +74,9 @@ void NetworkSession::Render() const
 	std::string sendRateStr			= Stringf( "%dhz", m_simulatedSendFrequency );
 	std::string lossPercentageStr	= Stringf( "%.2f%%", m_simulatedLossFraction * 100.f );
 	std::string simLagRangeStr		= Stringf( "%dms - %dms", m_simulatedMinLatency_ms, m_simulatedMaxLatency_ms );
+	std::string heartbeatHzStr		= Stringf( "%.2fhz", m_heartbeatFrequency );
 	AABB2		srllBox				= backgroundBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.6f ), Vector2( 1.f, 0.9f ) );
-	std::string srllStr				= Stringf( "%-8s:%s\n%-8s:%s\n%-8s:%s", "rate", sendRateStr.c_str(), "sim_lag", simLagRangeStr.c_str(), "sim_loss", lossPercentageStr.c_str() );
+	std::string srllStr				= Stringf( "%-8s: %s (%s: %s)\n%-8s: %s\n%-8s: %s", "rate", sendRateStr.c_str(), "heartbeat", heartbeatHzStr.c_str(), "sim_lag", simLagRangeStr.c_str(), "sim_loss", lossPercentageStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( srllStr.c_str(), Vector2( 0.f, 1.f ), srllBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// My Socket Address
@@ -80,7 +96,7 @@ void NetworkSession::Render() const
 	// Title Column of Table: All Connections
 	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
 	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", "--", "idx", "address", "rtt(ms)", "loss(%)", "lrcv(s)", "lsnt(s)", "sntack", "rcvack", "rcvbits" );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(ms)", "loss(%)", "lrcv(s)", "lsnt(s)", "sntack", "rcvack", "rcvbits" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -100,6 +116,9 @@ void NetworkSession::Render() const
 
 		// address
 		std::string connectionAddrStr = m_connections[i]->m_address.AddressToString();
+
+		// simsndrt(hz)
+		std::string simsndrt = Stringf( "%dhz", m_connections[i]->GetCurrentSendFrequency() );
 
 		// rtt(ms)
 		std::string rttStr = "X.XX";
@@ -127,7 +146,7 @@ void NetworkSession::Render() const
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
 }
@@ -156,6 +175,11 @@ bool NetworkSession::BindPort( uint16_t port, uint16_t range )
 	delete m_mySocket;
 	m_mySocket = nullptr;
 	return false;
+}
+
+void NetworkSession::RegisterCoreMessages()
+{
+	RegisterNetworkMessage( "heartbeat", OnHeartbeat );
 }
 
 void NetworkSession::ProcessIncoming()
@@ -260,6 +284,27 @@ void NetworkSession::RegisterNetworkMessage( char const *messageName, networkMes
 		it->second.id = messageID;
 		messageID++;
 	}
+}
+
+bool NetworkSession::SetHeartbeatFrequency( float frequencyHz )
+{
+	// We can set it to zero, b/c we'll be dividing by zero when updating the timer
+	if( frequencyHz == 0 )
+		return false;
+
+	// Set the frequency
+	m_heartbeatFrequency = frequencyHz;
+
+	// Update timer in all the connections
+	for each( NetworkConnection* connection in m_connections )
+	{
+		if( connection == nullptr )
+			continue;
+
+		connection->UpdateHeartbeatTimer();
+	}
+
+	return true;
 }
 
 void NetworkSession::SetSimulationLoss( float lossFraction )
