@@ -56,10 +56,11 @@ void NetworkSession::Render() const
 	m_theRenderer->DrawTextInBox2D( titleStr.c_str(), Vector2( 0.f, 0.5f ), titleBox, m_uiTitleFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Simulated Rate, Lag & Loss
-	std::string lossPercentageStr	= Stringf( "%.2f %%", m_simulatedLossFraction * 100.f );
-	std::string simLagRangeStr		= Stringf( "%d ms-%d ms", m_simulatedMinLatency_ms, m_simulatedMaxLatency_ms );
+	std::string sendRateStr			= Stringf( "%dhz", m_simulatedSendFrequency );
+	std::string lossPercentageStr	= Stringf( "%.2f%%", m_simulatedLossFraction * 100.f );
+	std::string simLagRangeStr		= Stringf( "%dms - %dms", m_simulatedMinLatency_ms, m_simulatedMaxLatency_ms );
 	AABB2		srllBox				= backgroundBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.6f ), Vector2( 1.f, 0.9f ) );
-	std::string srllStr				= Stringf( "%-8s:%s\n%-8s:%s\n%-8s:%s", "rate", "XX hz", "sim_lag", simLagRangeStr.c_str(), "sim_loss", lossPercentageStr.c_str() );
+	std::string srllStr				= Stringf( "%-8s:%s\n%-8s:%s\n%-8s:%s", "rate", sendRateStr.c_str(), "sim_lag", simLagRangeStr.c_str(), "sim_loss", lossPercentageStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( srllStr.c_str(), Vector2( 0.f, 1.f ), srllBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// My Socket Address
@@ -270,6 +271,11 @@ void NetworkSession::SetSimulationLatency( uint minAddedLatency_ms, uint maxAdde
 {
 	m_simulatedMinLatency_ms =  minAddedLatency_ms;
 	m_simulatedMaxLatency_ms = (minAddedLatency_ms > maxAddedLatency_ms) ? minAddedLatency_ms : maxAddedLatency_ms;
+}
+
+void NetworkSession::SetSimulationSendFrequency( uint8_t frequencyHz )
+{
+	m_simulatedSendFrequency = frequencyHz;
 }
 
 void NetworkSession::ReceivePacket()

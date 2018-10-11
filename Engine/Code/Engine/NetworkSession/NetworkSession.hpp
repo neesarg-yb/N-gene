@@ -89,21 +89,26 @@ public:
 	void RegisterNetworkMessage( char const *messageName, networkMessage_cb cb );
 
 private:
-	float	m_simulatedLossFraction		= 0.f;
-	uint	m_simulatedMinLatency_ms	= 0U;
-	uint	m_simulatedMaxLatency_ms	= 100000U;
+	// Net Simulation
+	float	m_simulatedLossFraction	 = 0.f;
+	uint	m_simulatedMinLatency_ms = 0U;
+	uint	m_simulatedMaxLatency_ms = 0U;
+	uint8_t m_simulatedSendFrequency = 20;
 
 	// Priority Queue
 	StampedNetworkPacketPriorityQueue m_receivedPackets;
 
 public:
-	// Net Simulation
+	inline float	GetSimulatedLossFraction()	const { return m_simulatedLossFraction; }
+	inline uint8_t	GetSimulatedSendFrequency()	const { return m_simulatedSendFrequency; }
+
 	void SetSimulationLoss( float lossFraction );
 	void SetSimulationLatency( uint minAddedLatency_ms, uint maxAddedLatency_ms = 0U );
+	void SetSimulationSendFrequency( uint8_t frequencyHz );
 
 private:
 	void ReceivePacket();
 	void ProcessReceivedPackets();
 	void QueuePacketForSimulation( NetworkPacket *newPacket, NetworkAddress &sender );	// Queues them with a random latency
-	void ProccessAndDeletePacket ( NetworkPacket *&packet, NetworkAddress &sender );				// Process the packet and deletes it
+	void ProccessAndDeletePacket ( NetworkPacket *&packet, NetworkAddress &sender );	// Process the packet and deletes it
 };
