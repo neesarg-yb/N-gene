@@ -72,6 +72,7 @@ public:
 public:
 	// Network Operations
 	bool BindPort( uint16_t port, uint16_t range );
+	void RegisterCoreMessages();
 
 	void ProcessIncoming();
 	void ProcessOutgoing();
@@ -94,14 +95,18 @@ private:
 	uint	m_simulatedMinLatency_ms = 0U;
 	uint	m_simulatedMaxLatency_ms = 0U;
 	uint8_t m_simulatedSendFrequency = 20;
+	float	m_heartbeatFrequency	 = 0.2f;
 
+private:
 	// Priority Queue
 	StampedNetworkPacketPriorityQueue m_receivedPackets;
 
 public:
+	inline float	GetHeartbeatFrequency()		const { return m_heartbeatFrequency; }
 	inline float	GetSimulatedLossFraction()	const { return m_simulatedLossFraction; }
 	inline uint8_t	GetSimulatedSendFrequency()	const { return m_simulatedSendFrequency; }
 
+	bool SetHeartbeatFrequency( float frequencyHz );
 	void SetSimulationLoss( float lossFraction );
 	void SetSimulationLatency( uint minAddedLatency_ms, uint maxAddedLatency_ms = 0U );
 	void SetSimulationSendFrequency( uint8_t frequencyHz );

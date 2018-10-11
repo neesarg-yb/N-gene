@@ -24,12 +24,14 @@ private:
 	NetworkMessages		 m_outgoingMessages;		// Unreliable messages, for now
 
 private:
-	Stopwatch			 m_timer;					// To simulate send frequency
+	Stopwatch			 m_sendRateTimer;			// To simulate send frequency
+	Stopwatch			 m_heartbeatTimer;			// To send heartbeat regularly
 
 public:
 	void Send( NetworkMessage &msg );
 	void FlushMessages();
 
-	uint8_t	GetSendFrequency() const;
+	uint8_t	GetCurrentSendFrequency() const;			// Minimum of ( My sendFrequency, Parent's sendFrequency )
 	void	SetSendFrequencyTo( uint8_t frequencyHz );	// Sets it to the min( passedFrequency, parentsFrequency )
+	void	UpdateHeartbeatTimer();						// Sets the heartbeat timer according to parentSession
 };
