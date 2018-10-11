@@ -1,5 +1,5 @@
 #pragma once
-#include <map>
+#include <queue>
 #include <vector>
 #include "Engine/Network/UDPSocket.hpp"
 #include "Engine/Network/NetworkAddress.hpp"
@@ -8,11 +8,37 @@
 
 #define MAX_SESSION_CONNECTIONS (0xff)
 
-// Session Message Callbacks
-typedef NetworkConnection*		NetworkConnections[ MAX_SESSION_CONNECTIONS ];
-typedef std::map< std::string,	NetworkMessageDefinition >	NetworkMessageDefinitionsMap;
+class  NetworkPacket;
+struct StampedNetworkPacket;
+struct CustomCompareForStampedPacketQueue;
 
-class NetworkPacket;
+// Session Message Callbacks
+typedef NetworkConnection*																									NetworkConnections[ MAX_SESSION_CONNECTIONS ];
+typedef std::map< std::string,	NetworkMessageDefinition >																	NetworkMessageDefinitionsMap;
+typedef std::priority_queue< StampedNetworkPacket, std::vector<StampedNetworkPacket>, CustomCompareForStampedPacketQueue >	StampedNetworkPacketPriorityQueue;
+
+struct StampedNetworkPacket
+{
+public:
+	NetworkPacket	*packet;
+	NetworkAddress	 sender;
+	uint64_t		 timestampHPC;
+
+public:
+	StampedNetworkPacket( NetworkPacket *netPacket, NetworkAddress &senderAddr )
+		: sender( senderAddr )
+		, packet( netPacket )
+		, timestampHPC( 0U ) { }
+};
+
+// Puts the lowest timestamp having StampedPacket at the top
+struct CustomCompareForStampedPacketQueue
+{
+	bool operator () ( StampedNetworkPacket &lhs, StampedNetworkPacket &rhs )
+	{
+		return lhs.timestampHPC > rhs.timestampHPC;
+	}
+};
 
 class NetworkSession
 {
@@ -61,4 +87,23 @@ public:
 	NetworkConnection* GetConnection( int idx );
 
 	void RegisterNetworkMessage( char const *messageName, networkMessage_cb cb );
+
+private:
+	float	m_simulatedLossFraction		= 0.f;
+	uint	m_simulatedMinLatency_ms	= 0U;
+	uint	m_simulatedMaxLatency_ms	= 100000U;
+
+	// Priority Queue
+	StampedNetworkPacketPriorityQueue m_receivedPackets;
+
+public:
+	// Net Simulation
+	void SetSimulationLoss( float lossFraction );
+	void SetSimulationLatency( uint minAddedLatency_ms, uint maxAddedLatency_ms = 0U );
+
+private:
+	void ReceivePacket();
+	void ProcessReceivedPackets();
+	void QueuePacketForSimulation( NetworkPacket *newPacket, NetworkAddress &sender );	// Queues them with a random latency
+	void ProccessAndDeletePacket ( NetworkPacket *&packet, NetworkAddress &sender );				// Process the packet and deletes it
 };
