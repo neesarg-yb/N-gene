@@ -103,6 +103,9 @@
     <ClCompile Include="Potential Engine\CB_Follow.cpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
+    <ClCompile Include="World\Building.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -170,6 +173,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CB_Follow.hpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Building.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -285,6 +291,9 @@
       <Filter>Materials</Filter>
     </None>
     <None Include="..\..\Run_win32\Data\Materials\terrain.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\building.material">
       <Filter>Materials</Filter>
     </None>
   </ItemGroup>

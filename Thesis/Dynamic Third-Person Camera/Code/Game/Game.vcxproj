@@ -300,6 +300,7 @@
     <ClCompile Include="Potential Engine\GameObject.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
+    <ClCompile Include="World\Building.cpp" />
     <ClCompile Include="World\Player.cpp" />
     <ClCompile Include="World\Terrain.cpp" />
   </ItemGroup>
@@ -329,6 +330,7 @@
     <ClInclude Include="Potential Engine\GameObject.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
+    <ClInclude Include="World\Building.hpp" />
     <ClInclude Include="World\Player.hpp" />
     <ClInclude Include="World\Terrain.hpp" />
   </ItemGroup>
@@ -341,6 +343,7 @@
     <None Include="..\..\Run_win32\Data\Materials\Block_Stairs.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Void.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Water.material" />
+    <None Include="..\..\Run_win32\Data\Materials\building.material" />
     <None Include="..\..\Run_win32\Data\Materials\default.material" />
     <None Include="..\..\Run_win32\Data\Materials\pickbuffer.material" />
     <None Include="..\..\Run_win32\Data\Materials\terrain.material" />

@@ -140,6 +140,7 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 	//		Start doing the Ray March until we reach the accuracy
 	float distanceFromTerrain	= startPosition.y - GetYCoordinateForMyPositionAt(startPosition.x, startPosition.z);
 	float aboveBelowSign		= GetSign( distanceFromTerrain );
+	float const startSign		= aboveBelowSign; // We'll use it to make sure that the impactPosition we suggest is on the other side of startPosition
 	
 	// Ray
 	Ray3 ray = Ray3( startPosition, direction );
@@ -165,8 +166,8 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 			if( aboveBelowSign == -1.f )
 				std::swap( abovePoint, belowPoint );
 
-			// Ray March until appropriate accuracy
-			while ( abs(distanceFromTerrain) > accuracy )
+			// Ray March until appropriate accuracy & until we're on the same side of the startPosition
+			while ( abs(distanceFromTerrain) > accuracy || (aboveBelowSign == startSign) )
 			{
 				// Set Middle Point as our new position
 				position = (abovePoint + belowPoint) * 0.5f;

@@ -9,6 +9,14 @@
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
 
+enum WorldEntityTypes
+{
+	ENTITY_PLAYER = 0,
+	ENTITY_TERRAIN,
+	ENTITY_BUILDING,
+	NUM_ENTITIES
+};
+
 class Scene_FollowCamera : public GameState
 {
 public:
@@ -24,7 +32,7 @@ public:
 	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.6f );
 
 	// Game Specific
-	GameObjectList			 m_gameObjects;
+	GameObjectList			 m_gameObjects[ NUM_ENTITIES ];
 	Terrain					*m_terrain			= nullptr;
 	Player					*m_player			= nullptr;
 
@@ -43,8 +51,10 @@ public:
 	void Update( float deltaSeconds );
 	void Render( Camera *gameCamera ) const;
 
+	RaycastResult Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );
+
 private:
-	void AddNewGameObjectToScene( GameObject *go );
+	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
 
 	void ChangeCameraBehaviour();

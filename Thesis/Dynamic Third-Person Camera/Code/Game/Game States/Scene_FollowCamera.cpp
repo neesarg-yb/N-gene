@@ -7,6 +7,7 @@
 #include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/theGame.hpp"
+#include "Game/World/Building.hpp"
 
 Scene_FollowCamera::Scene_FollowCamera()
 	: GameState( "FOLLOW CAMERA" )
@@ -32,11 +33,24 @@ Scene_FollowCamera::Scene_FollowCamera()
 
 	// Terrain
 	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_rivers.png" );
-	AddNewGameObjectToScene( m_terrain );
+	AddNewGameObjectToScene( m_terrain, ENTITY_TERRAIN );
+
+	// Buildings
+	for( int i = 0; i < 10; i ++ )
+	{
+		Vector2 worldMins = Vector2( m_terrain->m_worldBounds.mins.x, m_terrain->m_worldBounds.mins.z );
+		Vector2 worldMaxs = Vector2( m_terrain->m_worldBounds.maxs.x, m_terrain->m_worldBounds.maxs.z );
+		Vector2 positionXZ;
+		positionXZ.x = GetRandomFloatInRange( worldMins.x, worldMaxs.x );
+		positionXZ.y = GetRandomFloatInRange( worldMins.y, worldMaxs.y );
+
+		Building *aBuilding = new Building( positionXZ, 25.f, 5.f, *m_terrain );
+		AddNewGameObjectToScene( aBuilding, ENTITY_BUILDING );
+	}
 
 	// Player
 	m_player = new Player( Vector3( 0.f, 0.f, 15.f ), *m_terrain );
-	AddNewGameObjectToScene( m_player );
+	AddNewGameObjectToScene( m_player, ENTITY_PLAYER );
 	
 	// Camera Manager
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput );
@@ -44,7 +58,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 
 	// Set the Raycast std::function
 	raycast_std_func terrainRaycastStdFunc;
-	terrainRaycastStdFunc = [ this ]( Vector3 const &startPos, Vector3 const &direction, float maxDistance ) { return m_terrain->Raycast( startPos, direction, maxDistance, 0.05f ); };
+	terrainRaycastStdFunc = [ this ]( Vector3 const &startPos, Vector3 const &direction, float maxDistance ) { return Raycast( startPos, direction, maxDistance ); };
 	m_cameraManager->SetRaycastCallback( terrainRaycastStdFunc );
 
 	// Camera Behaviour
@@ -78,8 +92,19 @@ Scene_FollowCamera::~Scene_FollowCamera()
 	m_terrain = nullptr;	// Gets deleted from m_gameObjects
 	
 	// GameObjects
-	for each (GameObject* go in m_gameObjects)
-		go->RemoveRenderablesFromScene( *m_scene );
+	for( int i = 0; i < NUM_ENTITIES; i++ )
+	{
+		while ( m_gameObjects[i].size() > 0 )
+		{
+			GameObject* &lastGameObject = m_gameObjects[i].back();
+
+			lastGameObject->RemoveRenderablesFromScene( *m_scene );
+			delete lastGameObject;
+			lastGameObject = nullptr;
+
+			m_gameObjects[i].pop_back();
+		}
+	}
 
 	// Lights
 	while ( m_lights.size() > 0 )
@@ -126,8 +151,11 @@ void Scene_FollowCamera::Update( float deltaSeconds )
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 
 	// Update Game Objects
-	for each (GameObject* go in m_gameObjects)
-		go->Update( deltaSeconds );
+	for( int i = 0; i < NUM_ENTITIES; i++ )
+	{
+		for each( GameObject* go in m_gameObjects[i] )
+			go->Update( deltaSeconds );
+	}
 
 	// Update Camera Stuffs
 	EnableDisableCameraConstrains();
@@ -156,10 +184,43 @@ void Scene_FollowCamera::Render( Camera *gameCamera ) const
 	DebugRendererRender();
 }
 
-void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go )
+RaycastResult Scene_FollowCamera::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )
+{
+	RaycastResult closestResult( startPosition );
+
+	// Do Terrain Raycast
+	closestResult = m_terrain->Raycast( startPosition, direction, maxDistance, 0.05f );
+
+	// Do Building Raycast
+	GameObjectList &buildings = m_gameObjects[ ENTITY_BUILDING ];
+	for( int i = 0; i < buildings.size(); i++ )
+	{
+		Building		*thisBuilding		= (Building*)buildings[i];
+		RaycastResult	 buildingHitResult	= thisBuilding->Raycast( startPosition, direction, maxDistance );
+
+		// If this one is the closest hit point, from start position
+		if( closestResult.didImpact == true )
+		{
+			if( buildingHitResult.didImpact == true )
+			{
+				if( buildingHitResult.fractionTravelled < closestResult.fractionTravelled )
+					closestResult = buildingHitResult;
+			}
+		}
+		else
+		{
+			if( buildingHitResult.didImpact == true )
+				closestResult = buildingHitResult;
+		}
+	}
+
+	return closestResult;
+}
+
+void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
 {
 	// Add game object which gets updated every frame
-	m_gameObjects.push_back( go );
+	m_gameObjects[ entityType ].push_back( go );
 
 	// Add its Renderable(s) to the Scene
 	go->AddRenderablesToScene( *m_scene );
