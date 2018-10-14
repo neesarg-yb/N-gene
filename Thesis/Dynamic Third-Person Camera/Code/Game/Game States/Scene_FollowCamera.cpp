@@ -3,6 +3,7 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/Potential Engine/CC_CameraCollision.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/Potential Engine/CB_Follow.hpp"
@@ -61,6 +62,15 @@ Scene_FollowCamera::Scene_FollowCamera()
 	terrainRaycastStdFunc = [ this ]( Vector3 const &startPos, Vector3 const &direction, float maxDistance ) { return Raycast( startPos, direction, maxDistance ); };
 	m_cameraManager->SetRaycastCallback( terrainRaycastStdFunc );
 
+	// Set the Sphere Collision std::function
+	sphere_collision_func collisionFunc;
+	collisionFunc = [ this ] ( Vector3 const &center, float radius )
+		{ 
+			Sphere cameraRig( center, radius );
+			return SphereCollision( cameraRig ); 
+		};
+	m_cameraManager->SetSphereCollisionCallback( collisionFunc );
+
 	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
 	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow" );
@@ -68,9 +78,11 @@ Scene_FollowCamera::Scene_FollowCamera()
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 
 	// Camera Constrains
-	CC_LineOfSight* losConstarin = new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
+	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
+	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
 	m_cameraManager->RegisterConstrain( losConstarin );
-	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
+	m_cameraManager->RegisterConstrain( collisionConstrain );
+	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight,CameraCollision" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
@@ -215,6 +227,24 @@ RaycastResult Scene_FollowCamera::Raycast( Vector3 const &startPosition, Vector3
 	}
 
 	return closestResult;
+}
+
+Vector3 Scene_FollowCamera::SphereCollision( Sphere const &sphere )
+{
+	Vector3 positionAfterCollision = sphere.center;
+
+	for( uint i = 0; i < NUM_ENTITIES; i++ )
+	{
+		GameObjectList &gameObjects = m_gameObjects[i];
+
+		for( uint idx = 0; idx < gameObjects.size(); idx++ )
+		{
+			bool didCollide			= false;
+			positionAfterCollision	= gameObjects[ idx ]->CheckCollisionWithSphere( positionAfterCollision, sphere.radius, didCollide );
+		}
+	}
+
+	return positionAfterCollision;
 }
 
 void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )

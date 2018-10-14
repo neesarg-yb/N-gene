@@ -33,3 +33,12 @@ void GameObject::Update( float deltaSeconds )
 
 	m_acceleration = Vector3::ZERO;							// Reset the acceleration for next frame
 }
+
+Vector3 GameObject::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
+{
+	// Defaults as not colliding
+	UNUSED( radius );
+
+	outIsColliding = false;
+	return center;
+}

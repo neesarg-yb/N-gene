@@ -27,4 +27,7 @@ public:
 	virtual void AddRenderablesToScene( Scene &activeScene )	= 0;
 	virtual void RemoveRenderablesFromScene( Scene &activeScene ) = 0;
 
+public:
+	virtual Vector3 CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const;		// returns the corrected position of center, if colliding
+
 };

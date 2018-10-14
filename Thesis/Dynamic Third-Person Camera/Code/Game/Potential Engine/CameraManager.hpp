@@ -35,8 +35,10 @@ private:
 	// Camera Context
 	InputSystem				&m_inputSystem;				// Current input system
 	Camera					&m_camera;					// Possessed Camera
-	GameObject				*m_anchor	 = nullptr;		// Anchor GameObject
-	raycast_std_func		 m_raycastCB = nullptr;		// Raycast function provided from Game Side
+	float					 m_cameraRadius = 1.f;		// It should be based on Camera's near-plane
+	GameObject				*m_anchor		= nullptr;	// Anchor GameObject
+	raycast_std_func		 m_raycastCB	= nullptr;	// Raycast function, provided from Game Side
+	sphere_collision_func	 m_collisionCB	= nullptr;	// Sphere Collision function, provided from Game Side
 
 	// Camera Behaviours
 	CameraBehaviourList		 m_cameraBehaviours;		// All the behaviors that can be run on Camera
@@ -61,6 +63,8 @@ public:
 	// Context
 	void			SetAnchor( GameObject *anchor );
 	void			SetRaycastCallback( raycast_std_func raycastFunction );
+	void			SetSphereCollisionCallback( sphere_collision_func collisionFunction );
+	float			GetCameraRadius() const;
 	CameraContext	GetCameraContext() const;
 	
 	// Behaviours
@@ -78,7 +82,7 @@ private:
 	void ResetActivateConstrainsFromTags ( Tags const &constrainsToActivate );
 
 private:
-	int GetCameraBehaviourIndex( CameraBehaviour *cb );					// Returns -1 if couldn't fine it in the list
-	int GetCameraBehaviourIndex( std::string const &behaviourName );	// Returns -1 if couldn't fine it in the list
-	int GetCameraConstrainIndex( std::string const &constrainName );	// Returns -1 if couldn't fine it in the list
+	int GetCameraBehaviourIndex( CameraBehaviour *cb );					// Returns -1 if couldn't find it in the list
+	int GetCameraBehaviourIndex( std::string const &behaviourName );	// Returns -1 if couldn't find it in the list
+	int GetCameraConstrainIndex( std::string const &constrainName );	// Returns -1 if couldn't find it in the list
 };

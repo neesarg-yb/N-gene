@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Math/Sphere.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
 #include "Game/Potential Engine/CameraManager.hpp"
@@ -51,7 +52,8 @@ public:
 	void Update( float deltaSeconds );
 	void Render( Camera *gameCamera ) const;
 
-	RaycastResult Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );
+	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );
+	Vector3			SphereCollision( Sphere const &sphere );
 
 private:
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );

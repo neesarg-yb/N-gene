@@ -6,8 +6,8 @@ class CameraManager;
 class CameraConstrain
 {
 public:
-	 CameraConstrain( char const *name, CameraManager &manager, uint8_t priority );
-	~CameraConstrain();
+			 CameraConstrain( char const *name, CameraManager &manager, uint8_t priority );
+	virtual ~CameraConstrain();
 
 public:
 	uint8_t		const	 m_priority; // (0 to 255) : Higher the value, higher the priority

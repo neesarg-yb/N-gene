@@ -3,6 +3,7 @@
 
 CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem )
 	: m_camera( camera )
+	, m_cameraRadius( 2.f * camera.GetCameraNear() )
 	, m_inputSystem( inputSystem )
 {
 
@@ -82,9 +83,19 @@ void CameraManager::SetRaycastCallback( raycast_std_func raycastFunction )
 	m_raycastCB = raycastFunction;
 }
 
+void CameraManager::SetSphereCollisionCallback( sphere_collision_func collisionFunction )
+{
+	m_collisionCB = collisionFunction;
+}
+
+float CameraManager::GetCameraRadius() const
+{
+	return m_cameraRadius;
+}
+
 CameraContext CameraManager::GetCameraContext() const
 {
-	return CameraContext( m_anchor->m_transform.GetWorldPosition(), m_raycastCB );
+	return CameraContext( m_anchor->m_transform.GetWorldPosition(), m_raycastCB, m_collisionCB );
 }
 
 int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )
