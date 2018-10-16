@@ -57,51 +57,8 @@ bool Building::IsPointInside( Vector3 const &position ) const
 	return m_worldBounds.IsPointInsideMe( position );
 }
 
-void Building::PushTheSphereOutOfTheBuilding( Sphere &sphereInsideBuilding ) const
+RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const
 {
-	Vector3	&center = sphereInsideBuilding.center;
-	float	&radius = sphereInsideBuilding.radius;
-
-	// Get six planes of the AABB
-	Plane3 allPlanes[6];
-	m_worldBounds.GetSixPlanes( allPlanes );
-
-	// Which one is the closest plane?
-	int		closestPlaneIdx			= 0;
-	float	closestPlaneDistance	= allPlanes[0].GetDistanceFromPoint( center );
-
-	for( int i = 1; i < 6; i++ )
-	{
-		float distanceFromPlane = allPlanes[i].GetDistanceFromPoint( center );
-		if( distanceFromPlane > closestPlaneDistance )	// Because both will be negative, so the bigger is smaller
-		{
-			closestPlaneIdx			= i;
-			closestPlaneDistance	= distanceFromPlane;
-		}
-	}
-	
-	// Push the center: in the direction of normal of the closest plane
-	Plane3 &closestPlane = allPlanes[ closestPlaneIdx ];
-	DebugRenderLineSegment( 20.f, sphereInsideBuilding.center, RGBA_WHITE_COLOR, sphereInsideBuilding.center + (closestPlane.normal * -1.f * closestPlaneDistance), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-
-	center += closestPlane.normal * (-1.f * closestPlaneDistance);
-
- 
- 	// Debug Render
-// 	DebugRenderLineSegment( 0.f, m_worldBounds.mins, RGBA_WHITE_COLOR, m_worldBounds.mins + (allPlanes[0].normal * 10.f), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-// 	DebugRenderLineSegment( 0.f, m_worldBounds.mins, RGBA_WHITE_COLOR, m_worldBounds.mins + (allPlanes[1].normal * 10.f), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-// 	DebugRenderLineSegment( 0.f, m_worldBounds.mins, RGBA_WHITE_COLOR, m_worldBounds.mins + (allPlanes[2].normal * 10.f), RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-// 
-// 	DebugRenderLineSegment( 0.f, m_worldBounds.maxs, RGBA_WHITE_COLOR, m_worldBounds.maxs + (allPlanes[3].normal * 10.f), RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-// 	DebugRenderLineSegment( 0.f, m_worldBounds.maxs, RGBA_WHITE_COLOR, m_worldBounds.maxs + (allPlanes[4].normal * 10.f), RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-// 	DebugRenderLineSegment( 0.f, m_worldBounds.maxs, RGBA_WHITE_COLOR, m_worldBounds.maxs + (allPlanes[5].normal * 10.f), RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-// 
-// 	DebugRenderSphere( 0.f, m_worldBounds.mins, 1.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-}
-
-RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const
-{
-	float const sampleSize = 0.2f;
 	// Logic:
 	//
 	// For each step, until we reach the max distance
@@ -113,11 +70,11 @@ RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &di
 
 	Vector3	position;
 	bool	didImpact = false;
-	for( float t = 0.f; (t <= maxDistance - sampleSize) && (didImpact == false); t += sampleSize )
+	for( float t = 0.f; (t <= maxDistance - accuracy) && (didImpact == false); t += accuracy )
 	{
 		position	= ray.Evaluate( t );
 		didImpact	= IsPointInside( position );
-		position	= ray.Evaluate( t + sampleSize );	// To make sure that the position we suggest is on the other side of the startPosition
+		position	= ray.Evaluate( t + accuracy );	// To make sure that the position we suggest is on the other side of the startPosition
 	}
 
 	if( didImpact == false )
@@ -134,27 +91,24 @@ RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &di
 
 Vector3 Building::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
 {
-	// Increase the AABB3's borders such that the center touches them first, if it is colliding
-	float distanceFromBuilding = m_worldBounds.GetDistanceFromPoint( center ) - radius;
-
-//	if( distanceFromBuilding > 0.f )
-//		DebugRenderSphere( 0.f, center, radius, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-//	else
-//		DebugRenderSphere( 0.f, center, radius, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	Vector3 closestPointInBounds = m_worldBounds.GetClosestPointInsideBounds( center );
+	Vector3 pushDirection		 = closestPointInBounds - center;
+	float	pushDistance		 = pushDirection.NormalizeAndGetLength() - radius;
 
 	// Is Colliding ?
-	if( distanceFromBuilding > 0.f )
+	if( pushDistance > 0.f )
 	{
+		// No
 		outIsColliding = false;
-		return center;				// return, if point is not inside
+
+		return center;
 	}
 	else
+	{
+		// Yes
 		outIsColliding = true;
-
-	// Sphere is inside, push it out
-	Sphere collidingSphere( center, radius );
-	PushTheSphereOutOfTheBuilding( collidingSphere );
-	
-//	return center;
-	return collidingSphere.center;
+		
+		Vector3 newCenter = center + (pushDirection * pushDistance);
+		return  newCenter;
+	}
 }

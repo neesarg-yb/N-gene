@@ -26,7 +26,6 @@ public:
 	void RemoveRenderablesFromScene( Scene &activeScene );
 
 	bool			IsPointInside( Vector3 const &position ) const;
-	void			PushTheSphereOutOfTheBuilding( Sphere &sphereInsideBuilding ) const;	// Assumes that the point is inside the Building
-	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const;
+	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const;
 	Vector3			CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const;
 };
