@@ -16,8 +16,9 @@ CC_CameraCollision::~CC_CameraCollision()
 
 void CC_CameraCollision::Execute( CameraState &suggestedCameraState )
 {
-	CameraContext context	= m_manager.GetCameraContext();
-	Vector3		  newCenter	= context.sphereCollisionCallback( suggestedCameraState.m_position, m_manager.GetCameraRadius() );
-
-	suggestedCameraState.m_position = newCenter;
+	UNUSED( suggestedCameraState );
+	// CameraContext context	= m_manager.GetCameraContext();
+	// Vector3		  newCenter	= context.sphereCollisionCallback( suggestedCameraState.m_position, m_manager.GetCameraRadius() );
+	// 
+	// suggestedCameraState.m_position = newCenter;
 }

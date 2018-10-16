@@ -28,6 +28,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 	// A directional light
 	Light *directionalLight = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
 	directionalLight->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
+	directionalLight->UsesShadowMap( true );
 
 	// Add to Scene
 	AddNewLightToScene( directionalLight );
@@ -37,13 +38,15 @@ Scene_FollowCamera::Scene_FollowCamera()
 	AddNewGameObjectToScene( m_terrain, ENTITY_TERRAIN );
 
 	// Buildings
-	for( int i = 0; i < 10; i ++ )
+	for( int i = 0; i < 1; i ++ )
 	{
 		Vector2 worldMins = Vector2( m_terrain->m_worldBounds.mins.x, m_terrain->m_worldBounds.mins.z );
 		Vector2 worldMaxs = Vector2( m_terrain->m_worldBounds.maxs.x, m_terrain->m_worldBounds.maxs.z );
 		Vector2 positionXZ;
 		positionXZ.x = GetRandomFloatInRange( worldMins.x, worldMaxs.x );
 		positionXZ.y = GetRandomFloatInRange( worldMins.y, worldMaxs.y );
+
+		positionXZ = Vector2( 10.f, 10.f );
 
 		Building *aBuilding = new Building( positionXZ, 25.f, 5.f, *m_terrain );
 		AddNewGameObjectToScene( aBuilding, ENTITY_BUILDING );
@@ -82,7 +85,8 @@ Scene_FollowCamera::Scene_FollowCamera()
 	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
 	m_cameraManager->RegisterConstrain( losConstarin );
 	m_cameraManager->RegisterConstrain( collisionConstrain );
-	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight,CameraCollision" );
+//	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
+	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
@@ -179,6 +183,23 @@ void Scene_FollowCamera::Update( float deltaSeconds )
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
+
+
+	// Debug Player
+	Vector3 center = m_player->m_transform.GetWorldPosition();
+	float	radius = 0.5f;
+	Sphere bb8( center, radius );
+
+	bool isColliding;
+	center = m_gameObjects[ ENTITY_BUILDING ][0]->CheckCollisionWithSphere( center, radius, isColliding );
+	Matrix44 playerMatr;
+	playerMatr.SetTColumn( center );
+	DebugRenderBasis( 0.f, playerMatr, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	if( isColliding )
+	{
+		m_player->m_transform.SetPosition( center );
+		m_player->m_velocity = Vector3::ZERO;
+	}
 }
 
 void Scene_FollowCamera::Render( Camera *gameCamera ) const

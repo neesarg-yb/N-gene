@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Math/Vector2.hpp"
+#include "Engine/Math/Sphere.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
 #include "Engine/Core/RaycastResult.hpp"
 
@@ -24,6 +25,8 @@ public:
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
 
-	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );
-	bool			IsPointInside( Vector3 const &position );
+	bool			IsPointInside( Vector3 const &position ) const;
+	void			PushTheSphereOutOfTheBuilding( Sphere &sphereInsideBuilding ) const;	// Assumes that the point is inside the Building
+	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const;
+	Vector3			CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const;
 };
