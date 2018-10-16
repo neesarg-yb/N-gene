@@ -207,6 +207,7 @@ void Scene_FollowCamera::Render( Camera *gameCamera ) const
 	TODO( "DebugRenderer getting started from Scene_QuaternionTets.. This is a hot fix for now." );
 	DebugRendererChange3DCamera( m_camera );
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderTerrainNormalRaycast();
 	DebugRendererRender();
 }
 
@@ -317,5 +318,13 @@ void Scene_FollowCamera::EnableDisableCameraConstrains()
 
 		DebugRender2DText( 3.f, Vector2(-850.f, 460.f - yOffset), 15.f, constarinsColor, constarinsColor, constrainsActiveStr.c_str() );
 	}
+}
+
+void Scene_FollowCamera::DebugRenderTerrainNormalRaycast() const
+{
+	Vector3 raycastDirection = m_camera->m_cameraTransform.GetQuaternion().RotatePoint( Vector3::FRONT );
+	RaycastResult result	 = m_terrain->Raycast( m_camera->m_cameraTransform.GetWorldPosition(), raycastDirection, 100.f, 0.01f );
+
+	DebugRenderLineSegment( 0.f, result.impactPosition, RGBA_KHAKI_COLOR, result.impactPosition + result.impactNormal, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }
 

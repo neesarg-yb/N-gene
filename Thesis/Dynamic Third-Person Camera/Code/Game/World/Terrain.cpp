@@ -95,7 +95,7 @@ float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffse
 
 	float	heightBottom	= Interpolate( bottomLeft.y,	bottomRight.y,	xzFraction.x );
 	float	heightTop		= Interpolate( topLeft.y,		topRight.y,		xzFraction.x );
-	float	myHeight			= Interpolate( heightBottom,	heightTop,		xzFraction.y );
+	float	myHeight		= Interpolate( heightBottom,	heightTop,		xzFraction.y );
 
 	return myHeight + yOffset;
 }
@@ -107,27 +107,48 @@ Vector3 Terrain::Get3DCoordinateForMyPositionAt( Vector2 myXZPosition, float yOf
 	return Vector3( myXZPosition.x, yCoord, myXZPosition.y );
 }
 
-Matrix44 Terrain::GetModelMatrixForMyPositionAt( Vector2 myXZPosition, Vector2 ForwardDirection, Vector2 RightDirection )
+Vector3 Terrain::GetNormalForMyPositionAt( Vector2 myXZPosition ) const
 {
-	// Get XZ position relative to Terrain
+	// Get Position on Terrain
 	Vector3 terrainWorldPos	= m_transform.GetWorldPosition();
 	Vector2 posOnTerrain	= myXZPosition - Vector2( terrainWorldPos.x, terrainWorldPos.z );
 
-	float	myY				= GetYCoordinateForMyPositionAt( myXZPosition );
-	Vector3 myPosition		= Vector3( myXZPosition.x, myY, myXZPosition.y );
+	// Get Position of four corners
+	Vector3 bottomLeftPos	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_LEFT  );
+	Vector3 bottomRightPos	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_RIGHT );
+	Vector3 topLeftPos		= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_LEFT	 );
+	Vector3 topRightPos		= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_RIGHT	 );
 
-	Vector3 du				= GetVertexPositionUsingHeightMap( posOnTerrain + RightDirection * 0.5f )
-							- GetVertexPositionUsingHeightMap( posOnTerrain - RightDirection * 0.5f );
-	Vector3	dv				= GetVertexPositionUsingHeightMap( posOnTerrain + ForwardDirection * 0.5f )
-							- GetVertexPositionUsingHeightMap( posOnTerrain - ForwardDirection * 0.5f );
+	// Four Edge Directions
+	//
+	// t.l.       t.r.
+	//   ^---->--^   
+	//   |       |   
+	//   |       |   
+	//   |       |   
+	//   ----->---   
+	// b.l.       b.r.
+	Vector3 botLeftToBotRight  = bottomRightPos	- bottomLeftPos;
+	Vector3 topLeftToTopRight  = topRightPos	- topLeftPos;
+	Vector3 botLeftToTopLeft   = topLeftPos		- bottomLeftPos;
+	Vector3 botRightToTopRight = topRightPos	- bottomRightPos;
 
-	Vector3 tangent			= du.GetNormalized();
-	Vector3 bitangent		= dv.GetNormalized();
-	Vector3 normal			= Vector3::CrossProduct( bitangent, tangent );
+	// Four Corners' Normal
+	Vector3 botLeftNormal  = Vector3::CrossProduct( botLeftToTopLeft, botLeftToBotRight ).GetNormalized();
+	Vector3 topLeftNormal  = Vector3::CrossProduct( topLeftToTopRight, botLeftToTopLeft * -1.f ).GetNormalized();
+	Vector3 topRightNormal = Vector3::CrossProduct( topLeftToTopRight, botRightToTopRight * -1.f ).GetNormalized();
+	Vector3 botRightNormal = Vector3::CrossProduct( botLeftToBotRight * -1.f, botRightToTopRight ).GetNormalized();
 
-	Matrix44 newModel		= Matrix44( tangent, normal, bitangent, myPosition );
+	// Bipolar Interpolation of normals
+	Vector2 xzFraction;
+	xzFraction.x = fmodf( posOnTerrain.x, 1.f );
+	xzFraction.y = fmodf( posOnTerrain.y, 1.f );
 
-	return newModel;
+	Vector3 topInterpNormal		= Interpolate( topLeftNormal, topRightNormal, xzFraction.x );
+	Vector3 bottomInterpNormal	= Interpolate( botLeftNormal, botRightNormal, xzFraction.x );
+	Vector3 interpNormal		= Interpolate( bottomInterpNormal, topInterpNormal, xzFraction.y );
+
+	return interpNormal;
 }
 
 RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy )
@@ -203,7 +224,7 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 		// Impact point
 		ContactPoint impactPoint;
 		impactPoint.position		= position;
-		impactPoint.normal			= GetModelMatrixForMyPositionAt( impactPositionXZ, Vector2::TOP_DIR, Vector2::RIGHT_DIR ).GetJColumn();
+		impactPoint.normal			= GetNormalForMyPositionAt( impactPositionXZ );
 		
 		// Fraction traveled
 		float fractionTravelled		= distanceTravelled / maxDistance;

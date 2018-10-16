@@ -41,7 +41,7 @@ public:
 	// Fetching the Position
 	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f ) const;
 	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f ) const;
-	Matrix44		GetModelMatrixForMyPositionAt	( Vector2 myXZPosition, Vector2 uvForwardDirection, Vector2 uvRightDirection );
+	Vector3			GetNormalForMyPositionAt		( Vector2 myXZPosition ) const;
 
 	// Raycast
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy );

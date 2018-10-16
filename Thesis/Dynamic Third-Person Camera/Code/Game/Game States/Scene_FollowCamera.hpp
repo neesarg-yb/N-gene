@@ -61,4 +61,6 @@ private:
 
 	void ChangeCameraBehaviour();
 	void EnableDisableCameraConstrains();
+
+	void DebugRenderTerrainNormalRaycast() const;
 };
