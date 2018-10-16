@@ -87,7 +87,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );
 }
 
 Scene_FollowCamera::~Scene_FollowCamera()

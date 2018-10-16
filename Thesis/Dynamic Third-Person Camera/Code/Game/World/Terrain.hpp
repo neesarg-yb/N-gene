@@ -46,6 +46,9 @@ public:
 	// Raycast
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy );
 
+	// Collision
+	Vector3			CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const;
+
 private:
 	// Surface Patch
 	Vector3			SinWavePlane( float u, float v );

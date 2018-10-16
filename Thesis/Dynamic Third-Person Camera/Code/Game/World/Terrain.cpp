@@ -213,6 +213,14 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 	}
 }
 
+Vector3 Terrain::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
+{
+	UNUSED( radius );
+
+	outIsColliding = false;
+	return center;
+}
+
 Vector3 Terrain::SinWavePlane( float u, float v )
 {
 	Vector3 outPos	= Vector3( u, 0.f, v );
