@@ -19,8 +19,8 @@ ForwardRenderingPath::ForwardRenderingPath( Renderer &activeRenderer )
 {
 	m_shadowCamera			= new Camera();
 	m_shadowSampler			= new Sampler( SAMPLER_SHADOW );
-	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 3072, 3072, TEXTURE_FORMAT_RGBA8 );
-	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 3072, 3072, TEXTURE_FORMAT_D24S8 );
+	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 1024, 1024, TEXTURE_FORMAT_RGBA8 );
+	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 1024, 1024, TEXTURE_FORMAT_D24S8 );
 	m_shadowCamera->SetColorTarget( m_shadowColorTarget );
 	m_shadowCamera->SetDepthStencilTarget( m_shadowDepthTarget );
 }
@@ -109,7 +109,7 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const 
 		// We need shadowCamera's position to follow sceneCameraPosition
 		Matrix44 lightsWorldMatrix			= light->m_transform.GetWorldTransformMatrix();
 		Vector3  moveBackwardsDirection		= lightsWorldMatrix.GetKColumn() * -1.f;
-		Vector3  shadowCamAdjustedPosition	= sceneCameraPosition + ( moveBackwardsDirection * 50.f );
+		Vector3  shadowCamAdjustedPosition	= sceneCameraPosition + ( moveBackwardsDirection * 15.f );
 		lightsWorldMatrix.SetTColumn( shadowCamAdjustedPosition );
 
 		// Setup the camera at that light
