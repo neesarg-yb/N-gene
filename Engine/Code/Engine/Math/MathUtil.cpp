@@ -38,6 +38,25 @@ bool SolveQuadraticEquation( Vector2& out, float a, float b, float c )
 	return true;
 }
 
+float AreaOfTriangle2D( Vector2 p1, Vector2 p2, Vector2 p3 )
+{
+	return abs( ((p1.x * (p2.y - p3.y)) + (p2.x * (p3.y - p1.y)) + (p3.x * (p1.y - p2.y))) * 0.5f );
+}
+
+bool IsPointIsInsideTriangle2D( Vector2 point, Vector2 triangleCornerA, Vector2 triangleCornerB, Vector2 triangleCornerC )
+{
+	// Area of the triangle
+	float A  = AreaOfTriangle2D( triangleCornerA, triangleCornerB, triangleCornerC );
+	
+	// Area of three sub-triangles made with the point & two corners
+	float A1 = AreaOfTriangle2D( point, triangleCornerA, triangleCornerB );
+	float A2 = AreaOfTriangle2D( point, triangleCornerB, triangleCornerC );
+	float A3 = AreaOfTriangle2D( point, triangleCornerA, triangleCornerC );
+
+	// If sum of sub-area(s) == total area i.e. the point is inside
+	return ( A == (A1 + A2 + A3) );
+}
+
 float DegreeToRadian(float degree) {
 	return ( (degree * M_PI) / 180.f );
 }
