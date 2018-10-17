@@ -57,6 +57,17 @@ bool IsPointIsInsideTriangle2D( Vector2 point, Vector2 triangleCornerA, Vector2 
 	return ( A == (A1 + A2 + A3) );
 }
 
+void GetPointsOnCircle2D( Vector2 center, float radius, int numPoints, Vector2 *outArray )
+{
+	float stepInDegrees = 360.f / numPoints;
+
+	for( int i = 0; i < numPoints; i++ )
+	{
+		outArray[i].x = radius * CosDegree( stepInDegrees * i );
+		outArray[i].y = radius * SinDegree( stepInDegrees * i );
+	}
+}
+
 float DegreeToRadian(float degree) {
 	return ( (degree * M_PI) / 180.f );
 }
