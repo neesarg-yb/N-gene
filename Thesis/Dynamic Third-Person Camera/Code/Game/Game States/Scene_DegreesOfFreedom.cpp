@@ -141,7 +141,12 @@ void Scene_DegreesOfFreedom::Render( Camera *gameCamera ) const
 	// Debug Renderer
 	TODO( "DebugRenderer getting started from Scene_QuaternionTets.. This is a hot fix for now." );
 	DebugRendererChange3DCamera( m_camera );
-	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	Matrix44 bMat;
+	bMat.SetTColumn( Vector3( 0.f, 0.f, 1.f ) );
+
+	DebugRenderBasis( 0.f, Matrix44(),	RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderBasis( 0.f, bMat,		RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
 	DebugRendererRender();
 }
 

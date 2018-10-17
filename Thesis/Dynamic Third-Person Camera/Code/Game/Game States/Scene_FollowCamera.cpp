@@ -198,15 +198,16 @@ void Scene_FollowCamera::Update( float deltaSeconds )
 void Scene_FollowCamera::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
+	Vector3 playerPosition = m_player->m_transform.GetWorldPosition();
 
 	// Render the Scene
 	g_theRenderer->SetAmbientLight( m_ambientLight );
-	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene );
+	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, &playerPosition );
 
 	// Debug Renderer
 	TODO( "DebugRenderer getting started from Scene_QuaternionTets.. This is a hot fix for now." );
 	DebugRendererChange3DCamera( m_camera );
-	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 	DebugRenderTerrainNormalRaycast();
 	DebugRendererRender();
 }
