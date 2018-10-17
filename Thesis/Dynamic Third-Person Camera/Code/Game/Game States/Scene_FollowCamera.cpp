@@ -55,7 +55,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 	AddNewGameObjectToScene( m_player, ENTITY_PLAYER );
 	
 	// Camera Manager
-	m_cameraManager = new CameraManager( *m_camera, *g_theInput );
+	m_cameraManager = new CameraManager( *m_camera, *g_theInput, 0.1f );
 	m_cameraManager->SetAnchor( m_player );
 
 	// Set the Raycast std::function
@@ -85,14 +85,9 @@ Scene_FollowCamera::Scene_FollowCamera()
 	m_cameraManager->RegisterConstrain( collisionConstrain );
 	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
-
-
-	// DEBUGGING THE COLLISION W/ TERRAIN
-	freelookBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
-
-
+	
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );
+	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
 }
 
 Scene_FollowCamera::~Scene_FollowCamera()

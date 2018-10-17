@@ -41,7 +41,7 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
 	AddNewGameObjectToScene( m_player );
 
 	// Camera Manager
-	m_cameraManager = new CameraManager( *m_camera, *g_theInput );
+	m_cameraManager = new CameraManager( *m_camera, *g_theInput, m_cameraNear );
 	m_cameraManager->SetAnchor( m_player );
 
 	// Degrees of Freedom - Camera Behavior

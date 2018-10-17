@@ -1,9 +1,9 @@
 #pragma once
 #include "CameraManager.hpp"
 
-CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem )
+CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem, float cameraRadius )
 	: m_camera( camera )
-	, m_cameraRadius( 2.f * camera.GetCameraNear() )
+	, m_cameraRadius( cameraRadius )
 	, m_inputSystem( inputSystem )
 {
 

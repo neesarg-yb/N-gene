@@ -396,3 +396,51 @@ ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, fl
 
 	return chunks;
 }
+
+// Vector3 Terrain::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
+// {
+// 	// Get points on the radius of the sphere
+// 	Vector2 xzPointsOnSphere[10];
+// 	GetPointsOnCircle2D( Vector2(center.x, center.z), radius, 5, xzPointsOnSphere );
+// 	GetPointsOnCircle2D( Vector2(center.x, center.z), radius * 0.5f, 5, &xzPointsOnSphere[5] );
+// 
+// 	// From these points we'll check about the collision
+// 	Vector3 fetchPlanePoints[11];
+// 
+// 	// One of them being underneath the center
+// 	fetchPlanePoints[10] = center;
+// 
+// 	// And from other points inside the sphere
+// 	for( int i = 0; i < 10; i++ )
+// 		fetchPlanePoints[i] = Vector3( xzPointsOnSphere[i].x, center.y, xzPointsOnSphere[i].y );
+// 
+// 	// Get maximum pushDistance
+// 	float	pushDistance = 0.f;
+// 	Vector3 pushDirection;
+// 	for( int i = 0; i < 11; i++ )
+// 	{
+// 		Plane3 planeUnderneath	 = GetPlaneForMyPositionAt( fetchPlanePoints[i].x, fetchPlanePoints[i].z );
+// 		float  distanceFromPlane = planeUnderneath.GetDistanceFromPoint( center );
+// 
+// 		float pushDistForThisPlane = radius - distanceFromPlane;
+// 		if( pushDistForThisPlane > pushDistance )
+// 		{
+// 			pushDistance	= pushDistForThisPlane;
+// 			pushDirection	= planeUnderneath.normal;
+// 		}
+// 	}
+// 
+// 	if( pushDistance == 0.f )
+// 	{
+// 		outIsColliding = false;
+// 		return center;
+// 	}
+// 	else
+// 	{
+// 		outIsColliding = true;
+// 
+// 		// Push the center out of that plane
+// 		Vector3 newCenter  = center + (pushDirection * pushDistance);
+// 		return  newCenter;
+// 	}
+// }

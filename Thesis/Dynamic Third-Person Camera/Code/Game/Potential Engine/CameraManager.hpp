@@ -28,7 +28,7 @@ typedef std::priority_queue< CameraConstrain*, CameraConstrainList, CustomCamera
 class CameraManager
 {
 public:
-	 CameraManager( Camera &camera, InputSystem &inputSystem );
+	 CameraManager( Camera &camera, InputSystem &inputSystem, float cameraRadius );
 	~CameraManager();
 
 private:
