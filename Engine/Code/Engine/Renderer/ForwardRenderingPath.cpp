@@ -36,11 +36,15 @@ ForwardRenderingPath::~ForwardRenderingPath()
 	delete m_shadowCamera;
 }
 
-void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) const
+void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, Vector3 const *shadowCameraAnchorPos /* = nullptr */ ) const
 {
 	// For each Lights, Render for ShadowMap
 	TODO( "I'm assuming that there is only one directional light & it uses ShadowMap!" );
-	RenderSceneForShadowMap( scene, camera.m_cameraTransform.GetWorldPosition() );
+	Vector3 shadowAnchorPosition = camera.m_cameraTransform.GetWorldPosition();
+	if( shadowCameraAnchorPos != nullptr )
+		shadowAnchorPosition = *shadowCameraAnchorPos;
+
+	RenderSceneForShadowMap( scene, shadowAnchorPosition );
 
 	// Bind the camera
 	m_renderer.BindCamera( &camera );
@@ -93,15 +97,12 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene ) 
 
 			m_renderer.DrawMesh( *dc.m_mesh, dc.m_model );
 		}
-
 	}
 
 	camera.PostRender( m_renderer );
-
-	TODO( "Apply Effects, if there are any.." );
 }
 
-void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const &sceneCameraPosition ) const
+void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const &cameraAnchorPosition ) const
 {
 	for each (Light* light in scene.m_lights)
 	{
@@ -112,7 +113,7 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const 
 		// We need shadowCamera's position to follow sceneCameraPosition
 		Matrix44 lightsWorldMatrix			= light->m_transform.GetWorldTransformMatrix();
 		Vector3  moveBackwardsDirection		= lightsWorldMatrix.GetKColumn() * -1.f;
-		Vector3  shadowCamAdjustedPosition	= sceneCameraPosition + ( moveBackwardsDirection * 15.f );
+		Vector3  shadowCamAdjustedPosition	= cameraAnchorPosition + ( moveBackwardsDirection * m_shadowCameraPullback );
 		lightsWorldMatrix.SetTColumn( shadowCamAdjustedPosition );
 
 		// Setup the camera at that light
