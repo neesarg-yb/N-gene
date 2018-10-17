@@ -28,7 +28,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 	// A directional light
 	Light *directionalLight = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
 	directionalLight->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
-//	directionalLight->UsesShadowMap( true );
+	directionalLight->UsesShadowMap( true );
 
 	// Add to Scene
 	AddNewLightToScene( directionalLight );
