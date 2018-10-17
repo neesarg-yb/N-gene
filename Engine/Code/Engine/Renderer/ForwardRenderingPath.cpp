@@ -1,6 +1,7 @@
 #pragma once
 #include <tuple>
 #include "ForwardRenderingPath.hpp"
+#include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/Texture.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/Light.hpp"
@@ -9,6 +10,7 @@
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Math/Vector3.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 typedef std::tuple< float, unsigned int > ContributionLightIndexTuple;
 typedef std::vector< DrawCall > DrawCallList;
@@ -18,9 +20,10 @@ ForwardRenderingPath::ForwardRenderingPath( Renderer &activeRenderer )
 	: m_renderer( activeRenderer )
 {
 	m_shadowCamera			= new Camera();
+	m_shadowShader			= activeRenderer.CreateOrGetShader( "deapth_only" );
 	m_shadowSampler			= new Sampler( SAMPLER_SHADOW );
-	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 1024, 1024, TEXTURE_FORMAT_RGBA8 );
-	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 1024, 1024, TEXTURE_FORMAT_D24S8 );
+	m_shadowColorTarget		= m_renderer.CreateRenderTarget( 4096, 4096, TEXTURE_FORMAT_RGBA8 );
+	m_shadowDepthTarget		= m_renderer.CreateRenderTarget( 4096, 4096, TEXTURE_FORMAT_D24S8 );
 	m_shadowCamera->SetColorTarget( m_shadowColorTarget );
 	m_shadowCamera->SetDepthStencilTarget( m_shadowDepthTarget );
 }
@@ -141,6 +144,7 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const 
 
 				// Draw for each Shaders present in ShaderGroup
 				m_renderer.BindMaterialForShaderIndex( *material );
+				m_renderer.UseShader( m_shadowShader );
 				m_renderer.DrawMesh( *mesh, transform.GetWorldTransformMatrix() );
 			}
 		}
