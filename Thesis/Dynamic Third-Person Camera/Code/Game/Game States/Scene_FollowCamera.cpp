@@ -86,6 +86,11 @@ Scene_FollowCamera::Scene_FollowCamera()
 	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
 
+
+	// DEBUGGING THE COLLISION W/ TERRAIN
+	freelookBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
+
+
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );
 }

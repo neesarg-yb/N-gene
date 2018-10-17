@@ -61,6 +61,50 @@ void Terrain::RemoveRenderablesFromScene( Scene &activeScene )
 		activeScene.RemoveRenderable( *m_chunks[i] );
 }
 
+Vector3 Terrain::GetNormalForMyPositionAt( Vector2 myXZPosition ) const
+{
+	// Get Position on Terrain
+	Vector3 terrainWorldPos	= m_transform.GetWorldPosition();
+	Vector2 posOnTerrain	= myXZPosition - Vector2( terrainWorldPos.x, terrainWorldPos.z );
+
+	// Get Position of four corners
+	Vector3 bottomLeftPos	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_LEFT  );
+	Vector3 bottomRightPos	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_RIGHT );
+	Vector3 topLeftPos		= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_LEFT	 );
+	Vector3 topRightPos		= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_RIGHT	 );
+
+	// Four Edge Directions
+	//
+	// t.l.       t.r.
+	//   ^---->--^   
+	//   |       |   
+	//   |       |   
+	//   |       |   
+	//   ----->---   
+	// b.l.       b.r.
+	Vector3 botLeftToBotRight  = bottomRightPos	- bottomLeftPos;
+	Vector3 topLeftToTopRight  = topRightPos	- topLeftPos;
+	Vector3 botLeftToTopLeft   = topLeftPos		- bottomLeftPos;
+	Vector3 botRightToTopRight = topRightPos	- bottomRightPos;
+
+	// Four Corners' Normal
+	Vector3 botLeftNormal  = Vector3::CrossProduct( botLeftToTopLeft, botLeftToBotRight ).GetNormalized();
+	Vector3 topLeftNormal  = Vector3::CrossProduct( topLeftToTopRight, botLeftToTopLeft * -1.f ).GetNormalized();
+	Vector3 topRightNormal = Vector3::CrossProduct( topLeftToTopRight, botRightToTopRight * -1.f ).GetNormalized();
+	Vector3 botRightNormal = Vector3::CrossProduct( botLeftToBotRight * -1.f, botRightToTopRight ).GetNormalized();
+
+	// Bipolar Interpolation of normals
+	Vector2 xzFraction;
+	xzFraction.x = fmodf( posOnTerrain.x, 1.f );
+	xzFraction.y = fmodf( posOnTerrain.y, 1.f );
+
+	Vector3 topInterpNormal		= Interpolate( topLeftNormal, topRightNormal, xzFraction.x );
+	Vector3 bottomInterpNormal	= Interpolate( botLeftNormal, botRightNormal, xzFraction.x );
+	Vector3 interpNormal		= Interpolate( bottomInterpNormal, topInterpNormal, xzFraction.y );
+
+	return interpNormal;
+}
+
 float Terrain::GetYCoordinateForMyPositionAt( Vector2 myXZPosition, float yOffset /* = 0.f */ ) const
 {
 	// Note: myXZPosition is in World Space
@@ -107,48 +151,12 @@ Vector3 Terrain::Get3DCoordinateForMyPositionAt( Vector2 myXZPosition, float yOf
 	return Vector3( myXZPosition.x, yCoord, myXZPosition.y );
 }
 
-Vector3 Terrain::GetNormalForMyPositionAt( Vector2 myXZPosition ) const
+Plane3 Terrain::GetPlaneForMyPositionAt( Vector2 myXZPosition ) const
 {
-	// Get Position on Terrain
-	Vector3 terrainWorldPos	= m_transform.GetWorldPosition();
-	Vector2 posOnTerrain	= myXZPosition - Vector2( terrainWorldPos.x, terrainWorldPos.z );
+	Vector3 pointOnTerrain	= Get3DCoordinateForMyPositionAt( myXZPosition );
+	Vector3 normalAtPoint	= GetNormalForMyPositionAt( myXZPosition );
 
-	// Get Position of four corners
-	Vector3 bottomLeftPos	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_LEFT  );
-	Vector3 bottomRightPos	= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_BOTTOM_RIGHT );
-	Vector3 topLeftPos		= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_LEFT	 );
-	Vector3 topRightPos		= GiveQuadVertexForMyPositionAt( posOnTerrain, TERRAIN_QUAD_TOP_RIGHT	 );
-
-	// Four Edge Directions
-	//
-	// t.l.       t.r.
-	//   ^---->--^   
-	//   |       |   
-	//   |       |   
-	//   |       |   
-	//   ----->---   
-	// b.l.       b.r.
-	Vector3 botLeftToBotRight  = bottomRightPos	- bottomLeftPos;
-	Vector3 topLeftToTopRight  = topRightPos	- topLeftPos;
-	Vector3 botLeftToTopLeft   = topLeftPos		- bottomLeftPos;
-	Vector3 botRightToTopRight = topRightPos	- bottomRightPos;
-
-	// Four Corners' Normal
-	Vector3 botLeftNormal  = Vector3::CrossProduct( botLeftToTopLeft, botLeftToBotRight ).GetNormalized();
-	Vector3 topLeftNormal  = Vector3::CrossProduct( topLeftToTopRight, botLeftToTopLeft * -1.f ).GetNormalized();
-	Vector3 topRightNormal = Vector3::CrossProduct( topLeftToTopRight, botRightToTopRight * -1.f ).GetNormalized();
-	Vector3 botRightNormal = Vector3::CrossProduct( botLeftToBotRight * -1.f, botRightToTopRight ).GetNormalized();
-
-	// Bipolar Interpolation of normals
-	Vector2 xzFraction;
-	xzFraction.x = fmodf( posOnTerrain.x, 1.f );
-	xzFraction.y = fmodf( posOnTerrain.y, 1.f );
-
-	Vector3 topInterpNormal		= Interpolate( topLeftNormal, topRightNormal, xzFraction.x );
-	Vector3 bottomInterpNormal	= Interpolate( botLeftNormal, botRightNormal, xzFraction.x );
-	Vector3 interpNormal		= Interpolate( bottomInterpNormal, topInterpNormal, xzFraction.y );
-
-	return interpNormal;
+	return Plane3( normalAtPoint, pointOnTerrain );
 }
 
 RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy )
@@ -236,10 +244,27 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 
 Vector3 Terrain::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
 {
-	UNUSED( radius );
+	float yCoordinateOnTerrain = GetYCoordinateForMyPositionAt( center.x, center.z );
+	if( center.y - yCoordinateOnTerrain >= radius )
+	{
+		// Early out if the sphere is above the terrain-surface
+		outIsColliding = false;
+		return center;
+	}
+	else
+	{
+		// Sphere is colliding with terrain
+		outIsColliding = true;
 
-	outIsColliding = false;
-	return center;
+		// Get the Plane, so we can push the sphere in its normal
+		Plane3 planeUnderCenter = GetPlaneForMyPositionAt( center.x, center.z );
+		float distanceFromPlane = planeUnderCenter.GetDistanceFromPoint( center );
+
+		float pushDistance	= radius - distanceFromPlane;
+		Vector3 newCenter	= center + (planeUnderCenter.normal * pushDistance);
+
+		return newCenter;
+	}
 }
 
 Vector3 Terrain::SinWavePlane( float u, float v )

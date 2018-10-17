@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include "Engine/Math/Plane3.hpp"
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/RaycastResult.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
@@ -39,9 +40,10 @@ public:
 	void			RemoveRenderablesFromScene( Scene &activeScene );
 
 	// Fetching the Position
+	Vector3			GetNormalForMyPositionAt		( Vector2 myXZPosition ) const;
 	float			GetYCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f ) const;
 	Vector3			Get3DCoordinateForMyPositionAt	( Vector2 myXZPosition, float yOffset = 0.f ) const;
-	Vector3			GetNormalForMyPositionAt		( Vector2 myXZPosition ) const;
+	Plane3			GetPlaneForMyPositionAt			( Vector2 myXZPosition ) const; // Returns most accurate representation of terrain-plane at that point
 
 	// Raycast
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy );
@@ -62,6 +64,10 @@ private:
 	inline Vector3	SinWavePlane( Vector2 uv ) { return SinWavePlane( uv.x, uv.y ); }
 
 public:
-	inline float	GetYCoordinateForMyPositionAt( float x, float z, float yOffset = 0.f ) const { return GetYCoordinateForMyPositionAt( Vector2( x, z ), yOffset ); }
+	inline float	GetYCoordinateForMyPositionAt	( float x, float z, float yOffset = 0.f )	const { return GetYCoordinateForMyPositionAt( Vector2( x, z ), yOffset ); }
+	inline Vector3	Get3DCoordinateForMyPositionAt	( float x, float z, float yOffset = 0.f )	const { return Get3DCoordinateForMyPositionAt( Vector2( x, z ), yOffset ); }
+	inline Plane3	GetPlaneForMyPositionAt			( float x, float z )						const { return GetPlaneForMyPositionAt( Vector2(x, z) ); }
+
+private:
 	inline Vector3	GetVertexPositionUsingHeightMap( Vector2 uv ) const { return GetVertexPositionUsingHeightMap( uv.x, uv.y ); }
 };
