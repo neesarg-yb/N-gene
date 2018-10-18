@@ -207,9 +207,14 @@ void theGame::StartTransitionToState( std::string const &stateName )
 
 void theGame::ConfirmTransitionToNextState()
 {
+	// Set current game state
 	int idx	= FindGameStateNamed( m_nextGameStateName, m_currentGameState );
 	GUARANTEE_RECOVERABLE( idx >= 0, Stringf("Couldn't find gamestate named \"%s\"", m_nextGameStateName.c_str() ) );
 
+	// Inform about this game state about transition
+	m_currentGameState->JustFinishedTransition();
+
+	// Finish the transition
 	m_nextGameStateName	= "NONE";
 	m_timeSinceTransitionBegan = 0;
 }

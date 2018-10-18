@@ -3,6 +3,7 @@
 #include "Engine/Math/IntRange.hpp"
 #include "Engine/Math/FloatRange.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Profiler/ProfilerConsole.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
@@ -185,9 +186,16 @@ void theApp::Startup()
 	CommandRegister( "rc_echo", RCSSetEcho );
 	CommandRegister( "clone_process", CloneMyself );
 
+	DebugRendererStartup( g_theRenderer, nullptr );
+
 	g_theGame->Startup();
 
 	DebuggerPrintf( "theApp::Startup()" );
+}
+
+void theApp::Shutdown()
+{
+	DebugRendererShutdown();
 }
 
 void theApp::RunFrame() {

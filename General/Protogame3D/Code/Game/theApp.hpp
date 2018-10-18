@@ -26,6 +26,7 @@ public:
 	bool NKeyIsPressed = false;
 
 	void Startup();
+	void Shutdown();
 	void RunFrame();
 
 	bool IsQuitting();
