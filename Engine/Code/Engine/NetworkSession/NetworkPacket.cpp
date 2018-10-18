@@ -77,7 +77,7 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 		GUARANTEE_RECOVERABLE( writeSuccess, "Error: Couldn't write to Network Packet!" );
 		
 		// Update header for new unreliable message count
-		m_header.unreliableMessageCount++;
+		m_header.messageCount++;
 		WriteHeader( m_header );
 
 		return true;
@@ -131,7 +131,7 @@ bool NetworkPacket::IsValid() const
 	}
 
 	// Fetch Message Count
-	uint8_t	messageCount = packetHeader.unreliableMessageCount;
+	uint8_t	messageCount = packetHeader.messageCount;
 
 	// Skip each messages..
 	while ( messageCount > 0 )
@@ -161,4 +161,9 @@ bool NetworkPacket::IsValid() const
 
 	m_readHead = preservedReadHead;
 	return (bytesLeftInBuffer == 0U);
+}
+
+bool NetworkPacket::HasMessages() const
+{
+	return m_header.messageCount > 0U;
 }
