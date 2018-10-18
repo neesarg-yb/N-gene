@@ -156,6 +156,9 @@ void Initialize( HINSTANCE applicationInstanceHandle )
 //-----------------------------------------------------------------------------------------------
 void Shutdown()
 {
+	// GAME SHUTDOWN
+	g_theApp->Shutdown();
+
 	// Destroy the global App instance
 	delete g_theApp;
 	g_theApp = nullptr;
