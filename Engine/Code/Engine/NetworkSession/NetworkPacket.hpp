@@ -9,8 +9,13 @@ typedef std::vector< NetworkPacket* > NetworkPacketList;
 struct NetworkPacketHeader
 {
 public:
-	uint8_t connectionIndex			= 0xff;		// When creating a NetworkPacket Idx = receiver's; When NetworkSession sends this packet, it gets replaced by sender's idx
-	uint8_t unreliableMessageCount	= 0x00;
+	uint8_t connectionIndex	= 0xff;		// When creating a NetworkPacket Idx = receiver's; When NetworkSession sends this packet, it gets replaced by sender's idx
+	uint8_t messageCount	= 0x00;
+
+	// Acknowledgment
+	uint16_t ack;
+	uint16_t lastReceivedAck;
+	uint16_t previouslyReceivedAckBitfield;
 
 public:
 	NetworkPacketHeader() { }
@@ -18,10 +23,10 @@ public:
 	{
 		connectionIndex = connectionIdx;
 	}
-	NetworkPacketHeader( uint8_t connectionIdx, uint8_t unreliableMsgCount )
+	NetworkPacketHeader( uint8_t connectionIdx, uint8_t msgCount )
 	{
-		connectionIndex  = connectionIdx;
-		unreliableMessageCount = unreliableMsgCount;
+		connectionIndex	 = connectionIdx;
+		messageCount	 = msgCount;
 	}
 };
 
@@ -36,10 +41,10 @@ public:
 	NetworkPacketHeader m_header;
 
 //	Buffer:
-//	                                                                                total size <= MTU
-//	|------------------------------------------------------------------------------------------------
-//	| 1 byte: SenderIdx  | 1 byte: UnreliableMessageCount | PackedMessage_1 | PackedMessage_2.. | ..
-//	|------------------------------------------------------------------------------------------------
+//	                                                                                                  total size <= MTU
+//	|-------------------------------------------------------------------------------------------------------------------
+//	| PacketHeader: ( 1 byte: SenderIdx  | 1 byte: UnreliableMessageCount | .. ) | PackedMessage_1 | PackedMessage_2.. | ..
+//	|-------------------------------------------------------------------------------------------------------------------
 //
 //  Packed Message:
 //	|----------------------------------------------------------------------------------
@@ -55,4 +60,5 @@ public:
 	bool ReadMessage ( NetworkMessage &outMessage );		// Fills the m_header for you!
 
 	bool IsValid() const;									// Read Head doesn't get affected after this operation
+	bool HasMessages() const;								// If it has at least one message
 };

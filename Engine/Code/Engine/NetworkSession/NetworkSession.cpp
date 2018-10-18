@@ -242,6 +242,13 @@ uint8_t NetworkSession::GetMyConnectionIndex() const
 	return idx;
 }
 
+NetworkConnection* NetworkSession::GetMyConnection()
+{
+	uint idx = GetMyConnectionIndex();
+
+	return m_connections[ idx ];
+}
+
 NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )
 {
 	// If idx is not in range
@@ -394,7 +401,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 		GUARANTEE_RECOVERABLE( headerReadingSuccess, "Couldn't read the Packet Header successfully!" );
 
 		NetworkMessage receivedMessage;
-		for( int i = 0; i < packet->m_header.unreliableMessageCount; i++ )
+		for( int i = 0; i < packet->m_header.messageCount; i++ )
 		{
 			bool messageReadSuccess = packet->ReadMessage( receivedMessage );
 			GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
