@@ -121,17 +121,17 @@ bool NetworkPacket::IsValid() const
 	// Start from beginning
 	ResetRead();
 
-	// Jump the Sender Index
-	MoveReadheadBy( 1 );
-
-	// Read Message Count
-	uint8_t	messageCount = 0x00;
-	size_t	countBytes	 = ReadBytes( &messageCount, 1U );
-	if( countBytes != 1U )
+	// Read PacketHeader
+	NetworkPacketHeader packetHeader;
+	size_t readCount = ReadBytes( &packetHeader, sizeof(NetworkPacketHeader) );
+	if( readCount != sizeof(NetworkPacketHeader) )
 	{
 		m_readHead = preservedReadHead;
 		return false;
 	}
+
+	// Fetch Message Count
+	uint8_t	messageCount = packetHeader.unreliableMessageCount;
 
 	// Skip each messages..
 	while ( messageCount > 0 )
