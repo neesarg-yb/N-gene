@@ -14,6 +14,8 @@ private:
 	Stopwatch	*m_stopwatch	= nullptr;
 
 public:
+	void JustFinishedTransition();
+
 	void BeginFrame();
 	void EndFrame();
 

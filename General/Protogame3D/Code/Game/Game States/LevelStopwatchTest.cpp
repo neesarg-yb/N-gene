@@ -24,6 +24,11 @@ LevelStopwatchTest::~LevelStopwatchTest()
 	m_levelClock = nullptr;
 }
 
+void LevelStopwatchTest::JustFinishedTransition()
+{
+	DebugRendererChange3DCamera( nullptr );
+}
+
 void LevelStopwatchTest::BeginFrame()
 {
 
