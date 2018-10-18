@@ -242,6 +242,13 @@ uint8_t NetworkSession::GetMyConnectionIndex() const
 	return idx;
 }
 
+NetworkConnection* NetworkSession::GetMyConnection()
+{
+	uint idx = GetMyConnectionIndex();
+
+	return m_connections[ idx ];
+}
+
 NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )
 {
 	// If idx is not in range

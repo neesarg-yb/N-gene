@@ -12,6 +12,11 @@ public:
 	uint8_t connectionIndex			= 0xff;		// When creating a NetworkPacket Idx = receiver's; When NetworkSession sends this packet, it gets replaced by sender's idx
 	uint8_t unreliableMessageCount	= 0x00;
 
+	// Acknowledgment
+	uint16_t ack;
+	uint16_t lastReceivedAck;
+	uint16_t previouslyReceivedAckBitfield;
+
 public:
 	NetworkPacketHeader() { }
 	NetworkPacketHeader( uint8_t connectionIdx )

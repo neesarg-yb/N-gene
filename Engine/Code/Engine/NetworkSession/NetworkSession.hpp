@@ -80,7 +80,8 @@ public:
 	void SendPacket( NetworkPacket &packetToSend );		// Replaces connectionIndex by sender's index
 	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
 
-	uint8_t GetMyConnectionIndex() const;				// Returns 0xff if not found
+	uint8_t				GetMyConnectionIndex() const;				// Returns 0xff if not found
+	NetworkConnection*	GetMyConnection();							// Will crashes if not found
 
 public:
 	// Connections & Messages
