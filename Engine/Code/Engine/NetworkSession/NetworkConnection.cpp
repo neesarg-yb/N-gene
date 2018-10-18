@@ -7,8 +7,11 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 	: m_indexInSession( idx )
 	, m_parentSession( parentSession )
 	, m_address( addr )
+	, m_sendRateTimer( GetMasterClock() )
+	, m_heartbeatTimer( GetMasterClock() )
 {
-
+	SetSendFrequencyTo( m_sendFrequency );
+	UpdateHeartbeatTimer();
 }
 
 NetworkConnection::~NetworkConnection()
@@ -29,6 +32,18 @@ void NetworkConnection::Send( NetworkMessage &msg )
 
 void NetworkConnection::FlushMessages()
 {
+	// If it hasn't been time to send, return
+	if( m_sendRateTimer.CheckAndReset() != true )
+		return;
+
+	// If we need a heartbeat to be sent
+	if( m_heartbeatTimer.CheckAndReset() == true )
+	{
+		NetworkMessage heartbeat( "heartbeat" );
+		Send( heartbeat );
+	}
+
+	// Batch all the messages into packets
 	NetworkPacketList packetsToSend;
 
 	NetworkPacket *thisPacket = nullptr;
@@ -77,4 +92,34 @@ void NetworkConnection::FlushMessages()
 
 		packetsToSend.pop_back();
 	}
+}
+
+uint8_t NetworkConnection::GetCurrentSendFrequency() const
+{
+	// Get min frequency between mine & parent's
+	uint8_t parentFrequency	= m_parentSession.GetSimulatedSendFrequency();
+	uint8_t minFrequency	= ( m_sendFrequency < parentFrequency ) ? m_sendFrequency : parentFrequency;
+
+	return minFrequency;
+}
+
+void NetworkConnection::SetSendFrequencyTo( uint8_t frequencyHz )
+{
+	// Change local variable
+	m_sendFrequency = frequencyHz;
+
+	uint8_t sendFrequency = GetCurrentSendFrequency();
+
+	// Frequency can't be ZERO
+	GUARANTEE_RECOVERABLE( sendFrequency != 0, "NetworkConnection: Send Frequency can't be ZERO!!" );
+
+	// Set the timer
+	double intervalInSeconds = 1.0 / sendFrequency;
+	m_sendRateTimer.SetTimer( intervalInSeconds );
+}
+
+void NetworkConnection::UpdateHeartbeatTimer()
+{
+	double intervalInSeconds = 1.0 / m_parentSession.GetHeartbeatFrequency();
+	m_heartbeatTimer.SetTimer( intervalInSeconds );
 }

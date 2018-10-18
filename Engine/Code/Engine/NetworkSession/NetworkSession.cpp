@@ -1,7 +1,21 @@
 #pragma once
 #include "NetworkSession.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
+
+bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( msg );
+	
+	if( from.connection == nullptr )
+		return false;
+	else
+	{
+		ConsolePrintf( "Heartbeat Received from [%d] connection.", from.connection->m_indexInSession );
+		return true;
+	}
+}
 
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 	: m_theRenderer( currentRenderer )
@@ -16,6 +30,8 @@ NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 
 	if( currentRenderer != nullptr )
 		m_fonts = currentRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
+	
+	RegisterCoreMessages();
 }
 
 NetworkSession::~NetworkSession()
@@ -46,7 +62,7 @@ void NetworkSession::Render() const
 	m_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	// Draw overlay
-	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.8f, 1.f ) );
+	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.95f, 1.f ) );
 	m_theRenderer->DrawAABB( backgroundBox, m_uiBackgroundColor );
 
 	// Title Box
@@ -55,8 +71,12 @@ void NetworkSession::Render() const
 	m_theRenderer->DrawTextInBox2D( titleStr.c_str(), Vector2( 0.f, 0.5f ), titleBox, m_uiTitleFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Simulated Rate, Lag & Loss
-	AABB2		srllBox = backgroundBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.6f ), Vector2( 1.f, 0.9f ) );
-	std::string srllStr = Stringf( "%-8s:%s\n%-8s:%s\n%-8s:%s", "rate", "XX hz", "sim_lag", "X ms-X ms", "sim_loss", "X.XX %" );
+	std::string sendRateStr			= Stringf( "%dhz", m_simulatedSendFrequency );
+	std::string lossPercentageStr	= Stringf( "%.2f%%", m_simulatedLossFraction * 100.f );
+	std::string simLagRangeStr		= Stringf( "%dms - %dms", m_simulatedMinLatency_ms, m_simulatedMaxLatency_ms );
+	std::string heartbeatHzStr		= Stringf( "%.2fhz", m_heartbeatFrequency );
+	AABB2		srllBox				= backgroundBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.6f ), Vector2( 1.f, 0.9f ) );
+	std::string srllStr				= Stringf( "%-8s: %s (%s: %s)\n%-8s: %s\n%-8s: %s", "rate", sendRateStr.c_str(), "heartbeat", heartbeatHzStr.c_str(), "sim_lag", simLagRangeStr.c_str(), "sim_loss", lossPercentageStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( srllStr.c_str(), Vector2( 0.f, 1.f ), srllBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// My Socket Address
@@ -76,7 +96,7 @@ void NetworkSession::Render() const
 	// Title Column of Table: All Connections
 	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
 	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", "--", "idx", "address", "rtt(ms)", "loss(%)", "lrcv(s)", "lsnt(s)", "sntack", "rcvack", "rcvbits" );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(ms)", "loss(%)", "lrcv(s)", "lsnt(s)", "sntack", "rcvack", "rcvbits" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -96,6 +116,9 @@ void NetworkSession::Render() const
 
 		// address
 		std::string connectionAddrStr = m_connections[i]->m_address.AddressToString();
+
+		// simsndrt(hz)
+		std::string simsndrt = Stringf( "%dhz", m_connections[i]->GetCurrentSendFrequency() );
 
 		// rtt(ms)
 		std::string rttStr = "X.XX";
@@ -123,7 +146,7 @@ void NetworkSession::Render() const
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
 }
@@ -154,58 +177,15 @@ bool NetworkSession::BindPort( uint16_t port, uint16_t range )
 	return false;
 }
 
+void NetworkSession::RegisterCoreMessages()
+{
+	RegisterNetworkMessage( "heartbeat", OnHeartbeat );
+}
+
 void NetworkSession::ProcessIncoming()
 {
-	NetworkAddress sender;
-
-	void	*buffer			= malloc( PACKET_MTU );
-	size_t	 receivedBytes	= m_mySocket->ReceiveFrom( &sender, buffer, PACKET_MTU );
-
-	NetworkPacket receivedPacket;
-	receivedPacket.WriteBytes( receivedBytes, buffer, false );
-
-	if( receivedBytes > 0 )
-	{
-		if( receivedPacket.IsValid() )
-		{
-			bool headerReadingSuccess = receivedPacket.ReadHeader( receivedPacket.m_header );
-			GUARANTEE_RECOVERABLE( headerReadingSuccess, "Couldn't read the Packet Header successfully!" );
-
-			NetworkMessage receivedMessage;
-			for( int i = 0; i < receivedPacket.m_header.unreliableMessageCount; i++ )
-			{
-				bool messageReadSuccess = receivedPacket.ReadMessage( receivedMessage );
-				GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
-
-				// To get Message Definition from index
-				NetworkMessageDefinitionsMap::iterator it = m_registeredMessages.begin();
-				std::advance( it, receivedMessage.m_header.networkMessageDefinitionIndex );
-
-				// If that's a valid definition index
-				if( it != m_registeredMessages.end() )
-				{
-					// Set the pointer to that definition
-					receivedMessage.m_definition = &it->second;
-					
-					// Create a NetworkSender
-					NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
-					uint8_t receivedConnIdx = receivedPacket.m_header.connectionIndex;
-					if( receivedConnIdx != 0xff )
-						thisSender.connection = m_connections[ receivedPacket.m_header.connectionIndex ];		// If sender has a valid connection, fill it in
-
-					// Do a callback!
-					receivedMessage.m_definition->callback( receivedMessage, thisSender );
-				}
-				else
-					ConsolePrintf( "Received invalid messageDefinition Index: %d", receivedMessage.m_header.networkMessageDefinitionIndex );
-			}
-		}
-		else
-			ConsolePrintf( RGBA_KHAKI_COLOR, "Bad Packet Received from %s", sender.AddressToString().c_str() );
-	}
-
-	// Free the temp buffer
-	free( buffer );
+	ReceivePacket();
+	ProcessReceivedPackets();
 }
 
 void NetworkSession::ProcessOutgoing()
@@ -304,4 +284,148 @@ void NetworkSession::RegisterNetworkMessage( char const *messageName, networkMes
 		it->second.id = messageID;
 		messageID++;
 	}
+}
+
+bool NetworkSession::SetHeartbeatFrequency( float frequencyHz )
+{
+	// We can set it to zero, b/c we'll be dividing by zero when updating the timer
+	if( frequencyHz == 0 )
+		return false;
+
+	// Set the frequency
+	m_heartbeatFrequency = frequencyHz;
+
+	// Update timer in all the connections
+	for each( NetworkConnection* connection in m_connections )
+	{
+		if( connection == nullptr )
+			continue;
+
+		connection->UpdateHeartbeatTimer();
+	}
+
+	return true;
+}
+
+void NetworkSession::SetSimulationLoss( float lossFraction )
+{
+	m_simulatedLossFraction = ClampFloat01( lossFraction );
+}
+
+void NetworkSession::SetSimulationLatency( uint minAddedLatency_ms, uint maxAddedLatency_ms /*= 0U */ )
+{
+	m_simulatedMinLatency_ms =  minAddedLatency_ms;
+	m_simulatedMaxLatency_ms = (minAddedLatency_ms > maxAddedLatency_ms) ? minAddedLatency_ms : maxAddedLatency_ms;
+}
+
+void NetworkSession::SetSimulationSendFrequency( uint8_t frequencyHz )
+{
+	m_simulatedSendFrequency = frequencyHz;
+}
+
+void NetworkSession::ReceivePacket()
+{
+	NetworkAddress sender;
+
+	void	*buffer			= malloc( PACKET_MTU );
+	size_t	 receivedBytes	= m_mySocket->ReceiveFrom( &sender, buffer, PACKET_MTU );
+
+	NetworkPacket *receivedPacket = new NetworkPacket();
+	receivedPacket->WriteBytes( receivedBytes, buffer, false );
+	bool discardThisPacket = CheckRandomChance( m_simulatedLossFraction );
+
+	// If it is not an empty packet & if we're not discarding
+	if( (receivedBytes > 0) && (discardThisPacket == false) )
+		QueuePacketForSimulation( receivedPacket, sender );
+
+	// Free the temp buffer
+	free( buffer );
+}
+
+void NetworkSession::ProcessReceivedPackets()
+{
+	uint64_t currentHPC = Clock::GetCurrentHPC();
+
+	// Check all packets
+	while ( m_receivedPackets.size() > 0 )
+	{
+		// If the top one is due to process
+		if( m_receivedPackets.top().timestampHPC <= currentHPC )
+		{
+			// Get the top packet
+			StampedNetworkPacket thisStampedPacket = m_receivedPackets.top();
+
+			// Process it
+			ProccessAndDeletePacket( thisStampedPacket.packet, thisStampedPacket.sender );
+
+			// Remove the top from queue
+			m_receivedPackets.pop();
+		}
+		else
+			break;	// Because we don't have the top due at this point
+	}
+}
+
+void NetworkSession::QueuePacketForSimulation( NetworkPacket *newPacket, NetworkAddress &sender )
+{
+	StampedNetworkPacket stampedPacket( newPacket, sender );
+
+	// Calculate random latency
+	uint	range		= m_simulatedMaxLatency_ms - m_simulatedMinLatency_ms;
+	int		randomRange	= GetRandomIntInRange( 0, (int)range );
+	uint	latency_ms	= m_simulatedMinLatency_ms + (uint)randomRange;
+
+	// Get timestamp out of it
+	uint64_t latency_HPC = Clock::GetHPCFromMilliSeconds( latency_ms );
+	uint64_t timestamp	 = Clock::GetCurrentHPC() + latency_HPC;
+
+	// Stamp with the latency
+	stampedPacket.timestampHPC = timestamp;
+
+	// Add it to priority queue
+	m_receivedPackets.push( stampedPacket );
+}
+
+void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAddress &sender )
+{
+	if( packet->IsValid() )
+	{
+		bool headerReadingSuccess = packet->ReadHeader( packet->m_header );
+		GUARANTEE_RECOVERABLE( headerReadingSuccess, "Couldn't read the Packet Header successfully!" );
+
+		NetworkMessage receivedMessage;
+		for( int i = 0; i < packet->m_header.unreliableMessageCount; i++ )
+		{
+			bool messageReadSuccess = packet->ReadMessage( receivedMessage );
+			GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
+
+			// To get Message Definition from index
+			NetworkMessageDefinitionsMap::iterator it = m_registeredMessages.begin();
+			std::advance( it, receivedMessage.m_header.networkMessageDefinitionIndex );
+
+			// If that's a valid definition index
+			if( it != m_registeredMessages.end() )
+			{
+				// Set the pointer to that definition
+				receivedMessage.m_definition = &it->second;
+
+				// Create a NetworkSender
+				NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
+				uint8_t receivedConnIdx = packet->m_header.connectionIndex;
+				if( receivedConnIdx != 0xff )
+					thisSender.connection = m_connections[ packet->m_header.connectionIndex ];		// If sender has a valid connection, fill it in
+
+																											// Do a callback!
+				receivedMessage.m_definition->callback( receivedMessage, thisSender );
+			}
+			else
+				ConsolePrintf( "Received invalid messageDefinition Index: %d", receivedMessage.m_header.networkMessageDefinitionIndex );
+		}
+	}
+	else
+		ConsolePrintf( RGBA_KHAKI_COLOR, "Bad Packet Received from %s", sender.AddressToString().c_str() );
+
+	// Delete the packet
+	delete packet;
+	packet = nullptr;
 }

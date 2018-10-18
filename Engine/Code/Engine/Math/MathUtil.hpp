@@ -10,6 +10,9 @@
 class Vector2;
 
 bool	SolveQuadraticEquation( Vector2& out, float a, float b, float c );			// Solves a*(t^2) + b*t + c = 0. If roots found, returns true. Note: Always returns two roots. 
+float	AreaOfTriangle2D( Vector2 p1, Vector2 p2, Vector2 p3 );
+bool	IsPointIsInsideTriangle2D( Vector2 point, Vector2 triangleCornerA, Vector2 triangleCornerB, Vector2 triangleCornerC );
+void	GetPointsOnCircle2D( Vector2 center, float radius, int numPoints, Vector2 *outArray );
 
 float	DegreeToRadian(float degree);
 float	RadianToDegree(float radian);
