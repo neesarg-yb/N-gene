@@ -43,8 +43,14 @@ void NetworkConnection::FlushMessages()
 		Send( heartbeat );
 	}
 	
-	// Populate messages into thisPacket
-	NetworkPacket thisPacket( (uint8_t)m_indexInSession );
+	// Populate messages into thisPacket & its header
+	NetworkPacket		 thisPacket;
+	NetworkPacketHeader &thisHeader				= thisPacket.m_header;
+	thisHeader.messageCount						= 0x00;
+	thisHeader.connectionIndex					= (uint8_t)m_indexInSession;
+	thisHeader.ack								= GetNextAckToSend();
+	thisHeader.lastReceivedAck					= m_lastReceivedAck;
+	thisHeader.previouslyReceivedAckBitfield	= m_previousReceivedAckBitfield;
 	
 	// Reliable Messages
 	// ...
@@ -72,7 +78,10 @@ void NetworkConnection::FlushMessages()
 
 	// Send if not empty
 	if( thisPacket.HasMessages() )
+	{
 		m_parentSession.SendPacket( thisPacket );
+		IncrementSentAck();
+	}
 }
 
 uint8_t NetworkConnection::GetCurrentSendFrequency() const
@@ -103,4 +112,18 @@ void NetworkConnection::UpdateHeartbeatTimer()
 {
 	double intervalInSeconds = 1.0 / m_parentSession.GetHeartbeatFrequency();
 	m_heartbeatTimer.SetTimer( intervalInSeconds );
+}
+
+uint16_t NetworkConnection::GetNextAckToSend()
+{
+	// If we wrapped on last increment, increment it again to make it a valid ack
+	if( m_nextSentAck == INVALID_PACKET_ACK )
+		m_nextSentAck++;
+
+	return m_nextSentAck;
+}
+
+void NetworkConnection::IncrementSentAck()
+{
+	m_nextSentAck++;
 }
