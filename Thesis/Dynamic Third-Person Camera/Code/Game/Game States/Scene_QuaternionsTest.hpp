@@ -12,6 +12,8 @@ public:
 	~Scene_QuaternionsTest();
 
 public:
+	void JustFinishedTransition();
+
 	void BeginFrame();
 	void EndFrame();
 

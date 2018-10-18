@@ -99,6 +99,11 @@ Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 	m_renderingPath = nullptr;
 }
 
+void Scene_DegreesOfFreedom::JustFinishedTransition()
+{
+	DebugRendererChange3DCamera( m_camera );
+}
+
 void Scene_DegreesOfFreedom::BeginFrame()
 {
 	ChangeCameraBehaviour();
@@ -113,6 +118,9 @@ void Scene_DegreesOfFreedom::EndFrame()
 
 void Scene_DegreesOfFreedom::Update( float deltaSeconds )
 {
+	// Update Debug Renderer Objects
+	DebugRendererUpdate( deltaSeconds );
+
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 
 	// Update Game Objects
@@ -121,9 +129,6 @@ void Scene_DegreesOfFreedom::Update( float deltaSeconds )
 
 	// Update Camera Stuffs
 	m_cameraManager->Update( deltaSeconds );
-
-	// Update Debug Renderer Objects
-	DebugRendererUpdate( deltaSeconds );
 
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
@@ -138,15 +143,14 @@ void Scene_DegreesOfFreedom::Render( Camera *gameCamera ) const
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene );
 
-	// Debug Renderer
-	TODO( "DebugRenderer getting started from Scene_QuaternionTets.. This is a hot fix for now." );
-	DebugRendererChange3DCamera( m_camera );
+	// DEBUG
 	Matrix44 bMat;
 	bMat.SetTColumn( Vector3( 0.f, 0.f, 1.f ) );
 
 	DebugRenderBasis( 0.f, Matrix44(),	RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRenderBasis( 0.f, bMat,		RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-
+	
+	// Debug Renderer
 	DebugRendererRender();
 }
 

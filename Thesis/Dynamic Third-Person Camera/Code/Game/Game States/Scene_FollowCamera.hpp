@@ -47,6 +47,7 @@ private:
 	bool					 m_constrainsActive = true;
 
 public:
+	void JustFinishedTransition();
 	void BeginFrame();
 	void EndFrame();
 	void Update( float deltaSeconds );

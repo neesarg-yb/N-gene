@@ -19,16 +19,18 @@ Scene_QuaternionsTest::Scene_QuaternionsTest()
 
 	// Skybox
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
-
-	DebugRendererStartup( g_theRenderer, m_camera );
-
+	
 	QuaternionsTestCode();
 }
 
 Scene_QuaternionsTest::~Scene_QuaternionsTest()
 {
-	DebugRendererShutdown();
 	delete m_camera;
+}
+
+void Scene_QuaternionsTest::JustFinishedTransition()
+{
+	DebugRendererChange3DCamera( m_camera );
 }
 
 void Scene_QuaternionsTest::BeginFrame()
@@ -45,6 +47,12 @@ void Scene_QuaternionsTest::EndFrame()
 
 void Scene_QuaternionsTest::Update( float deltaSeconds )
 {
+	// Profiler Test
+	PROFILE_SCOPE_FUNCTION();
+
+	// Debug Renderer
+	DebugRendererUpdate( deltaSeconds );
+
 	if( m_t >= 1.f )
 	{
 		m_currentEulerRotation	= m_targetSlerpEulerRotation;
@@ -52,16 +60,10 @@ void Scene_QuaternionsTest::Update( float deltaSeconds )
 		m_t						= 0.f;
 	}
 
-	// Profiler Test
-	PROFILE_SCOPE_FUNCTION();
-
 	// Level::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
 	UpdateEulerRotationAccordingToInput( deltaSeconds );
-
-	// Debug Renderer
-	DebugRendererUpdate( deltaSeconds );
 
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
@@ -135,7 +137,7 @@ void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
 	DebugRenderTag( 0.f, 1.f, m_eulerBasisWorldPos		- Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "EULER ANGLE");
 	DebugRenderTag( 0.f, 1.f, m_quaternionBasisWorldPos - Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "QUATERNIONS");
 
-	// Debug Render
+	// Debug Renderer
 	DebugRendererRender();
 }
 

@@ -11,6 +11,8 @@ public:
 	~LevelSelect();
 
 public:
+	void JustFinishedTransition();
+
 	void BeginFrame();
 	void EndFrame();
 

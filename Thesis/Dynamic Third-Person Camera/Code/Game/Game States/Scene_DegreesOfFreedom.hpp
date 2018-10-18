@@ -40,6 +40,7 @@ private:
 	float const				 m_cameraFar		= 1000.f;
 
 public:
+	void JustFinishedTransition();
 	void BeginFrame();
 	void EndFrame();
 	void Update( float deltaSeconds );

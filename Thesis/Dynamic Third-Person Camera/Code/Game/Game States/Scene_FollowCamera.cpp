@@ -148,6 +148,11 @@ Scene_FollowCamera::~Scene_FollowCamera()
 	m_renderingPath = nullptr;
 }
 
+void Scene_FollowCamera::JustFinishedTransition()
+{
+	DebugRendererChange3DCamera( m_camera );
+}
+
 void Scene_FollowCamera::BeginFrame()
 {
 	ChangeCameraBehaviour();
@@ -162,6 +167,9 @@ void Scene_FollowCamera::EndFrame()
 
 void Scene_FollowCamera::Update( float deltaSeconds )
 {
+	// Update Debug Renderer Objects
+	DebugRendererUpdate( deltaSeconds );
+
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 
 	// Update Game Objects
@@ -175,24 +183,9 @@ void Scene_FollowCamera::Update( float deltaSeconds )
 	EnableDisableCameraConstrains();
 	m_cameraManager->Update( deltaSeconds );
 
-	// Update Debug Renderer Objects
-	DebugRendererUpdate( deltaSeconds );
-
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
-
-
-// 	// Debug Collision: Player to Buildings
-// 	Vector3 center = m_player->m_transform.GetWorldPosition();
-// 	float	radius = 0.25f;
-// 	
-// 	bool isColliding;
-// 	center = m_gameObjects[ ENTITY_BUILDING ][0]->CheckCollisionWithSphere( center, radius, isColliding );
-// 	if( isColliding )
-// 	{
-// 		m_player->m_transform.SetPosition( center );
-// 	}
 }
 
 void Scene_FollowCamera::Render( Camera *gameCamera ) const
@@ -204,11 +197,10 @@ void Scene_FollowCamera::Render( Camera *gameCamera ) const
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, &playerPosition );
 
-	// Debug Renderer
-	TODO( "DebugRenderer getting started from Scene_QuaternionTets.. This is a hot fix for now." );
-	DebugRendererChange3DCamera( m_camera );
+	// DEBUG
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-	DebugRenderTerrainNormalRaycast();
+
+	// Debug Renderer
 	DebugRendererRender();
 }
 

@@ -24,6 +24,11 @@ LevelSelect::~LevelSelect()
 
 }
 
+void LevelSelect::JustFinishedTransition()
+{
+
+}
+
 void LevelSelect::BeginFrame()
 {
 
