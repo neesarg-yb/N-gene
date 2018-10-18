@@ -51,11 +51,12 @@ void DebugRendererUpdate( float deltaSeconds )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
+	
+	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
+		renderObject->Update( deltaSeconds );
 
 	DeleteOverdueRenderObjects();
 
-	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
-		renderObject->Update( deltaSeconds );
 }
 
 void DebugRendererRender()
