@@ -683,6 +683,9 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+	if( s_renderer != nullptr )
+		s_renderer = nullptr;
+
 	// Empty the TexturePool
 	while ( m_texturePool.size() > 0 )
 	{
