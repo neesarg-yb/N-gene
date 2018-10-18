@@ -15,6 +15,6 @@
          <alpha   op ="add" src ="one" dest ="one" />
    </blend>
 
-   <depth write ="true" test ="always" />
+   <depth write ="false" test ="always" />
 
 </shader>

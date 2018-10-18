@@ -11,6 +11,8 @@ public:
 	~Attract();
 
 public:
+	void JustFinishedTransition();
+
 	void BeginFrame();
 	void EndFrame();
 

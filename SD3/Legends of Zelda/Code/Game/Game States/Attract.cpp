@@ -22,6 +22,11 @@ Attract::~Attract()
 	
 }
 
+void Attract::JustFinishedTransition()
+{
+
+}
+
 void Attract::BeginFrame()
 {
 

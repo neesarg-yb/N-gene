@@ -24,9 +24,6 @@ Level1::Level1()
 	m_lightSources[0]->SetUpForDirectionalLight( 20.f, Vector3( 1.f, 0.f, 0.f), RGBA_WHITE_COLOR );
 	m_lightSources[0]->UsesShadowMap( false );
 
-	// Setup the DebugRenderer
-	DebugRendererStartup( g_theRenderer, m_camera );
-
 	// Battle Scene
 	m_levelScene = new Scene();
 	m_levelScene->AddLight( *m_lightSources[0] );
@@ -41,8 +38,6 @@ Level1::~Level1()
 	delete m_renderingPath;
 	delete m_levelScene;
 
-	DebugRendererShutdown();
-
 	// Lights
 	for( unsigned int i = 0; i < m_lightSources.size(); i++ )
 		delete m_lightSources[i];
@@ -55,6 +50,11 @@ Level1::~Level1()
 	m_allGameObjects.clear();
 
 	delete m_camera;
+}
+
+void Level1::JustFinishedTransition()
+{
+	DebugRendererChange3DCamera( m_camera );
 }
 
 void Level1::BeginFrame()
@@ -74,15 +74,15 @@ void Level1::Update( float deltaSeconds )
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
+	// Debug Renderer
+	DebugRendererUpdate( deltaSeconds );
+
 	// Level::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
 
 	// Game Objects
 	for each( GameObject* go in m_allGameObjects )
 		go->Update( deltaSeconds );
-
-	// Debug Renderer
-	DebugRendererUpdate( deltaSeconds );
 
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );

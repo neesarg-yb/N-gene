@@ -500,6 +500,8 @@ void theGame::ConfirmTransitionToNextState()
 	int idx	= FindGameStateNamed( m_nextGameStateName, m_currentGameState );
 	GUARANTEE_RECOVERABLE( idx >= 0, Stringf("Couldn't find gamestate named \"%s\"", m_nextGameStateName.c_str() ) );
 
+	m_currentGameState->JustFinishedTransition();
+
 	m_nextGameStateName	= "NONE";
 	m_timeSinceTransitionBegan = 0;
 }

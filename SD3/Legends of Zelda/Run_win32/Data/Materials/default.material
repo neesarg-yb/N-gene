@@ -8,5 +8,5 @@
    		<texture bind="2" src="Data\Images\Defaults\black.png" />
    		
    		<float bind="SPECULAR_AMOUNT" 	 value="1.0" />
-   		<float bind="SPECULAR_POWER" 	    value="16.0" />
+   		<float bind="SPECULAR_POWER" 	 value="16.0" />
    </material>
