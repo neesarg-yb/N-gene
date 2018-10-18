@@ -12,6 +12,8 @@ public:
 	std::string const m_name = "NOT ASSIGNED";
 
 public:
+	virtual void JustFinishedTransition() = 0;			// To this GameState
+
 	virtual void BeginFrame() = 0;
 	virtual void EndFrame() = 0;
 
