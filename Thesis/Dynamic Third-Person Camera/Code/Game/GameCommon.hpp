@@ -13,6 +13,9 @@ enum WorldEntityTypes
 class  Blackboard;
 extern Blackboard* g_gameConfigBlackboard;
 
+class Clock;
+extern Clock* g_gameClock;		// Clock managed by theGame
+
 class theApp;
 extern theApp* g_theApp;
 

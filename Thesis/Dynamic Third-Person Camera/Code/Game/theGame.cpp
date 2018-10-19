@@ -1,4 +1,5 @@
 #include "theGame.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
@@ -45,6 +46,9 @@ theGame::theGame()
 {
 	// Set global variable
 	g_theGame = this;
+
+	// Initialize the game clock
+	g_gameClock = new Clock( GetMasterClock() );
 
 	m_lastFramesTime = GetCurrentTimeSeconds();
 
@@ -130,7 +134,7 @@ void theGame::Update()
 	PROFILE_SCOPE_FUNCTION();
 
 	// Calculating deltaTime
-	float deltaSeconds			= CalculateDeltaTime();
+	float deltaSeconds			= (float) g_gameClock->GetFrameDeltaSeconds();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
 
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
@@ -286,14 +290,6 @@ void theGame::RenderLoadingScreen() const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	g_theRenderer->DrawTextInBox2D( "Loading..", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-}
-
-float theGame::CalculateDeltaTime() {
-	double currentTime = GetCurrentTimeSeconds();
-	float deltaSeconds = (float)(currentTime - m_lastFramesTime);
-	m_lastFramesTime = currentTime;
-
-	return deltaSeconds;
 }
 
 double theGame::GetTimeSinceGameStarted() const

@@ -209,11 +209,11 @@ void theApp::RunFrame() {
 }
 
 void theApp::BeginFrame() {
-	// Profiler MarkFrame
-	Profiler::GetInstance()->MarkFrame();
-
 	// Inform the Clock about frame
 	TickMasterClock();
+
+	// Profiler MarkFrame
+	Profiler::GetInstance()->MarkFrame();
 
 	g_theInput->BeginFrame();
 	g_theRenderer->BeginFrame();

@@ -145,16 +145,17 @@ void Scene_ProportionalController::JustFinishedTransition()
 
 void Scene_ProportionalController::BeginFrame()
 {
-	m_cameraManager->PreUpdate();
+
 }
 
 void Scene_ProportionalController::EndFrame()
 {
-	m_cameraManager->PostUpdate();
 }
 
 void Scene_ProportionalController::Update( float deltaSeconds )
 {
+	m_cameraManager->PreUpdate();
+
 	// Update Debug Renderer Objects
 	DebugRendererUpdate( deltaSeconds );
 
@@ -174,6 +175,8 @@ void Scene_ProportionalController::Update( float deltaSeconds )
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
+
+	m_cameraManager->PostUpdate();
 }
 
 void Scene_ProportionalController::Render( Camera *gameCamera ) const

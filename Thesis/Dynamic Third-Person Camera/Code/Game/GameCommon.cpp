@@ -4,6 +4,7 @@
 #include "Game/theGame.hpp"
 
 Blackboard*				g_gameConfigBlackboard	= nullptr;
+Clock*					g_gameClock				= nullptr;
 theApp*					g_theApp				= nullptr;
 theGame*				g_theGame				= nullptr;
 Renderer*				g_theRenderer			= nullptr;

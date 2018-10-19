@@ -17,20 +17,15 @@ CB_ProportionalController::~CB_ProportionalController()
 
 void CB_ProportionalController::PreUpdate()
 {
-
+	// Change controlling fraction as per input
+	if( g_theInput->IsKeyPressed( UP ) )
+		m_controllingFraction += 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+	if( g_theInput->IsKeyPressed( DOWN ) )
+		m_controllingFraction -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 }
 
 void CB_ProportionalController::PostUpdate()
 {
-	// Change controlling fraction as per input
-	if( g_theInput->WasKeyJustPressed( UP ) )
-		m_controllingFraction += 1.f;
-	if( g_theInput->WasKeyJustPressed( DOWN ) )
-		m_controllingFraction -= 1.f;
-
-	// Clamp it to [0, 1]
-//	m_controllingFraction = ClampFloat01( m_controllingFraction );
-
 	// Print it on Debug Screen
 	std::string controllingFractionStr = Stringf( "Controlling Fraction(PC) = %f", m_controllingFraction );
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
@@ -66,6 +61,10 @@ CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState c
 	float altitudeChange	 = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
 	m_rotationAroundAnchor	+= rotationChange;
 	m_altitudeAroundAnchor	+= altitudeChange;
+
+	// Clamp the Altitude
+	float clampedAltitude	= ClampFloat( m_altitudeAroundAnchor, m_pitchRange.min, m_pitchRange.max );
+	m_altitudeAroundAnchor	= clampedAltitude;
 
 	// Vertical Offset
 	float verticalOffsetChange	 = 0.f;
