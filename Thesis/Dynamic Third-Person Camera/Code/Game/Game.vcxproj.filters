@@ -109,6 +109,9 @@
     <ClCompile Include="Potential Engine\CC_CameraCollision.cpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\Scene_ProportionalController.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -182,6 +185,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CC_CameraCollision.hpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_ProportionalController.hpp">
+      <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -300,6 +306,12 @@
       <Filter>Materials</Filter>
     </None>
     <None Include="..\..\Run_win32\Data\Materials\building.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\terrain_grass.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\terrain_gridlines.material">
       <Filter>Materials</Filter>
     </None>
   </ItemGroup>

@@ -285,6 +285,7 @@
     <ClCompile Include="Game States\Attract.cpp" />
     <ClCompile Include="Game States\LevelSelect.cpp" />
     <ClCompile Include="Game States\Scene_FollowCamera.cpp" />
+    <ClCompile Include="Game States\Scene_ProportionalController.cpp" />
     <ClCompile Include="Game States\Scene_QuaternionsTest.cpp" />
     <ClCompile Include="GameCommon.cpp" />
     <ClCompile Include="Main_Win32.cpp" />
@@ -316,6 +317,7 @@
     <ClInclude Include="Game States\Attract.hpp" />
     <ClInclude Include="Game States\LevelSelect.hpp" />
     <ClInclude Include="Game States\Scene_FollowCamera.hpp" />
+    <ClInclude Include="Game States\Scene_ProportionalController.hpp" />
     <ClInclude Include="Game States\Scene_QuaternionsTest.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="GameCommon.hpp" />
@@ -349,6 +351,8 @@
     <None Include="..\..\Run_win32\Data\Materials\default.material" />
     <None Include="..\..\Run_win32\Data\Materials\pickbuffer.material" />
     <None Include="..\..\Run_win32\Data\Materials\terrain.material" />
+    <None Include="..\..\Run_win32\Data\Materials\terrain_grass.material" />
+    <None Include="..\..\Run_win32\Data\Materials\terrain_gridlines.material" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.vs" />

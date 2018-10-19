@@ -12,7 +12,7 @@ LevelSelect::LevelSelect()
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(5) Camera Behavior and Controls ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(4) Camera Hints, Target Points..", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(3) Camera Collision             ", &m_levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Better Together              ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Proportional Controller      ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Degrees of Freedom           ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
@@ -75,4 +75,6 @@ void LevelSelect::LevelSelected( char const * levelName )
 		g_theGame->StartTransitionToState( "DEGREES OF FREEDOM" );
 	else if( std::string(levelName) == "(1) Follow Camera                " )
 		g_theGame->StartTransitionToState( "FOLLOW CAMERA" );
+	else if( std::string(levelName) == "(2) Proportional Controller      " )
+		g_theGame->StartTransitionToState( "PROPORTIONAL CONTROLLER" );
 }

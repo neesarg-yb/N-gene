@@ -10,11 +10,11 @@
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
 
-class Scene_FollowCamera : public GameState
+class Scene_ProportionalController : public GameState
 {
 public:
-			 Scene_FollowCamera();
-	virtual ~Scene_FollowCamera();
+			 Scene_ProportionalController();
+	virtual ~Scene_ProportionalController();
 
 public:
 	// Rendering Specific
@@ -57,3 +57,4 @@ private:
 
 	void DebugRenderTerrainNormalRaycast() const;
 };
+

@@ -1,17 +1,17 @@
 #pragma once
-#include "Scene_FollowCamera.hpp"
+#include "Scene_ProportionalController.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/CC_CameraCollision.hpp"
-#include "Game/Potential Engine/CC_LineOfSight.hpp"
-#include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/Potential Engine/CB_Follow.hpp"
+#include "Game/Potential Engine/CB_FreeLook.hpp"
+#include "Game/Potential Engine/CC_LineOfSight.hpp"
+#include "Game/Potential Engine/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 
-Scene_FollowCamera::Scene_FollowCamera()
-	: GameState( "FOLLOW CAMERA" )
+Scene_ProportionalController::Scene_ProportionalController()
+	: GameState( "PROPORTIONAL CONTROLLER" )
 {
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 	m_scene			= new Scene();
@@ -20,7 +20,7 @@ Scene_FollowCamera::Scene_FollowCamera()
 	m_camera = new Camera();
 	m_camera->SetColorTarget( g_theRenderer->GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
-	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\galaxy1.png" );
+	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
@@ -34,26 +34,13 @@ Scene_FollowCamera::Scene_FollowCamera()
 	AddNewLightToScene( directionalLight );
 
 	// Terrain
-	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_rivers.png", TERRAIN_GRIDLINES );
+	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png", TERRAIN_GRASS );
 	AddNewGameObjectToScene( m_terrain, ENTITY_TERRAIN );
-
-	// Buildings
-	for( int i = 0; i < 10; i ++ )
-	{
-		Vector2 worldMins = Vector2( m_terrain->m_worldBounds.mins.x, m_terrain->m_worldBounds.mins.z );
-		Vector2 worldMaxs = Vector2( m_terrain->m_worldBounds.maxs.x, m_terrain->m_worldBounds.maxs.z );
-		Vector2 positionXZ;
-		positionXZ.x = GetRandomFloatInRange( worldMins.x, worldMaxs.x );
-		positionXZ.y = GetRandomFloatInRange( worldMins.y, worldMaxs.y );
-
-		Building *aBuilding = new Building( positionXZ, 25.f, 5.f, *m_terrain );
-		AddNewGameObjectToScene( aBuilding, ENTITY_BUILDING );
-	}
 
 	// Player
 	m_player = new Player( Vector3( 0.f, 0.f, 15.f ), *m_terrain );
 	AddNewGameObjectToScene( m_player, ENTITY_PLAYER );
-	
+
 	// Camera Manager
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput, 0.1f );
 	m_cameraManager->SetAnchor( m_player );
@@ -66,10 +53,10 @@ Scene_FollowCamera::Scene_FollowCamera()
 	// Set the Sphere Collision std::function
 	sphere_collision_func collisionFunc;
 	collisionFunc = [ this ] ( Vector3 const &center, float radius )
-		{ 
-			Sphere cameraRig( center, radius );
-			return SphereCollision( cameraRig ); 
-		};
+	{ 
+		Sphere cameraRig( center, radius );
+		return SphereCollision( cameraRig ); 
+	};
 	m_cameraManager->SetSphereCollisionCallback( collisionFunc );
 
 	// Camera Behaviour
@@ -83,14 +70,12 @@ Scene_FollowCamera::Scene_FollowCamera()
 	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
 	m_cameraManager->RegisterConstrain( losConstarin );
 	m_cameraManager->RegisterConstrain( collisionConstrain );
-	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
-	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
-	
+
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
 }
 
-Scene_FollowCamera::~Scene_FollowCamera()
+Scene_ProportionalController::~Scene_ProportionalController()
 {
 	// Camera Behaviour
 	m_cameraManager->DeleteCameraBehaviour( "Follow" );
@@ -99,14 +84,14 @@ Scene_FollowCamera::~Scene_FollowCamera()
 	// Camera Manager
 	delete m_cameraManager;
 	m_cameraManager = nullptr;
-	
+
 	// Player
 	m_player = nullptr;		// Gets deleted from m_gameObjects
-	
-	// Terrain
+
+							// Terrain
 	m_terrain = nullptr;	// Gets deleted from m_gameObjects
-	
-	// GameObjects
+
+							// GameObjects
 	for( int i = 0; i < NUM_ENTITIES; i++ )
 	{
 		while ( m_gameObjects[i].size() > 0 )
@@ -149,24 +134,22 @@ Scene_FollowCamera::~Scene_FollowCamera()
 	m_renderingPath = nullptr;
 }
 
-void Scene_FollowCamera::JustFinishedTransition()
+void Scene_ProportionalController::JustFinishedTransition()
 {
 	DebugRendererChange3DCamera( m_camera );
 }
 
-void Scene_FollowCamera::BeginFrame()
+void Scene_ProportionalController::BeginFrame()
 {
-	ChangeCameraBehaviour();
-
 	m_cameraManager->PreUpdate();
 }
 
-void Scene_FollowCamera::EndFrame()
+void Scene_ProportionalController::EndFrame()
 {
 	m_cameraManager->PostUpdate();
 }
 
-void Scene_FollowCamera::Update( float deltaSeconds )
+void Scene_ProportionalController::Update( float deltaSeconds )
 {
 	// Update Debug Renderer Objects
 	DebugRendererUpdate( deltaSeconds );
@@ -189,7 +172,7 @@ void Scene_FollowCamera::Update( float deltaSeconds )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
 }
 
-void Scene_FollowCamera::Render( Camera *gameCamera ) const
+void Scene_ProportionalController::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
 	Vector3 playerPosition = m_player->m_transform.GetWorldPosition();
@@ -205,7 +188,7 @@ void Scene_FollowCamera::Render( Camera *gameCamera ) const
 	DebugRendererRender();
 }
 
-RaycastResult Scene_FollowCamera::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )
+RaycastResult Scene_ProportionalController::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )
 {
 	RaycastResult closestResult( startPosition );
 
@@ -238,7 +221,7 @@ RaycastResult Scene_FollowCamera::Raycast( Vector3 const &startPosition, Vector3
 	return closestResult;
 }
 
-Vector3 Scene_FollowCamera::SphereCollision( Sphere const &sphere )
+Vector3 Scene_ProportionalController::SphereCollision( Sphere const &sphere )
 {
 	Vector3 positionAfterCollision = sphere.center;
 
@@ -256,7 +239,7 @@ Vector3 Scene_FollowCamera::SphereCollision( Sphere const &sphere )
 	return positionAfterCollision;
 }
 
-void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
+void Scene_ProportionalController::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
 {
 	// Add game object which gets updated every frame
 	m_gameObjects[ entityType ].push_back( go );
@@ -265,7 +248,7 @@ void Scene_FollowCamera::AddNewGameObjectToScene( GameObject *go, WorldEntityTyp
 	go->AddRenderablesToScene( *m_scene );
 }
 
-void Scene_FollowCamera::AddNewLightToScene( Light *light )
+void Scene_ProportionalController::AddNewLightToScene( Light *light )
 {
 	// Add to list, so we can delete it at deconstruction
 	m_lights.push_back( light );
@@ -277,12 +260,12 @@ void Scene_FollowCamera::AddNewLightToScene( Light *light )
 	m_scene->AddRenderable( *light->m_renderable );
 }
 
-void Scene_FollowCamera::ChangeCameraBehaviour()
+void Scene_ProportionalController::ChangeCameraBehaviour()
 {
 	return;
 }
 
-void Scene_FollowCamera::EnableDisableCameraConstrains()
+void Scene_ProportionalController::EnableDisableCameraConstrains()
 {
 	XboxController &controller = g_theInput->m_controller[0];
 	bool toggleConstrainButton = controller.m_xboxButtonStates[ XBOX_BUTTON_X ].keyJustPressed;
@@ -314,11 +297,12 @@ void Scene_FollowCamera::EnableDisableCameraConstrains()
 	}
 }
 
-void Scene_FollowCamera::DebugRenderTerrainNormalRaycast() const
+void Scene_ProportionalController::DebugRenderTerrainNormalRaycast() const
 {
 	Vector3 raycastDirection = m_camera->m_cameraTransform.GetQuaternion().RotatePoint( Vector3::FRONT );
 	RaycastResult result	 = m_terrain->Raycast( m_camera->m_cameraTransform.GetWorldPosition(), raycastDirection, 100.f, 0.01f );
 
 	DebugRenderLineSegment( 0.f, result.impactPosition, RGBA_KHAKI_COLOR, result.impactPosition + result.impactNormal, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }
+
 

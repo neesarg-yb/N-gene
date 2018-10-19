@@ -10,6 +10,7 @@
 #include "Game/Game States/Scene_FollowCamera.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
 #include "Game/Game States/Scene_DegreesOfFreedom.hpp"
+#include "Game/Game States/Scene_ProportionalController.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -99,6 +100,9 @@ void theGame::Startup()
 
 	GameState* followCamera = new Scene_FollowCamera();
 	AddNewGameState( followCamera );
+
+	GameState* pcScene = new Scene_ProportionalController();
+	AddNewGameState( pcScene );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );

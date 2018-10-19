@@ -1,7 +1,14 @@
 #pragma once
-
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Input/InputSystem.hpp"
+
+enum WorldEntityTypes
+{
+	ENTITY_PLAYER = 0,
+	ENTITY_TERRAIN,
+	ENTITY_BUILDING,
+	NUM_ENTITIES
+};
 
 class  Blackboard;
 extern Blackboard* g_gameConfigBlackboard;

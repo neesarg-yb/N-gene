@@ -17,12 +17,18 @@ enum eTerrainQuadVetrex
 	NUM_TERRAIN_QUAD_VERTICES
 };
 
+enum eTerrainMaterial
+{
+	TERRAIN_GRIDLINES,
+	TERRAIN_GRASS
+};
+
 class Terrain : public GameObject
 {
 public:
 	 // Terrain is always generated with 1x1 squares
 	 // Texture used to render the terrain gets repeated on each of these 1x1 square
-	 Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath );
+	 Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath, eTerrainMaterial materialFile );
 	~Terrain();
 
 public:
@@ -33,6 +39,7 @@ public:
 
 private:
 	Image			*m_heightMapImage		= nullptr;
+	std::string		 m_materialFilePath		= "";
 
 public:
 	void			Update( float deltaSeconds );

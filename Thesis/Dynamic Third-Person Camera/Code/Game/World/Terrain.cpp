@@ -8,10 +8,23 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 
-Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath )
+Terrain::Terrain( Vector3 spawnPosition, IntVector2 gridSize, float maxHeight, std::string heightMapImagePath, eTerrainMaterial materialFile )
 	: m_maxHeight( maxHeight )
 	, m_sampleSize( gridSize )
 {
+	switch( materialFile )
+	{
+	case TERRAIN_GRIDLINES:
+		m_materialFilePath = "Data\\Materials\\terrain_gridlines.material";
+		break;
+	case TERRAIN_GRASS:
+		m_materialFilePath = "Data\\Materials\\terrain_grass.material";
+		break;
+	default:
+		m_materialFilePath = "Data\\Materials\\terrain_gridlines.material";
+		break;
+	}
+
 	// NOTE!
 	//
 	// TERRAIN'S ORIGIN IS AT BOTTOM LEFT CORNER, NOT AT THE CENTER!
@@ -385,7 +398,7 @@ ChunkList Terrain::MakeChunksUsingSurfacePatch( std::function<Vector3( float, fl
 
 			Mesh *terrainMesh = chunkMB.ConstructMesh<Vertex_Lit>();
 			m_renderable->SetBaseMesh( terrainMesh );
-			Material *terrainMaterial = Material::CreateNewFromFile( "Data\\Materials\\terrain.material" );
+			Material *terrainMaterial = Material::CreateNewFromFile( m_materialFilePath.c_str() );
 			m_renderable->SetBaseMaterial( terrainMaterial );
 
 			chunks.push_back( m_renderable );
