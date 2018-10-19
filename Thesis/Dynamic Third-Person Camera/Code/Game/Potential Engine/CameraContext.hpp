@@ -11,8 +11,10 @@ struct CameraContext
 public:
 	Vector3					playerPosition;
 	raycast_std_func		raycastCallback;
+
+	float					cameraCollisionRadius;
 	sphere_collision_func	sphereCollisionCallback;
 
 public:
-	CameraContext( Vector3 const &playerPosition, raycast_std_func raycastCallback, sphere_collision_func sphereCollisionCallback );
+	CameraContext( Vector3 const &playerPosition, raycast_std_func raycastCallback, float collisionRadius, sphere_collision_func sphereCollisionCallback );
 };

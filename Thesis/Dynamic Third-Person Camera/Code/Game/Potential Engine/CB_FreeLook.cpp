@@ -62,5 +62,5 @@ CameraState CB_FreeLook::Update( float deltaSeconds )
 	// FOV Change
 	float fov = m_camera->GetFOV();
 
-	return CameraState( cameraPosition, cameraOrientation, fov );
+	return CameraState( Vector3::ZERO, cameraPosition, cameraOrientation, fov );
 }

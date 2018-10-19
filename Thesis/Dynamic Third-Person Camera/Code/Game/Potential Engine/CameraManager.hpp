@@ -11,7 +11,6 @@
 #include "Game/Potential Engine/CameraState.hpp"
 #include "Game/Potential Engine/CameraContext.hpp"
 
-
 struct CustomCameraConstarinCompare
 {
 	// Such that top element is the lowest priority, and bottom is the highest priority
@@ -32,6 +31,9 @@ public:
 	~CameraManager();
 
 private:
+	// Current Camera State
+	CameraState				 m_currentCameraState;
+
 	// Camera Context
 	InputSystem				&m_inputSystem;				// Current input system
 	Camera					&m_camera;					// Possessed Camera
@@ -60,11 +62,12 @@ public:
 	void PostUpdate();
 
 public:
+	CameraState		GetCurrentCameraState() const;
+
 	// Context
 	void			SetAnchor( GameObject *anchor );
 	void			SetRaycastCallback( raycast_std_func raycastFunction );
 	void			SetSphereCollisionCallback( sphere_collision_func collisionFunction );
-	float			GetCameraRadius() const;
 	CameraContext	GetCameraContext() const;
 	
 	// Behaviours
@@ -79,6 +82,7 @@ public:
 	void EnableConstrains	( bool enable = true );
 
 private:
+	void UpdateCameraState( float deltaSeconds, CameraState newState );
 	void ResetActivateConstrainsFromTags ( Tags const &constrainsToActivate );
 
 private:

@@ -57,10 +57,8 @@ void CameraManager::Update( float deltaSeconds )
 		m_behaviourTransitionTimeRemaining -= deltaSeconds;
 	}
 
-	// Sets properties of the camera
-	m_camera.SetFOVForPerspective( updatedCameraState.m_fov );
-	m_camera.SetCameraPositionTo ( updatedCameraState.m_position );
-	m_camera.SetCameraQuaternionRotationTo( updatedCameraState.m_orientation );
+	// Update the current state
+	UpdateCameraState( deltaSeconds, updatedCameraState );
 }
 
 void CameraManager::PreUpdate()
@@ -71,6 +69,11 @@ void CameraManager::PreUpdate()
 void CameraManager::PostUpdate()
 {
 	m_aciveBehaviour->PostUpdate();
+}
+
+CameraState CameraManager::GetCurrentCameraState() const
+{
+	return m_currentCameraState;
 }
 
 void CameraManager::SetAnchor( GameObject *anchor )
@@ -88,14 +91,9 @@ void CameraManager::SetSphereCollisionCallback( sphere_collision_func collisionF
 	m_collisionCB = collisionFunction;
 }
 
-float CameraManager::GetCameraRadius() const
-{
-	return m_cameraRadius;
-}
-
 CameraContext CameraManager::GetCameraContext() const
 {
-	return CameraContext( m_anchor->m_transform.GetWorldPosition(), m_raycastCB, m_collisionCB );
+	return CameraContext( m_anchor->m_transform.GetWorldPosition(), m_raycastCB, m_cameraRadius, m_collisionCB );
 }
 
 int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )
@@ -160,32 +158,6 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 	ResetActivateConstrainsFromTags( constrainsToActivate );
 }
 
-/*
-	// To cache elements of the priority queue
-	CameraConstrainPriorityQueue cachedQueue;
-	
-	// Delete if this constrain already exists
-	while ( m_registeredConstrains.size() > 0 )
-	{
-		CameraConstrain *thisConstrain( m_registeredConstrains.top() );
-		m_registeredConstrains.pop();
-		
-		if( thisConstrain->m_name == newConstrain->m_name )
-		{
-			delete thisConstrain;
-			thisConstrain = nullptr;
-		}
-		else
-			cachedQueue.push( thisConstrain );
-	}
-	
-	// Add new constrain
-	cachedQueue.push( newConstrain );
-	
-	// Swap the updated contents of cached queue to original one
-	std::swap( cachedQueue, m_registeredConstrains );
-*/
-
 void CameraManager::RegisterConstrain( CameraConstrain* newConstrain )
 {
 	// Delete if we have a registered constrain of the same name..
@@ -224,6 +196,23 @@ void CameraManager::DeregisterConstrain( char const *name )
 void CameraManager::EnableConstrains( bool enable /*= true */ )
 {
 	m_constrainsEnabled = enable;
+}
+
+void CameraManager::UpdateCameraState( float deltaSeconds, CameraState newState )
+{
+	// Update position with velocity
+	newState.m_position += newState.m_velocity * deltaSeconds;
+
+	// Sets properties of the camera
+	m_camera.SetFOVForPerspective( newState.m_fov );
+	m_camera.SetCameraPositionTo ( newState.m_position );
+	m_camera.SetCameraQuaternionRotationTo( newState.m_orientation );
+
+	// Reset the velocity
+	newState.m_velocity = Vector3::ZERO;
+	
+	// Store off the current state
+	m_currentCameraState = newState;
 }
 
 void CameraManager::ResetActivateConstrainsFromTags( Tags const &constrainsToActivate )
