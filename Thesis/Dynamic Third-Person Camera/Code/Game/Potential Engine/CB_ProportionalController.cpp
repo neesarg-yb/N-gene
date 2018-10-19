@@ -117,9 +117,10 @@ CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState c
 	Vector3 suggestVelocity	= diffInPosition * m_controllingFactor;
 	if( m_mpcEnabled )
 	{
+		float leadFactor = 3.f;
 		// Modified PC
 		CameraContext context = m_manager.GetCameraContext();
-		suggestVelocity += context.anchorGameObject->m_velocity;
+		suggestVelocity += (context.anchorGameObject->m_velocity) * leadFactor;
 	}
 
 	// Control exit characteristics

@@ -308,11 +308,6 @@
     <ClCompile Include="World\Terrain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
-      <Project>{e0fa82ef-eac2-4365-850a-8401eec91ca0}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Abstract Classes\GameState.hpp" />
     <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />
@@ -385,6 +380,11 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
+      <Project>{e0fa82ef-eac2-4365-850a-8401eec91ca0}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
