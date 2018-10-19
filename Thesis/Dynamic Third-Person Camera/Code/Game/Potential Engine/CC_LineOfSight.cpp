@@ -19,7 +19,7 @@ void CC_LineOfSight::Execute( CameraState &suggestedCameraState )
 	CameraContext context = m_manager.GetCameraContext();
 
 	// Player's Position
-	Vector3 playerPosition = context.playerPosition;
+	Vector3 playerPosition = context.anchorGameObject->m_transform.GetWorldPosition();
 
 	// Move the CameraState until we get clear line of sight
 	bool hasClearLineOfSight = false;

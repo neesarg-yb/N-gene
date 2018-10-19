@@ -4,7 +4,7 @@
 class CB_FreeLook : public CameraBehaviour
 {
 public:
-	 CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName );
+	 CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager const &manager );
 	~CB_FreeLook();
 
 public:

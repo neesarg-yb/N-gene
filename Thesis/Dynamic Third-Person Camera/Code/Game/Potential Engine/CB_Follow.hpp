@@ -4,7 +4,7 @@
 class CB_Follow : public CB_DegreesOfFreedom
 {
 public:
-	 CB_Follow(  float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name = "Follow" );
+	 CB_Follow(  float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const &manager );
 	~CB_Follow();
 
 private:

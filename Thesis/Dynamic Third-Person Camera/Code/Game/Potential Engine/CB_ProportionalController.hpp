@@ -4,7 +4,7 @@
 class CB_ProportionalController : public CB_DegreesOfFreedom
 {
 public:
-	 CB_ProportionalController( char const *name );
+	 CB_ProportionalController( char const *name, CameraManager const &manager );
 	~CB_ProportionalController();
 
 private:
@@ -30,7 +30,9 @@ private:
 	float		m_fov						= m_goalState.m_fov;
 
 	// Proportional Controller
-	float		m_controllingFraction		= 8.5f;
+	bool		m_mpcEnabled				= false;
+	float		m_controllingFactor			= 8.5f;
+	float		m_accelerationLimit			= 35.f;							// Units per second^2
 
 public:
 	void		PreUpdate();

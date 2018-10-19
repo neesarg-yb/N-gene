@@ -5,10 +5,12 @@
 #include "Game/Potential Engine/GameObject.hpp"
 #include "Game/Potential Engine/CameraState.hpp"
 
+class CameraManager;
+
 class CameraBehaviour
 {
 public:
-			 CameraBehaviour( std::string const &behaviourName );
+			 CameraBehaviour( std::string const &behaviourName, CameraManager const &manager );
 	virtual ~CameraBehaviour();
 
 public:
@@ -17,6 +19,9 @@ public:
 	GameObject	const		*m_anchor		= nullptr;
 	InputSystem				*m_inputSystem	= nullptr;
 	Tags					 m_constrains;	// Which constrains to apply by Camera Manager
+
+protected:
+	CameraManager const		&m_manager;
 
 public:
 	virtual void			PreUpdate () = 0;

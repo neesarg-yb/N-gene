@@ -1,8 +1,8 @@
 #pragma once
 #include "CB_Follow.hpp"
 
-CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name /*= "Follow" */ )
-	: CB_DegreesOfFreedom( name )
+CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const &manager )
+	: CB_DegreesOfFreedom( name, manager )
 	, m_rotationSpeed( rotationSpeed )
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )
 {

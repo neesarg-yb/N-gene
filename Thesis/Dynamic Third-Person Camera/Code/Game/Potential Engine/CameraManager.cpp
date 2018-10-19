@@ -93,7 +93,7 @@ void CameraManager::SetSphereCollisionCallback( sphere_collision_func collisionF
 
 CameraContext CameraManager::GetCameraContext() const
 {
-	return CameraContext( m_anchor->m_transform.GetWorldPosition(), m_raycastCB, m_cameraRadius, m_collisionCB );
+	return CameraContext( m_anchor, m_raycastCB, m_cameraRadius, m_collisionCB );
 }
 
 int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )
@@ -207,9 +207,6 @@ void CameraManager::UpdateCameraState( float deltaSeconds, CameraState newState 
 	m_camera.SetFOVForPerspective( newState.m_fov );
 	m_camera.SetCameraPositionTo ( newState.m_position );
 	m_camera.SetCameraQuaternionRotationTo( newState.m_orientation );
-
-	// Reset the velocity
-	newState.m_velocity = Vector3::ZERO;
 	
 	// Store off the current state
 	m_currentCameraState = newState;

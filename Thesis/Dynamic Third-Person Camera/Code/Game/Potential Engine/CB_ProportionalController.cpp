@@ -3,9 +3,11 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/Potential Engine/CameraContext.hpp"
+#include "Game/Potential Engine/CameraManager.hpp"
 
-CB_ProportionalController::CB_ProportionalController( char const *name )
-	: CB_DegreesOfFreedom( name )
+CB_ProportionalController::CB_ProportionalController( char const *name, CameraManager const &manager )
+	: CB_DegreesOfFreedom( name, manager )
 {
 
 }
@@ -19,16 +21,36 @@ void CB_ProportionalController::PreUpdate()
 {
 	// Change controlling fraction as per input
 	if( g_theInput->IsKeyPressed( UP ) )
-		m_controllingFraction += 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_controllingFactor += 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->IsKeyPressed( DOWN ) )
-		m_controllingFraction -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_controllingFactor -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+	if( g_theInput->IsKeyPressed( RIGHT ) )
+		m_accelerationLimit += 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+	if( g_theInput->IsKeyPressed( LEFT ) )
+		m_accelerationLimit -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+	if( g_theInput->WasKeyJustPressed( 'M' ) )
+		m_mpcEnabled = !m_mpcEnabled;
 }
 
 void CB_ProportionalController::PostUpdate()
 {
 	// Print it on Debug Screen
-	std::string controllingFractionStr = Stringf( "Controlling Fraction(PC) = %f", m_controllingFraction );
-	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
+	std::string pcTypeString = Stringf( "Currently Active: %s", m_mpcEnabled ? "MPC" : "PC" );
+	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, pcTypeString.c_str() );
+	std::string mpcEnableStr = "Press [M] to enable toggle MPC";
+	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, mpcEnableStr.c_str() );
+	std::string upDownStr = "Press [UP] [DOWN] to change controlling factor.";
+	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, upDownStr.c_str() );
+	std::string leftRightStr = "Press [Right] [LEFT] to change acceleration limit.";
+	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, leftRightStr.c_str() );
+
+	// Controlling Factor
+	std::string controllingFractionStr = Stringf( "%-20s = %f", "Controlling Factor", m_controllingFactor );
+	DebugRender2DText( 0.f, Vector2(-850.f, 380.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
+
+	// Acceleration Limit
+	std::string accelerationLimitStr = Stringf( "%-20s = %f", "Acceleration Limit", m_accelerationLimit );
+	DebugRender2DText( 0.f, Vector2(-850.f, 360.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, accelerationLimitStr.c_str() );
 }
 
 CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState const &currentState )
@@ -92,11 +114,31 @@ CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState c
 
 	// Proportional Controller
 	Vector3 diffInPosition	= m_goalState.m_position - currentState.m_position;
-	Vector3 suggestVelocity	= diffInPosition * m_controllingFraction;
+	Vector3 suggestVelocity	= diffInPosition * m_controllingFactor;
+	if( m_mpcEnabled )
+	{
+		// Modified PC
+		CameraContext context = m_manager.GetCameraContext();
+		suggestVelocity += context.anchorGameObject->m_velocity;
+	}
+
+	// Control exit characteristics
+	Vector3 deltaVelocity;
+	Vector3 differenceInVelocity = suggestVelocity - currentState.m_velocity;
+	float	maxDeltaVelocity	 = m_accelerationLimit * deltaSeconds;
+	float	velocityDiffLength	 = differenceInVelocity.GetLength();
+	if( velocityDiffLength < maxDeltaVelocity )
+	{
+		deltaVelocity = differenceInVelocity;
+	}
+	else
+	{
+		deltaVelocity = (differenceInVelocity / velocityDiffLength) * maxDeltaVelocity;
+	}
 
 	CameraState goalStateWithVelocity( m_goalState );
 	goalStateWithVelocity.m_position = currentState.m_position;		// Do not move directly, let velocity move position
-	goalStateWithVelocity.m_velocity = suggestVelocity;
+	goalStateWithVelocity.m_velocity = currentState.m_velocity + deltaVelocity;
 
 	return goalStateWithVelocity;
 }
