@@ -25,8 +25,10 @@ void CB_FreeLook::PostUpdate()
 
 }
 
-CameraState CB_FreeLook::Update( float deltaSeconds )
+CameraState CB_FreeLook::Update( float deltaSeconds, CameraState const &currentState )
 {
+	UNUSED( currentState );
+
 	// Input from Xbox Controller
 	XboxController &controller	 = m_inputSystem->m_controller[0];
 	Vector2			leftStick	 = controller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;

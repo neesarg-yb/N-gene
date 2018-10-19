@@ -21,7 +21,7 @@ public:
 public:
 	virtual void			PreUpdate () = 0;
 	virtual void			PostUpdate() = 0;
-	virtual CameraState		Update( float deltaSeconds ) = 0;
+	virtual CameraState		Update( float deltaSeconds, CameraState const &currentState ) = 0;
 
 public:
 	void SetCameraAnchorAndInputSystemTo( Camera *camera, GameObject *anchor, InputSystem *input );

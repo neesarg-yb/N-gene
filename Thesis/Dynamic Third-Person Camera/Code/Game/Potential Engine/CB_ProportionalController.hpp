@@ -1,16 +1,13 @@
 #pragma once
 #include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
 
-class CB_Follow : public CB_DegreesOfFreedom
+class CB_ProportionalController : public CB_DegreesOfFreedom
 {
 public:
-	 CB_Follow(  float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name = "Follow" );
-	~CB_Follow();
+	 CB_ProportionalController( char const *name );
+	~CB_ProportionalController();
 
 private:
-	// Limits
-	FloatRange	m_pitchRange				= FloatRange( -60.f, 35.f );	// In Degrees
-
 	// Speed - To change variables by
 	float		m_rotationSpeed				= 20.f;							// Degrees per Second
 	float const	m_distanceChangeSpeed		= 3.5f;
@@ -29,8 +26,11 @@ private:
 	// Field of View
 	float		m_fov						= m_goalState.m_fov;
 
+	// Proportional Controller
+	float		m_controllingFraction		= 8.5f;
+
 public:
-	void		PreUpdate()  { }
-	void		PostUpdate() { }
-	CameraState Update( float deltaSeconds, CameraState const &currentState );
+	void		PreUpdate();
+	void		PostUpdate();
+	CameraState	Update( float deltaSeconds, CameraState const &currentState );
 };

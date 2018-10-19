@@ -1,32 +1,51 @@
 #pragma once
-#include "CB_Follow.hpp"
+#include "CB_ProportionalController.hpp"
+#include "Engine/Core/Clock.hpp"
+#include "Engine/Core/StringUtils.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 
-CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name /*= "Follow" */ )
+CB_ProportionalController::CB_ProportionalController( char const *name )
 	: CB_DegreesOfFreedom( name )
-	, m_rotationSpeed( rotationSpeed )
-	, m_pitchRange( minPitchAngle, maxPitchAnngle )
-{
-	// Radius of spherical coordinate == Distance from Anchor
-	m_distanceFromAnchor = distFromAnchor;
-}
-
-CB_Follow::~CB_Follow()
 {
 
 }
 
-CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentState )
+CB_ProportionalController::~CB_ProportionalController()
 {
-	UNUSED( currentState );
 
+}
+
+void CB_ProportionalController::PreUpdate()
+{
+
+}
+
+void CB_ProportionalController::PostUpdate()
+{
+	// Change controlling fraction as per input
+	if( g_theInput->WasKeyJustPressed( UP ) )
+		m_controllingFraction += 1.f;
+	if( g_theInput->WasKeyJustPressed( DOWN ) )
+		m_controllingFraction -= 1.f;
+
+	// Clamp it to [0, 1]
+//	m_controllingFraction = ClampFloat01( m_controllingFraction );
+
+	// Print it on Debug Screen
+	std::string controllingFractionStr = Stringf( "Controlling Fraction(PC) = %f", m_controllingFraction );
+	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
+}
+
+CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState const &currentState )
+{
 	// Get input from Xbox Controller
 	XboxController &controller = m_inputSystem->m_controller[0];
-	
+
 	Vector2 rightStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;		// For Rotation
-	
+
 	bool leftShoulderPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown;				// For change in Distance from Anchor
 	bool rightShoulderPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
-	
+
 	bool dPadUp		= controller.m_xboxButtonStates[ XBOX_BUTTON_UP ].keyIsDown;							// For Offset change
 	bool dPadDown	= controller.m_xboxButtonStates[ XBOX_BUTTON_DOWN ].keyIsDown;
 	bool dPadRight	= controller.m_xboxButtonStates[ XBOX_BUTTON_RIGHT ].keyIsDown;
@@ -34,7 +53,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 
 	float leftTrigger	= controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];								// For the FOV change
 	float rightTrigger	= controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
-	
+
 
 	// Distance from Anchor
 	float distanceChange	 = 0.f;
@@ -47,10 +66,6 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	float altitudeChange	 = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
 	m_rotationAroundAnchor	+= rotationChange;
 	m_altitudeAroundAnchor	+= altitudeChange;
-
-	// Clamp the Altitude
-	float clampedAltitude	= ClampFloat( m_altitudeAroundAnchor, m_pitchRange.min, m_pitchRange.max );
-	m_altitudeAroundAnchor	= clampedAltitude;
 
 	// Vertical Offset
 	float verticalOffsetChange	 = 0.f;
@@ -74,6 +89,15 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	SetOrientationToLookAtAnchor();
 	SetOffsetToWorldPosition( m_localHorizontalOffset, m_localVerticalOffset );
 	SetFOV( m_fov );
-	
-	return m_goalState;
+
+
+	// Proportional Controller
+	Vector3 diffInPosition	= m_goalState.m_position - currentState.m_position;
+	Vector3 suggestVelocity	= diffInPosition * m_controllingFraction;
+
+	CameraState goalStateWithVelocity( m_goalState );
+	goalStateWithVelocity.m_position = currentState.m_position;		// Do not move directly, let velocity move position
+	goalStateWithVelocity.m_velocity = suggestVelocity;
+
+	return goalStateWithVelocity;
 }

@@ -212,6 +212,9 @@ void theApp::BeginFrame() {
 	// Profiler MarkFrame
 	Profiler::GetInstance()->MarkFrame();
 
+	// Inform the Clock about frame
+	TickMasterClock();
+
 	g_theInput->BeginFrame();
 	g_theRenderer->BeginFrame();
 	g_theGame->BeginFrame();

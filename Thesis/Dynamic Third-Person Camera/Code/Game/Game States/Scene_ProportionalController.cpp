@@ -5,6 +5,7 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
+#include "Game/Potential Engine/CB_ProportionalController.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
 #include "Game/Potential Engine/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
@@ -62,8 +63,10 @@ Scene_ProportionalController::Scene_ProportionalController()
 	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook" );
 	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow" );
+	CameraBehaviour* pcBehaviour		= new CB_ProportionalController( "PC" );
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
+	m_cameraManager->AddNewCameraBehaviour( pcBehaviour );
 
 	// Camera Constrains
 	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
@@ -72,7 +75,7 @@ Scene_ProportionalController::Scene_ProportionalController()
 	m_cameraManager->RegisterConstrain( collisionConstrain );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+	m_cameraManager->SetActiveCameraBehaviourTo( "PC" );
 }
 
 Scene_ProportionalController::~Scene_ProportionalController()
@@ -80,6 +83,7 @@ Scene_ProportionalController::~Scene_ProportionalController()
 	// Camera Behaviour
 	m_cameraManager->DeleteCameraBehaviour( "Follow" );
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
+	m_cameraManager->DeleteCameraBehaviour( "PC" );
 
 	// Camera Manager
 	delete m_cameraManager;

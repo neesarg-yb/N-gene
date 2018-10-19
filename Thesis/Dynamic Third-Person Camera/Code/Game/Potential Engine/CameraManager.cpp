@@ -25,7 +25,7 @@ CameraManager::~CameraManager()
 
 void CameraManager::Update( float deltaSeconds )
 {
-	m_lastSuggestedState = m_aciveBehaviour->Update( deltaSeconds );
+	m_lastSuggestedState = m_aciveBehaviour->Update( deltaSeconds, m_currentCameraState );
 
 	// Constrains, if enabled
 	if( m_constrainsEnabled == true )

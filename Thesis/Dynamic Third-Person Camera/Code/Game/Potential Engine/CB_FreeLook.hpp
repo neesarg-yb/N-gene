@@ -13,7 +13,7 @@ public:
 	FloatRange	m_pitchRange	= FloatRange( 30.f, 100.f );
 	
 public:
-	void				PreUpdate();
-	void				PostUpdate();
-	CameraState	Update( float deltaSeconds );
+	void		PreUpdate();
+	void		PostUpdate();
+	CameraState	Update( float deltaSeconds, CameraState const &currentState );
 };

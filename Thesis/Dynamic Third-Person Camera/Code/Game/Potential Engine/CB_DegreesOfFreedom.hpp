@@ -8,12 +8,12 @@ public:
 	~CB_DegreesOfFreedom();
 
 protected:
-	CameraState m_currentState;
+	CameraState m_goalState;
 
 public:
 	void		PreUpdate () = 0;
 	void		PostUpdate() = 0;
-	CameraState	Update( float deltaSeconds ) = 0;
+	CameraState	Update( float deltaSeconds, CameraState const &currentState ) = 0;
 
 protected:
 	// Set the Current CameraState

@@ -19,31 +19,31 @@ void CB_DegreesOfFreedom::SetWorldPosition( float distanceFromAnchor, float rota
 	Vector3 relativeCameraPosition	= GetPositionFromSpericalCoordinate( distanceFromAnchor, rotationInDegrees, altitudeInDegrees );
 	Vector3 worldCameraPosition		= anchorWorldPosition + relativeCameraPosition;
 
-	m_currentState.m_position		= worldCameraPosition;
+	m_goalState.m_position			= worldCameraPosition;
 }
 
 void CB_DegreesOfFreedom::SetOrientationToLookAtAnchor()
 {
 	TODO( "Find out: Why cameraOrientation.GetInverse() works?!" );
 	Vector3		anchorWorldPosition	= m_anchor->m_transform.GetWorldPosition();
-	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition, m_currentState.m_position );
+	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition, m_goalState.m_position );
 	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix ).GetInverse();
 
-	m_currentState.m_orientation	= cameraOrientation;
+	m_goalState.m_orientation		= cameraOrientation;
 }
 
 void CB_DegreesOfFreedom::SetOffsetToWorldPosition( float localHorizontalOffset, float localVerticalOffset )
 {
-	Vector3 rightOfCameraInWorld = m_currentState.m_orientation.RotatePoint( Vector3::RIGHT );
-	Vector3 upOfCameraInWorld	 = m_currentState.m_orientation.RotatePoint( Vector3::UP );
+	Vector3 rightOfCameraInWorld = m_goalState.m_orientation.RotatePoint( Vector3::RIGHT );
+	Vector3 upOfCameraInWorld	 = m_goalState.m_orientation.RotatePoint( Vector3::UP );
 	Vector3 worldPositionOffset	 = ( rightOfCameraInWorld * localHorizontalOffset ) + ( upOfCameraInWorld * localVerticalOffset );
 
-	m_currentState.m_position	+= worldPositionOffset;
+	m_goalState.m_position		+= worldPositionOffset;
 }
 
 void CB_DegreesOfFreedom::SetFOV( float cameraFOV )
 {
-	m_currentState.m_fov = cameraFOV;
+	m_goalState.m_fov = cameraFOV;
 }
 
 Vector3 CB_DegreesOfFreedom::GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude )
