@@ -19,6 +19,18 @@ NetworkConnection::~NetworkConnection()
 
 }
 
+void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
+{
+	m_lastReceivedTimeHPC = Clock::GetCurrentHPC();
+
+	// Update received acks
+	if( receivedPacketHeader.ack != INVALID_PACKET_ACK )
+	{
+		// TODO: Update my last received size;
+		// ...
+	}
+}
+
 void NetworkConnection::Send( NetworkMessage &msg )
 {
 	// Set the header
@@ -81,6 +93,9 @@ void NetworkConnection::FlushMessages()
 	{
 		m_parentSession.SendPacket( thisPacket );
 		IncrementSentAck();
+
+		// Update Analytics
+		m_lastSendTimeHPC = Clock::GetCurrentHPC();
 	}
 }
 

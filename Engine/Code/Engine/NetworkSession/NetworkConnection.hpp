@@ -4,9 +4,10 @@
 #include "Engine/Network/NetworkAddress.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 
-#define INVALID_PACKET_ACK (0x0000)
+#define INVALID_PACKET_ACK (0xffff)
 
-class NetworkSession;
+class  NetworkSession;
+struct NetworkPacketHeader;
 
 typedef std::vector< NetworkMessage* > NetworkMessages;
 
@@ -24,14 +25,16 @@ public:
 
 private:
 	// Packet Tracking
-	uint16_t			 m_nextSentAck					= INVALID_PACKET_ACK;	// Sending		- Updated during a flush
-	uint16_t			 m_lastReceivedAck				= INVALID_PACKET_ACK;	// Receiving	- Updated during process packet
+	uint16_t			 m_nextSentAck					= INVALID_PACKET_ACK;		// Sending		- Updated during a flush
+	uint16_t			 m_lastReceivedAck				= INVALID_PACKET_ACK;		// Receiving	- Updated during process packet
 	uint16_t			 m_previousReceivedAckBitfield	= 0U;
-	uint16_t			 m_lastSendTime_ms;										// Analytics
-	uint16_t			 m_lastReceivedTime_ms;
 
-	float				 m_loss	= 0.f;											// Loss rate we perceive to this connection
-	float				 m_rtt	= 0.f;											// Latency perceived on this connection
+public:
+	uint64_t			 m_lastSendTimeHPC				= Clock::GetCurrentHPC();	// Analytics
+	uint64_t			 m_lastReceivedTimeHPC			= Clock::GetCurrentHPC();
+
+	float				 m_loss	= 0.f;												// Loss rate we perceive to this connection
+	float				 m_rtt	= 0.f;												// Latency perceived on this connection
 
 private:
 	// Outgoing Messages
@@ -44,6 +47,8 @@ private:
 	Stopwatch			 m_heartbeatTimer;				// To send heartbeat regularly
 
 public:
+	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );
+
 	void	Send( NetworkMessage &msg );
 	void	FlushMessages();
 
