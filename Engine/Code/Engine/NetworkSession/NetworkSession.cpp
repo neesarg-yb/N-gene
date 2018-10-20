@@ -127,10 +127,14 @@ void NetworkSession::Render() const
 		std::string lossPercentStr = "X.XX";
 
 		// lrcv(s)
-		std::string lrcvStr = "XX.XXX";
+		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_connections[i]->m_lastReceivedTimeHPC;
+		double	 lastReceivedDeltaSec = Clock::GetSecondsFromHPC( lastReceivedDeltaHPC );
+		std::string lrcvStr = Stringf( "%.3f", lastReceivedDeltaSec);
 
 		// lsnt(s)
-		std::string lsntStr = "X.XXX";
+		uint64_t lastSentDeltaHPC = Clock::GetCurrentHPC() - m_connections[i]->m_lastSendTimeHPC;
+		double	 lastSentDeltaSec = Clock::GetSecondsFromHPC( lastSentDeltaHPC );
+		std::string lsntStr = Stringf( "%.3f", lastSentDeltaSec);
 
 		// sntack
 		std::string sntackSrt = "XX";
@@ -400,6 +404,16 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 		bool headerReadingSuccess = packet->ReadHeader( packet->m_header );
 		GUARANTEE_RECOVERABLE( headerReadingSuccess, "Couldn't read the Packet Header successfully!" );
 
+		// Inform the connection about received packet
+		uint8_t receivedConnIdx = packet->m_header.connectionIndex;
+		if( receivedConnIdx != 0xff )
+		{
+			NetworkConnection *receivedForConnection = m_connections[ receivedConnIdx ];
+			if( receivedForConnection != nullptr )
+				receivedForConnection->OnReceivePacket( packet->m_header );
+		}
+
+		// Process each messages
 		NetworkMessage receivedMessage;
 		for( int i = 0; i < packet->m_header.messageCount; i++ )
 		{
@@ -418,11 +432,10 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 
 				// Create a NetworkSender
 				NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
-				uint8_t receivedConnIdx = packet->m_header.connectionIndex;
 				if( receivedConnIdx != 0xff )
 					thisSender.connection = m_connections[ packet->m_header.connectionIndex ];		// If sender has a valid connection, fill it in
 
-																											// Do a callback!
+				// Do a callback!
 				receivedMessage.m_definition->callback( receivedMessage, thisSender );
 			}
 			else

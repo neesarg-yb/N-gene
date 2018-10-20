@@ -2,6 +2,7 @@
 #include <vector>
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
+#include "Engine/NetworkSession/NetworkConnection.hpp"
 
 class NetworkPacket;
 typedef std::vector< NetworkPacket* > NetworkPacketList;
@@ -13,9 +14,9 @@ public:
 	uint8_t messageCount	= 0x00;
 
 	// Acknowledgment
-	uint16_t ack;
-	uint16_t lastReceivedAck;
-	uint16_t previouslyReceivedAckBitfield;
+	uint16_t ack							= INVALID_PACKET_ACK;
+	uint16_t lastReceivedAck				= INVALID_PACKET_ACK;
+	uint16_t previouslyReceivedAckBitfield	= 0U;
 
 public:
 	NetworkPacketHeader() { }
@@ -42,9 +43,9 @@ public:
 
 //	Buffer:
 //	                                                                                                  total size <= MTU
-//	|-------------------------------------------------------------------------------------------------------------------
+//	|----------------------------------------------------------------------------------------------------------------------
 //	| PacketHeader: ( 1 byte: SenderIdx  | 1 byte: UnreliableMessageCount | .. ) | PackedMessage_1 | PackedMessage_2.. | ..
-//	|-------------------------------------------------------------------------------------------------------------------
+//	|----------------------------------------------------------------------------------------------------------------------
 //
 //  Packed Message:
 //	|----------------------------------------------------------------------------------
