@@ -1,10 +1,10 @@
 #pragma once#
 #include <vector>
+#include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/Stopwatch.hpp"
 #include "Engine/Network/NetworkAddress.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
-
-#define INVALID_PACKET_ACK (0xffff)
+#include "Engine/NetworkSession/NetworkPacket.hpp"
 
 class  NetworkSession;
 struct NetworkPacketHeader;
@@ -26,8 +26,10 @@ public:
 private:
 	// Packet Tracking
 	uint16_t			 m_nextSentAck					= INVALID_PACKET_ACK;		// Sending		- Updated during a flush
-	uint16_t			 m_lastReceivedAck				= INVALID_PACKET_ACK;		// Receiving	- Updated during process packet
-	uint16_t			 m_previousReceivedAckBitfield	= 0U;
+	uint16_t			 m_highestReceivedAck			= INVALID_PACKET_ACK;		// Receiving	- Updated during process packet
+
+public:
+	uint16_t			 m_receivedAcksBitfield			= 0U;
 
 public:
 	uint64_t			 m_lastSendTimeHPC				= Clock::GetCurrentHPC();	// Analytics
@@ -41,6 +43,9 @@ private:
 	uint8_t				 m_sendFrequency = 0xff;		// Defaults to max frequency: 255hz 
 	NetworkMessages		 m_outgoingUnreliableMessages;	// Unreliable messages, for now
 
+	// Tracking the packets
+	PacketTracker		 m_packetTrackers[ MAX_TRACKED_PACKETS ];
+
 private:
 	// Timers
 	Stopwatch			 m_sendRateTimer;				// To simulate send frequency
@@ -48,6 +53,7 @@ private:
 
 public:
 	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );
+	void	ConfirmPacketReceived( uint16_t ack );
 
 	void	Send( NetworkMessage &msg );
 	void	FlushMessages();
@@ -59,4 +65,6 @@ public:
 private:
 	uint16_t GetNextAckToSend();
 	void	 IncrementSentAck();
+
+	PacketTracker*	AddTrackedPacket( uint16_t ack );
 };

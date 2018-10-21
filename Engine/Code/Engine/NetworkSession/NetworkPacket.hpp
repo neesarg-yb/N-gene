@@ -1,11 +1,40 @@
 #pragma once
 #include <vector>
+#include "Engine/Core/Clock.hpp"
+#include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
-#include "Engine/NetworkSession/NetworkConnection.hpp"
 
 class NetworkPacket;
 typedef std::vector< NetworkPacket* > NetworkPacketList;
+
+struct PacketTracker
+{
+public:
+	uint16_t ack			= INVALID_PACKET_ACK;
+	uint64_t sentTimeHPC	= Clock::GetCurrentHPC();
+
+public:
+	PacketTracker() { }
+
+	PacketTracker( uint16_t inAck )		// Sets sentTimeHPC as current time
+		: ack( inAck ) { }
+
+	PacketTracker( uint16_t inAck, uint64_t inSentTimeHPC )
+		: ack( inAck )
+		, sentTimeHPC( inSentTimeHPC ) { }
+
+public:
+	void TrackForAck( uint16_t inAck )
+	{
+		ack			= inAck;
+		sentTimeHPC	= Clock::GetCurrentHPC();
+	}
+	void Invalidate()
+	{
+		ack = INVALID_PACKET_ACK;
+	}
+};
 
 struct NetworkPacketHeader
 {
@@ -15,8 +44,8 @@ public:
 
 	// Acknowledgment
 	uint16_t ack							= INVALID_PACKET_ACK;
-	uint16_t lastReceivedAck				= INVALID_PACKET_ACK;
-	uint16_t previouslyReceivedAckBitfield	= 0U;
+	uint16_t highestReceivedAck				= INVALID_PACKET_ACK;
+	uint16_t receivedAcksHistory			= 0U; // Bit field
 
 public:
 	NetworkPacketHeader() { }
