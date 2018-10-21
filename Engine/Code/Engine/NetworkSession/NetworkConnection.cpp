@@ -1,4 +1,5 @@
 #pragma once
+#include <bitset>
 #include "NetworkConnection.hpp"
 #include "Engine/Core/Clock.hpp"
 #include "Engine/NetworkSession/NetworkSession.hpp"
@@ -37,6 +38,8 @@ void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeade
 			// Shift the remaining difference
 			int d = (receivedAck - m_highestReceivedAck) - 1;
 			m_receivedAcksBitfield <<= d;
+
+			m_highestReceivedAck = receivedAck;
 		}
 		else
 		{
@@ -62,26 +65,27 @@ void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeade
 	// Update received acks
 	if( receivedPacketHeader.ack != INVALID_PACKET_ACK )
 	{
-		ConfirmPacketReceived( receivedPacketHeader.ack );
+		ConfirmPacketReceived( receivedPacketHeader.highestReceivedAck );
 
-		// TODO: Update my last received size;
-		// ...
+		std::bitset<16> acksBitField = m_receivedAcksBitfield;
+		for( int i = 0; i < 16; i++ )
+		{
+			bool isReceived = acksBitField.test( i );
+			int  ackToCheck = m_highestReceivedAck - i - 1;
+			if( isReceived && ackToCheck >= 0 )
+				ConfirmPacketReceived( (uint16_t)ackToCheck );
+		}
 
 	}
 }
 
 void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 {
-	// Highest Received Ack
-	if( m_highestReceivedAck != INVALID_PACKET_ACK && ack > m_highestReceivedAck )
-		m_highestReceivedAck = ack;
-
 	// Packet Tracker
-	int idx = ack & MAX_TRACKED_PACKETS;
+	int idx = ack % MAX_TRACKED_PACKETS;
 	PacketTracker &tracker = m_packetTrackers[ idx ];
 	
-	// If this packet is of different ack..
-	if( tracker.ack != ack )
+	if( tracker.ack == INVALID_PACKET_ACK )
 		return;
 
 	// Calculate RTT
@@ -119,12 +123,12 @@ void NetworkConnection::FlushMessages()
 	
 	// Populate messages into thisPacket & its header
 	NetworkPacket		 thisPacket;
-	NetworkPacketHeader &thisHeader				= thisPacket.m_header;
-	thisHeader.messageCount						= 0x00;
-	thisHeader.connectionIndex					= (uint8_t)m_indexInSession;
-	thisHeader.ack								= GetNextAckToSend();
-	thisHeader.highestReceivedAck				= m_highestReceivedAck;
-	thisHeader.receivedAcksHistory				= m_receivedAcksBitfield;
+	NetworkPacketHeader &thisHeader		= thisPacket.m_header;
+	thisHeader.messageCount				= 0x00;
+	thisHeader.connectionIndex			= (uint8_t)m_indexInSession;
+	thisHeader.ack						= GetNextAckToSend();
+	thisHeader.highestReceivedAck		= m_highestReceivedAck;
+	thisHeader.receivedAcksHistory		= m_receivedAcksBitfield;
 	
 	// Reliable Messages
 	// ...
