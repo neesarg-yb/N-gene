@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/Network/NetworkAddress.hpp"
 

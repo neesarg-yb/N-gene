@@ -1,5 +1,6 @@
 #pragma once
 #include "NetworkConnection.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/NetworkSession/NetworkSession.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
@@ -16,19 +17,80 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 
 NetworkConnection::~NetworkConnection()
 {
-
+	
 }
 
 void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
 {
+	// Last Received Time
 	m_lastReceivedTimeHPC = Clock::GetCurrentHPC();
+	
+	uint16_t receivedAck = receivedPacketHeader.ack;
+	if( m_highestReceivedAck != INVALID_PACKET_ACK )
+	{
+		if( receivedAck > m_highestReceivedAck )
+		{
+			// Shift one bit, and mark myself as received
+			m_receivedAcksBitfield <<= 1;
+			m_receivedAcksBitfield |= 0x0001;
+
+			// Shift the remaining difference
+			int d = (receivedAck - m_highestReceivedAck) - 1;
+			m_receivedAcksBitfield <<= d;
+		}
+		else
+		{
+			// Mark bit for the receivedPacket's ack
+			int s = (m_highestReceivedAck - receivedAck) - 1;
+			
+			uint16_t maskBit = 0x0001;
+			maskBit <<= s;
+
+			m_receivedAcksBitfield |= maskBit;
+		}
+	}
+	else
+	{
+		// First ack ever received..
+		// Bit field is 0U, already.
+
+		// We just need to change highest received ack
+		m_highestReceivedAck = receivedAck;
+	}
+
 
 	// Update received acks
 	if( receivedPacketHeader.ack != INVALID_PACKET_ACK )
 	{
+		ConfirmPacketReceived( receivedPacketHeader.ack );
+
 		// TODO: Update my last received size;
 		// ...
+
 	}
+}
+
+void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
+{
+	// Highest Received Ack
+	if( m_highestReceivedAck != INVALID_PACKET_ACK && ack > m_highestReceivedAck )
+		m_highestReceivedAck = ack;
+
+	// Packet Tracker
+	int idx = ack & MAX_TRACKED_PACKETS;
+	PacketTracker &tracker = m_packetTrackers[ idx ];
+	
+	// If this packet is of different ack..
+	if( tracker.ack != ack )
+		return;
+
+	// Calculate RTT
+	uint64_t rttHPC			= Clock::GetCurrentHPC() - tracker.sentTimeHPC;
+	double	 secondsThisRTT	= Clock::GetSecondsFromHPC( rttHPC );
+	m_rtt = (0.9f * m_rtt) + (0.1f * (float)secondsThisRTT);
+	
+	// Invalidate
+	tracker.Invalidate();
 }
 
 void NetworkConnection::Send( NetworkMessage &msg )
@@ -61,8 +123,8 @@ void NetworkConnection::FlushMessages()
 	thisHeader.messageCount						= 0x00;
 	thisHeader.connectionIndex					= (uint8_t)m_indexInSession;
 	thisHeader.ack								= GetNextAckToSend();
-	thisHeader.lastReceivedAck					= m_lastReceivedAck;
-	thisHeader.previouslyReceivedAckBitfield	= m_previousReceivedAckBitfield;
+	thisHeader.highestReceivedAck				= m_highestReceivedAck;
+	thisHeader.receivedAcksHistory				= m_receivedAcksBitfield;
 	
 	// Reliable Messages
 	// ...
@@ -91,6 +153,10 @@ void NetworkConnection::FlushMessages()
 	// Send if not empty
 	if( thisPacket.HasMessages() )
 	{
+		// Track the packet
+		AddTrackedPacket( thisPacket.m_header.ack );
+
+		// Send it
 		m_parentSession.SendPacket( thisPacket );
 		IncrementSentAck();
 
@@ -142,3 +208,12 @@ void NetworkConnection::IncrementSentAck()
 {
 	m_nextSentAck++;
 }
+
+PacketTracker* NetworkConnection::AddTrackedPacket( uint16_t ack )
+{
+	int index = ack % MAX_TRACKED_PACKETS;
+	m_packetTrackers[ index ].TrackForAck( ack );
+
+	return &m_packetTrackers[ index ];
+}
+

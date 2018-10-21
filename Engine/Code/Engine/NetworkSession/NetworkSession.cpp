@@ -1,5 +1,6 @@
 #pragma once
 #include "NetworkSession.hpp"
+#include <bitset>
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
@@ -96,7 +97,7 @@ void NetworkSession::Render() const
 	// Title Column of Table: All Connections
 	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
 	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(ms)", "loss(%)", "lrcv(s)", "lsnt(s)", "sntack", "rcvack", "rcvbits" );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "sntack", "rcvack", "rcvbits" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -120,8 +121,8 @@ void NetworkSession::Render() const
 		// simsndrt(hz)
 		std::string simsndrt = Stringf( "%dhz", m_connections[i]->GetCurrentSendFrequency() );
 
-		// rtt(ms)
-		std::string rttStr = "X.XX";
+		// rtt(s)
+		std::string rttStr = Stringf( "%.3f", m_connections[i]->m_rtt );
 
 		// loss(%)
 		std::string lossPercentStr = "X.XX";
@@ -143,7 +144,8 @@ void NetworkSession::Render() const
 		std::string rcvackStr = "XXXXX";
 
 		// rcvbits
-		std::string rcvbitsStr = "xxxxxxxxxxxxxxxx";
+		std::bitset< 16 > rcvbit = m_connections[i]->m_receivedAcksBitfield;
+		std::string rcvbitsStr = rcvbit.to_string();
 
 		// Calculate the AABB
 		Vector2	mins = Vector2( columnTitlesBox.mins.x, columnTitlesBox.mins.y - ( ++numOfConnectionDisplayed * (m_uiBodyFontSize * 1.1f) ) );

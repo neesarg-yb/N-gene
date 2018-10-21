@@ -36,6 +36,12 @@ const   float	   g_aspectRatio = 1.77f;
 #define GL_BIND_FUNCTION(f)      wglGetTypedProcAddress( &f, #f )
 
 
+// NETWORK SESSION
+#define MAX_SESSION_CONNECTIONS	(0xff)
+#define INVALID_PACKET_ACK		(0xffff)
+#define MAX_TRACKED_PACKETS		(64)
+
+
 // Use this to deduce type of the pointer so we can cast; 
 template <typename T>
 bool wglGetTypedProcAddress( T *out, char const *name ) 
