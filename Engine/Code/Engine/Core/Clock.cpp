@@ -131,7 +131,7 @@ uint64_t Clock::GetHPCFromMilliSeconds( unsigned int ms )
 {
 	CheckInitalizeSecondsPerClockCycle();
 
-	return (uint64_t)(s_frequency * (ms/1000));
+	return (uint64_t)( (s_frequency * ms) / 1000 );
 }
 
 uint64_t Clock::GetCurrentHPC()
