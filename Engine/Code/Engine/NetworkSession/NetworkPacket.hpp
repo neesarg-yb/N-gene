@@ -38,14 +38,17 @@ public:
 
 struct NetworkPacketHeader
 {
+	// Note!
+	//		Don't forget to update "NETWORK_PACKET_HEADER_SIZE" in Engine/Core/EngineCommon.h
 public:
 	uint8_t connectionIndex	= 0xff;		// When creating a NetworkPacket Idx = receiver's; When NetworkSession sends this packet, it gets replaced by sender's idx
-	uint8_t messageCount	= 0x00;
 
 	// Acknowledgment
 	uint16_t ack							= INVALID_PACKET_ACK;
 	uint16_t highestReceivedAck				= INVALID_PACKET_ACK;
 	uint16_t receivedAcksHistory			= 0U; // Bit field
+
+	uint8_t messageCount	= 0x00;
 
 public:
 	NetworkPacketHeader() { }
@@ -84,10 +87,10 @@ public:
 
 public:
 	void WriteHeader( NetworkPacketHeader const &header );
-	bool ReadHeader ( NetworkPacketHeader &outHeader );
+	bool ReadHeader ( NetworkPacketHeader &outHeader ) const;
 
 	bool WriteMessage( NetworkMessage const &msg );			// Writes the message and updates the header
-	bool ReadMessage ( NetworkMessage &outMessage );		// Fills the m_header for you!
+	bool ReadMessage ( NetworkMessage &outMessage ) const;	// Fills the m_header for you!
 
 	bool IsValid() const;									// Read Head doesn't get affected after this operation
 	bool HasMessages() const;								// If it has at least one message
