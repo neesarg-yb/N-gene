@@ -33,7 +33,7 @@ public:
 	uint64_t			 m_lastSendTimeHPC				= Clock::GetCurrentHPC();	// Analytics
 	uint64_t			 m_lastReceivedTimeHPC			= Clock::GetCurrentHPC();
 
-	float				 m_loss	= 0.f;												// Loss rate we perceive to this connection
+	float				 m_loss	= 0.f;												// [0, 1] Loss rate we perceive to this connection
 	float				 m_rtt	= 0.f;												// Latency perceived on this connection
 
 private:
@@ -65,4 +65,5 @@ private:
 	void	 IncrementSentAck();
 
 	PacketTracker*	AddTrackedPacket( uint16_t ack );
+	bool			IsActivePacketTracker( uint16_t ack );
 };
