@@ -21,25 +21,34 @@ NetworkPacket::~NetworkPacket()
 
 void NetworkPacket::WriteHeader( NetworkPacketHeader const &header )
 {
-	// Change header to LITTLE_ENDIAN
-	NetworkPacketHeader headerLittleEndian = header;
-	ChangeEndiannessTo( sizeof(NetworkPacketHeader), &headerLittleEndian, LITTLE_ENDIAN );
+	// Write header according to individual data variables
+	BytePacker networkHeaderBP( NETWORK_PACKET_HEADER_SIZE, LITTLE_ENDIAN );
+	networkHeaderBP.WriteBytes( sizeof( header.connectionIndex ),		&header.connectionIndex );
+	networkHeaderBP.WriteBytes( sizeof( header.ack ),					&header.ack );
+	networkHeaderBP.WriteBytes( sizeof( header.highestReceivedAck ),	&header.highestReceivedAck );
+	networkHeaderBP.WriteBytes( sizeof( header.receivedAcksHistory ),	&header.receivedAcksHistory );
+	networkHeaderBP.WriteBytes( sizeof( header.messageCount ),			&header.messageCount);
 	
 	// Rewrite it to buffer
-	NetworkPacketHeader *bufferPointer = (NetworkPacketHeader *)m_buffer;
-	bufferPointer[0] = headerLittleEndian;
+	if( GetWrittenByteCount() == 0 )
+		WriteBytes( networkHeaderBP.GetWrittenByteCount(), networkHeaderBP.GetBuffer(), false );
+	else
+		memcpy( m_buffer, networkHeaderBP.GetBuffer(), networkHeaderBP.GetWrittenByteCount() );
 }
 
-bool NetworkPacket::ReadHeader( NetworkPacketHeader &outHeader )
+bool NetworkPacket::ReadHeader( NetworkPacketHeader &outHeader ) const
 {
 	// To start reading from the beginning
 	ResetRead();
 
-	// Read bytes and change it to local ENDIANESS
-	size_t expectedBytes	= sizeof( NetworkPacketHeader );
-	size_t readHeaderBytes	= ReadBytes( &outHeader, expectedBytes );
-
-	return (expectedBytes == readHeaderBytes);
+	size_t totalReadBytes = 0;
+	totalReadBytes += ReadBytes( &outHeader.connectionIndex,		sizeof( outHeader.connectionIndex ) );
+	totalReadBytes += ReadBytes( &outHeader.ack,					sizeof( outHeader.ack ) );
+	totalReadBytes += ReadBytes( &outHeader.highestReceivedAck,		sizeof( outHeader.highestReceivedAck ) );
+	totalReadBytes += ReadBytes( &outHeader.receivedAcksHistory,	sizeof( outHeader.receivedAcksHistory ) );
+	totalReadBytes += ReadBytes( &outHeader.messageCount,			sizeof( outHeader.messageCount ) );
+	
+	return (totalReadBytes == NETWORK_PACKET_HEADER_SIZE);
 }
 
 bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
@@ -48,19 +57,19 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 	// If we didn't write header before, and it is the first message that we are writing
 	size_t bytesWritten = GetWrittenByteCount();
 	if( bytesWritten == 0U )
-		WriteBytes( sizeof( NetworkPacketHeader ), &m_header );															// Write the header
+		WriteHeader( m_header );															// Write the header
 
 	BytePacker messagePacker( LITTLE_ENDIAN );
 
 	size_t messageBytes			 = msg.GetWrittenByteCount();
-	size_t messagePlusHeaderSize = sizeof( NetworkMessageHeader ) + messageBytes;
+	size_t messagePlusHeaderSize = NETWORK_MESSAGE_HEADER_SIZE + messageBytes;
 	uint16_t bytesCountToWrite	 = ((uint16_t)messagePlusHeaderSize);
 
 	// Write bytes-to-read
 	messagePacker.WriteBytes( 2U, &bytesCountToWrite );
 
-	// Write message header
-	messagePacker.WriteBytes( sizeof( NetworkMessageHeader ), &msg.m_header );
+	// Write message header - all the variables, one by one
+	messagePacker.WriteBytes( sizeof(msg.m_header.networkMessageDefinitionIndex), &msg.m_header.networkMessageDefinitionIndex );
 
 	// Write message
 	messagePacker.WriteBytes( messageBytes, msg.GetBuffer(), false );						// false because it is already in LITTLE_ENDIANESS
@@ -84,7 +93,7 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 	}
 }
 
-bool NetworkPacket::ReadMessage( NetworkMessage &outMessage )
+bool NetworkPacket::ReadMessage( NetworkMessage &outMessage ) const
 {
 	// Get Length of Message & Header
 	uint16_t messageAndHeaderLength;
@@ -93,7 +102,7 @@ bool NetworkPacket::ReadMessage( NetworkMessage &outMessage )
 		return false;
 	
 	// Get Header
-	size_t messageHeaderSize = sizeof( NetworkMessageHeader );
+	size_t messageHeaderSize = NETWORK_MESSAGE_HEADER_SIZE;
 	size_t headerBytes		 = ReadBytes( &outMessage.m_header, messageHeaderSize );
 	if( headerBytes != messageHeaderSize )
 		return false;
@@ -123,8 +132,8 @@ bool NetworkPacket::IsValid() const
 
 	// Read PacketHeader
 	NetworkPacketHeader packetHeader;
-	size_t readCount = ReadBytes( &packetHeader, sizeof(NetworkPacketHeader) );
-	if( readCount != sizeof(NetworkPacketHeader) )
+	bool readSuccess = ReadHeader( packetHeader );
+	if( readSuccess == false )
 	{
 		m_readHead = preservedReadHead;
 		return false;

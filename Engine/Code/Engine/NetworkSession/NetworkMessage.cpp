@@ -3,7 +3,7 @@
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
 NetworkMessage::NetworkMessage( const char *name )
-	: BytePacker( PACKET_MTU - sizeof(NetworkPacketHeader) - 2U - sizeof(NetworkMessageHeader) , LITTLE_ENDIAN )
+	: BytePacker( PACKET_MTU - NETWORK_PACKET_HEADER_SIZE - 2U - NETWORK_MESSAGE_HEADER_SIZE , LITTLE_ENDIAN )
 	, m_name( name )
 {
 

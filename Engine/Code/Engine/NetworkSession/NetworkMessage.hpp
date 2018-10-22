@@ -29,6 +29,9 @@ public:
 
 struct NetworkMessageHeader
 {
+	// Note!
+	//		Don't forget to update "NETWORK_MESSAGE_HEADER_SIZE" in Engine/Core/EngineCommon.h
+public:
 	uint8_t networkMessageDefinitionIndex = 0xff;
 };
 
