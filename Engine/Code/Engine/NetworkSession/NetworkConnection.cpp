@@ -62,7 +62,7 @@ void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeade
 		m_highestReceivedAck = receivedAck;
 	}
 
-
+	int lostPackets = 0;
 	// Update received acks
 	if( receivedPacketHeader.ack != INVALID_PACKET_ACK )
 	{
@@ -84,10 +84,20 @@ void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeade
 					ackToCheck = (uint16_t)ackToCheck - 1U;
 
 				if( isReceived )
+				{
 					ConfirmPacketReceived( (uint16_t)ackToCheck );
+				}
+				else if( IsActivePacketTracker( (uint16_t)ackToCheck ) )
+				{
+					lostPackets++;
+				}
 			}
 		}
 	}
+
+	// Trend towards new loss
+	float newLoss = lostPackets / 16.f;
+	m_loss = newLoss;
 }
 
 void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
@@ -232,5 +242,17 @@ PacketTracker* NetworkConnection::AddTrackedPacket( uint16_t ack )
 	m_packetTrackers[ index ].TrackForAck( ack );
 
 	return &m_packetTrackers[ index ];
+}
+
+bool NetworkConnection::IsActivePacketTracker( uint16_t ack )
+{
+	// Packet Tracker
+	int idx = ack % MAX_TRACKED_PACKETS;
+	PacketTracker &tracker = m_packetTrackers[ idx ];
+
+	if( tracker.ack == INVALID_PACKET_ACK )
+		return false;
+	else
+		return true;
 }
 

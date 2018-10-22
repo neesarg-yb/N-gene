@@ -125,7 +125,7 @@ void NetworkSession::Render() const
 		std::string rttStr = Stringf( "%.3f", m_connections[i]->m_rtt );
 
 		// loss(%)
-		std::string lossPercentStr = "X.XX";
+		std::string lossPercentStr = Stringf( "%.2f", m_connections[i]->m_loss * 100.f );
 
 		// lrcv(s)
 		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_connections[i]->m_lastReceivedTimeHPC;
