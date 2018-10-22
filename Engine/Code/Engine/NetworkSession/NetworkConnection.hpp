@@ -23,12 +23,10 @@ public:
 	NetworkSession		&m_parentSession;
 	int					 m_indexInSession;
 
-private:
+public:
 	// Packet Tracking
 	uint16_t			 m_nextSentAck					= INVALID_PACKET_ACK;		// Sending		- Updated during a flush
 	uint16_t			 m_highestReceivedAck			= INVALID_PACKET_ACK;		// Receiving	- Updated during process packet
-
-public:
 	uint16_t			 m_receivedAcksBitfield			= 0U;
 
 public:

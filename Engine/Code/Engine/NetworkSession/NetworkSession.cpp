@@ -97,7 +97,7 @@ void NetworkSession::Render() const
 	// Title Column of Table: All Connections
 	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
 	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "sntack", "rcvack", "rcvbits" );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -137,11 +137,11 @@ void NetworkSession::Render() const
 		double	 lastSentDeltaSec = Clock::GetSecondsFromHPC( lastSentDeltaHPC );
 		std::string lsntStr = Stringf( "%.3f", lastSentDeltaSec);
 
-		// sntack
-		std::string sntackSrt = "XX";
+		// nsntack
+		std::string sntackSrt = Stringf( "%d", m_connections[i]->m_nextSentAck );
 
-		// rcvack
-		std::string rcvackStr = "XXXXX";
+		// hrcvack
+		std::string rcvackStr = Stringf( "%d", m_connections[i]->m_highestReceivedAck );
 
 		// rcvbits
 		std::bitset< 16 > rcvbit = m_connections[i]->m_receivedAcksBitfield;
@@ -152,7 +152,7 @@ void NetworkSession::Render() const
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-6s  %-6s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
 }
