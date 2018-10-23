@@ -33,6 +33,7 @@ private:
 	bool		m_mpcEnabled				= false;
 	float		m_controllingFactor			= 8.5f;
 	float		m_accelerationLimit			= 35.f;							// Units per second^2
+	float		m_leadFactor				= 1.f;
 
 public:
 	void		PreUpdate();

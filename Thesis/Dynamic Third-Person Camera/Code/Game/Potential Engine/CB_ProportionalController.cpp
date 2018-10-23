@@ -30,6 +30,15 @@ void CB_ProportionalController::PreUpdate()
 		m_accelerationLimit -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->WasKeyJustPressed( 'M' ) )
 		m_mpcEnabled = !m_mpcEnabled;
+	if( g_theInput->IsKeyPressed( PAGE_DOWN ) )
+		m_leadFactor -= 2.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+	if( g_theInput->IsKeyPressed( PAGE_UP ) )
+		m_leadFactor += 2.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+
+	// Clamp the factors
+	m_controllingFactor	= (m_controllingFactor < 0.f)	? 0.f : m_controllingFactor;
+	m_accelerationLimit = (m_accelerationLimit < 0.f )	? 0.f : m_accelerationLimit;
+	m_leadFactor		= (m_leadFactor < 0.f)			? 0.f : m_leadFactor;
 }
 
 void CB_ProportionalController::PostUpdate()
@@ -39,18 +48,24 @@ void CB_ProportionalController::PostUpdate()
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, pcTypeString.c_str() );
 	std::string mpcEnableStr = "Press [M] to enable toggle MPC";
 	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, mpcEnableStr.c_str() );
-	std::string upDownStr = "Press [UP] [DOWN] to change controlling factor.";
+	std::string upDownStr = "Press [UP] [DOWN] to change the controlling factor.";
 	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, upDownStr.c_str() );
-	std::string leftRightStr = "Press [Right] [LEFT] to change acceleration limit.";
+	std::string leftRightStr = "Press [Right] [LEFT] to change the acceleration limit.";
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, leftRightStr.c_str() );
+	std::string trianglesStr = "Press [PG UP] [PG DOWN] to change the lead factor.";
+	DebugRender2DText( 0.f, Vector2(-850.f, 380.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, trianglesStr.c_str() );
 
 	// Controlling Factor
 	std::string controllingFractionStr = Stringf( "%-20s = %f", "Controlling Factor", m_controllingFactor );
-	DebugRender2DText( 0.f, Vector2(-850.f, 380.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 360.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
 
 	// Acceleration Limit
 	std::string accelerationLimitStr = Stringf( "%-20s = %f", "Acceleration Limit", m_accelerationLimit );
-	DebugRender2DText( 0.f, Vector2(-850.f, 360.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, accelerationLimitStr.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 340.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, accelerationLimitStr.c_str() );
+
+	// Lead Factor
+	std::string leadFactorStr = Stringf( "%-20s = %f", "Lead Factor", m_leadFactor );
+	DebugRender2DText( 0.f, Vector2(-850.f, 320.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, leadFactorStr.c_str() );
 }
 
 CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState const &currentState )
@@ -117,10 +132,9 @@ CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState c
 	Vector3 suggestVelocity	= diffInPosition * m_controllingFactor;
 	if( m_mpcEnabled )
 	{
-		float leadFactor = 3.f;
 		// Modified PC
 		CameraContext context = m_manager.GetCameraContext();
-		suggestVelocity += (context.anchorGameObject->m_velocity) * leadFactor;
+		suggestVelocity += (context.anchorGameObject->m_velocity) * m_leadFactor;
 	}
 
 	// Control exit characteristics
