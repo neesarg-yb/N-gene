@@ -1,5 +1,8 @@
 #pragma once
+#include <bitset>
 #include "NetworkConnection.hpp"
+#include "Engine/Core/Clock.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkSession.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
@@ -16,7 +19,103 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 
 NetworkConnection::~NetworkConnection()
 {
+	
+}
 
+void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
+{
+	// Last Received Time
+	m_lastReceivedTimeHPC = Clock::GetCurrentHPC();
+	
+	uint16_t receivedAck = receivedPacketHeader.ack;
+	if( m_highestReceivedAck != INVALID_PACKET_ACK )
+	{
+		if( receivedAck > m_highestReceivedAck )
+		{
+			// Shift one bit, and mark myself as received
+			m_receivedAcksBitfield <<= 1;
+			m_receivedAcksBitfield |= 0x0001;
+
+			// Shift the remaining difference
+			int d = (receivedAck - m_highestReceivedAck) - 1;
+			m_receivedAcksBitfield <<= d;
+
+			m_highestReceivedAck = receivedAck;
+		}
+		else
+		{
+			// Mark bit for the receivedPacket's ack
+			int s = (m_highestReceivedAck - receivedAck) - 1;
+			
+			uint16_t maskBit = 0x0001;
+			maskBit <<= s;
+
+			m_receivedAcksBitfield |= maskBit;
+		}
+	}
+	else
+	{
+		// First ack ever received..
+		// Bit field is 0U, already.
+
+		// We just need to change highest received ack
+		m_highestReceivedAck = receivedAck;
+	}
+
+	int lostPackets = 0;
+	// Update received acks
+	if( receivedPacketHeader.ack != INVALID_PACKET_ACK )
+	{
+		// Go through packet's history of ack, see if there's something that connection already received & we didn't know
+		if( receivedPacketHeader.highestReceivedAck != INVALID_PACKET_ACK )
+		{
+			// The highest received from their side
+			ConfirmPacketReceived( receivedPacketHeader.highestReceivedAck );
+
+			// Previous 16 acks from its highest received
+			std::bitset<16> acksBitField = m_receivedAcksBitfield;
+			for( int i = 0; i < 16; i++ )
+			{
+				bool isReceived = acksBitField.test( i );
+				int  ackToCheck = m_highestReceivedAck - i - 1;
+
+				// If we are about to wrap back from ZERO: skip the INVALID(0xffff) by subtracting an extra 1
+				if( ackToCheck < 0 )
+					ackToCheck = (uint16_t)ackToCheck - 1U;
+
+				if( isReceived )
+				{
+					ConfirmPacketReceived( (uint16_t)ackToCheck );
+				}
+				else if( IsActivePacketTracker( (uint16_t)ackToCheck ) )
+				{
+					lostPackets++;
+				}
+			}
+		}
+	}
+
+	// Trend towards new loss
+	float newLoss = lostPackets / 16.f;
+	m_loss = newLoss;
+}
+
+void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
+{
+	// Packet Tracker
+	int idx = ack % MAX_TRACKED_PACKETS;
+	PacketTracker &tracker = m_packetTrackers[ idx ];
+	
+	if( tracker.ack == INVALID_PACKET_ACK )
+		return;
+
+	// Calculate RTT
+	uint64_t rttHPC			= Clock::GetCurrentHPC() - tracker.sentTimeHPC;
+	double	 secondsThisRTT	= Clock::GetSecondsFromHPC( rttHPC );
+	m_rtt = (0.9f * m_rtt) + (0.1f * (float)secondsThisRTT);
+
+	// Invalidate
+	tracker.Invalidate();
 }
 
 void NetworkConnection::Send( NetworkMessage &msg )
@@ -45,12 +144,9 @@ void NetworkConnection::FlushMessages()
 	
 	// Populate messages into thisPacket & its header
 	NetworkPacket		 thisPacket;
-	NetworkPacketHeader &thisHeader				= thisPacket.m_header;
-	thisHeader.messageCount						= 0x00;
-	thisHeader.connectionIndex					= (uint8_t)m_indexInSession;
-	thisHeader.ack								= GetNextAckToSend();
-	thisHeader.lastReceivedAck					= m_lastReceivedAck;
-	thisHeader.previouslyReceivedAckBitfield	= m_previousReceivedAckBitfield;
+	NetworkPacketHeader &thisHeader		= thisPacket.m_header;
+	thisHeader.messageCount				= 0x00;
+	thisHeader.connectionIndex			= (uint8_t)m_indexInSession;
 	
 	// Reliable Messages
 	// ...
@@ -79,8 +175,20 @@ void NetworkConnection::FlushMessages()
 	// Send if not empty
 	if( thisPacket.HasMessages() )
 	{
+		// Set Ack for this packet
+		thisHeader.ack						= GetNextAckToSend();
+		thisHeader.highestReceivedAck		= m_highestReceivedAck;
+		thisHeader.receivedAcksHistory		= m_receivedAcksBitfield;
+
+		// Track the packet
+		AddTrackedPacket( thisPacket.m_header.ack );
+
+		// Send it
 		m_parentSession.SendPacket( thisPacket );
 		IncrementSentAck();
+
+		// Update Analytics
+		m_lastSendTimeHPC = Clock::GetCurrentHPC();
 	}
 }
 
@@ -127,3 +235,24 @@ void NetworkConnection::IncrementSentAck()
 {
 	m_nextSentAck++;
 }
+
+PacketTracker* NetworkConnection::AddTrackedPacket( uint16_t ack )
+{
+	int index = ack % MAX_TRACKED_PACKETS;
+	m_packetTrackers[ index ].TrackForAck( ack );
+
+	return &m_packetTrackers[ index ];
+}
+
+bool NetworkConnection::IsActivePacketTracker( uint16_t ack )
+{
+	// Packet Tracker
+	int idx = ack % MAX_TRACKED_PACKETS;
+	PacketTracker &tracker = m_packetTrackers[ idx ];
+
+	if( tracker.ack == INVALID_PACKET_ACK )
+		return false;
+	else
+		return true;
+}
+

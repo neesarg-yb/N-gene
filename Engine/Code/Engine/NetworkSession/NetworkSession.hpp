@@ -1,12 +1,12 @@
 #pragma once
 #include <queue>
 #include <vector>
+#include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Network/UDPSocket.hpp"
 #include "Engine/Network/NetworkAddress.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 #include "Engine/NetworkSession/NetworkConnection.hpp"
 
-#define MAX_SESSION_CONNECTIONS (0xff)
 
 class  NetworkPacket;
 struct StampedNetworkPacket;
