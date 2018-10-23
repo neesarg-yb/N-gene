@@ -37,7 +37,9 @@ enum VK_Codes
 	DELETE_KEY	= 0x2E,				/* VK_DELETE */
 	ESCAPE		= 0x1B,				/* VK_ESCAPE */
 	ENTER		= 0x0D,				/* VK_RETURN */
-	SHIFT		= 0x10				/* VK_SHIFT */
+	SHIFT		= 0x10,				/* VK_SHIFT */
+	PAGE_UP		= 0x21,				/* VK_PRIOR */
+	PAGE_DOWN	= 0x22				/* VK_NEXT */
 };
 
 typedef KeyButtonState MouseButtonState;
