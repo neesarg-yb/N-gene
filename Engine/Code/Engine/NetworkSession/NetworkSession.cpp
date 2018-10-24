@@ -13,7 +13,7 @@ bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
 		return false;
 	else
 	{
-		ConsolePrintf( "Heartbeat Received from [%d] connection.", from.connection->m_indexInSession );
+		// ConsolePrintf( "Heartbeat Received from [%d] connection.", from.connection->m_indexInSession );
 		return true;
 	}
 }
