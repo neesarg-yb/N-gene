@@ -168,8 +168,15 @@ void NetworkConnection::FlushMessages()
 	// Send if not empty
 	if( thisPacket.HasMessages() )
 	{
+		uint16_t ackToSend = GetNextAckToSend();
+		IncrementSentAck();
+
+		// If about to wrap around, calculate the loss
+		if( (ackToSend % MAX_TRACKED_PACKETS) == 0 )
+			m_loss = CalculateLoss();
+
 		// Set Ack for this packet
-		thisHeader.ack						= GetNextAckToSend();
+		thisHeader.ack						= ackToSend;
 		thisHeader.highestReceivedAck		= m_highestReceivedAck;
 		thisHeader.receivedAcksHistory		= m_receivedAcksBitfield;
 
@@ -178,7 +185,6 @@ void NetworkConnection::FlushMessages()
 
 		// Send it
 		m_parentSession.SendPacket( thisPacket );
-		IncrementSentAck();
 
 		// Update Analytics
 		m_lastSendTimeHPC = Clock::GetCurrentHPC();
@@ -229,10 +235,30 @@ void NetworkConnection::IncrementSentAck()
 	m_nextSentAck++;
 }
 
+float NetworkConnection::CalculateLoss() const
+{
+	int lostPackets = 0U;
+
+	for( int i = 0; i < MAX_TRACKED_PACKETS; i++ )
+	{
+		PacketTracker const &tracker = m_packetTrackers[i];
+		// If that tracker is still tracking some old packet
+		if( tracker.IsValid() )
+		{
+			// Consider that packet as lost
+			lostPackets++;
+		}
+	}
+
+	float  loss = (float)lostPackets / (float)MAX_TRACKED_PACKETS;
+	return loss;
+}
+
 PacketTracker* NetworkConnection::AddTrackedPacket( uint16_t ack )
 {
 	int index = ack % MAX_TRACKED_PACKETS;
 	PacketTracker &tracker = m_packetTrackers[ index ];
+
 	tracker.TrackForAck( ack );
 
 	return &m_packetTrackers[ index ];
