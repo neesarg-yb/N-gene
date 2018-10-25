@@ -1,6 +1,7 @@
 #pragma once
 #include "DebugRenderer.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Input/Command.hpp"
@@ -47,16 +48,18 @@ void DebugRendererChange3DCamera( Camera *camera3D )
 	debugCamera3D = camera3D;
 }
 
-void DebugRendererUpdate( float deltaSeconds )
+void DebugRendererUpdate( Clock const *clock )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 	
+	Clock const *activeClock	= (clock != nullptr) ? clock : GetMasterClock();
+	float const  deltaSeconds	= (float) activeClock->frame.seconds;
+
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
 		renderObject->Update( deltaSeconds );
 
 	DeleteOverdueRenderObjects();
-
 }
 
 void DebugRendererRender()

@@ -50,7 +50,7 @@ void DebugRenderObject::Update( float deltaSeconds )
 {
 	m_timeElapsed += deltaSeconds;
 
-	if( m_timeElapsed >= m_lifetime )
+	if( m_timeElapsed > m_lifetime )
 		m_deleteMe = true;
 }
 

@@ -17,7 +17,7 @@ void DebugRendererChange3DCamera( Camera *camera3D );
 /////////////////////
 // Update & Render //
 /////////////////////
-void DebugRendererUpdate( float deltaSeconds );
+void DebugRendererUpdate( Clock const *clock );								// If set to nullptr, uses the Master Clock
 void DebugRendererRender();
 void ClearAllRenderingObjects( Command& cmd );
 
