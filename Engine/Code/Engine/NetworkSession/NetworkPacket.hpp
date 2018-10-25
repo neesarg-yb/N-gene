@@ -34,6 +34,10 @@ public:
 	{
 		ack = INVALID_PACKET_ACK;
 	}
+	bool IsValid() const
+	{
+		return (ack != INVALID_PACKET_ACK);
+	}
 };
 
 struct NetworkPacketHeader

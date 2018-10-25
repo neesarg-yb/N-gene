@@ -63,6 +63,7 @@ public:
 private:
 	uint16_t GetNextAckToSend();
 	void	 IncrementSentAck();
+	float	 CalculateLoss() const;							// Goes through the packetTrackers & calculates loss according to how many packets are still being tracked
 
 	PacketTracker*	AddTrackedPacket( uint16_t ack );
 	bool			IsActivePacketTracker( uint16_t ack );
