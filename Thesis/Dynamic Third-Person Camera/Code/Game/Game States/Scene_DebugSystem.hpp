@@ -49,4 +49,10 @@ public:
 private:
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
+
+	void AddTestDebugRenderObjects();
+
+private:
+	void ChangeClocksTimeScale();
+	void PauseUnpauseClock();
 };

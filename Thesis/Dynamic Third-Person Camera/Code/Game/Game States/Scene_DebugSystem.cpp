@@ -111,7 +111,8 @@ void Scene_DebugSystem::JustFinishedTransition()
 
 void Scene_DebugSystem::BeginFrame()
 {
-
+	ChangeClocksTimeScale();
+	PauseUnpauseClock();
 }
 
 void Scene_DebugSystem::EndFrame()
@@ -122,6 +123,17 @@ void Scene_DebugSystem::EndFrame()
 void Scene_DebugSystem::Update()
 {
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
+
+	// If the clock is paused, do not update
+	if( m_clock->IsPaused() )
+	{
+		// If game is paused, we still need the FreeLook camera working..
+		// We'll update the manager with Master Clock
+		m_cameraManager->PreUpdate();
+		m_cameraManager->Update( (float) GetMasterClock()->GetFrameDeltaSeconds() );
+		m_cameraManager->PostUpdate();
+		return;
+	}
 
 	m_cameraManager->PreUpdate();
 
@@ -137,6 +149,8 @@ void Scene_DebugSystem::Update()
 
 	// Update Camera Stuffs
 	m_cameraManager->Update( deltaSeconds );
+
+	AddTestDebugRenderObjects();
 
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
@@ -213,4 +227,45 @@ void Scene_DebugSystem::AddNewLightToScene( Light *light )
 
 	// Add its renderable
 	m_scene->AddRenderable( *light->m_renderable );
+}
+
+
+Vector3		g_rotateAroundCenter	= Vector3( 25.f, 0.f, 25.f );
+float		g_radiusToRotateAround	= 10.f;
+float		g_angleOfRotation		= 0.f;
+float		g_pointTimeElapsed		= 0.f;
+void Scene_DebugSystem::AddTestDebugRenderObjects()
+{
+	g_angleOfRotation += (float)(m_clock->GetFrameDeltaSeconds() * 45.0);
+
+	Vector2 positionInXZPlane	= PolarToCartesian( g_radiusToRotateAround, g_angleOfRotation ) + Vector2( g_rotateAroundCenter.x, g_rotateAroundCenter.z );
+	float	positionYOffset		= SinDegree( g_angleOfRotation * 2.5f ) * 3.5f;
+	Vector3 debugSpherePosition	= Vector3( positionInXZPlane.x, g_rotateAroundCenter.y + positionYOffset, positionInXZPlane.y );
+
+	DebugRenderPoint( 0.f, 1.f, g_rotateAroundCenter, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderWireSphere( 0.f, debugSpherePosition, 1.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
+	g_pointTimeElapsed += (float) m_clock->GetFrameDeltaSeconds();
+	if( g_pointTimeElapsed >= 0.05f )
+	{
+		g_pointTimeElapsed = 0.f;
+		DebugRenderPoint( 1.5f, 0.2f, debugSpherePosition, RGBA_BLUE_COLOR, RGBA_YELLOW_COLOR, DEBUG_RENDER_USE_DEPTH );
+	}
+}
+
+void Scene_DebugSystem::ChangeClocksTimeScale()
+{
+	if( g_theInput->IsKeyPressed( UP ) )
+		m_clock->SetTimeSclae( m_clock->GetTimeScale() + (1.f * GetMasterClock()->GetFrameDeltaSeconds()) );
+	if( g_theInput->IsKeyPressed( DOWN ) )
+		m_clock->SetTimeSclae( m_clock->GetTimeScale() - (1.f * GetMasterClock()->GetFrameDeltaSeconds()) );
+
+	float clampedTimeScale = ClampFloat( (float)m_clock->GetTimeScale(), 0.f, 3.f );
+	m_clock->SetTimeSclae( clampedTimeScale );
+}
+
+void Scene_DebugSystem::PauseUnpauseClock()
+{
+	if( g_theInput->WasKeyJustPressed( 'P' ) )
+		m_clock->IsPaused() ? m_clock->Resume() : m_clock->Pause();
 }
