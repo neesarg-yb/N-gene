@@ -7,8 +7,8 @@
 #include "Game/theGame.hpp"
 #include "Game/World/Terrain.hpp"
 
-Scene_DegreesOfFreedom::Scene_DegreesOfFreedom()
-	: GameState( "DEGREES OF FREEDOM" )
+Scene_DegreesOfFreedom::Scene_DegreesOfFreedom( Clock const *parentClock )
+	: GameState( "DEGREES OF FREEDOM", parentClock )
 {
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 	m_scene			= new Scene();
@@ -116,10 +116,12 @@ void Scene_DegreesOfFreedom::EndFrame()
 	m_cameraManager->PostUpdate();
 }
 
-void Scene_DegreesOfFreedom::Update( float deltaSeconds )
+void Scene_DegreesOfFreedom::Update()
 {
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
+
 	// Update Debug Renderer Objects
-	DebugRendererUpdate( deltaSeconds );
+	DebugRendererUpdate( m_clock );
 
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 

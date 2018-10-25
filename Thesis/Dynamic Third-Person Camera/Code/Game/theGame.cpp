@@ -91,25 +91,25 @@ void theGame::Startup()
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
-	GameState* attractGS = new Attract();
+	GameState* attractGS = new Attract( g_gameClock );
 	AddNewGameState( attractGS );
 
-	GameState* levelSelectGS = new LevelSelect();
+	GameState* levelSelectGS = new LevelSelect( g_gameClock );
 	AddNewGameState( levelSelectGS );
 
-	GameState* quaternionsTest = new Scene_QuaternionsTest();
+	GameState* quaternionsTest = new Scene_QuaternionsTest( g_gameClock );
 	AddNewGameState( quaternionsTest );
 
-	GameState* degreesOfFreedom = new Scene_DegreesOfFreedom();
+	GameState* degreesOfFreedom = new Scene_DegreesOfFreedom( g_gameClock );
 	AddNewGameState( degreesOfFreedom );
 
-	GameState* followCamera = new Scene_FollowCamera();
+	GameState* followCamera = new Scene_FollowCamera( g_gameClock );
 	AddNewGameState( followCamera );
 
-	GameState* pcScene = new Scene_ProportionalController();
+	GameState* pcScene = new Scene_ProportionalController( g_gameClock );
 	AddNewGameState( pcScene );
 
-	GameState* debugScene = new Scene_DebugSystem();
+	GameState* debugScene = new Scene_DebugSystem( g_gameClock );
 	AddNewGameState( debugScene );
 
 	// Set game state to begin with
@@ -175,7 +175,7 @@ void theGame::Update()
 		m_fadeEffectAlpha		= 0.f;		
 
 	// Continue updating the currentGameState
-	m_currentGameState->Update( deltaSeconds );
+	m_currentGameState->Update();
 }
 
 void theGame::Render() const

@@ -13,7 +13,7 @@ typedef std::vector< Light* >		Lights;
 class Scene_ProportionalController : public GameState
 {
 public:
-			 Scene_ProportionalController();
+			 Scene_ProportionalController( Clock const *parentClock );
 	virtual ~Scene_ProportionalController();
 
 public:
@@ -42,7 +42,7 @@ public:
 	void JustFinishedTransition();
 	void BeginFrame();
 	void EndFrame();
-	void Update( float deltaSeconds );
+	void Update();
 	void Render( Camera *gameCamera ) const;
 
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );

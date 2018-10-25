@@ -11,8 +11,8 @@
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 
-Scene_ProportionalController::Scene_ProportionalController()
-	: GameState( "PROPORTIONAL CONTROLLER" )
+Scene_ProportionalController::Scene_ProportionalController( Clock const *parentClock )
+	: GameState( "PROPORTIONAL CONTROLLER", parentClock )
 {
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 	m_scene			= new Scene();
@@ -150,14 +150,17 @@ void Scene_ProportionalController::BeginFrame()
 
 void Scene_ProportionalController::EndFrame()
 {
+
 }
 
-void Scene_ProportionalController::Update( float deltaSeconds )
+void Scene_ProportionalController::Update()
 {
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
+
 	m_cameraManager->PreUpdate();
 
 	// Update Debug Renderer Objects
-	DebugRendererUpdate( deltaSeconds );
+	DebugRendererUpdate( m_clock );
 
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 

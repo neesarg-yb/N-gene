@@ -7,8 +7,8 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
 
-Scene_QuaternionsTest::Scene_QuaternionsTest()
-	: GameState( "QUATERNIONS TEST" )
+Scene_QuaternionsTest::Scene_QuaternionsTest( Clock const *parentClock )
+	: GameState( "QUATERNIONS TEST", parentClock )
 {
 	// Setup the Orbit camera
 	m_camera = new Camera();
@@ -45,13 +45,15 @@ void Scene_QuaternionsTest::EndFrame()
 	PROFILE_SCOPE_FUNCTION();
 }
 
-void Scene_QuaternionsTest::Update( float deltaSeconds )
+void Scene_QuaternionsTest::Update()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
+
 	// Debug Renderer
-	DebugRendererUpdate( deltaSeconds );
+	DebugRendererUpdate( m_clock );
 
 	if( m_t >= 1.f )
 	{

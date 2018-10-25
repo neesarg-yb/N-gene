@@ -4,8 +4,8 @@
 #include "Engine/Core/MenuAction.hpp"
 #include "Game/theGame.hpp"
 
-LevelSelect::LevelSelect()
-	: GameState( "LEVEL SELECT" )
+LevelSelect::LevelSelect( Clock const *parentClock )
+	: GameState( "LEVEL SELECT", parentClock )
 {
 	// Setup the LevelSelection UI
 	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.35f, 0.30f, 0.65f, 0.55f ) );
@@ -39,10 +39,12 @@ void LevelSelect::EndFrame()
 
 }
 
-void LevelSelect::Update( float deltaSeconds )
+void LevelSelect::Update()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
+
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "ATTRACT" );

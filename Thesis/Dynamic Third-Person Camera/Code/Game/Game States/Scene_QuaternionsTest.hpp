@@ -8,7 +8,7 @@
 class Scene_QuaternionsTest : public GameState
 {
 public:
-	 Scene_QuaternionsTest();
+	 Scene_QuaternionsTest( Clock const *parentClock );
 	~Scene_QuaternionsTest();
 
 public:
@@ -17,7 +17,7 @@ public:
 	void BeginFrame();
 	void EndFrame();
 
-	void Update( float deltaSeconds );
+	void Update();
 	void Render( Camera *gameCamera ) const;
 
 private:

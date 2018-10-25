@@ -15,7 +15,7 @@ typedef std::vector< Light* >		Lights;
 class Scene_DegreesOfFreedom : public GameState
 {
 public:
-			 Scene_DegreesOfFreedom();
+			 Scene_DegreesOfFreedom( Clock const *parentClock );
 	virtual ~Scene_DegreesOfFreedom();
 
 public:
@@ -43,7 +43,7 @@ public:
 	void JustFinishedTransition();
 	void BeginFrame();
 	void EndFrame();
-	void Update( float deltaSeconds );
+	void Update();
 	void Render( Camera *gameCamera ) const;
 
 private:

@@ -13,7 +13,7 @@ typedef std::vector< Light* >		Lights;
 class Scene_DebugSystem: public GameState
 {
 public:
-			 Scene_DebugSystem();
+			 Scene_DebugSystem( Clock const *parentClock );
 	virtual ~Scene_DebugSystem();
 
 public:
@@ -41,7 +41,7 @@ public:
 	void JustFinishedTransition();
 	void BeginFrame();
 	void EndFrame();
-	void Update( float deltaSeconds );
+	void Update();
 	void Render( Camera *gameCamera ) const;
 
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );

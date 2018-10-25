@@ -6,8 +6,8 @@
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 
-Scene_DebugSystem::Scene_DebugSystem()
-	: GameState( "DEBUG SYSTEM" )
+Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
+	: GameState( "DEBUG SYSTEM", parentClock )
 {
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 	m_scene			= new Scene();
@@ -119,12 +119,14 @@ void Scene_DebugSystem::EndFrame()
 
 }
 
-void Scene_DebugSystem::Update( float deltaSeconds )
+void Scene_DebugSystem::Update()
 {
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
+
 	m_cameraManager->PreUpdate();
 
 	// Update Debug Renderer Objects
-	DebugRendererUpdate( deltaSeconds );
+	DebugRendererUpdate( m_clock );
 
 	// Update Game Objects
 	for( int i = 0; i < NUM_ENTITIES; i++ )

@@ -7,7 +7,7 @@ class UIMenu;
 class Attract : public GameState
 {
 public:
-	 Attract();
+	 Attract( Clock const *parentClock );
 	~Attract();
 
 public:
@@ -16,7 +16,7 @@ public:
 	void BeginFrame();
 	void EndFrame();
 
-	void Update( float deltaSeconds );
+	void Update();
 	void Render( Camera *gameCamera ) const;
 
 private:

@@ -10,8 +10,8 @@
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 
-Scene_FollowCamera::Scene_FollowCamera()
-	: GameState( "FOLLOW CAMERA" )
+Scene_FollowCamera::Scene_FollowCamera( Clock const *parentClock )
+	: GameState( "FOLLOW CAMERA", parentClock )
 {
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 	m_scene			= new Scene();
@@ -166,10 +166,12 @@ void Scene_FollowCamera::EndFrame()
 	m_cameraManager->PostUpdate();
 }
 
-void Scene_FollowCamera::Update( float deltaSeconds )
+void Scene_FollowCamera::Update()
 {
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
+
 	// Update Debug Renderer Objects
-	DebugRendererUpdate( deltaSeconds );
+	DebugRendererUpdate( m_clock );
 
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 
