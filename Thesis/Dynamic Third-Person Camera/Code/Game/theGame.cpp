@@ -12,6 +12,7 @@
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
 #include "Game/Game States/Scene_DegreesOfFreedom.hpp"
 #include "Game/Game States/Scene_ProportionalController.hpp"
+#include "Game/Game States/Scene_DebugSystem.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -107,6 +108,9 @@ void theGame::Startup()
 
 	GameState* pcScene = new Scene_ProportionalController();
 	AddNewGameState( pcScene );
+
+	GameState* debugScene = new Scene_DebugSystem();
+	AddNewGameState( debugScene );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );

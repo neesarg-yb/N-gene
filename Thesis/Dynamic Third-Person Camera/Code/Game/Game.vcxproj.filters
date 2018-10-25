@@ -115,6 +115,9 @@
     <ClCompile Include="Potential Engine\CB_ProportionalController.cpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\Scene_DebugSystem.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -194,6 +197,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CB_ProportionalController.hpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_DebugSystem.hpp">
+      <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

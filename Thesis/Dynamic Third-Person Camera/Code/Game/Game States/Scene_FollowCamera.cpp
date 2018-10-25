@@ -279,7 +279,20 @@ void Scene_FollowCamera::AddNewLightToScene( Light *light )
 
 void Scene_FollowCamera::ChangeCameraBehaviour()
 {
-	return;
+	XboxController &controller	= g_theInput->m_controller[0];
+	bool leftStickJustPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_LS ].keyJustPressed;
+
+	static bool dofBehaviourActive = true;
+	if( leftStickJustPressed )
+	{
+		std::string behaviourToActivate = dofBehaviourActive ? "FreeLook" : "Follow";
+		dofBehaviourActive = !dofBehaviourActive;
+
+		m_cameraManager->SetActiveCameraBehaviourTo( behaviourToActivate );
+
+		std::string activeBehaviourMessage = Stringf( "Active Camera Behavior: \"%s\"", behaviourToActivate.c_str() );
+		DebugRender2DText( 5.f, Vector2(-850.f, 460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, activeBehaviourMessage.c_str() );
+	}
 }
 
 void Scene_FollowCamera::EnableDisableCameraConstrains()
