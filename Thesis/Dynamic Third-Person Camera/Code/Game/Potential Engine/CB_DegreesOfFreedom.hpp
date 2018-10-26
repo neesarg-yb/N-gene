@@ -4,7 +4,7 @@
 class CB_DegreesOfFreedom : public CameraBehaviour
 {
 public:
-	 CB_DegreesOfFreedom( char const *name, CameraManager const &manager );
+	 CB_DegreesOfFreedom( char const *name, CameraManager const *manager );
 	~CB_DegreesOfFreedom();
 
 protected:

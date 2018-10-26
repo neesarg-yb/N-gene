@@ -301,6 +301,7 @@
     <ClCompile Include="Potential Engine\CB_ProportionalController.cpp" />
     <ClCompile Include="Potential Engine\CC_CameraCollision.cpp" />
     <ClCompile Include="Potential Engine\CC_LineOfSight.cpp" />
+    <ClCompile Include="Potential Engine\DebugCamera.cpp" />
     <ClCompile Include="Potential Engine\GameObject.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
@@ -330,6 +331,7 @@
     <ClInclude Include="Potential Engine\CB_ProportionalController.hpp" />
     <ClInclude Include="Potential Engine\CC_CameraCollision.hpp" />
     <ClInclude Include="Potential Engine\CC_LineOfSight.hpp" />
+    <ClInclude Include="Potential Engine\DebugCamera.hpp" />
     <ClInclude Include="Potential Engine\GameObject.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />

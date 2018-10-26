@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Math/Sphere.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
+#include "Game/Potential Engine/DebugCamera.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
 #include "Game/Potential Engine/CameraManager.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
@@ -21,6 +22,7 @@ public:
 	ForwardRenderingPath	*m_renderingPath		= nullptr;
 	Scene					*m_scene				= nullptr;
 	Camera					*m_camera				= nullptr;
+	DebugCamera				*m_debugCamera			= nullptr;
 	Lights					 m_lights;
 	Vector4					 m_ambientLight			= Vector4( 1.f, 1.f, 1.f, 0.6f );
 

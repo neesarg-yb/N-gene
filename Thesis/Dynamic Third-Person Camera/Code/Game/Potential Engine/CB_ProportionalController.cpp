@@ -6,7 +6,7 @@
 #include "Game/Potential Engine/CameraContext.hpp"
 #include "Game/Potential Engine/CameraManager.hpp"
 
-CB_ProportionalController::CB_ProportionalController( char const *name, CameraManager const &manager )
+CB_ProportionalController::CB_ProportionalController( char const *name, CameraManager const *manager )
 	: CB_DegreesOfFreedom( name, manager )
 {
 
@@ -133,7 +133,7 @@ CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState c
 	if( m_mpcEnabled )
 	{
 		// Modified PC
-		CameraContext context = m_manager.GetCameraContext();
+		CameraContext context = m_manager->GetCameraContext();
 		suggestVelocity += (context.anchorGameObject->m_velocity) * m_leadFactor;
 	}
 

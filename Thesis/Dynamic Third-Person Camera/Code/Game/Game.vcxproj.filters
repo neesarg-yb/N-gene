@@ -118,6 +118,9 @@
     <ClCompile Include="Game States\Scene_DebugSystem.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="Potential Engine\DebugCamera.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -200,6 +203,9 @@
     </ClInclude>
     <ClInclude Include="Game States\Scene_DebugSystem.hpp">
       <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\DebugCamera.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

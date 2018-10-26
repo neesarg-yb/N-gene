@@ -21,6 +21,13 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
+	// Setting up the Debug Camera
+	CameraBehaviour *debugFreelook = new CB_FreeLook( 2.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr );
+	m_debugCamera = new DebugCamera( debugFreelook );
+	m_debugCamera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
+	// Add to Scene
+	m_scene->AddCamera( *m_debugCamera );
+
 	// A directional light
 	Light *directionalLight = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
 	directionalLight->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
@@ -42,7 +49,7 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	m_cameraManager->SetRaycastCallback( terrainRaycastStdFunc );
 	
 	// Camera Behaviour
-	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", *m_cameraManager );
+	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
@@ -113,6 +120,9 @@ void Scene_DebugSystem::BeginFrame()
 {
 	ChangeClocksTimeScale();
 	PauseUnpauseClock();
+
+	if( m_clock->IsPaused() )
+		m_debugCamera->Update();
 }
 
 void Scene_DebugSystem::EndFrame()
@@ -123,17 +133,6 @@ void Scene_DebugSystem::EndFrame()
 void Scene_DebugSystem::Update()
 {
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
-
-	// If the clock is paused, do not update
-	if( m_clock->IsPaused() )
-	{
-		// If game is paused, we still need the FreeLook camera working..
-		// We'll update the manager with Master Clock
-		m_cameraManager->PreUpdate();
-		m_cameraManager->Update( (float) GetMasterClock()->GetFrameDeltaSeconds() );
-		m_cameraManager->PostUpdate();
-		return;
-	}
 
 	m_cameraManager->PreUpdate();
 
@@ -166,6 +165,9 @@ void Scene_DebugSystem::Render( Camera *gameCamera ) const
 	// Render the Scene
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
+	m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
+	DebugRenderQuad( 0.f, Vector3( 10.f, 3.f, 2.f ), Vector3::ZERO, Vector2( 10.f, 10.f ), nullptr, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderQuad( 0.f, Vector3( 10.f, 3.f, 0.f ), Vector3::ZERO, Vector2( 10.f, 10.f ), m_debugCamera->GetColorTarget(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 
 	// DEBUG
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );

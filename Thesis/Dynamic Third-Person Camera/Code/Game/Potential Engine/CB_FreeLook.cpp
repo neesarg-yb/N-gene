@@ -1,7 +1,7 @@
 #pragma once
 #include "CB_FreeLook.hpp"
 
-CB_FreeLook::CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager const &manager )
+CB_FreeLook::CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager const *manager )
 	: CameraBehaviour( behaviourName, manager )
 	, m_movementSpeed( movementSpeed )
 	, m_rotationSpeed( rotationSpeed )

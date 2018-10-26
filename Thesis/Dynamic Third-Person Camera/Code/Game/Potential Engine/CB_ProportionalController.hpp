@@ -4,7 +4,7 @@
 class CB_ProportionalController : public CB_DegreesOfFreedom
 {
 public:
-	 CB_ProportionalController( char const *name, CameraManager const &manager );
+	 CB_ProportionalController( char const *name, CameraManager const *manager );
 	~CB_ProportionalController();
 
 private:
