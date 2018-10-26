@@ -98,6 +98,9 @@ Scene_DebugSystem::~Scene_DebugSystem()
 		lastLight = nullptr;
 	}
 
+	delete m_debugCamera;
+	m_debugCamera = nullptr;
+
 	// Camera
 	delete m_camera;
 	m_camera = nullptr;
@@ -120,6 +123,7 @@ void Scene_DebugSystem::BeginFrame()
 {
 	ChangeClocksTimeScale();
 	PauseUnpauseClock();
+	ChangeDebugCameraOverlaySize();
 
 	if( m_clock->IsPaused() )
 		m_debugCamera->Update();
@@ -164,16 +168,28 @@ void Scene_DebugSystem::Render( Camera *gameCamera ) const
 
 	// Render the Scene
 	g_theRenderer->SetAmbientLight( m_ambientLight );
-	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
-	m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
-	DebugRenderQuad( 0.f, Vector3( 10.f, 3.f, 2.f ), Vector3::ZERO, Vector2( 10.f, 10.f ), nullptr, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-	DebugRenderQuad( 0.f, Vector3( 10.f, 3.f, 0.f ), Vector3::ZERO, Vector2( 10.f, 10.f ), m_debugCamera->GetColorTarget(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	
+	if( m_clock->IsPaused() == false )
+		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
+	else
+	{
+		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
+		m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
+	}
 
 	// DEBUG
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
 	// Debug Renderer
 	DebugRendererRender();
+
+	if( m_clock->IsPaused() )
+	{
+		if( m_debugCameraFullOverlay )
+			m_debugCamera->RenderAsFulscreenOverlay();
+		else
+			m_debugCamera->RenderAsMiniOverlay();
+	}
 }
 
 RaycastResult Scene_DebugSystem::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )
@@ -270,4 +286,10 @@ void Scene_DebugSystem::PauseUnpauseClock()
 {
 	if( g_theInput->WasKeyJustPressed( 'P' ) )
 		m_clock->IsPaused() ? m_clock->Resume() : m_clock->Pause();
+}
+
+void Scene_DebugSystem::ChangeDebugCameraOverlaySize()
+{
+	if( g_theInput->WasKeyJustPressed( 'O' ) )
+		m_debugCameraFullOverlay = !m_debugCameraFullOverlay;
 }

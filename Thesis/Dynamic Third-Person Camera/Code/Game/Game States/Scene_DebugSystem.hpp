@@ -32,12 +32,13 @@ public:
 
 private:
 	// Camera
-	CameraManager			*m_cameraManager		= nullptr;
-	float const				 m_initialFOV			= 45.f;			// Degrees
-	float const				 m_changeFOVSpeed		= 10.f;			// Degrees per seconds
-	float const				 m_cameraNear			= 0.001f;
-	float const				 m_cameraFar			= 1000.f;
-	bool					 m_constrainsActive		= true;
+	CameraManager			*m_cameraManager			= nullptr;
+	float const				 m_initialFOV				= 45.f;			// Degrees
+	float const				 m_changeFOVSpeed			= 10.f;			// Degrees per seconds
+	float const				 m_cameraNear				= 0.001f;
+	float const				 m_cameraFar				= 1000.f;
+	bool					 m_constrainsActive			= true;
+	bool					 m_debugCameraFullOverlay	= false;
 
 public:
 	void JustFinishedTransition();
@@ -57,4 +58,5 @@ private:
 private:
 	void ChangeClocksTimeScale();
 	void PauseUnpauseClock();
+	void ChangeDebugCameraOverlaySize();
 };
