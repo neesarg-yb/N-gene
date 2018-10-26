@@ -69,7 +69,7 @@ public:
 
 public:
 	Transform		 m_cameraTransform;
-private:
+protected:
 	Matrix44		 m_viewMatrix;		// inverse of cameraMatrix (used for shader) (World to Camera)
 	Matrix44		 m_projMatrix;		// projection, identity by default.. (Camera to Clip)
 
@@ -77,7 +77,7 @@ public:
 	UniformBuffer	*m_cameraUBO		= nullptr;
 	FrameBuffer		 m_outputFramebuffer;
 
-private:
+protected:
 	// Camera Properties
 	float			m_aspectRatio		=  g_aspectRatio;	// Screen aspect ratio
 	float			m_fov				=  45.f;			// Field of View
@@ -96,7 +96,7 @@ public:
 	void SetFOVForPerspective			( float fov );
 	void SetNearAndFarForPerspective	( float cameraNear, float cameraFar );
 	
-private:
+protected:
 	// Post Processing 
 	Texture*		m_bloomTexture		= nullptr;
 
