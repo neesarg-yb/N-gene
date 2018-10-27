@@ -4,7 +4,7 @@
 #include "Engine/Core/Window.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-DebugCamera::DebugCamera( CameraBehaviour *newBehaviour )
+DebugCamera::DebugCamera( CameraBehaviour *newBehaviour , bool shadowMapDisabled /*= true*/ )
 	: m_behaviour( newBehaviour )
 {
 	// Setup the Camera
@@ -26,6 +26,8 @@ DebugCamera::DebugCamera( CameraBehaviour *newBehaviour )
 	m_uiCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_uiCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );			// Make an NDC
 
+	// ShadowMap
+	m_shadowMapEnabled = !shadowMapDisabled;
 }
 
 DebugCamera::~DebugCamera()

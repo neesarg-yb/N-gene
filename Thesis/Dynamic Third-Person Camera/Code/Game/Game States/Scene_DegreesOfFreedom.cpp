@@ -101,7 +101,7 @@ Scene_DegreesOfFreedom::~Scene_DegreesOfFreedom()
 
 void Scene_DegreesOfFreedom::JustFinishedTransition()
 {
-	DebugRendererChange3DCamera( m_camera );
+
 }
 
 void Scene_DegreesOfFreedom::BeginFrame()
@@ -140,10 +140,6 @@ void Scene_DegreesOfFreedom::Update()
 void Scene_DegreesOfFreedom::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
-	
-	// Render the Scene
-	g_theRenderer->SetAmbientLight( m_ambientLight );
-	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene );
 
 	// DEBUG
 	Matrix44 bMat;
@@ -152,8 +148,9 @@ void Scene_DegreesOfFreedom::Render( Camera *gameCamera ) const
 	DebugRenderBasis( 0.f, Matrix44(),	RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRenderBasis( 0.f, bMat,		RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 	
-	// Debug Renderer
-	DebugRendererRender();
+	// Render the Scene
+	g_theRenderer->SetAmbientLight( m_ambientLight );
+	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene );
 }
 
 void Scene_DegreesOfFreedom::AddNewGameObjectToScene( GameObject *go )

@@ -5,7 +5,7 @@
 class DebugCamera : public Camera
 {
 public:
-	 DebugCamera( CameraBehaviour *newBehaviour );
+	 DebugCamera( CameraBehaviour *newBehaviour, bool shadowMapDisabled = true );
 	~DebugCamera();
 
 private:

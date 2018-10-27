@@ -23,6 +23,7 @@ Scene_ProportionalController::Scene_ProportionalController( Clock const *parentC
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
+	m_camera->EnableShadowMap();
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
@@ -140,7 +141,7 @@ Scene_ProportionalController::~Scene_ProportionalController()
 
 void Scene_ProportionalController::JustFinishedTransition()
 {
-	DebugRendererChange3DCamera( m_camera );
+
 }
 
 void Scene_ProportionalController::BeginFrame()
@@ -185,17 +186,15 @@ void Scene_ProportionalController::Update()
 void Scene_ProportionalController::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
-	Vector3 playerPosition = m_player->m_transform.GetWorldPosition();
-
-	// Render the Scene
-	g_theRenderer->SetAmbientLight( m_ambientLight );
-	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, &playerPosition );
 
 	// DEBUG
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
-	// Debug Renderer
-	DebugRendererRender();
+	// Render the Scene
+	g_theRenderer->SetAmbientLight( m_ambientLight );
+
+	Vector3 playerPosition = m_player->m_transform.GetWorldPosition();
+	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, &playerPosition );
 }
 
 RaycastResult Scene_ProportionalController::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )

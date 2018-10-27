@@ -22,6 +22,7 @@ Scene_FollowCamera::Scene_FollowCamera( Clock const *parentClock )
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\galaxy1.png" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
+	m_camera->EnableShadowMap();
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
@@ -151,7 +152,7 @@ Scene_FollowCamera::~Scene_FollowCamera()
 
 void Scene_FollowCamera::JustFinishedTransition()
 {
-	DebugRendererChange3DCamera( m_camera );
+
 }
 
 void Scene_FollowCamera::BeginFrame()
@@ -196,15 +197,12 @@ void Scene_FollowCamera::Render( Camera *gameCamera ) const
 	UNUSED( gameCamera );
 	Vector3 playerPosition = m_player->m_transform.GetWorldPosition();
 
-	// Render the Scene
-	g_theRenderer->SetAmbientLight( m_ambientLight );
-	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, &playerPosition );
-
 	// DEBUG
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
-	// Debug Renderer
-	DebugRendererRender();
+	// Render the Scene
+	g_theRenderer->SetAmbientLight( m_ambientLight );
+	m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, &playerPosition );
 }
 
 RaycastResult Scene_FollowCamera::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )

@@ -30,7 +30,7 @@ Scene_QuaternionsTest::~Scene_QuaternionsTest()
 
 void Scene_QuaternionsTest::JustFinishedTransition()
 {
-	DebugRendererChange3DCamera( m_camera );
+
 }
 
 void Scene_QuaternionsTest::BeginFrame()
@@ -140,7 +140,7 @@ void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
 	DebugRenderTag( 0.f, 1.f, m_quaternionBasisWorldPos - Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "QUATERNIONS");
 
 	// Debug Renderer
-	DebugRendererRender();
+	DebugRendererRender( m_camera );
 }
 
 void Scene_QuaternionsTest::QuaternionsTestCode() const

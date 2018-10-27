@@ -18,6 +18,7 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
+	m_camera->EnableShadowMap();
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
@@ -116,7 +117,7 @@ Scene_DebugSystem::~Scene_DebugSystem()
 
 void Scene_DebugSystem::JustFinishedTransition()
 {
-	DebugRendererChange3DCamera( m_camera );
+
 }
 
 void Scene_DebugSystem::BeginFrame()
@@ -166,6 +167,9 @@ void Scene_DebugSystem::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
 
+	// DEBUG
+	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
 	// Render the Scene
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	
@@ -176,12 +180,6 @@ void Scene_DebugSystem::Render( Camera *gameCamera ) const
 		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
 		m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
 	}
-
-	// DEBUG
-	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-
-	// Debug Renderer
-	DebugRendererRender();
 
 	if( m_clock->IsPaused() )
 	{
