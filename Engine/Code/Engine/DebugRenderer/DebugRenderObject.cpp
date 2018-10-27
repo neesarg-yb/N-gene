@@ -22,11 +22,11 @@ void DebugRenderObject::ToggleDebugRendering( Command& cmd )
 
 Shader* DebugRenderObject::s_debugShader = nullptr;
 
-DebugRenderObject::DebugRenderObject( float lifetime, Renderer &renderer, Camera &camera, Matrix44 modelMatrix, Mesh const *newMesh, Texture const *texture, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode renderMode /* = DEBUG_RENDER_USE_DEPTH */, eFillMode polygonMode /* = FRONT_AND_BACK_FILL */ )
+DebugRenderObject::DebugRenderObject( float lifetime, Renderer &renderer, eDebugRenderCameraType cameraType, Matrix44 modelMatrix, Mesh const *newMesh, Texture const *texture, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode renderMode /* = DEBUG_RENDER_USE_DEPTH */, eFillMode polygonMode /* = FRONT_AND_BACK_FILL */ )
 	: m_lifetime( lifetime )
 	, m_renderer( renderer )
+	, m_cameraType( cameraType )
 	, m_modelMatrix( modelMatrix )
-	, m_camera( camera )
 	, m_mesh( newMesh )
 	, m_texture( texture )
 	, m_startColor( startColor )
@@ -54,7 +54,7 @@ void DebugRenderObject::Update( float deltaSeconds )
 		m_deleteMe = true;
 }
 
-void DebugRenderObject::Render() const
+void DebugRenderObject::Render( Camera &camera ) const
 {
 	if( s_isDebugRenderingEnabled == false )
 		return;
@@ -93,7 +93,7 @@ void DebugRenderObject::Render() const
 	m_renderer.SetUniform( "COLORLERP", debugColorLerp );
 
 	m_renderer.SetCurrentDiffuseTexture( m_texture );
-	m_renderer.BindCamera( &m_camera );
+	m_renderer.BindCamera( &camera );
 	m_renderer.DrawMesh( *m_mesh, m_modelMatrix );
 
 

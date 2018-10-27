@@ -10,7 +10,6 @@
 
 
 Renderer									*debugRenderer				= nullptr;
-Camera										*debugCamera3D				= nullptr;
 Camera										*debugCamera2D				= nullptr;
 BitmapFont									*debugFont					= nullptr;
 std::vector< DebugRenderObject* >			 debugRenderObjectQueue;
@@ -19,10 +18,9 @@ std::vector< DebugRenderObject* >			 debugRenderObjectQueue;
 void EmptyTheRenderObjectQueue();
 void DeleteOverdueRenderObjects();
 
-void DebugRendererStartup( Renderer *activeRenderer, Camera *camera3D )
+void DebugRendererStartup( Renderer *activeRenderer )
 {
 	debugRenderer = activeRenderer;
-	debugCamera3D = camera3D;
 	debugCamera2D = new Camera();
 
 	debugCamera2D->SetColorTarget( Renderer::GetDefaultColorTarget() );
@@ -43,11 +41,6 @@ void DebugRendererShutdown()
 	EmptyTheRenderObjectQueue();
 }
 
-void DebugRendererChange3DCamera( Camera *camera3D )
-{
-	debugCamera3D = camera3D;
-}
-
 void DebugRendererUpdate( Clock const *clock )
 {
 	// Profiler Test
@@ -62,13 +55,16 @@ void DebugRendererUpdate( Clock const *clock )
 	DeleteOverdueRenderObjects();
 }
 
-void DebugRendererRender()
+void DebugRendererRender( Camera *camera3D )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
-		renderObject->Render();
+	{
+		Camera &activeCamera = (renderObject->m_cameraType == DEBUG_CAMERA_2D) ? *debugCamera2D : *camera3D;
+		renderObject->Render( activeCamera );
+	}
 }
 
 void ClearAllRenderingObjects( Command& cmd )
@@ -226,7 +222,7 @@ void DebugRender2DQuad( float lifetime, AABB2 const &bounds, Rgba const &startCo
 	mb.End();
 	
 	Transform modelTransform = Transform( centerPos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( quadObject );
 }
 
@@ -244,7 +240,7 @@ void DebugRender2DLine( float lifetime, Vector2 const &p0, Rgba const &p0Color, 
 	mb.End();
 
 	Transform modelTransform = Transform( centerPos.GetAsVector3(), Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, tintStartColor, tintEndColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, tintStartColor, tintEndColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( lineObject );
 }
 
@@ -273,7 +269,7 @@ void DebugRender2DText( float lifetime, Vector2 const &position, float const hei
 	mb.End();
 
 	Transform modelTransform = Transform( position.GetAsVector3(), Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( textObject );
 }
 
@@ -295,7 +291,7 @@ void DebugRenderPoint( float lifetime, float size, Vector3 const &position, Rgba
 	mb.End();
 
 	Transform modelTransform = Transform( position, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *pointObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	DebugRenderObject *pointObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( pointObject );
 }
 
@@ -313,7 +309,7 @@ void DebugRenderLineSegment( float lifetime, Vector3 const &p0, Rgba const &p0Co
 	mb.End();
 
 	Transform modelTransform = Transform( centerPos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( lineObject );
 }
 
@@ -343,7 +339,7 @@ void DebugRenderBasis( float lifetime, Matrix44 const &basis, Rgba const &startC
 	mb.End();
 
 	Transform modelTransform = Transform( basis.GetTColumn(), Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *basisLines = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	DebugRenderObject *basisLines = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( basisLines );
 }
 
@@ -352,7 +348,7 @@ void DebugRenderSphere( float lifetime, Vector3 const &pos, float const radius, 
 	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, Vector3::ZERO );
 
 	Transform modelTransform = Transform( pos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_FILL );
+	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_FILL );
 	debugRenderObjectQueue.push_back( wireSphereObject );
 }
 
@@ -361,7 +357,7 @@ void DebugRenderWireSphere( float lifetime, Vector3 const &pos, float const radi
 	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, Vector3::ZERO );
 
 	Transform modelTransform = Transform( pos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
+	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
 	debugRenderObjectQueue.push_back( wireSphereObject );
 }
 
@@ -372,7 +368,7 @@ void DebugRenderWireCube( float lifetime, Vector3 const &bottomLeftFront, Vector
 	Mesh* cubeMesh	= MeshBuilder::CreateCube( size, Vector3::ZERO );
 	
 	Transform modelTransform = Transform( center, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *wireCubeObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), cubeMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
+	DebugRenderObject *wireCubeObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), cubeMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
 	debugRenderObjectQueue.push_back( wireCubeObject );
 }
 
@@ -381,7 +377,7 @@ void DebugRenderQuad( float lifetime, Vector3 const &pos, Vector3 const &eulerRo
 	Transform modelTransform = Transform( pos, eulerRotation, Vector3::ONE_ALL );
 	Mesh* quadMesh	= MeshBuilder::CreatePlane( xySize, Vector3::ZERO );
 
-	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), quadMesh, texture, startColor, endColor, mode, FRONT_AND_BACK_FILL );
+	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), quadMesh, texture, startColor, endColor, mode, FRONT_AND_BACK_FILL );
 	debugRenderObjectQueue.push_back( quadObject );
 }
 
@@ -406,6 +402,6 @@ void DebugRenderTag( float lifetime, float const height, Vector3 const &startPos
 	mb.End();
 
 	Transform modelTransform = Transform( startPos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( textObject );
 }

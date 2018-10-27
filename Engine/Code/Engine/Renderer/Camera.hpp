@@ -97,6 +97,8 @@ public:
 	void SetNearAndFarForPerspective	( float cameraNear, float cameraFar );
 	
 protected:
+	bool			m_shadowMapEnabled	= false;
+
 	// Post Processing 
 	Texture*		m_bloomTexture		= nullptr;
 
@@ -107,4 +109,8 @@ protected:
 	Matrix44		m_skyboxModel		= Matrix44();
 
 	void ApplyEffect( Shader *fullScreenEffect, Renderer &theRenderer, uint totalPasses = 1 );
+
+public:
+	inline void EnableShadowMap( bool enable = true )	{ m_shadowMapEnabled = enable; }
+	inline bool ShadowMapEnabled() const				{ return m_shadowMapEnabled; }
 };
