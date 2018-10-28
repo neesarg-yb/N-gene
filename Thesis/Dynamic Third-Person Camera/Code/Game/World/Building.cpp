@@ -78,7 +78,7 @@ RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &di
 	}
 
 	if( didImpact == false )
-		return RaycastResult( startPosition );
+		return RaycastResult( position );
 	else
 	{
 		float	distTravelled		= (position - startPosition).GetLength();

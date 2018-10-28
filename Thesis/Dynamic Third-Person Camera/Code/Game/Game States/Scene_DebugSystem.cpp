@@ -177,8 +177,8 @@ void Scene_DebugSystem::Render( Camera *gameCamera ) const
 		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
 	else
 	{
-		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
-		m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
+		// Renders the scene for all cameras: m_camera, m_debugCamera
+		m_renderingPath->RenderScene( *m_scene );
 	}
 
 	if( m_clock->IsPaused() )
@@ -252,6 +252,7 @@ float		g_angleOfRotation		= 0.f;
 float		g_pointTimeElapsed		= 0.f;
 void Scene_DebugSystem::AddTestDebugRenderObjects()
 {
+	// A Sphere orbiting around a Point
 	g_angleOfRotation += (float)(m_clock->GetFrameDeltaSeconds() * 45.0);
 
 	Vector2 positionInXZPlane	= PolarToCartesian( g_radiusToRotateAround, g_angleOfRotation ) + Vector2( g_rotateAroundCenter.x, g_rotateAroundCenter.z );
@@ -267,6 +268,12 @@ void Scene_DebugSystem::AddTestDebugRenderObjects()
 		g_pointTimeElapsed = 0.f;
 		DebugRenderPoint( 1.5f, 0.2f, debugSpherePosition, RGBA_BLUE_COLOR, RGBA_YELLOW_COLOR, DEBUG_RENDER_USE_DEPTH );
 	}
+
+	// Raycast from Camera
+	Vector3 raycasyStart = m_camera->m_cameraTransform.GetWorldPosition();
+	Vector3 cameraForward = m_camera->m_cameraTransform.GetWorldTransformMatrix().GetKColumn();
+	RaycastResult raycastResult = m_terrain->Raycast( raycasyStart, cameraForward, 20.f, 0.1f );
+	DebugRenderRaycast( 0.f, raycasyStart, raycastResult, 0.5f, RGBA_GREEN_COLOR, RGBA_RED_COLOR, RGBA_KHAKI_COLOR, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_DebugSystem::ChangeClocksTimeScale()

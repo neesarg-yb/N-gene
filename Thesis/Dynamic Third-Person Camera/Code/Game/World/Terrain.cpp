@@ -236,7 +236,7 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 
 	// If it did not impact & did impact but not inside the bounds of the terrain,
 	if( didImpact == false || impactInsideTheBounds == false )
-		return RaycastResult( startPosition );			// Returns as if it did not hit!
+		return RaycastResult( position );			// Returns as if it did not hit!
 	else
 	{
 		Vector2 impactPositionXZ	= Vector2( position.x, position.z );
