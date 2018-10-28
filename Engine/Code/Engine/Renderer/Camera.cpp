@@ -238,6 +238,7 @@ UBOCameraMatrices Camera::GetUBOCameraMatrices() const
 {
 	UBOCameraMatrices toReturn;
 
+	toReturn.usesShadowMap		= m_shadowMapEnabled ? 1.f : 0.f;
 	toReturn.viewMatrix			= m_viewMatrix;
 	toReturn.projectionMatrix	= m_projMatrix;
 
