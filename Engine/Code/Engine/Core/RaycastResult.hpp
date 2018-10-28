@@ -10,6 +10,6 @@ public:
 	float	fractionTravelled;
 
 public:
-	RaycastResult( Vector3 const &startPosition );																// Defaults as if (didImpact = FALSE)
+	RaycastResult( Vector3 const &endPosition );																// Defaults as if (didImpact = FALSE)
 	RaycastResult( Vector3 const &impactPosition, Vector3 const &impactNormal, float fractionTravelled );		// didImpact = TRUE
 };

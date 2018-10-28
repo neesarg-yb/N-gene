@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Engine/Core/RaycastResult.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/DebugRenderer/DebugRenderObject.hpp"
@@ -103,3 +104,15 @@ void DebugRenderTag( float lifetime,
 	Rgba	const &startColor,
 	Rgba	const &endColor,
 	std::string	asciiText );
+
+void DebugRenderRaycast( float lifetime,
+	Vector3			const &startPosition,
+	RaycastResult	const &raycastResult,
+	float			const impactPointSize,
+	Rgba			const &colorOnImpact,
+	Rgba			const &colorOnNoImpact,
+	Rgba			const &impactPositionColor,
+	Rgba			const &impactNormalColor,
+	Rgba			const &startColor,
+	Rgba			const &endColor,
+	eDebugRenderMode mode );
