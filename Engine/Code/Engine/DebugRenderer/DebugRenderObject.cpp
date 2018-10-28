@@ -69,6 +69,8 @@ void DebugRenderObject::Render( Camera &camera ) const
 		break;
 
 	case FRONT_AND_BACK_LINE:
+		// i.e. wire-frame => we want to see all the sides
+		m_renderer.SetCullingMode( CULLMODE_NONE );
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		break;
 	}
@@ -82,9 +84,14 @@ void DebugRenderObject::Render( Camera &camera ) const
 	case DEBUG_RENDER_USE_DEPTH:
 		m_renderer.EnableDepth( COMPARE_LESS, true ); 
 		break;
-	default:
+	case DEBUG_RENDER_XRAY:
 		m_renderer.EnableDepth( COMPARE_LESS, true ); 
 		break;
+	case DEBUG_RENDER_HIDDEN:
+		m_renderer.EnableDepth( COMPARE_GREATER, false );
+		break;
+	default:
+		m_renderer.EnableDepth( COMPARE_LESS, true );
 	}
 
 	// Color Lerp
@@ -96,6 +103,13 @@ void DebugRenderObject::Render( Camera &camera ) const
 	m_renderer.BindCamera( &camera );
 	m_renderer.DrawMesh( *m_mesh, m_modelMatrix );
 
+	// Second render-pass for X-Ray
+	if( m_renderMode == DEBUG_RENDER_XRAY )
+	{
+		m_renderer.EnableDepth( COMPARE_GREATER, false );		// To Draw X-Ray without affecting the depth
+		m_renderer.SetUniform( "COLORLERP", RGBA_GRAY_COLOR );
+		m_renderer.DrawMesh( *m_mesh, m_modelMatrix );
+	}
 
 	// Reset after draw..
 	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
