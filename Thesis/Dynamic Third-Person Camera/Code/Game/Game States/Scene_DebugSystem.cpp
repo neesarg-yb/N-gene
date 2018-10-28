@@ -259,7 +259,7 @@ void Scene_DebugSystem::AddTestDebugRenderObjects()
 	float	positionYOffset		= SinDegree( g_angleOfRotation * 2.5f ) * 3.5f;
 	Vector3 debugSpherePosition	= Vector3( positionInXZPlane.x, g_rotateAroundCenter.y + positionYOffset, positionInXZPlane.y );
 
-	DebugRenderPoint( 0.f, 1.f, g_rotateAroundCenter, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderWireCube( 0.f, g_rotateAroundCenter - Vector3( 0.25f, 0.25f, 0.25f), g_rotateAroundCenter + Vector3( 0.25f, 0.25f, 0.25f), RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_XRAY );
 	DebugRenderWireSphere( 0.f, debugSpherePosition, 1.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
 	g_pointTimeElapsed += (float) m_clock->GetFrameDeltaSeconds();
