@@ -37,6 +37,14 @@ ForwardRenderingPath::~ForwardRenderingPath()
 	delete m_shadowCamera;
 }
 
+void ForwardRenderingPath::RenderScene( Scene &scene, Vector3 const *shadowCameraAnchorPos /*= nullptr */ ) const
+{
+	std::vector< Camera* > cameras = scene.m_cameras;
+
+	for each( Camera* camera in cameras )
+		RenderSceneForCamera( *camera, scene, shadowCameraAnchorPos );
+}
+
 void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, Vector3 const *shadowCameraAnchorPos /* = nullptr */ ) const
 {
 	// For each Lights, Render for ShadowMap

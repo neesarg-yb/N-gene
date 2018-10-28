@@ -405,3 +405,66 @@ void DebugRenderTag( float lifetime, float const height, Vector3 const &startPos
 	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( textObject );
 }
+
+void DebugRenderRaycast( float lifetime, Vector3 const &startPosition, RaycastResult const &raycastResult, float const impactPointSize, Rgba const &colorOnImpact, Rgba const &colorOnNoImpact, Rgba const &impactPositionColor, Rgba const &impactNormalColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
+{
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	// Draw the Ray
+	Vector3		localEndPosition = raycastResult.impactPosition - startPosition;
+	Rgba const &rayColor		 = raycastResult.didImpact ? colorOnImpact : colorOnNoImpact;
+
+	// Up until the impact point
+	mb.SetColor( rayColor );
+	mb.PushVertex( Vector3::ZERO );
+
+	mb.SetColor( rayColor );
+	mb.PushVertex( localEndPosition );
+
+	// Draw other info. only on impact
+	if( raycastResult.didImpact )
+	{
+		// Impact Position
+		Vector3	impactPointPosLocal	= localEndPosition;
+		float	halfSize			= impactPointSize * 0.5f;
+		
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f,  halfSize, 0.f ) );
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f, -halfSize, 0.f ) );
+
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3(  halfSize, 0.f, 0.f ) );
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( -halfSize, 0.f, 0.f ) );
+
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f, 0.f,  halfSize ) );
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f, 0.f, -halfSize ) );
+
+		// Impact Normal
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal );
+
+		mb.SetColor( impactNormalColor );
+		mb.PushVertex( impactPointPosLocal + raycastResult.impactNormal );
+
+		// After the impact point
+		Vector3 rayDirection	= localEndPosition;
+		float	lengthAtImpact	= rayDirection.NormalizeAndGetLength();
+		float	fullLength		= lengthAtImpact / raycastResult.fractionTravelled;
+		mb.SetColor( colorOnNoImpact );
+		mb.PushVertex( localEndPosition );
+		
+		mb.SetColor( colorOnNoImpact );
+		mb.PushVertex( localEndPosition + (rayDirection * (fullLength - lengthAtImpact)) );
+	}
+
+	mb.End();
+
+	Transform modelTransform = Transform( startPosition, Vector3::ZERO, Vector3::ONE_ALL );
+	DebugRenderObject *raycastDebugObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( raycastDebugObject );
+}

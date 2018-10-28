@@ -1,13 +1,13 @@
 #pragma once
 #include "RaycastResult.hpp"
 
-RaycastResult::RaycastResult( Vector3 const &startPosition )
+RaycastResult::RaycastResult( Vector3 const &endPosition )
 {
 	// Set values as if impact didn't happen at startPosition
 	didImpact			= false;
-	impactPosition		= startPosition;
+	impactPosition		= endPosition;
 	impactNormal		= Vector3::ZERO;
-	fractionTravelled	= 0.f;
+	fractionTravelled	= 1.f;
 }
 
 RaycastResult::RaycastResult( Vector3 const &impactPosition, Vector3 const &impactNormal, float fractionTravelled )
