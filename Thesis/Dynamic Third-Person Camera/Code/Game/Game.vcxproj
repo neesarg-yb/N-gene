@@ -360,6 +360,9 @@
     <None Include="..\..\Run_win32\Data\Shaders\combine_fs.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\combine_fs.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\combine_fs.vs" />
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.fs" />
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.shader" />
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\debug.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\debug.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\debug.vs" />
@@ -369,6 +372,7 @@
     <None Include="..\..\Run_win32\Data\Shaders\lit.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_alpha.shader" />
+    <None Include="..\..\Run_win32\Data\Shaders\lit_cull_none.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_bitangent.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_normal.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_tangent.shader" />

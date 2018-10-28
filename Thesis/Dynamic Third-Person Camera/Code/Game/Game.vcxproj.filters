@@ -332,6 +332,18 @@
     <None Include="..\..\Run_win32\Data\Materials\terrain_gridlines.material">
       <Filter>Materials</Filter>
     </None>
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_cull_none.shader">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader">

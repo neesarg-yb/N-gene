@@ -59,12 +59,13 @@ uniform float SPECULAR_POWER;
 // camera related
 uniform vec3 EYE_POSITION;
 
-in vec2 passUV;
-in vec4 passColor;
-in vec3 passWorldPos;   
-in vec3 passWorldNormal;
-in vec3 passWorldTangent;
-in vec3 passWorldBitangent;
+in vec2  passUV;
+in vec4  passColor;
+in vec3  passWorldPos;   
+in vec3  passWorldNormal;
+in vec3  passWorldTangent;
+in vec3  passWorldBitangent;
+in float passCameraUsesShadows;
 
 // Outputs
 layout(location = 0) out vec4 outColor; 
@@ -140,6 +141,7 @@ void main( void )
    #endif
 
 //   outColor = vec4( GetShadowFactor( passWorldPos, world_normal, LIGHTS[0] ) );
+//   outColor = vec4( passCameraUsesShadows, 1.f, 1.f, 1.f );
 }
 
 
@@ -237,7 +239,7 @@ float GetAttenuation( float lightIntensity, float distanceFromLight, vec3 attenu
 float GetShadowFactor( vec3 position, vec3 normal, LightData light )
 {
    float shadow = light.uses_shadow;
-   if (shadow == 0.0f) {
+   if (shadow == 0.0f || passCameraUsesShadows == 0.f) {
       return 1.0f; 
    }
 

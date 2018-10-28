@@ -2,8 +2,11 @@
 
 layout( binding = 2, std140 ) uniform uboCamera
 {
-	mat4 VIEW;
-	mat4 PROJECTION;
+   vec3    padding_04;
+   float   USES_SHADOW;
+
+   mat4    VIEW;
+   mat4    PROJECTION;
 };
 
 uniform mat4 MODEL;
@@ -15,12 +18,13 @@ in vec4 TANGENT;
 in vec4 COLOR; 
 in vec2 UV;
 
-out vec2 passUV; 
-out vec4 passColor;
-out vec3 passWorldPos;
-out vec3 passWorldNormal;
-out vec3 passWorldTangent;
-out vec3 passWorldBitangent;
+out vec2  passUV; 
+out vec4  passColor;
+out vec3  passWorldPos;
+out vec3  passWorldNormal;
+out vec3  passWorldTangent;
+out vec3  passWorldBitangent;
+out float passCameraUsesShadows;
 
 // Entry point - required.  What does this stage do?
 void main( void )
@@ -37,6 +41,7 @@ void main( void )
    passWorldNormal = (MODEL * vec4( NORMAL, 0.0f )).xyz; 
    passWorldTangent = normalize( (vec4( TANGENT.xyz, 0.0f ) * MODEL).xyz ); 
    passWorldBitangent = normalize( cross( passWorldTangent, passWorldNormal ) * TANGENT.w ); 
+   passCameraUsesShadows = USES_SHADOW;
 
    gl_Position = clip_pos;
 }
