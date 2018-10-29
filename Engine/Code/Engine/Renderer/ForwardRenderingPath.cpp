@@ -8,6 +8,7 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Renderable.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Profiler/Profiler.hpp"
@@ -36,6 +37,14 @@ ForwardRenderingPath::~ForwardRenderingPath()
 	delete m_shadowCamera;
 }
 
+void ForwardRenderingPath::RenderScene( Scene &scene, Vector3 const *shadowCameraAnchorPos /*= nullptr */ ) const
+{
+	std::vector< Camera* > cameras = scene.m_cameras;
+
+	for each( Camera* camera in cameras )
+		RenderSceneForCamera( *camera, scene, shadowCameraAnchorPos );
+}
+
 void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, Vector3 const *shadowCameraAnchorPos /* = nullptr */ ) const
 {
 	// For each Lights, Render for ShadowMap
@@ -44,7 +53,8 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, V
 	if( shadowCameraAnchorPos != nullptr )
 		shadowAnchorPosition = *shadowCameraAnchorPos;
 
-	RenderSceneForShadowMap( scene, shadowAnchorPosition );
+	if( camera.ShadowMapEnabled() )
+		RenderSceneForShadowMap( scene, shadowAnchorPosition );
 
 	// Bind the camera
 	m_renderer.BindCamera( &camera );
@@ -100,6 +110,9 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, V
 	}
 
 	camera.PostRender( m_renderer );
+
+	if( camera.RenderDebugObjectsEnabled() )
+		DebugRendererRender( &camera );
 }
 
 void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const &cameraAnchorPosition ) const

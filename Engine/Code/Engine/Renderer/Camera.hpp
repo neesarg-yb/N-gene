@@ -62,14 +62,16 @@ public:
 	void SetupForSkybox	( std::string pathToSkyboxImage );								// Enables the Skybox using the image at path
 	void RenderSkyBox	( Renderer &theRenderer );
 
+	// NDC to World
+	Vector3 GetWorldPositionFromNDC( Vector3 ndcPos ) const;
 	// Screen to World
-	Vector3	GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ = 0.f );
+	Vector3	GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ = 0.f ) const;
 	// World to Screen
-	Vector2 GetScreenPositionFromWorld( Vector3 const &worldPoint, float w );			// Assumes that center of screen is ( 0, 0 )
+	Vector2 GetScreenPositionFromWorld( Vector3 const &worldPoint, float w ) const;			// Assumes that center of screen is ( 0, 0 )
 
 public:
 	Transform		 m_cameraTransform;
-private:
+protected:
 	Matrix44		 m_viewMatrix;		// inverse of cameraMatrix (used for shader) (World to Camera)
 	Matrix44		 m_projMatrix;		// projection, identity by default.. (Camera to Clip)
 
@@ -77,7 +79,7 @@ public:
 	UniformBuffer	*m_cameraUBO		= nullptr;
 	FrameBuffer		 m_outputFramebuffer;
 
-private:
+protected:
 	// Camera Properties
 	float			m_aspectRatio		=  g_aspectRatio;	// Screen aspect ratio
 	float			m_fov				=  45.f;			// Field of View
@@ -96,7 +98,10 @@ public:
 	void SetFOVForPerspective			( float fov );
 	void SetNearAndFarForPerspective	( float cameraNear, float cameraFar );
 	
-private:
+protected:
+	bool			m_shadowMapEnabled	 = false;
+	bool			m_renderDebugObjects = true;
+
 	// Post Processing 
 	Texture*		m_bloomTexture		= nullptr;
 
@@ -107,4 +112,11 @@ private:
 	Matrix44		m_skyboxModel		= Matrix44();
 
 	void ApplyEffect( Shader *fullScreenEffect, Renderer &theRenderer, uint totalPasses = 1 );
+
+public:
+	inline void RenderDebugObjects( bool render = true ) { m_renderDebugObjects = render; }
+	inline bool RenderDebugObjectsEnabled() const		 { return m_renderDebugObjects; }
+
+	inline void EnableShadowMap( bool enable = true )	 { m_shadowMapEnabled = enable; }
+	inline bool ShadowMapEnabled() const				 { return m_shadowMapEnabled; }
 };

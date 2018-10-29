@@ -22,11 +22,11 @@ void DebugRenderObject::ToggleDebugRendering( Command& cmd )
 
 Shader* DebugRenderObject::s_debugShader = nullptr;
 
-DebugRenderObject::DebugRenderObject( float lifetime, Renderer &renderer, Camera &camera, Matrix44 modelMatrix, Mesh const *newMesh, Texture const *texture, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode renderMode /* = DEBUG_RENDER_USE_DEPTH */, eFillMode polygonMode /* = FRONT_AND_BACK_FILL */ )
+DebugRenderObject::DebugRenderObject( float lifetime, Renderer &renderer, eDebugRenderCameraType cameraType, Matrix44 modelMatrix, Mesh const *newMesh, Texture const *texture, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode renderMode /* = DEBUG_RENDER_USE_DEPTH */, eFillMode polygonMode /* = FRONT_AND_BACK_FILL */ )
 	: m_lifetime( lifetime )
 	, m_renderer( renderer )
+	, m_cameraType( cameraType )
 	, m_modelMatrix( modelMatrix )
-	, m_camera( camera )
 	, m_mesh( newMesh )
 	, m_texture( texture )
 	, m_startColor( startColor )
@@ -50,11 +50,11 @@ void DebugRenderObject::Update( float deltaSeconds )
 {
 	m_timeElapsed += deltaSeconds;
 
-	if( m_timeElapsed >= m_lifetime )
+	if( m_timeElapsed > m_lifetime )
 		m_deleteMe = true;
 }
 
-void DebugRenderObject::Render() const
+void DebugRenderObject::Render( Camera &camera ) const
 {
 	if( s_isDebugRenderingEnabled == false )
 		return;
@@ -69,6 +69,8 @@ void DebugRenderObject::Render() const
 		break;
 
 	case FRONT_AND_BACK_LINE:
+		// i.e. wire-frame => we want to see all the sides
+		m_renderer.SetCullingMode( CULLMODE_NONE );
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		break;
 	}
@@ -82,9 +84,14 @@ void DebugRenderObject::Render() const
 	case DEBUG_RENDER_USE_DEPTH:
 		m_renderer.EnableDepth( COMPARE_LESS, true ); 
 		break;
-	default:
+	case DEBUG_RENDER_XRAY:
 		m_renderer.EnableDepth( COMPARE_LESS, true ); 
 		break;
+	case DEBUG_RENDER_HIDDEN:
+		m_renderer.EnableDepth( COMPARE_GREATER, false );
+		break;
+	default:
+		m_renderer.EnableDepth( COMPARE_LESS, true );
 	}
 
 	// Color Lerp
@@ -93,9 +100,16 @@ void DebugRenderObject::Render() const
 	m_renderer.SetUniform( "COLORLERP", debugColorLerp );
 
 	m_renderer.SetCurrentDiffuseTexture( m_texture );
-	m_renderer.BindCamera( &m_camera );
+	m_renderer.BindCamera( &camera );
 	m_renderer.DrawMesh( *m_mesh, m_modelMatrix );
 
+	// Second render-pass for X-Ray
+	if( m_renderMode == DEBUG_RENDER_XRAY )
+	{
+		m_renderer.EnableDepth( COMPARE_GREATER, false );		// To Draw X-Ray without affecting the depth
+		m_renderer.SetUniform( "COLORLERP", RGBA_GRAY_COLOR );
+		m_renderer.DrawMesh( *m_mesh, m_modelMatrix );
+	}
 
 	// Reset after draw..
 	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );

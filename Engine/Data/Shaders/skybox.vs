@@ -5,11 +5,14 @@ in vec3 POSITION;
 
 out vec3 passWorldPosition;
 
-layout(binding=2, std140) uniform uboCamera 
+layout( binding = 2, std140 ) uniform uboCamera
 {
-   mat4 VIEW;
-   mat4 PROJECTION; 
-}; 
+   vec3    padding_04;
+   float   USES_SHADOW;
+
+   mat4    VIEW;
+   mat4    PROJECTION;
+};
 
 uniform mat4 MODEL;
 

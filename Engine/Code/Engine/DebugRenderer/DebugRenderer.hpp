@@ -1,24 +1,25 @@
 #pragma once
 #include <string>
+#include "Engine/Core/RaycastResult.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/DebugRenderer/DebugRenderObject.hpp"
 
+class Camera;
 class Command;
 
 
 ////////////////////////
 // Startup & Shutdown //
 ////////////////////////
-void DebugRendererStartup( Renderer *activeRenderer, Camera *camera3D );	// Uses windowSize to create a camera2D. Where (0,0) is center
+void DebugRendererStartup( Renderer *activeRenderer );	// Uses windowSize to create a camera2D. Where (0,0) is center
 void DebugRendererShutdown();
-void DebugRendererChange3DCamera( Camera *camera3D );
 
 /////////////////////
 // Update & Render //
 /////////////////////
-void DebugRendererUpdate( float deltaSeconds );
-void DebugRendererRender();
+void DebugRendererUpdate( Clock const *clock );								// If set to nullptr, uses the Master Clock
+void DebugRendererRender( Camera *camera3D );
 void ClearAllRenderingObjects( Command& cmd );
 
 
@@ -104,3 +105,23 @@ void DebugRenderTag( float lifetime,
 	Rgba	const &startColor,
 	Rgba	const &endColor,
 	std::string	asciiText );
+
+void DebugRenderRaycast( float lifetime,
+	Vector3			const &startPosition,
+	RaycastResult	const &raycastResult,
+	float			const impactPointSize,
+	Rgba			const &colorOnImpact,
+	Rgba			const &colorOnNoImpact,
+	Rgba			const &impactPositionColor,
+	Rgba			const &impactNormalColor,
+	Rgba			const &startColor,
+	Rgba			const &endColor,
+	eDebugRenderMode mode );
+
+void DebugRenderCamera( float lifetime,
+	Camera			const &camera,
+	float			const cameraBodySize,
+	Rgba			const &frustumColor,
+	Rgba			const &startColor,
+	Rgba			const &endColor,
+	eDebugRenderMode mode );

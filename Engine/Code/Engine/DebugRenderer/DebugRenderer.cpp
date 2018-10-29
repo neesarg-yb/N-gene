@@ -1,15 +1,17 @@
 #pragma once
 #include "DebugRenderer.hpp"
 #include "Engine/Core/Window.hpp"
-#include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/Core/Clock.hpp"
+#include "Engine/Core/DevConsole.hpp"
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Input/Command.hpp"
-#include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/Renderer/Camera.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 
 
 Renderer									*debugRenderer				= nullptr;
-Camera										*debugCamera3D				= nullptr;
 Camera										*debugCamera2D				= nullptr;
 BitmapFont									*debugFont					= nullptr;
 std::vector< DebugRenderObject* >			 debugRenderObjectQueue;
@@ -18,10 +20,9 @@ std::vector< DebugRenderObject* >			 debugRenderObjectQueue;
 void EmptyTheRenderObjectQueue();
 void DeleteOverdueRenderObjects();
 
-void DebugRendererStartup( Renderer *activeRenderer, Camera *camera3D )
+void DebugRendererStartup( Renderer *activeRenderer )
 {
 	debugRenderer = activeRenderer;
-	debugCamera3D = camera3D;
 	debugCamera2D = new Camera();
 
 	debugCamera2D->SetColorTarget( Renderer::GetDefaultColorTarget() );
@@ -42,30 +43,30 @@ void DebugRendererShutdown()
 	EmptyTheRenderObjectQueue();
 }
 
-void DebugRendererChange3DCamera( Camera *camera3D )
-{
-	debugCamera3D = camera3D;
-}
-
-void DebugRendererUpdate( float deltaSeconds )
+void DebugRendererUpdate( Clock const *clock )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 	
+	Clock const *activeClock	= (clock != nullptr) ? clock : GetMasterClock();
+	float const  deltaSeconds	= (float) activeClock->frame.seconds;
+
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
 		renderObject->Update( deltaSeconds );
 
 	DeleteOverdueRenderObjects();
-
 }
 
-void DebugRendererRender()
+void DebugRendererRender( Camera *camera3D )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
-		renderObject->Render();
+	{
+		Camera &activeCamera = (renderObject->m_cameraType == DEBUG_CAMERA_2D) ? *debugCamera2D : *camera3D;
+		renderObject->Render( activeCamera );
+	}
 }
 
 void ClearAllRenderingObjects( Command& cmd )
@@ -223,7 +224,7 @@ void DebugRender2DQuad( float lifetime, AABB2 const &bounds, Rgba const &startCo
 	mb.End();
 	
 	Transform modelTransform = Transform( centerPos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( quadObject );
 }
 
@@ -241,7 +242,7 @@ void DebugRender2DLine( float lifetime, Vector2 const &p0, Rgba const &p0Color, 
 	mb.End();
 
 	Transform modelTransform = Transform( centerPos.GetAsVector3(), Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, tintStartColor, tintEndColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, tintStartColor, tintEndColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( lineObject );
 }
 
@@ -270,7 +271,7 @@ void DebugRender2DText( float lifetime, Vector2 const &position, float const hei
 	mb.End();
 
 	Transform modelTransform = Transform( position.GetAsVector3(), Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( textObject );
 }
 
@@ -292,7 +293,7 @@ void DebugRenderPoint( float lifetime, float size, Vector3 const &position, Rgba
 	mb.End();
 
 	Transform modelTransform = Transform( position, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *pointObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	DebugRenderObject *pointObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( pointObject );
 }
 
@@ -310,7 +311,7 @@ void DebugRenderLineSegment( float lifetime, Vector3 const &p0, Rgba const &p0Co
 	mb.End();
 
 	Transform modelTransform = Transform( centerPos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( lineObject );
 }
 
@@ -340,7 +341,7 @@ void DebugRenderBasis( float lifetime, Matrix44 const &basis, Rgba const &startC
 	mb.End();
 
 	Transform modelTransform = Transform( basis.GetTColumn(), Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *basisLines = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	DebugRenderObject *basisLines = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( basisLines );
 }
 
@@ -349,7 +350,7 @@ void DebugRenderSphere( float lifetime, Vector3 const &pos, float const radius, 
 	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, Vector3::ZERO );
 
 	Transform modelTransform = Transform( pos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_FILL );
+	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_FILL );
 	debugRenderObjectQueue.push_back( wireSphereObject );
 }
 
@@ -358,7 +359,7 @@ void DebugRenderWireSphere( float lifetime, Vector3 const &pos, float const radi
 	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, Vector3::ZERO );
 
 	Transform modelTransform = Transform( pos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
+	DebugRenderObject *wireSphereObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), wireSphereMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
 	debugRenderObjectQueue.push_back( wireSphereObject );
 }
 
@@ -369,7 +370,7 @@ void DebugRenderWireCube( float lifetime, Vector3 const &bottomLeftFront, Vector
 	Mesh* cubeMesh	= MeshBuilder::CreateCube( size, Vector3::ZERO );
 	
 	Transform modelTransform = Transform( center, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *wireCubeObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), cubeMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
+	DebugRenderObject *wireCubeObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), cubeMesh, nullptr, startColor, endColor, mode, FRONT_AND_BACK_LINE );
 	debugRenderObjectQueue.push_back( wireCubeObject );
 }
 
@@ -378,7 +379,7 @@ void DebugRenderQuad( float lifetime, Vector3 const &pos, Vector3 const &eulerRo
 	Transform modelTransform = Transform( pos, eulerRotation, Vector3::ONE_ALL );
 	Mesh* quadMesh	= MeshBuilder::CreatePlane( xySize, Vector3::ZERO );
 
-	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), quadMesh, texture, startColor, endColor, mode, FRONT_AND_BACK_FILL );
+	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), quadMesh, texture, startColor, endColor, mode, FRONT_AND_BACK_FILL );
 	debugRenderObjectQueue.push_back( quadObject );
 }
 
@@ -403,6 +404,225 @@ void DebugRenderTag( float lifetime, float const height, Vector3 const &startPos
 	mb.End();
 
 	Transform modelTransform = Transform( startPos, Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, *debugCamera3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	DebugRenderObject *textObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), &debugFont->m_spriteSheet.m_spriteSheetTexture, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
 	debugRenderObjectQueue.push_back( textObject );
+}
+
+void DebugRenderRaycast( float lifetime, Vector3 const &startPosition, RaycastResult const &raycastResult, float const impactPointSize, Rgba const &colorOnImpact, Rgba const &colorOnNoImpact, Rgba const &impactPositionColor, Rgba const &impactNormalColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
+{
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	// Draw the Ray
+	Vector3		localEndPosition = raycastResult.impactPosition - startPosition;
+	Rgba const &rayColor		 = raycastResult.didImpact ? colorOnImpact : colorOnNoImpact;
+
+	// Up until the impact point
+	mb.SetColor( rayColor );
+	mb.PushVertex( Vector3::ZERO );
+
+	mb.SetColor( rayColor );
+	mb.PushVertex( localEndPosition );
+
+	// Draw other info. only on impact
+	if( raycastResult.didImpact )
+	{
+		// Impact Position
+		Vector3	impactPointPosLocal	= localEndPosition;
+		float	halfSize			= impactPointSize * 0.5f;
+		
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f,  halfSize, 0.f ) );
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f, -halfSize, 0.f ) );
+
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3(  halfSize, 0.f, 0.f ) );
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( -halfSize, 0.f, 0.f ) );
+
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f, 0.f,  halfSize ) );
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal + Vector3( 0.f, 0.f, -halfSize ) );
+
+		// Impact Normal
+		mb.SetColor( impactPositionColor );
+		mb.PushVertex( impactPointPosLocal );
+
+		mb.SetColor( impactNormalColor );
+		mb.PushVertex( impactPointPosLocal + raycastResult.impactNormal );
+
+		// After the impact point
+		Vector3 rayDirection	= localEndPosition;
+		float	lengthAtImpact	= rayDirection.NormalizeAndGetLength();
+		float	fullLength		= lengthAtImpact / raycastResult.fractionTravelled;
+		mb.SetColor( colorOnNoImpact );
+		mb.PushVertex( localEndPosition );
+		
+		mb.SetColor( colorOnNoImpact );
+		mb.PushVertex( localEndPosition + (rayDirection * (fullLength - lengthAtImpact)) );
+	}
+
+	mb.End();
+
+	Transform modelTransform = Transform( startPosition, Vector3::ZERO, Vector3::ONE_ALL );
+	DebugRenderObject *raycastDebugObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( raycastDebugObject );
+}
+
+void DebugRenderCamera( float lifetime, Camera const &camera, float const cameraBodySize, Rgba const &frustumColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
+{
+	Vector3 cameraWorldPos = camera.m_cameraTransform.GetWorldPosition();
+
+	// World to Camera
+	Matrix44 worldToCameraMat = camera.GetViewMatrix();
+	// Camera to Clip
+	Matrix44 cameraToClipMat = camera.GetProjectionMatrix();
+	// So.. World to Clip
+	Matrix44 worldToClipMatrix( cameraToClipMat );
+	worldToClipMatrix.Append( worldToCameraMat );						// => WORLD_TO_CLIP = (CAMERA_TO_CLIP * WORLD_TO_CAMERA)
+
+	Matrix44 clipToWorldMatrix;
+	bool inverted = worldToClipMatrix.GetInverse( clipToWorldMatrix );	// => CLIP_TO_WORLD = inverse( WORLD_TO_CLIP )
+	GUARANTEE_RECOVERABLE( inverted, "Warning: Couln't inverse the Matrix!!" );
+
+	// Camera Frustum view of far plane - from backside
+	//  
+	// J      far plane     A
+	//  |------------------|
+	//  |                  |
+	//  |        * C       | far plane
+	//  |                  |
+	//  |------------------|
+	// K                    B
+	// 
+	Vector4 fJ4 = clipToWorldMatrix.Multiply( Vector4( -1.f,  1.f,  1.f,  1.f ) );
+	Vector4 fA4 = clipToWorldMatrix.Multiply( Vector4(  1.f,  1.f,  1.f,  1.f ) );
+	Vector4 fB4 = clipToWorldMatrix.Multiply( Vector4(  1.f, -1.f,  1.f,  1.f ) );
+	Vector4 fK4 = clipToWorldMatrix.Multiply( Vector4( -1.f, -1.f,  1.f,  1.f ) );
+	Vector4 nJ4 = clipToWorldMatrix.Multiply( Vector4( -1.f,  1.f, -1.f,  1.f ) );
+	Vector4 nA4 = clipToWorldMatrix.Multiply( Vector4(  1.f,  1.f, -1.f,  1.f ) );
+	Vector4 nB4 = clipToWorldMatrix.Multiply( Vector4(  1.f, -1.f, -1.f,  1.f ) );
+	Vector4 nK4 = clipToWorldMatrix.Multiply( Vector4( -1.f, -1.f, -1.f,  1.f ) );
+
+	Vector3 farJ  = (fJ4.IgnoreW() / fJ4.w) - cameraWorldPos;
+	Vector3 farA  = (fA4.IgnoreW() / fA4.w) - cameraWorldPos;
+	Vector3 farB  = (fB4.IgnoreW() / fB4.w) - cameraWorldPos;
+	Vector3 farK  = (fK4.IgnoreW() / fK4.w) - cameraWorldPos;
+	Vector3 nearJ = (nJ4.IgnoreW() / nJ4.w) - cameraWorldPos;
+	Vector3 nearA = (nA4.IgnoreW() / nA4.w) - cameraWorldPos;
+	Vector3 nearB = (nB4.IgnoreW() / nB4.w) - cameraWorldPos;
+	Vector3 nearK = (nK4.IgnoreW() / nK4.w) - cameraWorldPos;
+
+	// Add these four edges in the mesh builder
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	// Camera Pos. to Near
+	// J Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( nearJ );
+	// A Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( nearA );
+	// B Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( nearB );
+	// K Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( nearK );
+
+	// Camera Near to Far
+	// J Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearJ );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farJ );
+	// A Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearA );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farA );
+	// B Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearB );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farB );
+	// K Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearK );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farK );
+
+	// Far Plane's rectangle
+	// JA
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farJ );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farA );
+
+	// AB
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farA );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farB );
+
+	// BK
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farB );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farK );
+
+	// KJ
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farK );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( farJ );
+
+	// Near Plane's rectangle
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearJ );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearA );
+
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearA );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearB );
+
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearB );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearK );
+
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearK );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearJ );
+
+	mb.End();
+
+	// Camera Frustum
+	Transform modelTransform = Transform( cameraWorldPos, Vector3::ZERO, Vector3::ONE_ALL );
+	DebugRenderObject *cameraFrustumDebugObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( cameraFrustumDebugObject );
+
+	// Camera Body
+	mb = MeshBuilder();
+	mb.Begin( PRIMITIVE_TRIANGES, true );
+	mb.AddCube( Vector3( 0.7f, 0.7f, 1.f ), Vector3( 0.f, 0.f, -0.5f ), frustumColor );
+	mb.End();
+
+	modelTransform = Transform( cameraWorldPos, camera.m_cameraTransform.GetRotation(), Vector3( cameraBodySize, cameraBodySize, cameraBodySize ) );
+	DebugRenderObject* cameraBodyDebugObject =  new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( cameraBodyDebugObject );
 }
