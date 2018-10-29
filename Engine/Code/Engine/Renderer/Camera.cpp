@@ -281,7 +281,32 @@ void Camera::RenderSkyBox( Renderer &theRenderer )
 	theRenderer.DrawMesh( *m_skyboxMesh, m_skyboxModel );
 }
 
-Vector3 Camera::GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ /* = 0.f */ )
+Vector3 Camera::GetWorldPositionFromNDC( Vector3 ndcPos ) const
+{
+	// NDC to View
+	Matrix44 invProjMatrix;	
+	bool valid			= m_projMatrix.GetInverse( invProjMatrix );
+	Vector4	 viewPos	= invProjMatrix.Multiply( Vector4( ndcPos, 1.f ) );
+	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
+	// 
+	// 	std::string viewString = Stringf( "View: ( %f, %f, %f, %f )", viewPos.x, viewPos.y, viewPos.z, viewPos.w );
+	// 	DebugRender2DText( 0.f, Vector2(-380.f, -380.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, viewString.c_str() );
+
+	// View to World
+	Matrix44 invViewMatrix;
+	valid				= m_viewMatrix.GetInverse( invViewMatrix );
+	Vector4 worldPos4	= invViewMatrix.Multiply( viewPos );
+	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
+
+	Vector3 worldPos	= Vector3( worldPos4.x, worldPos4.y, worldPos4.z ) / worldPos4.w;
+	// 
+	// 	std::string worldString = Stringf( "World: ( %f, %f, %f )", worldPos.x, worldPos.y, worldPos.z );
+	// 	DebugRender2DText( 0.f, Vector2(-380.f, -360.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, worldString.c_str() );
+
+	return worldPos;
+}
+
+Vector3 Camera::GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ /* = 0.f */ ) const
 {
 	// Screen to NDC
 	Vector3 ndcXYZ;
@@ -292,30 +317,12 @@ Vector3 Camera::GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ /
 // 	std::string ndcString = Stringf( "NDC: ( %f, %f, %f )", ndcXYZ.x, ndcXYZ.y, ndcXYZ.z );
 // 	DebugRender2DText( 0.f, Vector2(-380.f, -400.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, ndcString.c_str() );
 
-	// NDC to View
-	Matrix44 invProjMatrix;	
-	bool valid			= m_projMatrix.GetInverse( invProjMatrix );
-	Vector4	 viewPos	= invProjMatrix.Multiply( Vector4( ndcXYZ, 1.f ) );
-	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
-// 
-// 	std::string viewString = Stringf( "View: ( %f, %f, %f, %f )", viewPos.x, viewPos.y, viewPos.z, viewPos.w );
-// 	DebugRender2DText( 0.f, Vector2(-380.f, -380.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, viewString.c_str() );
-
-	// View to World
-	Matrix44 invViewMatrix;
-	valid				= m_viewMatrix.GetInverse( invViewMatrix );
-	Vector4 worldPos4	= invViewMatrix.Multiply( viewPos );
-	GUARANTEE_RECOVERABLE( valid, "Warning: Couln't inverse the Matrix!!" );
-
-	Vector3 worldPos	= Vector3( worldPos4.x, worldPos4.y, worldPos4.z ) / worldPos4.w;
-// 
-// 	std::string worldString = Stringf( "World: ( %f, %f, %f )", worldPos.x, worldPos.y, worldPos.z );
-// 	DebugRender2DText( 0.f, Vector2(-380.f, -360.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, worldString.c_str() );
+	Vector3 worldPos = GetWorldPositionFromNDC( ndcXYZ );
 
 	return worldPos;
 }
 
-Vector2 Camera::GetScreenPositionFromWorld( Vector3 const &worldPoint, float w )
+Vector2 Camera::GetScreenPositionFromWorld( Vector3 const &worldPoint, float w ) const
 {
 	// World to Camera
 	Vector4 posInCamera = m_viewMatrix.Multiply( Vector4( worldPoint, w ) );

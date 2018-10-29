@@ -118,8 +118,9 @@ void DebugRenderRaycast( float lifetime,
 	Rgba			const &endColor,
 	eDebugRenderMode mode );
 
-void DebugRenderPerspectiveCamera( float lifetime,
+void DebugRenderCamera( float lifetime,
 	Camera			const &camera,
+	float			const cameraBodySize,
 	Rgba			const &frustumColor,
 	Rgba			const &startColor,
 	Rgba			const &endColor,

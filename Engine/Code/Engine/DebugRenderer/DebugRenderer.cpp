@@ -471,26 +471,25 @@ void DebugRenderRaycast( float lifetime, Vector3 const &startPosition, RaycastRe
 	debugRenderObjectQueue.push_back( raycastDebugObject );
 }
 
-void DebugRenderPerspectiveCamera( float lifetime, Camera const &camera, Rgba const &frustumColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
+void DebugRenderCamera( float lifetime, Camera const &camera, float const cameraBodySize, Rgba const &frustumColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
 {
-	float cameraAspect	= camera.GetAspectRatio();
-	float farPlane		= camera.GetCameraFar();
-	float nearPlane		= camera.GetCameraNear();
-	float theta			= camera.GetFOV() * 0.5f;		// Half of the horizontal FOV
-	float alpha			= theta / cameraAspect;			// Half of the vertical   FOV
-	
-	GUARANTEE_RECOVERABLE( fmodf(theta, 90.f) != 0.0, "DebugRenderPerspectiveCamera: FOV can't be 180 degrees!" );
-	GUARANTEE_RECOVERABLE( fmodf(alpha, 90.f) != 0.0, "DebugRenderPerspectiveCamera: FOV can't be 180 degrees!" );
+	Vector3 cameraWorldPos = camera.m_cameraTransform.GetWorldPosition();
 
-	// Get distance on edges: for near & far planes
-	float farEdgeDistance	= farPlane  / CosDegree( theta );
-	float nearEdgeDistance	= nearPlane / CosDegree( theta );
-	farEdgeDistance	 /= CosDegree( alpha );
-	nearEdgeDistance /= CosDegree( alpha );
+	// World to Camera
+	Matrix44 worldToCameraMat = camera.GetViewMatrix();
+	// Camera to Clip
+	Matrix44 cameraToClipMat = camera.GetProjectionMatrix();
+	// So.. World to Clip
+	Matrix44 worldToClipMatrix( cameraToClipMat );
+	worldToClipMatrix.Append( worldToCameraMat );						// => WORLD_TO_CLIP = (CAMERA_TO_CLIP * WORLD_TO_CAMERA)
+
+	Matrix44 clipToWorldMatrix;
+	bool inverted = worldToClipMatrix.GetInverse( clipToWorldMatrix );	// => CLIP_TO_WORLD = inverse( WORLD_TO_CLIP )
+	GUARANTEE_RECOVERABLE( inverted, "Warning: Couln't inverse the Matrix!!" );
 
 	// Camera Frustum view of far plane - from backside
 	//  
-	// J                    A
+	// J      far plane     A
 	//  |------------------|
 	//  |                  |
 	//  |        * C       | far plane
@@ -498,21 +497,23 @@ void DebugRenderPerspectiveCamera( float lifetime, Camera const &camera, Rgba co
 	//  |------------------|
 	// K                    B
 	// 
-	// Get the directions of the each edges from camera's position: CJ, CA, CB, & CK
-	Matrix44	const cameraWorldMatrix	= camera.m_cameraTransform.GetWorldTransformMatrix();
-	Vector3		const cameraRight		= cameraWorldMatrix.GetIColumn();
-	Vector3		const cameraUp			= cameraWorldMatrix.GetJColumn();
-	Vector3		const cameraForward		= cameraWorldMatrix.GetKColumn();
+	Vector4 fJ4 = clipToWorldMatrix.Multiply( Vector4( -1.f,  1.f,  1.f,  1.f ) );
+	Vector4 fA4 = clipToWorldMatrix.Multiply( Vector4(  1.f,  1.f,  1.f,  1.f ) );
+	Vector4 fB4 = clipToWorldMatrix.Multiply( Vector4(  1.f, -1.f,  1.f,  1.f ) );
+	Vector4 fK4 = clipToWorldMatrix.Multiply( Vector4( -1.f, -1.f,  1.f,  1.f ) );
+	Vector4 nJ4 = clipToWorldMatrix.Multiply( Vector4( -1.f,  1.f, -1.f,  1.f ) );
+	Vector4 nA4 = clipToWorldMatrix.Multiply( Vector4(  1.f,  1.f, -1.f,  1.f ) );
+	Vector4 nB4 = clipToWorldMatrix.Multiply( Vector4(  1.f, -1.f, -1.f,  1.f ) );
+	Vector4 nK4 = clipToWorldMatrix.Multiply( Vector4( -1.f, -1.f, -1.f,  1.f ) );
 
-	Quaternion const posThetaRotation( cameraUp,	 theta );
-	Quaternion const negThetaRotation( cameraUp,	-theta );
-	Quaternion const posAlphaRotation( cameraRight,	 alpha );
-	Quaternion const negAlphaRotation( cameraRight,	-alpha );
-
-	Vector3 aDir = negAlphaRotation.RotatePoint( posThetaRotation.RotatePoint( cameraForward ) );
-	Vector3 bDir = posAlphaRotation.RotatePoint( posThetaRotation.RotatePoint( cameraForward ) );
-	Vector3 jDir = negAlphaRotation.RotatePoint( negThetaRotation.RotatePoint( cameraForward ) );
-	Vector3 kDir = posAlphaRotation.RotatePoint( negThetaRotation.RotatePoint( cameraForward ) );
+	Vector3 farJ  = (fJ4.IgnoreW() / fJ4.w) - cameraWorldPos;
+	Vector3 farA  = (fA4.IgnoreW() / fA4.w) - cameraWorldPos;
+	Vector3 farB  = (fB4.IgnoreW() / fB4.w) - cameraWorldPos;
+	Vector3 farK  = (fK4.IgnoreW() / fK4.w) - cameraWorldPos;
+	Vector3 nearJ = (nJ4.IgnoreW() / nJ4.w) - cameraWorldPos;
+	Vector3 nearA = (nA4.IgnoreW() / nA4.w) - cameraWorldPos;
+	Vector3 nearB = (nB4.IgnoreW() / nB4.w) - cameraWorldPos;
+	Vector3 nearK = (nK4.IgnoreW() / nK4.w) - cameraWorldPos;
 
 	// Add these four edges in the mesh builder
 	MeshBuilder mb;
@@ -523,94 +524,105 @@ void DebugRenderPerspectiveCamera( float lifetime, Camera const &camera, Rgba co
 	mb.SetColor( RGBA_GRAY_COLOR );
 	mb.PushVertex( Vector3::ZERO );
 	mb.SetColor( RGBA_GRAY_COLOR );
-	mb.PushVertex( jDir * nearEdgeDistance );
+	mb.PushVertex( nearJ );
 	// A Edge
 	mb.SetColor( RGBA_GRAY_COLOR );
 	mb.PushVertex( Vector3::ZERO );
 	mb.SetColor( RGBA_GRAY_COLOR );
-	mb.PushVertex( aDir * nearEdgeDistance );
+	mb.PushVertex( nearA );
 	// B Edge
 	mb.SetColor( RGBA_GRAY_COLOR );
 	mb.PushVertex( Vector3::ZERO );
 	mb.SetColor( RGBA_GRAY_COLOR );
-	mb.PushVertex( bDir * nearEdgeDistance );
+	mb.PushVertex( nearB );
 	// K Edge
 	mb.SetColor( RGBA_GRAY_COLOR );
 	mb.PushVertex( Vector3::ZERO );
 	mb.SetColor( RGBA_GRAY_COLOR );
-	mb.PushVertex( kDir * nearEdgeDistance );
+	mb.PushVertex( nearK );
 
 	// Camera Near to Far
 	// J Edge
 	mb.SetColor( frustumColor );
-	mb.PushVertex( jDir * nearEdgeDistance );
+	mb.PushVertex( nearJ );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( jDir * farEdgeDistance );
+	mb.PushVertex( farJ );
 	// A Edge
 	mb.SetColor( frustumColor );
-	mb.PushVertex( aDir * nearEdgeDistance );
+	mb.PushVertex( nearA );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( aDir * farEdgeDistance );
+	mb.PushVertex( farA );
 	// B Edge
 	mb.SetColor( frustumColor );
-	mb.PushVertex( bDir * nearEdgeDistance );
+	mb.PushVertex( nearB );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( bDir * farEdgeDistance );
+	mb.PushVertex( farB );
 	// K Edge
 	mb.SetColor( frustumColor );
-	mb.PushVertex( kDir * nearEdgeDistance );
+	mb.PushVertex( nearK );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( kDir * farEdgeDistance );
+	mb.PushVertex( farK );
 
 	// Far Plane's rectangle
 	// JA
 	mb.SetColor( frustumColor );
-	mb.PushVertex( jDir * farEdgeDistance );
+	mb.PushVertex( farJ );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( aDir * farEdgeDistance );
+	mb.PushVertex( farA );
 
 	// AB
 	mb.SetColor( frustumColor );
-	mb.PushVertex( aDir * farEdgeDistance );
+	mb.PushVertex( farA );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( bDir * farEdgeDistance );
+	mb.PushVertex( farB );
 
 	// BK
 	mb.SetColor( frustumColor );
-	mb.PushVertex( bDir * farEdgeDistance );
+	mb.PushVertex( farB );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( kDir * farEdgeDistance );
+	mb.PushVertex( farK );
 
 	// KJ
 	mb.SetColor( frustumColor );
-	mb.PushVertex( kDir * farEdgeDistance );
+	mb.PushVertex( farK );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( jDir * farEdgeDistance );
+	mb.PushVertex( farJ );
 
-	// Similar rectangle for near plane
+	// Near Plane's rectangle
 	mb.SetColor( frustumColor );
-	mb.PushVertex( jDir * nearEdgeDistance );
+	mb.PushVertex( nearJ );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( aDir * nearEdgeDistance );
-
-	mb.SetColor( frustumColor );
-	mb.PushVertex( aDir * nearEdgeDistance );
-	mb.SetColor( frustumColor );
-	mb.PushVertex( bDir * nearEdgeDistance );
+	mb.PushVertex( nearA );
 
 	mb.SetColor( frustumColor );
-	mb.PushVertex( bDir * nearEdgeDistance );
+	mb.PushVertex( nearA );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( kDir * nearEdgeDistance );
+	mb.PushVertex( nearB );
 
 	mb.SetColor( frustumColor );
-	mb.PushVertex( kDir * nearEdgeDistance );
+	mb.PushVertex( nearB );
 	mb.SetColor( frustumColor );
-	mb.PushVertex( jDir * nearEdgeDistance );
+	mb.PushVertex( nearK );
+
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearK );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( nearJ );
 
 	mb.End();
 
-	Transform modelTransform = Transform( camera.m_cameraTransform.GetWorldPosition(), Vector3::ZERO, Vector3::ONE_ALL );
-	DebugRenderObject *cameraDebugObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
-	debugRenderObjectQueue.push_back( cameraDebugObject );
+	// Camera Frustum
+	Transform modelTransform = Transform( cameraWorldPos, Vector3::ZERO, Vector3::ONE_ALL );
+	DebugRenderObject *cameraFrustumDebugObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( cameraFrustumDebugObject );
+
+	// Camera Body
+	mb = MeshBuilder();
+	mb.Begin( PRIMITIVE_TRIANGES, true );
+	mb.AddCube( Vector3( 0.7f, 0.7f, 1.f ), Vector3( 0.f, 0.f, -0.5f ), frustumColor );
+	mb.End();
+
+	modelTransform = Transform( cameraWorldPos, camera.m_cameraTransform.GetRotation(), Vector3( cameraBodySize, cameraBodySize, cameraBodySize ) );
+	DebugRenderObject* cameraBodyDebugObject =  new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( cameraBodyDebugObject );
 }

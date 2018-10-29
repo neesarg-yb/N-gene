@@ -62,10 +62,12 @@ public:
 	void SetupForSkybox	( std::string pathToSkyboxImage );								// Enables the Skybox using the image at path
 	void RenderSkyBox	( Renderer &theRenderer );
 
+	// NDC to World
+	Vector3 GetWorldPositionFromNDC( Vector3 ndcPos ) const;
 	// Screen to World
-	Vector3	GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ = 0.f );
+	Vector3	GetWorldPositionFromScreen( Vector2 screenPosition, float ndcZ = 0.f ) const;
 	// World to Screen
-	Vector2 GetScreenPositionFromWorld( Vector3 const &worldPoint, float w );			// Assumes that center of screen is ( 0, 0 )
+	Vector2 GetScreenPositionFromWorld( Vector3 const &worldPoint, float w ) const;			// Assumes that center of screen is ( 0, 0 )
 
 public:
 	Transform		 m_cameraTransform;
