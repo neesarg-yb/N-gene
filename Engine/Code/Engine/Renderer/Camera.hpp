@@ -99,7 +99,8 @@ public:
 	void SetNearAndFarForPerspective	( float cameraNear, float cameraFar );
 	
 protected:
-	bool			m_shadowMapEnabled	= false;
+	bool			m_shadowMapEnabled	 = false;
+	bool			m_renderDebugObjects = true;
 
 	// Post Processing 
 	Texture*		m_bloomTexture		= nullptr;
@@ -113,6 +114,9 @@ protected:
 	void ApplyEffect( Shader *fullScreenEffect, Renderer &theRenderer, uint totalPasses = 1 );
 
 public:
-	inline void EnableShadowMap( bool enable = true )	{ m_shadowMapEnabled = enable; }
-	inline bool ShadowMapEnabled() const				{ return m_shadowMapEnabled; }
+	inline void RenderDebugObjects( bool render = true ) { m_renderDebugObjects = render; }
+	inline bool RenderDebugObjectsEnabled() const		 { return m_renderDebugObjects; }
+
+	inline void EnableShadowMap( bool enable = true )	 { m_shadowMapEnabled = enable; }
+	inline bool ShadowMapEnabled() const				 { return m_shadowMapEnabled; }
 };

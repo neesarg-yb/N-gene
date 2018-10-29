@@ -41,7 +41,9 @@ Texture::Texture( Image& image )
 Texture::~Texture()
 {
 	if( m_textureID > 0 )
-		glDeleteTextures( 1, &m_textureID );
+		glDeleteTextures( m_mipCount, &m_textureID );
+
+	GL_CHECK_ERROR(); 
 }
 
 unsigned int Texture::GetHandle() const
@@ -65,7 +67,7 @@ unsigned int Texture::GetHeight() const
 void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texelSize, int numComponents )
 {
 	m_dimensions = texelSize;
-	GLint mipCount = CalculateMipCount( m_dimensions );
+	m_mipCount = CalculateMipCount( m_dimensions );
 
 	// Tell OpenGL that our pixel data is single-byte aligned
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
@@ -89,7 +91,7 @@ void Texture::PopulateFromData( unsigned char* imageData, const IntVector2& texe
 	}
 
 	glTexStorage2D( GL_TEXTURE_2D,
-		mipCount,							// number of levels (mip-layers)
+		m_mipCount,							// number of levels (mip-layers)
 		internalFormat,						// how is the memory stored on the GPU
 		m_dimensions.x, m_dimensions.y );	// dimensions
 											// copies CPU memory to the GPU - needed for texture resources

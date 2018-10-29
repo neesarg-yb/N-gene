@@ -111,7 +111,8 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, V
 
 	camera.PostRender( m_renderer );
 
-	DebugRendererRender( &camera );
+	if( camera.RenderDebugObjectsEnabled() )
+		DebugRendererRender( &camera );
 }
 
 void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const &cameraAnchorPosition ) const
