@@ -25,7 +25,7 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	// Setting up the Debug Camera
 	CameraBehaviour *debugFreelook = new CB_FreeLook( 2.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr );
 	m_debugCamera = new DebugCamera( debugFreelook );
-	m_debugCamera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
+	m_debugCamera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, 0.0001f, 1000.f );
 	// Add to Scene
 	m_scene->AddCamera( *m_debugCamera );
 
@@ -274,6 +274,9 @@ void Scene_DebugSystem::AddTestDebugRenderObjects()
 	Vector3 cameraForward = m_camera->m_cameraTransform.GetWorldTransformMatrix().GetKColumn();
 	RaycastResult raycastResult = m_terrain->Raycast( raycasyStart, cameraForward, 20.f, 0.1f );
 	DebugRenderRaycast( 0.f, raycasyStart, raycastResult, 0.5f, RGBA_GREEN_COLOR, RGBA_RED_COLOR, RGBA_KHAKI_COLOR, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
+	// Camera Frustum
+	DebugRenderPerspectiveCamera( 0.f, *m_camera, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 }
 
 void Scene_DebugSystem::ChangeClocksTimeScale()
