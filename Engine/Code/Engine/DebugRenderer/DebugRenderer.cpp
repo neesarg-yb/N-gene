@@ -2,10 +2,12 @@
 #include "DebugRenderer.hpp"
 #include "Engine/Core/Window.hpp"
 #include "Engine/Core/Clock.hpp"
-#include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/Core/DevConsole.hpp"
 #include "Engine/Math/Transform.hpp"
 #include "Engine/Input/Command.hpp"
-#include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/Renderer/Camera.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 
 
@@ -467,4 +469,148 @@ void DebugRenderRaycast( float lifetime, Vector3 const &startPosition, RaycastRe
 	Transform modelTransform = Transform( startPosition, Vector3::ZERO, Vector3::ONE_ALL );
 	DebugRenderObject *raycastDebugObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( raycastDebugObject );
+}
+
+void DebugRenderPerspectiveCamera( float lifetime, Camera const &camera, Rgba const &frustumColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
+{
+	float cameraAspect	= camera.GetAspectRatio();
+	float farPlane		= camera.GetCameraFar();
+	float nearPlane		= camera.GetCameraNear();
+	float theta			= camera.GetFOV() * 0.5f;		// Half of the horizontal FOV
+	float alpha			= theta / cameraAspect;			// Half of the vertical   FOV
+	
+	GUARANTEE_RECOVERABLE( fmodf(theta, 90.f) != 0.0, "DebugRenderPerspectiveCamera: FOV can't be 180 degrees!" );
+	GUARANTEE_RECOVERABLE( fmodf(alpha, 90.f) != 0.0, "DebugRenderPerspectiveCamera: FOV can't be 180 degrees!" );
+
+	// Get distance on edges: for near & far planes
+	float farEdgeDistance	= farPlane  / CosDegree( theta );
+	float nearEdgeDistance	= nearPlane / CosDegree( theta );
+	farEdgeDistance	 /= CosDegree( alpha );
+	nearEdgeDistance /= CosDegree( alpha );
+
+	// Camera Frustum view of far plane - from backside
+	//  
+	// J                    A
+	//  |------------------|
+	//  |                  |
+	//  |        * C       | far plane
+	//  |                  |
+	//  |------------------|
+	// K                    B
+	// 
+	// Get the directions of the each edges from camera's position: CJ, CA, CB, & CK
+	Matrix44	const cameraWorldMatrix	= camera.m_cameraTransform.GetWorldTransformMatrix();
+	Vector3		const cameraRight		= cameraWorldMatrix.GetIColumn();
+	Vector3		const cameraUp			= cameraWorldMatrix.GetJColumn();
+	Vector3		const cameraForward		= cameraWorldMatrix.GetKColumn();
+
+	Quaternion const posThetaRotation( cameraUp,	 theta );
+	Quaternion const negThetaRotation( cameraUp,	-theta );
+	Quaternion const posAlphaRotation( cameraRight,	 alpha );
+	Quaternion const negAlphaRotation( cameraRight,	-alpha );
+
+	Vector3 aDir = negAlphaRotation.RotatePoint( posThetaRotation.RotatePoint( cameraForward ) );
+	Vector3 bDir = posAlphaRotation.RotatePoint( posThetaRotation.RotatePoint( cameraForward ) );
+	Vector3 jDir = negAlphaRotation.RotatePoint( negThetaRotation.RotatePoint( cameraForward ) );
+	Vector3 kDir = posAlphaRotation.RotatePoint( negThetaRotation.RotatePoint( cameraForward ) );
+
+	// Add these four edges in the mesh builder
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	// Camera Pos. to Near
+	// J Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( jDir * nearEdgeDistance );
+	// A Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( aDir * nearEdgeDistance );
+	// B Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( bDir * nearEdgeDistance );
+	// K Edge
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( RGBA_GRAY_COLOR );
+	mb.PushVertex( kDir * nearEdgeDistance );
+
+	// Camera Near to Far
+	// J Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( jDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( jDir * farEdgeDistance );
+	// A Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( aDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( aDir * farEdgeDistance );
+	// B Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( bDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( bDir * farEdgeDistance );
+	// K Edge
+	mb.SetColor( frustumColor );
+	mb.PushVertex( kDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( kDir * farEdgeDistance );
+
+	// Far Plane's rectangle
+	// JA
+	mb.SetColor( frustumColor );
+	mb.PushVertex( jDir * farEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( aDir * farEdgeDistance );
+
+	// AB
+	mb.SetColor( frustumColor );
+	mb.PushVertex( aDir * farEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( bDir * farEdgeDistance );
+
+	// BK
+	mb.SetColor( frustumColor );
+	mb.PushVertex( bDir * farEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( kDir * farEdgeDistance );
+
+	// KJ
+	mb.SetColor( frustumColor );
+	mb.PushVertex( kDir * farEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( jDir * farEdgeDistance );
+
+	// Similar rectangle for near plane
+	mb.SetColor( frustumColor );
+	mb.PushVertex( jDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( aDir * nearEdgeDistance );
+
+	mb.SetColor( frustumColor );
+	mb.PushVertex( aDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( bDir * nearEdgeDistance );
+
+	mb.SetColor( frustumColor );
+	mb.PushVertex( bDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( kDir * nearEdgeDistance );
+
+	mb.SetColor( frustumColor );
+	mb.PushVertex( kDir * nearEdgeDistance );
+	mb.SetColor( frustumColor );
+	mb.PushVertex( jDir * nearEdgeDistance );
+
+	mb.End();
+
+	Transform modelTransform = Transform( camera.m_cameraTransform.GetWorldPosition(), Vector3::ZERO, Vector3::ONE_ALL );
+	DebugRenderObject *cameraDebugObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( cameraDebugObject );
 }
