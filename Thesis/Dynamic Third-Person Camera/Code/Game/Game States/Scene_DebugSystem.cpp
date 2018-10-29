@@ -276,7 +276,7 @@ void Scene_DebugSystem::AddTestDebugRenderObjects()
 	DebugRenderRaycast( 0.f, raycasyStart, raycastResult, 0.5f, RGBA_GREEN_COLOR, RGBA_RED_COLOR, RGBA_KHAKI_COLOR, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
 	// Camera Frustum
-	DebugRenderPerspectiveCamera( 0.f, *m_camera, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	DebugRenderCamera( 0.f, *m_camera, 0.2f, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 }
 
 void Scene_DebugSystem::ChangeClocksTimeScale()
