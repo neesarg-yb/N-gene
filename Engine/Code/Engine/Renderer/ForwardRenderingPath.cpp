@@ -39,6 +39,8 @@ ForwardRenderingPath::~ForwardRenderingPath()
 
 void ForwardRenderingPath::RenderScene( Scene &scene, Vector3 const *shadowCameraAnchorPos /*= nullptr */ ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	std::vector< Camera* > cameras = scene.m_cameras;
 
 	for each( Camera* camera in cameras )
@@ -47,6 +49,8 @@ void ForwardRenderingPath::RenderScene( Scene &scene, Vector3 const *shadowCamer
 
 void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, Vector3 const *shadowCameraAnchorPos /* = nullptr */ ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// For each Lights, Render for ShadowMap
 	TODO( "I'm assuming that there is only one directional light & it uses ShadowMap!" );
 	Vector3 shadowAnchorPosition = camera.m_cameraTransform.GetWorldPosition();
@@ -117,6 +121,8 @@ void ForwardRenderingPath::RenderSceneForCamera( Camera &camera, Scene &scene, V
 
 void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const &cameraAnchorPosition ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	for each (Light* light in scene.m_lights)
 	{
 		// If light doesn't use ShadowMap, skip
@@ -167,6 +173,8 @@ void ForwardRenderingPath::RenderSceneForShadowMap( Scene &scene, Vector3 const 
 
 void ForwardRenderingPath::SetMostContributingLights( unsigned int &lightCount, unsigned int ( &effectiveLightIndices )[MAX_LIGHTS], Vector3 const &renderablePosition, std::vector< Light* > &lightsInScene ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	lightCount = 0;
 
 	// Get all the lightSources to sort
@@ -208,6 +216,8 @@ void ForwardRenderingPath::SetMostContributingLights( unsigned int &lightCount, 
 
 void ForwardRenderingPath::SortDrawCallsForCamera( std::vector<DrawCall> &drawCallsToSort, Camera &camera ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// Separate all the layers in different vectors
 	std::map< unsigned int , DrawCallList > layersAndDrawCalls;
 	while( drawCallsToSort.size() > 0 )

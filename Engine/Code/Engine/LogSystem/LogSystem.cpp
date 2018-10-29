@@ -90,7 +90,7 @@ void LogSystem::LoggerStartup( char const *fileRootName /*= DEFAULT_LOG_NAME */ 
 	}
 
 	// Hook IDE output tab
-	LogHook( WriteToIDE, nullptr );
+	// LogHook( WriteToIDE, nullptr );
 
 	// Start the log thread
 	if( m_loggerThread == nullptr )
