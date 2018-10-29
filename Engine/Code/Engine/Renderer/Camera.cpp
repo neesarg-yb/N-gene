@@ -2,6 +2,7 @@
 #include "Camera.hpp"
 #include "Engine/Core/Window.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Shader.hpp"
 #include "Engine/Renderer/TextureCube.hpp"
@@ -62,6 +63,8 @@ unsigned int Camera::GetFrameBufferHandle() const
 
 void Camera::PreRender( Renderer &theRenderer )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	TODO( "Decide when you'll bind Bloom and other textures, again!" );
 	// Unbind all other color targets except main one..
 	for( uint i = 1; i < MAX_COLOR_TARGETS; i++ )
@@ -79,6 +82,8 @@ void Camera::PreRender( Renderer &theRenderer )
 
 void Camera::PostRender( Renderer &theRenderer )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	Shader *bloomShader = theRenderer.CreateOrGetShader( "bloom_fs" );
 
 	// Apply the Bloom Effect

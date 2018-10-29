@@ -32,6 +32,5 @@ private:
 private:
 	unsigned int	m_textureID;
 	IntVector2		m_dimensions	= IntVector2( 0, 0 );
-	int				m_mipCount		= 1;
 	eTextureFormat	m_format		= TEXTURE_FORMAT_RGBA8;
 };
