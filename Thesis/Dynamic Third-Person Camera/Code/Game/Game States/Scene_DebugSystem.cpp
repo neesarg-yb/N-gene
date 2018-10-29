@@ -19,11 +19,12 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
 	m_camera->EnableShadowMap();
+	m_camera->RenderDebugObjects( false );
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
 	// Setting up the Debug Camera
-	CameraBehaviour *debugFreelook = new CB_FreeLook( 2.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr );
+	CameraBehaviour *debugFreelook = new CB_FreeLook( 5.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr );
 	m_debugCamera = new DebugCamera( debugFreelook );
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, 0.0001f, 1000.f );
 	// Add to Scene
