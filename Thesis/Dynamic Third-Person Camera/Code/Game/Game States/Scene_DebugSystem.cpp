@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene_DebugSystem.hpp"
 #include "Engine/Renderer/Scene.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/theGame.hpp"
@@ -123,6 +124,8 @@ void Scene_DebugSystem::JustFinishedTransition()
 
 void Scene_DebugSystem::BeginFrame()
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	ChangeClocksTimeScale();
 	PauseUnpauseClock();
 	ChangeDebugCameraOverlaySize();
@@ -133,14 +136,20 @@ void Scene_DebugSystem::BeginFrame()
 
 void Scene_DebugSystem::EndFrame()
 {
-
+	PROFILE_SCOPE_FUNCTION();
 }
 
 void Scene_DebugSystem::Update()
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 
 	m_cameraManager->PreUpdate();
+
+	TODO( "HERE IS THE PROBLEM!!" );
+	if( m_clock->IsPaused() == false )
+		AddTestDebugRenderObjects();
 
 	// Update Debug Renderer Objects
 	DebugRendererUpdate( m_clock );
@@ -155,8 +164,6 @@ void Scene_DebugSystem::Update()
 	// Update Camera Stuffs
 	m_cameraManager->Update( deltaSeconds );
 
-	AddTestDebugRenderObjects();
-
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
@@ -167,10 +174,8 @@ void Scene_DebugSystem::Update()
 void Scene_DebugSystem::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
-
-	// DEBUG
-	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-
+	PROFILE_SCOPE_FUNCTION();
+	
 	// Render the Scene
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	
@@ -253,6 +258,10 @@ float		g_angleOfRotation		= 0.f;
 float		g_pointTimeElapsed		= 0.f;
 void Scene_DebugSystem::AddTestDebugRenderObjects()
 {
+	// DEBUG BASIS
+	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
+
 	// A Sphere orbiting around a Point
 	g_angleOfRotation += (float)(m_clock->GetFrameDeltaSeconds() * 45.0);
 

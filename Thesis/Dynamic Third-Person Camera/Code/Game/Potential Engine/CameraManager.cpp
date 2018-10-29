@@ -1,5 +1,6 @@
 #pragma once
 #include "CameraManager.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 
 CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem, float cameraRadius )
 	: m_camera( camera )
@@ -25,6 +26,8 @@ CameraManager::~CameraManager()
 
 void CameraManager::Update( float deltaSeconds )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	m_lastSuggestedState = m_aciveBehaviour->Update( deltaSeconds, m_currentCameraState );
 
 	// Constrains, if enabled
