@@ -5,6 +5,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/DebugRenderer/DebugRenderObject.hpp"
 
+class Camera;
 class Command;
 
 
@@ -113,6 +114,13 @@ void DebugRenderRaycast( float lifetime,
 	Rgba			const &colorOnNoImpact,
 	Rgba			const &impactPositionColor,
 	Rgba			const &impactNormalColor,
+	Rgba			const &startColor,
+	Rgba			const &endColor,
+	eDebugRenderMode mode );
+
+void DebugRenderPerspectiveCamera( float lifetime,
+	Camera			const &camera,
+	Rgba			const &frustumColor,
 	Rgba			const &startColor,
 	Rgba			const &endColor,
 	eDebugRenderMode mode );
