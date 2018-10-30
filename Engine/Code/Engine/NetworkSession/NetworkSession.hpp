@@ -14,7 +14,6 @@ struct CustomCompareForStampedPacketQueue;
 
 // Session Message Callbacks
 typedef NetworkConnection*																									NetworkConnections[ MAX_SESSION_CONNECTIONS ];
-typedef std::map< std::string,	NetworkMessageDefinition >																	NetworkMessageDefinitionsMap;
 typedef std::priority_queue< StampedNetworkPacket, std::vector<StampedNetworkPacket>, CustomCompareForStampedPacketQueue >	StampedNetworkPacketPriorityQueue;
 
 struct StampedNetworkPacket
@@ -51,8 +50,8 @@ public:
 	UDPSocket *m_mySocket = nullptr;
 
 	// Connections - clients or host
-	NetworkConnections			 m_connections = { nullptr };	// Vector of all the connections
-	NetworkMessageDefinitionsMap m_registeredMessages;			// Map of < name, NetworkMessageInfo >
+	NetworkConnections			 m_connections					= { nullptr };	// Vector of all the connections
+	NetworkMessageDefinition*	 m_registeredMessages[ 256 ]	= { nullptr };	// Array NetworkMessageDefinition: index is uint8 => [0, 0xff]
 
 public:
 	// UI
@@ -77,7 +76,7 @@ public:
 	void ProcessIncoming();
 	void ProcessOutgoing();
 
-	void SendPacket( NetworkPacket &packetToSend );		// Replaces connectionIndex by sender's index
+	void SendPacket( NetworkPacket &packetToSend );					// Replaces connectionIndex by sender's index
 	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
 
 	uint8_t				GetMyConnectionIndex() const;				// Returns 0xff if not found
@@ -88,7 +87,10 @@ public:
 	NetworkConnection* AddConnection( int idx, NetworkAddress &addr );	// Adds a new client
 	NetworkConnection* GetConnection( int idx );
 
-	void RegisterNetworkMessage( char const *messageName, networkMessage_cb cb );
+	bool RegisterNetworkMessage( char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netMessageOptionsFlag );					// Returns true on success
+	void RegisterNetworkMessage( uint8_t index, char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netmessageOptionsFlag );	// Rewrite if a definition already exists at that index
+
+	int GetRegisteredIndexForMessageNamed( std::string const &definitionName ) const;															// Returns -1 if not found
 
 private:
 	// Net Simulation
