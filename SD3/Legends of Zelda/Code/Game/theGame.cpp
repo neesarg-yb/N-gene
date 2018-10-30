@@ -249,35 +249,6 @@ bool OnAddResponse( NetworkMessage const &msg, NetworkSender &from )
 	return true;
 }
 
-bool OnPing( NetworkMessage const &msg, NetworkSender &from )
-{
-	char str[256];
-	msg.Read( str, 256 );
-
-	ConsolePrintf( "Received ping from %s => %s", from.address.AddressToString().c_str(), str ); 
-
-	// ping responds with pong
-	NetworkMessage pong( "pong" ); 
-	if( from.connection != nullptr )
-		from.connection->Send( pong );
-	else
-		from.session.SendDirectMessageTo( pong, from.address );
-
-	// all messages serve double duty
-	// do some work, and also validate
-	// if a message ends up being malformed, we return false
-	// to notify the session we may want to kick this connection; 
-	return true; 
-}
-
-bool OnPong( NetworkMessage const &msg, NetworkSender &from )
-{
-	UNUSED( msg );
-
-	ConsolePrintf( "PONG! Received from %s", from.address.AddressToString().c_str() );
-	return false;
-}
-
 bool OnAdd( NetworkMessage const &msg, NetworkSender &from )
 {
 	float val0 = 0;
@@ -372,10 +343,8 @@ void theGame::Startup()
 
 	// Network Session
 	m_session = new NetworkSession( g_theRenderer );
-	m_session->RegisterNetworkMessage( "ping", OnPing );
-	m_session->RegisterNetworkMessage( "pong", OnPong );
-	m_session->RegisterNetworkMessage( "add",  OnAdd );
-	m_session->RegisterNetworkMessage( "add_response",  OnAddResponse );
+	m_session->RegisterNetworkMessage( "add",  OnAdd, NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION );
+	m_session->RegisterNetworkMessage( "add_response",  OnAddResponse, NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION );
 
 	// For now we'll just shortcut to being a HOST
 	// "bound" state
