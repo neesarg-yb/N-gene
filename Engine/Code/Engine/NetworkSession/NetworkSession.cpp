@@ -520,7 +520,17 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 					thisSender.connection = m_connections[ packet->m_header.connectionIndex ];		// If sender has a valid connection, fill it in
 
 				// Do a callback!
-				receivedMessage.m_definition->callback( receivedMessage, thisSender );
+				if( messageDefinition->RequiresConnection() && thisSender.connection == nullptr )
+				{
+					// Requires a connection, but don't have this address registered!
+					// Log an error
+					ConsolePrintf( RGBA_RED_COLOR, "IGNORED THE MESSAGE: Received from address: %s, but it requires a connection", thisSender.address.AddressToString().c_str() );
+				}
+				else
+				{
+					// Do the callback
+					receivedMessage.m_definition->callback( receivedMessage, thisSender );
+				}
 			}
 			else
 				ConsolePrintf( "Received invalid messageDefinition Index: %d", receivedMessage.m_header.networkMessageDefinitionIndex );

@@ -91,6 +91,12 @@ public:
 		this->callback		= callback;
 		this->optionsFlag	= optionsFlag;
 	}
+
+public:
+	bool RequiresConnection() const
+	{
+		return ( optionsFlag & (~NET_MESSAGE_OPTION_CONNECTIONLESS) ) == (~NET_MESSAGE_OPTION_CONNECTIONLESS);
+	}
 };
 
 class NetworkMessage : public BytePacker
