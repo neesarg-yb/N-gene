@@ -54,7 +54,7 @@ Level1::~Level1()
 
 void Level1::JustFinishedTransition()
 {
-	DebugRendererChange3DCamera( m_camera );
+
 }
 
 void Level1::BeginFrame()
@@ -75,7 +75,7 @@ void Level1::Update( float deltaSeconds )
 	PROFILE_SCOPE_FUNCTION();
 
 	// Debug Renderer
-	DebugRendererUpdate( deltaSeconds );
+	DebugRendererUpdate( GetMasterClock() );
 
 	// Level::Update
 	m_timeSinceStartOfTheBattle += deltaSeconds;
@@ -110,5 +110,5 @@ void Level1::Render( Camera *gameCamera ) const
 //	std::string ambLightIntensity	= std::string( "Ambient Light: " + std::to_string(m_ambientLight.w) );
 //	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, ambLightIntensity);
 
-	DebugRendererRender();
+	DebugRendererRender( m_camera );
 }
