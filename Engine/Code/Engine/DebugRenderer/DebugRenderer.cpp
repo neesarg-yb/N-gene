@@ -62,7 +62,7 @@ void DebugRendererRender( Camera *camera3D )
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	DebuggerPrintf( "\nTotal DebugRenderObjects: %d", debugRenderObjectQueue.size() );
+	// DebuggerPrintf( "\nTotal DebugRenderObjects: %d", debugRenderObjectQueue.size() );
 
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
 	{
@@ -86,7 +86,7 @@ void ClearAllRenderingObjects( Command& cmd )
 
 void DeleteOverdueRenderObjects()
 {
-	DebuggerPrintf( "\n\nDebugRenderObject size BEFORE delete: %d", debugRenderObjectQueue.size() );
+	// DebuggerPrintf( "\n\nDebugRenderObject size BEFORE delete: %d", debugRenderObjectQueue.size() );
 
 	uint deletedObjects = 0U;
 	// Check if RenderObject is ready to be deleted..
@@ -110,8 +110,8 @@ void DeleteOverdueRenderObjects()
 		}
 	}
 
-	DebuggerPrintf( "\nDebugRenderObject size AFTER delete : %d", debugRenderObjectQueue.size() );
-	DebuggerPrintf( "\nDebugRenderObject deleted THIS FRAME: %d", deletedObjects );
+	// DebuggerPrintf( "\nDebugRenderObject size AFTER delete : %d", debugRenderObjectQueue.size() );
+	// DebuggerPrintf( "\nDebugRenderObject deleted THIS FRAME: %d", deletedObjects );
 }
 
 void EmptyTheRenderObjectQueue()
