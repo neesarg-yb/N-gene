@@ -11,6 +11,26 @@ struct NetworkSender;
 
 typedef bool (*networkMessage_cb) ( NetworkMessage const &, NetworkSender & );
 
+enum eNetworkMessageOptions : uint
+{
+	NET_MESSAGE_OPTION_CONNECTIONLESS					= BIT_FLAG(0),
+	NET_MESSAGE_OPTION_RELIABLE							= BIT_FLAG(1),
+	NET_MESSAGE_OPTION_IN_ORDER							= BIT_FLAG(2),
+
+	// Convenience
+	NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION	= 0U,
+	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER				= NET_MESSAGE_OPTION_RELIABLE | NET_MESSAGE_OPTION_IN_ORDER,
+};
+
+enum eNetworkCoreMessages : uint8_t
+{
+	NET_MESSAGE_PING = 0,
+	NET_MESSAGE_PONG,
+	NET_MESSAGE_HEARTBEAT,
+
+	NUM_NET_MESSAGES
+};
+
 struct NetworkSender
 {
 public:
@@ -38,27 +58,38 @@ public:
 struct NetworkMessageDefinition
 {
 public:
-	int					id			= -1;
-	std::string			name		= "NAME NOT ASSIGNED!";
-	networkMessage_cb	callback	= nullptr;
+	int						id			= -1;
+	std::string				name		= "NAME NOT ASSIGNED!";
+	networkMessage_cb		callback	= nullptr;
+	eNetworkMessageOptions	optionsFlag	= NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION;
 
 public:
 	NetworkMessageDefinition() { }
-	NetworkMessageDefinition( char const *name, networkMessage_cb callback )
+	NetworkMessageDefinition( char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
 	{
-		this->name		= name;
-		this->callback	= callback;
+		this->name			= name;
+		this->callback		= callback;
+		this->optionsFlag	= optionsFlag;
 	}
-	NetworkMessageDefinition( std::string &name, networkMessage_cb callback )
+	NetworkMessageDefinition( std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
 	{
-		this->name		= name;
-		this->callback	= callback;
+		this->name			= name;
+		this->callback		= callback;
+		this->optionsFlag	= optionsFlag;
 	}
-	NetworkMessageDefinition( int id, std::string &name, networkMessage_cb callback ) 
+	NetworkMessageDefinition( int id, char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag ) 
 	{
-		this->id		= id;
-		this->name		= name;
-		this->callback	= callback;
+		this->id			= id;
+		this->name			= name;
+		this->callback		= callback;
+		this->optionsFlag	= optionsFlag;
+	}
+	NetworkMessageDefinition( int id, std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag ) 
+	{
+		this->id			= id;
+		this->name			= name;
+		this->callback		= callback;
+		this->optionsFlag	= optionsFlag;
 	}
 };
 

@@ -113,9 +113,11 @@ void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 
 void NetworkConnection::Send( NetworkMessage &msg )
 {
-	// Set the header
-	std::string msgDefinitionName				= msg.m_name;
-	msg.m_header.networkMessageDefinitionIndex	= (uint8_t)m_parentSession.m_registeredMessages[ msgDefinitionName ].id;
+	// Update the index of this messageToSend
+	int msgIdx = m_parentSession.GetRegisteredIndexForMessageNamed( msg.m_name );
+	GUARANTEE_RECOVERABLE( msgIdx != -1, "Can't find the registered message definition!" );
+
+	msg.m_header.networkMessageDefinitionIndex	= (uint8_t) msgIdx;
 
 	// Push to the outgoing messages
 	NetworkMessage *msgToSend = new NetworkMessage( msg );

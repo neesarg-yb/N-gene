@@ -5,6 +5,35 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
+bool OnPing( NetworkMessage const &msg, NetworkSender &from )
+{
+	char str[256];
+	msg.Read( str, 256 );
+
+	ConsolePrintf( "Received ping from %s => %s", from.address.AddressToString().c_str(), str ); 
+
+	// ping responds with pong
+	NetworkMessage pong( "pong" ); 
+	if( from.connection != nullptr )
+		from.connection->Send( pong );
+	else
+		from.session.SendDirectMessageTo( pong, from.address );
+
+	// all messages serve double duty
+	// do some work, and also validate
+	// if a message ends up being malformed, we return false
+	// to notify the session we may want to kick this connection; 
+	return true; 
+}
+
+bool OnPong( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( msg );
+
+	ConsolePrintf( "PONG! Received from %s", from.address.AddressToString().c_str() );
+	return false;
+}
+
 bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
 {
 	UNUSED( msg );
@@ -47,6 +76,16 @@ NetworkSession::~NetworkSession()
 		// Delete
 		delete m_connections[i];
 		m_connections[i] = nullptr;
+	}
+
+	// Delete all message definitions
+	for( int i = 0; i < 256; i++ )
+	{
+		if( m_registeredMessages[i] == nullptr )
+			continue;
+
+		delete m_registeredMessages[i];
+		m_registeredMessages[i] = nullptr;
 	}
 
 	// Delete my UDP Socket
@@ -185,7 +224,9 @@ bool NetworkSession::BindPort( uint16_t port, uint16_t range )
 
 void NetworkSession::RegisterCoreMessages()
 {
-	RegisterNetworkMessage( "heartbeat", OnHeartbeat );
+	RegisterNetworkMessage( NET_MESSAGE_PING,		"ping",		 OnPing,		NET_MESSAGE_OPTION_CONNECTIONLESS );
+	RegisterNetworkMessage( NET_MESSAGE_PONG,		"pong",		 OnPong,		NET_MESSAGE_OPTION_CONNECTIONLESS );
+	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,	"heartbeat", OnHeartbeat,	NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION );
 }
 
 void NetworkSession::ProcessIncoming()
@@ -217,8 +258,14 @@ void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 
 void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address )
 {
+	// Update the index of this messageToSend
+	int msgIdx = GetRegisteredIndexForMessageNamed( messageToSend.m_name );
+	GUARANTEE_RECOVERABLE( msgIdx != -1, "Can't find the registered message definition!" );
+
+	messageToSend.m_header.networkMessageDefinitionIndex = (uint8_t) msgIdx;
+
+	// Send the Packet
 	NetworkPacket packetToSend;
-	messageToSend.m_header.networkMessageDefinitionIndex = (uint8_t) m_registeredMessages[ messageToSend.m_name ].id;
 	packetToSend.WriteMessage( messageToSend );
 
 	m_mySocket->SendTo( address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
@@ -283,20 +330,56 @@ NetworkConnection* NetworkSession::GetConnection( int idx )
 		return m_connections[idx];
 }
 
-void NetworkSession::RegisterNetworkMessage( char const *messageName, networkMessage_cb cb )
+void NetworkSession::RegisterNetworkMessage( uint8_t index, char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netmessageOptionsFlag )
 {
-	// Register new message
-	m_registeredMessages[ messageName ] = NetworkMessageDefinition( messageName, cb );
-
-	// Adjust each messages' ID
-	int messageID = 0;
-	for( NetworkMessageDefinitionsMap::iterator	it  = m_registeredMessages.begin(); 
-												it != m_registeredMessages.end(); 
-												it++ )
+	NetworkMessageDefinition *newDefinition = new NetworkMessageDefinition( (int)index, messageName, cb, netmessageOptionsFlag );
+	
+	if( m_registeredMessages[ index ] != nullptr )
 	{
-		it->second.id = messageID;
-		messageID++;
+		delete m_registeredMessages[ index ];
+		m_registeredMessages[ index ] = nullptr;
 	}
+
+	m_registeredMessages[ index ] = newDefinition;
+}
+
+bool NetworkSession::RegisterNetworkMessage( char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netMessageOptionsFlag )
+{
+	for( uint8_t index = NUM_NET_MESSAGES; index <= 0xff; index++ )
+	{
+		if( m_registeredMessages[ index ] != nullptr )
+			continue;
+		else
+		{
+			NetworkMessageDefinition *newDefinition = new NetworkMessageDefinition( (int)index, messageName, cb, netMessageOptionsFlag );
+			m_registeredMessages[ index ] = newDefinition;
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int NetworkSession::GetRegisteredIndexForMessageNamed( std::string const &definitionName ) const
+{
+	int idx = -1;
+
+	for( int i = 0; i < 256; i++ )
+	{
+		// Skip if nullptr
+		if( m_registeredMessages[i] == nullptr )
+			continue;
+
+		// Note the index if name matches
+		if( m_registeredMessages[i]->name == definitionName )
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	return idx;
 }
 
 bool NetworkSession::SetHeartbeatFrequency( float frequencyHz )
@@ -423,14 +506,13 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 			GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
 
 			// To get Message Definition from index
-			NetworkMessageDefinitionsMap::iterator it = m_registeredMessages.begin();
-			std::advance( it, receivedMessage.m_header.networkMessageDefinitionIndex );
+			NetworkMessageDefinition *messageDefinition = m_registeredMessages[ receivedMessage.m_header.networkMessageDefinitionIndex ];
 
 			// If that's a valid definition index
-			if( it != m_registeredMessages.end() )
+			if( messageDefinition != nullptr )
 			{
 				// Set the pointer to that definition
-				receivedMessage.m_definition = &it->second;
+				receivedMessage.m_definition = messageDefinition;
 
 				// Create a NetworkSender
 				NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
