@@ -125,11 +125,12 @@ void Scene_DebugSystem::JustFinishedTransition()
 void Scene_DebugSystem::BeginFrame()
 {
 	PROFILE_SCOPE_FUNCTION();
-
-	ChangeClocksTimeScale();
-	PauseUnpauseClock();
 	ChangeDebugCameraOverlaySize();
 
+	// Update Debug Renderer Objects
+	DebugRendererBeginFrame( m_clock );
+
+	// Debug Camera
 	if( m_clock->IsPaused() )
 		m_debugCamera->Update();
 }
@@ -137,24 +138,27 @@ void Scene_DebugSystem::BeginFrame()
 void Scene_DebugSystem::EndFrame()
 {
 	PROFILE_SCOPE_FUNCTION();
+
+	// Manipulate Clock after Scene::Update
+	ChangeClocksTimeScale();
+	PauseUnpauseClock();
 }
 
 void Scene_DebugSystem::Update()
 {
 	PROFILE_SCOPE_FUNCTION();
 
-	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
+	if( m_clock->IsPaused() )
+		return;
 
+	// Camera Manager
 	m_cameraManager->PreUpdate();
 
-	TODO( "HERE IS THE PROBLEM!!" );
-	if( m_clock->IsPaused() == false )
-		AddTestDebugRenderObjects();
-
-	// Update Debug Renderer Objects
-	DebugRendererUpdate( m_clock );
+	// Test Debug Objects
+	AddTestDebugRenderObjects();
 
 	// Update Game Objects
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 	for( int i = 0; i < NUM_ENTITIES; i++ )
 	{
 		for each( GameObject* go in m_gameObjects[i] )
@@ -183,16 +187,23 @@ void Scene_DebugSystem::Render( Camera *gameCamera ) const
 		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
 	else
 	{
-		// Renders the scene for all cameras: m_camera, m_debugCamera
-		m_renderingPath->RenderScene( *m_scene );
-	}
-
-	if( m_clock->IsPaused() )
-	{
+		// Debug Camera Overlay
 		if( m_debugCameraFullOverlay )
+		{
+			// Render Scene just for debugCamera, because the main camera will be hidden at this point
+			m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
+
+			// Draw DebugCamera overlay as full screen
 			m_debugCamera->RenderAsFulscreenOverlay();
+		}
 		else
+		{
+			// Render Scene for both cameras: m_camers, m_debuCamera
+			m_renderingPath->RenderScene( *m_scene );
+
+			// Draw DebugCamera overlay as picture-in-picture
 			m_debugCamera->RenderAsMiniOverlay();
+		}
 	}
 }
 

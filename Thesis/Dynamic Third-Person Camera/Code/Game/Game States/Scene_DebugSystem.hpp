@@ -53,10 +53,11 @@ private:
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
 
-	void AddTestDebugRenderObjects();
+	void AddTestDebugRenderObjects();	// Should happen after DebugRendererBeginFrame(), but before DebugRendererRender()
 
 private:
-	void ChangeClocksTimeScale();
-	void PauseUnpauseClock();
+	void ChangeClocksTimeScale();		// Should happen after Scene::Update()
+	void PauseUnpauseClock();			// Should happen after Scene::Update()
+	
 	void ChangeDebugCameraOverlaySize();
 };

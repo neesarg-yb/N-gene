@@ -37,6 +37,9 @@ void Scene_QuaternionsTest::BeginFrame()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
+
+	// Debug Renderer
+	DebugRendererBeginFrame( m_clock );
 }
 
 void Scene_QuaternionsTest::EndFrame()
@@ -51,9 +54,6 @@ void Scene_QuaternionsTest::Update()
 	PROFILE_SCOPE_FUNCTION();
 
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
-
-	// Debug Renderer
-	DebugRendererUpdate( m_clock );
 
 	if( m_t >= 1.f )
 	{
@@ -140,7 +140,7 @@ void Scene_QuaternionsTest::Render( Camera *gameCamera ) const
 	DebugRenderTag( 0.f, 1.f, m_quaternionBasisWorldPos - Vector3( 4.f, 4.f, 0.f ), m_camera->m_cameraTransform.GetWorldTransformMatrix().GetJColumn(), m_camera->m_cameraTransform.GetTransformMatrix().GetIColumn(), RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "QUATERNIONS");
 
 	// Debug Renderer
-	DebugRendererRender( m_camera );
+	DebugRendererLateRender( m_camera );
 }
 
 void Scene_QuaternionsTest::QuaternionsTestCode() const

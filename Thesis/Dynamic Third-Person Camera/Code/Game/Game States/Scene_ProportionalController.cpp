@@ -146,7 +146,8 @@ void Scene_ProportionalController::JustFinishedTransition()
 
 void Scene_ProportionalController::BeginFrame()
 {
-
+	// Update Debug Renderer Objects
+	DebugRendererBeginFrame( m_clock );
 }
 
 void Scene_ProportionalController::EndFrame()
@@ -159,9 +160,6 @@ void Scene_ProportionalController::Update()
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 
 	m_cameraManager->PreUpdate();
-
-	// Update Debug Renderer Objects
-	DebugRendererUpdate( m_clock );
 
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 

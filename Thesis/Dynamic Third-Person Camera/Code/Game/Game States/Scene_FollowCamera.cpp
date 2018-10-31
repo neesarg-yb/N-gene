@@ -160,6 +160,9 @@ void Scene_FollowCamera::BeginFrame()
 	ChangeCameraBehaviour();
 
 	m_cameraManager->PreUpdate();
+
+	// Update Debug Renderer Objects
+	DebugRendererBeginFrame( m_clock );
 }
 
 void Scene_FollowCamera::EndFrame()
@@ -170,9 +173,6 @@ void Scene_FollowCamera::EndFrame()
 void Scene_FollowCamera::Update()
 {
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
-
-	// Update Debug Renderer Objects
-	DebugRendererUpdate( m_clock );
 
 	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
 
