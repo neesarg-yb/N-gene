@@ -318,6 +318,49 @@ void DebugRenderLineSegment( float lifetime, Vector3 const &p0, Rgba const &p0Co
 	debugRenderObjectQueue.push_back( lineObject );
 }
 
+void DebugRenderVector( float lifetime, Vector3 const &origin, Vector3 const &vector, Rgba const &color, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
+{
+	float		length		 = vector.GetLength();
+	Matrix44	lookAt		 = Matrix44::MakeLookAtView( vector, Vector3::ZERO );
+	Quaternion	rotation	 = Quaternion::FromMatrix( lookAt ).GetInverse();
+
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	// Body
+	mb.SetColor( color );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+
+	// Arrow(s)
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(-0.1f, 0.f, 0.9f) );
+	
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.1f, 0.f, 0.9f) );
+
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, -0.1f, 0.9f) );
+
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.1f, 0.9f) );
+	
+	mb.End();
+
+	Transform modelTransform = Transform( origin, rotation, Vector3( 1.f, 1.f, length ) );
+	DebugRenderObject *vectorObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh<Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( vectorObject );
+}
+
 void DebugRenderBasis( float lifetime, Matrix44 const &basis, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
 	Vector3 localPosition = Vector3::ZERO;
