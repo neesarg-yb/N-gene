@@ -226,7 +226,7 @@ void NetworkSession::RegisterCoreMessages()
 {
 	RegisterNetworkMessage( NET_MESSAGE_PING,		"ping",		 OnPing,		NET_MESSAGE_OPTION_CONNECTIONLESS );
 	RegisterNetworkMessage( NET_MESSAGE_PONG,		"pong",		 OnPong,		NET_MESSAGE_OPTION_CONNECTIONLESS );
-	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,	"heartbeat", OnHeartbeat,	NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION );
+	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,	"heartbeat", OnHeartbeat,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 }
 
 void NetworkSession::ProcessIncoming()
@@ -524,7 +524,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 				{
 					// Requires a connection, but don't have this address registered!
 					// Log an error
-					ConsolePrintf( RGBA_RED_COLOR, "IGNORED THE MESSAGE: Received from address: %s, but it requires a connection", thisSender.address.AddressToString().c_str() );
+					ConsolePrintf( RGBA_RED_COLOR, "IGNORED \"%s\" MESSAGE: Received from address: %s, but it requires a connection", receivedMessage.m_definition->name.c_str(), thisSender.address.AddressToString().c_str() );
 				}
 				else
 				{
