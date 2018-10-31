@@ -30,7 +30,10 @@ Clock::~Clock()
 
 bool Clock::IsPaused() const
 {
-	return m_isPaused;
+	if( m_isPaused == true || m_timeScale == 0.f )
+		return true;
+	else
+		return false;
 }
 
 void Clock::Resume()
