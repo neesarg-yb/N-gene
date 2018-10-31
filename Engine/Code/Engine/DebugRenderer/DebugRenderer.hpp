@@ -18,8 +18,22 @@ void DebugRendererShutdown();
 /////////////////////
 // Update & Render //
 /////////////////////
-void DebugRendererUpdate( Clock const *clock );								// If set to nullptr, uses the Master Clock
-void DebugRendererRender( Camera *camera3D );
+
+//
+// Execution order should be:
+//
+// .----------------------------.    then     .--------------------------.
+// |  DebugRenderBeginFrame();  |  ========>  | Add DebugRenderObject(s) |
+// *----------------------------*             *--------------------------*
+//                                                        |               
+//                                                        | then          
+//                                                        V               
+//  otherwise drawing a debug object         .----------------------------.
+//  just for one frame wont work!            |  DebugRenderLateRender();  |
+//  (by setting lifetime = 0.f)              *----------------------------*
+//                                                                        
+void DebugRendererBeginFrame( Clock const *clock );		// Deletes the overdue Render Objects
+void DebugRendererLateRender( Camera *camera3D );
 void ClearAllRenderingObjects( Command& cmd );
 
 
