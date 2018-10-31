@@ -68,12 +68,20 @@ void DebugRenderPoint( float lifetime, float size,
 	Rgba const		&endColor, 
 	eDebugRenderMode const mode );
 
-void DebugRenderLineSegment	( float lifetime, 
+void DebugRenderLineSegment( float lifetime, 
 	Vector3 const	&p0, Rgba const &p0Color, 
 	Vector3 const	&p1, Rgba const &p1Color, 
 	Rgba const		&startColor, 
 	Rgba const		&endColor, 
 	eDebugRenderMode const	mode );
+
+void DebugRenderVector( float lifetime,
+	Vector3 const	&origin,
+	Vector3 const	&vector,
+	Rgba const		&color,
+	Rgba const		&startColor,
+	Rgba const		&endColor,
+	eDebugRenderMode const mode );
 
 void DebugRenderBasis( float lifetime,
 	Matrix44 const	&basis, 
