@@ -343,8 +343,8 @@ void theGame::Startup()
 
 	// Network Session
 	m_session = new NetworkSession( g_theRenderer );
-	m_session->RegisterNetworkMessage( "add",  OnAdd, NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION );
-	m_session->RegisterNetworkMessage( "add_response",  OnAddResponse, NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION );
+	m_session->RegisterNetworkMessage( "add",  OnAdd, NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	m_session->RegisterNetworkMessage( "add_response",  OnAddResponse, NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 
 	// For now we'll just shortcut to being a HOST
 	// "bound" state
