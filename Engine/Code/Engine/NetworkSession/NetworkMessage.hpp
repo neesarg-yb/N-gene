@@ -18,7 +18,7 @@ enum eNetworkMessageOptions : uint
 	NET_MESSAGE_OPTION_IN_ORDER							= BIT_FLAG(2),
 
 	// Convenience
-	NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION	= 0U,
+	NET_MESSAGE_OPTION_REQUIRES_CONNECTION				= 0U,
 	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER				= NET_MESSAGE_OPTION_RELIABLE | NET_MESSAGE_OPTION_IN_ORDER,
 };
 
@@ -61,7 +61,7 @@ public:
 	int						id			= -1;
 	std::string				name		= "NAME NOT ASSIGNED!";
 	networkMessage_cb		callback	= nullptr;
-	eNetworkMessageOptions	optionsFlag	= NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION;
+	eNetworkMessageOptions	optionsFlag	= NET_MESSAGE_OPTION_REQUIRES_CONNECTION;
 
 public:
 	NetworkMessageDefinition() { }
@@ -95,7 +95,7 @@ public:
 public:
 	bool RequiresConnection() const
 	{
-		return ( optionsFlag & (~NET_MESSAGE_OPTION_CONNECTIONLESS) ) == (~NET_MESSAGE_OPTION_CONNECTIONLESS);
+		return ( optionsFlag & NET_MESSAGE_OPTION_CONNECTIONLESS ) != NET_MESSAGE_OPTION_CONNECTIONLESS;
 	}
 };
 
