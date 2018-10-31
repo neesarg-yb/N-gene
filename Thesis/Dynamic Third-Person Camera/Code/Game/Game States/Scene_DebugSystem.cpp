@@ -298,6 +298,11 @@ void Scene_DebugSystem::AddTestDebugRenderObjects()
 
 	// Camera Frustum
 	DebugRenderCamera( 0.f, *m_camera, 0.2f, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+
+	// Debug Vector
+	Vector3 origin	= m_camera->m_cameraTransform.GetWorldPosition();
+	Vector3 front	= m_camera->m_cameraTransform.GetWorldTransformMatrix().GetKColumn();
+	DebugRenderVector( 0.f, origin, front * -8.f, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 }
 
 void Scene_DebugSystem::ChangeClocksTimeScale()
