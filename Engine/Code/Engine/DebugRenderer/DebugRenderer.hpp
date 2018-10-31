@@ -18,8 +18,22 @@ void DebugRendererShutdown();
 /////////////////////
 // Update & Render //
 /////////////////////
-void DebugRendererUpdate( Clock const *clock );								// If set to nullptr, uses the Master Clock
-void DebugRendererRender( Camera *camera3D );
+
+//
+// Execution order should be:
+//
+// .----------------------------.    then     .--------------------------.
+// |  DebugRenderBeginFrame();  |  ========>  | Add DebugRenderObject(s) |
+// *----------------------------*             *--------------------------*
+//                                                        |               
+//                                                        | then          
+//                                                        V               
+//  otherwise drawing a debug object         .----------------------------.
+//  just for one frame wont work!            |  DebugRenderLateRender();  |
+//  (by setting lifetime = 0.f)              *----------------------------*
+//                                                                        
+void DebugRendererBeginFrame( Clock const *clock );		// Deletes the overdue Render Objects
+void DebugRendererLateRender( Camera *camera3D );
 void ClearAllRenderingObjects( Command& cmd );
 
 
@@ -54,12 +68,20 @@ void DebugRenderPoint( float lifetime, float size,
 	Rgba const		&endColor, 
 	eDebugRenderMode const mode );
 
-void DebugRenderLineSegment	( float lifetime, 
+void DebugRenderLineSegment( float lifetime, 
 	Vector3 const	&p0, Rgba const &p0Color, 
 	Vector3 const	&p1, Rgba const &p1Color, 
 	Rgba const		&startColor, 
 	Rgba const		&endColor, 
 	eDebugRenderMode const	mode );
+
+void DebugRenderVector( float lifetime,
+	Vector3 const	&origin,
+	Vector3 const	&vector,
+	Rgba const		&color,
+	Rgba const		&startColor,
+	Rgba const		&endColor,
+	eDebugRenderMode const mode );
 
 void DebugRenderBasis( float lifetime,
 	Matrix44 const	&basis, 

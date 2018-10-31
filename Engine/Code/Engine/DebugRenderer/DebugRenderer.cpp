@@ -43,7 +43,7 @@ void DebugRendererShutdown()
 	EmptyTheRenderObjectQueue();
 }
 
-void DebugRendererUpdate( Clock const *clock )
+void DebugRendererBeginFrame( Clock const *clock )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
@@ -57,12 +57,10 @@ void DebugRendererUpdate( Clock const *clock )
 	DeleteOverdueRenderObjects();
 }
 
-void DebugRendererRender( Camera *camera3D )
+void DebugRendererLateRender( Camera *camera3D )
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
-
-	// DebuggerPrintf( "\nTotal DebugRenderObjects: %d", debugRenderObjectQueue.size() );
 
 	for( DebugRenderObject* renderObject : debugRenderObjectQueue )
 	{
@@ -86,8 +84,6 @@ void ClearAllRenderingObjects( Command& cmd )
 
 void DeleteOverdueRenderObjects()
 {
-	// DebuggerPrintf( "\n\nDebugRenderObject size BEFORE delete: %d", debugRenderObjectQueue.size() );
-
 	uint deletedObjects = 0U;
 	// Check if RenderObject is ready to be deleted..
 	for( unsigned int i = 0; i < debugRenderObjectQueue.size(); i++ )
@@ -109,9 +105,6 @@ void DeleteOverdueRenderObjects()
 			deletedObjects++;
 		}
 	}
-
-	// DebuggerPrintf( "\nDebugRenderObject size AFTER delete : %d", debugRenderObjectQueue.size() );
-	// DebuggerPrintf( "\nDebugRenderObject deleted THIS FRAME: %d", deletedObjects );
 }
 
 void EmptyTheRenderObjectQueue()
@@ -323,6 +316,49 @@ void DebugRenderLineSegment( float lifetime, Vector3 const &p0, Rgba const &p0Co
 	Transform modelTransform = Transform( centerPos, Vector3::ZERO, Vector3::ONE_ALL );
 	DebugRenderObject *lineObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
 	debugRenderObjectQueue.push_back( lineObject );
+}
+
+void DebugRenderVector( float lifetime, Vector3 const &origin, Vector3 const &vector, Rgba const &color, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
+{
+	float		length		 = vector.GetLength();
+	Matrix44	lookAt		 = Matrix44::MakeLookAtView( vector, Vector3::ZERO );
+	Quaternion	rotation	 = Quaternion::FromMatrix( lookAt ).GetInverse();
+
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	// Body
+	mb.SetColor( color );
+	mb.PushVertex( Vector3::ZERO );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+
+	// Arrow(s)
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(-0.1f, 0.f, 0.9f) );
+	
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.1f, 0.f, 0.9f) );
+
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, -0.1f, 0.9f) );
+
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.f, 1.f) );
+	mb.SetColor( color );
+	mb.PushVertex( Vector3(0.f, 0.1f, 0.9f) );
+	
+	mb.End();
+
+	Transform modelTransform = Transform( origin, rotation, Vector3( 1.f, 1.f, length ) );
+	DebugRenderObject *vectorObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_3D, modelTransform.GetTransformMatrix(), mb.ConstructMesh<Vertex_3DPCU>(), nullptr, startColor, endColor, mode );
+	debugRenderObjectQueue.push_back( vectorObject );
 }
 
 void DebugRenderBasis( float lifetime, Matrix44 const &basis, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
