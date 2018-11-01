@@ -524,7 +524,9 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 				{
 					// Requires a connection, but don't have this address registered!
 					// Log an error
-					ConsolePrintf( RGBA_RED_COLOR, "IGNORED \"%s\" MESSAGE: Received from address: %s, but it requires a connection", receivedMessage.m_definition->name.c_str(), thisSender.address.AddressToString().c_str() );
+					ConsolePrintf( RGBA_RED_COLOR, "IGNORED \"%s\" MESSAGE: Received from address: %s, but it requires a connection", 
+													receivedMessage.m_definition->name.c_str(), 
+													thisSender.address.AddressToString().c_str() );
 				}
 				else
 				{

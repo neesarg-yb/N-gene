@@ -124,7 +124,7 @@ public:
 	bool Write( float number );
 	bool Write( std::string const &string );
 
-	bool	Raad( int &outNumber ) const;
+	bool	Read( int &outNumber ) const;
 	bool	Read( float &outNumber ) const;
 	size_t	Read( char *outString, size_t maxSize ) const;
 };

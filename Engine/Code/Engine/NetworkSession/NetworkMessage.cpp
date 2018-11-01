@@ -29,7 +29,7 @@ bool NetworkMessage::Write( std::string const &string )
 	return WriteString( string.c_str() );
 }
 
-bool NetworkMessage::Raad( int &outNumber ) const
+bool NetworkMessage::Read( int &outNumber ) const
 {
 	size_t expectedBytes = sizeof( int );
 	size_t bytesRead	 = ReadBytes( &outNumber, expectedBytes );
