@@ -11,6 +11,34 @@
 #include "Game/Game States/LevelSelect.hpp"
 #include "Game/Game States/Level1.hpp"
 
+int connectionToSendUMsg	= -1;
+int lastSentUMsgIdx			= -1;
+int pendingUMsgCountToSend	=  0;
+
+void UnreliableTestCommand( Command& cmd )
+{
+	std::string connectionIdx	= cmd.GetNextString();
+	std::string countStr		= cmd.GetNextString();
+
+	if( countStr == "" || connectionIdx == "" )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Provide valid arguments!" );
+		return;
+	}
+
+	if( pendingUMsgCountToSend > 0 )
+	{
+		ConsolePrintf( RGBA_YELLOW_COLOR, "Error: Last command still needs to send %d unreliable messages to connection %d", lastSentUMsgIdx + 1 + pendingUMsgCountToSend, connectionToSendUMsg );
+		return;
+	}
+	
+	connectionToSendUMsg = atoi( connectionIdx.c_str() );
+	int uMsgCount		 = atoi( countStr.c_str() );
+
+	lastSentUMsgIdx			= -1;
+	pendingUMsgCountToSend	= uMsgCount;
+}
+
 void EchoTestCommand( Command& cmd )
 {
 	ConsolePrintf( "%s", cmd.GetNextString().c_str() );
@@ -275,6 +303,19 @@ bool OnAdd( NetworkMessage const &msg, NetworkSender &from )
 	return true;
 }
 
+bool OnUnreliableTest( NetworkMessage const &msg, NetworkSender &from )
+{
+	int messageIdx		= 0;
+	int totalMessages	= 0;
+
+	if( !msg.Read( messageIdx ) || !msg.Read( totalMessages ) )
+		return false;
+
+	ConsolePrintf( "[%d] Received (%d/%d)th unreliable test message", from.connection->m_indexInSession, messageIdx, totalMessages );
+
+	return true;
+}
+
 theGame::theGame()
 {
 	// Set global variable
@@ -313,19 +354,20 @@ void theGame::Startup()
 	g_theRenderer->EndFrame();
 
 	// Console stuffs
-	CommandRegister( "echo", EchoTestCommand );
-	CommandRegister( "log_show_all", ShowAllLogTags );
-	CommandRegister( "log_hide_all", HideAllLogTags );
-	CommandRegister( "log_show_tag", ShowLogTag );
-	CommandRegister( "log_hide_tag", HideLogTag );
-	CommandRegister( "add_connection", AddSessionConnection );
-	CommandRegister( "send_ping", SessionSendPing );
-	CommandRegister( "send_add", SessionSendAdd );
-	CommandRegister( "net_sim_loss", NetSimLoss );
-	CommandRegister( "net_sim_lag", NetSimLag );
-	CommandRegister( "net_set_session_send_rate", SetSessionSendRate );
-	CommandRegister( "net_set_connection_send_rate", SetConnectionSendRate );
-	CommandRegister( "net_set_heart_rate", SetHeartbeatRate );
+	CommandRegister( "echo",							EchoTestCommand );
+	CommandRegister( "log_show_all",					ShowAllLogTags );
+	CommandRegister( "log_hide_all",					HideAllLogTags );
+	CommandRegister( "log_show_tag",					ShowLogTag );
+	CommandRegister( "log_hide_tag",					HideLogTag );
+	CommandRegister( "add_connection",					AddSessionConnection );
+	CommandRegister( "send_ping",						SessionSendPing );
+	CommandRegister( "send_add",						SessionSendAdd );
+	CommandRegister( "send_unreliable_test",			UnreliableTestCommand );
+	CommandRegister( "net_sim_loss",					NetSimLoss );
+	CommandRegister( "net_sim_lag",						NetSimLag );
+	CommandRegister( "net_set_session_send_rate",		SetSessionSendRate );
+	CommandRegister( "net_set_connection_send_rate",	SetConnectionSendRate );
+	CommandRegister( "net_set_heart_rate",				SetHeartbeatRate );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
@@ -343,8 +385,8 @@ void theGame::Startup()
 
 	// Network Session
 	m_session = new NetworkSession( g_theRenderer );
-	m_session->RegisterNetworkMessage( "add",  OnAdd, NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
-	m_session->RegisterNetworkMessage( "add_response",  OnAddResponse, NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	RegisterGameMessages();
+	m_unreliableMsgTimer.SetTimer( 0.030 );
 
 	// For now we'll just shortcut to being a HOST
 	// "bound" state
@@ -371,6 +413,32 @@ void theGame::EndFrame()
 	PROFILE_SCOPE_FUNCTION();
 
 	m_currentGameState->EndFrame();
+
+	// UNRELIABLE TEST
+	if( pendingUMsgCountToSend > 0 )
+	{
+		if( m_unreliableMsgTimer.CheckAndReset() )
+		{
+			NetworkMessage msg("unreliable_test");
+			msg.Write( ++lastSentUMsgIdx );
+			msg.Write( lastSentUMsgIdx + --pendingUMsgCountToSend );
+
+			NetworkConnection *sendTo = m_session->GetConnection( connectionToSendUMsg );
+			if( sendTo == nullptr )
+			{
+				ConsolePrintf( RGBA_RED_COLOR, "Connection %d is not valid!", connectionToSendUMsg );
+
+				connectionToSendUMsg	= -1;
+				lastSentUMsgIdx			= -1;
+				pendingUMsgCountToSend	=  0;
+			}
+			else
+			{
+				ConsolePrintf( "Unreliable Test Message %d/%d sent to connection [%d]", lastSentUMsgIdx, lastSentUMsgIdx + 1 + pendingUMsgCountToSend, connectionToSendUMsg );
+				sendTo->Send( msg );
+			}
+		}
+	}
 
 	// Network Session
 	m_session->ProcessOutgoing();
@@ -484,6 +552,16 @@ void theGame::QuitGame( char const * actionName )
 NetworkSession* theGame::GetSession()
 {
 	return g_theGame->m_session;
+}
+
+void theGame::RegisterGameMessages()
+{
+	// Not fixed index
+	m_session->RegisterNetworkMessage( "add",				OnAdd,				NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	m_session->RegisterNetworkMessage( "add_response",		OnAddResponse,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+
+	// Fixed index
+	m_session->RegisterNetworkMessage( NET_MESSAGE_UNRELIABLE_TEST, "unreliable_test",	OnUnreliableTest,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 }
 
 void theGame::AddNewGameState( GameState* gsToAdd )

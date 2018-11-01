@@ -28,6 +28,7 @@ public:
 public:
 	// Network Session
 	NetworkSession		*m_session = nullptr;
+	Stopwatch			 m_unreliableMsgTimer;
 
 	// UI & Camera
 	const AABB2			m_default_screen_bounds	= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
@@ -53,6 +54,8 @@ public:
 	// Network Session
 	static NetworkSession* GetSession();
 
+	void RegisterGameMessages();
+
 public:
 	// Game States
 	bool		SetCurrentGameState		( std::string const &gsName );		// returns false if game state of that name doesn't exists
@@ -68,7 +71,6 @@ private:
 	const float		m_transitionTime					=	2.5;
 	const float		m_halfTransitionTime				=	m_transitionTime * 0.5f;
 	float			m_fadeEffectAlpha					=	0.f;						// 0 to 1
-
 	
 private:
 	// Game States
