@@ -2,6 +2,67 @@
 #include "NetworkPacket.hpp"
 #include "Engine/NetworkSession/NetworkSession.hpp"
 
+// STRUCT - PACKET TRACKER
+PacketTracker::PacketTracker( uint16_t inAck )
+	: ack( inAck ) 
+{ 
+
+}
+
+PacketTracker::PacketTracker( uint16_t inAck, uint64_t inSentTimeHPC )
+	: ack( inAck )
+	, sentTimeHPC( inSentTimeHPC ) 
+{ 
+
+}
+
+bool PacketTracker::AddNewReliableID( uint16_t reliableID )
+{
+	bool addedSuccessfully = false;
+
+	for( int i = 0; i < MAX_RELIABLES_PER_PACKET; i++ )
+	{
+		if( sentReliables[i] != 0 )
+			continue;
+
+		sentReliables[i]  = reliableID;
+		addedSuccessfully = true;
+		break;
+	}
+
+	return addedSuccessfully;
+}
+
+void PacketTracker::TrackForAck( uint16_t inAck )
+{
+	ack			= inAck;
+	sentTimeHPC	= Clock::GetCurrentHPC();
+}
+
+void PacketTracker::Invalidate()
+{
+	ack = INVALID_PACKET_ACK;
+}
+
+bool PacketTracker::IsValid() const
+{
+	return (ack != INVALID_PACKET_ACK);
+}
+
+// STRUCT - NETWORK PACKET HEADER
+NetworkPacketHeader::NetworkPacketHeader( uint8_t connectionIdx )
+{
+	connectionIndex = connectionIdx;
+}
+
+NetworkPacketHeader::NetworkPacketHeader( uint8_t connectionIdx, uint8_t msgCount )
+{
+	connectionIndex	 = connectionIdx;
+	messageCount	 = msgCount;
+}
+
+
+// CLASS - NETWORK PACKET
 NetworkPacket::NetworkPacket()
 	: BytePacker( PACKET_MTU, LITTLE_ENDIAN )
 {

@@ -12,9 +12,12 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 	, m_address( addr )
 	, m_sendRateTimer( GetMasterClock() )
 	, m_heartbeatTimer( GetMasterClock() )
+	, m_confirmReliablesTimer( GetMasterClock() )
 {
 	SetSendFrequencyTo( m_sendFrequency );
 	UpdateHeartbeatTimer();
+
+	m_confirmReliablesTimer.SetTimer( 0.01 );
 }
 
 NetworkConnection::~NetworkConnection()
@@ -111,6 +114,11 @@ void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 	}
 }
 
+bool NetworkConnection::HasMessagesToSend() const
+{
+	return (m_outgoingReliables.size() > 0) || (m_outgoingUnreliables.size() > 0);
+}
+
 void NetworkConnection::Send( NetworkMessage &msg )
 {
 	// Update the index of this messageToSend
@@ -138,20 +146,60 @@ void NetworkConnection::FlushMessages()
 		NetworkMessage heartbeat( "heartbeat" );
 		Send( heartbeat );
 	}
-	
+		
+	// Return if there's nothing to send
+	if( HasMessagesToSend() == false )
+		return;
+
 	// Populate messages into thisPacket & its header
 	NetworkPacket		 thisPacket;
-	NetworkPacketHeader &thisHeader		= thisPacket.m_header;
-	thisHeader.messageCount				= 0x00;
-	thisHeader.connectionIndex			= (uint8_t)m_indexInSession;
-	
-	// Unconfirmed Reliable Messages
+	NetworkPacketHeader &thisHeader	= thisPacket.m_header;
+	thisHeader.messageCount			= 0x00;
+	thisHeader.connectionIndex		= (uint8_t)m_indexInSession;
+
+	// Ack
+	uint16_t ackToSend = GetNextAckToSend();
+	IncrementSentAck();
+	thisHeader.ack					= ackToSend;
+	thisHeader.highestReceivedAck	= m_highestReceivedAck;
+	thisHeader.receivedAcksHistory	= m_receivedAcksBitfield;
+
+	// If about to wrap around, calculate the loss
+	if( (ackToSend % MAX_TRACKED_PACKETS) == 0 )
+		m_loss = CalculateLoss();
+
+	// Track the packet
+	int reliableMessagesInThisPacker = 0;
+	PacketTracker *packetTracker = AddTrackedPacket( thisPacket.m_header.ack );
+
+	// Send Unconfirmed Reliable Messages
 	// ...
+	if( m_confirmReliablesTimer.CheckAndReset() )
+	{
+		for( int ucrID = 0; ucrID < m_sentReliables.size(); ucrID++ )
+		{
+			// Don't write more than MAX reliables in this packet
+			if( reliableMessagesInThisPacker > MAX_RELIABLES_PER_PACKET )
+				break;
+
+			bool writeSuccessfull = thisPacket.WriteMessage( *m_sentReliables[ucrID] );
+			if( writeSuccessfull )
+			{
+				reliableMessagesInThisPacker++;
+				packetTracker->AddNewReliableID( m_sentReliables[ucrID]->m_header.reliableID );
+			}
+			else
+			{
+				GUARANTEE_RECOVERABLE( false, "Error: Ancountered a message which is too large to fit in current packet!" );
+				continue;		// This message might be too big to fit?
+			}
+		}
+	}
 	
 	// Reliable Messages
 	bool	 reliableIDIncrementedOnce	= false;
 	uint16_t reliableIDToSend			= GetNextReliableIDToSend();
-	while ( m_outgoingReliables.size() > 0 )
+	while( m_outgoingReliables.size() > 0 && reliableMessagesInThisPacker < MAX_RELIABLES_PER_PACKET )
 	{
 		// Give outgoing message proper reliable ID
 		m_outgoingReliables.front()->m_header.reliableID = reliableIDToSend;
@@ -159,6 +207,9 @@ void NetworkConnection::FlushMessages()
 		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingReliables.front() );
 		if( writeSuccessfull )
 		{
+			reliableMessagesInThisPacker++;
+			packetTracker->AddNewReliableID( reliableIDToSend );
+
 			// Move the message to sent reliables queue
 			std::swap( m_outgoingReliables.front(), m_outgoingReliables.back() );
 
@@ -166,7 +217,7 @@ void NetworkConnection::FlushMessages()
 			m_outgoingReliables.pop_back();
 
 			// Increment once per whole packet
-			if( reliableIDIncrementedOnce == false )
+			if( reliableIDIncrementedOnce != true )
 			{
 				IncrementSentReliableID();
 				reliableIDIncrementedOnce = true;
@@ -202,30 +253,11 @@ void NetworkConnection::FlushMessages()
 		}
 	}
 
-	// Send if not empty
-	if( thisPacket.HasMessages() )
-	{
-		uint16_t ackToSend = GetNextAckToSend();
-		IncrementSentAck();
+	// Send it
+	m_parentSession.SendPacket( thisPacket );
 
-		// If about to wrap around, calculate the loss
-		if( (ackToSend % MAX_TRACKED_PACKETS) == 0 )
-			m_loss = CalculateLoss();
-
-		// Set Ack for this packet
-		thisHeader.ack						= ackToSend;
-		thisHeader.highestReceivedAck		= m_highestReceivedAck;
-		thisHeader.receivedAcksHistory		= m_receivedAcksBitfield;
-
-		// Track the packet
-		AddTrackedPacket( thisPacket.m_header.ack );
-
-		// Send it
-		m_parentSession.SendPacket( thisPacket );
-
-		// Update Analytics
-		m_lastSendTimeHPC = Clock::GetCurrentHPC();
-	}
+	// Update Analytics
+	m_lastSendTimeHPC = Clock::GetCurrentHPC();
 }
 
 uint8_t NetworkConnection::GetCurrentSendFrequency() const
@@ -328,6 +360,10 @@ void NetworkConnection::EmptyTheOutgoingUnreliables()
 
 uint16_t NetworkConnection::GetNextReliableIDToSend()
 {
+	// Treating 0 as nothing
+	if( m_nextSentReliableID == 0U )
+		m_nextSentReliableID++;
+
 	return m_nextSentReliableID;
 }
 
