@@ -5,6 +5,8 @@
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 
+#define MAX_RELIABLES_PER_PACKET (32)
+
 class NetworkPacket;
 typedef std::vector< NetworkPacket* > NetworkPacketList;
 
@@ -13,31 +15,19 @@ struct PacketTracker
 public:
 	uint16_t ack			= INVALID_PACKET_ACK;
 	uint64_t sentTimeHPC	= Clock::GetCurrentHPC();
+	uint16_t sentReliables[ MAX_RELIABLES_PER_PACKET ] = { 0U };
 
 public:
 	PacketTracker() { }
-
-	PacketTracker( uint16_t inAck )		// Sets sentTimeHPC as current time
-		: ack( inAck ) { }
-
-	PacketTracker( uint16_t inAck, uint64_t inSentTimeHPC )
-		: ack( inAck )
-		, sentTimeHPC( inSentTimeHPC ) { }
+	PacketTracker( uint16_t inAck );		// Sets sentTimeHPC as current time
+	PacketTracker( uint16_t inAck, uint64_t inSentTimeHPC );
 
 public:
-	void TrackForAck( uint16_t inAck )
-	{
-		ack			= inAck;
-		sentTimeHPC	= Clock::GetCurrentHPC();
-	}
-	void Invalidate()
-	{
-		ack = INVALID_PACKET_ACK;
-	}
-	bool IsValid() const
-	{
-		return (ack != INVALID_PACKET_ACK);
-	}
+	bool AddNewReliableID( uint16_t reliableID );
+	void TrackForAck( uint16_t inAck );
+
+	void Invalidate();
+	bool IsValid() const;
 };
 
 struct NetworkPacketHeader
@@ -56,15 +46,8 @@ public:
 
 public:
 	NetworkPacketHeader() { }
-	NetworkPacketHeader( uint8_t connectionIdx )
-	{
-		connectionIndex = connectionIdx;
-	}
-	NetworkPacketHeader( uint8_t connectionIdx, uint8_t msgCount )
-	{
-		connectionIndex	 = connectionIdx;
-		messageCount	 = msgCount;
-	}
+	NetworkPacketHeader( uint8_t connectionIdx );
+	NetworkPacketHeader( uint8_t connectionIdx, uint8_t msgCount );
 };
 
 class NetworkPacket : public BytePacker

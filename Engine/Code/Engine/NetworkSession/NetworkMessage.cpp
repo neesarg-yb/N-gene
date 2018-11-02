@@ -2,6 +2,58 @@
 #include "NetworkMessage.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
+// STRUCT - NETWORK SENDER
+NetworkSender::NetworkSender( NetworkSession &parentSesion, NetworkAddress &netAddress, NetworkConnection *netConnection )
+	: session( parentSesion )
+	, address( netAddress )
+	, connection( netConnection ) 
+{
+
+}
+
+// STRUCT - NETWORK MESSAGE DEFINITION
+NetworkMessageDefinition::NetworkMessageDefinition( char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
+{
+	this->name			= name;
+	this->callback		= callback;
+	this->optionsFlag	= optionsFlag;
+}
+
+NetworkMessageDefinition::NetworkMessageDefinition( std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
+{
+	this->name			= name;
+	this->callback		= callback;
+	this->optionsFlag	= optionsFlag;
+}
+
+NetworkMessageDefinition::NetworkMessageDefinition( int id, char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
+{
+	this->id			= id;
+	this->name			= name;
+	this->callback		= callback;
+	this->optionsFlag	= optionsFlag;
+}
+
+NetworkMessageDefinition::NetworkMessageDefinition( int id, std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
+{
+	this->id			= id;
+	this->name			= name;
+	this->callback		= callback;
+	this->optionsFlag	= optionsFlag;
+}
+
+bool NetworkMessageDefinition::RequiresConnection() const
+{
+	return ( optionsFlag & NET_MESSAGE_OPTION_CONNECTIONLESS ) != NET_MESSAGE_OPTION_CONNECTIONLESS;
+}
+
+bool NetworkMessageDefinition::IsReliable() const
+{
+	return (optionsFlag & NET_MESSAGE_OPTION_RELIABLE) == NET_MESSAGE_OPTION_RELIABLE;
+}
+
+
+// CLASS - NETWORK MESSAGE
 NetworkMessage::NetworkMessage( const char *name )
 	: BytePacker( PACKET_MTU - NETWORK_PACKET_HEADER_SIZE - 2U - NETWORK_RELIABLE_MESSAGE_HEADER_SIZE , LITTLE_ENDIAN )
 	, m_name( name )

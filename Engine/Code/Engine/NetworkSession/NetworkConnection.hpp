@@ -53,11 +53,13 @@ private:
 	// Timers
 	Stopwatch			 m_sendRateTimer;				// To simulate send frequency
 	Stopwatch			 m_heartbeatTimer;				// To send heartbeat regularly
+	Stopwatch			 m_confirmReliablesTimer;
 
 public:
 	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );
 	void	ConfirmPacketReceived( uint16_t ack );
 
+	bool	HasMessagesToSend() const;
 	void	Send( NetworkMessage &msg );
 	void	FlushMessages();
 

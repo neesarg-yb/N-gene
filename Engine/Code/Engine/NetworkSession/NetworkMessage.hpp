@@ -13,13 +13,13 @@ typedef bool (*networkMessage_cb) ( NetworkMessage const &, NetworkSender & );
 
 enum eNetworkMessageOptions : uint
 {
-	NET_MESSAGE_OPTION_CONNECTIONLESS					= BIT_FLAG(0),
-	NET_MESSAGE_OPTION_RELIABLE							= BIT_FLAG(1),
-	NET_MESSAGE_OPTION_IN_ORDER							= BIT_FLAG(2),
+	NET_MESSAGE_OPTION_CONNECTIONLESS		= BIT_FLAG(0),
+	NET_MESSAGE_OPTION_RELIABLE				= BIT_FLAG(1),
+	NET_MESSAGE_OPTION_IN_ORDER				= BIT_FLAG(2),
 
 	// Convenience
-	NET_MESSAGE_OPTION_REQUIRES_CONNECTION				= 0U,
-	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER				= NET_MESSAGE_OPTION_RELIABLE | NET_MESSAGE_OPTION_IN_ORDER,
+	NET_MESSAGE_OPTION_REQUIRES_CONNECTION	= 0U,
+	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER	= NET_MESSAGE_OPTION_RELIABLE | NET_MESSAGE_OPTION_IN_ORDER,
 };
 
 enum eNetworkCoreMessages : uint8_t
@@ -39,10 +39,7 @@ public:
 	NetworkConnection	*connection;
 
 public:
-	NetworkSender( NetworkSession &parentSesion, NetworkAddress &netAddress, NetworkConnection *netConnection )
-		: session( parentSesion )
-		, address( netAddress )
-		, connection( netConnection ) { }
+	NetworkSender( NetworkSession &parentSesion, NetworkAddress &netAddress, NetworkConnection *netConnection );
 };
 
 struct NetworkMessageHeader
@@ -64,43 +61,14 @@ public:
 
 public:
 	NetworkMessageDefinition() { }
-	NetworkMessageDefinition( char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
-	{
-		this->name			= name;
-		this->callback		= callback;
-		this->optionsFlag	= optionsFlag;
-	}
-	NetworkMessageDefinition( std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag )
-	{
-		this->name			= name;
-		this->callback		= callback;
-		this->optionsFlag	= optionsFlag;
-	}
-	NetworkMessageDefinition( int id, char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag ) 
-	{
-		this->id			= id;
-		this->name			= name;
-		this->callback		= callback;
-		this->optionsFlag	= optionsFlag;
-	}
-	NetworkMessageDefinition( int id, std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag ) 
-	{
-		this->id			= id;
-		this->name			= name;
-		this->callback		= callback;
-		this->optionsFlag	= optionsFlag;
-	}
+	NetworkMessageDefinition( char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag );
+	NetworkMessageDefinition( std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag );
+	NetworkMessageDefinition( int id, char const *name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag ); 
+	NetworkMessageDefinition( int id, std::string &name, networkMessage_cb callback, eNetworkMessageOptions optionsFlag ); 
 
 public:
-	bool RequiresConnection() const
-	{
-		return ( optionsFlag & NET_MESSAGE_OPTION_CONNECTIONLESS ) != NET_MESSAGE_OPTION_CONNECTIONLESS;
-	}
-
-	bool IsReliable() const
-	{
-		return (optionsFlag & NET_MESSAGE_OPTION_RELIABLE) == NET_MESSAGE_OPTION_RELIABLE;
-	}
+	bool RequiresConnection() const;
+	bool IsReliable() const;
 };
 
 class NetworkMessage : public BytePacker
@@ -122,6 +90,7 @@ public:
 	std::string						 m_name			= "NAME NOT ASSIGNED!";
 	uint64_t						 m_lastSentHPC	= 0U;
 	NetworkMessageHeader			 m_header;					// NetworkConnection fills the header when it adds to outgoing queue..
+
 private:
 	NetworkMessageDefinition const	*m_definition	= nullptr;	// *NetworkSession fills the header & definition when it receives the Packet
 
