@@ -114,14 +114,16 @@ void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 void NetworkConnection::Send( NetworkMessage &msg )
 {
 	// Update the index of this messageToSend
-	int msgIdx = m_parentSession.GetRegisteredIndexForMessageNamed( msg.m_name );
-	GUARANTEE_RECOVERABLE( msgIdx != -1, "Can't find the registered message definition!" );
-
-	msg.m_header.networkMessageDefinitionIndex	= (uint8_t) msgIdx;
-
+	NetworkMessageDefinition const *msgDef = m_parentSession.GetRegisteredMessageDefination( msg.m_name );
+	msg.SetDefinition( msgDef );
+	
 	// Push to the outgoing messages
 	NetworkMessage *msgToSend = new NetworkMessage( msg );
-	m_outgoingUnreliableMessages.push_back( msgToSend );
+
+	if( msgToSend->IsReliable() )
+		m_outgoingReliables.push_back( msgToSend );
+	else
+		m_outgoingUnreliables.push_back( msgToSend );
 }
 
 void NetworkConnection::FlushMessages()
@@ -143,26 +145,59 @@ void NetworkConnection::FlushMessages()
 	thisHeader.messageCount				= 0x00;
 	thisHeader.connectionIndex			= (uint8_t)m_indexInSession;
 	
-	// Reliable Messages
+	// Unconfirmed Reliable Messages
 	// ...
 	
-	// Unreliable Messages
-	while ( m_outgoingUnreliableMessages.size() > 0 )
+	// Reliable Messages
+	bool	 reliableIDIncrementedOnce	= false;
+	uint16_t reliableIDToSend			= GetNextReliableIDToSend();
+	while ( m_outgoingReliables.size() > 0 )
 	{
-		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingUnreliableMessages.front() );
+		// Give outgoing message proper reliable ID
+		m_outgoingReliables.front()->m_header.reliableID = reliableIDToSend;
+
+		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingReliables.front() );
+		if( writeSuccessfull )
+		{
+			// Move the message to sent reliables queue
+			std::swap( m_outgoingReliables.front(), m_outgoingReliables.back() );
+
+			m_sentReliables.push_back( m_outgoingReliables.back() );
+			m_outgoingReliables.pop_back();
+
+			// Increment once per whole packet
+			if( reliableIDIncrementedOnce == false )
+			{
+				IncrementSentReliableID();
+				reliableIDIncrementedOnce = true;
+			}
+		}
+		else
+		{
+			// That would mean that package can't store more messages
+			// Reliable messages => we'll send the remaining ones next time
+			break;
+		}
+	}
+	
+	// Unreliable Messages
+	while ( m_outgoingUnreliables.size() > 0 )
+	{
+		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingUnreliables.front() );
 		if( writeSuccessfull )
 		{
 			// Delete the message from queue
-			std::swap( m_outgoingUnreliableMessages.front(), m_outgoingUnreliableMessages.back() );
-			delete m_outgoingUnreliableMessages.back();
-			m_outgoingUnreliableMessages.back() = nullptr;
+			std::swap( m_outgoingUnreliables.front(), m_outgoingUnreliables.back() );
+			delete m_outgoingUnreliables.back();
+			m_outgoingUnreliables.back() = nullptr;
 
-			m_outgoingUnreliableMessages.pop_back();
+			m_outgoingUnreliables.pop_back();
 		}
 		else
 		{
 			// That would mean that package can't store more messages
 			// Unreliable messages => we don't care about leftover messages
+			EmptyTheOutgoingUnreliables();
 			break;
 		}
 	}
@@ -278,3 +313,25 @@ bool NetworkConnection::IsActivePacketTracker( uint16_t ack )
 		return true;
 }
 
+void NetworkConnection::EmptyTheOutgoingUnreliables()
+{
+	while ( m_outgoingUnreliables.size() > 0 )
+	{
+		// fast delete
+		std::swap( m_outgoingUnreliables.front(), m_outgoingUnreliables.back() );
+		delete m_outgoingUnreliables.back();
+		m_outgoingUnreliables.back() = nullptr;
+
+		m_outgoingUnreliables.pop_back();
+	}
+}
+
+uint16_t NetworkConnection::GetNextReliableIDToSend()
+{
+	return m_nextSentReliableID;
+}
+
+void NetworkConnection::IncrementSentReliableID()
+{
+	m_nextSentReliableID++;
+}

@@ -37,11 +37,12 @@ const   float	   g_aspectRatio = 1.77f;
 
 
 // NETWORK SESSION
-#define MAX_SESSION_CONNECTIONS		(0xff)
-#define INVALID_PACKET_ACK			(0xffff)
-#define MAX_TRACKED_PACKETS			(64)
-#define NETWORK_PACKET_HEADER_SIZE	(8)
-#define NETWORK_MESSAGE_HEADER_SIZE	(1)
+#define MAX_SESSION_CONNECTIONS					(0xff)
+#define INVALID_PACKET_ACK						(0xffff)
+#define MAX_TRACKED_PACKETS						(64)
+#define NETWORK_PACKET_HEADER_SIZE				(8)
+#define NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE	(1)
+#define NETWORK_RELIABLE_MESSAGE_HEADER_SIZE	(3)
 
 
 // Use this to deduce type of the pointer so we can cast; 

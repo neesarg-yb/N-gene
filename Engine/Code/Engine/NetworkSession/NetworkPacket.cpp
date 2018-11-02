@@ -1,5 +1,6 @@
 #pragma once
 #include "NetworkPacket.hpp"
+#include "Engine/NetworkSession/NetworkSession.hpp"
 
 NetworkPacket::NetworkPacket()
 	: BytePacker( PACKET_MTU, LITTLE_ENDIAN )
@@ -61,8 +62,15 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 
 	BytePacker messagePacker( LITTLE_ENDIAN );
 
+	// Set message header size according based on its nature
+	size_t messageHeaderSize;
+	if( msg.IsReliable() )
+		messageHeaderSize = NETWORK_RELIABLE_MESSAGE_HEADER_SIZE;
+	else
+		messageHeaderSize = NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE;
+
 	size_t messageBytes			 = msg.GetWrittenByteCount();
-	size_t messagePlusHeaderSize = NETWORK_MESSAGE_HEADER_SIZE + messageBytes;
+	size_t messagePlusHeaderSize = messageHeaderSize + messageBytes;
 	uint16_t bytesCountToWrite	 = ((uint16_t)messagePlusHeaderSize);
 
 	// Write bytes-to-read
@@ -70,6 +78,8 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 
 	// Write message header - all the variables, one by one
 	messagePacker.WriteBytes( sizeof(msg.m_header.networkMessageDefinitionIndex), &msg.m_header.networkMessageDefinitionIndex );
+	if( msg.IsReliable() )
+		messagePacker.WriteBytes( sizeof(msg.m_header.reliableID), &msg.m_header.reliableID );
 
 	// Write message
 	messagePacker.WriteBytes( messageBytes, msg.GetBuffer(), false );						// false because it is already in LITTLE_ENDIANESS
@@ -93,7 +103,7 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 	}
 }
 
-bool NetworkPacket::ReadMessage( NetworkMessage &outMessage ) const
+bool NetworkPacket::ReadMessage( NetworkMessage &outMessage, NetworkSession const &session ) const
 {
 	// Get Length of Message & Header
 	uint16_t messageAndHeaderLength;
@@ -101,11 +111,27 @@ bool NetworkPacket::ReadMessage( NetworkMessage &outMessage ) const
 	if( sizeBytes != 2U )
 		return false;
 	
-	// Get Header
-	size_t messageHeaderSize = NETWORK_MESSAGE_HEADER_SIZE;
-	size_t headerBytes		 = ReadBytes( &outMessage.m_header, messageHeaderSize );
-	if( headerBytes != messageHeaderSize )
+	// HEADER
+	// Get Message Def. Index
+	uint8_t  msgDefIdx;
+	uint16_t messageHeaderSize = NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE;
+	size_t headerBytes = ReadBytes( &msgDefIdx, 1U );
+	if( headerBytes != 1U )
 		return false;
+
+	// Set Message Definition
+	NetworkMessageDefinition const *msgDef = session.GetRegisteredMessageDefination( msgDefIdx );
+	outMessage.SetDefinition( msgDef );
+
+	// If reliable message, read the reliableID
+	if( msgDef->IsReliable() )
+	{
+		messageHeaderSize = NETWORK_RELIABLE_MESSAGE_HEADER_SIZE;
+
+		size_t reliableIDBytes = ReadBytes( &outMessage.m_header.reliableID, 2U );
+		if( reliableIDBytes != 2U )
+			return false;
+	}
 
 	// Get Message
 	uint16_t messageLength		= messageAndHeaderLength - (uint16_t)messageHeaderSize;
