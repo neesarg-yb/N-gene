@@ -342,7 +342,20 @@ bool OnUnreliableTest( NetworkMessage const &msg, NetworkSender &from )
 	if( !msg.Read( messageIdx ) || !msg.Read( totalMessages ) )
 		return false;
 
-	ConsolePrintf( "[%d] Received (%d/%d)th unreliable test message", from.connection->m_indexInSession, messageIdx, totalMessages );
+	ConsolePrintf( RGBA_GRAY_COLOR, "[%d] Received (%d/%d)th unreliable test message", from.connection->m_indexInSession, messageIdx, totalMessages );
+
+	return true;
+}
+
+bool OnReliableTest( NetworkMessage const &msg, NetworkSender &from )
+{
+	int messageIdx		= 0;
+	int totalMessages	= 0;
+
+	if( !msg.Read( messageIdx ) || !msg.Read( totalMessages ) )
+		return false;
+
+	ConsolePrintf( "[%d] Received (%d/%d)th reliable test message", from.connection->m_indexInSession, messageIdx, totalMessages );
 
 	return true;
 }
@@ -600,7 +613,7 @@ void theGame::RegisterGameMessages()
 
 	// Fixed index
 	m_session->RegisterNetworkMessage( NET_MESSAGE_UNRELIABLE_TEST,	"unreliable_test",	OnUnreliableTest,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
-	m_session->RegisterNetworkMessage( NET_MESSAGE_RELIABLE_TEST,	"reliable_test",	OnUnreliableTest,	NET_MESSAGE_OPTION_RELIABLE );
+	m_session->RegisterNetworkMessage( NET_MESSAGE_RELIABLE_TEST,	"reliable_test",	OnReliableTest,	NET_MESSAGE_OPTION_RELIABLE );
 
 }
 
