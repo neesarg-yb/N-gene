@@ -102,7 +102,7 @@ void NetworkSession::Render() const
 	m_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	// Draw overlay
-	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.95f, 1.f ) );
+	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 1.f, 1.f ) );
 	m_theRenderer->DrawAABB( backgroundBox, m_uiBackgroundColor );
 
 	// Title Box
@@ -136,7 +136,7 @@ void NetworkSession::Render() const
 	// Title Column of Table: All Connections
 	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
 	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits" );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -186,12 +186,15 @@ void NetworkSession::Render() const
 		std::bitset< 16 > rcvbit = m_connections[i]->m_receivedAcksBitfield;
 		std::string rcvbitsStr = rcvbit.to_string();
 
+		// ucnfrmR
+		std::string ncnfrm_relStr = Stringf( "%d", m_connections[i]->GetUnconfirmedSendReliablesCount() );
+
 		// Calculate the AABB
 		Vector2	mins = Vector2( columnTitlesBox.mins.x, columnTitlesBox.mins.y - ( ++numOfConnectionDisplayed * (m_uiBodyFontSize * 1.1f) ) );
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
 }
