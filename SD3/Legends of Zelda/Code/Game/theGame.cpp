@@ -11,6 +11,7 @@
 #include "Game/Game States/LevelSelect.hpp"
 #include "Game/Game States/Level1.hpp"
 
+bool sendReliables			= false;
 int connectionToSendUMsg	= -1;
 int lastSentUMsgIdx			= -1;
 int pendingUMsgCountToSend	=  0;
@@ -35,6 +36,7 @@ void UnreliableTestCommand( Command& cmd )
 	connectionToSendUMsg = atoi( connectionIdx.c_str() );
 	int uMsgCount		 = atoi( countStr.c_str() );
 
+	sendReliables			= false;
 	lastSentUMsgIdx			= -1;
 	pendingUMsgCountToSend	= uMsgCount;
 
@@ -61,6 +63,7 @@ void ReliableTestCommand( Command& cmd )
 	connectionToSendUMsg = atoi( connectionIdx.c_str() );
 	int uMsgCount		 = atoi( countStr.c_str() );
 
+	sendReliables			= true;
 	lastSentUMsgIdx			= -1;
 	pendingUMsgCountToSend	= uMsgCount;
 
@@ -443,12 +446,18 @@ void theGame::EndFrame()
 
 	m_currentGameState->EndFrame();
 
-	// UNRELIABLE TEST
+	// UNRELIABLE-RELIABLE TEST
 	if( pendingUMsgCountToSend > 0 )
 	{
 		if( m_unreliableMsgTimer.CheckAndReset() )
 		{
-			NetworkMessage msg("unreliable_test");
+			std::string msgDefName;
+			if( sendReliables )
+				msgDefName = "reliable_test";
+			else
+				msgDefName = "unreliable_test";
+
+			NetworkMessage msg( msgDefName.c_str() );
 			msg.Write( ++lastSentUMsgIdx );
 			msg.Write( lastSentUMsgIdx + --pendingUMsgCountToSend );
 
@@ -463,7 +472,7 @@ void theGame::EndFrame()
 			}
 			else
 			{
-				ConsolePrintf( "Unreliable Test Message %d/%d sent to connection [%d]", lastSentUMsgIdx, lastSentUMsgIdx + 1 + pendingUMsgCountToSend, connectionToSendUMsg );
+				ConsolePrintf( "Unreliable Test Message %d/%d sent to connection [%d]", lastSentUMsgIdx, lastSentUMsgIdx + pendingUMsgCountToSend, connectionToSendUMsg );
 				sendTo->Send( msg );
 			}
 		}
