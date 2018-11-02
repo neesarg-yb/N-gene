@@ -28,7 +28,7 @@ void UnreliableTestCommand( Command& cmd )
 
 	if( pendingUMsgCountToSend > 0 )
 	{
-		ConsolePrintf( RGBA_YELLOW_COLOR, "Error: Last command still needs to send %d unreliable messages to connection %d", lastSentUMsgIdx + 1 + pendingUMsgCountToSend, connectionToSendUMsg );
+		ConsolePrintf( RGBA_YELLOW_COLOR, "Error: Last command still needs to send %d messages to connection %d", lastSentUMsgIdx + 1 + pendingUMsgCountToSend, connectionToSendUMsg );
 		return;
 	}
 	
@@ -37,6 +37,34 @@ void UnreliableTestCommand( Command& cmd )
 
 	lastSentUMsgIdx			= -1;
 	pendingUMsgCountToSend	= uMsgCount;
+
+	ConsolePrintf( RGBA_PURPLE_COLOR, "Unreliable %d messages enqueued for send!", pendingUMsgCountToSend );
+}
+
+void ReliableTestCommand( Command& cmd )
+{
+	std::string connectionIdx	= cmd.GetNextString();
+	std::string countStr		= cmd.GetNextString();
+
+	if( countStr == "" || connectionIdx == "" )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Provide valid arguments!" );
+		return;
+	}
+
+	if( pendingUMsgCountToSend > 0 )
+	{
+		ConsolePrintf( RGBA_YELLOW_COLOR, "Error: Last command still needs to send %d messages to connection %d", lastSentUMsgIdx + 1 + pendingUMsgCountToSend, connectionToSendUMsg );
+		return;
+	}
+
+	connectionToSendUMsg = atoi( connectionIdx.c_str() );
+	int uMsgCount		 = atoi( countStr.c_str() );
+
+	lastSentUMsgIdx			= -1;
+	pendingUMsgCountToSend	= uMsgCount;
+
+	ConsolePrintf( RGBA_GREEN_COLOR, "Reliable %d messages enqueued for send!", pendingUMsgCountToSend );
 }
 
 void EchoTestCommand( Command& cmd )
@@ -363,6 +391,7 @@ void theGame::Startup()
 	CommandRegister( "send_ping",						SessionSendPing );
 	CommandRegister( "send_add",						SessionSendAdd );
 	CommandRegister( "send_unreliable_test",			UnreliableTestCommand );
+	CommandRegister( "send_reliable_test",				ReliableTestCommand );
 	CommandRegister( "net_sim_loss",					NetSimLoss );
 	CommandRegister( "net_sim_lag",						NetSimLag );
 	CommandRegister( "net_set_session_send_rate",		SetSessionSendRate );
@@ -561,7 +590,9 @@ void theGame::RegisterGameMessages()
 	m_session->RegisterNetworkMessage( "add_response",		OnAddResponse,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 
 	// Fixed index
-	m_session->RegisterNetworkMessage( NET_MESSAGE_UNRELIABLE_TEST, "unreliable_test",	OnUnreliableTest,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	m_session->RegisterNetworkMessage( NET_MESSAGE_UNRELIABLE_TEST,	"unreliable_test",	OnUnreliableTest,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	m_session->RegisterNetworkMessage( NET_MESSAGE_RELIABLE_TEST,	"reliable_test",	OnUnreliableTest,	NET_MESSAGE_OPTION_RELIABLE );
+
 }
 
 void theGame::AddNewGameState( GameState* gsToAdd )
