@@ -41,10 +41,8 @@ public:
 public:
 	NetworkSender( NetworkSession &parentSesion, NetworkAddress &netAddress, NetworkConnection *netConnection )
 		: session( parentSesion )
-	{
-		address		= netAddress;
-		connection	= netConnection;
-	}
+		, address( netAddress )
+		, connection( netConnection ) { }
 };
 
 struct NetworkMessageHeader
@@ -52,7 +50,8 @@ struct NetworkMessageHeader
 	// Note!
 	//		Don't forget to update "NETWORK_MESSAGE_HEADER_SIZE" in Engine/Core/EngineCommon.h
 public:
-	uint8_t networkMessageDefinitionIndex = 0xff;
+	uint8_t		networkMessageDefinitionIndex	= 0xff;
+	uint16_t	reliableID						= 0;
 };
 
 struct NetworkMessageDefinition
@@ -97,6 +96,11 @@ public:
 	{
 		return ( optionsFlag & NET_MESSAGE_OPTION_CONNECTIONLESS ) != NET_MESSAGE_OPTION_CONNECTIONLESS;
 	}
+
+	bool IsReliable() const
+	{
+		return (optionsFlag & NET_MESSAGE_OPTION_RELIABLE) == NET_MESSAGE_OPTION_RELIABLE;
+	}
 };
 
 class NetworkMessage : public BytePacker
@@ -116,8 +120,10 @@ public:
 
 public:
 	std::string						 m_name			= "NAME NOT ASSIGNED!";
+	uint64_t						 m_lastSentHPC	= 0U;
 	NetworkMessageHeader			 m_header;					// NetworkConnection fills the header when it adds to outgoing queue..
-	NetworkMessageDefinition const	*m_definition	= nullptr;	// NetworkSession fills the header & definition when it receives the Packet
+private:
+	NetworkMessageDefinition const	*m_definition	= nullptr;	// *NetworkSession fills the header & definition when it receives the Packet
 
 public:
 	bool Write( int number );
@@ -127,4 +133,10 @@ public:
 	bool	Read( int &outNumber ) const;
 	bool	Read( float &outNumber ) const;
 	size_t	Read( char *outString, size_t maxSize ) const;
+
+public:
+	NetworkMessageDefinition const* GetDefinition() const;
+	void SetDefinition( NetworkMessageDefinition const *def );	// Sets message definition and updates the member variables: m_name, m_header
+	
+	bool IsReliable() const;
 };

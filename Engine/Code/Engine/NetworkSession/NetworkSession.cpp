@@ -259,11 +259,9 @@ void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address )
 {
 	// Update the index of this messageToSend
-	int msgIdx = GetRegisteredIndexForMessageNamed( messageToSend.m_name );
-	GUARANTEE_RECOVERABLE( msgIdx != -1, "Can't find the registered message definition!" );
-
-	messageToSend.m_header.networkMessageDefinitionIndex = (uint8_t) msgIdx;
-
+	NetworkMessageDefinition const *msgDef = GetRegisteredMessageDefination( messageToSend.m_name );
+	messageToSend.SetDefinition( msgDef );
+	
 	// Send the Packet
 	NetworkPacket packetToSend;
 	packetToSend.WriteMessage( messageToSend );
@@ -361,10 +359,8 @@ bool NetworkSession::RegisterNetworkMessage( char const *messageName, networkMes
 	return false;
 }
 
-int NetworkSession::GetRegisteredIndexForMessageNamed( std::string const &definitionName ) const
+NetworkMessageDefinition const* NetworkSession::GetRegisteredMessageDefination( std::string const &definitionName ) const
 {
-	int idx = -1;
-
 	for( int i = 0; i < 256; i++ )
 	{
 		// Skip if nullptr
@@ -374,12 +370,16 @@ int NetworkSession::GetRegisteredIndexForMessageNamed( std::string const &defini
 		// Note the index if name matches
 		if( m_registeredMessages[i]->name == definitionName )
 		{
-			idx = i;
-			break;
+			return m_registeredMessages[i];
 		}
 	}
 
-	return idx;
+	return nullptr;
+}
+
+NetworkMessageDefinition const* NetworkSession::GetRegisteredMessageDefination( int defIndex ) const
+{
+	return m_registeredMessages[ defIndex ];
 }
 
 bool NetworkSession::SetHeartbeatFrequency( float frequencyHz )
@@ -502,7 +502,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 		NetworkMessage receivedMessage;
 		for( int i = 0; i < packet->m_header.messageCount; i++ )
 		{
-			bool messageReadSuccess = packet->ReadMessage( receivedMessage );
+			bool messageReadSuccess = packet->ReadMessage( receivedMessage, *this );
 			GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
 
 			// To get Message Definition from index
@@ -512,7 +512,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 			if( messageDefinition != nullptr )
 			{
 				// Set the pointer to that definition
-				receivedMessage.m_definition = messageDefinition;
+				receivedMessage.SetDefinition( messageDefinition );
 
 				// Create a NetworkSender
 				NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
@@ -525,13 +525,13 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 					// Requires a connection, but don't have this address registered!
 					// Log an error
 					ConsolePrintf( RGBA_RED_COLOR, "IGNORED \"%s\" MESSAGE: Received from address: %s, but it requires a connection", 
-													receivedMessage.m_definition->name.c_str(), 
+													receivedMessage.m_name.c_str(), 
 													thisSender.address.AddressToString().c_str() );
 				}
 				else
 				{
 					// Do the callback
-					receivedMessage.m_definition->callback( receivedMessage, thisSender );
+					receivedMessage.GetDefinition()->callback( receivedMessage, thisSender );
 				}
 			}
 			else

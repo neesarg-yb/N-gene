@@ -3,7 +3,7 @@
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
 NetworkMessage::NetworkMessage( const char *name )
-	: BytePacker( PACKET_MTU - NETWORK_PACKET_HEADER_SIZE - 2U - NETWORK_MESSAGE_HEADER_SIZE , LITTLE_ENDIAN )
+	: BytePacker( PACKET_MTU - NETWORK_PACKET_HEADER_SIZE - 2U - NETWORK_RELIABLE_MESSAGE_HEADER_SIZE , LITTLE_ENDIAN )
 	, m_name( name )
 {
 
@@ -48,4 +48,22 @@ bool NetworkMessage::Read( float &outNumber ) const
 size_t NetworkMessage::Read( char *outString, size_t maxSize ) const
 {
 	return ReadString( outString, maxSize );
+}
+
+NetworkMessageDefinition const* NetworkMessage::GetDefinition() const
+{
+	return m_definition;
+}
+
+void NetworkMessage::SetDefinition( NetworkMessageDefinition const *def )
+{
+	m_definition = def;
+
+	m_name = m_definition->name;
+	m_header.networkMessageDefinitionIndex = (uint8_t)def->id;
+}
+
+bool NetworkMessage::IsReliable() const
+{
+	return m_definition->IsReliable();
 }

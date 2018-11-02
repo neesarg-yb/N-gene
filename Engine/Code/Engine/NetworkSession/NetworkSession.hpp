@@ -90,7 +90,8 @@ public:
 	bool RegisterNetworkMessage( char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netMessageOptionsFlag );					// Returns true on success
 	void RegisterNetworkMessage( uint8_t index, char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netmessageOptionsFlag );	// Rewrite if a definition already exists at that index
 
-	int GetRegisteredIndexForMessageNamed( std::string const &definitionName ) const;															// Returns -1 if not found
+	NetworkMessageDefinition const* GetRegisteredMessageDefination( std::string const &definitionName ) const;															// Returns -1 if not found
+	NetworkMessageDefinition const* GetRegisteredMessageDefination( int defIndex ) const;
 
 private:
 	// Net Simulation
