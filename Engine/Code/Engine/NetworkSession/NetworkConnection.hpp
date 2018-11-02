@@ -39,15 +39,16 @@ public:
 
 private:
 	// Outgoing Messages
-	uint8_t				 m_sendFrequency = 0xff;		// Defaults to max frequency: 255hz 
-	NetworkMessages		 m_outgoingUnreliables;	// Unreliable messages, for now
+	bool				 m_immediatlyRespondForAck	= false;
+	uint8_t				 m_sendFrequency			= 0xff;							// Defaults to max frequency: 255hz 
+	NetworkMessages		 m_outgoingUnreliables;										// Unreliable messages, for now
 
 	// Tracking the packets
 	PacketTracker		 m_packetTrackers[ MAX_TRACKED_PACKETS ];
 
 	// Sent Messages
 	NetworkMessages		 m_outgoingReliables;
-	NetworkMessages		 m_sentReliables;
+	NetworkMessages		 m_unconfirmedSentReliables;
 
 private:
 	// Timers
@@ -62,6 +63,8 @@ public:
 	bool	HasMessagesToSend() const;
 	void	Send( NetworkMessage &msg );
 	void	FlushMessages();
+
+	uint	GetUnconfirmedSendReliablesCount() const;
 
 	uint8_t	GetCurrentSendFrequency() const;			// Minimum of ( My sendFrequency, Parent's sendFrequency )
 	void	SetSendFrequencyTo( uint8_t frequencyHz );	// Sets it to the min( passedFrequency, parentsFrequency )
@@ -78,4 +81,5 @@ private:
 
 	uint16_t GetNextReliableIDToSend();
 	void	 IncrementSentReliableID();
+	void	 ConfirmReliableMessages( PacketTracker &tracker );		// Removes the confirmed messages from m_unconfirmedSentReliables
 };
