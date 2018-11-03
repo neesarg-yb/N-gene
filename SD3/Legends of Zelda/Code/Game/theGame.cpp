@@ -485,7 +485,7 @@ void theGame::EndFrame()
 			}
 			else
 			{
-				ConsolePrintf( "Unreliable Test Message %d/%d sent to connection [%d]", lastSentUMsgIdx, lastSentUMsgIdx + pendingUMsgCountToSend, connectionToSendUMsg );
+				ConsolePrintf( "\"%s\" Message %d/%d sent to connection [%d]", msgDefName.c_str(), lastSentUMsgIdx, lastSentUMsgIdx + pendingUMsgCountToSend, connectionToSendUMsg );
 				sendTo->Send( msg );
 			}
 		}
