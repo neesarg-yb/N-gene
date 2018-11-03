@@ -533,8 +533,16 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 				}
 				else
 				{
-					// Do the callback
-					receivedMessage.GetDefinition()->callback( receivedMessage, thisSender );
+					if( thisSender.connection == nullptr )
+					{
+						// Do the callback
+						receivedMessage.GetDefinition()->callback( receivedMessage, thisSender );
+					}
+					else
+					{
+						// Hand it over to the Connection
+						thisSender.connection->ProcessReceivedMessage( receivedMessage, thisSender );
+					}
 				}
 			}
 			else
