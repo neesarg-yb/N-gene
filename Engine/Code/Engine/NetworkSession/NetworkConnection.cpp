@@ -27,11 +27,13 @@ NetworkConnection::~NetworkConnection()
 
 void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
 {
+	// We need to send back updated acks, asap
 	m_immediatlyRespondForAck = true;
 
 	// Last Received Time
 	m_lastReceivedTimeHPC = Clock::GetCurrentHPC();
 	
+	// Update Bit Field - Received Acks
 	uint16_t receivedAck = receivedPacketHeader.ack;
 	if( receivedAck != INVALID_PACKET_ACK )
 	{
@@ -125,9 +127,10 @@ void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage,
 		receivedMessage.GetDefinition()->callback( receivedMessage, sender );		// Just do the call back, msg is not reliable thus we don't need to check anything
 	else
 	{
+		// Reliable Message
 		bool alreadyReceived = ReliableMessageAlreadyReceived( receivedMessage.m_header.reliableID );
 
-		// Don't process if already received
+		// Don't process if already received it
 		if( alreadyReceived )
 			return;
 
@@ -151,7 +154,7 @@ bool NetworkConnection::ReliableMessageAlreadyReceived( uint16_t reliableID )
 	return false;
 }
 
-bool NetworkConnection::HasMessagesToSend() const
+bool NetworkConnection::HasNewMessagesToSend() const
 {
 	return (m_outgoingReliables.size() > 0) || (m_outgoingUnreliables.size() > 0);
 }
@@ -185,11 +188,10 @@ void NetworkConnection::FlushMessages()
 		NetworkMessage heartbeat( "heartbeat" );
 		Send( heartbeat );
 	}
-		
-	// Return if there's nothing to send
-	bool timeToResendReliables	= m_confirmReliablesTimer.CheckAndReset();
-	bool noReliablesToSend		= (m_unconfirmedSentReliables.size() == 0);
-	if( HasMessagesToSend() == false  && (timeToResendReliables == false || noReliablesToSend == true) )
+	
+	// To return if there's nothing to send
+	bool shouldResendUnconfirmedReliables = ShouldResendUnconfirmedReliables();
+	if( HasNewMessagesToSend() == false && shouldResendUnconfirmedReliables == false )
 	{
 		// But if we gotta inform the connection about last received packet, do it!
 		if( m_immediatlyRespondForAck == true )
@@ -236,9 +238,10 @@ void NetworkConnection::FlushMessages()
 	int reliableMessagesInThisPacker = 0;
 	PacketTracker *packetTracker = AddTrackedPacket( thisPacket.m_header.ack );
 
-	// Send Unconfirmed Reliable Messages
+
+	// Unconfirmed Reliable Messages
 	// ...
-	if( timeToResendReliables )
+	if( shouldResendUnconfirmedReliables )
 	{
 		for( int ucrID = 0; ucrID < m_unconfirmedSentReliables.size(); ucrID++ )
 		{
@@ -260,7 +263,9 @@ void NetworkConnection::FlushMessages()
 		}
 	}
 	
+
 	// Reliable Messages
+	// ...
 	while( m_outgoingReliables.size() > 0 && reliableMessagesInThisPacker < MAX_RELIABLES_PER_PACKET )
 	{
 		// Give outgoing message proper reliable ID
@@ -424,7 +429,7 @@ void NetworkConnection::EmptyTheOutgoingUnreliables()
 uint16_t NetworkConnection::GetNextReliableIDToSend()
 {
 	// Treating 0 as nothing
-	if( m_nextSentReliableID == 0U )
+	if( m_nextSentReliableID == INVALID_RELIABLE_ID )
 		m_nextSentReliableID++;
 
 	return m_nextSentReliableID;
@@ -433,6 +438,14 @@ uint16_t NetworkConnection::GetNextReliableIDToSend()
 void NetworkConnection::IncrementSentReliableID()
 {
 	m_nextSentReliableID++;
+}
+
+bool NetworkConnection::ShouldResendUnconfirmedReliables()
+{
+	bool timeToResendReliables	= m_confirmReliablesTimer.CheckAndReset();
+	bool hasReliablesToResend	= (m_unconfirmedSentReliables.size() > 0);
+
+	return (timeToResendReliables == true) && (hasReliablesToResend == true);
 }
 
 void NetworkConnection::ConfirmReliableMessages( PacketTracker &tracker )
