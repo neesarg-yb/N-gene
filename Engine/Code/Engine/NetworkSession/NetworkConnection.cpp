@@ -17,7 +17,7 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 	SetSendFrequencyTo( m_sendFrequency );
 	UpdateHeartbeatTimer();
 
-	m_confirmReliablesTimer.SetTimer( 0.01 );
+	m_confirmReliablesTimer.SetTimer( 0.1 );
 }
 
 NetworkConnection::~NetworkConnection()
@@ -117,6 +117,38 @@ void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 		// Invalidate
 		tracker.Invalidate();
 	}
+}
+
+void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage, NetworkSender sender )
+{
+	if( receivedMessage.IsReliable() == false )
+		receivedMessage.GetDefinition()->callback( receivedMessage, sender );		// Just do the call back, msg is not reliable thus we don't need to check anything
+	else
+	{
+		bool alreadyReceived = ReliableMessageAlreadyReceived( receivedMessage.m_header.reliableID );
+
+		// Don't process if already received
+		if( alreadyReceived )
+			return;
+
+		receivedMessage.GetDefinition()->callback( receivedMessage, sender );
+	}
+}
+
+bool NetworkConnection::ReliableMessageAlreadyReceived( uint16_t reliableID )
+{
+	for( uint i = 0; i < m_receivedReliableIDs.size(); i++ )
+	{
+		if( m_receivedReliableIDs[i] != reliableID )
+			continue;
+
+		// We found the ID already in the list
+		return true;
+	}
+
+	// Receiving the first time, add it to list
+	m_receivedReliableIDs.push_back( reliableID );
+	return false;
 }
 
 bool NetworkConnection::HasMessagesToSend() const
@@ -229,11 +261,10 @@ void NetworkConnection::FlushMessages()
 	}
 	
 	// Reliable Messages
-	bool	 reliableIDIncrementedOnce	= false;
-	uint16_t reliableIDToSend			= GetNextReliableIDToSend();
 	while( m_outgoingReliables.size() > 0 && reliableMessagesInThisPacker < MAX_RELIABLES_PER_PACKET )
 	{
 		// Give outgoing message proper reliable ID
+		uint16_t reliableIDToSend = GetNextReliableIDToSend();
 		m_outgoingReliables.front()->m_header.reliableID = reliableIDToSend;
 
 		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingReliables.front() );
@@ -248,12 +279,7 @@ void NetworkConnection::FlushMessages()
 			m_unconfirmedSentReliables.push_back( m_outgoingReliables.back() );
 			m_outgoingReliables.pop_back();
 
-			// Increment once per whole packet
-			if( reliableIDIncrementedOnce != true )
-			{
-				IncrementSentReliableID();
-				reliableIDIncrementedOnce = true;
-			}
+			IncrementSentReliableID();
 		}
 		else
 		{

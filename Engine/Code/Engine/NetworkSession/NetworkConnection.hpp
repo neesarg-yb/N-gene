@@ -44,7 +44,8 @@ private:
 	NetworkMessages		 m_outgoingUnreliables;										// Unreliable messages, for now
 
 	// Tracking the packets
-	PacketTracker		 m_packetTrackers[ MAX_TRACKED_PACKETS ];
+	PacketTracker		  m_packetTrackers[ MAX_TRACKED_PACKETS ];
+	std::vector<uint16_t> m_receivedReliableIDs;
 
 	// Sent Messages
 	NetworkMessages		 m_outgoingReliables;
@@ -57,8 +58,10 @@ private:
 	Stopwatch			 m_confirmReliablesTimer;
 
 public:
-	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );
+	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );	// It is there for tracking the messages & packets, it doesn't process em!
 	void	ConfirmPacketReceived( uint16_t ack );
+	void	ProcessReceivedMessage( NetworkMessage &receivedMessage, NetworkSender sender );
+	bool	ReliableMessageAlreadyReceived( uint16_t reliableID );			// If not, returns false and adds it to the received list; returns true if already received
 
 	bool	HasMessagesToSend() const;
 	void	Send( NetworkMessage &msg );
