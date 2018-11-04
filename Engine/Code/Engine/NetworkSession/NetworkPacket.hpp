@@ -15,10 +15,10 @@ struct PacketTracker
 public:
 	uint16_t ack			= INVALID_PACKET_ACK;
 	uint64_t sentTimeHPC	= Clock::GetCurrentHPC();
-	uint16_t sentReliables[ MAX_RELIABLES_PER_PACKET ] = { 0U };
+	uint16_t sentReliables[ MAX_RELIABLES_PER_PACKET ];
 
 public:
-	PacketTracker() { }
+	PacketTracker();
 	PacketTracker( uint16_t inAck );		// Sets sentTimeHPC as current time
 	PacketTracker( uint16_t inAck, uint64_t inSentTimeHPC );
 
@@ -26,6 +26,7 @@ public:
 	bool AddNewReliableID( uint16_t reliableID );
 	void TrackForAck( uint16_t inAck );
 
+	void ResetSentReliables();
 	void Invalidate();
 	bool IsValid() const;
 };
