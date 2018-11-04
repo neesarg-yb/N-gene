@@ -29,6 +29,7 @@ public:
 	uint16_t			 m_highestReceivedAck			= INVALID_PACKET_ACK;		// Receiving	- Updated during process packet
 	uint16_t			 m_receivedAcksBitfield			= 0U;
 	uint16_t			 m_nextSentReliableID			= INVALID_RELIABLE_ID;
+	uint16_t			 m_highestConfirmedReliableID	= INVALID_RELIABLE_ID;
 
 public:
 	uint64_t			 m_lastSendTimeHPC				= Clock::GetCurrentHPC();	// Analytics
@@ -77,6 +78,8 @@ private:
 	// Tracking Messages-or-Packet
 	void			ConfirmPacketReceived( uint16_t ack );
 	bool			ReliableMessageAlreadyReceived( uint16_t reliableID );	// If not, returns false and adds it to the received list; returns true if already received
+	bool			CanSendReliableID( uint16_t reliableID );
+	bool			ShouldProcessReliableMessage( uint16_t reliableID );
 
 	// Acks
 	uint16_t		GetNextAckToSend();

@@ -128,10 +128,10 @@ void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage,
 	else
 	{
 		// Reliable Message
-		bool alreadyReceived = ReliableMessageAlreadyReceived( receivedMessage.m_header.reliableID );
+		bool process = ShouldProcessReliableMessage( receivedMessage.m_header.reliableID );
 
 		// Don't process if already received it
-		if( alreadyReceived )
+		if( process != true )
 			return;
 
 		receivedMessage.GetDefinition()->callback( receivedMessage, sender );
@@ -152,6 +152,36 @@ bool NetworkConnection::ReliableMessageAlreadyReceived( uint16_t reliableID )
 	// Receiving the first time, add it to list
 	m_receivedReliableIDs.push_back( reliableID );
 	return false;
+}
+
+bool NetworkConnection::CanSendReliableID( uint16_t reliableID )
+{
+	uint16_t oldestUnconfirmedReliableID = INVALID_RELIABLE_ID;
+
+	for each (NetworkMessage* unconfirmedMsg in m_unconfirmedSentReliables)
+	{
+		uint16_t unconfirmedID = unconfirmedMsg->m_header.reliableID;
+
+		if( unconfirmedID < oldestUnconfirmedReliableID )
+			oldestUnconfirmedReliableID = unconfirmedID;
+	}
+
+	// No unconfirmed messages
+	if( oldestUnconfirmedReliableID == INVALID_RELIABLE_ID )
+		return true;
+
+	if( reliableID < oldestUnconfirmedReliableID + RELIABLE_MESSAGES_WINDOW )
+		return true;
+	else
+		return false;
+}
+
+bool NetworkConnection::ShouldProcessReliableMessage( uint16_t reliableID )
+{
+	if( reliableID > m_highestConfirmedReliableID && reliableID <= (m_highestConfirmedReliableID - RELIABLE_MESSAGES_WINDOW) )
+		return false;
+	else
+		return (ReliableMessageAlreadyReceived( reliableID ) == false);
 }
 
 bool NetworkConnection::HasNewMessagesToSend() const
@@ -254,6 +284,7 @@ void NetworkConnection::FlushMessages()
 			{
 				reliableMessagesInThisPacker++;
 				packetTracker->AddNewReliableID( m_unconfirmedSentReliables[ucrID]->m_header.reliableID );
+				// ConsolePrintf( RGBA_GRAY_COLOR, "Resending message with ReliableID %d", m_unconfirmedSentReliables[ucrID]->m_header.reliableID );
 			}
 			else
 			{
@@ -270,13 +301,18 @@ void NetworkConnection::FlushMessages()
 	{
 		// Give outgoing message proper reliable ID
 		uint16_t reliableIDToSend = GetNextReliableIDToSend();
+
+		if( CanSendReliableID( reliableIDToSend ) == false )
+			break;
+
 		m_outgoingReliables.front()->m_header.reliableID = reliableIDToSend;
 
 		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingReliables.front() );
 		if( writeSuccessfull )
 		{
 			reliableMessagesInThisPacker++;
-			packetTracker->AddNewReliableID( reliableIDToSend );
+			bool added = packetTracker->AddNewReliableID( reliableIDToSend );
+			ConsolePrintf( RGBA_KHAKI_COLOR, "Sending message with ReliableID %d, added = %s", reliableIDToSend, added ? "YES" : "NO" );
 
 			// Move the message to sent reliables queue
 			std::swap( m_outgoingReliables.front(), m_outgoingReliables.back() );
@@ -453,15 +489,28 @@ void NetworkConnection::ConfirmReliableMessages( PacketTracker &tracker )
 	for( int i = 0; i < MAX_RELIABLES_PER_PACKET; i++ )
 	{
 		// Reached to the end of list, all the remaining slots didn't get used
-		if( tracker.sentReliables[i] == 0 )
-			return;
+		if( tracker.sentReliables[i] == INVALID_RELIABLE_ID )
+			break;
 
 		// Look for that reliableID if the vector
 		uint16_t receivedReliableID = tracker.sentReliables[i];
+
+		// Update the highest confirmed
+		if( m_highestConfirmedReliableID != INVALID_RELIABLE_ID )
+		{
+			if( m_highestConfirmedReliableID < receivedReliableID )
+				m_highestConfirmedReliableID = receivedReliableID;
+		}
+		else
+			m_highestConfirmedReliableID = receivedReliableID;
+
 		for( uint j = 0; j < m_unconfirmedSentReliables.size(); j++ )
 		{
 			NetworkMessage* &thisUMsg = m_unconfirmedSentReliables[j];
-			if( thisUMsg->m_header.reliableID == receivedReliableID )
+			bool isReceivedReliableID = (thisUMsg->m_header.reliableID == receivedReliableID);
+			bool isOlderThanLowestUnconfirmed = thisUMsg->m_header.reliableID <= (m_highestConfirmedReliableID - RELIABLE_MESSAGES_WINDOW);
+
+			if( isReceivedReliableID || isOlderThanLowestUnconfirmed )
 			{
 				// Fast-Delete the message from unconfirmed
 				std::swap( thisUMsg, m_unconfirmedSentReliables.back() );
@@ -470,6 +519,8 @@ void NetworkConnection::ConfirmReliableMessages( PacketTracker &tracker )
 				m_unconfirmedSentReliables.back() = nullptr;
 
 				m_unconfirmedSentReliables.pop_back();
+
+				ConsolePrintf( "Reliable ID confirmed: %d", receivedReliableID );
 			}
 		}
 	}
