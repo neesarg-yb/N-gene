@@ -191,12 +191,22 @@ void Vector3::SetFromText( const char* text )
 
 Vector3 PolarToCartesian( float radius, float rotation, float altitude )
 {
-	TODO( "This one is right, but according to my calculation x & z should be flipped.." );
 	float z = radius * SinDegree( altitude ) * SinDegree( rotation );
 	float x = radius * SinDegree( altitude ) * CosDegree( rotation );
 	float y = radius * CosDegree( altitude );
 
 	return Vector3( x, y, z );
+}
+
+void CartesianToPolar( Vector3 const &position, float &outRadius, float &outRotation, float &outAltitude )
+{
+	float r		= position.GetLength();
+	float alt	= acosf( position.y / r );
+	float rot	= atan2f( position.z, position.x );
+
+	outRadius	= r;
+	outAltitude	= fmodf( RadianToDegree( alt ), 360.f );
+	outRotation	= fmodf( RadianToDegree( rot ), 360.f );
 }
 
 Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd )
