@@ -234,10 +234,7 @@ void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const
 
 	// Render the Scene
 	if( m_clock->IsPaused() == false )
-	{
 		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
-		m_debugCamera->RenderAsMiniOverlay();
-	}
 	else
 	{
 		// Debug Camera Overlay

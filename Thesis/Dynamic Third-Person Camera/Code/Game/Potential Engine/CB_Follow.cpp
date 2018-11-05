@@ -46,7 +46,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	m_distanceFromAnchor	+= distanceChange;
 
 	// Altitude & Rotation
-	float rotationChange	 =  1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
+	float rotationChange	 = -1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
 	float altitudeChange	 = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
 	m_rotationAroundAnchor	+= rotationChange;
 	m_altitudeAroundAnchor	+= altitudeChange;
@@ -77,8 +77,6 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	SetOrientationToLookAtAnchor();
 	SetOffsetToWorldPosition( m_localHorizontalOffset, m_localVerticalOffset );
 	SetFOV( m_fov );
-
-	CartesianToPolarTest( m_goalState );
 	
 	return m_goalState;
 }
@@ -93,8 +91,8 @@ void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
 	DebuggerPrintf( "\n Current    Polar: Radius: %f, Rotation: %f, Altitude: %f", m_distanceFromAnchor, m_rotationAroundAnchor, m_altitudeAroundAnchor );
 	DebuggerPrintf( "\n Calculated Polar: Radius: %f, Rotation: %f, Altitude: %f", radius, rotation, altitude );
 
-	// Vector3 cartPosition = PolarToCartesian( radius, rotation, altitude );
+	Vector3 cartPosition = PolarToCartesian( radius, rotation, altitude );
 
-	// DebugRenderPoint( 0.f, 1.f, anchorPos, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_XRAY );
-	// DebugRenderWireSphere( 3.f, anchorPos + cartPosition, 0.2f, RGBA_GREEN_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_XRAY );
+	DebugRenderPoint( 0.f, 1.f, anchorPos, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_XRAY );
+	DebugRenderWireSphere( 3.f, anchorPos + cartPosition, 0.2f, RGBA_GREEN_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_XRAY );
 }
