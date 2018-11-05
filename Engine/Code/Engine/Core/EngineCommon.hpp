@@ -37,18 +37,21 @@ const   float	   g_aspectRatio = 1.77f;
 
 
 // NETWORK SESSION
-#define MAX_SESSION_CONNECTIONS		(0xff)
-#define INVALID_PACKET_ACK			(0xffff)
-#define MAX_TRACKED_PACKETS			(64)
-#define NETWORK_PACKET_HEADER_SIZE	(8)
-#define NETWORK_MESSAGE_HEADER_SIZE	(1)
+#define MAX_SESSION_CONNECTIONS					(0xff)
+#define INVALID_PACKET_ACK						(0xffff)
+#define INVALID_RELIABLE_ID						(0xffff)
+#define RELIABLE_MESSAGES_WINDOW				(32)
+#define MAX_TRACKED_PACKETS						(128)
+#define NETWORK_PACKET_HEADER_SIZE				(8)
+#define NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE	(1)
+#define NETWORK_RELIABLE_MESSAGE_HEADER_SIZE	(3)
 
 
 // Use this to deduce type of the pointer so we can cast; 
 template <typename T>
 bool wglGetTypedProcAddress( T *out, char const *name ) 
 {
-	// Grab the function from the currently bound render contect
+	// Grab the function from the currently bound render contact
 	// most opengl 2.0+ features will be found here
 	*out = (T) wglGetProcAddress(name); 
 

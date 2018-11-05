@@ -102,7 +102,7 @@ void NetworkSession::Render() const
 	m_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	// Draw overlay
-	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 0.95f, 1.f ) );
+	AABB2 backgroundBox = m_screenBounds.GetBoundsFromPercentage( Vector2( 0.f, 0.8f ), Vector2( 1.f, 1.f ) );
 	m_theRenderer->DrawAABB( backgroundBox, m_uiBackgroundColor );
 
 	// Title Box
@@ -136,7 +136,7 @@ void NetworkSession::Render() const
 	// Title Column of Table: All Connections
 	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
 	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits" );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -186,12 +186,15 @@ void NetworkSession::Render() const
 		std::bitset< 16 > rcvbit = m_connections[i]->m_receivedAcksBitfield;
 		std::string rcvbitsStr = rcvbit.to_string();
 
+		// ucnfrmR
+		std::string ncnfrm_relStr = Stringf( "%d", m_connections[i]->GetUnconfirmedSendReliablesCount() );
+
 		// Calculate the AABB
 		Vector2	mins = Vector2( columnTitlesBox.mins.x, columnTitlesBox.mins.y - ( ++numOfConnectionDisplayed * (m_uiBodyFontSize * 1.1f) ) );
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
 }
@@ -226,7 +229,7 @@ void NetworkSession::RegisterCoreMessages()
 {
 	RegisterNetworkMessage( NET_MESSAGE_PING,		"ping",		 OnPing,		NET_MESSAGE_OPTION_CONNECTIONLESS );
 	RegisterNetworkMessage( NET_MESSAGE_PONG,		"pong",		 OnPong,		NET_MESSAGE_OPTION_CONNECTIONLESS );
-	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,	"heartbeat", OnHeartbeat,	NET_MESSAGE_OPTION_UNRELIABLE_REQUIRES_CONNECTION );
+	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,	"heartbeat", OnHeartbeat,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 }
 
 void NetworkSession::ProcessIncoming()
@@ -259,11 +262,9 @@ void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address )
 {
 	// Update the index of this messageToSend
-	int msgIdx = GetRegisteredIndexForMessageNamed( messageToSend.m_name );
-	GUARANTEE_RECOVERABLE( msgIdx != -1, "Can't find the registered message definition!" );
-
-	messageToSend.m_header.networkMessageDefinitionIndex = (uint8_t) msgIdx;
-
+	NetworkMessageDefinition const *msgDef = GetRegisteredMessageDefination( messageToSend.m_name );
+	messageToSend.SetDefinition( msgDef );
+	
 	// Send the Packet
 	NetworkPacket packetToSend;
 	packetToSend.WriteMessage( messageToSend );
@@ -361,10 +362,8 @@ bool NetworkSession::RegisterNetworkMessage( char const *messageName, networkMes
 	return false;
 }
 
-int NetworkSession::GetRegisteredIndexForMessageNamed( std::string const &definitionName ) const
+NetworkMessageDefinition const* NetworkSession::GetRegisteredMessageDefination( std::string const &definitionName ) const
 {
-	int idx = -1;
-
 	for( int i = 0; i < 256; i++ )
 	{
 		// Skip if nullptr
@@ -374,12 +373,16 @@ int NetworkSession::GetRegisteredIndexForMessageNamed( std::string const &defini
 		// Note the index if name matches
 		if( m_registeredMessages[i]->name == definitionName )
 		{
-			idx = i;
-			break;
+			return m_registeredMessages[i];
 		}
 	}
 
-	return idx;
+	return nullptr;
+}
+
+NetworkMessageDefinition const* NetworkSession::GetRegisteredMessageDefination( int defIndex ) const
+{
+	return m_registeredMessages[ defIndex ];
 }
 
 bool NetworkSession::SetHeartbeatFrequency( float frequencyHz )
@@ -502,7 +505,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 		NetworkMessage receivedMessage;
 		for( int i = 0; i < packet->m_header.messageCount; i++ )
 		{
-			bool messageReadSuccess = packet->ReadMessage( receivedMessage );
+			bool messageReadSuccess = packet->ReadMessage( receivedMessage, *this );
 			GUARANTEE_RECOVERABLE( messageReadSuccess, "Couldn't read the Network Message successfully!" );
 
 			// To get Message Definition from index
@@ -512,7 +515,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 			if( messageDefinition != nullptr )
 			{
 				// Set the pointer to that definition
-				receivedMessage.m_definition = messageDefinition;
+				receivedMessage.SetDefinition( messageDefinition );
 
 				// Create a NetworkSender
 				NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
@@ -524,12 +527,22 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 				{
 					// Requires a connection, but don't have this address registered!
 					// Log an error
-					ConsolePrintf( RGBA_RED_COLOR, "IGNORED THE MESSAGE: Received from address: %s, but it requires a connection", thisSender.address.AddressToString().c_str() );
+					ConsolePrintf( RGBA_RED_COLOR, "IGNORED \"%s\" MESSAGE: Received from address: %s, but it requires a connection", 
+													receivedMessage.m_name.c_str(), 
+													thisSender.address.AddressToString().c_str() );
 				}
 				else
 				{
-					// Do the callback
-					receivedMessage.m_definition->callback( receivedMessage, thisSender );
+					if( thisSender.connection == nullptr )
+					{
+						// Do the callback
+						receivedMessage.GetDefinition()->callback( receivedMessage, thisSender );
+					}
+					else
+					{
+						// Hand it over to the Connection
+						thisSender.connection->ProcessReceivedMessage( receivedMessage, thisSender );
+					}
 				}
 			}
 			else

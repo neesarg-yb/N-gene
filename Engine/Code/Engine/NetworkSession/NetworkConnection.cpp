@@ -12,9 +12,12 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 	, m_address( addr )
 	, m_sendRateTimer( GetMasterClock() )
 	, m_heartbeatTimer( GetMasterClock() )
+	, m_confirmReliablesTimer( GetMasterClock() )
 {
 	SetSendFrequencyTo( m_sendFrequency );
 	UpdateHeartbeatTimer();
+
+	m_confirmReliablesTimer.SetTimer( 0.1 );
 }
 
 NetworkConnection::~NetworkConnection()
@@ -24,9 +27,13 @@ NetworkConnection::~NetworkConnection()
 
 void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
 {
+	// We need to send back updated acks, asap
+	m_immediatlyRespondForAck = true;
+
 	// Last Received Time
 	m_lastReceivedTimeHPC = Clock::GetCurrentHPC();
 	
+	// Update Bit Field - Received Acks
 	uint16_t receivedAck = receivedPacketHeader.ack;
 	if( receivedAck != INVALID_PACKET_ACK )
 	{
@@ -106,22 +113,95 @@ void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 		double	 secondsThisRTT	= Clock::GetSecondsFromHPC( rttHPC );
 		m_rtt = (0.9f * m_rtt) + (0.1f * (float)secondsThisRTT);
 
+		// Confirm Reliable Messages
+		ConfirmReliableMessages( tracker );
+
 		// Invalidate
 		tracker.Invalidate();
 	}
 }
 
+void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage, NetworkSender sender )
+{
+	if( receivedMessage.IsReliable() == false )
+		receivedMessage.GetDefinition()->callback( receivedMessage, sender );		// Just do the call back, msg is not reliable thus we don't need to check anything
+	else
+	{
+		// Reliable Message
+		bool process = ShouldProcessReliableMessage( receivedMessage.m_header.reliableID );
+
+		// Don't process if already received it
+		if( process != true )
+			return;
+
+		receivedMessage.GetDefinition()->callback( receivedMessage, sender );
+	}
+}
+
+bool NetworkConnection::ReliableMessageAlreadyReceived( uint16_t reliableID )
+{
+	for( uint i = 0; i < m_receivedReliableIDs.size(); i++ )
+	{
+		if( m_receivedReliableIDs[i] != reliableID )
+			continue;
+
+		// We found the ID already in the list
+		return true;
+	}
+
+	// Receiving the first time, add it to list
+	m_receivedReliableIDs.push_back( reliableID );
+	return false;
+}
+
+bool NetworkConnection::CanSendReliableID( uint16_t reliableID )
+{
+	uint16_t oldestUnconfirmedReliableID = INVALID_RELIABLE_ID;
+
+	for each (NetworkMessage* unconfirmedMsg in m_unconfirmedSentReliables)
+	{
+		uint16_t unconfirmedID = unconfirmedMsg->m_header.reliableID;
+
+		if( unconfirmedID < oldestUnconfirmedReliableID )
+			oldestUnconfirmedReliableID = unconfirmedID;
+	}
+
+	// No unconfirmed messages
+	if( oldestUnconfirmedReliableID == INVALID_RELIABLE_ID )
+		return true;
+
+	if( reliableID < oldestUnconfirmedReliableID + RELIABLE_MESSAGES_WINDOW )
+		return true;
+	else
+		return false;
+}
+
+bool NetworkConnection::ShouldProcessReliableMessage( uint16_t reliableID )
+{
+	if( reliableID > m_highestConfirmedReliableID && reliableID <= (m_highestConfirmedReliableID - RELIABLE_MESSAGES_WINDOW) )
+		return false;
+	else
+		return (ReliableMessageAlreadyReceived( reliableID ) == false);
+}
+
+bool NetworkConnection::HasNewMessagesToSend() const
+{
+	return (m_outgoingReliables.size() > 0) || (m_outgoingUnreliables.size() > 0);
+}
+
 void NetworkConnection::Send( NetworkMessage &msg )
 {
 	// Update the index of this messageToSend
-	int msgIdx = m_parentSession.GetRegisteredIndexForMessageNamed( msg.m_name );
-	GUARANTEE_RECOVERABLE( msgIdx != -1, "Can't find the registered message definition!" );
-
-	msg.m_header.networkMessageDefinitionIndex	= (uint8_t) msgIdx;
-
+	NetworkMessageDefinition const *msgDef = m_parentSession.GetRegisteredMessageDefination( msg.m_name );
+	msg.SetDefinition( msgDef );
+	
 	// Push to the outgoing messages
 	NetworkMessage *msgToSend = new NetworkMessage( msg );
-	m_outgoingUnreliableMessages.push_back( msgToSend );
+
+	if( msgToSend->IsReliable() )
+		m_outgoingReliables.push_back( msgToSend );
+	else
+		m_outgoingUnreliables.push_back( msgToSend );
 }
 
 void NetworkConnection::FlushMessages()
@@ -133,64 +213,155 @@ void NetworkConnection::FlushMessages()
 	// If we need a heartbeat to be sent
 	if( m_heartbeatTimer.CheckAndReset() == true )
 	{
+		m_immediatlyRespondForAck = false;
+
 		NetworkMessage heartbeat( "heartbeat" );
 		Send( heartbeat );
 	}
 	
+	// To return if there's nothing to send
+	bool shouldResendUnconfirmedReliables = ShouldResendUnconfirmedReliables();
+	if( HasNewMessagesToSend() == false && shouldResendUnconfirmedReliables == false )
+	{
+		// But if we gotta inform the connection about last received packet, do it!
+		if( m_immediatlyRespondForAck == true )
+		{
+			m_immediatlyRespondForAck = false;
+
+			// Prepare the packet header
+			NetworkPacket packetJustForAck;
+			NetworkPacketHeader &theHeader	= packetJustForAck.m_header;
+			theHeader.messageCount			= 0x00;
+			theHeader.connectionIndex		= (uint8_t)m_indexInSession;
+			theHeader.ack					= INVALID_PACKET_ACK;
+			theHeader.highestReceivedAck	= m_highestReceivedAck;
+			theHeader.receivedAcksHistory	= m_receivedAcksBitfield;
+
+			// Send it
+			m_parentSession.SendPacket( packetJustForAck );
+
+			// Update Analytics
+			m_lastSendTimeHPC = Clock::GetCurrentHPC();
+		}
+
+		return;
+	}
+
 	// Populate messages into thisPacket & its header
 	NetworkPacket		 thisPacket;
-	NetworkPacketHeader &thisHeader		= thisPacket.m_header;
-	thisHeader.messageCount				= 0x00;
-	thisHeader.connectionIndex			= (uint8_t)m_indexInSession;
+	NetworkPacketHeader &thisHeader	= thisPacket.m_header;
+	thisHeader.messageCount			= 0x00;
+	thisHeader.connectionIndex		= (uint8_t)m_indexInSession;
+
+	// Ack
+	uint16_t ackToSend = GetNextAckToSend();
+	IncrementSentAck();
+	thisHeader.ack					= ackToSend;
+	thisHeader.highestReceivedAck	= m_highestReceivedAck;
+	thisHeader.receivedAcksHistory	= m_receivedAcksBitfield;
+
+	// If about to wrap around, calculate the loss
+	if( (ackToSend % MAX_TRACKED_PACKETS) == 0 )
+		m_loss = CalculateLoss();
+
+	// Track the packet
+	int reliableMessagesInThisPacker = 0;
+	PacketTracker *packetTracker = AddTrackedPacket( thisPacket.m_header.ack );
+
+
+	// Unconfirmed Reliable Messages
+	// ...
+	if( shouldResendUnconfirmedReliables )
+	{
+		for( int ucrID = 0; ucrID < m_unconfirmedSentReliables.size(); ucrID++ )
+		{
+			// Don't write more than MAX reliables in this packet
+			if( reliableMessagesInThisPacker > MAX_RELIABLES_PER_PACKET )
+				break;
+
+			bool writeSuccessfull = thisPacket.WriteMessage( *m_unconfirmedSentReliables[ucrID] );
+			if( writeSuccessfull )
+			{
+				reliableMessagesInThisPacker++;
+				packetTracker->AddNewReliableID( m_unconfirmedSentReliables[ucrID]->m_header.reliableID );
+				// ConsolePrintf( RGBA_GRAY_COLOR, "Resending message with ReliableID %d", m_unconfirmedSentReliables[ucrID]->m_header.reliableID );
+			}
+			else
+			{
+				GUARANTEE_RECOVERABLE( false, "Error: Ancountered a message which is too large to fit in current packet!" );
+				continue;		// This message might be too big to fit?
+			}
+		}
+	}
 	
+
 	// Reliable Messages
 	// ...
+	while( m_outgoingReliables.size() > 0 && reliableMessagesInThisPacker < MAX_RELIABLES_PER_PACKET )
+	{
+		// Give outgoing message proper reliable ID
+		uint16_t reliableIDToSend = GetNextReliableIDToSend();
+
+		if( CanSendReliableID( reliableIDToSend ) == false )
+			break;
+
+		m_outgoingReliables.front()->m_header.reliableID = reliableIDToSend;
+
+		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingReliables.front() );
+		if( writeSuccessfull )
+		{
+			reliableMessagesInThisPacker++;
+			bool added = packetTracker->AddNewReliableID( reliableIDToSend );
+			ConsolePrintf( RGBA_KHAKI_COLOR, "Sending message with ReliableID %d, added = %s", reliableIDToSend, added ? "YES" : "NO" );
+
+			// Move the message to sent reliables queue
+			std::swap( m_outgoingReliables.front(), m_outgoingReliables.back() );
+
+			m_unconfirmedSentReliables.push_back( m_outgoingReliables.back() );
+			m_outgoingReliables.pop_back();
+
+			IncrementSentReliableID();
+		}
+		else
+		{
+			// That would mean that package can't store more messages
+			// Reliable messages => we'll send the remaining ones next time
+			break;
+		}
+	}
 	
 	// Unreliable Messages
-	while ( m_outgoingUnreliableMessages.size() > 0 )
+	while ( m_outgoingUnreliables.size() > 0 )
 	{
-		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingUnreliableMessages.front() );
+		bool writeSuccessfull = thisPacket.WriteMessage( *m_outgoingUnreliables.front() );
 		if( writeSuccessfull )
 		{
 			// Delete the message from queue
-			std::swap( m_outgoingUnreliableMessages.front(), m_outgoingUnreliableMessages.back() );
-			delete m_outgoingUnreliableMessages.back();
-			m_outgoingUnreliableMessages.back() = nullptr;
+			std::swap( m_outgoingUnreliables.front(), m_outgoingUnreliables.back() );
+			delete m_outgoingUnreliables.back();
+			m_outgoingUnreliables.back() = nullptr;
 
-			m_outgoingUnreliableMessages.pop_back();
+			m_outgoingUnreliables.pop_back();
 		}
 		else
 		{
 			// That would mean that package can't store more messages
 			// Unreliable messages => we don't care about leftover messages
+			EmptyTheOutgoingUnreliables();
 			break;
 		}
 	}
 
-	// Send if not empty
-	if( thisPacket.HasMessages() )
-	{
-		uint16_t ackToSend = GetNextAckToSend();
-		IncrementSentAck();
+	// Send it
+	m_parentSession.SendPacket( thisPacket );
 
-		// If about to wrap around, calculate the loss
-		if( (ackToSend % MAX_TRACKED_PACKETS) == 0 )
-			m_loss = CalculateLoss();
+	// Update Analytics
+	m_lastSendTimeHPC = Clock::GetCurrentHPC();
+}
 
-		// Set Ack for this packet
-		thisHeader.ack						= ackToSend;
-		thisHeader.highestReceivedAck		= m_highestReceivedAck;
-		thisHeader.receivedAcksHistory		= m_receivedAcksBitfield;
-
-		// Track the packet
-		AddTrackedPacket( thisPacket.m_header.ack );
-
-		// Send it
-		m_parentSession.SendPacket( thisPacket );
-
-		// Update Analytics
-		m_lastSendTimeHPC = Clock::GetCurrentHPC();
-	}
+uint NetworkConnection::GetUnconfirmedSendReliablesCount() const
+{
+	return (uint)m_unconfirmedSentReliables.size();
 }
 
 uint8_t NetworkConnection::GetCurrentSendFrequency() const
@@ -278,3 +449,79 @@ bool NetworkConnection::IsActivePacketTracker( uint16_t ack )
 		return true;
 }
 
+void NetworkConnection::EmptyTheOutgoingUnreliables()
+{
+	while ( m_outgoingUnreliables.size() > 0 )
+	{
+		// fast delete
+		std::swap( m_outgoingUnreliables.front(), m_outgoingUnreliables.back() );
+		delete m_outgoingUnreliables.back();
+		m_outgoingUnreliables.back() = nullptr;
+
+		m_outgoingUnreliables.pop_back();
+	}
+}
+
+uint16_t NetworkConnection::GetNextReliableIDToSend()
+{
+	// Treating 0 as nothing
+	if( m_nextSentReliableID == INVALID_RELIABLE_ID )
+		m_nextSentReliableID++;
+
+	return m_nextSentReliableID;
+}
+
+void NetworkConnection::IncrementSentReliableID()
+{
+	m_nextSentReliableID++;
+}
+
+bool NetworkConnection::ShouldResendUnconfirmedReliables()
+{
+	bool timeToResendReliables	= m_confirmReliablesTimer.CheckAndReset();
+	bool hasReliablesToResend	= (m_unconfirmedSentReliables.size() > 0);
+
+	return (timeToResendReliables == true) && (hasReliablesToResend == true);
+}
+
+void NetworkConnection::ConfirmReliableMessages( PacketTracker &tracker )
+{
+	for( int i = 0; i < MAX_RELIABLES_PER_PACKET; i++ )
+	{
+		// Reached to the end of list, all the remaining slots didn't get used
+		if( tracker.sentReliables[i] == INVALID_RELIABLE_ID )
+			break;
+
+		// Look for that reliableID if the vector
+		uint16_t receivedReliableID = tracker.sentReliables[i];
+
+		// Update the highest confirmed
+		if( m_highestConfirmedReliableID != INVALID_RELIABLE_ID )
+		{
+			if( m_highestConfirmedReliableID < receivedReliableID )
+				m_highestConfirmedReliableID = receivedReliableID;
+		}
+		else
+			m_highestConfirmedReliableID = receivedReliableID;
+
+		for( uint j = 0; j < m_unconfirmedSentReliables.size(); j++ )
+		{
+			NetworkMessage* &thisUMsg = m_unconfirmedSentReliables[j];
+			bool isReceivedReliableID = (thisUMsg->m_header.reliableID == receivedReliableID);
+			bool isOlderThanLowestUnconfirmed = thisUMsg->m_header.reliableID <= (m_highestConfirmedReliableID - RELIABLE_MESSAGES_WINDOW);
+
+			if( isReceivedReliableID || isOlderThanLowestUnconfirmed )
+			{
+				// Fast-Delete the message from unconfirmed
+				std::swap( thisUMsg, m_unconfirmedSentReliables.back() );
+
+				delete m_unconfirmedSentReliables.back();
+				m_unconfirmedSentReliables.back() = nullptr;
+
+				m_unconfirmedSentReliables.pop_back();
+
+				ConsolePrintf( "Reliable ID confirmed: %d", receivedReliableID );
+			}
+		}
+	}
+}
