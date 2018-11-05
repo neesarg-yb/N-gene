@@ -226,6 +226,7 @@ void Camera::RotateCameraBy( Vector3 const &localRotation )
 
 Vector3 Camera::GetForwardVector() const 
 {
+	TODO( "This should be camera's transform matrix!" );
 	return m_viewMatrix.GetKColumn();
 }
 

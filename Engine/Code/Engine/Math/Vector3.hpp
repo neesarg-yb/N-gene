@@ -50,8 +50,8 @@ public:
 	float z = 0.f;
 };
 
-Vector3 PolarToCartesian( float radius, float rotation, float altitude );										// rotation = 0 starts at x-axis arrow, rotates according to right hand from y-axis; altitude = 0 starts at y-axis arrow
-void	CartesianToPolar( Vector3 const &position, float &outRadius, float &outRotation, float &outAltitude );	// rotation = 0 starts at x-axis arrow, rotates according to right hand from y-axis; altitude = 0 starts at y-axis arrow
+Vector3 PolarToCartesian( float radius, float rotation, float altitude );										// rotation is along Y-Axis according to left hand rule. Rotation = 0 starts from X-Axis Arrow; altitude = 0 starts at y-axis arrow
+void	CartesianToPolar( Vector3 const &position, float &outRadius, float &outRotation, float &outAltitude );	// rotation is along Y-Axis according to left hand rule. Rotation = 0 starts from X-Axis Arrow; altitude = 0 starts at y-axis arrow
 
 Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd );
 Vector3 Slerp( Vector3 const &a, Vector3 const &b, float t );
