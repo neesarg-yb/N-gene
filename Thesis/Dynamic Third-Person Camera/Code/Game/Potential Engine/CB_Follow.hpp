@@ -4,7 +4,7 @@
 class CB_Follow : public CB_DegreesOfFreedom
 {
 public:
-	 CB_Follow(  float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager );
+	 CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager );
 	~CB_Follow();
 
 private:
@@ -16,6 +16,7 @@ private:
 	float const	m_distanceChangeSpeed		= 3.5f;
 	float const m_fovChangeSpeed			= 10.f;
 	float const m_offsetChangeSpeed			= 1.f;
+	float const m_maxDistFromAnchor			= 0.f;
 
 	// Spherical Coordinates
 	float		m_distanceFromAnchor		= 0.f;
@@ -33,4 +34,7 @@ public:
 	void		PreUpdate()  { }
 	void		PostUpdate() { }
 	CameraState Update( float deltaSeconds, CameraState const &currentState );
+	
+private:
+	void CartesianToPolarTest( CameraState const &camState ) const;
 };

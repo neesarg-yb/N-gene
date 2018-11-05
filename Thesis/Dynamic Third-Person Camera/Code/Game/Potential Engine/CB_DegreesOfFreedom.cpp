@@ -46,9 +46,7 @@ void CB_DegreesOfFreedom::SetFOV( float cameraFOV )
 	m_goalState.m_fov = cameraFOV;
 }
 
-Vector3 CB_DegreesOfFreedom::GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude )
+Vector3 CB_DegreesOfFreedom::GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude ) const
 {
-	float roationRelativeToXAxis = rotation - 90.f;
-
-	return PolarToCartesian( radius, roationRelativeToXAxis, altitude);
+	return PolarToCartesian( radius, rotation, altitude);
 }

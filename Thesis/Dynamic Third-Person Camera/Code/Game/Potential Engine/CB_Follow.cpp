@@ -1,13 +1,16 @@
 #pragma once
 #include "CB_Follow.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/Potential Engine/CameraManager.hpp"
 
 CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager )
 	: CB_DegreesOfFreedom( name, manager )
 	, m_rotationSpeed( rotationSpeed )
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )
+	, m_maxDistFromAnchor( distFromAnchor )
+	, m_distanceFromAnchor( distFromAnchor )
 {
-	// Radius of spherical coordinate == Distance from Anchor
-	m_distanceFromAnchor = distFromAnchor;
+
 }
 
 CB_Follow::~CB_Follow()
@@ -74,6 +77,24 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	SetOrientationToLookAtAnchor();
 	SetOffsetToWorldPosition( m_localHorizontalOffset, m_localVerticalOffset );
 	SetFOV( m_fov );
+
+	CartesianToPolarTest( m_goalState );
 	
 	return m_goalState;
+}
+
+void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
+{
+	Vector3 anchorPos	= m_manager->GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
+	Vector3 position	= camState.m_position;
+	
+	float radius, rotation, altitude;
+	CartesianToPolar( position - anchorPos, radius, rotation, altitude );
+	DebuggerPrintf( "\n Current    Polar: Radius: %f, Rotation: %f, Altitude: %f", m_distanceFromAnchor, m_rotationAroundAnchor, m_altitudeAroundAnchor );
+	DebuggerPrintf( "\n Calculated Polar: Radius: %f, Rotation: %f, Altitude: %f", radius, rotation, altitude );
+
+	// Vector3 cartPosition = PolarToCartesian( radius, rotation, altitude );
+
+	// DebugRenderPoint( 0.f, 1.f, anchorPos, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_XRAY );
+	// DebugRenderWireSphere( 3.f, anchorPos + cartPosition, 0.2f, RGBA_GREEN_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_XRAY );
 }

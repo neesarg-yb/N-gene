@@ -198,6 +198,7 @@ void Scene_CollisionAvoidance::Update()
 
 	// All DebugRender must be added during update (not during render)
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderCamera( 0.f, *m_camera, 1.f, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 	DebugRenderHotkeys();
 
 	// Player moves relative to the direction of camera
@@ -233,7 +234,10 @@ void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const
 
 	// Render the Scene
 	if( m_clock->IsPaused() == false )
+	{
 		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
+		m_debugCamera->RenderAsMiniOverlay();
+	}
 	else
 	{
 		// Debug Camera Overlay

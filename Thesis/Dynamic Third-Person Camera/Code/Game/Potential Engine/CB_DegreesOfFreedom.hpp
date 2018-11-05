@@ -23,5 +23,5 @@ protected:
 	void SetFOV( float cameraFOV );
 
 private:
-	Vector3 GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude );
+	Vector3 GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude ) const;
 };
