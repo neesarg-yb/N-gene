@@ -8,11 +8,12 @@
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
+#include "Game/Game States/Scene_DebugSystem.hpp"
 #include "Game/Game States/Scene_FollowCamera.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
 #include "Game/Game States/Scene_DegreesOfFreedom.hpp"
+#include "Game/Game States/Scene_CollisionAvoidance.hpp"
 #include "Game/Game States/Scene_ProportionalController.hpp"
-#include "Game/Game States/Scene_DebugSystem.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -111,6 +112,9 @@ void theGame::Startup()
 
 	GameState* debugScene = new Scene_DebugSystem( g_gameClock );
 	AddNewGameState( debugScene );
+
+	GameState* collisionAvoidanceScene = new Scene_CollisionAvoidance( g_gameClock );
+	AddNewGameState( collisionAvoidanceScene );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );

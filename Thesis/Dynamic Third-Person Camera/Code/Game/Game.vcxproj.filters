@@ -121,6 +121,9 @@
     <ClCompile Include="Potential Engine\DebugCamera.cpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\Scene_CollisionAvoidance.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -206,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\DebugCamera.hpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_CollisionAvoidance.hpp">
+      <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

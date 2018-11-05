@@ -281,6 +281,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Abstract Classes\GameState.cpp" />
+    <ClCompile Include="Game States\Scene_CollisionAvoidance.cpp" />
     <ClCompile Include="Game States\Scene_DebugSystem.cpp" />
     <ClCompile Include="Game States\Scene_DegreesOfFreedom.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
@@ -311,6 +312,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Abstract Classes\GameState.hpp" />
+    <ClInclude Include="Game States\Scene_CollisionAvoidance.hpp" />
     <ClInclude Include="Game States\Scene_DebugSystem.hpp" />
     <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />
