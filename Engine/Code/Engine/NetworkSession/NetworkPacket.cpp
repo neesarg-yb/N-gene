@@ -3,40 +3,32 @@
 #include "Engine/NetworkSession/NetworkSession.hpp"
 
 // STRUCT - PACKET TRACKER
-
 PacketTracker::PacketTracker()
 {
-	ResetSentReliables();
+
 }
 
 PacketTracker::PacketTracker( uint16_t inAck )
 	: ack( inAck ) 
 { 
-	ResetSentReliables();
+
 }
 
 PacketTracker::PacketTracker( uint16_t inAck, uint64_t inSentTimeHPC )
 	: ack( inAck )
 	, sentTimeHPC( inSentTimeHPC ) 
 { 
-	ResetSentReliables();
+
 }
 
 bool PacketTracker::AddNewReliableID( uint16_t reliableID )
 {
-	bool addedSuccessfully = false;
+	if( reliablesCount >= MAX_RELIABLES_PER_PACKET )
+		return false;
 
-	for( int i = 0; i < MAX_RELIABLES_PER_PACKET; i++ )
-	{
-		if( sentReliables[i] != INVALID_RELIABLE_ID )
-			continue;
-
-		sentReliables[i]  = reliableID;
-		addedSuccessfully = true;
-		break;
-	}
-
-	return addedSuccessfully;
+	int idx = reliablesCount++;
+	sentReliables[ idx ] = reliableID;
+	return true;
 }
 
 void PacketTracker::TrackForAck( uint16_t inAck )
@@ -50,13 +42,6 @@ void PacketTracker::TrackForAck( uint16_t inAck )
 void PacketTracker::Invalidate()
 {
 	ack = INVALID_PACKET_ACK;
-	ResetSentReliables();
-}
-
-void PacketTracker::ResetSentReliables()
-{
-	for( int i = 0; i < MAX_RELIABLES_PER_PACKET; i++ )
-		sentReliables[i] = INVALID_RELIABLE_ID;
 }
 
 bool PacketTracker::IsValid() const
