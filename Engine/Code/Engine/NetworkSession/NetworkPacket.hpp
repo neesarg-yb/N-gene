@@ -15,6 +15,8 @@ struct PacketTracker
 public:
 	uint16_t ack			= INVALID_PACKET_ACK;
 	uint64_t sentTimeHPC	= Clock::GetCurrentHPC();
+
+	int		 reliablesCount = 0;
 	uint16_t sentReliables[ MAX_RELIABLES_PER_PACKET ];
 
 public:
@@ -26,7 +28,6 @@ public:
 	bool AddNewReliableID( uint16_t reliableID );
 	void TrackForAck( uint16_t inAck );
 
-	void ResetSentReliables();
 	void Invalidate();
 	bool IsValid() const;
 };

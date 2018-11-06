@@ -156,8 +156,11 @@ bool NetworkConnection::ReliableMessageAlreadyReceived( uint16_t reliableID )
 
 bool NetworkConnection::CanSendReliableID( uint16_t reliableID )
 {
-	uint16_t oldestUnconfirmedReliableID = INVALID_RELIABLE_ID;
+	// No unconfirmed messages
+	if( m_unconfirmedSentReliables.size() == 0 )
+		return true;
 
+	uint16_t oldestUnconfirmedReliableID = 0xffff;
 	for each (NetworkMessage* unconfirmedMsg in m_unconfirmedSentReliables)
 	{
 		uint16_t unconfirmedID = unconfirmedMsg->m_header.reliableID;
@@ -165,10 +168,6 @@ bool NetworkConnection::CanSendReliableID( uint16_t reliableID )
 		if( unconfirmedID < oldestUnconfirmedReliableID )
 			oldestUnconfirmedReliableID = unconfirmedID;
 	}
-
-	// No unconfirmed messages
-	if( oldestUnconfirmedReliableID == INVALID_RELIABLE_ID )
-		return true;
 
 	if( reliableID < oldestUnconfirmedReliableID + RELIABLE_MESSAGES_WINDOW )
 		return true;
@@ -178,7 +177,7 @@ bool NetworkConnection::CanSendReliableID( uint16_t reliableID )
 
 bool NetworkConnection::ShouldProcessReliableMessage( uint16_t reliableID )
 {
-	if( reliableID > m_highestConfirmedReliableID && reliableID <= (m_highestConfirmedReliableID - RELIABLE_MESSAGES_WINDOW) )
+	if( CycleLess( reliableID, GetLowestConfirmedReliableID() + 0x0001 ) || CycleGreater( reliableID, GetHighestConfirmedReliableID() ) )
 		return false;
 	else
 		return (ReliableMessageAlreadyReceived( reliableID ) == false);
@@ -359,6 +358,16 @@ void NetworkConnection::FlushMessages()
 	m_lastSendTimeHPC = Clock::GetCurrentHPC();
 }
 
+uint16_t NetworkConnection::GetLowestConfirmedReliableID() const
+{
+	return (m_highestConfirmedReliableID - RELIABLE_MESSAGES_WINDOW);
+}
+
+uint16_t NetworkConnection::GetHighestConfirmedReliableID() const
+{
+	return m_highestConfirmedReliableID;
+}
+
 uint NetworkConnection::GetUnconfirmedSendReliablesCount() const
 {
 	return (uint)m_unconfirmedSentReliables.size();
@@ -464,16 +473,12 @@ void NetworkConnection::EmptyTheOutgoingUnreliables()
 
 uint16_t NetworkConnection::GetNextReliableIDToSend()
 {
-	// Treating 0 as nothing
-	if( m_nextSentReliableID == INVALID_RELIABLE_ID )
-		m_nextSentReliableID++;
-
-	return m_nextSentReliableID;
+	return m_nextReliableIDToSend;
 }
 
 void NetworkConnection::IncrementSentReliableID()
 {
-	m_nextSentReliableID++;
+	m_nextReliableIDToSend++;
 }
 
 bool NetworkConnection::ShouldResendUnconfirmedReliables()
@@ -486,17 +491,13 @@ bool NetworkConnection::ShouldResendUnconfirmedReliables()
 
 void NetworkConnection::ConfirmReliableMessages( PacketTracker &tracker )
 {
-	for( int i = 0; i < MAX_RELIABLES_PER_PACKET; i++ )
+	for( int i = 0; i < tracker.reliablesCount; i++ )
 	{
-		// Reached to the end of list, all the remaining slots didn't get used
-		if( tracker.sentReliables[i] == INVALID_RELIABLE_ID )
-			break;
-
 		// Look for that reliableID if the vector
 		uint16_t receivedReliableID = tracker.sentReliables[i];
 
 		// Update the highest confirmed
-		if( m_highestConfirmedReliableID != INVALID_RELIABLE_ID )
+		if( m_highestConfirmedReliableID != 0xffff )
 		{
 			if( m_highestConfirmedReliableID < receivedReliableID )
 				m_highestConfirmedReliableID = receivedReliableID;
@@ -508,7 +509,7 @@ void NetworkConnection::ConfirmReliableMessages( PacketTracker &tracker )
 		{
 			NetworkMessage* &thisUMsg = m_unconfirmedSentReliables[j];
 			bool isReceivedReliableID = (thisUMsg->m_header.reliableID == receivedReliableID);
-			bool isOlderThanLowestUnconfirmed = thisUMsg->m_header.reliableID <= (m_highestConfirmedReliableID - RELIABLE_MESSAGES_WINDOW);
+			bool isOlderThanLowestUnconfirmed = CycleLess( thisUMsg->m_header.reliableID, GetLowestConfirmedReliableID() + 0x0001 );
 
 			if( isReceivedReliableID || isOlderThanLowestUnconfirmed )
 			{
