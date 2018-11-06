@@ -124,6 +124,9 @@
     <ClCompile Include="Game States\Scene_CollisionAvoidance.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="Potential Engine\CC_ConeRaycast.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -212,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="Game States\Scene_CollisionAvoidance.hpp">
       <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CC_ConeRaycast.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

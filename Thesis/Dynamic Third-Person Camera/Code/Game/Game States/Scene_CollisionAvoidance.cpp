@@ -6,6 +6,7 @@
 #include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
+#include "Game/Potential Engine/CC_ConeRaycast.hpp"
 #include "Game/Potential Engine/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
@@ -87,9 +88,12 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 
 	// Camera Constrains
 	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
+	CC_ConeRaycast*		conRaycastCC		= new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 100 );
 	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
 	m_cameraManager->RegisterConstrain( losConstarin );
+	m_cameraManager->RegisterConstrain( conRaycastCC );
 	m_cameraManager->RegisterConstrain( collisionConstrain );
+	followBehaviour->m_constrains.SetOrRemoveTags( "ConeRaycast" );
 	// followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 	// followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
 
