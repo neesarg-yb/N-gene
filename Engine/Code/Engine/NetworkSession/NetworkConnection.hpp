@@ -28,8 +28,8 @@ public:
 	uint16_t			 m_nextSentAck					= INVALID_PACKET_ACK;		// Sending		- Updated during a flush
 	uint16_t			 m_highestReceivedAck			= INVALID_PACKET_ACK;		// Receiving	- Updated during process packet
 	uint16_t			 m_receivedAcksBitfield			= 0U;
-	uint16_t			 m_nextSentReliableID			= INVALID_RELIABLE_ID;
-	uint16_t			 m_highestConfirmedReliableID	= INVALID_RELIABLE_ID;
+	uint16_t			 m_nextReliableIDToSend			= 0x0000;
+	uint16_t			 m_highestConfirmedReliableID	= 0xffff;
 
 public:
 	uint64_t			 m_lastSendTimeHPC				= Clock::GetCurrentHPC();	// Analytics
@@ -47,6 +47,7 @@ private:
 	// Tracking the packets
 	PacketTracker		  m_packetTrackers[ MAX_TRACKED_PACKETS ];
 	std::vector<uint16_t> m_receivedReliableIDs;
+	TODO( "Clear received reliable IDs, once lower than window's lowest" );
 
 	// Sent Messages
 	NetworkMessages		 m_outgoingReliables;
@@ -69,6 +70,9 @@ public:
 	void	FlushMessages();							// Sends the queued messages
 
 	// Current State
+	uint16_t GetLowestConfirmedReliableID() const;
+	uint16_t GetHighestConfirmedReliableID() const;
+
 	uint	GetUnconfirmedSendReliablesCount() const;
 	uint8_t	GetCurrentSendFrequency() const;			// Minimum of ( My sendFrequency, Parent's sendFrequency )
 	void	SetSendFrequencyTo( uint8_t frequencyHz );	// Sets it to the min( passedFrequency, parentsFrequency )
