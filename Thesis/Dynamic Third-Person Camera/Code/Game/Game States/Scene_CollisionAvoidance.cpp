@@ -24,6 +24,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
 	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
 	m_camera->EnableShadowMap();
+	m_camera->RenderDebugObjects( false );
 	// Add to Scene
 	m_scene->AddCamera( *m_camera );
 
@@ -94,8 +95,8 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->RegisterConstrain( conRaycastCC );
 	m_cameraManager->RegisterConstrain( collisionConstrain );
 	followBehaviour->m_constrains.SetOrRemoveTags( "ConeRaycast" );
-	// followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 	// followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
+	// followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );

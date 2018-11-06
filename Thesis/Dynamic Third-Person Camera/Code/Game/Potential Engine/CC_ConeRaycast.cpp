@@ -72,8 +72,8 @@ void CC_ConeRaycast::Execute( CameraState &suggestedCameraState )
 
 void CC_ConeRaycast::ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vector3 cameraPos, std::vector< WeightedRaycasts_CR > &outConeRaycasts )
 {
-	int		const numSlices		= 2;
-	float	const coneAngle		= 60.f;
+	int		const numSlices		= 30;
+	float	const coneAngle		= 75.f;
 	float	const thetaPerSlice = coneAngle / numSlices;
 
 	PolarCoordinate currentCameraPolar;
@@ -127,13 +127,19 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 	{
 		// If did not impact, don't do any reductions based on this ray
 		if( raycastResult.ray.didImpact == false )
+		{
+			// sumWeightedReduction += 0.f;
+			// sumWeights += raycastResult.weight;
 			continue;
+		}
+		else
+		{
+			float reductionFraction		= ( 1.f - raycastResult.ray.fractionTravelled );
+			float suggestedReduction	= currDistFromPlayer * reductionFraction;
 
-		float reductionFraction		= ( 1.f - raycastResult.ray.fractionTravelled );
-		float suggestedReduction	= currDistFromPlayer * reductionFraction;
-
-		sumWeightedReduction += suggestedReduction * raycastResult.weight;
-		sumWeights += raycastResult.weight;
+			sumWeightedReduction += suggestedReduction * raycastResult.weight;
+			sumWeights += raycastResult.weight;
+		}
 	}
 
 	// If there were no hits from any ray casts
