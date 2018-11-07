@@ -2,6 +2,7 @@
 #include "Scene_CollisionAvoidance.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
+#include "Engine/Core/DevConsole.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
@@ -166,21 +167,20 @@ Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
 
 void Scene_CollisionAvoidance::JustFinishedTransition()
 {
-
+	ConsolePrintf( RGBA_GREEN_COLOR, "Scene_CollisionAvoidance: Press [T] to toggle the debug camera" );
 }
 
 void Scene_CollisionAvoidance::BeginFrame()
 {
 	PROFILE_SCOPE_FUNCTION();
-	ChangeDebugCameraOverlaySize();
+	ChangeDebugCameraSettings();
 
 	// Update Debug Renderer Objects
 	DebugRendererBeginFrame( m_clock );
 
 	// Debug Camera
-	if( m_clock->IsPaused() )
+	if( m_debugCameraEnabled == true )
 		m_debugCamera->Update();
-	
 }
 
 void Scene_CollisionAvoidance::EndFrame()
@@ -237,28 +237,32 @@ void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
-	// Render the Scene
-	if( m_clock->IsPaused() == false )
-		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
-	else
+	// Debug Camera Active?
+	if( m_debugCameraEnabled )
 	{
-		// Debug Camera Overlay
+		// Full-screen overlay?
 		if( m_debugCameraFullOverlay )
 		{
-			// Render Scene just for debugCamera, because the main camera will be hidden at this point
+			// Render on just the Debug Camera
 			m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
 
-			// Draw DebugCamera overlay as full screen
+			// Render the full overlay
 			m_debugCamera->RenderAsFulscreenOverlay();
 		}
 		else
 		{
-			// Render Scene for both cameras: m_camers, m_debuCamera
-			m_renderingPath->RenderScene( *m_scene );
+			// Render on both Camera(s)
+			m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
+			m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
 
-			// Draw DebugCamera overlay as picture-in-picture
+			// Render the mini overlay, too!
 			m_debugCamera->RenderAsMiniOverlay();
 		}
+	}
+	else
+	{
+		// Render just on the main camera
+		m_renderingPath->RenderSceneForCamera( *m_camera, *m_scene, nullptr );
 	}
 }
 
@@ -351,10 +355,26 @@ void Scene_CollisionAvoidance::PauseUnpauseClock()
 		m_clock->IsPaused() ? m_clock->Resume() : m_clock->Pause();
 }
 
-void Scene_CollisionAvoidance::ChangeDebugCameraOverlaySize()
+void Scene_CollisionAvoidance::ChangeDebugCameraSettings()
 {
-	if( g_theInput->WasKeyJustPressed( 'O' ) )
-		m_debugCameraFullOverlay = !m_debugCameraFullOverlay;
+	// Toggle the Debug Camera
+	if( g_theInput->WasKeyJustPressed( 'T' ) )
+		m_debugCameraEnabled = !m_debugCameraEnabled;
+
+	if( m_debugCameraEnabled )
+	{
+		// Change the overlay size
+		if( g_theInput->WasKeyJustPressed( 'O' ) )
+			m_debugCameraFullOverlay = !m_debugCameraFullOverlay;
+
+		g_theInput->ShowCursor( false );
+		g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
+	}
+	else
+	{
+		g_theInput->ShowCursor( true );
+		g_theInput->SetMouseModeTo( MOUSE_MODE_ABSOLUTE );
+	}
 }
 
 void Scene_CollisionAvoidance::DebugRenderHotkeys()
@@ -364,6 +384,12 @@ void Scene_CollisionAvoidance::DebugRenderHotkeys()
 	DebugRender2DText( 0.f, Vector2(-850.f, 460.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, pauseGame.c_str() );
 
 	// Debug Overlay
+	std::string debugCamera  = Stringf( "[T] Debug Camera: %s", m_debugCameraEnabled ? "Enabled" : "Disabled" );
+	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, debugCamera.c_str() );
 	std::string debugOverlay = Stringf( "[O] Debug Overlay: %s", m_debugCameraFullOverlay ? "Full Screen" : "Picture-in-Picture" );
-	DebugRender2DText( 0.f, Vector2(-850.f, 440.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, debugOverlay.c_str() );
+	DebugRender2DText( 0.f, Vector2(-850.f, 420.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, debugOverlay.c_str() );
+
+	// Mouse Instruction
+	std::string mouseLock = Stringf( "Disable the Debug Camera to release mouse!" );
+	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, mouseLock.c_str() );
 }

@@ -46,6 +46,7 @@ private:
 	float const				 m_cameraNear				= 0.001f;
 	float const				 m_cameraFar				= 1000.f;
 	bool					 m_debugCameraFullOverlay	= false;
+	bool					 m_debugCameraEnabled		= false;
 
 public:
 	void JustFinishedTransition();
@@ -67,6 +68,6 @@ private:
 	void PauseUnpauseClock();			// Should happen after Scene::Update()
 
 	// Debug Overlay
-	void ChangeDebugCameraOverlaySize();
+	void ChangeDebugCameraSettings();
 	void DebugRenderHotkeys();
 };
