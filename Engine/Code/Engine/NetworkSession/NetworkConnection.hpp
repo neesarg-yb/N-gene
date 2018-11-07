@@ -47,7 +47,6 @@ private:
 	// Tracking the packets
 	PacketTracker		  m_packetTrackers[ MAX_TRACKED_PACKETS ];
 	std::vector<uint16_t> m_receivedReliableIDs;
-	TODO( "Clear received reliable IDs, once lower than window's lowest" );
 
 	// Sent Messages
 	NetworkMessages		 m_outgoingReliables;

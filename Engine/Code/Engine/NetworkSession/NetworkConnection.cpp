@@ -140,6 +140,7 @@ void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage,
 
 bool NetworkConnection::ReliableMessageAlreadyReceived( uint16_t reliableID )
 {
+	TODO( "Clear received reliable IDs, once lower than window's lowest" );
 	for( uint i = 0; i < m_receivedReliableIDs.size(); i++ )
 	{
 		if( m_receivedReliableIDs[i] != reliableID )
