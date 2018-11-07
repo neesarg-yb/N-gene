@@ -74,8 +74,8 @@ void CC_ConeRaycast::Execute( CameraState &suggestedCameraState )
 
 void CC_ConeRaycast::ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vector3 cameraPos, std::vector< WeightedRaycasts_CR > &outConeRaycasts )
 {
-	int		const numSlices		= 30;
-	float	const coneAngle		= 75.f;
+	int		const numSlices		= 4;
+	float	const coneAngle		= 60.f;
 	float	const thetaPerSlice = coneAngle / numSlices;
 
 	PolarCoordinate currentCameraPolar;
@@ -101,6 +101,7 @@ void CC_ConeRaycast::ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vect
 		raycastDestPoints.push_back( posPolar );
 		raycastDestPoints.push_back( negPolar );
 
+		// float weight = (numSlices - i) * (1.f / numSlices);
 		float weight = pow(0.8f, i);
 		raycastWeights.push_back( weight );
 		raycastWeights.push_back( weight );
@@ -124,6 +125,7 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 {
 	float sumWeightedReduction = 0.f;
 	float sumWeights = 0.f;
+	float sumCount = 0.f;
 
 	Matrix44 debugCamMat = g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
 
@@ -132,16 +134,16 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 		// If did not impact, don't do any reductions based on this ray
 		if( raycastResult.ray.didImpact == false )
 		{
-			sumWeightedReduction += 0.f;
-			sumWeights += raycastResult.weight;
-
-			// Debug the suggested-reduction
-			Vector3 srPos = Vector3( raycastResult.ray.impactPosition.x, raycastResult.ray.impactPosition.y - 0.05f, raycastResult.ray.impactPosition.z );
-			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("%.1f", 0.f) );
-
-			// Debug the actual-reduction
-			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
-			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", 0.f * raycastResult.weight) );
+// 			sumWeightedReduction += 0.f;
+// 			sumWeights += raycastResult.weight;
+// 
+// 			// Debug the suggested-reduction
+// 			Vector3 srPos = Vector3( raycastResult.ray.impactPosition.x, raycastResult.ray.impactPosition.y - 0.05f, raycastResult.ray.impactPosition.z );
+// 			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("%.1f", 0.f) );
+// 
+// 			// Debug the actual-reduction
+// 			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
+// 			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", 0.f * raycastResult.weight) );
 
 			continue;
 		}
@@ -152,6 +154,7 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 
 			sumWeightedReduction += suggestedReduction * raycastResult.weight;
 			sumWeights += raycastResult.weight;
+			sumCount += 1.f;
 
 			// Debug the suggested-reduction
 			Vector3 srPos = Vector3( raycastResult.ray.impactPosition.x, raycastResult.ray.impactPosition.y - 0.05f, raycastResult.ray.impactPosition.z );
@@ -167,7 +170,7 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 	if( sumWeights == 0.f )
 		return currDistFromPlayer;
 
-	float weightedAvgReduction	= sumWeightedReduction / sumWeights;
+	float weightedAvgReduction	= sumWeightedReduction / sumWeights/*sumCount*/;
 	float suggestedDisatance	= currDistFromPlayer - weightedAvgReduction;
 	
 	// Debug the suggested-reduction
