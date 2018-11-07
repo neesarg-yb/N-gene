@@ -25,7 +25,7 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	m_scene->AddCamera( *m_camera );
 
 	// Setting up the Debug Camera
-	CameraBehaviour *debugFreelook = new CB_FreeLook( 5.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr );
+	CameraBehaviour *debugFreelook = new CB_FreeLook( 5.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr, USE_CONTROLLER_FL );
 	m_debugCamera = new DebugCamera( debugFreelook );
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, 0.0001f, 1000.f );
 	// Add to Scene
@@ -52,7 +52,7 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	m_cameraManager->SetRaycastCallback( terrainRaycastStdFunc );
 	
 	// Camera Behaviour
-	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager );
+	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager, USE_CONTROLLER_FL );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]

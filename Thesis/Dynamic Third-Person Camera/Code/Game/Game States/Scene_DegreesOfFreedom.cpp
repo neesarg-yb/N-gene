@@ -46,7 +46,7 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom( Clock const *parentClock )
 
 	// Degrees of Freedom - Camera Behavior
 	CameraBehaviour* dofBehaviour		= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow", m_cameraManager );
-	CameraBehaviour* followBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager );
+	CameraBehaviour* followBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager, USE_CONTROLLER_FL );
 	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );

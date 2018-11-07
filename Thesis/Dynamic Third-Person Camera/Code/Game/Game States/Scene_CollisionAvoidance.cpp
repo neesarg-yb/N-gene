@@ -4,7 +4,6 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CB_Follow.hpp"
-#include "Game/Potential Engine/CB_FreeLook.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
 #include "Game/Potential Engine/CC_ConeRaycast.hpp"
 #include "Game/Potential Engine/CC_CameraCollision.hpp"
@@ -29,8 +28,8 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_scene->AddCamera( *m_camera );
 
 	// Setting up the Debug Camera
-	CameraBehaviour *debugFreelook = new CB_FreeLook( 5.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr );
-	m_debugCamera = new DebugCamera( debugFreelook );
+	m_debugFreelook = new CB_FreeLook( 5.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr, USE_KEYBOARD_MOUSE_FL );
+	m_debugCamera = new DebugCamera( m_debugFreelook );
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, 0.0001f, 1000.f );
 	// Add to Scene
 	m_scene->AddCamera( *m_debugCamera );
@@ -181,6 +180,7 @@ void Scene_CollisionAvoidance::BeginFrame()
 	// Debug Camera
 	if( m_clock->IsPaused() )
 		m_debugCamera->Update();
+	
 }
 
 void Scene_CollisionAvoidance::EndFrame()
