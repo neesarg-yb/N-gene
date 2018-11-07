@@ -167,6 +167,8 @@ Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
 
 void Scene_CollisionAvoidance::JustFinishedTransition()
 {
+	g_activeDebugCamera = m_debugCamera;
+
 	ConsolePrintf( RGBA_GREEN_COLOR, "Scene_CollisionAvoidance: Press [T] to toggle the debug camera" );
 }
 

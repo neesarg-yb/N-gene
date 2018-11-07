@@ -10,6 +10,7 @@ theGame*				g_theGame				= nullptr;
 Renderer*				g_theRenderer			= nullptr;
 InputSystem*			g_theInput				= nullptr;
 RemoteCommandService*	g_rcs					= nullptr;
+DebugCamera*			g_activeDebugCamera		= nullptr;
 /*
 AudioSystem* g_theAudio = nullptr;
 */

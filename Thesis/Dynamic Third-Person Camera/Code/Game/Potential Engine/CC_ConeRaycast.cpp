@@ -1,9 +1,11 @@
 #pragma once
 #include "CC_ConeRaycast.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/RaycastResult.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CameraContext.hpp"
 #include "Game/Potential Engine/CameraManager.hpp"
+#include "Game/Potential Engine/DebugCamera.hpp"
 
 struct WeightedRaycasts_CR
 {
@@ -123,13 +125,24 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 	float sumWeightedReduction = 0.f;
 	float sumWeights = 0.f;
 
+	Matrix44 debugCamMat = g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
+
 	for each (WeightedRaycasts_CR raycastResult in coneRaycastResults)
 	{
 		// If did not impact, don't do any reductions based on this ray
 		if( raycastResult.ray.didImpact == false )
 		{
-			// sumWeightedReduction += 0.f;
-			// sumWeights += raycastResult.weight;
+			sumWeightedReduction += 0.f;
+			sumWeights += raycastResult.weight;
+
+			// Debug the suggested-reduction
+			Vector3 srPos = Vector3( raycastResult.ray.impactPosition.x, raycastResult.ray.impactPosition.y - 0.05f, raycastResult.ray.impactPosition.z );
+			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("%.1f", 0.f) );
+
+			// Debug the actual-reduction
+			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
+			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", 0.f * raycastResult.weight) );
+
 			continue;
 		}
 		else
@@ -139,6 +152,14 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 
 			sumWeightedReduction += suggestedReduction * raycastResult.weight;
 			sumWeights += raycastResult.weight;
+
+			// Debug the suggested-reduction
+			Vector3 srPos = Vector3( raycastResult.ray.impactPosition.x, raycastResult.ray.impactPosition.y - 0.05f, raycastResult.ray.impactPosition.z );
+			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("%.1f", suggestedReduction) );
+
+			// Debug the actual-reduction
+			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
+			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", suggestedReduction * raycastResult.weight) );
 		}
 	}
 
@@ -148,6 +169,9 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 
 	float weightedAvgReduction	= sumWeightedReduction / sumWeights;
 	float suggestedDisatance	= currDistFromPlayer - weightedAvgReduction;
+	
+	// Debug the suggested-reduction
+	DebugRenderTag( 0.f, 0.25f, m_manager.GetCurrentCameraState().m_position, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.1f", weightedAvgReduction) );
 
 	return suggestedDisatance;
 }
@@ -158,6 +182,13 @@ void CC_ConeRaycast::DebugDrawRaycastResults( std::vector<WeightedRaycasts_CR> c
 	Vector3 playerPos	 = contex.anchorGameObject->m_transform.GetWorldPosition();
 
 	for each (WeightedRaycasts_CR raycastResult in raycasts)
-		DebugRenderRaycast( 0.f, playerPos, raycastResult.ray, 0.5f, RGBA_RED_COLOR, RGBA_GREEN_COLOR, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	{
+		// Raycast
+		DebugRenderRaycast( 0.f, playerPos, raycastResult.ray, 0.f, RGBA_RED_COLOR, RGBA_GREEN_COLOR, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+
+		// Weights
+		Matrix44 debugCamMat = g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
+		DebugRenderTag( 0.f, 0.03f, raycastResult.ray.impactPosition, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("%.2f%%", raycastResult.weight * 100.f) );
+	}
 }
 
