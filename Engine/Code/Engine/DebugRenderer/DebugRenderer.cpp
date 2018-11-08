@@ -278,6 +278,136 @@ void DebugRender2DText( float lifetime, Vector2 const &position, float const hei
 	debugRenderObjectQueue.push_back( textObject );
 }
 
+FloatRange DebugRenderXYCurve( float lifetime, AABB2 const &drawBounds, xyCurve_cb curveCB, FloatRange xRange, float step, Rgba const &curveColor, Rgba const &backgroundColor, Rgba const &gridlineColor )
+{
+	Vector3 const upperLeft	 ( drawBounds.mins.x, drawBounds.maxs.y, 0.f );
+	Vector3 const upperRight ( drawBounds.maxs.x, drawBounds.maxs.y, 0.f );
+	Vector3 const bottomRight( drawBounds.maxs.x, drawBounds.mins.y, 0.f );
+	Vector3 const bottomLeft ( drawBounds.mins.x, drawBounds.mins.y, 0.f );
+	
+	//-------------------------
+ 	// Draw Background - Quad
+ 	MeshBuilder mb;
+ 	mb.Begin( PRIMITIVE_TRIANGES, true );
+ 	mb.SetColor( backgroundColor );
+ 	mb.PushVertex( bottomLeft );
+ 
+ 	mb.SetColor( backgroundColor );
+ 	mb.PushVertex( bottomRight );
+ 
+ 	mb.SetColor( backgroundColor );
+ 	mb.PushVertex( upperRight );
+ 
+ 	mb.SetColor( backgroundColor );
+ 	mb.PushVertex( upperLeft );
+ 
+ 	mb.AddFace( 0, 1, 2 );
+ 	mb.AddFace( 2, 3, 0 );
+ 	mb.End();
+ 
+ 	DebugRenderObject *quadObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, Matrix44(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+ 	debugRenderObjectQueue.push_back( quadObject );
+
+
+	//-------------------------
+	// Get points on the curve
+	std::vector< Vector2 > pointsOnCurve;
+	Vector2 firstPoint;
+	firstPoint.x = xRange.min;
+	firstPoint.y = curveCB( firstPoint.x );
+	pointsOnCurve.push_back( firstPoint );
+
+	FloatRange yRange = FloatRange( firstPoint.y, firstPoint.y );	// Min and Max
+
+	for( float xVal = xRange.min; xVal <= xRange.max; xVal += step )
+	{
+		Vector2 thisPoint;
+		thisPoint.x = xVal;
+		thisPoint.y = curveCB( thisPoint.x );
+		pointsOnCurve.push_back( thisPoint );
+
+		yRange.min = (yRange.min < thisPoint.y) ? yRange.min : thisPoint.y;
+		yRange.max = (yRange.max > thisPoint.y) ? yRange.max : thisPoint.y;
+	}
+
+	Vector2 lastPoint;
+	lastPoint.x = xRange.max;
+	lastPoint.y = curveCB( lastPoint.x );
+	pointsOnCurve.push_back( lastPoint );
+
+	yRange.min = (yRange.min < lastPoint.y) ? yRange.min : lastPoint.y;
+	yRange.max = (yRange.max > lastPoint.y) ? yRange.max : lastPoint.y;
+
+
+	//-----------
+	// Draw Grid
+	mb = MeshBuilder();
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	// Lines parallel to Y-Axis
+	float gridWidth = (xRange.max - xRange.min) / 10.f;
+	for( float x = xRange.min; x <= xRange.max; x += gridWidth )
+	{
+		float xOnQuad = RangeMapFloat( x, xRange.min, xRange.max, drawBounds.mins.x, drawBounds.maxs.x );
+		Vector3 bottomEnd = Vector3( xOnQuad, drawBounds.mins.y, 0.45f );
+		Vector3 topEnd    = Vector3( xOnQuad, drawBounds.maxs.y, 0.45f );
+
+		mb.SetColor( gridlineColor );
+		mb.PushVertex( bottomEnd );
+		mb.SetColor( gridlineColor );
+		mb.PushVertex( topEnd );
+	}
+
+	// Lines parallel to X-Axis
+	for( float y = yRange.min; y <= yRange.max; y += gridWidth )
+	{
+		float yOnQuad = RangeMapFloat( y, yRange.min, yRange.max, drawBounds.mins.y, drawBounds.maxs.y );
+		Vector3 leftEnd  = Vector3( drawBounds.mins.x, yOnQuad, 0.045f );
+		Vector3 rightEnd = Vector3( drawBounds.maxs.x, yOnQuad, 0.045f );
+
+		mb.SetColor( gridlineColor );
+		mb.PushVertex( leftEnd );
+		mb.SetColor( gridlineColor );
+		mb.PushVertex( rightEnd );
+	}
+
+	mb.End();
+	DebugRenderObject *gridsObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, Matrix44(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	debugRenderObjectQueue.push_back( gridsObject );
+	
+	// Draw the Curve
+	mb = MeshBuilder();
+	mb.Begin( PRIMITIVE_LINES, false );
+
+	for( int i = 1; i < pointsOnCurve.size(); i++ )
+	{
+		Vector2 prevPoint = pointsOnCurve[i-1];
+		Vector2 thisPoint = pointsOnCurve[i];
+
+		Vector3 prevPointXYZ;
+		prevPointXYZ.x = RangeMapFloat( prevPoint.x, xRange.min, xRange.max, drawBounds.mins.x, drawBounds.maxs.x );
+		prevPointXYZ.y = RangeMapFloat( prevPoint.y, yRange.min, yRange.max, drawBounds.mins.y, drawBounds.maxs.y );
+		prevPointXYZ.z = 0.4f;
+
+		mb.SetColor( curveColor );
+		mb.PushVertex( prevPointXYZ );
+
+		Vector3 thisPointXYZ;
+		thisPointXYZ.x = RangeMapFloat( thisPoint.x, xRange.min, xRange.max, drawBounds.mins.x, drawBounds.maxs.x );
+		thisPointXYZ.y = RangeMapFloat( thisPoint.y, yRange.min, yRange.max, drawBounds.mins.y, drawBounds.maxs.y );
+		thisPointXYZ.z = 0.4f;
+
+		mb.SetColor( curveColor );
+		mb.PushVertex( thisPointXYZ );
+	}
+
+	mb.End();
+	DebugRenderObject *curveObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, Matrix44(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	debugRenderObjectQueue.push_back( curveObject );
+
+	return yRange;
+}
+
 void DebugRenderPoint( float lifetime, float size, Vector3 const &position, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
 	float halfSize = size * 0.5f;
