@@ -9,6 +9,10 @@ public:
 	 CC_ConeRaycast( char const *name, CameraManager &manager, uint8_t priority );
 	~CC_ConeRaycast();
 
+private:
+	float m_curveHeight			= 50.f;
+	float m_curvewidthFactor	= 800.f;
+
 public:
 	void Execute( CameraState &suggestedCameraState );
 
@@ -17,4 +21,7 @@ private:
 	float AdjustDistanceFromAnchorBasedOnRaycastResult( float currDistFromPlayer, std::vector< WeightedRaycasts_CR > const &coneRaycastResults );
 
 	void DebugDrawRaycastResults( std::vector<WeightedRaycasts_CR> const &raycasts ) const;
+
+	void  ChangeCurveAccordingToInput();
+	float WeightCurve( float x, float maxHeight, float width ) const;	// A variation of Witch of Angesi like curve..
 };
