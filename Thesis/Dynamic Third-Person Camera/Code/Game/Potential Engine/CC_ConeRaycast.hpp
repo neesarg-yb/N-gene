@@ -20,10 +20,10 @@ public:
 	void Execute( CameraState &suggestedCameraState );
 
 private:
-	void  ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vector3 cameraPos, std::vector< WeightedRaycasts_CR > &outConeRaycasts );
+	void  ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vector3 cameraPos, std::vector< WeightedRaycasts_CR > *outConeRaycasts );			// Fills an array of outConeRaycasts[ NUM_RAY_DIRS ]; NUM_RAY_DIRS = 3
 	float AdjustDistanceFromAnchorBasedOnRaycastResult( float currDistFromPlayer, std::vector< WeightedRaycasts_CR > const &coneRaycastResults );
 
-	void DebugDrawRaycastResults( std::vector<WeightedRaycasts_CR> const &raycasts );
+	void  DebugDrawRaycastResults( std::vector<WeightedRaycasts_CR> const &raycasts );
 
 	void  ChangeCurveAccordingToInput();
 	float WeightCurve( float x, float maxHeight, float width ) const;	// A variation of Witch of Angesi like curve..

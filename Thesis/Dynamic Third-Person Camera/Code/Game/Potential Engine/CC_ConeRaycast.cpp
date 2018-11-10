@@ -9,6 +9,14 @@
 #include "Game/Potential Engine/CameraManager.hpp"
 #include "Game/Potential Engine/DebugCamera.hpp"
 
+enum eWeightedRaycastDir : int
+{
+	LEFT_RAYS = 0,
+	RIGHT_RAYS,
+	MIDDLE_RAYS,
+	NUM_RAY_DIRS
+};
+
 struct WeightedRaycasts_CR
 {
 public:
@@ -58,71 +66,93 @@ void CC_ConeRaycast::Execute( CameraState &suggestedCameraState )
 	Vector3			cameraPos	= suggestedCameraState.m_position;
 	float distCameraToPlayer	= (playerPos - cameraPos).GetLength();
 
-	std::vector< WeightedRaycasts_CR > coneRaycasts;
+	std::vector< WeightedRaycasts_CR > coneRaycasts[ NUM_RAY_DIRS ];
 	// Do Cone Raycast from anchor towards the camera
 	ConeRaycastFromPlayerTowardsCamera( playerPos, cameraPos, coneRaycasts );
 
-	DebugDrawRaycastResults( coneRaycasts );
+	for( int i = 0; i < NUM_RAY_DIRS; i++ )
+		DebugDrawRaycastResults( coneRaycasts[i] );
 
-	// Calculate weight according to which RayCast hits surrounding
-	float distFromAnchor = AdjustDistanceFromAnchorBasedOnRaycastResult( distCameraToPlayer, coneRaycasts );
+	// Calculate suggested distance from anchor for each sides
+	float distFromAnchor[ NUM_RAY_DIRS ];
+	for( int i = 0; i < NUM_RAY_DIRS; i++ )
+		distFromAnchor[i] = AdjustDistanceFromAnchorBasedOnRaycastResult( distCameraToPlayer, coneRaycasts[i] );
+	
+	// Take the lowest among all three directions
+	float lowestDistFromAnchor = distFromAnchor[0];
+	for( int i = 1; i < NUM_RAY_DIRS; i++ )
+		lowestDistFromAnchor = (distFromAnchor[i] < lowestDistFromAnchor) ? distFromAnchor[i] : lowestDistFromAnchor;
 
 	// Move Camera forward if needed
 	float radius, rotation, altitude;
 	CartesianToPolar( cameraPos - playerPos, radius, rotation, altitude );
-	radius = distFromAnchor;
+	radius = lowestDistFromAnchor;
 
 	Vector3 newCamPos = PolarToCartesian( radius, rotation, altitude ) + playerPos;
 	suggestedCameraState.m_position = newCamPos;
+
+	// Debug print the lowest-reduction
+	Matrix44	debugCamMat		= g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
+	std::string	reductionStr	= Stringf("min( L:%.1f, M:%.1f, R:%.1f ) = %.1f",	distCameraToPlayer - distFromAnchor[LEFT_RAYS], 
+																					distCameraToPlayer - distFromAnchor[MIDDLE_RAYS], 
+																					distCameraToPlayer - distFromAnchor[RIGHT_RAYS], 
+																					distCameraToPlayer - lowestDistFromAnchor);
+	DebugRenderTag( 0.f, 0.25f, newCamPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, reductionStr.c_str() );
 }
 
-void CC_ConeRaycast::ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vector3 cameraPos, std::vector< WeightedRaycasts_CR > &outConeRaycasts )
+void CC_ConeRaycast::ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vector3 cameraPos, std::vector< WeightedRaycasts_CR > *outConeRaycasts )
 {
 	int		const numSlices		= 15;
 	float	const coneAngle		= 60.f;
 	float	const thetaPerSlice = coneAngle / numSlices;
 
+	// Camera's Polar Coordinate
 	PolarCoordinate currentCameraPolar;
 	CartesianToPolar( cameraPos - playerPos, currentCameraPolar.radius, currentCameraPolar.rotation, currentCameraPolar.altitude );
 
-	CameraContext	 context	= m_manager.GetCameraContext();
-	raycast_std_func raycastCB	= context.raycastCallback;
-	
-	std::vector< PolarCoordinate >	raycastDestPoints;
-	std::vector< float >			raycastWeights;
+	// Raycast
+	CameraContext	 context			= m_manager.GetCameraContext();
+	raycast_std_func raycastCB			= context.raycastCallback;
+	Vector3 const	 startPos			= context.anchorGameObject->m_transform.GetWorldPosition();
+	Vector3			 rayDirection		= (cameraPos - startPos);
+	float			 maxDistance		= rayDirection.NormalizeAndGetLength();
 
-	raycastDestPoints.push_back( currentCameraPolar );
-	raycastWeights.push_back( m_curveCB( 0.f ) );
+	// Temp variables
+	float			 raycastWeight		= m_curveCB( 0.f );		// At ZERO degrees
+	PolarCoordinate	 raycastDestPoint	= currentCameraPolar;
+
+	// Push the middle ray's result
+	RaycastResult result = raycastCB( startPos, rayDirection, maxDistance );
+	outConeRaycasts[ MIDDLE_RAYS ].push_back( WeightedRaycasts_CR(result, raycastWeight) );
 
 	for( int i = 1; i <= numSlices; i++ )
 	{
+		// Polar Angles
 		float posAngle = i * thetaPerSlice;
 		float negAngle = posAngle * -1.f;
 
+		// End points for the raycast
 		PolarCoordinate posPolar( currentCameraPolar.radius, currentCameraPolar.rotation + posAngle, currentCameraPolar.altitude );
 		PolarCoordinate negPolar( currentCameraPolar.radius, currentCameraPolar.rotation + negAngle, currentCameraPolar.altitude );
-
-		raycastDestPoints.push_back( posPolar );
-		raycastDestPoints.push_back( negPolar );
-
-		// float weight = (numSlices - i) * (1.f / numSlices);
+		
+		Vector3 endPositivePoint = playerPos + PolarToCartesian( posPolar.radius, posPolar.rotation, posPolar.altitude );
+		Vector3 endNegativePoint = playerPos + PolarToCartesian( negPolar.radius, negPolar.rotation, negPolar.altitude );
+		
+		// respective weights
 		float posWeight = m_curveCB( posAngle );
 		float negWeight = m_curveCB( negAngle );
-		raycastWeights.push_back( posWeight );
-		raycastWeights.push_back( negWeight );
-	}
 
-	for( int i = 0; i < raycastDestPoints.size(); i++ )
-	{
-		float weight = raycastWeights[i];
-		PolarCoordinate destPolar = raycastDestPoints[i];
+		// Pos angles i.e. RIGHT from Anchor
+		rayDirection = (endPositivePoint - startPos);
+		maxDistance  = rayDirection.NormalizeAndGetLength();
+		result		 = raycastCB( startPos, rayDirection, maxDistance );
+		outConeRaycasts[ RIGHT_RAYS ].push_back( WeightedRaycasts_CR(result, posWeight) );
 
-		Vector3	startPos		= context.anchorGameObject->m_transform.GetWorldPosition();
-		Vector3	rayDirection	= PolarToCartesian( destPolar.radius, destPolar.rotation, destPolar.altitude ).GetNormalized();
-		float	maxDistance		= (cameraPos - playerPos).GetLength();
-
-		RaycastResult result = raycastCB( startPos, rayDirection, maxDistance );
-		outConeRaycasts.push_back( WeightedRaycasts_CR(result, weight) );
+		// Neg angles i.e. LEFT from Anchor
+		rayDirection = (endNegativePoint - startPos);
+		maxDistance  = rayDirection.NormalizeAndGetLength();
+		result		 = raycastCB( startPos, rayDirection, maxDistance );
+		outConeRaycasts[ LEFT_RAYS ].push_back( WeightedRaycasts_CR(result, negWeight) );
 	}
 }
 
@@ -175,9 +205,6 @@ float CC_ConeRaycast::AdjustDistanceFromAnchorBasedOnRaycastResult( float currDi
 
 	float weightedAvgReduction	= sumWeightedReduction / sumWeights;
 	float suggestedDisatance	= currDistFromPlayer - weightedAvgReduction;
-	
-	// Debug the suggested-reduction
-	DebugRenderTag( 0.f, 0.25f, m_manager.GetCurrentCameraState().m_position, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.1f", weightedAvgReduction) );
 
 	return suggestedDisatance;
 }
