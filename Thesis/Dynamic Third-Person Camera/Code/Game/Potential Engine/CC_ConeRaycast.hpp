@@ -12,10 +12,14 @@ public:
 
 private:
 	std::function<float (float x)> m_curveCB;
-	
-	float m_curveHeight			= 50.f;
-	float m_curvewidthFactor	= 800.f;
 
+	int		m_numSlices			= 15;
+	float	m_coneAngle			= 60.f;
+	float	m_curveHeight		= 50.f;
+	float	m_curvewidthFactor	= 800.f;
+
+	float	m_fNumSlices		= (float) m_numSlices;
+	
 public:
 	void Execute( CameraState &suggestedCameraState );
 
@@ -25,6 +29,6 @@ private:
 
 	void  DebugDrawRaycastResults( std::vector<WeightedRaycasts_CR> const &raycasts );
 
-	void  ChangeCurveAccordingToInput();
+	void  ChangeSettingsAccordingToInput();
 	float WeightCurve( float x, float maxHeight, float width ) const;	// A variation of Witch of Angesi like curve..
 };

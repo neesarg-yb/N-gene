@@ -189,7 +189,7 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 
 	Vector3 position;
 	bool	didImpact = false;
-	for ( float t = 0.f; (t <= maxDistance) && (didImpact == false); t += sampleSize )
+	for ( float t = 0.f; (t <= maxDistance) && (didImpact == false); t = fminf( t + sampleSize, maxDistance ) )
 	{
 		position	= ray.Evaluate( t );
 		distanceFromTerrain	= position.y - GetYCoordinateForMyPositionAt( position.x, position.z );
@@ -225,6 +225,10 @@ RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction,
 					belowPoint = position;
 			}
 		}
+
+		// To terminate once we reach to max distance
+		if( t == maxDistance )
+			break;
 	}
 	
 	// To check if the impact point is inside the terrain's bounds

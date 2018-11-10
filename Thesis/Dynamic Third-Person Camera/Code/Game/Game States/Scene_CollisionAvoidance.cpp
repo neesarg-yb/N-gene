@@ -190,7 +190,7 @@ void Scene_CollisionAvoidance::EndFrame()
 	PROFILE_SCOPE_FUNCTION();
 	
 	// Manipulate Clock after Scene::Update
-	ChangeClocksTimeScale();
+	// ChangeClocksTimeScale();	// Uses [UP] & [DOWN] keys, which might conflict with CC_ConeRaycast
 	PauseUnpauseClock();
 }
 

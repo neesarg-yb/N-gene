@@ -59,7 +59,7 @@ CC_ConeRaycast::~CC_ConeRaycast()
 
 void CC_ConeRaycast::Execute( CameraState &suggestedCameraState )
 {
-	ChangeCurveAccordingToInput();
+	ChangeSettingsAccordingToInput();
 
 	CameraContext	contex		= m_manager.GetCameraContext();
 	Vector3			playerPos	= contex.anchorGameObject->m_transform.GetWorldPosition();
@@ -102,9 +102,7 @@ void CC_ConeRaycast::Execute( CameraState &suggestedCameraState )
 
 void CC_ConeRaycast::ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vector3 cameraPos, std::vector< WeightedRaycasts_CR > *outConeRaycasts )
 {
-	int		const numSlices		= 15;
-	float	const coneAngle		= 60.f;
-	float	const thetaPerSlice = coneAngle / numSlices;
+	float const thetaPerSlice = m_coneAngle / m_numSlices;
 
 	// Camera's Polar Coordinate
 	PolarCoordinate currentCameraPolar;
@@ -125,7 +123,7 @@ void CC_ConeRaycast::ConeRaycastFromPlayerTowardsCamera( Vector3 playerPos, Vect
 	RaycastResult result = raycastCB( startPos, rayDirection, maxDistance );
 	outConeRaycasts[ MIDDLE_RAYS ].push_back( WeightedRaycasts_CR(result, raycastWeight) );
 
-	for( int i = 1; i <= numSlices; i++ )
+	for( int i = 1; i <= m_numSlices; i++ )
 	{
 		// Polar Angles
 		float posAngle = i * thetaPerSlice;
@@ -243,10 +241,12 @@ void CC_ConeRaycast::DebugDrawRaycastResults( std::vector<WeightedRaycasts_CR> c
 	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 20.f ), 17.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, "Use numpad's 46-28 to change width-height!" );
 }
 
-void CC_ConeRaycast::ChangeCurveAccordingToInput()
+void CC_ConeRaycast::ChangeSettingsAccordingToInput()
 {
-	float hightChangeSpeed = 5.f;
-	float widthChangeSpeed = 200.f;
+	float hightChangeSpeed		= 5.f;
+	float widthChangeSpeed		= 200.f;
+	float numSlicesChangeSpeed	= 3.f;
+	float coneAngleChangeSpeed	= 15.f;
 	float deltaSeconds = (float) GetMasterClock()->GetFrameDeltaSeconds();
 
 	if( g_theInput->IsKeyPressed( NUM_PAD_8 ) )
@@ -257,11 +257,22 @@ void CC_ConeRaycast::ChangeCurveAccordingToInput()
 		m_curvewidthFactor += widthChangeSpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( NUM_PAD_4 ) )
 		m_curvewidthFactor -= widthChangeSpeed * deltaSeconds;
-
+	if( g_theInput->IsKeyPressed( RIGHT ) )
+		m_coneAngle += coneAngleChangeSpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( LEFT ) )
+		m_coneAngle -= coneAngleChangeSpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( UP ) )
+		m_fNumSlices += numSlicesChangeSpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( DOWN ) )
+		m_fNumSlices -= numSlicesChangeSpeed * deltaSeconds;
+	
+	m_coneAngle			= ClampFloat( m_coneAngle, 1.f, 180.f );
+	m_fNumSlices		= ClampFloat( m_fNumSlices, 1.f, 100.f );
 	m_curveHeight		= ClampFloat( m_curveHeight, 1.f, 500.f );
 	m_curvewidthFactor	= ClampFloat( m_curvewidthFactor, 1.f, 2000.f );
-
-	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
+	
+	m_numSlices		= (int) floorf(m_fNumSlices);
+	m_curveCB		= [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
 }
 
 float CC_ConeRaycast::WeightCurve( float x, float maxHeight, float width ) const
