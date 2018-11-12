@@ -7,11 +7,14 @@ CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem, float ca
 	, m_cameraRadius( cameraRadius )
 	, m_inputSystem( inputSystem )
 {
-
+	m_defaultMotionController = new CameraMotionController( "default", this );
 }
 
 CameraManager::~CameraManager()
 {
+	delete m_defaultMotionController;
+	m_defaultMotionController = nullptr;
+
 	// Delete all the camera behaviors
 	while( m_cameraBehaviours.size() > 0 )
 	{
@@ -47,21 +50,28 @@ void CameraManager::Update( float deltaSeconds )
 	}
 
 	// This might change if in transition
-	CameraState updatedCameraState = m_lastSuggestedState;
+	CameraState constrainedCameraState = m_lastSuggestedState;
 
-	// Camera Behavior Transition
-	if( m_behaviourTransitionTimeRemaining > 0.f )
+	// Camera Mover
+	if( m_behaviourTransitionTimeRemaining <= 0.f )
 	{
+		constrainedCameraState = GetMotionController()->MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
+		SetCurrentCameraStateTo( constrainedCameraState );
+	}
+	else
+	{
+		// Camera Behavior Transition
 		float t = ( m_behaviourTransitionSeconds - m_behaviourTransitionTimeRemaining ) / m_behaviourTransitionSeconds;
 		t = ClampFloat01(t);
 
 		// Interpolate slowly to the suggested position, over time
-		updatedCameraState = CameraState::Interpolate( m_stateOnTransitionBegin, m_lastSuggestedState, t );
+		constrainedCameraState = CameraState::Interpolate( m_stateOnTransitionBegin, m_lastSuggestedState, t );
 		m_behaviourTransitionTimeRemaining -= deltaSeconds;
-	}
 
-	// Update the current state
-	UpdateCameraState( deltaSeconds, updatedCameraState );
+		// Update the current state
+		constrainedCameraState = m_defaultMotionController->MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
+		SetCurrentCameraStateTo( constrainedCameraState );
+	}
 }
 
 void CameraManager::PreUpdate()
@@ -144,6 +154,9 @@ void CameraManager::DeleteCameraBehaviour( CameraBehaviour *cameraBehaviourToDel
 
 void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName )
 {
+	// If setting the behaviour for the first time
+	bool immediatlySetCurrentState = false;
+
 	// If there is a camera behavior already active
 	if( m_aciveBehaviour != nullptr )
 	{
@@ -151,14 +164,34 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 		m_stateOnTransitionBegin			= m_lastSuggestedState;
 		m_behaviourTransitionTimeRemaining	= m_behaviourTransitionSeconds;
 	}
+	else
+	{
+		immediatlySetCurrentState = true;
+	}
 	
 	// Sets the new camera behavior to active
 	int idx = GetCameraBehaviourIndex( behaviourName );
 	m_aciveBehaviour = m_cameraBehaviours[ idx ];
 
+	// Change Camera Position to wherever that behavior wants it to
+	if( immediatlySetCurrentState )
+	{
+		CameraState suggestedState = m_aciveBehaviour->Update( 0.f, m_currentCameraState );
+		SetCurrentCameraStateTo( suggestedState );
+	}
+
 	// Update Active Constrains
 	Tags const &constrainsToActivate = m_aciveBehaviour->m_constrains;
 	ResetActivateConstrainsFromTags( constrainsToActivate );
+}
+
+void CameraManager::SetActiveMotionControllerTo( CameraMotionController *motionController )
+{
+	// Set it
+	m_activeMotionController = motionController;
+
+	// For safety, change its manager to this!
+	m_activeMotionController->m_manager = this;
 }
 
 void CameraManager::RegisterConstrain( CameraConstrain* newConstrain )
@@ -201,16 +234,18 @@ void CameraManager::EnableConstrains( bool enable /*= true */ )
 	m_constrainsEnabled = enable;
 }
 
-void CameraManager::UpdateCameraState( float deltaSeconds, CameraState newState )
+CameraMotionController* CameraManager::GetMotionController()
 {
-	// Update position with velocity
-	newState.m_position += newState.m_velocity * deltaSeconds;
+	return (m_activeMotionController == nullptr) ? m_defaultMotionController : m_activeMotionController;
+}
 
+void CameraManager::SetCurrentCameraStateTo( CameraState newState )
+{
 	// Sets properties of the camera
 	m_camera.SetFOVForPerspective( newState.m_fov );
 	m_camera.SetCameraPositionTo ( newState.m_position );
 	m_camera.SetCameraQuaternionRotationTo( newState.m_orientation );
-	
+
 	// Store off the current state
 	m_currentCameraState = newState;
 }

@@ -35,6 +35,9 @@
     <Filter Include="PotentialEngine\CameraConstrains">
       <UniqueIdentifier>{1fe26ba9-ee86-4c41-b4dc-7e0c53804464}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PotentialEngine\MotionControllers">
+      <UniqueIdentifier>{726a2a86-c517-4d77-8d08-f84c75d4e081}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -127,6 +130,12 @@
     <ClCompile Include="Potential Engine\CC_ConeRaycast.cpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
     </ClCompile>
+    <ClCompile Include="Potential Engine\CameraMotionController.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\CMC_ProportionalController.cpp">
+      <Filter>PotentialEngine\MotionControllers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -218,6 +227,12 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CC_ConeRaycast.hpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CameraMotionController.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CMC_ProportionalController.hpp">
+      <Filter>PotentialEngine\MotionControllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

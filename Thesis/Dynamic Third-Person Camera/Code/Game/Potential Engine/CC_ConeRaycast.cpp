@@ -239,6 +239,8 @@ void CC_ConeRaycast::DebugDrawRaycastResults( std::vector<WeightedRaycasts_CR> c
 	DebugRender2DText( 0.f, botCenter,			17.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("%.1f", yRange.min) );
 
 	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 20.f ), 17.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, "Use numpad's 46-28 to change width-height!" );
+	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 40.f ), 17.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, "+[K] -[H], to change cone angle." );
+	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 60.f ), 17.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, "+[U] -[J], to change number of slices." );
 }
 
 void CC_ConeRaycast::ChangeSettingsAccordingToInput()
@@ -257,13 +259,13 @@ void CC_ConeRaycast::ChangeSettingsAccordingToInput()
 		m_curvewidthFactor += widthChangeSpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( NUM_PAD_4 ) )
 		m_curvewidthFactor -= widthChangeSpeed * deltaSeconds;
-	if( g_theInput->IsKeyPressed( RIGHT ) )
+	if( g_theInput->IsKeyPressed( 'K' ) )
 		m_coneAngle += coneAngleChangeSpeed * deltaSeconds;
-	if( g_theInput->IsKeyPressed( LEFT ) )
+	if( g_theInput->IsKeyPressed( 'H' ) )
 		m_coneAngle -= coneAngleChangeSpeed * deltaSeconds;
-	if( g_theInput->IsKeyPressed( UP ) )
+	if( g_theInput->IsKeyPressed( 'U' ) )
 		m_fNumSlices += numSlicesChangeSpeed * deltaSeconds;
-	if( g_theInput->IsKeyPressed( DOWN ) )
+	if( g_theInput->IsKeyPressed( 'J' ) )
 		m_fNumSlices -= numSlicesChangeSpeed * deltaSeconds;
 	
 	m_coneAngle			= ClampFloat( m_coneAngle, 1.f, 180.f );

@@ -6,6 +6,7 @@
 #include "Game/Potential Engine/DebugCamera.hpp"
 #include "Game/Potential Engine/CameraManager.hpp"
 #include "Game/Potential Engine/CB_FreeLook.hpp"
+#include "Game/Potential Engine/CMC_ProportionalController.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/World/Player.hpp"
 #include "Game/World/Terrain.hpp"
@@ -31,7 +32,8 @@ public:
 	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.6f );
 
 	// Camera Behaviours
-	CB_FreeLook				*m_debugFreelook	= nullptr;
+	CB_FreeLook					*m_debugFreelook			= nullptr;
+	CMC_ProportionalController	*m_proportionalController	= nullptr;
 
 	// Game Specific
 	GameObjectList			 m_gameObjects[ NUM_ENTITIES ];

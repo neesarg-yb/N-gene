@@ -6,10 +6,11 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/CameraBehaviour.hpp"
-#include "Game/Potential Engine/CameraConstrain.hpp"
 #include "Game/Potential Engine/CameraState.hpp"
 #include "Game/Potential Engine/CameraContext.hpp"
+#include "Game/Potential Engine/CameraBehaviour.hpp"
+#include "Game/Potential Engine/CameraConstrain.hpp"
+#include "Game/Potential Engine/CameraMotionController.hpp"
 
 struct CustomCameraConstarinCompare
 {
@@ -33,6 +34,9 @@ public:
 private:
 	// Current Camera State
 	CameraState				 m_currentCameraState;
+
+	CameraMotionController	*m_defaultMotionController	= nullptr;
+	CameraMotionController	*m_activeMotionController	= nullptr;
 
 	// Camera Context
 	InputSystem				&m_inputSystem;				// Current input system
@@ -75,6 +79,7 @@ public:
 	void DeleteCameraBehaviour		( CameraBehaviour *cameraBehaviourToDelete );	// Deletes it
 	void DeleteCameraBehaviour		( std::string const &behaviourName );			// Deletes it
 	void SetActiveCameraBehaviourTo	( std::string const &behaviourName );
+	void SetActiveMotionControllerTo( CameraMotionController *motionController );	// Sets m_activeMotionController
 
 	// Constrains
 	void RegisterConstrain	( CameraConstrain* newConstrain );
@@ -82,7 +87,9 @@ public:
 	void EnableConstrains	( bool enable = true );
 
 private:
-	void UpdateCameraState( float deltaSeconds, CameraState newState );
+	CameraMotionController* GetMotionController();
+
+	void SetCurrentCameraStateTo( CameraState newState );
 	void ResetActivateConstrainsFromTags ( Tags const &constrainsToActivate );
 
 private:

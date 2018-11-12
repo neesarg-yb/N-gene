@@ -44,7 +44,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	AddNewLightToScene( directionalLight );
 
 	// Terrain
-	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_rivers.png", TERRAIN_GRIDLINES );
+	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png", TERRAIN_GRASS );
 	AddNewGameObjectToScene( m_terrain, ENTITY_TERRAIN );
 
 	// Buildings
@@ -87,6 +87,9 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow", m_cameraManager );
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 
+	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
+	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
+
 	// Camera Constrains
 	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
 	CC_ConeRaycast*		conRaycastCC		= new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 1 );
@@ -107,6 +110,9 @@ Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
 	// Camera Behaviour
 	m_cameraManager->DeleteCameraBehaviour( "Follow" );
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
+
+	delete m_proportionalController;
+	m_proportionalController = nullptr;
 
 	// Camera Manager
 	delete m_cameraManager;
@@ -245,6 +251,9 @@ void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const
 		// Full-screen overlay?
 		if( m_debugCameraFullOverlay )
 		{
+			// Since we're not rendering on this camera, we need to update its view matrix manually for DebugRenderCamera()'s frustum
+			m_camera->UpdateViewMatrix();
+
 			// Render on just the Debug Camera
 			m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
 

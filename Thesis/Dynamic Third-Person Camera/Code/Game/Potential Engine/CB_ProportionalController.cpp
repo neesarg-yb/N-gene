@@ -151,9 +151,13 @@ CameraState CB_ProportionalController::Update( float deltaSeconds, CameraState c
 		deltaVelocity = (differenceInVelocity / velocityDiffLength) * maxDeltaVelocity;
 	}
 
-	CameraState goalStateWithVelocity( m_goalState );
-	goalStateWithVelocity.m_position = currentState.m_position;		// Do not move directly, let velocity move position
-	goalStateWithVelocity.m_velocity = currentState.m_velocity + deltaVelocity;
+	// Set the final state
+	CameraState finalState( m_goalState );
+	finalState.m_position = currentState.m_position;
+	finalState.m_velocity = currentState.m_velocity + deltaVelocity;
 
-	return goalStateWithVelocity;
+	// Move according to velocity, too!
+	finalState.m_position += finalState.m_velocity * deltaSeconds;
+
+	return finalState;
 }
