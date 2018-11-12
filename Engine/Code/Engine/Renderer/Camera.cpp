@@ -49,8 +49,7 @@ void Camera::Finalize()
 
 void Camera::UpdateUBO()
 {
-	// Update viewMatrix if transform has a parent
-	m_viewMatrix = m_cameraTransform.GetWorldTransformMatrix().GetOrthonormalInverse();
+	UpdateViewMatrix();
 
 	*m_cameraUBO->As<UBOCameraMatrices>() = GetUBOCameraMatrices();
 	 m_cameraUBO->UpdateGPU();
