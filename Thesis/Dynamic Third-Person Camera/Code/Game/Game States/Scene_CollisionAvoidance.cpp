@@ -98,8 +98,9 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->RegisterConstrain( conRaycastCC );
 	m_cameraManager->RegisterConstrain( collisionConstrain );
 	followBehaviour->m_constrains.SetOrRemoveTags( "ConeRaycast" );
-	// followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
-	// followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
+	TODO( "CameraCollision contrain is not working as expected when I enabled culling to none!" );
+	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
+	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
