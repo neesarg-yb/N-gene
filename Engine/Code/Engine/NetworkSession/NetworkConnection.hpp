@@ -39,18 +39,16 @@ public:
 	float				 m_rtt	= 0.f;												// Latency perceived on this connection
 
 private:
-	// Outgoing Messages
+	// Outgoing-and-Sent Messages
 	bool				 m_immediatlyRespondForAck	= false;
 	uint8_t				 m_sendFrequency			= 0xff;							// Defaults to max frequency: 255hz 
 	NetworkMessages		 m_outgoingUnreliables;										// Unreliable messages, for now
+	NetworkMessages		 m_outgoingReliables;
+	NetworkMessages		 m_unconfirmedSentReliables;
 
 	// Tracking the packets
 	PacketTracker		  m_packetTrackers[ MAX_TRACKED_PACKETS ];
 	std::vector<uint16_t> m_receivedReliableIDs;
-
-	// Sent Messages
-	NetworkMessages		 m_outgoingReliables;
-	NetworkMessages		 m_unconfirmedSentReliables;
 
 private:
 	// Timers
@@ -69,8 +67,9 @@ public:
 	void	FlushMessages();							// Sends the queued messages
 
 	// Current State
-	uint16_t GetLowestConfirmedReliableID() const;
+	uint16_t GetLowestReliableIDToConfirm() const;
 	uint16_t GetHighestConfirmedReliableID() const;
+	bool	 HasReceivedReliableID( uint16_t reliableID ) const;
 
 	uint	GetUnconfirmedSendReliablesCount() const;
 	uint8_t	GetCurrentSendFrequency() const;			// Minimum of ( My sendFrequency, Parent's sendFrequency )
@@ -80,9 +79,7 @@ public:
 private:
 	// Tracking Messages-or-Packet
 	void			ConfirmPacketReceived( uint16_t ack );
-	bool			ReliableMessageAlreadyReceived( uint16_t reliableID );	// If not, returns false and adds it to the received list; returns true if already received
 	bool			CanSendReliableID( uint16_t reliableID );
-	bool			ShouldProcessReliableMessage( uint16_t reliableID );
 
 	// Acks
 	uint16_t		GetNextAckToSend();
@@ -95,7 +92,8 @@ private:
 
 	// Reliable ID
 	uint16_t		GetNextReliableIDToSend();
-	void			IncrementSentReliableID();
+	void			IncrementReliableIDToSend();
 	bool			ShouldResendUnconfirmedReliables();						// "Checks-and-Resets" the timer. Returns true if it is time to resend unconfirmed reliables (if there are any)   [ "USE IT JUST ONCE!!" ]
-	void			ConfirmReliableMessages( PacketTracker &tracker );		// Removes the confirmed messages from m_unconfirmedSentReliables
+	void			UpdateHigestConfirmedReliableID( PacketTracker &tracker );		// Removes the confirmed messages from m_unconfirmedSentReliables
+	void			MarkReliableReceived( uint16_t reliableID );
 };

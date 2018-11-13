@@ -33,13 +33,15 @@ const   float	   g_aspectRatio = 1.77f;
         "|  TODO :   " ##x "\n" \
         " --------------------------------------------------------------------------------------\n" )
 #define UNIMPLEMENTED()  TODO( "IMPLEMENT: " QUOTE(__FILE__) " (" QUOTE(__LINE__) ")" ) GUARANTEE_RECOVERABLE( false, "Interesting..!");
-#define GL_BIND_FUNCTION(f)      wglGetTypedProcAddress( &f, #f )
+#define GL_BIND_FUNCTION(f) wglGetTypedProcAddress( &f, #f )
 
 
 // NETWORK SESSION
 #define MAX_SESSION_CONNECTIONS					(0xff)
-#define INVALID_PACKET_ACK						(0xffff)
 #define MAX_TRACKED_PACKETS						(32)
+#define MAX_RELIABLES_PER_PACKET				(32)
+
+#define INVALID_PACKET_ACK						(0xffff)
 #define NETWORK_PACKET_HEADER_SIZE				(8)
 #define NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE	(1)
 #define NETWORK_RELIABLE_MESSAGE_HEADER_SIZE	(3)
