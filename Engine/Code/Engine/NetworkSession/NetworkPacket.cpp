@@ -42,6 +42,7 @@ void PacketTracker::TrackForAck( uint16_t inAck )
 void PacketTracker::Invalidate()
 {
 	ack = INVALID_PACKET_ACK;
+	reliablesCount = 0;
 }
 
 bool PacketTracker::IsValid() const

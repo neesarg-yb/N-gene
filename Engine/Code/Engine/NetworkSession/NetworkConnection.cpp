@@ -499,7 +499,8 @@ void NetworkConnection::UpdateHigestConfirmedReliableID( PacketTracker &tracker 
 		// Confirm Sent Reliables
 		for( uint ucI = 0; ucI < m_unconfirmedSentReliables.size(); ucI++ )
 		{
-			if( receivedReliableID == m_unconfirmedSentReliables[ucI]->m_header.reliableID )
+			bool isReceivedReliableID = (m_unconfirmedSentReliables[ucI]->m_header.reliableID == receivedReliableID );
+			if( isReceivedReliableID )
 			{
 				// Fast delete
 				std::swap( m_unconfirmedSentReliables[ucI], m_unconfirmedSentReliables.back() );
