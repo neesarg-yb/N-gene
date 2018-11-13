@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <functional>
 #include "Engine/Core/RaycastResult.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -7,6 +8,8 @@
 
 class Camera;
 class Command;
+
+typedef std::function< float(float x) > xyCurve_cb;
 
 
 ////////////////////////
@@ -57,6 +60,15 @@ void DebugRender2DText( float lifetime,
 	Rgba const		&startColor,	
 	Rgba const		&endColor,	
 	std::string		asciiText );
+
+FloatRange DebugRenderXYCurve( float lifetime,
+	AABB2 const		&drawBounds,
+	xyCurve_cb		curveCB,
+	FloatRange		xRange,
+	float			step,
+	Rgba const		&curveColor,
+	Rgba const		&backgroundColor,
+	Rgba const		&gridlineColor );		// Returns FloatRange of Y-Axis values
 
 
 //////////////////////
