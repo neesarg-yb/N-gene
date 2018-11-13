@@ -5,8 +5,6 @@
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
 
-#define MAX_RELIABLES_PER_PACKET (32)
-
 class NetworkPacket;
 typedef std::vector< NetworkPacket* > NetworkPacketList;
 
