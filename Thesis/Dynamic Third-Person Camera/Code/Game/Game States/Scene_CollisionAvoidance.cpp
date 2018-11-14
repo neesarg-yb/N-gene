@@ -84,7 +84,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 
 	// Camera Behaviour
 	// CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager );
-	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow", m_cameraManager );
+	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 75.f, 100.f, "Follow", m_cameraManager );
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
@@ -122,10 +122,10 @@ Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
 	// Player
 	m_player = nullptr;		// Gets deleted from m_gameObjects
 
-							// Terrain
+	// Terrain
 	m_terrain = nullptr;	// Gets deleted from m_gameObjects
 
-							// GameObjects
+	// GameObjects
 	for( int i = 0; i < NUM_ENTITIES; i++ )
 	{
 		while ( m_gameObjects[i].size() > 0 )

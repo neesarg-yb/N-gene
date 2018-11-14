@@ -12,7 +12,7 @@ public:
 	bool		m_mpcEnabled				= true;
 	float		m_controllingFactor			= 8.5f;
 	float		m_accelerationLimitXZ		= 35.f;							// Units per second^2
-	float		m_leadFactor				= 1.15f;
+	float		m_leadFactor				= 1.5f;
 
 public:
 	CameraState MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds );

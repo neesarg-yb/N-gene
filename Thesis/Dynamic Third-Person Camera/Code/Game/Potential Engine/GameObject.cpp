@@ -28,18 +28,23 @@ void GameObject::Update( float deltaSeconds )
 	
 	m_velocity += m_acceleration * deltaSeconds;			// Velocity from acceleration
 
-	// Limit the speed
-	float speed = m_velocity.GetLength();
-	if( speed <= 0.25f )
+	// Limit the speed - for XZ Plane
+	Vector2 velocityXZ( m_velocity.x, m_velocity.z );
+	float	velocityY	= m_velocity.y;
+	float	speedXZ		= velocityXZ.GetLength();
+
+	if( speedXZ <= 0.01f )
 	{
 		// Speed is too small, ignore it
-		m_velocity = Vector3::ZERO;
+		velocityXZ = Vector2::ZERO;
 	}
-	else if( speed > m_maxSpeed )
+	else if( speedXZ > m_maxSpeed )
 	{
 		// Speed is too large, limit it by maxSpeed
-		m_velocity = m_velocity.GetNormalized() * m_maxSpeed;
+		velocityXZ = velocityXZ.GetNormalized() * m_maxSpeed;
 	}
+
+	m_velocity = Vector3( velocityXZ.x, velocityY, velocityXZ.y );
 
 	currentPosition += m_velocity * deltaSeconds;			// Position from velocity
 	m_transform.SetPosition( currentPosition );				// Set the position
