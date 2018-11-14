@@ -118,6 +118,10 @@ void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 		// Invalidate
 		tracker.Invalidate();
 	}
+	else
+	{
+		ConsolePrintf( RGBA_PURPLE_COLOR, "Ack doesn't match [requested vs. fetched] = [%d vs. %d]", ack, tracker.ack );
+	}
 }
 
 void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage, NetworkSender sender )
