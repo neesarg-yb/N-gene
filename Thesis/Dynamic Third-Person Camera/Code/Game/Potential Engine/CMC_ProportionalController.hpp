@@ -12,13 +12,9 @@ public:
 	bool		m_mpcEnabled				= true;
 	float		m_controllingFactor			= 8.5f;
 	float		m_accelerationLimitXZ		= 35.f;							// Units per second^2
-	float		m_leadFactor				= 1.f;
-
-	// Look At Anchor
-	bool		m_lookAtAnchor				= false;
+	float		m_leadFactor				= 1.15f;
 
 public:
-	void		LookAtAnchorAfterMoved( bool enabled );
 	CameraState MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds );
 
 private:

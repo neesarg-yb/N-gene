@@ -28,6 +28,19 @@ void GameObject::Update( float deltaSeconds )
 	
 	m_velocity += m_acceleration * deltaSeconds;			// Velocity from acceleration
 
+	// Limit the speed
+	float speed = m_velocity.GetLength();
+	if( speed <= 0.25f )
+	{
+		// Speed is too small, ignore it
+		m_velocity = Vector3::ZERO;
+	}
+	else if( speed > m_maxSpeed )
+	{
+		// Speed is too large, limit it by maxSpeed
+		m_velocity = m_velocity.GetNormalized() * m_maxSpeed;
+	}
+
 	currentPosition += m_velocity * deltaSeconds;			// Position from velocity
 	m_transform.SetPosition( currentPosition );				// Set the position
 

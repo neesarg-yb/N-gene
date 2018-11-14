@@ -14,7 +14,7 @@ private:
 	std::function<float (float x)> m_curveCB;
 
 	int		m_numSlices			= 15;
-	float	m_coneAngle			= 60.f;
+	float	m_coneAngle			= 45.f;
 	float	m_curveHeight		= 50.f;
 	float	m_curvewidthFactor	= 800.f;
 

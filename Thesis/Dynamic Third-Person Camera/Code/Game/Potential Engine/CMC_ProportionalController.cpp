@@ -16,11 +16,6 @@ CMC_ProportionalController::~CMC_ProportionalController()
 
 }
 
-void CMC_ProportionalController::LookAtAnchorAfterMoved( bool enabled )
-{
-	m_lookAtAnchor = enabled;
-}
-
 CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds )
 {
 	ProcessInput();
@@ -70,15 +65,6 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 	// Move according to velocity
 	finalState.m_position += finalState.m_velocity * deltaSeconds;
 
-	// Look At
-	if( m_lookAtAnchor == true )
-	{
-		Matrix44	lookAtMat	= Matrix44::MakeLookAtView( context.anchorGameObject->m_transform.GetWorldPosition(), finalState.m_position );
-		Quaternion	orientation	= Quaternion::FromMatrix( lookAtMat ).GetInverse();
-
-		finalState.m_orientation = orientation;
-	}
-
 	return finalState;
 }
 
@@ -121,14 +107,14 @@ void CMC_ProportionalController::DebugPrintInformation() const
 	DebugRender2DText( 0.f, Vector2(-850.f, 300.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, trianglesStr.c_str() );
 
 	// Controlling Factor
-	std::string controllingFractionStr = Stringf( "%-20s = %f", "Controlling Factor", m_controllingFactor );
+	std::string controllingFractionStr = Stringf( "%-24s = %f", "Controlling Factor", m_controllingFactor );
 	DebugRender2DText( 0.f, Vector2(-850.f, 280.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
 
 	// Acceleration Limit
-	std::string accelerationLimitStr = Stringf( "%-20s = %f", "Acceleration Limit XZ", m_accelerationLimitXZ );
+	std::string accelerationLimitStr = Stringf( "%-24s = %f", "Acceleration Limit XZ", m_accelerationLimitXZ );
 	DebugRender2DText( 0.f, Vector2(-850.f, 260.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, accelerationLimitStr.c_str() );
 
 	// Lead Factor
-	std::string leadFactorStr = Stringf( "%-20s = %f", "Lead Factor", m_leadFactor );
+	std::string leadFactorStr = Stringf( "%-24s = %f", "Lead Factor", m_leadFactor );
 	DebugRender2DText( 0.f, Vector2(-850.f, 240.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, leadFactorStr.c_str() );
 }
