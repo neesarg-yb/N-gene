@@ -88,6 +88,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
+//	m_proportionalController->LookAtAnchorAfterMoved( true );
 	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
 
 	// Camera Constrains

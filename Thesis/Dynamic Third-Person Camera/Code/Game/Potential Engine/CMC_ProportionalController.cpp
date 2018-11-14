@@ -16,42 +16,68 @@ CMC_ProportionalController::~CMC_ProportionalController()
 
 }
 
+void CMC_ProportionalController::LookAtAnchorAfterMoved( bool enabled )
+{
+	m_lookAtAnchor = enabled;
+}
+
 CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds )
 {
 	ProcessInput();
 	DebugPrintInformation();
 
+	CameraContext context = m_manager->GetCameraContext();
+
 	// Proportional Controller
-	Vector3 diffInPosition	= goalState.m_position - currentState.m_position;
-	Vector3 suggestVelocity	= diffInPosition * m_controllingFactor;
+	Vector3 const diffInPosition	= goalState.m_position - currentState.m_position;
+	Vector3 const suggestVelocity	= diffInPosition * m_controllingFactor;
+	
+	// Velocities
+	Vector2 currentVelocityXZ	= Vector2( currentState.m_velocity.x, currentState.m_velocity.z );	// Current
+	float	currentVelocityY	= currentState.m_velocity.y;
+	Vector2 suggestedVelocityXZ	= Vector2( suggestVelocity.x, suggestVelocity.z );					// Suggested
+	float	suggestedVelocityY	= suggestVelocity.y;
+
 	if( m_mpcEnabled )
 	{
-		// Modified PC
-		CameraContext context = m_manager->GetCameraContext();
-		suggestVelocity += (context.anchorGameObject->m_velocity) * m_leadFactor;
+		Vector3 anchorVelocity	 = context.anchorGameObject->m_velocity;
+		Vector2 anchorVelocityXZ = Vector2( anchorVelocity.x, anchorVelocity.z );
+
+		// MPC takes account of anchor's velocity in suggestion
+		suggestedVelocityXZ += anchorVelocityXZ * m_leadFactor;
 	}
 
 	// Control exit characteristics
-	Vector3 deltaVelocity;
-	Vector3 differenceInVelocity = suggestVelocity - currentState.m_velocity;
-	float	maxDeltaVelocity	 = m_accelerationLimit * deltaSeconds;
-	float	velocityDiffLength	 = differenceInVelocity.GetLength();
+	Vector2 differenceInVelocityXZ	= suggestedVelocityXZ - currentVelocityXZ;
+	float	differenceInVelocityY	= suggestedVelocityY  - currentVelocityY;
+	float	maxDeltaVelocity		= m_accelerationLimitXZ * deltaSeconds;
+	float	velocityDiffLength		= differenceInVelocityXZ.GetLength();
+
+	Vector2 deltaVelocityXZ;
 	if( velocityDiffLength < maxDeltaVelocity )
-	{
-		deltaVelocity = differenceInVelocity;
-	}
+		deltaVelocityXZ = differenceInVelocityXZ;
 	else
-	{
-		deltaVelocity = (differenceInVelocity / velocityDiffLength) * maxDeltaVelocity;
-	}
+		deltaVelocityXZ = (differenceInVelocityXZ / velocityDiffLength) * maxDeltaVelocity;
 
 	// Final State to return
 	CameraState finalState( goalState );
-	finalState.m_position = currentState.m_position;
-	finalState.m_velocity = currentState.m_velocity + deltaVelocity;
+	finalState.m_position	= currentState.m_position;
+	
+	Vector2 finalVelocityXZ = currentVelocityXZ + deltaVelocityXZ;
+	float	finalVelocityY	= currentVelocityY  + differenceInVelocityY;	// For now I'm not applying limit to Y-Velocity
+	finalState.m_velocity	= Vector3( finalVelocityXZ.x, finalVelocityY, finalVelocityXZ.y );
 
 	// Move according to velocity
 	finalState.m_position += finalState.m_velocity * deltaSeconds;
+
+	// Look At
+	if( m_lookAtAnchor == true )
+	{
+		Matrix44	lookAtMat	= Matrix44::MakeLookAtView( context.anchorGameObject->m_transform.GetWorldPosition(), finalState.m_position );
+		Quaternion	orientation	= Quaternion::FromMatrix( lookAtMat ).GetInverse();
+
+		finalState.m_orientation = orientation;
+	}
 
 	return finalState;
 }
@@ -64,9 +90,9 @@ void CMC_ProportionalController::ProcessInput()
 	if( g_theInput->IsKeyPressed( DOWN ) )
 		m_controllingFactor -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->IsKeyPressed( RIGHT ) )
-		m_accelerationLimit += 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_accelerationLimitXZ += 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->IsKeyPressed( LEFT ) )
-		m_accelerationLimit -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_accelerationLimitXZ -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->WasKeyJustPressed( 'M' ) )
 		m_mpcEnabled = !m_mpcEnabled;
 	if( g_theInput->IsKeyPressed( PAGE_DOWN ) )
@@ -75,9 +101,9 @@ void CMC_ProportionalController::ProcessInput()
 		m_leadFactor += 2.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 
 	// Clamp the factors
-	m_controllingFactor	= (m_controllingFactor < 0.f)	? 0.f : m_controllingFactor;
-	m_accelerationLimit = (m_accelerationLimit < 0.f )	? 0.f : m_accelerationLimit;
-	m_leadFactor		= (m_leadFactor < 0.f)			? 0.f : m_leadFactor;
+	m_controllingFactor		= (m_controllingFactor < 0.f)	 ? 0.f : m_controllingFactor;
+	m_accelerationLimitXZ	= (m_accelerationLimitXZ < 0.f ) ? 0.f : m_accelerationLimitXZ;
+	m_leadFactor			= (m_leadFactor < 0.f)			 ? 0.f : m_leadFactor;
 }
 
 void CMC_ProportionalController::DebugPrintInformation() const
@@ -99,7 +125,7 @@ void CMC_ProportionalController::DebugPrintInformation() const
 	DebugRender2DText( 0.f, Vector2(-850.f, 280.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
 
 	// Acceleration Limit
-	std::string accelerationLimitStr = Stringf( "%-20s = %f", "Acceleration Limit", m_accelerationLimit );
+	std::string accelerationLimitStr = Stringf( "%-20s = %f", "Acceleration Limit XZ", m_accelerationLimitXZ );
 	DebugRender2DText( 0.f, Vector2(-850.f, 260.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, accelerationLimitStr.c_str() );
 
 	// Lead Factor
