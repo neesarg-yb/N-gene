@@ -49,12 +49,14 @@ struct NetworkMessageHeader
 public:
 	uint8_t		networkMessageDefinitionIndex	= 0xff;
 	uint16_t	reliableID						= 0;
+	uint16_t	sequenceID						= 0;
 };
 
 struct NetworkMessageDefinition
 {
 public:
 	int						id			= -1;
+	uint					channel		= 0U;
 	std::string				name		= "NAME NOT ASSIGNED!";
 	networkMessage_cb		callback	= nullptr;
 	eNetworkMessageOptions	optionsFlag	= NET_MESSAGE_OPTION_REQUIRES_CONNECTION;
@@ -69,6 +71,7 @@ public:
 public:
 	bool RequiresConnection() const;
 	bool IsReliable() const;
+	bool IsInOrder() const;
 };
 
 class NetworkMessage : public BytePacker
@@ -107,5 +110,8 @@ public:
 	NetworkMessageDefinition const* GetDefinition() const;
 	void SetDefinition( NetworkMessageDefinition const *def );	// Sets message definition and updates the member variables: m_name, m_header
 	
-	bool IsReliable() const;
+	inline bool IsReliable() const	{ return m_definition->IsReliable(); }
+	inline bool IsInOrder() const	{ return m_definition->IsInOrder(); }
+
+	inline uint GetChannel() const	{ return m_definition->channel; }
 };
