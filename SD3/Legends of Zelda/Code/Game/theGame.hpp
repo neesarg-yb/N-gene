@@ -17,6 +17,7 @@ enum eNetworkGameMessages : uint8_t
 	// ...
 
 	NET_MESSAGE_RELIABLE_TEST	= 129,
+	NET_MESSAGE_SEQUENCE_TEST	= 130,
 	NET_MESSAGE_UNRELIABLE_TEST = 0xff
 };
 

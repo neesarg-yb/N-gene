@@ -466,7 +466,7 @@ void theGame::EndFrame()
 		{
 			std::string msgDefName;
 			if( sendReliables )
-				msgDefName = "reliable_test";
+				msgDefName = "sequence_test";
 			else
 				msgDefName = "unreliable_test";
 
@@ -613,8 +613,8 @@ void theGame::RegisterGameMessages()
 
 	// Fixed index
 	m_session->RegisterNetworkMessage( NET_MESSAGE_UNRELIABLE_TEST,	"unreliable_test",	OnUnreliableTest,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
-	m_session->RegisterNetworkMessage( NET_MESSAGE_RELIABLE_TEST,	"reliable_test",	OnReliableTest,	NET_MESSAGE_OPTION_RELIABLE );
-
+	m_session->RegisterNetworkMessage( NET_MESSAGE_RELIABLE_TEST,	"reliable_test",	OnReliableTest,		NET_MESSAGE_OPTION_RELIABLE );
+	m_session->RegisterNetworkMessage( NET_MESSAGE_SEQUENCE_TEST,	"sequence_test",	OnReliableTest,		NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 }
 
 void theGame::AddNewGameState( GameState* gsToAdd )
