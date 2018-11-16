@@ -369,6 +369,9 @@
     <ClCompile Include="Math\Plane3.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkSession\NetworkMessageChannel.cpp">
+      <Filter>Network Session</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -712,6 +715,9 @@
     </ClInclude>
     <ClInclude Include="Math\Plane3.hpp">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkSession\NetworkMessageChannel.hpp">
+      <Filter>Network Session</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

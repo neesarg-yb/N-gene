@@ -126,10 +126,17 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 
 	// Set message header size according based on its nature
 	size_t messageHeaderSize;
-	if( msg.IsReliable() )
-		messageHeaderSize = NETWORK_RELIABLE_MESSAGE_HEADER_SIZE;
-	else
+	if( msg.IsReliable() == false )
 		messageHeaderSize = NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE;
+	else
+	{
+		// Reliable message
+		messageHeaderSize = NETWORK_RELIABLE_MESSAGE_HEADER_SIZE;
+		
+		// In order
+		if( msg.IsInOrder() )
+			messageHeaderSize = NETWORK_RELIABLE_INORDER_MESSAGE_HEADER_SIZE;
+	}
 
 	size_t messageBytes			 = msg.GetWrittenByteCount();
 	size_t messagePlusHeaderSize = messageHeaderSize + messageBytes;
@@ -142,6 +149,8 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 	messagePacker.WriteBytes( sizeof(msg.m_header.networkMessageDefinitionIndex), &msg.m_header.networkMessageDefinitionIndex );
 	if( msg.IsReliable() )
 		messagePacker.WriteBytes( sizeof(msg.m_header.reliableID), &msg.m_header.reliableID );
+	if( msg.IsInOrder() )
+		messagePacker.WriteBytes( sizeof(msg.m_header.sequenceID), &msg.m_header.sequenceID );
 
 	// Write message
 	messagePacker.WriteBytes( messageBytes, msg.GetBuffer(), false );						// false because it is already in LITTLE_ENDIANESS
@@ -193,6 +202,15 @@ bool NetworkPacket::ReadMessage( NetworkMessage &outMessage, NetworkSession cons
 		size_t reliableIDBytes = ReadBytes( &outMessage.m_header.reliableID, 2U );
 		if( reliableIDBytes != 2U )
 			return false;
+
+		if( msgDef->IsInOrder() )
+		{
+			messageHeaderSize = NETWORK_RELIABLE_INORDER_MESSAGE_HEADER_SIZE;
+			
+			size_t sequenceIDBytes = ReadBytes( &outMessage.m_header.sequenceID, 2U );
+			if( sequenceIDBytes != 2U )
+				return false;
+		}
 	}
 
 	// Get Message

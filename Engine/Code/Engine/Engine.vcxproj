@@ -315,6 +315,7 @@
     <ClCompile Include="Math\Vector4.cpp" />
     <ClCompile Include="NetworkSession\NetworkConnection.cpp" />
     <ClCompile Include="NetworkSession\NetworkMessage.cpp" />
+    <ClCompile Include="NetworkSession\NetworkMessageChannel.cpp" />
     <ClCompile Include="NetworkSession\NetworkPacket.cpp" />
     <ClCompile Include="NetworkSession\NetworkSession.cpp" />
     <ClCompile Include="Network\BytePacker.cpp" />
@@ -428,6 +429,7 @@
     <ClInclude Include="Math\Vector4.hpp" />
     <ClInclude Include="NetworkSession\NetworkConnection.hpp" />
     <ClInclude Include="NetworkSession\NetworkMessage.hpp" />
+    <ClInclude Include="NetworkSession\NetworkMessageChannel.hpp" />
     <ClInclude Include="NetworkSession\NetworkPacket.hpp" />
     <ClInclude Include="NetworkSession\NetworkSession.hpp" />
     <ClInclude Include="Network\BytePacker.hpp" />

@@ -52,6 +52,10 @@ bool NetworkMessageDefinition::IsReliable() const
 	return (optionsFlag & NET_MESSAGE_OPTION_RELIABLE) == NET_MESSAGE_OPTION_RELIABLE;
 }
 
+bool NetworkMessageDefinition::IsInOrder() const
+{
+	return (optionsFlag & NET_MESSAGE_OPTION_IN_ORDER) == NET_MESSAGE_OPTION_IN_ORDER;
+}
 
 // CLASS - NETWORK MESSAGE
 NetworkMessage::NetworkMessage( const char *name )
@@ -113,9 +117,4 @@ void NetworkMessage::SetDefinition( NetworkMessageDefinition const *def )
 
 	m_name = m_definition->name;
 	m_header.networkMessageDefinitionIndex = (uint8_t)def->id;
-}
-
-bool NetworkMessage::IsReliable() const
-{
-	return m_definition->IsReliable();
 }
