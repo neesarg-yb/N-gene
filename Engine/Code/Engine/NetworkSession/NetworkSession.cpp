@@ -425,20 +425,26 @@ void NetworkSession::SetSimulationSendFrequency( uint8_t frequencyHz )
 void NetworkSession::ReceivePacket()
 {
 	NetworkAddress sender;
+	size_t receivedBytes = 0U;
+	
+	do 
+	{
+		void *buffer = malloc( PACKET_MTU );
 
-	void	*buffer			= malloc( PACKET_MTU );
-	size_t	 receivedBytes	= m_mySocket->ReceiveFrom( &sender, buffer, PACKET_MTU );
+		receivedBytes = m_mySocket->ReceiveFrom( &sender, buffer, PACKET_MTU );
+		
+		NetworkPacket *receivedPacket = new NetworkPacket();
+		receivedPacket->WriteBytes( receivedBytes, buffer, false );
+		bool discardThisPacket = CheckRandomChance( m_simulatedLossFraction );
 
-	NetworkPacket *receivedPacket = new NetworkPacket();
-	receivedPacket->WriteBytes( receivedBytes, buffer, false );
-	bool discardThisPacket = CheckRandomChance( m_simulatedLossFraction );
+		// If it is not an empty packet & if we're not discarding
+		if( (receivedBytes > 0) && (discardThisPacket == false) )
+			QueuePacketForSimulation( receivedPacket, sender );
 
-	// If it is not an empty packet & if we're not discarding
-	if( (receivedBytes > 0) && (discardThisPacket == false) )
-		QueuePacketForSimulation( receivedPacket, sender );
+		// Free the temp buffer
+		free( buffer );
 
-	// Free the temp buffer
-	free( buffer );
+	} while ( receivedBytes > 0U );
 }
 
 void NetworkSession::ProcessReceivedPackets()

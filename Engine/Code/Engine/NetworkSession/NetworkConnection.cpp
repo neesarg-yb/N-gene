@@ -22,7 +22,6 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 
 NetworkConnection::~NetworkConnection()
 {
-	
 }
 
 void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
@@ -118,10 +117,6 @@ void NetworkConnection::ConfirmPacketReceived( uint16_t ack )
 		// Invalidate
 		tracker.Invalidate();
 	}
-	else
-	{
-		ConsolePrintf( RGBA_PURPLE_COLOR, "Ack doesn't match [requested vs. fetched] = [%d vs. %d]", ack, tracker.ack );
-	}
 }
 
 void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage, NetworkSender sender )
@@ -130,15 +125,50 @@ void NetworkConnection::ProcessReceivedMessage( NetworkMessage &receivedMessage,
 		receivedMessage.GetDefinition()->callback( receivedMessage, sender );		// Just do the call back, msg is not reliable thus we don't need to check anything
 	else
 	{
+		// Reliable message:
 		uint16_t reliableID = receivedMessage.m_header.reliableID;
 		if( HasReceivedReliableID( reliableID ) == true )
-			return;
+			return;																	// return if already received
+		else
+			MarkReliableReceived( reliableID );										// if not, mark as received
+
+		// If order doesn't matter
+		if( receivedMessage.IsInOrder() == false )
+			receivedMessage.GetDefinition()->callback( receivedMessage, sender );	// Do the callback, immediately
 		else
 		{
-			MarkReliableReceived( reliableID );
+			// Order matters! 
+			// Add to message to the right channel
+			uint channelId = receivedMessage.GetChannel();
+			NetworkMessageChannel &channel = m_messageChannels[ channelId ];
+			channel.m_pendingMessagesToProcess.push( NetworkMessageAndSender( new NetworkMessage(receivedMessage), new NetworkSender(sender) ) );
 
-			// Do the callback
-			receivedMessage.GetDefinition()->callback( receivedMessage, sender );
+			// And then process all the message which are in order..
+			bool listIsNotEmpty = channel.m_pendingMessagesToProcess.size() > 0;
+			while ( listIsNotEmpty )
+			{
+				NetworkMessageAndSender const &top = channel.m_pendingMessagesToProcess.top();
+				
+				bool expectedIDMatches = (channel.GetExpectedSequenceID() == top.message->m_header.sequenceID);
+				if( expectedIDMatches == false )
+					break;															// Expecting some other ID to get processed before this one! Just break.
+				else
+				{
+					// Increment for next time loop
+					channel.IncrementExpectedSequenceID();
+
+					// Process the message (i.e. do the callback)
+					top.message->GetDefinition()->callback( *top.message, *top.sender );
+
+					delete top.message;
+					delete top.sender;
+
+					// Remove the message from top
+					channel.m_pendingMessagesToProcess.pop();
+
+					listIsNotEmpty = channel.m_pendingMessagesToProcess.size() > 0;
+				}
+			}
 		}
 	}
 }
@@ -177,6 +207,16 @@ void NetworkConnection::Send( NetworkMessage &msg )
 	
 	// Push to the outgoing messages
 	NetworkMessage *msgToSend = new NetworkMessage( msg );
+	
+	// Assign sequence ID, if it is in-order traffic
+	if( msgToSend->IsInOrder() )
+	{
+		uint channelIdx = msgToSend->GetChannel();
+		NetworkMessageChannel &channel = m_messageChannels[ channelIdx ];
+		
+		msgToSend->m_header.sequenceID = channel.GetNextSequenceIDToSend();
+		channel.IncrementNextSendSequenceID();
+	}
 
 	if( msgToSend->IsReliable() )
 		m_outgoingReliables.push_back( msgToSend );
@@ -265,7 +305,6 @@ void NetworkConnection::FlushMessages()
 				reliableMessagesInThisPacker++;
 				bool reliableIDAdded = packetTracker->AddNewReliableID( m_unconfirmedSentReliables[ucrID]->m_header.reliableID );
 				GUARANTEE_RECOVERABLE( reliableIDAdded, "Error: Couldn't add new reliable ID to PacketTracker!!" );
-				// ConsolePrintf( RGBA_GRAY_COLOR, "Resending message with ReliableID %d", m_unconfirmedSentReliables[ucrID]->m_header.reliableID );
 			}
 			else
 			{

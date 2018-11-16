@@ -4,6 +4,7 @@
 #include "Engine/Core/Stopwatch.hpp"
 #include "Engine/Network/NetworkAddress.hpp"
 #include "Engine/NetworkSession/NetworkMessage.hpp"
+#include "Engine/NetworkSession/NetworkMessageChannel.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
 class  NetworkSession;
@@ -45,6 +46,9 @@ private:
 	NetworkMessages		 m_outgoingUnreliables;										// Unreliable messages, for now
 	NetworkMessages		 m_outgoingReliables;
 	NetworkMessages		 m_unconfirmedSentReliables;
+
+	// Network Channels
+	NetworkMessageChannel m_messageChannels[ MAX_NETWORK_MESSAGE_CHANNELS ];
 
 	// Tracking the packets
 	PacketTracker		  m_packetTrackers[ MAX_TRACKED_PACKETS ];
