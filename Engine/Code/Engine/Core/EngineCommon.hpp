@@ -48,7 +48,8 @@ const   float	   g_aspectRatio = 1.77f;
 #define NETWORK_RELIABLE_MESSAGE_HEADER_SIZE			(3)
 #define NETWORK_RELIABLE_INORDER_MESSAGE_HEADER_SIZE	(5)
 
-constexpr uint16_t RELIABLE_MESSAGES_WINDOW = 8;
+constexpr uint16_t	RELIABLE_MESSAGES_WINDOW	= 8;
+constexpr uint		MAX_NETWORK_ID_LENGTH		= 16;
 
 
 // Use this to deduce type of the pointer so we can cast; 

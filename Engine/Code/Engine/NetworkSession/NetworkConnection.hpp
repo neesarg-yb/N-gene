@@ -12,6 +12,13 @@ struct NetworkPacketHeader;
 
 typedef std::vector< NetworkMessage* > NetworkMessages;
 
+struct NetworkConnectionInfo
+{
+	NetworkAddress	address;
+	char			networkID[ MAX_NETWORK_ID_LENGTH ];		// Like a Steam or PSN ID
+	uint8_t			sessionIndex;
+};
+
 class NetworkConnection
 {
 public:
