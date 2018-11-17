@@ -70,12 +70,12 @@ NetworkSession::~NetworkSession()
 	for( size_t i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
 		// If nullptr, skip
-		if( m_connections[i] == nullptr )
+		if( m_boundConnections[i] == nullptr )
 			continue;
 
 		// Delete
-		delete m_connections[i];
-		m_connections[i] = nullptr;
+		delete m_boundConnections[i];
+		m_boundConnections[i] = nullptr;
 	}
 
 	// Delete all message definitions
@@ -144,7 +144,7 @@ void NetworkSession::Render() const
 	Vector2	connectionDetailBoxSize = Vector2( columnTitlesBox.maxs.x - columnTitlesBox.mins.x, columnTitlesBox.maxs.y - columnTitlesBox.mins.y );
 	for( int i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
-		if( m_connections[i] == nullptr )
+		if( m_boundConnections[i] == nullptr )
 			continue;
 
 		// To indicate which connection is mine!
@@ -155,39 +155,39 @@ void NetworkSession::Render() const
 		std::string idxStr = std::to_string( i );
 
 		// address
-		std::string connectionAddrStr = m_connections[i]->m_address.AddressToString();
+		std::string connectionAddrStr = m_boundConnections[i]->m_address.AddressToString();
 
 		// simsndrt(hz)
-		std::string simsndrt = Stringf( "%dhz", m_connections[i]->GetCurrentSendFrequency() );
+		std::string simsndrt = Stringf( "%dhz", m_boundConnections[i]->GetCurrentSendFrequency() );
 
 		// rtt(s)
-		std::string rttStr = Stringf( "%.3f", m_connections[i]->m_rtt );
+		std::string rttStr = Stringf( "%.3f", m_boundConnections[i]->m_rtt );
 
 		// loss(%)
-		std::string lossPercentStr = Stringf( "%.2f", m_connections[i]->m_loss * 100.f );
+		std::string lossPercentStr = Stringf( "%.2f", m_boundConnections[i]->m_loss * 100.f );
 
 		// lrcv(s)
-		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_connections[i]->m_lastReceivedTimeHPC;
+		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_boundConnections[i]->m_lastReceivedTimeHPC;
 		double	 lastReceivedDeltaSec = Clock::GetSecondsFromHPC( lastReceivedDeltaHPC );
 		std::string lrcvStr = Stringf( "%.3f", lastReceivedDeltaSec);
 
 		// lsnt(s)
-		uint64_t lastSentDeltaHPC = Clock::GetCurrentHPC() - m_connections[i]->m_lastSendTimeHPC;
+		uint64_t lastSentDeltaHPC = Clock::GetCurrentHPC() - m_boundConnections[i]->m_lastSendTimeHPC;
 		double	 lastSentDeltaSec = Clock::GetSecondsFromHPC( lastSentDeltaHPC );
 		std::string lsntStr = Stringf( "%.3f", lastSentDeltaSec);
 
 		// nsntack
-		std::string sntackSrt = Stringf( "%d", m_connections[i]->m_nextSentAck );
+		std::string sntackSrt = Stringf( "%d", m_boundConnections[i]->m_nextSentAck );
 
 		// hrcvack
-		std::string rcvackStr = Stringf( "%d", m_connections[i]->m_highestReceivedAck );
+		std::string rcvackStr = Stringf( "%d", m_boundConnections[i]->m_highestReceivedAck );
 
 		// rcvbits
-		std::bitset< 16 > rcvbit = m_connections[i]->m_receivedAcksBitfield;
+		std::bitset< 16 > rcvbit = m_boundConnections[i]->m_receivedAcksBitfield;
 		std::string rcvbitsStr = rcvbit.to_string();
 
 		// ucnfrmR
-		std::string ncnfrm_relStr = Stringf( "%d", m_connections[i]->GetUnconfirmedSendReliablesCount() );
+		std::string ncnfrm_relStr = Stringf( "%d", m_boundConnections[i]->GetUnconfirmedSendReliablesCount() );
 
 		// Calculate the AABB
 		Vector2	mins = Vector2( columnTitlesBox.mins.x, columnTitlesBox.mins.y - ( ++numOfConnectionDisplayed * (m_uiBodyFontSize * 1.1f) ) );
@@ -243,10 +243,10 @@ void NetworkSession::ProcessOutgoing()
 	for( int i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
 		// If nullptr, skip
-		if( m_connections[i] == nullptr )
+		if( m_boundConnections[i] == nullptr )
 			continue;
 
-		m_connections[i]->FlushMessages();
+		m_boundConnections[i]->FlushMessages();
 	}
 }
 
@@ -256,7 +256,7 @@ void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 	packetToSend.m_header.connectionIndex = GetMyConnectionIndex();
 	packetToSend.WriteHeader( packetToSend.m_header );
 
-	m_mySocket->SendTo( m_connections[idx]->m_address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
+	m_mySocket->SendTo( m_boundConnections[idx]->m_address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
 }
 
 void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address )
@@ -279,11 +279,11 @@ uint8_t NetworkSession::GetMyConnectionIndex() const
 
 	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
-		if( m_connections[i] == nullptr )
+		if( m_boundConnections[i] == nullptr )
 			continue;
 
 		// If connection found..
-		if( m_connections[i]->m_address == m_mySocket->m_address )
+		if( m_boundConnections[i]->m_address == m_mySocket->m_address )
 		{
 			// If it is under max indices allowed
 			if( i < 0xff )
@@ -300,27 +300,7 @@ NetworkConnection* NetworkSession::GetMyConnection()
 {
 	uint idx = GetMyConnectionIndex();
 
-	return m_connections[ idx ];
-}
-
-NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )
-{
-	// If idx is not in range
-	if( idx < 0 || idx >= MAX_SESSION_CONNECTIONS )
-		return nullptr;
-
-	// If there's a connection there already, delete it
-	if( m_connections[idx] != nullptr )
-	{
-		delete m_connections[idx];
-		m_connections[idx] = nullptr;
-	}
-
-	// Set new connection to that index
-	NetworkConnection* thisConnection = new NetworkConnection( idx, addr, *this );
-	m_connections[idx] = thisConnection;
-
-	return m_connections[idx];
+	return m_boundConnections[ idx ];
 }
 
 NetworkConnection* NetworkSession::GetConnection( int idx )
@@ -328,7 +308,7 @@ NetworkConnection* NetworkSession::GetConnection( int idx )
 	if( idx < 0 || idx >= MAX_SESSION_CONNECTIONS )
 		return nullptr;
 	else
-		return m_connections[idx];
+		return m_boundConnections[idx];
 }
 
 void NetworkSession::RegisterNetworkMessage( uint8_t index, char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netmessageOptionsFlag )
@@ -395,7 +375,7 @@ bool NetworkSession::SetHeartbeatFrequency( float frequencyHz )
 	m_heartbeatFrequency = frequencyHz;
 
 	// Update timer in all the connections
-	for each( NetworkConnection* connection in m_connections )
+	for each( NetworkConnection* connection in m_boundConnections )
 	{
 		if( connection == nullptr )
 			continue;
@@ -502,7 +482,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 		uint8_t receivedConnIdx = packet->m_header.connectionIndex;
 		if( receivedConnIdx != 0xff )
 		{
-			NetworkConnection *receivedForConnection = m_connections[ receivedConnIdx ];
+			NetworkConnection *receivedForConnection = m_boundConnections[ receivedConnIdx ];
 			if( receivedForConnection != nullptr )
 				receivedForConnection->OnReceivePacket( packet->m_header );
 		}
@@ -526,7 +506,7 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 				// Create a NetworkSender
 				NetworkSender thisSender = NetworkSender( *this, sender, nullptr );
 				if( receivedConnIdx != 0xff )
-					thisSender.connection = m_connections[ packet->m_header.connectionIndex ];		// If sender has a valid connection, fill it in
+					thisSender.connection = m_boundConnections[ packet->m_header.connectionIndex ];		// If sender has a valid connection, fill it in
 
 				// Do a callback!
 				if( messageDefinition->RequiresConnection() && thisSender.connection == nullptr )
@@ -562,3 +542,23 @@ void NetworkSession::ProccessAndDeletePacket( NetworkPacket *&packet, NetworkAdd
 	delete packet;
 	packet = nullptr;
 }
+
+// NetworkConnection* NetworkSession::AddConnection( int idx, NetworkAddress &addr )
+// {
+// 		// If idx is not in range
+// 		if( idx < 0 || idx >= MAX_SESSION_CONNECTIONS )
+// 			return nullptr;
+// 
+// 		// If there's a connection there already, delete it
+// 		if( m_boundConnections[idx] != nullptr )
+// 		{
+// 			delete m_boundConnections[idx];
+// 			m_boundConnections[idx] = nullptr;
+// 		}
+// 
+// 		// Set new connection to that index
+// 		NetworkConnection* thisConnection = new NetworkConnection( idx, addr, *this );
+// 		m_boundConnections[idx] = thisConnection;
+// 
+// 		return m_boundConnections[idx];
+// }
