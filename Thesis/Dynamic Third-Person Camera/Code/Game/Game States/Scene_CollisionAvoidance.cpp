@@ -44,7 +44,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	AddNewLightToScene( directionalLight );
 
 	// Terrain
-	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 250, 250 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png", TERRAIN_GRASS );
+	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 180, 180 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png", TERRAIN_GRASS );
 	AddNewGameObjectToScene( m_terrain, ENTITY_TERRAIN );
 
 	// Buildings

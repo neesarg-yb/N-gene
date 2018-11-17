@@ -52,15 +52,16 @@ void CameraManager::Update( float deltaSeconds )
 	// This might change if in transition
 	CameraState constrainedCameraState = m_lastSuggestedState;
 
-	// Camera Mover
+	// Camera Motion Controller
 	if( m_behaviourTransitionTimeRemaining <= 0.f )
 	{
+		// If not in transition of changing Camera Behaviour..
 		constrainedCameraState = GetMotionController()->MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
 		SetCurrentCameraStateTo( constrainedCameraState );
 	}
 	else
 	{
-		// Camera Behavior Transition
+		// Camera Behavior Transition is ongoing..
 		float t = ( m_behaviourTransitionSeconds - m_behaviourTransitionTimeRemaining ) / m_behaviourTransitionSeconds;
 		t = ClampFloat01(t);
 
