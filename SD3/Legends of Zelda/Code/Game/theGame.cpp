@@ -99,30 +99,6 @@ void HideLogTag( Command& cmd )
 	LogSystem::GetInstance()->HideTag( tagName );
 }
 
-void AddSessionConnection( Command &cmd )
-{
-	int				idx;
-	NetworkAddress	addr;
-
-	std::string arg1 = cmd.GetNextString();
-	std::string arg2 = cmd.GetNextString();
-	if( arg1 == "" || arg2 == "" )
-	{
-		ConsolePrintf( RGBA_RED_COLOR, "Error: Command needs two valid argument!" );
-		return;
-	}
-
-	idx	 = atoi( arg1.c_str() );
-	addr = NetworkAddress( arg2.c_str() );
-
-	NetworkSession		*session	= theGame::GetSession();
-	NetworkConnection	*connection	= session->AddConnection( idx, addr );
-	if( connection == nullptr )
-		ConsolePrintf( RGBA_RED_COLOR, "Failed to add connection!" );
-	else
-		ConsolePrintf( RGBA_GREEN_COLOR, "Connection added at index [%d]", idx );
-}
-
 void SessionSendPing( Command &cmd )
 {
 	int idx;
@@ -403,7 +379,6 @@ void theGame::Startup()
 	CommandRegister( "log_hide_all",					HideAllLogTags );
 	CommandRegister( "log_show_tag",					ShowLogTag );
 	CommandRegister( "log_hide_tag",					HideLogTag );
-	CommandRegister( "add_connection",					AddSessionConnection );
 	CommandRegister( "send_ping",						SessionSendPing );
 	CommandRegister( "send_add",						SessionSendAdd );
 	CommandRegister( "send_unreliable_test",			UnreliableTestCommand );
@@ -436,9 +411,10 @@ void theGame::Startup()
 	// For now we'll just shortcut to being a HOST
 	// "bound" state
 	// This creates the socket(s) we can communicate on..
-	bool bindSuccess = m_session->BindPort( GAME_PORT, 1U );
-	ConsolePrintf( RGBA_KHAKI_COLOR, "Network Session Bind Succes = %d; Address = %s", (int)bindSuccess, m_session->m_mySocket->m_address.AddressToString().c_str() );
-	m_session->m_mySocket->EnableNonBlocking();
+
+// 	bool bindSuccess = m_session->BindPort( GAME_PORT, 1U );
+// 	ConsolePrintf( RGBA_KHAKI_COLOR, "Network Session Bind Succes = %d; Address = %s", (int)bindSuccess, m_session->m_mySocket->m_address.AddressToString().c_str() );
+// 	m_session->m_mySocket->EnableNonBlocking();
 }
 
 void theGame::BeginFrame()
