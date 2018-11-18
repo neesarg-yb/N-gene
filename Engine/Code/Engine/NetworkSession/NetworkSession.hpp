@@ -106,8 +106,8 @@ public:
 
 	// My State
 	eNetworkSessionState		 m_state;
-	eNetworkSessionError		 m_errorCode;
-	std::string					 m_errorString;
+	eNetworkSessionError		 m_errorCode	= NET_SESSION_OK;
+	std::string					 m_errorString	= "OK";
 
 public:
 	// UI
@@ -122,6 +122,7 @@ public:
 	float	const				m_uiBodyFontSize	= 0.025f;
 
 public:
+	// Core Operations
 	void Update();
 	void Render() const;
 
@@ -129,36 +130,49 @@ public:
 	void ProcessOutgoing();
 
 private:
-	// Network Operations
-	bool					BindPort( uint16_t port, uint16_t range );
-	void					RegisterCoreMessages();
+	// Receiving & Processing
+	void ReceivePacket();
+	void ProcessReceivedPackets();
+	void QueuePacketForSimulation( NetworkPacket *newPacket, NetworkAddress &sender );	// Queues them with a random latency
+	void ProccessAndDeletePacket ( NetworkPacket *&packet, NetworkAddress &sender );	// Process the packet and deletes it
 
 public:
-	void					Host( char const *myID, uint16_t port, uint16_t portRange = DEFAULT_PORT_RANGE );
-	void					Join( char const *myID, NetworkConnectionInfo const &hostInfo );
-	void					Disconnect();
+	// Sending
+	void SendPacket			( NetworkPacket &packetToSend );		// Replaces connectionIndex by sender's index
+	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
 
+private:
+	// Session Setup
+	bool BindPort( uint16_t port, uint16_t range );
+
+public:
+	void Host( char const *myID, uint16_t port, uint16_t portRange = DEFAULT_PORT_RANGE );
+	void Join( char const *myID, NetworkAddress const &hostAddress );
+	void Disconnect();
+
+	// Session Errors
 	void					SetError( eNetworkSessionError error, char const *str );
 	void					ClearError();
 	eNetworkSessionError	GetLastError( std::string *outStr );
 
-	void					SendPacket			( NetworkPacket &packetToSend );		// Replaces connectionIndex by sender's index
-	void					SendDirectMessageTo	( NetworkMessage &messageToSend, NetworkAddress const &address );
+	// Current State
+	inline bool				IsRunning() const { return m_state != NET_SESSION_DISCONNECTED; }
 
 private:
-	NetworkConnection*		CreateConnection	( NetworkConnectionInfo const &info );
-	void					DestroyConnection	( NetworkConnection *connection );
-	void					BindConnection		( uint8_t idx, NetworkConnection *connection );
-
-	uint8_t					GetMyConnectionIndex() const;				// Returns 0xff if not found
-	NetworkConnection*		GetMyConnection();							// Will crashes if not found
+	// Network Connections
+	NetworkConnection*		CreateConnection			( NetworkConnectionInfo const &info );
+	void					DestroyConnection			( NetworkConnection *connection );
+	void					BindConnection				( uint8_t idx, NetworkConnection *connection );
 
 public:
-	// Connections & Messages
-	NetworkConnection*	GetConnection( int idx );
+	uint8_t					GetMyConnectionIndex() const;				// Returns 0xff if not found
+	NetworkConnection*		GetMyConnection();							// Will crashes if not found
+	NetworkConnection*		GetConnection( int idx );
 
-	bool				RegisterNetworkMessage( char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netMessageOptionsFlag );					// Returns true on success
-	void				RegisterNetworkMessage( uint8_t index, char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netmessageOptionsFlag );	// Rewrite if a definition already exists at that index
+	// Message Definitions
+	void					RegisterCoreMessages();
+	bool					RegisterNetworkMessage( char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netMessageOptionsFlag );					// Returns true on success
+	void					RegisterNetworkMessage( uint8_t index, char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netmessageOptionsFlag );	// Rewrite if a definition already exists at that index
 
 	NetworkMessageDefinition const* GetRegisteredMessageDefination( std::string const &definitionName ) const;															// Returns -1 if not found
 	NetworkMessageDefinition const* GetRegisteredMessageDefination( int defIndex ) const;
@@ -172,8 +186,7 @@ private:
 	float			m_heartbeatFrequency	 = 0.2f;
 
 private:
-	// Priority Queue
-	StampedNetworkPacketPriorityQueue m_receivedPackets;
+	StampedNetworkPacketPriorityQueue m_receivedPackets;				// Priority Queue
 
 public:
 	inline float	GetHeartbeatFrequency()		const { return m_heartbeatFrequency; }
@@ -184,10 +197,4 @@ public:
 	void			SetSimulationLoss( float lossFraction );
 	void			SetSimulationLatency( uint minAddedLatency_ms, uint maxAddedLatency_ms = 0U );
 	void			SetSimulationSendFrequency( uint8_t frequencyHz );
-
-private:
-	void			ReceivePacket();
-	void			ProcessReceivedPackets();
-	void			QueuePacketForSimulation( NetworkPacket *newPacket, NetworkAddress &sender );	// Queues them with a random latency
-	void			ProccessAndDeletePacket ( NetworkPacket *&packet, NetworkAddress &sender );	// Process the packet and deletes it
 };

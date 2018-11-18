@@ -6,8 +6,9 @@
 #include "Engine/NetworkSession/NetworkSession.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
-NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSession &parentSession )
+NetworkConnection::NetworkConnection( int idx, NetworkAddress const &addr, std::string networkID, NetworkSession &parentSession )
 	: m_indexInSession( idx )
+	, m_networkID( networkID, 0, MAX_NETWORK_ID_LENGTH )
 	, m_parentSession( parentSession )
 	, m_address( addr )
 	, m_sendRateTimer( GetMasterClock() )
@@ -18,6 +19,12 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress &addr, NetworkSess
 	UpdateHeartbeatTimer();
 
 	m_confirmReliablesTimer.SetTimer( 0.1 );
+}
+
+NetworkConnection::NetworkConnection( NetworkConnectionInfo const &info, NetworkSession &parentSession )
+	: NetworkConnection( info.sessionIndex, info.address, info.networkID, parentSession )
+{
+	
 }
 
 NetworkConnection::~NetworkConnection()

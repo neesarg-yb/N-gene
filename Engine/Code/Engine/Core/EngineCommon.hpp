@@ -42,6 +42,7 @@ const   float	   g_aspectRatio = 1.77f;
 #define MAX_RELIABLES_PER_PACKET						(32)
 #define MAX_NETWORK_MESSAGE_CHANNELS					(8)
 
+#define INVALID_INDEX_IN_SESSION						MAX_SESSION_CONNECTIONS
 #define INVALID_PACKET_ACK								(0xffff)
 #define NETWORK_PACKET_HEADER_SIZE						(8)
 #define NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE			(1)

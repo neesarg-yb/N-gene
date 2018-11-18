@@ -250,6 +250,46 @@ void NetworkSession::ProcessOutgoing()
 	}
 }
 
+void NetworkSession::Host( char const *myID, uint16_t port, uint16_t portRange /*= DEFAULT_PORT_RANGE */ )
+{
+	UNUSED( myID );
+	UNUSED( port );
+	UNUSED( portRange );
+}
+
+void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
+{
+	UNUSED( myID );
+	UNUSED( hostAddress );
+}
+
+void NetworkSession::Disconnect()
+{
+
+}
+
+void NetworkSession::SetError( eNetworkSessionError error, char const *str )
+{
+	m_errorCode		= error;
+	m_errorString	= str;
+}
+
+void NetworkSession::ClearError()
+{
+	m_errorCode		= NET_SESSION_OK;
+	m_errorString	= "OK";
+}
+
+eNetworkSessionError NetworkSession::GetLastError( std::string *outStr )
+{
+	*outStr = m_errorString;
+	eNetworkSessionError errorCpy = m_errorCode;
+	
+	ClearError();
+	
+	return errorCpy;
+}
+
 void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 {
 	uint8_t idx = packetToSend.m_header.connectionIndex;
@@ -270,6 +310,67 @@ void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, Network
 	packetToSend.WriteMessage( messageToSend );
 
 	m_mySocket->SendTo( address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
+}
+
+NetworkConnection* NetworkSession::CreateConnection( NetworkConnectionInfo const &info )
+{
+	NetworkConnection *newConnection = new NetworkConnection( info, *this );
+	m_allConnections.push_back( newConnection );
+
+	uint8_t indexInSession = (uint8_t)newConnection->m_indexInSession;
+	if( indexInSession != INVALID_INDEX_IN_SESSION )
+		BindConnection( indexInSession, newConnection );
+
+	return newConnection;
+}
+
+void NetworkSession::DestroyConnection( NetworkConnection *connection )
+{
+	// If it's the convenience pointer, set it to nullptr
+	if( connection == m_hostConnection )
+		m_hostConnection = nullptr;
+	if( connection == m_myConnection )
+		m_myConnection = nullptr;
+
+	// Delete it from the all Connections vector
+	bool connectionFound = false;
+	for( uint i = 0; i < m_allConnections.size(); i++ )
+	{
+		if( m_allConnections[i] != connection )
+			continue;
+		
+		// It is the connection we're looking for
+		connectionFound = true;
+
+		// Fast delete
+		std::swap( m_allConnections[i], m_allConnections.back() );
+		delete m_allConnections.back();
+		m_allConnections.back() = nullptr;
+
+		m_allConnections.pop_back();
+
+		break;
+	}
+
+	// It was never registered, return
+	if( connectionFound == false )
+		return;
+
+	// Remove it from bound connections
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] != connection )
+			continue;
+
+		// Just remove the reference, we deleted it from all connection
+		m_boundConnections[i] = nullptr;
+	}
+}
+
+void NetworkSession::BindConnection( uint8_t idx, NetworkConnection *connection )
+{
+	UNUSED( idx );
+	UNUSED( connection );
 }
 
 uint8_t NetworkSession::GetMyConnectionIndex() const
