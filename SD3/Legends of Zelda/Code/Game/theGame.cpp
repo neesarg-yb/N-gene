@@ -99,6 +99,53 @@ void HideLogTag( Command& cmd )
 	LogSystem::GetInstance()->HideTag( tagName );
 }
 
+void SessionHost( Command& cmd )
+{
+	NetworkSession *session = theGame::GetSession();
+	if( session->IsRunning() )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Error: Can't start hosting. Session is already running!" );
+		return;
+	}
+
+	std::string netIDStr = cmd.GetNextString();
+	std::string portStr	 = cmd.GetNextString();
+
+	if( netIDStr == "" || portStr == "" )
+	{
+		ConsolePrintf( RGBA_YELLOW_COLOR, "Provide two valid arguments: <id name> <port number>" );
+		return;
+	}
+
+	char const *myName	= netIDStr.c_str();
+	uint16_t	port	= (uint16_t) atoi( portStr.c_str() );
+
+	session->Host( myName, port );
+}
+
+void SessionJoin( Command &cmd )
+{
+	NetworkSession *session = theGame::GetSession();
+	if( session->IsRunning() )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Error: Can't join. Session is already running!" );
+		return;
+	}
+
+	std::string netIDStr	= cmd.GetNextString();
+	std::string hostAddrStr	= cmd.GetNextString();
+
+	if( netIDStr == "" || hostAddrStr == "" )
+	{
+		ConsolePrintf( RGBA_YELLOW_COLOR, "Provide two valid arguments: <id name> <host's address>" );
+	}
+
+	char const *myName			= netIDStr.c_str();
+	NetworkAddress hostAdderss	= NetworkAddress( hostAddrStr.c_str() );
+
+	session->Join( myName, hostAdderss );
+}
+
 void SessionSendPing( Command &cmd )
 {
 	int idx;
@@ -388,6 +435,8 @@ void theGame::Startup()
 	CommandRegister( "net_set_session_send_rate",		SetSessionSendRate );
 	CommandRegister( "net_set_connection_send_rate",	SetConnectionSendRate );
 	CommandRegister( "net_set_heart_rate",				SetHeartbeatRate );
+	CommandRegister( "net_host",						SessionHost );
+	CommandRegister( "net_join",						SessionJoin );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
