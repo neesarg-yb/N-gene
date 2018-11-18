@@ -1,4 +1,5 @@
 #pragma once#
+#include <string>
 #include <vector>
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/Stopwatch.hpp"
@@ -15,20 +16,22 @@ typedef std::vector< NetworkMessage* > NetworkMessages;
 struct NetworkConnectionInfo
 {
 	NetworkAddress	address;
-	char			networkID[ MAX_NETWORK_ID_LENGTH ];		// Like a Steam or PSN ID
 	uint8_t			sessionIndex;
+	char			networkID[ MAX_NETWORK_ID_LENGTH + 1 ];		// Like a Steam or PSN ID
 };
 
 class NetworkConnection
 {
 public:
-	 NetworkConnection( int idx, NetworkAddress &addr, NetworkSession &parentSession );
+	 NetworkConnection( NetworkConnectionInfo const &info, NetworkSession &parentSession );
+	 NetworkConnection( int idx, NetworkAddress const &addr, std::string networkID, NetworkSession &parentSession );
 	~NetworkConnection();
 
 public:
 	// Connection Info.
 	NetworkAddress		 m_address;
 	NetworkSession		&m_parentSession;
+	std::string const	 m_networkID					= "INVALID";				// length is limited by MAX_NETWORK_ID_LENGTH, in construction
 	int					 m_indexInSession;
 
 public:
