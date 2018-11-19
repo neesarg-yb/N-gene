@@ -28,28 +28,28 @@ constexpr uint16_t DEFAULT_PORT_RANGE = 10;
 
 
 //------
-// Enum
+// Enums
 //
 enum eNetworkSessionState
 {
-	NET_SESSION_DISCONNECTED = 0,
-	NET_SESSION_BOUND,
-	NET_SESSION_CONNECTING,
-	NET_SESSION_JOINING,
-	NET_SESSION_READY,
+	NET_SESSION_DISCONNECTED = 0,			// Session can be modified
+	NET_SESSION_BOUND,						// Bound to a socket, but no connections exists. Can send and receive connectionless messages. 
+	NET_SESSION_CONNECTING,					// Attempting to connect with host, no response received yet; i.e. waiting.
+	NET_SESSION_JOINING,					// Has established a connection, waiting for final setup information or join completion
+	NET_SESSION_READY,						// We are fully ready
 	NUM_NET_SESSION_STATES
 };
 
 enum eNetworkSessionError
 {
-	NET_SESSION_OK = 0,
-	NET_SESSION_ERROR_USER,
-	NET_SESSION_ERROR_INTERNAL,
+	NET_SESSION_OK = 0,						// No errors
+	NET_SESSION_ERROR_USER,					// User disconnected
+	NET_SESSION_ERROR_INTERNAL,				// Socket error
 	
-	NET_SESSION_ERROR_JOIN_DENIED,
-	NET_SESSION_ERROR_JOIN_DENIED_NOT_HOST,
-	NET_SESSION_ERROR_JOIN_DENIED_CLOSED,
-	NET_SESSION_ERROR_JOIN_DENIED_FULL,
+	NET_SESSION_ERROR_JOIN_DENIED,			// Generic deny error (release)
+	NET_SESSION_ERROR_JOIN_DENIED_NOT_HOST,	// Debug - tried to join someone who isn't joining
+	NET_SESSION_ERROR_JOIN_DENIED_CLOSED,	// Debug - not in a listen state
+	NET_SESSION_ERROR_JOIN_DENIED_FULL,		// Debug - Session was full :(
 	NUM_NET_SESSION_ERRORS
 };
 
@@ -107,7 +107,7 @@ public:
 	// My State
 	eNetworkSessionState		 m_state;
 	eNetworkSessionError		 m_errorCode	= NET_SESSION_OK;
-	std::string					 m_errorString	= "OK";
+	std::string					 m_errorString	= "";
 
 public:
 	// UI
@@ -156,7 +156,7 @@ public:
 	eNetworkSessionError	GetLastError( std::string *outStr );
 
 	// Current State
-	inline bool				IsRunning() const { return m_state != NET_SESSION_DISCONNECTED; }
+	inline bool				IsRunning() const { return  m_state != NET_SESSION_DISCONNECTED; }
 
 private:
 	// Network Connections
@@ -165,9 +165,12 @@ private:
 	void					BindConnection				( uint8_t idx, NetworkConnection *connection );
 
 public:
-	uint8_t					GetMyConnectionIndex() const;				// Returns 0xff if not found
-	NetworkConnection*		GetMyConnection();							// Will crashes if not found
 	NetworkConnection*		GetConnection( int idx );
+	uint8_t					GetMyConnectionIndex() const;
+	bool					IsRegistered( NetworkConnection const *connection ) const;	// connection is in m_allConnections
+	
+	inline NetworkConnection* const GetMyConnection()	const { return m_myConnection; }
+	inline NetworkConnection* const GetHostConnection()	const { return m_hostConnection; }
 
 	// Message Definitions
 	void					RegisterCoreMessages();
