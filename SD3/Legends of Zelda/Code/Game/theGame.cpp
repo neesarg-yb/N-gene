@@ -365,7 +365,7 @@ bool OnUnreliableTest( NetworkMessage const &msg, NetworkSender &from )
 	if( !msg.Read( messageIdx ) || !msg.Read( totalMessages ) )
 		return false;
 
-	ConsolePrintf( RGBA_GRAY_COLOR, "[%d] Received (%d/%d)th unreliable test message", from.connection->m_indexInSession, messageIdx, totalMessages );
+	ConsolePrintf( RGBA_GRAY_COLOR, "[%d] Received (%d/%d)th unreliable test message", from.connection->GetIndexInSession(), messageIdx, totalMessages );
 
 	return true;
 }
@@ -378,7 +378,7 @@ bool OnReliableTest( NetworkMessage const &msg, NetworkSender &from )
 	if( !msg.Read( messageIdx ) || !msg.Read( totalMessages ) )
 		return false;
 
-	ConsolePrintf( "[%d] Received (%d/%d)th reliable test message", from.connection->m_indexInSession, messageIdx, totalMessages );
+	ConsolePrintf( "[%d] Received (%d/%d)th reliable test message", from.connection->GetIndexInSession(), messageIdx, totalMessages );
 
 	return true;
 }
