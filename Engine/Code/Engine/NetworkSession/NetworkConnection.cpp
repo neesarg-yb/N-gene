@@ -6,11 +6,34 @@
 #include "Engine/NetworkSession/NetworkSession.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
+NetworkConnectionInfo::NetworkConnectionInfo( int index, std::string const &desiredNetworkID, NetworkAddress const &addr )
+	: address( addr )
+{
+	// Make sure that the passed index is within valid range!
+	if( index >= 0 && index < INVALID_INDEX_IN_SESSION )
+		indexInSession = (uint8_t)index;
+	else
+		indexInSession = INVALID_INDEX_IN_SESSION;
+
+	// Give it the networkID, limited by max length
+	std::string idLimitedLength = std::string( desiredNetworkID, 0, MAX_NETWORK_ID_LENGTH );
+	std::copy( idLimitedLength.begin(), idLimitedLength.end(), networkID );
+	
+	networkID[ MAX_NETWORK_ID_LENGTH ] = '\0';
+}
+
+bool NetworkConnectionInfo::operator==( NetworkConnectionInfo const &b ) const
+{
+	bool addressMatched			= (this->address		== b.address);
+	bool sessionIndexMatched	= (this->indexInSession	== b.indexInSession);
+	bool networkIDMatched		= (0 == strcmp( this->networkID, b.networkID ));
+
+	return (addressMatched && sessionIndexMatched && networkIDMatched);
+}
+
 NetworkConnection::NetworkConnection( int idx, NetworkAddress const &addr, std::string networkID, NetworkSession &parentSession )
-	: m_indexInSession( idx )
-	, m_networkID( networkID, 0, MAX_NETWORK_ID_LENGTH )
+	: m_info( idx, networkID, addr )
 	, m_parentSession( parentSession )
-	, m_address( addr )
 	, m_sendRateTimer( GetMasterClock() )
 	, m_heartbeatTimer( GetMasterClock() )
 	, m_confirmReliablesTimer( GetMasterClock() )
@@ -22,13 +45,22 @@ NetworkConnection::NetworkConnection( int idx, NetworkAddress const &addr, std::
 }
 
 NetworkConnection::NetworkConnection( NetworkConnectionInfo const &info, NetworkSession &parentSession )
-	: NetworkConnection( info.sessionIndex, info.address, info.networkID, parentSession )
+	: NetworkConnection( info.indexInSession, info.address, info.networkID, parentSession )
 {
 	
 }
 
 NetworkConnection::~NetworkConnection()
 {
+
+}
+
+bool NetworkConnection::operator==( NetworkConnection const &b ) const
+{
+	bool isInSameSession		= ( &(this->m_parentSession) == &(b.m_parentSession) );
+	bool isTheSameConnection	= ( this->m_info == b.m_info );
+
+	return (isInSameSession && isTheSameConnection);
 }
 
 void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
@@ -259,7 +291,7 @@ void NetworkConnection::FlushMessages()
 			NetworkPacket packetJustForAck;
 			NetworkPacketHeader &theHeader	= packetJustForAck.m_header;
 			theHeader.messageCount			= 0x00;
-			theHeader.connectionIndex		= (uint8_t)m_indexInSession;
+			theHeader.connectionIndex		= GetIndexInSession();
 			theHeader.ack					= INVALID_PACKET_ACK;
 			theHeader.highestReceivedAck	= m_highestReceivedAck;
 			theHeader.receivedAcksHistory	= m_receivedAcksBitfield;
@@ -278,7 +310,7 @@ void NetworkConnection::FlushMessages()
 	NetworkPacket		 thisPacket;
 	NetworkPacketHeader &thisHeader	= thisPacket.m_header;
 	thisHeader.messageCount			= 0x00;
-	thisHeader.connectionIndex		= (uint8_t)m_indexInSession;
+	thisHeader.connectionIndex		= GetIndexInSession();
 
 	// Ack
 	uint16_t ackToSend = GetNextAckToSend();
@@ -447,6 +479,21 @@ void NetworkConnection::UpdateHeartbeatTimer()
 {
 	double intervalInSeconds = 1.0 / m_parentSession.GetHeartbeatFrequency();
 	m_heartbeatTimer.SetTimer( intervalInSeconds );
+}
+
+bool NetworkConnection::IsMe() const
+{
+	return ( *m_parentSession.GetMyConnection() == *this );
+}
+
+bool NetworkConnection::IsHost() const
+{
+	return ( *m_parentSession.GetHostConnection() == *this );
+}
+
+bool NetworkConnection::IsClient() const
+{
+	return m_parentSession.IsRegistered( this );
 }
 
 uint16_t NetworkConnection::GetNextAckToSend()

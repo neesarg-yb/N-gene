@@ -8,18 +8,49 @@
 #include "Engine/NetworkSession/NetworkMessageChannel.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 
+
+//---------------------------------
+// Forward Declarations
+// 
 class  NetworkSession;
 struct NetworkPacketHeader;
 
 typedef std::vector< NetworkMessage* > NetworkMessages;
 
-struct NetworkConnectionInfo
+
+//---------------------------------
+// Enums
+// 
+enum eNetworkConnectionState
 {
-	NetworkAddress	address;
-	uint8_t			sessionIndex;
-	char			networkID[ MAX_NETWORK_ID_LENGTH + 1 ];		// Like a Steam or PSN ID
+	NET_CONNECTION_DISCONNECTED = 0,
+	NET_CONNECTION_CONNECTED,
+	NET_CONNECTION_READY,
+	NUM_NET_CONNECTIONS
 };
 
+
+//---------------------------------
+// Structures
+// 
+struct NetworkConnectionInfo
+{
+public:
+	NetworkAddress	address;												// My address..
+	uint8_t			indexInSession;											// Index in the session
+	char			networkID[ MAX_NETWORK_ID_LENGTH + 1 ] = "INVALID";		// Like a Steam or PSN ID
+
+public:
+	NetworkConnectionInfo( int index, std::string const &desiredNetworkID, NetworkAddress const &addr );
+
+public:
+	bool operator == ( NetworkConnectionInfo const &b ) const;
+};
+
+
+//---------------------------------
+// Classes
+// 
 class NetworkConnection
 {
 public:
@@ -29,10 +60,9 @@ public:
 
 public:
 	// Connection Info.
-	NetworkAddress		 m_address;
-	NetworkSession		&m_parentSession;
-	std::string const	 m_networkID					= "INVALID";				// length is limited by MAX_NETWORK_ID_LENGTH, in construction
-	int					 m_indexInSession;
+	NetworkSession			&m_parentSession;
+	NetworkConnectionInfo	 m_info;
+	eNetworkConnectionState	 m_state;
 
 public:
 	// Packet Tracking
@@ -71,6 +101,13 @@ private:
 	Stopwatch			 m_confirmReliablesTimer;
 
 public:
+	bool operator == ( NetworkConnection const &b ) const;
+
+public:
+	inline NetworkAddress	GetAddress()		const { return m_info.address; }
+	inline uint8_t			GetIndexInSession()	const { return m_info.indexInSession; }
+	inline std::string		GetNetworkID()		const { return m_info.networkID; }
+
 	// Receiving End
 	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );		// It is there for tracking the messages & packets, it doesn't process em!
 	void	ProcessReceivedMessage( NetworkMessage &receivedMessage, NetworkSender sender );
@@ -80,7 +117,7 @@ public:
 	void	Send( NetworkMessage &msg );				// Queues the messages to send
 	void	FlushMessages();							// Sends the queued messages
 
-	// Current State
+	// Current State - Messages
 	uint16_t GetLowestReliableIDToConfirm() const;
 	uint16_t GetHighestConfirmedReliableID() const;
 	bool	 HasReceivedReliableID( uint16_t reliableID ) const;
@@ -89,6 +126,16 @@ public:
 	uint8_t	GetCurrentSendFrequency() const;			// Minimum of ( My sendFrequency, Parent's sendFrequency )
 	void	SetSendFrequencyTo( uint8_t frequencyHz );	// Sets it to the min( passedFrequency, parentsFrequency )
 	void	UpdateHeartbeatTimer();						// Sets the heartbeat timer according to parentSession
+
+	// Connection Identification
+	bool	IsMe()		const;							// If this is the local connection
+	bool	IsHost()	const;							// If this connection is the host
+	bool	IsClient()	const;							// If this connection is a client
+
+	// Current State - Connection
+	inline bool		IsConnected()	 const { return (m_state == NET_CONNECTION_CONNECTED) || (m_state == NET_CONNECTION_READY); }
+	inline bool		IsDisconnected() const { return  m_state == NET_CONNECTION_DISCONNECTED; }
+	inline bool		IsReady()		 const { return  m_state == NET_CONNECTION_READY; }
 
 private:
 	// Tracking Messages-or-Packet

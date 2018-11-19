@@ -155,7 +155,7 @@ void NetworkSession::Render() const
 		std::string idxStr = std::to_string( i );
 
 		// address
-		std::string connectionAddrStr = m_boundConnections[i]->m_address.AddressToString();
+		std::string connectionAddrStr = m_boundConnections[i]->GetAddress().AddressToString();
 
 		// simsndrt(hz)
 		std::string simsndrt = Stringf( "%dhz", m_boundConnections[i]->GetCurrentSendFrequency() );
@@ -277,7 +277,7 @@ void NetworkSession::SetError( eNetworkSessionError error, char const *str )
 void NetworkSession::ClearError()
 {
 	m_errorCode		= NET_SESSION_OK;
-	m_errorString	= "OK";
+	m_errorString	= "";
 }
 
 eNetworkSessionError NetworkSession::GetLastError( std::string *outStr )
@@ -296,7 +296,7 @@ void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 	packetToSend.m_header.connectionIndex = GetMyConnectionIndex();
 	packetToSend.WriteHeader( packetToSend.m_header );
 
-	m_mySocket->SendTo( m_boundConnections[idx]->m_address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
+	m_mySocket->SendTo( m_boundConnections[idx]->GetAddress(), packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
 }
 
 void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address )
@@ -317,7 +317,7 @@ NetworkConnection* NetworkSession::CreateConnection( NetworkConnectionInfo const
 	NetworkConnection *newConnection = new NetworkConnection( info, *this );
 	m_allConnections.push_back( newConnection );
 
-	uint8_t indexInSession = (uint8_t)newConnection->m_indexInSession;
+	uint8_t indexInSession = (uint8_t)newConnection->GetIndexInSession();
 	if( indexInSession != INVALID_INDEX_IN_SESSION )
 		BindConnection( indexInSession, newConnection );
 
@@ -384,7 +384,7 @@ uint8_t NetworkSession::GetMyConnectionIndex() const
 			continue;
 
 		// If connection found..
-		if( m_boundConnections[i]->m_address == m_mySocket->m_address )
+		if( m_boundConnections[i]->GetAddress() == m_mySocket->m_address )
 		{
 			// If it is under max indices allowed
 			if( i < 0xff )
@@ -397,19 +397,23 @@ uint8_t NetworkSession::GetMyConnectionIndex() const
 	return idx;
 }
 
-NetworkConnection* NetworkSession::GetMyConnection()
-{
-	uint idx = GetMyConnectionIndex();
-
-	return m_boundConnections[ idx ];
-}
-
 NetworkConnection* NetworkSession::GetConnection( int idx )
 {
 	if( idx < 0 || idx >= MAX_SESSION_CONNECTIONS )
 		return nullptr;
 	else
 		return m_boundConnections[idx];
+}
+
+bool NetworkSession::IsRegistered( NetworkConnection const *connection ) const
+{
+	for each (NetworkConnection const *client in m_allConnections)
+	{
+		if( *connection == *client )
+			return true;
+	}
+
+	return false;
 }
 
 void NetworkSession::RegisterNetworkMessage( uint8_t index, char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netmessageOptionsFlag )
