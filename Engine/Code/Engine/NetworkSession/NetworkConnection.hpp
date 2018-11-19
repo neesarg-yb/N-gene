@@ -62,7 +62,7 @@ public:
 	// Connection Info.
 	NetworkSession			&m_parentSession;
 	NetworkConnectionInfo	 m_info;
-	eNetworkConnectionState	 m_state;
+	eNetworkConnectionState	 m_state					= NET_CONNECTION_DISCONNECTED;
 
 public:
 	// Packet Tracking

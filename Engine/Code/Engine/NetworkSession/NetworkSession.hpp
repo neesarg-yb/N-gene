@@ -105,7 +105,7 @@ public:
 	NetworkMessageDefinition*	 m_registeredMessages[ 256 ]	= { nullptr };	// Array NetworkMessageDefinition: index is uint8 => [0, 0xff]
 
 	// My State
-	eNetworkSessionState		 m_state;
+	eNetworkSessionState		 m_state		= NET_SESSION_DISCONNECTED;
 	eNetworkSessionError		 m_errorCode	= NET_SESSION_OK;
 	std::string					 m_errorString	= "";
 
@@ -160,9 +160,10 @@ public:
 
 private:
 	// Network Connections
-	NetworkConnection*		CreateConnection			( NetworkConnectionInfo const &info );
-	void					DestroyConnection			( NetworkConnection *connection );
-	void					BindConnection				( uint8_t idx, NetworkConnection *connection );
+	NetworkConnection*		CreateConnection	( NetworkConnectionInfo const &info );
+	void					DestroyConnection	( NetworkConnection *connection );
+	void					BindConnection		( uint8_t idx, NetworkConnection *connection );
+	void					DeleteConnection	( NetworkConnection* &connection );	// Removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections; deletes it and sets the passed connection to nullptr
 
 public:
 	NetworkConnection*		GetConnection( int idx );
