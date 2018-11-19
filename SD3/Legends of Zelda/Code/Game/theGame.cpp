@@ -456,14 +456,6 @@ void theGame::Startup()
 	m_session = new NetworkSession( g_theRenderer );
 	RegisterGameMessages();
 	m_unreliableMsgTimer.SetTimer( 0.030 );
-
-	// For now we'll just shortcut to being a HOST
-	// "bound" state
-	// This creates the socket(s) we can communicate on..
-
-// 	bool bindSuccess = m_session->BindPort( GAME_PORT, 1U );
-// 	ConsolePrintf( RGBA_KHAKI_COLOR, "Network Session Bind Succes = %d; Address = %s", (int)bindSuccess, m_session->m_mySocket->m_address.AddressToString().c_str() );
-// 	m_session->m_mySocket->EnableNonBlocking();
 }
 
 void theGame::BeginFrame()
@@ -472,7 +464,8 @@ void theGame::BeginFrame()
 	PROFILE_SCOPE_FUNCTION();
 
 	// Network Session
-	m_session->ProcessIncoming();
+	if( m_session->IsRunning() )
+		m_session->ProcessIncoming();
 
 	m_currentGameState->BeginFrame();
 }
@@ -517,7 +510,8 @@ void theGame::EndFrame()
 	}
 
 	// Network Session
-	m_session->ProcessOutgoing();
+	if( m_session->IsRunning() )
+		m_session->ProcessOutgoing();
 }
 
 void theGame::Update() 
@@ -585,7 +579,8 @@ void theGame::Render() const
 	g_theRenderer->DrawAABB( m_default_screen_bounds, overlayBoxColor );
 
 	// Network Session UI
-	m_session->Render();
+	if( m_session->IsRunning() )
+		m_session->Render();
 }
 
 bool theGame::SetCurrentGameState( std::string const &gsName )
