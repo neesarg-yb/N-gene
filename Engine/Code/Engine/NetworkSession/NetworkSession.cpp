@@ -93,6 +93,11 @@ NetworkSession::~NetworkSession()
 	m_mySocket = nullptr;
 }
 
+void NetworkSession::Update()
+{
+
+}
+
 void NetworkSession::Render() const
 {
 	m_theRenderer->BindCamera( m_uiCamera );
@@ -136,7 +141,7 @@ void NetworkSession::Render() const
 	// Title Column of Table: All Connections
 	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
 	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
+	std::string	columnTitleStr		= Stringf( "%-4s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -147,9 +152,14 @@ void NetworkSession::Render() const
 		if( m_boundConnections[i] == nullptr )
 			continue;
 
-		// To indicate which connection is mine!
-		int			myIndex		= GetMyConnectionIndex();
-		std::string isLocalStr	= (i == myIndex) ? "L" : " ";
+		// To indicate if connection is "host", "local", etc..
+		bool isLocal = m_boundConnections[i]->IsMe();
+		bool isHost  = m_boundConnections[i]->IsHost();
+		std::string connectionLebelStr = "";
+		if( isHost )
+			connectionLebelStr += "H ";
+		if( isLocal )
+			connectionLebelStr += "L ";
 		
 		// idx
 		std::string idxStr = std::to_string( i );
@@ -194,7 +204,7 @@ void NetworkSession::Render() const
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", isLocalStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-4s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", connectionLebelStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
 }
@@ -217,7 +227,10 @@ bool NetworkSession::BindPort( uint16_t port, uint16_t range )
 
 	// return true on success
 	if( success )
+	{
+		m_mySocket->EnableNonBlocking();
 		return true;
+	}
 
 	// on failure, return after deleting the socket
 	delete m_mySocket;
@@ -252,9 +265,35 @@ void NetworkSession::ProcessOutgoing()
 
 void NetworkSession::Host( char const *myID, uint16_t port, uint16_t portRange /*= DEFAULT_PORT_RANGE */ )
 {
-	UNUSED( myID );
-	UNUSED( port );
-	UNUSED( portRange );
+	if( IsRunning() )
+	{
+		ConsolePrintf( RGBA_RED_COLOR, "Can't host.. the session is already running!" );
+		return;
+	}
+
+	bool portBound = BindPort( port, portRange );
+	if( portBound == false )
+	{
+		SetError( NET_SESSION_ERROR_INTERNAL, "Can't bind the port..!" );
+		return;
+	}
+
+	NetworkConnection *myConnectionAsHost = new NetworkConnection( 0, m_mySocket->m_address, myID, *this );
+	DeleteConnection( m_myConnection );	// Make sure the old my connection is deleted
+
+	// Convenience pointers
+	m_myConnection		= myConnectionAsHost;
+	m_hostConnection	= myConnectionAsHost;
+
+	// Connection lists
+	m_allConnections.push_back( myConnectionAsHost );
+	m_boundConnections[ 0 ] = myConnectionAsHost;
+
+	// Connection: ready
+	myConnectionAsHost->m_state	= NET_CONNECTION_READY;
+	
+	// Session: ready
+	m_state = NET_SESSION_READY;
 }
 
 void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
@@ -371,6 +410,52 @@ void NetworkSession::BindConnection( uint8_t idx, NetworkConnection *connection 
 {
 	UNUSED( idx );
 	UNUSED( connection );
+}
+
+void NetworkSession::DeleteConnection( NetworkConnection* &connection )
+{
+	// Reset the pointers to nullptr
+	if( m_myConnection == connection )
+		m_myConnection = nullptr;
+
+	if( m_hostConnection == connection )
+	{
+		m_hostConnection = nullptr;
+		m_state = NET_SESSION_DISCONNECTED;
+	}
+
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] == connection )
+			m_boundConnections[i] = nullptr;
+	}
+
+	// Delete the connection
+	bool isDeleted = false;
+	for( uint i = 0; i < m_allConnections.size(); i++ )
+	{
+		if( m_allConnections[i] != connection )
+			continue;
+
+		std::swap( m_allConnections[i], m_allConnections.back() );
+		delete m_allConnections.back();
+		m_allConnections.back() = nullptr;
+
+		m_allConnections.pop_back();
+		
+		isDeleted = true;
+		break;
+	}
+
+	// If connection was not registered, delete the provided connection at least
+	if( isDeleted == false )
+	{
+		if( connection != nullptr )
+		{
+			delete connection;
+			connection = nullptr;
+		}
+	}
 }
 
 uint8_t NetworkSession::GetMyConnectionIndex() const
