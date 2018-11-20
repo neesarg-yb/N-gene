@@ -13,7 +13,7 @@
 
 enum eNetworkGameMessages : uint8_t
 {
-	NET_MESSAGE_TEST_GAME_MESSAGE = NUM_NET_MESSAGES,	// So we resume from the count where we left off in core network messages
+	NET_MESSAGE_TEST_GAME_MESSAGE = NUM_CORE_NET_SESSION_MESSAGES,	// So we resume from the count where we left off in core network messages
 	// ...
 
 	NET_MESSAGE_RELIABLE_TEST	= 129,
