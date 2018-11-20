@@ -38,7 +38,7 @@ const   float	   g_aspectRatio = 1.77f;
 
 // NETWORK SESSION
 #define MAX_SESSION_CONNECTIONS							(0xff)
-#define MAX_TRACKED_PACKETS								(32)
+#define MAX_TRACKED_PACKETS								(128)
 #define MAX_RELIABLES_PER_PACKET						(32)
 #define MAX_NETWORK_MESSAGE_CHANNELS					(8)
 
@@ -49,7 +49,7 @@ const   float	   g_aspectRatio = 1.77f;
 #define NETWORK_RELIABLE_MESSAGE_HEADER_SIZE			(3)
 #define NETWORK_RELIABLE_INORDER_MESSAGE_HEADER_SIZE	(5)
 
-constexpr uint16_t	RELIABLE_MESSAGES_WINDOW	= 8;
+constexpr uint16_t	RELIABLE_MESSAGES_WINDOW	= 64;
 constexpr uint		MAX_NETWORK_ID_LENGTH		= 16;
 
 

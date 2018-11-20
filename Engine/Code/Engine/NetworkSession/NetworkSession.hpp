@@ -150,20 +150,28 @@ public:
 	void Join( char const *myID, NetworkAddress const &hostAddress );
 	void Disconnect();
 
+	bool ProcessJoinRequest( char *networkID, NetworkAddress const &reqFromAddress );
+
 	// Session Errors
 	void					SetError( eNetworkSessionError error, char const *str );
 	void					ClearError();
 	eNetworkSessionError	GetLastError( std::string *outStr );
 
 	// Current State
-	inline bool				IsRunning() const { return  m_state != NET_SESSION_DISCONNECTED; }
+	inline bool				IsRunning()		const { return m_state != NET_SESSION_DISCONNECTED; }
+	inline bool				IsHosting()		const { return m_myConnection == m_hostConnection; }
+	inline bool				IsListening()	const { return m_state == NET_SESSION_READY; }
+	bool					IsLobbyFull()	const;
 
 private:
 	// Network Connections
 	NetworkConnection*		CreateConnection	( NetworkConnectionInfo const &info );
 	void					DestroyConnection	( NetworkConnection *connection );
 	void					BindConnection		( uint8_t idx, NetworkConnection *connection );
-	void					DeleteConnection	( NetworkConnection* &connection );	// Removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections; deletes it and sets the passed connection to nullptr
+	
+	void					DeleteConnection		( NetworkConnection* &connection );	// Removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections; deletes it and sets the passed connection to nullptr
+	bool					ConnectionAlreadyExists	( NetworkAddress const &address );
+	int						GetIndexForNewConnection() const;							// Returns -1, if no vacant slots found
 
 public:
 	NetworkConnection*		GetConnection( int idx );
