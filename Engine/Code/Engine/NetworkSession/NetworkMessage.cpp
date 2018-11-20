@@ -58,8 +58,14 @@ bool NetworkMessageDefinition::IsInOrder() const
 }
 
 // CLASS - NETWORK MESSAGE
-NetworkMessage::NetworkMessage( const char *name )
-	: BytePacker( PACKET_MTU - NETWORK_PACKET_HEADER_SIZE - 2U - NETWORK_RELIABLE_MESSAGE_HEADER_SIZE , LITTLE_ENDIAN )
+NetworkMessage::NetworkMessage( eEndianness endianness /*= LITTLE_ENDIAN */ )
+	: BytePacker( endianness )
+{
+
+}
+
+NetworkMessage::NetworkMessage( const char *name, eEndianness endianness /* = LITTLE_ENDIAN */ )
+	: BytePacker( PACKET_MTU - NETWORK_PACKET_HEADER_SIZE - 2U - NETWORK_RELIABLE_MESSAGE_HEADER_SIZE, endianness )
 	, m_name( name )
 {
 

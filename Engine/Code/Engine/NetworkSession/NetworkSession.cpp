@@ -47,6 +47,58 @@ bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
 	}
 }
 
+bool OnJoinRequest( NetworkMessage const &msg, NetworkSender &from ) 
+{
+	// Fetch the networkID string
+	char joinerNetworkID[ MAX_NETWORK_ID_LENGTH + 1 ] = "";
+	msg.ReadString( joinerNetworkID, MAX_NETWORK_ID_LENGTH );
+	joinerNetworkID[ MAX_NETWORK_ID_LENGTH ] = '\0';
+
+	return from.session.ProcessJoinRequest( joinerNetworkID, from.address );
+}
+
+bool OnJoinDeny( NetworkMessage const &msg, NetworkSender &from ) 
+{
+	UNUSED( msg );
+	UNUSED( from );
+
+	return false;
+}
+
+bool OnAccept( NetworkMessage const &msg, NetworkSender &from ) 
+{
+	UNUSED( msg );
+	UNUSED( from );
+
+	return false;
+}
+
+bool OnNewConnection( NetworkMessage const &msg, NetworkSender &from ) 
+{
+	UNUSED( msg );
+	UNUSED( from );
+
+	return false;
+}
+
+bool OnJoinFinished( NetworkMessage const &msg, NetworkSender &from ) 
+{
+	UNUSED( msg );
+	UNUSED( from );
+
+	return false;
+}
+
+bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from ) 
+{
+	eNetworkConnectionState updatedState = NET_CONNECTION_DISCONNECTED;
+	msg.ReadBytes( &updatedState, sizeof(eNetworkConnectionState) );
+
+	from.connection->m_state = updatedState;
+	
+	return true;
+}
+
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 	: m_theRenderer( currentRenderer )
 {
@@ -95,7 +147,23 @@ NetworkSession::~NetworkSession()
 
 void NetworkSession::Update()
 {
+	ProcessIncoming();
 
+	switch (m_state)
+	{
+	case NET_SESSION_DISCONNECTED:
+		break;
+	case NET_SESSION_BOUND:
+		break;
+	case NET_SESSION_CONNECTING:
+		break;
+	case NET_SESSION_JOINING:
+		break;
+	case NET_SESSION_READY:
+		break;
+	default:
+		break;
+	}
 }
 
 void NetworkSession::Render() const
@@ -240,9 +308,17 @@ bool NetworkSession::BindPort( uint16_t port, uint16_t range )
 
 void NetworkSession::RegisterCoreMessages()
 {
-	RegisterNetworkMessage( NET_MESSAGE_PING,		"ping",		 OnPing,		NET_MESSAGE_OPTION_CONNECTIONLESS );
-	RegisterNetworkMessage( NET_MESSAGE_PONG,		"pong",		 OnPong,		NET_MESSAGE_OPTION_CONNECTIONLESS );
-	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,	"heartbeat", OnHeartbeat,	NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	RegisterNetworkMessage( NET_MESSAGE_PING,						"ping",					OnPing,				NET_MESSAGE_OPTION_CONNECTIONLESS );
+	RegisterNetworkMessage( NET_MESSAGE_PONG,						"pong",					OnPong,				NET_MESSAGE_OPTION_CONNECTIONLESS );
+	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,					"heartbeat",			OnHeartbeat,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	
+	// Connection Management
+	RegisterNetworkMessage( NET_MESSAGE_JOIN_REQUEST,				"join_request",			OnJoinRequest,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	RegisterNetworkMessage( NET_MESSAGE_JOIN_DENY,					"join_deny",			OnJoinDeny,			NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	RegisterNetworkMessage( NET_MESSAGE_JOIN_ACCEPT,				"join_accept",			OnAccept,			NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
+	RegisterNetworkMessage( NET_MESSAGE_NEW_CONNECTION,				"new_connection",		OnNewConnection,	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
+	RegisterNetworkMessage( NET_MESSAGE_JOIN_FINISHED,				"join_finished",		OnJoinFinished,		NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
+	RegisterNetworkMessage( NET_MESSAGE_UPDATE_CONNECTION_STATE,	"update_connection",	OnUpdateConnection,	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 }
 
 void NetworkSession::ProcessIncoming()
@@ -298,13 +374,101 @@ void NetworkSession::Host( char const *myID, uint16_t port, uint16_t portRange /
 
 void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 {
-	UNUSED( myID );
-	UNUSED( hostAddress );
+	bool portBound = BindPort( hostAddress.port, MAX_SESSION_CONNECTIONS );
+	if( portBound == false )
+	{
+		SetError( NET_SESSION_ERROR_INTERNAL, "Can't bind the port..!" );
+		return;
+	}
+
+	// Make a connection for the host
+	NetworkConnection *host = new NetworkConnection( 0, hostAddress, "host", *this );
+	
+	DeleteConnection( m_hostConnection );
+	m_hostConnection = host;
+
+	m_allConnections.push_back( host );
+	m_boundConnections[0] = host;
+	
+	host->m_state = NET_CONNECTION_CONNECTED;
+
+	// Make a connection for yourself
+	NetworkConnection *myConnection = new NetworkConnection( INVALID_INDEX_IN_SESSION, m_mySocket->m_address, myID, *this );
+	
+	DeleteConnection( m_myConnection );
+	m_myConnection = myConnection;
+
+	m_state = NET_SESSION_CONNECTING;
 }
 
 void NetworkSession::Disconnect()
 {
 
+}
+
+bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &reqFromAddress )
+{
+	eNetworkSessionError joinRequestError = NET_SESSION_OK;
+
+	// Error: I'm not a host
+	if( IsHosting() == false )
+	{
+		joinRequestError = NET_SESSION_ERROR_JOIN_DENIED_NOT_HOST;
+
+		NetworkMessage denyMessage( "join_deny" );
+		denyMessage.WriteBytes( sizeof(eNetworkSessionError), &joinRequestError );
+
+		SendDirectMessageTo( denyMessage, reqFromAddress );
+		return false;
+	}
+
+	// I'm a host!
+	// Error: I'm not listening
+	if( IsListening() == false )
+	{
+		joinRequestError = NET_SESSION_ERROR_JOIN_DENIED_CLOSED;
+
+		NetworkMessage denyMessage( "join_deny" );
+		denyMessage.WriteBytes( sizeof(eNetworkSessionError), &joinRequestError );
+
+		SendDirectMessageTo( denyMessage, reqFromAddress );
+		return false;
+	}
+
+	// I'm a host & listening
+	// Error: Lobby is full
+	if( IsLobbyFull() == true )
+	{
+		joinRequestError = NET_SESSION_ERROR_JOIN_DENIED_FULL;
+
+		NetworkMessage denyMessage( "join_deny" );
+		denyMessage.WriteBytes( sizeof(eNetworkSessionError), &joinRequestError );
+
+		SendDirectMessageTo( denyMessage, reqFromAddress );
+		return false;
+	}
+
+	if( ConnectionAlreadyExists( reqFromAddress ) == true )
+		return true;
+
+	// Bind as new connection
+	int idx = GetIndexForNewConnection();
+	NetworkConnection *newConnection = new NetworkConnection( idx, reqFromAddress, networkID, *this );
+	
+	m_allConnections.push_back( newConnection );
+	m_boundConnections[ idx ] = newConnection;
+
+	// Send: JOIN_ACCEPT
+	NetworkMessage acceptMessage( "join_accept" );
+	acceptMessage.WriteString( m_hostConnection->GetNetworkID().c_str() );
+	acceptMessage.WriteBytes( sizeof(int), &idx );
+	newConnection->Send( acceptMessage );
+
+	// Send: JOIN_FINISHED
+	NetworkMessage joinFinishedMessage( "join_finished" );
+	newConnection->Send( joinFinishedMessage );
+
+	return true;
 }
 
 void NetworkSession::SetError( eNetworkSessionError error, char const *str )
@@ -327,6 +491,17 @@ eNetworkSessionError NetworkSession::GetLastError( std::string *outStr )
 	ClearError();
 	
 	return errorCpy;
+}
+
+bool NetworkSession::IsLobbyFull() const
+{
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] == nullptr )
+			return false;
+	}
+
+	return true;
 }
 
 void NetworkSession::SendPacket( NetworkPacket &packetToSend )
@@ -458,6 +633,34 @@ void NetworkSession::DeleteConnection( NetworkConnection* &connection )
 	}
 }
 
+bool NetworkSession::ConnectionAlreadyExists( NetworkAddress const &address )
+{
+	if( m_myConnection->GetAddress() == address )
+		return true;
+
+	if( m_hostConnection->GetAddress() == address )
+		return true;
+
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i]->GetAddress() == address )
+			return true;
+	}
+
+	return false;
+}
+
+int NetworkSession::GetIndexForNewConnection() const
+{
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] == nullptr )
+			return i;
+	}
+
+	return -1;
+}
+
 uint8_t NetworkSession::GetMyConnectionIndex() const
 {
 	// defaults to INVALID index
@@ -516,7 +719,7 @@ void NetworkSession::RegisterNetworkMessage( uint8_t index, char const *messageN
 
 bool NetworkSession::RegisterNetworkMessage( char const *messageName, networkMessage_cb cb, eNetworkMessageOptions netMessageOptionsFlag )
 {
-	for( uint8_t index = NUM_NET_MESSAGES; index <= 0xff; index++ )
+	for( uint8_t index = NUM_CORE_NET_SESSION_MESSAGES; index <= 0xff; index++ )
 	{
 		if( m_registeredMessages[ index ] != nullptr )
 			continue;
