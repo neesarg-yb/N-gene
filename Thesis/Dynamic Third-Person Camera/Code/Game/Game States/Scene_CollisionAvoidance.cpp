@@ -7,6 +7,7 @@
 #include "Game/Potential Engine/CB_Follow.hpp"
 #include "Game/Potential Engine/CC_LineOfSight.hpp"
 #include "Game/Potential Engine/CC_ConeRaycast.hpp"
+#include "Game/Potential Engine/CC_ModifiedConeRaycast.hpp"
 #include "Game/Potential Engine/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
@@ -91,16 +92,20 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
 
 	// Camera Constrains
-	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
-	CC_ConeRaycast*		conRaycastCC		= new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 1 );
-	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 3 );
+	CC_LineOfSight*			losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
+	CC_ConeRaycast*			conRaycastCC		= new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 2 );
+	CC_ModifiedConeRaycast*	modConRaycastCC		= new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1 );
+	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 4 );
 	m_cameraManager->RegisterConstrain( losConstarin );
 	m_cameraManager->RegisterConstrain( conRaycastCC );
+	m_cameraManager->RegisterConstrain( modConRaycastCC );
 	m_cameraManager->RegisterConstrain( collisionConstrain );
-	followBehaviour->m_constrains.SetOrRemoveTags( "ConeRaycast" );
+
+//	followBehaviour->m_constrains.SetOrRemoveTags( "ConeRaycast" );
+	followBehaviour->m_constrains.SetOrRemoveTags( "M_ConeRaycast" );
 	TODO( "CameraCollision contrain is not working as expected when I enabled culling to none!" );
-	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
-	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
+//	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
+//	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );

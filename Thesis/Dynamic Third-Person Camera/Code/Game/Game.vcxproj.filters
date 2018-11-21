@@ -136,6 +136,9 @@
     <ClCompile Include="Potential Engine\CMC_ProportionalController.cpp">
       <Filter>PotentialEngine\MotionControllers</Filter>
     </ClCompile>
+    <ClCompile Include="Potential Engine\CC_ModifiedConeRaycast.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -233,6 +236,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CMC_ProportionalController.hpp">
       <Filter>PotentialEngine\MotionControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\CC_ModifiedConeRaycast.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

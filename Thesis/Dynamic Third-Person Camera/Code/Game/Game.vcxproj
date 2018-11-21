@@ -304,6 +304,7 @@
     <ClCompile Include="Potential Engine\CC_CameraCollision.cpp" />
     <ClCompile Include="Potential Engine\CC_ConeRaycast.cpp" />
     <ClCompile Include="Potential Engine\CC_LineOfSight.cpp" />
+    <ClCompile Include="Potential Engine\CC_ModifiedConeRaycast.cpp" />
     <ClCompile Include="Potential Engine\CMC_ProportionalController.cpp" />
     <ClCompile Include="Potential Engine\DebugCamera.cpp" />
     <ClCompile Include="Potential Engine\GameObject.cpp" />
@@ -338,6 +339,7 @@
     <ClInclude Include="Potential Engine\CC_CameraCollision.hpp" />
     <ClInclude Include="Potential Engine\CC_ConeRaycast.hpp" />
     <ClInclude Include="Potential Engine\CC_LineOfSight.hpp" />
+    <ClInclude Include="Potential Engine\CC_ModifiedConeRaycast.hpp" />
     <ClInclude Include="Potential Engine\CMC_ProportionalController.hpp" />
     <ClInclude Include="Potential Engine\DebugCamera.hpp" />
     <ClInclude Include="Potential Engine\GameObject.hpp" />
