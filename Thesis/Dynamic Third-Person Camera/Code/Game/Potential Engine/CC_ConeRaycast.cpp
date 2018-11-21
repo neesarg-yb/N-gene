@@ -2,7 +2,6 @@
 #include "CC_ConeRaycast.hpp"
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
-#include "Engine/Core/RaycastResult.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CameraContext.hpp"
@@ -15,18 +14,6 @@ enum eWeightedRaycastDir : int
 	RIGHT_RAYS,
 	MIDDLE_RAYS,
 	NUM_RAY_DIRS
-};
-
-struct WeightedRaycasts_CR
-{
-public:
-	float weight = 0.f;
-	RaycastResult ray;
-
-public:
-	WeightedRaycasts_CR( RaycastResult const &raycastResult, float raycastWeight )
-		: ray( raycastResult )
-		, weight( raycastWeight ) { }
 };
 
 struct PolarCoordinate

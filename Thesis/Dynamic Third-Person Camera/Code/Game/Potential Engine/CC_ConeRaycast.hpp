@@ -1,9 +1,28 @@
 #pragma once
 #include <functional>
+#include "Engine/Core/RaycastResult.hpp"
 #include "Game/Potential Engine/CameraConstrain.hpp"
 
-struct WeightedRaycasts_CR;
 
+//---------------------------------
+// Structures
+// 
+struct WeightedRaycasts_CR
+{
+public:
+	float weight = 0.f;
+	RaycastResult ray;
+
+public:
+	WeightedRaycasts_CR( RaycastResult const &raycastResult, float raycastWeight )
+		: ray( raycastResult )
+		, weight( raycastWeight ) { }
+};
+
+
+//---------------------------------
+// Classes
+// 
 class CC_ConeRaycast : public CameraConstrain
 {
 public:
