@@ -28,7 +28,14 @@ enum eNetworkCoreMessages : uint8_t
 	NET_MESSAGE_PONG,
 	NET_MESSAGE_HEARTBEAT,
 
-	NUM_NET_MESSAGES
+	NET_MESSAGE_JOIN_REQUEST,				// unreliable
+	NET_MESSAGE_JOIN_DENY,					// unreliable
+	NET_MESSAGE_JOIN_ACCEPT,				// reliable in-order
+	NET_MESSAGE_NEW_CONNECTION,				// reliable in-order
+	NET_MESSAGE_JOIN_FINISHED,				// reliable in-order
+	NET_MESSAGE_UPDATE_CONNECTION_STATE,	// reliable in-order
+
+	NUM_CORE_NET_SESSION_MESSAGES
 };
 
 struct NetworkSender
@@ -77,8 +84,8 @@ public:
 class NetworkMessage : public BytePacker
 {
 public:
-	 NetworkMessage() { }
-	 NetworkMessage( const char *name );
+	 NetworkMessage( eEndianness endianness = LITTLE_ENDIAN );
+	 NetworkMessage( const char *name, eEndianness endianness = LITTLE_ENDIAN );
 	~NetworkMessage();
 
 public:
