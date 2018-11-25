@@ -66,7 +66,7 @@ private:
 	void GeneratePointsOnSphere( std::vector< Vector3 > &outPoints, Vector3 referencePoint, float maxRotationDegrees, int numCircularLayers, std::vector< int > const &numPointsInLayer ) const;
 
 	// Generate rays for the raycast
-	void GenerateWeightedRays( std::vector< WeightedRay_MCR > &outWeightedRays, Vector3 const &cameraPosition, Vector3 const &playerPosition, std::vector< Vector3 > const &endPointsRelativeToPlayer ) const;
+	void GenerateWeightedRays( std::vector< WeightedRay_MCR > &outWeightedRays, Vector3 maxWeightDirection, Vector3 const &playerPosition, std::vector< Vector3 > const &endPointsRelativeToPlayer ) const;
 
 	// Do the Raycasts
 	void GetRaycastResults( std::vector< RaycastResultWithWeight_MCR > &outRaycastResults, std::vector< WeightedRay_MCR > const &weightedRays ) const;

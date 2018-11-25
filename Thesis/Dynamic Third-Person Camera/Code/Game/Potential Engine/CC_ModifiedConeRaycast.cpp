@@ -10,7 +10,6 @@
 CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority )
 	: CameraConstrain( name, manager, priority )
 {
-
 	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
 }
 
@@ -32,7 +31,8 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 	// Prepare Rays and Weights from those points, for Raycast
 	std::vector< WeightedRay_MCR > weightedRays;
-	GenerateWeightedRays( weightedRays, cameraPosition, playerPosition, targetPointsOnSphere );
+	Vector3 maxWeightDirection = cameraPosRelativeToPlayer.GetNormalized();
+	GenerateWeightedRays( weightedRays, maxWeightDirection, playerPosition, targetPointsOnSphere );
 
 	// Do Raycasts!
 	std::vector< RaycastResultWithWeight_MCR > raycastResults;
@@ -51,12 +51,14 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 	// DEBUG RENDER
 	for each (Vector3 debugPoint in targetPointsOnSphere)
+	{
 		DebugRenderSphere( 0.f, debugPoint + playerPosition, 0.1f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_USE_DEPTH );
+	}
 
 	Matrix44 camModelMat = g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
 	Vector3	 cameraUp	 = camModelMat.GetJColumn();
 	Vector3	 cameraRight = camModelMat.GetIColumn();
-	DebugRenderTag( 0.f, 0.35f, cameraPosition, cameraUp, cameraRight, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", reductionInRadius) );
+ 	DebugRenderTag( 0.f, 0.35f, cameraPosition, cameraUp, cameraRight, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", reductionInRadius) );
 }
 
 float CC_ModifiedConeRaycast::WeightCurve( float x, float maxHeight, float width ) const
@@ -81,7 +83,7 @@ void CC_ModifiedConeRaycast::GeneratePointsOnSphere( std::vector<Vector3> &outPo
 	for( int i = 0; i < numCircularLayers; i++ )
 	{
 		// Each layer is some degrees away from the reference point..
-		Vector3 startPolarPoint		= referencePolarPoint;		
+		Vector3 startPolarPoint = referencePolarPoint;		
 		startPolarPoint.y += rotationDegreesPerLayer * (i + 1);		// Each layer starts at different rotation
 
 		Vector3 const startPoint = PolarToCartesian( startPolarPoint.x, startPolarPoint.y, startPolarPoint.z );
@@ -103,43 +105,25 @@ void CC_ModifiedConeRaycast::GeneratePointsOnSphere( std::vector<Vector3> &outPo
 	}
 }
 
-void CC_ModifiedConeRaycast::GenerateWeightedRays( std::vector< WeightedRay_MCR > &outWeightedRays, Vector3 const &cameraPosition, Vector3 const &playerPosition, std::vector< Vector3 > const &endPointsRelativeToPlayer ) const
+void CC_ModifiedConeRaycast::GenerateWeightedRays( std::vector< WeightedRay_MCR > &outWeightedRays, Vector3 maxWeightDirection, Vector3 const &playerPosition, std::vector< Vector3 > const &endPointsRelativeToPlayer ) const
 {
-	Vector3 cameraPolar;
-	CartesianToPolar( (cameraPosition - playerPosition), cameraPolar.x, cameraPolar.y, cameraPolar.z );
+	Matrix44 debugCamMat = g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
+	maxWeightDirection.NormalizeAndGetLength();
 
-	int i = 0;
 	for each (Vector3 endPoint in endPointsRelativeToPlayer)
 	{
-		Vector3 polarCoord;
-		CartesianToPolar( endPoint, polarCoord.x, polarCoord.y, polarCoord.z );
-
-		// Get Relative degrees to calculate weights
-		float relativeRotDegrees = fmodf(polarCoord.y - cameraPolar.y, 360.f);
-		float relativeAltDegrees = fmodf(polarCoord.z - cameraPolar.z, 360.f);
-		
-		// We need it in range of [ -180.f, 180.f ]
-		relativeRotDegrees = (relativeRotDegrees < -180.f) ? (relativeRotDegrees + 360.f) : relativeRotDegrees; 
-		relativeAltDegrees = (relativeAltDegrees < -180.f) ? (relativeAltDegrees + 360.f) : relativeAltDegrees;
-
-		relativeRotDegrees = (relativeRotDegrees > +180.f) ? (relativeRotDegrees - 360.f) : relativeRotDegrees; 
-		relativeAltDegrees = (relativeAltDegrees > +180.f) ? (relativeAltDegrees - 360.f) : relativeAltDegrees;
-
-//		if( i == 20 )
-//			DebuggerPrintf( "\n(20) Rot: %f, Alt: %f", relativeRotDegrees, relativeAltDegrees );
-
-		// Calculate weight
-		float weightRotation = m_curveCB( relativeRotDegrees );
-		float weightAltitude = m_curveCB( relativeAltDegrees );
-		float finalWeight	 = weightRotation * weightAltitude;
+		float	radius		= endPoint.NormalizeAndGetLength();
+		float	finalWeight	= Vector3::DotProduct( maxWeightDirection, endPoint );
 
 		// Get Ray
-		float	rayLength	= endPoint.NormalizeAndGetLength();
+		float	rayLength	= radius;
 		Ray3	ray			= Ray3( playerPosition, endPoint );
 
 		outWeightedRays.push_back( WeightedRay_MCR( finalWeight, ray, rayLength ) );
 
-		i++;
+		// Debug the actual-reduction
+		Vector3 weightTagPos = playerPosition + (endPoint * radius);
+		DebugRenderTag( 0.f, 0.04f, weightTagPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("%.1f", finalWeight*100.f) );
 	}
 }
 
