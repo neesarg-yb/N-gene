@@ -85,7 +85,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 
 	// Camera Behaviour
 	// CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager );
-	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f/*, 75.f, 100.f*/, 1.f, 179.f, "Follow", m_cameraManager );
+	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
