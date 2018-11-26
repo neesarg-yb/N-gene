@@ -25,6 +25,16 @@ CameraState::~CameraState()
 
 }
 
+Transform CameraState::GetTransform() const
+{
+	return Transform( m_position, m_orientation, Vector3::ONE_ALL );
+}
+
+Matrix44 CameraState::GetTransformMatrix() const
+{
+	return GetTransform().GetWorldTransformMatrix();
+}
+
 CameraState CameraState::Interpolate( CameraState const &a, CameraState const &b, float fraction )
 {
 	CameraState i;
