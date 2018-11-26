@@ -15,6 +15,13 @@ WeightedTargetPoint_MCR::WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, 
 
 }
 
+WeightedRaycastResult_MCR::WeightedRaycastResult_MCR( RaycastResult const &inResult, float inWeight )
+	: result( inResult )
+	, weight( inWeight )
+{
+
+}
+
 CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority )
 	: CameraConstrain( name, manager, priority )
 {
@@ -35,17 +42,19 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	Vector3 playerPosition				= context.anchorGameObject->m_transform.GetWorldPosition();
 	Vector3 cameraPosition				= suggestedCameraState.m_position;
 	Vector3 cameraPosRelativeToPlayer	= (cameraPosition - playerPosition);
+	Matrix44 debugCamMatrix				= g_activeDebugCamera->GetCameraModelMatrix();
 
 	// Get points on sphere around the player, such that the camera is on its surface
 	std::vector< Vector3 >	targetPointsOnSphere = { cameraPosRelativeToPlayer };
 	Matrix44				camToWorldMatrix	 = suggestedCameraState.GetTransformMatrix();
 	GeneratePointsOnSphere( targetPointsOnSphere, cameraPosRelativeToPlayer, camToWorldMatrix, m_maxRotationDegrees, m_numCircularLayers, m_numRaysInLayer );
 
+	// Give weights to the target points
 	std::vector< WeightedTargetPoint_MCR > weightedTargetPoints;
 	AssignWeightToTargetPoints( weightedTargetPoints, targetPointsOnSphere, cameraPosRelativeToPlayer );
 
+
 	// DEBUG RENDER
-	Matrix44 debugCamMatrix = g_activeDebugCamera->GetCameraModelMatrix();
 	for each (WeightedTargetPoint_MCR point in weightedTargetPoints)
 	{
 		Vector3 debugPointPos = point.targetPoint + playerPosition;
@@ -56,12 +65,36 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 		DebugRenderTag( 0.f, 0.08f, debugPointPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "%.2f", point.weight ) );
 	}
 
+
+	// Perform Raycasts
+	std::vector< WeightedRaycastResult_MCR > weightedRaycastResults;
+	PerformRaycastOnTargetPoints( weightedRaycastResults, weightedTargetPoints, playerPosition );
+
+	// Polar coordinate of camera, relative to the player position
+	float cameraRadius, cameraRotation, cameraAltitude;
+	CartesianToPolar( cameraPosRelativeToPlayer, cameraRadius, cameraRotation, cameraAltitude );
+
+	// Calculate Reduction in Radius
+	float reductionInRadius = CalculateRadiusReduction( weightedRaycastResults, cameraRadius );
+
+	// Set new position!
+	cameraRadius -= reductionInRadius;
+	Vector3 newCamPos = PolarToCartesian( cameraRadius, cameraRotation, cameraAltitude ) + playerPosition;
+	suggestedCameraState.m_position = newCamPos;
+	
+
+	// DEBUG RENDER
+	DebugRenderTag( 0.f, 0.25f, newCamPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf( "-%.2f", reductionInRadius ) );
+
 	DebugRenderBasis( 0.f, suggestedCameraState.GetTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRenderBasis( 0.f, context.anchorGameObject->m_transform.GetWorldTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 }
 
 float CC_ModifiedConeRaycast::WeightCurve( float x, float maxHeight, float width ) const
 {
+	float shiftPickBy = 1;
+	x = x - shiftPickBy;
+
 	// Equation:
 	//			        width                 
 	//			y = ------------- * maxHeight 
@@ -72,9 +105,9 @@ float CC_ModifiedConeRaycast::WeightCurve( float x, float maxHeight, float width
 void CC_ModifiedConeRaycast::DebugRenderSettingsDetails()
 {
 	// Weights Curve 
-	float stepSize  = 2.5f;
+	float stepSize = 0.01f;
 	AABB2 graphBounds = AABB2( Vector2(-460.f, -385.f), 400.f, 100.f );
-	FloatRange xRange = FloatRange( -100.f, 100.f );
+	FloatRange xRange = FloatRange( 0.f, 1.f );
 	FloatRange yRange = DebugRenderXYCurve( 0.f, graphBounds, m_curveCB, xRange, stepSize, RGBA_GREEN_COLOR, RGBA_BLACK_COLOR, RGBA_GRAY_COLOR );
 
 	float centerXCoordinate		= (graphBounds.mins.x + graphBounds.maxs.x) * 0.5f;
@@ -97,8 +130,8 @@ void CC_ModifiedConeRaycast::DebugRenderSettingsDetails()
 
 void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
 {
-	float hightChangeSpeed		= 5.f;
-	float widthChangeSpeed		= 200.f;
+	float hightChangeSpeed		= 1.f;
+	float widthChangeSpeed		= 0.01f;
 	float deltaSeconds			= (float)GetMasterClock()->GetFrameDeltaSeconds();
 
 	if( g_theInput->IsKeyPressed( NUM_PAD_8 ) )
@@ -118,8 +151,8 @@ void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
 	if( g_theInput->IsKeyPressed( 'J' ) )
 		IncrementNumCircularLayers( deltaSeconds, -1.f );			// Decrement
 
-	m_curveHeight		= ClampFloat( m_curveHeight, 1.f, 500.f );
-	m_curvewidthFactor	= ClampFloat( m_curvewidthFactor, 1.f, 2000.f );
+	m_curveHeight		= ClampFloat( m_curveHeight, 0.0001f, 10.f );
+	m_curvewidthFactor	= ClampFloat( m_curvewidthFactor, 0.0001f, 10.f );
 
 	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
 }
@@ -201,8 +234,77 @@ void CC_ModifiedConeRaycast::AssignWeightToTargetPoints( std::vector< WeightedTa
 	for each (Vector3 point in targetPoints)
 	{
 		Vector3	pointDirection	= point.GetNormalized();
-		float	weight			= Vector3::DotProduct( pointDirection, referenceDirection );
+		float	dotProduct		= Vector3::DotProduct( pointDirection, referenceDirection );
+		float	weight			= m_curveCB( dotProduct );
 
 		outWeightedPoints.push_back( WeightedTargetPoint_MCR( point, weight ) );
 	}
+}
+
+void CC_ModifiedConeRaycast::PerformRaycastOnTargetPoints( std::vector< WeightedRaycastResult_MCR > &outRaycastResult, std::vector< WeightedTargetPoint_MCR > const &pointsOnSphere, Vector3 const &sphereCenter )
+{
+	CameraContext context = m_manager.GetCameraContext();
+
+	for each (WeightedTargetPoint_MCR sPoint in pointsOnSphere)
+	{
+		Vector3 rayStartPos	 = sphereCenter;
+		Vector3	rayDirection = sPoint.targetPoint;
+		float	rayMaxLength = rayDirection.NormalizeAndGetLength();
+
+		RaycastResult result = context.raycastCallback( rayStartPos, rayDirection, rayMaxLength );
+		outRaycastResult.push_back( WeightedRaycastResult_MCR(result, sPoint.weight) );
+
+		DebugRenderRaycast( 0.f, sphereCenter, result, 0.2f, RGBA_RED_COLOR, RGBA_GREEN_COLOR, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	}
+}
+
+float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRaycastResult_MCR > const &raycastResults, float currentRadius )
+{
+	float sumWeights = 0.f;
+	float sumWeightedReduction = 0.f;
+
+	Matrix44 debugCamMat = g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
+
+	for each (WeightedRaycastResult_MCR raycast in raycastResults)
+	{
+		// If did not impact, don't do any reductions based on this ray
+		if( raycast.result.didImpact == false )
+		{
+			sumWeightedReduction += 0.f;
+			sumWeights += raycast.weight;
+
+			// Debug the suggested-reduction
+			Vector3 srPos = Vector3( raycast.result.impactPosition.x, raycast.result.impactPosition.y - 0.08f, raycast.result.impactPosition.z );
+			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("%.1f", 0.f) );
+
+			// Debug the actual-reduction
+			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
+			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", 0.f * raycast.weight) );
+
+			continue;
+		}
+		else
+		{
+			float reductionFraction	 = ( 1.f - raycast.result.fractionTravelled );
+			float suggestedReduction = currentRadius * reductionFraction;
+
+			sumWeightedReduction += suggestedReduction * raycast.weight;
+			sumWeights += raycast.weight;
+
+			// Debug the suggested-reduction
+			Vector3 srPos = Vector3( raycast.result.impactPosition.x, raycast.result.impactPosition.y - 0.08f, raycast.result.impactPosition.z );
+			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("%.1f", suggestedReduction) );
+
+			// Debug the actual-reduction
+			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
+			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("%.2f", suggestedReduction * raycast.weight) );
+		}
+	}
+
+	// If there were no hits from any ray casts
+	if( sumWeights == 0.f )
+		return 0.f;
+
+	float  weightedAvgReduction	= sumWeightedReduction / sumWeights;
+	return weightedAvgReduction;
 }
