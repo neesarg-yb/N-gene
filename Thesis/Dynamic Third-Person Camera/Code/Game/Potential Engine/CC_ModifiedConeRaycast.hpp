@@ -6,6 +6,20 @@
 
 
 //---------------------------------
+// Structures
+// 
+struct WeightedTargetPoint_MCR
+{
+public:
+	float	weight;
+	Vector3	targetPoint;
+
+public:
+	WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeight );
+};
+
+
+//---------------------------------
 // Classes
 // 
 class CC_ModifiedConeRaycast : public CameraConstrain
@@ -41,4 +55,7 @@ private:
 
 	// Positions of all the points are in Cartesian Coordinates
 	void	GeneratePointsOnSphere( std::vector< Vector3 > &outPoints, Vector3 referencePointOnSphere, Matrix44 const &cameraToWorldMatrix, float maxRotationDegrees, int numCircularLayers, std::vector< int > const &numPointsInLayer ) const;
+
+	// Assigns weights by doing dot product between directions of target point & reference
+	void	AssignWeightToTargetPoints( std::vector< WeightedTargetPoint_MCR > &outWeightedPoints, std::vector< Vector3 > const &targetPoints, Vector3 const &referenceVector );
 };

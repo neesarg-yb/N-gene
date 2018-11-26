@@ -8,6 +8,13 @@
 #include "Game/Potential Engine/DebugCamera.hpp"
 #include "Game/GameCommon.hpp"
 
+WeightedTargetPoint_MCR::WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeight )
+	: weight( inWeight )
+	, targetPoint( inTargetPoint )
+{
+
+}
+
 CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority )
 	: CameraConstrain( name, manager, priority )
 {
@@ -34,10 +41,19 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	Matrix44				camToWorldMatrix	 = suggestedCameraState.GetTransformMatrix();
 	GeneratePointsOnSphere( targetPointsOnSphere, cameraPosRelativeToPlayer, camToWorldMatrix, m_maxRotationDegrees, m_numCircularLayers, m_numRaysInLayer );
 
+	std::vector< WeightedTargetPoint_MCR > weightedTargetPoints;
+	AssignWeightToTargetPoints( weightedTargetPoints, targetPointsOnSphere, cameraPosRelativeToPlayer );
+
 	// DEBUG RENDER
-	for each (Vector3 debugPoint in targetPointsOnSphere)
+	Matrix44 debugCamMatrix = g_activeDebugCamera->GetCameraModelMatrix();
+	for each (WeightedTargetPoint_MCR point in weightedTargetPoints)
 	{
-		DebugRenderSphere( 0.f, debugPoint + playerPosition, 0.1f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_XRAY );
+		Vector3 debugPointPos = point.targetPoint + playerPosition;
+
+		float	weightColorFraction = ClampFloat(RangeMapFloat( 1.f - point.weight, 0.f, 0.5f, 0.f, 1.f ), 0.f, 1.f);
+		Rgba	sphereWeightColor	= Interpolate( RGBA_ORANGE_COLOR, RGBA_CYAN_COLOR, weightColorFraction );
+		DebugRenderSphere( 0.f, debugPointPos, 0.1f, sphereWeightColor, sphereWeightColor, DEBUG_RENDER_XRAY );
+		DebugRenderTag( 0.f, 0.08f, debugPointPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "%.2f", point.weight ) );
 	}
 
 	DebugRenderBasis( 0.f, suggestedCameraState.GetTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
@@ -175,5 +191,18 @@ void CC_ModifiedConeRaycast::GeneratePointsOnSphere( std::vector<Vector3> &outPo
 
 			outPoints.push_back( thisPointAroundCamera );
 		}
+	}
+}
+
+void CC_ModifiedConeRaycast::AssignWeightToTargetPoints( std::vector< WeightedTargetPoint_MCR > &outWeightedPoints, std::vector< Vector3 > const &targetPoints, Vector3 const &referenceVector )
+{
+	Vector3 referenceDirection	= referenceVector.GetNormalized();
+	
+	for each (Vector3 point in targetPoints)
+	{
+		Vector3	pointDirection	= point.GetNormalized();
+		float	weight			= Vector3::DotProduct( pointDirection, referenceDirection );
+
+		outWeightedPoints.push_back( WeightedTargetPoint_MCR( point, weight ) );
 	}
 }
