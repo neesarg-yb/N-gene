@@ -1,5 +1,6 @@
 #pragma once
 #include "CC_ModifiedConeRaycast.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Math/Quaternion.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
@@ -20,6 +21,9 @@ CC_ModifiedConeRaycast::~CC_ModifiedConeRaycast()
 
 void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 {
+	ChangeSettingsAccordingToInput();
+	DebugRenderSettingsDetails();
+
 	CameraContext context				= m_manager.GetCameraContext();
 	Vector3 playerPosition				= context.anchorGameObject->m_transform.GetWorldPosition();
 	Vector3 cameraPosition				= suggestedCameraState.m_position;
@@ -47,6 +51,82 @@ float CC_ModifiedConeRaycast::WeightCurve( float x, float maxHeight, float width
 	//			y = ------------- * maxHeight 
 	//			     x^2 + width             
 	return (width / ((x*x) + width)) * maxHeight;
+}
+
+void CC_ModifiedConeRaycast::DebugRenderSettingsDetails()
+{
+	// Weights Curve 
+	float stepSize  = 2.5f;
+	AABB2 graphBounds = AABB2( Vector2(-460.f, -385.f), 400.f, 100.f );
+	FloatRange xRange = FloatRange( -100.f, 100.f );
+	FloatRange yRange = DebugRenderXYCurve( 0.f, graphBounds, m_curveCB, xRange, stepSize, RGBA_GREEN_COLOR, RGBA_BLACK_COLOR, RGBA_GRAY_COLOR );
+
+	float centerXCoordinate		= (graphBounds.mins.x + graphBounds.maxs.x) * 0.5f;
+	Vector2 leftBottomCorner	= Vector2(graphBounds.mins.x, graphBounds.mins.y);
+	Vector2 rightBottomCorner	= Vector2(graphBounds.maxs.x, graphBounds.mins.y);
+	Vector2 topCenter = Vector2( centerXCoordinate, graphBounds.maxs.y );
+	Vector2 botCenter = Vector2( centerXCoordinate, graphBounds.mins.y );
+	DebugRender2DText( 0.f, leftBottomCorner,	17.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("%.1f", xRange.min) );
+	DebugRender2DText( 0.f, rightBottomCorner,	17.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("%.1f", xRange.max) );
+	DebugRender2DText( 0.f, topCenter,			17.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("%.1f", yRange.max) );
+	DebugRender2DText( 0.f, botCenter,			17.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("%.1f", yRange.min) );
+
+	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 20.f ), 17.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, "Use numpad's 46-28 to change width-height!" );
+
+	std::string maxRotDegreesStr = Stringf( "+[K] -[H], to change max rotation degrees: %0.1f", m_maxRotationDegrees );
+	std::string numLayersStr	 = Stringf( "+[U] -[J], to change number circular layers: %d",  m_numCircularLayers );
+	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 40.f ), 17.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, maxRotDegreesStr.c_str() );
+	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 60.f ), 17.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, numLayersStr.c_str() );
+}
+
+void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
+{
+	float hightChangeSpeed		= 5.f;
+	float widthChangeSpeed		= 200.f;
+	float deltaSeconds			= (float)GetMasterClock()->GetFrameDeltaSeconds();
+
+	if( g_theInput->IsKeyPressed( NUM_PAD_8 ) )
+		m_curveHeight += hightChangeSpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( NUM_PAD_2 ) )
+		m_curveHeight -= hightChangeSpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( NUM_PAD_6 ) )
+		m_curvewidthFactor += widthChangeSpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( NUM_PAD_4 ) )
+		m_curvewidthFactor -= widthChangeSpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( 'K' ) )
+		IncrementMaxRotationDegrees( deltaSeconds,  1.f );			// Increment
+	if( g_theInput->IsKeyPressed( 'H' ) )
+		IncrementMaxRotationDegrees( deltaSeconds, -1.f );			// Decrement
+	if( g_theInput->IsKeyPressed( 'U' ) )
+		IncrementNumCircularLayers( deltaSeconds,  1.f );			// Increment
+	if( g_theInput->IsKeyPressed( 'J' ) )
+		IncrementNumCircularLayers( deltaSeconds, -1.f );			// Decrement
+
+	m_curveHeight		= ClampFloat( m_curveHeight, 1.f, 500.f );
+	m_curvewidthFactor	= ClampFloat( m_curvewidthFactor, 1.f, 2000.f );
+
+	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
+}
+
+void CC_ModifiedConeRaycast::IncrementMaxRotationDegrees( float deltaSeconds, float multiplier )
+{
+	float incrementSpeed = 15.f;
+
+	m_maxRotationDegrees += incrementSpeed * multiplier * deltaSeconds;
+	m_maxRotationDegrees  = ClampFloat( m_maxRotationDegrees, 0.f, 180.f );
+}
+
+void CC_ModifiedConeRaycast::IncrementNumCircularLayers( float deltaSeconds, float multiplier )
+{
+	float incrementSpeed = 1.5f;
+
+	m_fNumCircularLayers += incrementSpeed * multiplier * deltaSeconds;
+	m_fNumCircularLayers  = ClampFloat( m_fNumCircularLayers, 0, 15 );
+	m_numCircularLayers   = (int)floorf( m_fNumCircularLayers );
+
+	// Add num of rays in newly added layer..
+	while ( m_numRaysInLayer.size() < m_numCircularLayers )
+		m_numRaysInLayer.push_back( m_numRaysInLayer.back() );
 }
 
 void CC_ModifiedConeRaycast::GeneratePointsOnSphere( std::vector<Vector3> &outPoints, Vector3 referencePointOnSphere, Matrix44 const &cameraToWorldMatrix, float maxRotationDegrees, int numCircularLayers, std::vector<int> const &numPointsInLayer ) const
