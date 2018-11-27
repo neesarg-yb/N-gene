@@ -60,10 +60,9 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 	for each (WeightedTargetPoint_MCR point in weightedTargetPoints)
 	{
-		Vector3 debugPointPos = point.targetPoint + playerPosition;
+		Vector3 debugPointPos		= point.targetPoint + playerPosition;
+		Rgba	sphereWeightColor	= GetColorFromWeight( point.weight );
 
-		float	weightColorFraction = ClampFloat(RangeMapFloat( 1.f - point.weight, 0.f, 0.5f, 0.f, 1.f ), 0.f, 1.f);
-		Rgba	sphereWeightColor	= Interpolate( RGBA_ORANGE_COLOR, RGBA_CYAN_COLOR, weightColorFraction );
 		DebugRenderSphere( 0.f, debugPointPos, 0.1f, sphereWeightColor, sphereWeightColor, DEBUG_RENDER_XRAY );
 		DebugRenderTag( 0.f, 0.08f, debugPointPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "%.2f", point.weight ) );
 	}
@@ -326,7 +325,7 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 	bool inverseSuccess = cameraTransformMatrix.GetInverse( sphereToCameraMatrix );
 	GUARANTEE_RECOVERABLE( inverseSuccess, "Error: Failed inverting the camera transform matrix!" );
 	
-	AABB2					boundsOfCanvas = AABB2( (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::min)(), (std::numeric_limits<float>::min)() );
+	AABB2					boundsPoints = AABB2( (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::min)(), (std::numeric_limits<float>::min)() );
 	std::vector< Vector2 >	pointsToRender;
 	std::vector< float >	weightsOfPoints;
 
@@ -340,8 +339,8 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 		weightsOfPoints.push_back( point.weight );
 
 		// Update min & max bounds
-		Vector2 &mins = boundsOfCanvas.mins;
-		Vector2 &maxs = boundsOfCanvas.maxs;
+		Vector2 &mins = boundsPoints.mins;
+		Vector2 &maxs = boundsPoints.maxs;
 
 		mins.x = ( position2D.x < mins.x ) ? position2D.x : mins.x;
 		mins.y = ( position2D.y < mins.y ) ? position2D.y : mins.y;
@@ -350,9 +349,37 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 		maxs.y = ( position2D.y > maxs.y ) ? position2D.y : maxs.y;
 	}
 
+	// Render background
 	AABB2 backgroundBounds = AABB2( Vector2(-710.f, -50.f), 150.f, 150.f );
 	DebugRender2DQuad( 0.f, backgroundBounds, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
 
-	Vector2 center = backgroundBounds.GetCenter();
-	DebugRender2DRound( 0.f, center, 10.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
+	// Bounds of canvas
+	float radiusOfPoint = 5.f;
+	AABB2 canvasBounds= AABB2(	backgroundBounds.mins.x + radiusOfPoint + 2.f, 
+								backgroundBounds.mins.y + radiusOfPoint + 2.f, 
+								backgroundBounds.maxs.x - radiusOfPoint - 2.f, 
+								backgroundBounds.maxs.y - radiusOfPoint - 2.f	);
+	
+	// Render each points
+	for( uint i = 0; i < pointsToRender.size(); i++ )
+	{
+		Vector2	&positionXY	= pointsToRender[i];
+		float	&weight		= weightsOfPoints[i];
+
+		float screenPositionX = RangeMapFloat( positionXY.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
+		float screenPositionY = RangeMapFloat( positionXY.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
+		
+		Vector2	screenPosition( screenPositionX, screenPositionY );
+		Rgba	weightColor = GetColorFromWeight( weight );
+
+		DebugRender2DRound( 0.f, screenPosition, radiusOfPoint, weightColor, weightColor );
+	}
+}
+
+Rgba CC_ModifiedConeRaycast::GetColorFromWeight( float weight ) const
+{
+	float	weightColorFraction = ClampFloat( RangeMapFloat( 1.f - weight, 0.f, 0.5f, 0.f, 1.f ), 0.f, 1.f );
+	Rgba	sphereWeightColor	= Interpolate( RGBA_ORANGE_COLOR, RGBA_WHITE_COLOR, weightColorFraction );
+
+	return sphereWeightColor;
 }

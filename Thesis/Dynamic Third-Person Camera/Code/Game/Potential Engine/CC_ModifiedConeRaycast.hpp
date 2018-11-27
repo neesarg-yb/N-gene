@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Ray3.hpp"
 #include "Engine/Core/RaycastResult.hpp"
 #include "Game/Potential Engine/CameraConstrain.hpp"
@@ -77,4 +78,5 @@ private:
 
 	// Renders all the target points on a 2D canvas, for debugging their weights
 	void	DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState );
+	Rgba	GetColorFromWeight( float weight ) const;
 };
