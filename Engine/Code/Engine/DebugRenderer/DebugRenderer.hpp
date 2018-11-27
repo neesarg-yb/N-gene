@@ -43,6 +43,12 @@ void ClearAllRenderingObjects( Command& cmd );
 //////////////////////
 // 2D Render System //
 //////////////////////
+void DebugRender2DRound( float lifetime,
+	Vector2 const	&center,
+	float const		 radius,
+	Rgba const		&startColor,
+	Rgba const		&endColor );
+
 void DebugRender2DQuad( float lifetime, 
 	AABB2 const &bounds,
 	Rgba const	&startColor,
