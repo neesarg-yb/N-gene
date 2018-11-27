@@ -73,6 +73,8 @@ void CameraManager::Update( float deltaSeconds )
 		constrainedCameraState = m_defaultMotionController->MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
 		SetCurrentCameraStateTo( constrainedCameraState );
 	}
+
+	m_lastFinalCameraState = constrainedCameraState;
 }
 
 void CameraManager::PreUpdate()
@@ -107,7 +109,7 @@ void CameraManager::SetSphereCollisionCallback( sphere_collision_func collisionF
 
 CameraContext CameraManager::GetCameraContext() const
 {
-	return CameraContext( m_anchor, m_raycastCB, m_cameraRadius, m_collisionCB );
+	return CameraContext( m_anchor, m_raycastCB, m_cameraRadius, m_collisionCB, m_lastFinalCameraState );
 }
 
 int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )
@@ -178,7 +180,9 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 	if( immediatlySetCurrentState )
 	{
 		CameraState suggestedState = m_aciveBehaviour->Update( 0.f, m_currentCameraState );
+		
 		SetCurrentCameraStateTo( suggestedState );
+		m_lastFinalCameraState = suggestedState;
 	}
 
 	// Update Active Constrains

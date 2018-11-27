@@ -3,6 +3,7 @@
 #include <limits>
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Math/Plane3.hpp"
 #include "Engine/Math/Quaternion.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/CameraManager.hpp"
@@ -42,6 +43,7 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	CameraContext context				= m_manager.GetCameraContext();
 	Vector3 playerPosition				= context.anchorGameObject->m_transform.GetWorldPosition();
 	Vector3 cameraPosition				= suggestedCameraState.m_position;
+	Vector3 projectedVelocity			= ProjectVectorOnPlane( context.cameraStateLastFrame.m_velocity, suggestedCameraState.GetTransformMatrix().GetKColumn() );
 	Vector3 cameraPosRelativeToPlayer	= (cameraPosition - playerPosition);
 	Matrix44 debugCamMatrix				= g_activeDebugCamera->GetCameraModelMatrix();
 
@@ -52,11 +54,10 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 	// Give weights to the target points
 	std::vector< WeightedTargetPoint_MCR > weightedTargetPoints;
-	AssignWeightToTargetPoints( weightedTargetPoints, targetPointsOnSphere, cameraPosRelativeToPlayer );
-
+	AssignWeightToTargetPoints( weightedTargetPoints, targetPointsOnSphere, cameraPosRelativeToPlayer + projectedVelocity );
 
 	// DEBUG RENDER
-	DebugRenderWeightedTargetPoints( weightedTargetPoints, suggestedCameraState );
+	DebugRenderWeightedTargetPoints( weightedTargetPoints, suggestedCameraState, cameraPosRelativeToPlayer + projectedVelocity );
 
 	for each (WeightedTargetPoint_MCR point in weightedTargetPoints)
 	{
@@ -311,7 +312,7 @@ float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRay
 	return weightedAvgReduction;
 }
 
-void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState )
+void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState, Vector3 const &projectedVelocity )
 {
 
 	Vector3 playerPosition		= m_manager.GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
@@ -360,6 +361,13 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 								backgroundBounds.maxs.x - radiusOfPoint - 2.f, 
 								backgroundBounds.maxs.y - radiusOfPoint - 2.f	);
 	
+	// Render velocity-line
+	Vector3 projVelInCameraSpace	= sphereToCameraMatrix.Multiply( projectedVelocity, 1.f );
+	float	projVelScreenPositionX	= RangeMapFloat( projVelInCameraSpace.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
+	float	projVelScreenPositionY	= RangeMapFloat( projVelInCameraSpace.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
+	Vector2 projVelInCameraSpaceXY	= Vector2( projVelScreenPositionX, projVelScreenPositionY );
+	DebugRender2DLine( 0.f, canvasBounds.GetCenter(), RGBA_BLUE_COLOR, projVelInCameraSpaceXY, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+
 	// Render each points
 	for( uint i = 0; i < pointsToRender.size(); i++ )
 	{

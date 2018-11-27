@@ -2,6 +2,7 @@
 #include <functional>
 #include "Engine/Math/Vector3.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
+#include "Game/Potential Engine/CameraState.hpp"
 
 struct  RaycastResult;
 typedef std::function< RaycastResult(Vector3 const &startPosition, Vector3 const &rayDirection, float maxDistance) >	raycast_std_func;
@@ -16,6 +17,8 @@ public:
 	float					 cameraCollisionRadius;
 	sphere_collision_func	 sphereCollisionCallback;
 
+	CameraState				 cameraStateLastFrame;
+
 public:
-	CameraContext( GameObject const *anchor, raycast_std_func raycastCallback, float collisionRadius, sphere_collision_func sphereCollisionCallback );
+	CameraContext( GameObject const *anchor, raycast_std_func raycastCallback, float collisionRadius, sphere_collision_func sphereCollisionCallback, CameraState const &stateLastFrame );
 };

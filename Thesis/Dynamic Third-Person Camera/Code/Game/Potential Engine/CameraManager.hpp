@@ -49,7 +49,8 @@ private:
 	// Camera Behaviours
 	CameraBehaviourList		 m_cameraBehaviours;		// All the behaviors that can be run on Camera
 	CameraBehaviour			*m_aciveBehaviour = nullptr;
-	CameraState				 m_lastSuggestedState;
+	CameraState				 m_lastSuggestedState;		// It is set before applying any constraints or motion controller changes
+	CameraState				 m_lastFinalCameraState;	// It is set at the end of Update(), after all the contraint and motion controller changes
 	CameraState				 m_stateOnTransitionBegin;
 	
 	float const m_behaviourTransitionSeconds = 1.f;
