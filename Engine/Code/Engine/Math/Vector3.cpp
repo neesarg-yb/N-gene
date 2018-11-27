@@ -93,6 +93,13 @@ float Vector3::GetLength() const
 	return length;
 }
 
+float Vector3::GetLengthSquared() const
+{
+	const float squaredLength = (x*x) + (y*y) + (z*z);
+	
+	return squaredLength;
+}
+
 Vector3 Vector3::GetNormalized() const 
 {
 	const float lengthOfVec	= GetLength();
