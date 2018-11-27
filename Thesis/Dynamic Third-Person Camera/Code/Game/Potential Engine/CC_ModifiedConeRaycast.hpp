@@ -74,4 +74,7 @@ private:
 
 	// According to the wights of each RaycastResults, calculates reduction in current given radius
 	float	CalculateRadiusReduction( std::vector< WeightedRaycastResult_MCR > const &raycastResults, float currentRadius );
+
+	// Renders all the target points on a 2D canvas, for debugging their weights
+	void	DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState );
 };

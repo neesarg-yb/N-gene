@@ -1,5 +1,6 @@
 #pragma once
 #include "CC_ModifiedConeRaycast.hpp"
+#include <limits>
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Math/Quaternion.hpp"
@@ -55,6 +56,8 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 
 	// DEBUG RENDER
+	DebugRenderWeightedTargetPoints( weightedTargetPoints, suggestedCameraState );
+
 	for each (WeightedTargetPoint_MCR point in weightedTargetPoints)
 	{
 		Vector3 debugPointPos = point.targetPoint + playerPosition;
@@ -307,4 +310,49 @@ float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRay
 
 	float  weightedAvgReduction	= sumWeightedReduction / sumWeights;
 	return weightedAvgReduction;
+}
+
+void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState )
+{
+
+	Vector3 playerPosition		= m_manager.GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
+	Vector3 cameraPosition		= cameraState.m_position;
+	Vector3 cameraRelToPlayer	= cameraPosition - playerPosition;
+	
+	Matrix44 cameraTransformMatrix = cameraState.GetTransformMatrix();	// Camera to World
+	cameraTransformMatrix.SetTColumn( cameraRelToPlayer );				// Making it: Camera to Sphere
+	
+	Matrix44 sphereToCameraMatrix;
+	bool inverseSuccess = cameraTransformMatrix.GetInverse( sphereToCameraMatrix );
+	GUARANTEE_RECOVERABLE( inverseSuccess, "Error: Failed inverting the camera transform matrix!" );
+	
+	AABB2					boundsOfCanvas = AABB2( (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::min)(), (std::numeric_limits<float>::min)() );
+	std::vector< Vector2 >	pointsToRender;
+	std::vector< float >	weightsOfPoints;
+
+	for each (WeightedTargetPoint_MCR point in targetPoints)
+	{
+		// Add vec2 point and its weight to the vector
+		Vector3 pointInCameraSpace = sphereToCameraMatrix.Multiply( point.targetPoint, 1.f );
+		Vector2 position2D( pointInCameraSpace.x, pointInCameraSpace.y );
+		
+		pointsToRender.push_back( position2D );
+		weightsOfPoints.push_back( point.weight );
+
+		// Update min & max bounds
+		Vector2 &mins = boundsOfCanvas.mins;
+		Vector2 &maxs = boundsOfCanvas.maxs;
+
+		mins.x = ( position2D.x < mins.x ) ? position2D.x : mins.x;
+		mins.y = ( position2D.y < mins.y ) ? position2D.y : mins.y;
+
+		maxs.x = ( position2D.x > maxs.x ) ? position2D.x : maxs.x;
+		maxs.y = ( position2D.y > maxs.y ) ? position2D.y : maxs.y;
+	}
+
+	AABB2 backgroundBounds = AABB2( Vector2(-710.f, -50.f), 150.f, 150.f );
+	DebugRender2DQuad( 0.f, backgroundBounds, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
+
+	Vector2 center = backgroundBounds.GetCenter();
+	DebugRender2DRound( 0.f, center, 10.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
 }
