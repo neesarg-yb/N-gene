@@ -32,6 +32,7 @@ public:
 
 	void			LimitLengthTo( float const maxLength );
 	float			GetLength() const;
+	float			GetLengthSquared() const;
 	Vector3			GetNormalized() const;
 	float			NormalizeAndGetLength();	// Returns length of the vector and then normalizes it
 	Vector3			GetAsDirection() const;		// From Euler Rotation to Direction Vector
