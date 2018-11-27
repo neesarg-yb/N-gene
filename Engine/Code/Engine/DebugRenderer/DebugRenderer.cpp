@@ -200,6 +200,39 @@ void AddTexturedAABBToMeshBuilder( MeshBuilder& mb, Vector3 const &mins, float h
 	mb.PushVertex( bottomLeftPos );
 }
 
+void DebugRender2DRound( float lifetime, Vector2 const &center, float const radius, Rgba const &startColor, Rgba const &endColor )
+{
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_TRIANGES, true );
+
+	uint  const numSlices = 10U;
+	float const degreesPerSlice = 360.f / (float)numSlices;
+
+	// Push Center Vertex: idx = 0
+	mb.SetColor( RGBA_WHITE_COLOR );
+	mb.PushVertex( Vector3::ZERO );
+
+	// Push Points on Circle: idx = [ 1, numSlices + 1]
+	for( uint slice = 0; slice <= numSlices; slice++ )
+	{
+		float	degreeAngle = slice * degreesPerSlice;
+		Vector2 cartesianA	= PolarToCartesian( radius, degreeAngle );
+
+		mb.SetColor( RGBA_WHITE_COLOR );
+		mb.PushVertex( cartesianA.GetAsVector3() );
+	}
+
+	// Push Indices
+	for ( uint i = 1; i < (numSlices + 1); i++ )
+		mb.AddFace( (i + 1), 0, i );	//  = (next point on circle, center, this point on circle)
+
+	mb.End();
+
+	Transform modelTramsform = Transform( center.GetAsVector3(), Vector3::ZERO, Vector3::ONE_ALL );
+	DebugRenderObject *roundObject = new DebugRenderObject( lifetime, *debugRenderer, DEBUG_CAMERA_2D, modelTramsform.GetTransformMatrix(), mb.ConstructMesh <Vertex_3DPCU>(), nullptr, startColor, endColor, DEBUG_RENDER_IGNORE_DEPTH );
+	debugRenderObjectQueue.push_back( roundObject );
+}
+
 void DebugRender2DQuad( float lifetime, AABB2 const &bounds, Rgba const &startColor, Rgba const &endColor )
 {
 	Vector3 const upperLeft		( bounds.mins.x, bounds.maxs.y, 0.f );
