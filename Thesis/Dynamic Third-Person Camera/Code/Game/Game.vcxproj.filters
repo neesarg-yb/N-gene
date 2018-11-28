@@ -139,6 +139,9 @@
     <ClCompile Include="Potential Engine\CC_ModifiedConeRaycast.cpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
     </ClCompile>
+    <ClCompile Include="World\House.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -239,6 +242,9 @@
     </ClInclude>
     <ClInclude Include="Potential Engine\CC_ModifiedConeRaycast.hpp">
       <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="World\House.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,7 @@
 #include "Game/Potential Engine/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
+#include "Game/World/House.hpp"
 
 Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	: GameState( "COLLISION AVOIDANCE", parentClock )
@@ -47,6 +48,10 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	// Terrain
 	m_terrain = new Terrain( Vector3( -125.f, -25.f, -125.f ), IntVector2( 180, 180 ), 30.f, "Data\\Images\\Terrain\\heightmap_simple.png", TERRAIN_GRASS );
 	AddNewGameObjectToScene( m_terrain, ENTITY_TERRAIN );
+
+	// House
+	House *testHouse = new House( Vector2::ZERO, 5.f, 5.f, 6.5f, 0.5f, *m_terrain );
+	AddNewGameObjectToScene( testHouse, ENTITY_HOME );
 
 	// Buildings
 	for( int i = 0; i < TOTAL_BUILDINGS; i ++ )
