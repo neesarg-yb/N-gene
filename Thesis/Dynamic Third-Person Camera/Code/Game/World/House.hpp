@@ -23,7 +23,6 @@ public:
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
 
-	bool			IsPointInside( Vector3 const &position ) const;
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const;
 	Vector3			CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding );
 };

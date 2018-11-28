@@ -51,7 +51,11 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 
 	// House
 	House *testHouse = new House( Vector2::ZERO, 5.f, 5.f, 6.5f, 0.5f, *m_terrain );
-	AddNewGameObjectToScene( testHouse, ENTITY_HOME );
+	AddNewGameObjectToScene( testHouse, ENTITY_HOUSE );
+
+	// Just a terrace (balcony?)
+	Building *tBuilding = new Building( Vector2( 0.f, -30.f), 1.f, 25.f, *m_terrain, 2.5f );
+	AddNewGameObjectToScene( tBuilding, ENTITY_BUILDING );
 
 	// Buildings
 	for( int i = 0; i < TOTAL_BUILDINGS; i ++ )
@@ -90,7 +94,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 
 	// Camera Behaviour
 	// CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager );
-	CameraBehaviour* followBehaviour	= new CB_Follow( 5.f, 40.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
+	CameraBehaviour* followBehaviour	= new CB_Follow( 7.f, 30.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
@@ -315,6 +319,29 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 		{
 			if( buildingHitResult.didImpact == true )
 				closestResult = buildingHitResult;
+		}
+	}
+
+	// Do House Raycast
+	GameObjectList &houses = m_gameObjects[ ENTITY_HOUSE ];
+	for( int i = 0; i < houses.size(); i++ )
+	{
+		House			*thisHouse		= (House*)houses[i];
+		RaycastResult	 houseHitResult	= thisHouse->Raycast( startPosition, direction, maxDistance, 0.2f );
+
+		// If this one is the closest hit point, from start position
+		if( closestResult.didImpact == true )
+		{
+			if( houseHitResult.didImpact == true )
+			{
+				if( houseHitResult.fractionTravelled < closestResult.fractionTravelled )
+					closestResult = houseHitResult;
+			}
+		}
+		else
+		{
+			if( houseHitResult.didImpact == true )
+				closestResult = houseHitResult;
 		}
 	}
 

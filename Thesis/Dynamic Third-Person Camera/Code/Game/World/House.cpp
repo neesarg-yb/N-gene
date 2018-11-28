@@ -1,7 +1,10 @@
 #pragma once
 #include "House.hpp"
+#include "Engine/Core/Ray3.hpp"
+#include "Engine/Core/RaycastResult.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/World/Terrain.hpp"
 
 House::House( Vector2 positionXZ, float const height, float const width, float const length, float const wallThickness, Terrain const &parentTerrain )
@@ -97,24 +100,42 @@ void House::RemoveRenderablesFromScene( Scene &activeScene )
 	activeScene.RemoveRenderable( *m_renderable );
 }
 
-bool House::IsPointInside( Vector3 const &position ) const
-{
-	UNUSED( position );
-
-	return false;
-}
-
 RaycastResult House::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const
 {
-	UNUSED( accuracy );
+	// Ray
+	Ray3 ray = Ray3( startPosition, direction );
+	RaycastResult result( startPosition + (direction * maxDistance) );
 
-	return RaycastResult( startPosition + (direction * maxDistance) );
+	for each (AABB3 worldBounds in m_wallsWorldBounds)
+	{
+		Vector3	position;
+		bool	didImpact = false;
+		for( float t = 0.f; (t <= maxDistance - accuracy) && (didImpact == false); t += accuracy )
+		{
+			position	= ray.Evaluate( t );
+			didImpact	= worldBounds.IsPointInsideMe( position );
+			position	= ray.Evaluate( t + accuracy );	// To make sure that the position we suggest is on the other side of the startPosition
+		}
+
+		if( didImpact )
+		{
+			float	distTravelled		= (position - startPosition).GetLength();
+			float	fractionTravelled	= distTravelled / maxDistance;
+			Vector3	normal				= Vector3::ZERO;
+
+			if( fractionTravelled < result.fractionTravelled)
+				result = RaycastResult( position, normal, fractionTravelled );
+		}
+	}
+
+	return result;
 }
 
 Vector3 House::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding )
 {
 	UNUSED( radius );
-	UNUSED( outIsColliding );
+	TODO( "Write a collision check!" );
 
+	outIsColliding = false;
 	return center;
 }

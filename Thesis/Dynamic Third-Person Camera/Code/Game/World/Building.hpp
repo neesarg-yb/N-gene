@@ -10,7 +10,7 @@ class Terrain;
 class Building : public GameObject
 {
 public:
-	 Building( Vector2 positionXZ, float const height, float const width, Terrain const &parentTerrain );
+	 Building( Vector2 positionXZ, float const height, float const width, Terrain const &parentTerrain, float const offsetFromGround = 0.f );
 	~Building();
 
 private:

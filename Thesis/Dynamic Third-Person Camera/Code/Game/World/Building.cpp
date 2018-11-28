@@ -7,12 +7,12 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/World/Terrain.hpp"
 
-Building::Building( Vector2 positionXZ, float const height, float const width, Terrain const &parentTerrain )
+Building::Building( Vector2 positionXZ, float const height, float const width, Terrain const &parentTerrain, float const offsetFromGround /*= 0.f*/ )
 	: m_parentTerrain( parentTerrain )
 	, m_size( width, height, width )
 {
 	// Set Transform
-	Vector3 xyzPosition = m_parentTerrain.Get3DCoordinateForMyPositionAt( positionXZ, height * 0.4f );
+	Vector3 xyzPosition = m_parentTerrain.Get3DCoordinateForMyPositionAt( positionXZ, (height * 0.4f) + offsetFromGround );
 	m_transform			= Transform( xyzPosition, Vector3::ZERO, Vector3::ONE_ALL );
 
 	// Set Renderable
