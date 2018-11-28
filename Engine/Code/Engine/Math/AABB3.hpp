@@ -16,6 +16,12 @@ public:
 	Vector3 maxs;
 
 public:
+	void	TranslateBy( Vector3 translation );
+
+public:
+	Vector3	GetSize() const;
+	Vector3 GetCenter() const;
+
 	float	GetDistanceFromPoint( Vector3 const &point ) const;
 	bool	IsPointInsideMe( Vector3 const &point ) const;
 	Vector3 GetClosestPointInsideBounds( Vector3 const &from ) const;
