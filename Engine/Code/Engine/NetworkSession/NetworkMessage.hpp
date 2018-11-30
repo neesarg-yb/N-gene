@@ -31,9 +31,9 @@ enum eNetworkCoreMessages : uint8_t
 	NET_MESSAGE_JOIN_REQUEST,				// unreliable
 	NET_MESSAGE_JOIN_DENY,					// unreliable
 	NET_MESSAGE_JOIN_ACCEPT,				// reliable in-order
-	NET_MESSAGE_NEW_CONNECTION,				// reliable in-order
 	NET_MESSAGE_JOIN_FINISHED,				// reliable in-order
 	NET_MESSAGE_UPDATE_CONNECTION_STATE,	// reliable in-order
+//	NET_MESSAGE_NEW_CONNECTION,				// reliable in-order
 
 	NUM_CORE_NET_SESSION_MESSAGES
 };

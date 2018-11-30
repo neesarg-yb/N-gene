@@ -59,34 +59,25 @@ bool OnJoinRequest( NetworkMessage const &msg, NetworkSender &from )
 
 bool OnJoinDeny( NetworkMessage const &msg, NetworkSender &from ) 
 {
-	UNUSED( msg );
-	UNUSED( from );
+	eNetworkSessionError error = NUM_NET_SESSION_ERRORS;
+	msg.ReadBytes( &error, sizeof(eNetworkSessionError) );
 
-	return false;
+	return from.session.ProcessJoinDeny( error, from.address );
 }
 
 bool OnAccept( NetworkMessage const &msg, NetworkSender &from ) 
 {
-	UNUSED( msg );
-	UNUSED( from );
+	uint8_t connectionIdx = MAX_SESSION_CONNECTIONS;
+	msg.ReadBytes( &connectionIdx, sizeof(uint8_t) );
 
-	return false;
-}
-
-bool OnNewConnection( NetworkMessage const &msg, NetworkSender &from ) 
-{
-	UNUSED( msg );
-	UNUSED( from );
-
-	return false;
+	return from.session.ProcessJoinAccept( connectionIdx, from.address );
 }
 
 bool OnJoinFinished( NetworkMessage const &msg, NetworkSender &from ) 
 {
 	UNUSED( msg );
-	UNUSED( from );
 
-	return false;
+	return from.session.ProcessJoinFinished( from.address );
 }
 
 bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from ) 
@@ -94,14 +85,14 @@ bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from )
 	eNetworkConnectionState updatedState = NET_CONNECTION_DISCONNECTED;
 	msg.ReadBytes( &updatedState, sizeof(eNetworkConnectionState) );
 
-	from.connection->m_state = updatedState;
-	
-	return true;
+	return from.session.ProcessUpdateConnectionState( updatedState, from.address );
 }
 
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 	: m_theRenderer( currentRenderer )
 {
+	SetBoundConnectionsToNull();
+
 	// For UI
 	m_uiCamera = new Camera();
 
@@ -114,6 +105,9 @@ NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 		m_fonts = currentRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
 	
 	RegisterCoreMessages();
+
+	// Timers
+	m_joinRequestTimer.SetTimer( m_joinTimerSeconds );
 }
 
 NetworkSession::~NetworkSession()
@@ -152,15 +146,25 @@ void NetworkSession::Update()
 	switch (m_state)
 	{
 	case NET_SESSION_DISCONNECTED:
+		UpdateSessionDisconnected();
 		break;
+
 	case NET_SESSION_BOUND:
+		UpdateSessionBound();
 		break;
+
 	case NET_SESSION_CONNECTING:
+		UpdateSessionConnecting();
 		break;
+
 	case NET_SESSION_JOINING:
+		UpdateSessionJoining();
 		break;
+
 	case NET_SESSION_READY:
+		UpdateSessionReady();
 		break;
+
 	default:
 		break;
 	}
@@ -277,6 +281,66 @@ void NetworkSession::Render() const
 	}
 }
 
+void NetworkSession::UpdateSessionDisconnected()
+{
+
+}
+
+void NetworkSession::UpdateSessionBound()
+{
+
+}
+
+void NetworkSession::UpdateSessionConnecting()
+{
+	if( m_myConnection->GetState() == NET_CONNECTION_CONNECTED )
+	{
+		UpdateStateTo( NET_SESSION_JOINING );
+		return;
+	}
+
+	// Not connected => send JOIN_REQUEST after some interval
+	if( m_joinRequestTimer.CheckAndReset() )
+	{
+		NetworkMessage msg( "join_request", LITTLE_ENDIAN );
+		msg.WriteString( m_myConnection->GetNetworkID().c_str() );
+
+		m_hostConnection->Send( msg );
+	}
+
+	// Timeout check
+	if( m_joinTimeoutTimer.CheckAndReset() )
+	{
+		SetError( NET_SESSION_ERROR_TIMEOUT, "Host didn't respond. Timed out!" );
+		UpdateStateTo( NET_SESSION_DISCONNECTED );
+	}
+}
+
+void NetworkSession::UpdateSessionJoining()
+{
+	// Does nothing
+	//	Just waits until my connection is marked as ready,
+	//	Which happens in ProcessJoinFinished(), called on NET_MESSAGE_JOIN_FINISHED
+}
+
+void NetworkSession::UpdateSessionReady()
+{
+
+}
+
+void NetworkSession::UpdateStateTo( eNetworkSessionState newState )
+{
+	// Reset timers
+	if( m_state != newState )
+	{
+		if( newState == NET_SESSION_DISCONNECTED )
+			m_joinTimeoutTimer.Reset();
+	}
+
+	// Change states
+	m_state = newState;
+}
+
 bool NetworkSession::BindPort( uint16_t port, uint16_t range )
 {
 	NetworkAddress localAddress = NetworkAddress::GetLocal();
@@ -316,7 +380,6 @@ void NetworkSession::RegisterCoreMessages()
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_REQUEST,				"join_request",			OnJoinRequest,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_DENY,					"join_deny",			OnJoinDeny,			NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_ACCEPT,				"join_accept",			OnAccept,			NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
-	RegisterNetworkMessage( NET_MESSAGE_NEW_CONNECTION,				"new_connection",		OnNewConnection,	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_FINISHED,				"join_finished",		OnJoinFinished,		NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 	RegisterNetworkMessage( NET_MESSAGE_UPDATE_CONNECTION_STATE,	"update_connection",	OnUpdateConnection,	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 }
@@ -366,10 +429,10 @@ void NetworkSession::Host( char const *myID, uint16_t port, uint16_t portRange /
 	m_boundConnections[ 0 ] = myConnectionAsHost;
 
 	// Connection: ready
-	myConnectionAsHost->m_state	= NET_CONNECTION_READY;
+	myConnectionAsHost->UpdateStateTo( NET_CONNECTION_READY );
 	
 	// Session: ready
-	m_state = NET_SESSION_READY;
+	UpdateStateTo( NET_SESSION_READY );
 }
 
 void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
@@ -390,7 +453,7 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	m_allConnections.push_back( host );
 	m_boundConnections[0] = host;
 	
-	host->m_state = NET_CONNECTION_CONNECTED;
+	host->UpdateStateTo( NET_CONNECTION_CONNECTED );
 
 	// Make a connection for yourself
 	NetworkConnection *myConnection = new NetworkConnection( INVALID_INDEX_IN_SESSION, m_mySocket->m_address, myID, *this );
@@ -398,7 +461,7 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	DeleteConnection( m_myConnection );
 	m_myConnection = myConnection;
 
-	m_state = NET_SESSION_CONNECTING;
+	UpdateStateTo( NET_SESSION_CONNECTING );
 }
 
 void NetworkSession::Disconnect()
@@ -471,6 +534,38 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 	return true;
 }
 
+bool NetworkSession::ProcessJoinDeny( eNetworkSessionError errorCode, NetworkAddress const &senderAddress )
+{
+	return false;
+}
+
+bool NetworkSession::ProcessJoinAccept( uint8_t connectionIdx, NetworkAddress const &senderAddress )
+{
+	return false;
+}
+
+bool NetworkSession::ProcessJoinFinished( NetworkAddress const &senderAddress )
+{
+	if( m_hostConnection->GetAddress() == senderAddress )
+	{
+		UpdateStateTo( NET_SESSION_READY );
+		return true;
+	}
+	else
+		return false;
+}
+
+bool NetworkSession::ProcessUpdateConnectionState( eNetworkConnectionState state, NetworkAddress const &senderAddress )
+{
+	NetworkConnection *connection = GetConnection( senderAddress );
+
+	if( connection == nullptr )
+		return false;
+
+	connection->UpdateStateTo( state );
+	return true;
+}
+
 void NetworkSession::SetError( eNetworkSessionError error, char const *str )
 {
 	m_errorCode		= error;
@@ -524,6 +619,15 @@ void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, Network
 	packetToSend.WriteMessage( messageToSend );
 
 	m_mySocket->SendTo( address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
+}
+
+void NetworkSession::BroadcastMessage( NetworkMessage &messageToBroadcast )
+{
+	for each (NetworkConnection* connection in m_boundConnections)
+	{
+		if( connection != nullptr )
+			connection->Send( messageToBroadcast );
+	}
 }
 
 NetworkConnection* NetworkSession::CreateConnection( NetworkConnectionInfo const &info )
@@ -587,6 +691,17 @@ void NetworkSession::BindConnection( uint8_t idx, NetworkConnection *connection 
 	UNUSED( connection );
 }
 
+void NetworkSession::SetBoundConnectionsToNull()
+{
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		NetworkConnection* &connection = m_boundConnections[i];
+
+		if( connection != nullptr )
+			connection = nullptr;
+	}
+}
+
 void NetworkSession::DeleteConnection( NetworkConnection* &connection )
 {
 	// Reset the pointers to nullptr
@@ -596,7 +711,7 @@ void NetworkSession::DeleteConnection( NetworkConnection* &connection )
 	if( m_hostConnection == connection )
 	{
 		m_hostConnection = nullptr;
-		m_state = NET_SESSION_DISCONNECTED;
+		UpdateStateTo( NET_SESSION_DISCONNECTED );
 	}
 
 	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
@@ -691,6 +806,25 @@ NetworkConnection* NetworkSession::GetConnection( int idx )
 		return nullptr;
 	else
 		return m_boundConnections[idx];
+}
+
+NetworkConnection* NetworkSession::GetConnection( NetworkAddress const &address )
+{
+	NetworkConnection *connection = nullptr;
+
+	for each (NetworkConnection* boundConnection in m_boundConnections)
+	{
+		if( boundConnection == nullptr )
+			continue;
+
+		if( boundConnection->GetAddress() == address )
+		{
+			connection = boundConnection;
+			break;
+		}
+	}
+
+	return connection;
 }
 
 bool NetworkSession::IsRegistered( NetworkConnection const *connection ) const
