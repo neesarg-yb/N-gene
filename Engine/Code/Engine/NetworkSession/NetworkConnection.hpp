@@ -21,7 +21,7 @@ typedef std::vector< NetworkMessage* > NetworkMessages;
 //---------------------------------
 // Enums
 // 
-enum eNetworkConnectionState
+enum eNetworkConnectionState : uint8_t
 {
 	NET_CONNECTION_DISCONNECTED = 0,
 	NET_CONNECTION_CONNECTED,
@@ -62,6 +62,7 @@ public:
 	// Connection Info.
 	NetworkSession			&m_parentSession;
 	NetworkConnectionInfo	 m_info;
+private:
 	eNetworkConnectionState	 m_state					= NET_CONNECTION_DISCONNECTED;
 
 public:
@@ -107,6 +108,10 @@ public:
 	inline NetworkAddress	GetAddress()		const { return m_info.address; }
 	inline uint8_t			GetIndexInSession()	const { return m_info.indexInSession; }
 	inline std::string		GetNetworkID()		const { return m_info.networkID; }
+
+	// Connection State
+	eNetworkConnectionState	GetState() const;
+	void					UpdateStateTo( eNetworkConnectionState newState );
 
 	// Receiving End
 	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );		// It is there for tracking the messages & packets, it doesn't process em!

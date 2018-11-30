@@ -63,6 +63,23 @@ bool NetworkConnection::operator==( NetworkConnection const &b ) const
 	return (isInSameSession && isTheSameConnection);
 }
 
+eNetworkConnectionState NetworkConnection::GetState() const
+{
+	return m_state;
+}
+
+void NetworkConnection::UpdateStateTo( eNetworkConnectionState newState )
+{
+	if( m_state != newState )
+	{
+		NetworkMessage msg( "update_connection", LITTLE_ENDIAN );
+		msg.WriteBytes( sizeof(eNetworkConnectionState), &m_state );
+		m_parentSession.BroadcastMessage( msg );
+	}
+
+	m_state = newState;
+}
+
 void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
 {
 	// We need to send back updated acks, asap
