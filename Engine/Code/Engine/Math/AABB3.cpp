@@ -84,3 +84,31 @@ void AABB3::GetSixPlanes( Plane3 *planeArray ) const
 	planeArray[4] = Plane3( zyPlaneNormal, maxs );
 	planeArray[5] = Plane3( xzPlaneNormal, maxs );
 }
+
+void AABB3::TranslateBy( Vector3 translation )
+{
+	mins += translation;
+	maxs += translation;
+}
+
+Vector3 AABB3::GetSize() const
+{
+	Vector3 size;
+
+	size.x = fabs(maxs.x - mins.x);
+	size.y = fabs(maxs.y - mins.y);
+	size.z = fabs(maxs.z - mins.z);
+
+	return size;
+}
+
+Vector3 AABB3::GetCenter() const
+{
+	Vector3 center;
+
+	center.x = (mins.x + maxs.x) * 0.5f;
+	center.y = (mins.y + maxs.y) * 0.5f;
+	center.z = (mins.z + maxs.z) * 0.5f;
+
+	return center;
+}
