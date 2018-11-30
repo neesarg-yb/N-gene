@@ -71,9 +71,18 @@ void Clock::AdvanceClock( uint64_t const hpcElapsed )
 	uint64_t relativeElapsed = hpcElapsed;
 
 	if( m_isPaused )
+	{
 		relativeElapsed = 0;
-	else 
+	}
+	else if( m_timeScale == 1.0 )
+	{
+		// Don't do anything, we already have the right hpc
+	}
+	else
+	{
+		// Beware.. We might loose the precision..!
 		relativeElapsed = (uint64_t)( (double)hpcElapsed * m_timeScale );
+	}
 
 	frame.hpc		= relativeElapsed;
 	frame.seconds	= GetSecondsFromHPC( relativeElapsed );
