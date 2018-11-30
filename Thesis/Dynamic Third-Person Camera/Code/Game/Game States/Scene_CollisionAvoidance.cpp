@@ -294,6 +294,8 @@ void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const
 
 RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	RaycastResult closestResult( startPosition );
 
 	// Do Terrain Raycast
@@ -350,6 +352,8 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 
 Vector3 Scene_CollisionAvoidance::SphereCollision( Sphere const &sphere )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	Vector3 positionAfterCollision = sphere.center;
 
 	for( uint i = 0; i < NUM_ENTITIES; i++ )
