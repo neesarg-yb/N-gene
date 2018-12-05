@@ -379,7 +379,7 @@ void NetworkSession::RegisterCoreMessages()
 	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,					"heartbeat",			OnHeartbeat,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 	
 	// Connection Management
-	RegisterNetworkMessage( NET_MESSAGE_JOIN_REQUEST,				"join_request",			OnJoinRequest,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	RegisterNetworkMessage( NET_MESSAGE_JOIN_REQUEST,				"join_request",			OnJoinRequest,		NET_MESSAGE_OPTION_CONNECTIONLESS );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_DENY,					"join_deny",			OnJoinDeny,			NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_ACCEPT,				"join_accept",			OnAccept,			NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_FINISHED,				"join_finished",		OnJoinFinished,		NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
@@ -456,6 +456,11 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	m_boundConnections[0] = host;
 	
 	host->UpdateStateTo( NET_CONNECTION_CONNECTED );
+
+	// Send join request to join
+	NetworkMessage joinRequestMessage("join_request", LITTLE_ENDIAN);
+	joinRequestMessage.WriteString( myID );
+	host->Send( joinRequestMessage );
 
 	// Make a connection for yourself
 	NetworkConnection *myConnection = new NetworkConnection( INVALID_INDEX_IN_SESSION, m_mySocket->m_address, myID, *this );
@@ -786,6 +791,9 @@ bool NetworkSession::ConnectionAlreadyExists( NetworkAddress const &address )
 
 	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
+		if( m_boundConnections[i] == nullptr )
+			continue;
+
 		if( m_boundConnections[i]->GetAddress() == address )
 			return true;
 	}
