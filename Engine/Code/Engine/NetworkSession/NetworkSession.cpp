@@ -514,6 +514,7 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	
 	DeleteConnection( m_myConnection );
 	m_myConnection = myConnection;
+	m_allConnections.push_back( m_myConnection );
 
 	UpdateStateTo( NET_SESSION_CONNECTING );
 }
