@@ -63,6 +63,11 @@ bool NetworkConnection::operator==( NetworkConnection const &b ) const
 	return (isInSameSession && isTheSameConnection);
 }
 
+bool NetworkConnection::operator!=( NetworkConnection const &b ) const
+{
+	return !(*this == b);
+}
+
 eNetworkConnectionState NetworkConnection::GetState() const
 {
 	return m_state;
@@ -74,7 +79,7 @@ void NetworkConnection::UpdateStateTo( eNetworkConnectionState newState )
 	{
 		NetworkMessage msg( "update_connection", LITTLE_ENDIAN );
 		msg.WriteBytes( sizeof(eNetworkConnectionState), &m_state );
-		m_parentSession.BroadcastMessage( msg );
+		m_parentSession.BroadcastMessage( msg, this );
 	}
 
 	m_state = newState;
@@ -289,10 +294,14 @@ void NetworkConnection::FlushMessages()
 	// If we need a heartbeat to be sent
 	if( m_heartbeatTimer.CheckAndReset() == true )
 	{
-		m_immediatlyRespondForAck = false;
+		// Send heartbeat if not a local connection..
+		if( *this != *m_parentSession.GetMyConnection() )
+		{
+			m_immediatlyRespondForAck = false;
 
-		NetworkMessage heartbeat( "heartbeat" );
-		Send( heartbeat );
+			NetworkMessage heartbeat( "heartbeat" );
+			Send( heartbeat );
+		}
 	}
 	
 	// To return, if there's nothing to send

@@ -158,7 +158,7 @@ public:
 	// Sending
 	void SendPacket			( NetworkPacket &packetToSend );							// Replaces connectionIndex by sender's index
 	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
-	void BroadcastMessage	( NetworkMessage &messageToBroadcast );
+	void BroadcastMessage	( NetworkMessage &messageToBroadcast, NetworkConnection const *excludeConnection = nullptr );
 
 private:
 	// Session Setup
@@ -189,11 +189,12 @@ public:
 private:
 	// Network Connections
 	NetworkConnection*		CreateConnection	( NetworkConnectionInfo const &info );
-	void					DestroyConnection	( NetworkConnection *connection );
 	void					BindConnection		( uint8_t idx, NetworkConnection *connection );
+	void					DeleteConnection	( NetworkConnection* connection );		// Deletes the connection and removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections
+	void					DeleteAllConnections();										// Including myConnection & hostConnection
+	void					RemoveDisconnectedConnections();
 	
 	void					SetBoundConnectionsToNull();								// Deletes and sets all bound connections to nullptr
-	void					DeleteConnection		( NetworkConnection* &connection );	// Removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections; deletes it and sets the passed connection to nullptr
 	bool					ConnectionAlreadyExists	( NetworkAddress const &address );
 	int						GetIndexForNewConnection() const;							// Returns -1, if no vacant slots found
 
