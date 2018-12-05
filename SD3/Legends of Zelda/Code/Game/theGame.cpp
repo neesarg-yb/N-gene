@@ -147,6 +147,14 @@ void SessionJoin( Command &cmd )
 	session->Join( myName, hostAdderss );
 }
 
+void SessionDisconnect( Command &cmd )
+{
+	UNUSED( cmd );
+
+	NetworkSession *session = theGame::GetSession();
+	session->Disconnect();
+}
+
 void SessionSendPing( Command &cmd )
 {
 	int idx;
@@ -438,6 +446,7 @@ void theGame::Startup()
 	CommandRegister( "net_set_heart_rate",				SetHeartbeatRate );
 	CommandRegister( "net_host",						SessionHost );
 	CommandRegister( "net_join",						SessionJoin );
+	CommandRegister( "net_disconnect",					SessionDisconnect );
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
