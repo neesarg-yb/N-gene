@@ -11,12 +11,6 @@ bool UDPSocket::Bind( NetworkAddress &address, uint16_t portRange /*= 0U */ )
 	
 	for ( int remainingPorts = portRange; remainingPorts >= 0; remainingPorts-- )
 	{
-		// Check so that the port won't overflow
-		if( address.port == 0xff )
-			break;
-		else
-			address.port++;
-
 		// Get sockaddr
 		sockaddr sock_addr;
 		size_t sock_addr_len;
@@ -33,6 +27,12 @@ bool UDPSocket::Bind( NetworkAddress &address, uint16_t portRange /*= 0U */ )
 			m_address = address; 
 			return true; 
 		} 
+
+		// Check so that the port won't overflow
+		if( address.port == 0xffff )
+			break;
+		else
+			address.port++;
 	}
 
 	::closesocket( mySocket );
