@@ -138,6 +138,7 @@ void SessionJoin( Command &cmd )
 	if( netIDStr == "" || hostAddrStr == "" )
 	{
 		ConsolePrintf( RGBA_YELLOW_COLOR, "Provide two valid arguments: <id name> <host's address>" );
+		return;
 	}
 
 	char const *myName			= netIDStr.c_str();
