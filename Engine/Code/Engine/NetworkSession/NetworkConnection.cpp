@@ -19,7 +19,8 @@ NetworkConnectionInfo::NetworkConnectionInfo( int index, std::string const &desi
 	std::string idLimitedLength = std::string( desiredNetworkID, 0, MAX_NETWORK_ID_LENGTH );
 	std::copy( idLimitedLength.begin(), idLimitedLength.end(), networkID );
 	
-	networkID[ MAX_NETWORK_ID_LENGTH ] = '\0';
+	uint lastCharAt = (desiredNetworkID.size() < MAX_NETWORK_ID_LENGTH) ? ((uint) desiredNetworkID.size()) : MAX_NETWORK_ID_LENGTH;
+	networkID[ lastCharAt ] = '\0';
 }
 
 bool NetworkConnectionInfo::operator==( NetworkConnectionInfo const &b ) const
@@ -682,3 +683,33 @@ void NetworkConnection::MarkReliableReceived( uint16_t reliableID )
 		}
 	}
 */
+
+std::string ToString( eNetworkConnectionState inEnum )
+{
+	std::string str = "";
+
+	switch (inEnum)
+	{
+	case NET_CONNECTION_DISCONNECTED:
+		str = "Disconnected";
+		break;
+
+	case NET_CONNECTION_CONNECTED:
+		str = "Connected";
+		break;
+
+	case NET_CONNECTION_READY:
+		str = "Ready";
+		break;
+
+	case NUM_NET_CONNECTIONS:
+		str = std::to_string( NUM_NET_CONNECTIONS );
+		break;
+
+	default:
+		str = "Error!";
+		break;
+	}
+
+	return str;
+}
