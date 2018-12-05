@@ -90,6 +90,44 @@ bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from )
 	return from.session.ProcessUpdateConnectionState( updatedState, from.address );
 }
 
+std::string ToString( eNetworkSessionState inEnum )
+{
+	std::string str = "";
+
+	switch (inEnum)
+	{
+	case NET_SESSION_DISCONNECTED:
+		str = "Disconnected";
+		break;
+
+	case NET_SESSION_BOUND:
+		str = "Bound";
+		break;
+
+	case NET_SESSION_CONNECTING:
+		str = "Connecting";
+		break;
+
+	case NET_SESSION_JOINING:
+		str = "Joining";
+		break;
+
+	case NET_SESSION_READY:
+		str = "Ready";
+		break;
+
+	case NUM_NET_SESSION_STATES:
+		str = std::to_string( NUM_NET_SESSION_STATES );
+		break;
+
+	default:
+		str = "ERROR!";
+		break;
+	}
+
+	return str;
+}
+
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 	: m_theRenderer( currentRenderer )
 {
@@ -188,7 +226,7 @@ void NetworkSession::Render() const
 
 	// Title Box
 	AABB2		titleBox = backgroundBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.f ) );
-	std::string	titleStr = "NETWORK SESSION";
+	std::string	titleStr = "NETWORK SESSION (" + ToString(m_state) + ")";
 	m_theRenderer->DrawTextInBox2D( titleStr.c_str(), Vector2( 0.f, 0.5f ), titleBox, m_uiTitleFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Simulated Rate, Lag & Loss
@@ -196,16 +234,17 @@ void NetworkSession::Render() const
 	std::string lossPercentageStr	= Stringf( "%.2f%%", m_simulatedLossFraction * 100.f );
 	std::string simLagRangeStr		= Stringf( "%dms - %dms", m_simulatedMinLatency_ms, m_simulatedMaxLatency_ms );
 	std::string heartbeatHzStr		= Stringf( "%.2fhz", m_heartbeatFrequency );
-	AABB2		srllBox				= backgroundBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.6f ), Vector2( 1.f, 0.9f ) );
+	AABB2		srllBox				= backgroundBox.GetBoundsFromPercentage( Vector2( 0.01f, 0.6f ), Vector2( 1.f, 0.9f ) );
 	std::string srllStr				= Stringf( "%-8s: %s (%s: %s)\n%-8s: %s\n%-8s: %s", "rate", sendRateStr.c_str(), "heartbeat", heartbeatHzStr.c_str(), "sim_lag", simLagRangeStr.c_str(), "sim_loss", lossPercentageStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( srllStr.c_str(), Vector2( 0.f, 1.f ), srllBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// My Socket Address
-	AABB2		myAddressBaseBox	= backgroundBox.GetBoundsFromPercentage   ( Vector2( 0.0f, 0.5f ), Vector2( 1.f, 0.7f ) );
-	AABB2		myAddressTitleBox	= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.0f, 0.5f ), Vector2( 1.f, 1.0f ) );
-	AABB2		myAddressBox		= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.0f ), Vector2( 1.f, 0.5f ) );
+	AABB2		myAddressBaseBox	= backgroundBox.GetBoundsFromPercentage   ( Vector2( 0.00f, 0.5f ), Vector2( 1.f, 0.7f ) );
+	AABB2		myAddressTitleBox	= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.00f, 0.5f ), Vector2( 1.f, 1.0f ) );
+	AABB2		myAddressBox		= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.01f, 0.0f ), Vector2( 1.f, 0.5f ) );
 	std::string myAddressTitle		= "My Socket Address:";
-	std::string socketAddrStr		= m_mySocket->m_address.AddressToString();
+	std::string hostClientStr		= std::string( m_myConnection->IsHost() ? "Host" : "Client" ) + " as \"" + m_myConnection->GetNetworkID() + "\"";
+	std::string socketAddrStr		= m_mySocket->m_address.AddressToString() + " (" + hostClientStr + ")";
 	m_theRenderer->DrawTextInBox2D( myAddressTitle.c_str(), Vector2( 0.f, 0.5f ), myAddressTitleBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 	m_theRenderer->DrawTextInBox2D( socketAddrStr.c_str(),  Vector2( 0.f, 0.5f ), myAddressBox,      m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
@@ -215,9 +254,9 @@ void NetworkSession::Render() const
 	m_theRenderer->DrawTextInBox2D( connectionsHeadingStr.c_str(), Vector2( 0.f, 0.5f ), connectionsHeadingBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Title Column of Table: All Connections
-	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
-	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-4s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
+	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.01f, 0.0f ), Vector2( 1.f, 0.4f ) );
+	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.00f, 0.9f ), Vector2( 1.f, 1.0f ) );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-12s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "state", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -232,13 +271,16 @@ void NetworkSession::Render() const
 		bool isLocal = m_boundConnections[i]->IsMe();
 		bool isHost  = m_boundConnections[i]->IsHost();
 		std::string connectionLebelStr = "";
-		if( isHost )
-			connectionLebelStr += "H ";
 		if( isLocal )
-			connectionLebelStr += "L ";
+			connectionLebelStr += "L";
+		if( isHost )
+			connectionLebelStr += "H";
 		
 		// idx
 		std::string idxStr = std::to_string( i );
+
+		// state
+		std::string connectionStateStr = ToString( m_boundConnections[i]->GetState() );
 
 		// address
 		std::string connectionAddrStr = m_boundConnections[i]->GetAddress().AddressToString();
@@ -280,7 +322,7 @@ void NetworkSession::Render() const
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-4s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", connectionLebelStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-12s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", connectionLebelStr.c_str(), idxStr.c_str(), connectionStateStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
 }
@@ -539,6 +581,7 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 	uint8_t idx_u8 = (uint8_t)idx;
 	m_allConnections.push_back( newConnection );
 	m_boundConnections[ idx_u8 ] = newConnection;
+	m_boundConnections[ idx_u8 ]->UpdateStateTo( NET_CONNECTION_CONNECTED );
 
 	// Send: JOIN_ACCEPT
 	NetworkMessage acceptMessage( "join_accept", LITTLE_ENDIAN );

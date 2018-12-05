@@ -40,6 +40,8 @@ enum eNetworkSessionState : uint8_t
 	NUM_NET_SESSION_STATES
 };
 
+std::string ToString( eNetworkSessionState inEnum );
+
 enum eNetworkSessionError : uint8_t
 {
 	NET_SESSION_OK = 0,						// No errors
@@ -53,7 +55,6 @@ enum eNetworkSessionError : uint8_t
 	NET_SESSION_ERROR_JOIN_DENIED_FULL,		// Debug - Session was full :(
 	NUM_NET_SESSION_ERRORS
 };
-
 
 //------------
 // Structures

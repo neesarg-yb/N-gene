@@ -29,6 +29,8 @@ enum eNetworkConnectionState : uint8_t
 	NUM_NET_CONNECTIONS
 };
 
+std::string ToString( eNetworkConnectionState inEnum );
+
 
 //---------------------------------
 // Structures
