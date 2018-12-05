@@ -294,14 +294,10 @@ void NetworkConnection::FlushMessages()
 	// If we need a heartbeat to be sent
 	if( m_heartbeatTimer.CheckAndReset() == true )
 	{
-		// Send heartbeat if not a local connection..
-		if( *this != *m_parentSession.GetMyConnection() )
-		{
-			m_immediatlyRespondForAck = false;
+		m_immediatlyRespondForAck = false;
 
-			NetworkMessage heartbeat( "heartbeat" );
-			Send( heartbeat );
-		}
+		NetworkMessage heartbeat( "heartbeat" );
+		Send( heartbeat );
 	}
 	
 	// To return, if there's nothing to send
