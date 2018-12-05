@@ -141,6 +141,8 @@ NetworkSession::~NetworkSession()
 
 void NetworkSession::Update()
 {
+	RemoveDisconnectedConnections();
+
 	ProcessIncoming();
 
 	switch (m_state)
@@ -466,7 +468,8 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 
 void NetworkSession::Disconnect()
 {
-
+	DeleteAllConnections();
+	UpdateStateTo( NET_SESSION_DISCONNECTED );
 }
 
 bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &reqFromAddress )
@@ -536,11 +539,28 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 
 bool NetworkSession::ProcessJoinDeny( eNetworkSessionError errorCode, NetworkAddress const &senderAddress )
 {
-	return false;
+	if( (errorCode == NUM_NET_SESSION_ERRORS) || (senderAddress != m_hostConnection->GetAddress()) )
+		return false;
+
+	SetError( errorCode, "Join requested denied from the host!" );
+
+	// Connection, disconnected
+	m_myConnection->UpdateStateTo( NET_CONNECTION_DISCONNECTED );
+
+	// Session, disconnected
+	UpdateStateTo( NET_SESSION_DISCONNECTED );
+
+	return true;
 }
 
 bool NetworkSession::ProcessJoinAccept( uint8_t connectionIdx, NetworkAddress const &senderAddress )
 {
+	if( (connectionIdx == MAX_SESSION_CONNECTIONS) || (senderAddress != m_hostConnection->GetAddress()) )
+		return false;
+
+	BindConnection( connectionIdx, m_myConnection );
+	m_myConnection->UpdateStateTo( NET_CONNECTION_CONNECTED );
+
 	return false;
 }
 
@@ -621,12 +641,21 @@ void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, Network
 	m_mySocket->SendTo( address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
 }
 
-void NetworkSession::BroadcastMessage( NetworkMessage &messageToBroadcast )
+void NetworkSession::BroadcastMessage( NetworkMessage &messageToBroadcast, NetworkConnection const *excludeConnection /* = nullptr */ )
 {
 	for each (NetworkConnection* connection in m_boundConnections)
 	{
 		if( connection != nullptr )
-			connection->Send( messageToBroadcast );
+		{
+			bool exclude = false;
+
+			// Exclude if it is same connection..
+			if( excludeConnection != nullptr )
+				exclude = (*connection == *excludeConnection);
+
+			if( exclude == false )
+				connection->Send( messageToBroadcast );
+		}
 	}
 }
 
@@ -642,7 +671,7 @@ NetworkConnection* NetworkSession::CreateConnection( NetworkConnectionInfo const
 	return newConnection;
 }
 
-void NetworkSession::DestroyConnection( NetworkConnection *connection )
+void NetworkSession::DeleteConnection( NetworkConnection* connection )
 {
 	// If it's the convenience pointer, set it to nullptr
 	if( connection == m_hostConnection )
@@ -672,7 +701,10 @@ void NetworkSession::DestroyConnection( NetworkConnection *connection )
 
 	// It was never registered, return
 	if( connectionFound == false )
+	{
+		delete connection;
 		return;
+	}
 
 	// Remove it from bound connections
 	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
@@ -687,8 +719,50 @@ void NetworkSession::DestroyConnection( NetworkConnection *connection )
 
 void NetworkSession::BindConnection( uint8_t idx, NetworkConnection *connection )
 {
-	UNUSED( idx );
-	UNUSED( connection );
+	// Update its index
+	connection->m_info.indexInSession = idx;
+
+	// Delete if a connection is already there
+	if( m_boundConnections[idx] != nullptr )
+	{
+		delete m_boundConnections[idx];
+		m_boundConnections[idx] = nullptr;
+	}
+
+	// Bind the new one!
+	m_boundConnections[idx] = connection;
+}
+
+void NetworkSession::DeleteAllConnections()
+{
+	for( int i = 0; i < m_allConnections.size(); i++ )
+		DeleteConnection( m_allConnections[i] );
+}
+
+void NetworkSession::RemoveDisconnectedConnections()
+{
+	for( int i = 0; i < m_allConnections.size(); i++ )
+	{
+		NetworkConnection	&thisConnection = *m_allConnections[i];
+		bool				 isDisconnected = (thisConnection.GetState() == NET_CONNECTION_DISCONNECTED);
+		
+		if( isDisconnected == false )
+			continue;
+
+		// This connection marked itself as disconnected..
+		bool isMyConnection		= (thisConnection == *m_myConnection);
+		bool isHostConnection	= (thisConnection == *m_hostConnection);
+		if( isMyConnection || isHostConnection )
+		{
+			// If I or host gets disconnected, destroy all connections
+			DeleteAllConnections();
+
+			// Set session state to disconnected
+			UpdateStateTo( NET_SESSION_DISCONNECTED );
+		}
+		else
+			DeleteConnection( &thisConnection );
+	}
 }
 
 void NetworkSession::SetBoundConnectionsToNull()
@@ -699,52 +773,6 @@ void NetworkSession::SetBoundConnectionsToNull()
 
 		if( connection != nullptr )
 			connection = nullptr;
-	}
-}
-
-void NetworkSession::DeleteConnection( NetworkConnection* &connection )
-{
-	// Reset the pointers to nullptr
-	if( m_myConnection == connection )
-		m_myConnection = nullptr;
-
-	if( m_hostConnection == connection )
-	{
-		m_hostConnection = nullptr;
-		UpdateStateTo( NET_SESSION_DISCONNECTED );
-	}
-
-	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
-	{
-		if( m_boundConnections[i] == connection )
-			m_boundConnections[i] = nullptr;
-	}
-
-	// Delete the connection
-	bool isDeleted = false;
-	for( uint i = 0; i < m_allConnections.size(); i++ )
-	{
-		if( m_allConnections[i] != connection )
-			continue;
-
-		std::swap( m_allConnections[i], m_allConnections.back() );
-		delete m_allConnections.back();
-		m_allConnections.back() = nullptr;
-
-		m_allConnections.pop_back();
-		
-		isDeleted = true;
-		break;
-	}
-
-	// If connection was not registered, delete the provided connection at least
-	if( isDeleted == false )
-	{
-		if( connection != nullptr )
-		{
-			delete connection;
-			connection = nullptr;
-		}
 	}
 }
 

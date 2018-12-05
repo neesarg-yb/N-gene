@@ -103,6 +103,7 @@ private:
 
 public:
 	bool operator == ( NetworkConnection const &b ) const;
+	bool operator != ( NetworkConnection const &b ) const;
 
 public:
 	inline NetworkAddress	GetAddress()		const { return m_info.address; }
