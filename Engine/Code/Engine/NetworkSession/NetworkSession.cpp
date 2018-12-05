@@ -68,6 +68,8 @@ bool OnJoinDeny( NetworkMessage const &msg, NetworkSender &from )
 bool OnAccept( NetworkMessage const &msg, NetworkSender &from ) 
 {
 	uint8_t connectionIdx = MAX_SESSION_CONNECTIONS;
+	char netID[ MAX_NETWORK_ID_LENGTH + 1 ];
+	msg.ReadString( netID, MAX_NETWORK_ID_LENGTH );
 	msg.ReadBytes( &connectionIdx, sizeof(uint8_t) );
 
 	return from.session.ProcessJoinAccept( connectionIdx, from.address );
@@ -525,14 +527,23 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 	// Bind as new connection
 	int idx = GetIndexForNewConnection();
 	NetworkConnection *newConnection = new NetworkConnection( idx, reqFromAddress, networkID, *this );
+
+	if( idx == -1 )
+	{
+		delete newConnection;
+		newConnection = nullptr;
+
+		return false;
+	}
 	
+	uint8_t idx_u8 = (uint8_t)idx;
 	m_allConnections.push_back( newConnection );
-	m_boundConnections[ idx ] = newConnection;
+	m_boundConnections[ idx_u8 ] = newConnection;
 
 	// Send: JOIN_ACCEPT
-	NetworkMessage acceptMessage( "join_accept" );
+	NetworkMessage acceptMessage( "join_accept", LITTLE_ENDIAN );
 	acceptMessage.WriteString( m_hostConnection->GetNetworkID().c_str() );
-	acceptMessage.WriteBytes( sizeof(int), &idx );
+	acceptMessage.WriteBytes( sizeof(uint8_t), &idx_u8 );
 	newConnection->Send( acceptMessage );
 
 	// Send: JOIN_FINISHED
