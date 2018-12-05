@@ -74,12 +74,12 @@ eNetworkConnectionState NetworkConnection::GetState() const
 	return m_state;
 }
 
-void NetworkConnection::UpdateStateTo( eNetworkConnectionState newState )
+void NetworkConnection::UpdateStateTo( eNetworkConnectionState newState, bool broadcast )
 {
-	if( m_state != newState )
+	if( broadcast == true && m_state != newState )
 	{
 		NetworkMessage msg( "update_connection", LITTLE_ENDIAN );
-		msg.WriteBytes( sizeof(eNetworkConnectionState), &m_state );
+		msg.WriteBytes( sizeof(eNetworkConnectionState), &newState );
 		m_parentSession.BroadcastMessage( msg, this );
 	}
 

@@ -114,7 +114,7 @@ public:
 
 	// Connection State
 	eNetworkConnectionState	GetState() const;
-	void					UpdateStateTo( eNetworkConnectionState newState );
+	void					UpdateStateTo( eNetworkConnectionState newState, bool broadcast );
 
 	// Receiving End
 	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );		// It is there for tracking the messages & packets, it doesn't process em!
