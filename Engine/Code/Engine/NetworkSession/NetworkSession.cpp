@@ -475,7 +475,7 @@ void NetworkSession::Host( char const *myID, uint16_t port, uint16_t portRange /
 	m_boundConnections[ 0 ] = myConnectionAsHost;
 
 	// Connection: ready
-	myConnectionAsHost->UpdateStateTo( NET_CONNECTION_READY );
+	myConnectionAsHost->UpdateStateTo( NET_CONNECTION_READY, false );
 	
 	// Session: ready
 	UpdateStateTo( NET_SESSION_READY );
@@ -486,9 +486,12 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	bool portBound = BindPort( hostAddress.port, MAX_SESSION_CONNECTIONS );
 	if( portBound == false )
 	{
+		UpdateStateTo( NET_SESSION_DISCONNECTED );
 		SetError( NET_SESSION_ERROR_INTERNAL, "Can't bind the port..!" );
 		return;
 	}
+	else
+		UpdateStateTo( NET_SESSION_BOUND );
 
 	// Make a connection for the host
 	NetworkConnection *host = new NetworkConnection( 0, hostAddress, "host", *this );
@@ -499,7 +502,7 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	m_allConnections.push_back( host );
 	m_boundConnections[0] = host;
 	
-	host->UpdateStateTo( NET_CONNECTION_CONNECTED );
+	host->UpdateStateTo( NET_CONNECTION_DISCONNECTED, false );
 
 	// Send join request to join
 	NetworkMessage joinRequestMessage("join_request", LITTLE_ENDIAN);
@@ -581,17 +584,18 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 	uint8_t idx_u8 = (uint8_t)idx;
 	m_allConnections.push_back( newConnection );
 	m_boundConnections[ idx_u8 ] = newConnection;
-	m_boundConnections[ idx_u8 ]->UpdateStateTo( NET_CONNECTION_CONNECTED );
 
 	// Send: JOIN_ACCEPT
 	NetworkMessage acceptMessage( "join_accept", LITTLE_ENDIAN );
 	acceptMessage.WriteString( m_hostConnection->GetNetworkID().c_str() );
 	acceptMessage.WriteBytes( sizeof(uint8_t), &idx_u8 );
 	newConnection->Send( acceptMessage );
+	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, false );
 
 	// Send: JOIN_FINISHED
 	NetworkMessage joinFinishedMessage( "join_finished" );
 	newConnection->Send( joinFinishedMessage );
+	newConnection->UpdateStateTo( NET_CONNECTION_READY, false );
 
 	return true;
 }
@@ -604,7 +608,7 @@ bool NetworkSession::ProcessJoinDeny( eNetworkSessionError errorCode, NetworkAdd
 	SetError( errorCode, "Join requested denied from the host!" );
 
 	// Connection, disconnected
-	m_myConnection->UpdateStateTo( NET_CONNECTION_DISCONNECTED );
+	m_myConnection->UpdateStateTo( NET_CONNECTION_DISCONNECTED, true );
 
 	// Session, disconnected
 	UpdateStateTo( NET_SESSION_DISCONNECTED );
@@ -618,7 +622,10 @@ bool NetworkSession::ProcessJoinAccept( uint8_t connectionIdx, NetworkAddress co
 		return false;
 
 	BindConnection( connectionIdx, m_myConnection );
-	m_myConnection->UpdateStateTo( NET_CONNECTION_CONNECTED );
+	m_myConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, true );
+	m_hostConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, false );
+
+	UpdateStateTo( NET_SESSION_JOINING );
 
 	return false;
 }
@@ -627,6 +634,9 @@ bool NetworkSession::ProcessJoinFinished( NetworkAddress const &senderAddress )
 {
 	if( m_hostConnection->GetAddress() == senderAddress )
 	{
+		m_myConnection->UpdateStateTo( NET_CONNECTION_READY, true );
+		m_hostConnection->UpdateStateTo( NET_CONNECTION_READY, false );
+
 		UpdateStateTo( NET_SESSION_READY );
 		return true;
 	}
@@ -641,7 +651,7 @@ bool NetworkSession::ProcessUpdateConnectionState( eNetworkConnectionState state
 	if( connection == nullptr )
 		return false;
 
-	connection->UpdateStateTo( state );
+	connection->UpdateStateTo( state, false );
 	return true;
 }
 
