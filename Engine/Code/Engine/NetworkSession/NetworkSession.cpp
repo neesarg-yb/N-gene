@@ -598,12 +598,12 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 	acceptMessage.WriteString( m_hostConnection->GetNetworkID().c_str() );
 	acceptMessage.WriteBytes( sizeof(uint8_t), &idx_u8 );
 	newConnection->Send( acceptMessage );
-	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, false );
+	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTING, false );
 
 	// Send: JOIN_FINISHED
 	NetworkMessage joinFinishedMessage( "join_finished" );
 	newConnection->Send( joinFinishedMessage );
-	newConnection->UpdateStateTo( NET_CONNECTION_READY, false );
+	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, false );
 
 	return true;
 }
