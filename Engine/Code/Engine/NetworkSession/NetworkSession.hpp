@@ -226,7 +226,7 @@ private:
 	uint			m_simulatedMinLatency_ms = 0U;
 	uint			m_simulatedMaxLatency_ms = 0U;
 	uint8_t			m_simulatedSendFrequency = 20;
-	float			m_heartbeatFrequency	 = 0.2f;
+	float			m_heartbeatFrequency	 = 2.f;
 
 private:
 	StampedNetworkPacketPriorityQueue m_receivedPackets;				// Priority Queue
