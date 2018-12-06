@@ -90,6 +90,14 @@ bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from )
 	return from.session.ProcessUpdateConnectionState( updatedState, from.address );
 }
 
+bool OnHangup( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( msg );
+	ConsolePrintf( RGBA_RED_COLOR, "Connection \"%s\" hanged up!", from.connection->GetNetworkID().c_str() );
+
+	return from.session.ProcessUpdateConnectionState( NET_CONNECTION_DISCONNECTED, from.address );
+}
+
 std::string ToString( eNetworkSessionState inEnum )
 {
 	std::string str = "";
@@ -153,17 +161,11 @@ NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 
 NetworkSession::~NetworkSession()
 {
-	// Delete all connections
-	for( size_t i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
-	{
-		// If nullptr, skip
-		if( m_boundConnections[i] == nullptr )
-			continue;
+	// Tell all connections that I'm quitting, directly!
+	SendHangupToAllConnections();
 
-		// Delete
-		delete m_boundConnections[i];
-		m_boundConnections[i] = nullptr;
-	}
+	// Delete all connections
+	DeleteAllConnections();
 
 	// Delete all message definitions
 	for( int i = 0; i < 256; i++ )
@@ -390,6 +392,20 @@ void NetworkSession::UpdateStateTo( eNetworkSessionState newState )
 	m_state = newState;
 }
 
+void NetworkSession::SendHangupToAllConnections()
+{
+	for( int i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] == nullptr )
+			continue;
+
+		NetworkMessage hangupMsg( "hangup", LITTLE_ENDIAN );
+
+		m_boundConnections[i]->Send( hangupMsg );
+		m_boundConnections[i]->FlushMessages( true );
+	}
+}
+
 bool NetworkSession::BindPort( uint16_t port, uint16_t range )
 {
 	NetworkAddress localAddress = NetworkAddress::GetLocal();
@@ -431,6 +447,7 @@ void NetworkSession::RegisterCoreMessages()
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_ACCEPT,				"join_accept",			OnAccept,			NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_FINISHED,				"join_finished",		OnJoinFinished,		NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 	RegisterNetworkMessage( NET_MESSAGE_UPDATE_CONNECTION_STATE,	"update_connection",	OnUpdateConnection,	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
+	RegisterNetworkMessage( NET_MESSAGE_HANGUP,						"hangup",				OnHangup,			NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 }
 
 void NetworkSession::ProcessIncoming()

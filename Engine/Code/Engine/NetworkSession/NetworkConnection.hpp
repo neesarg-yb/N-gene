@@ -125,7 +125,7 @@ public:
 	// Sending End
 	bool	HasNewMessagesToSend() const;				// New reliables or unreliable, not the unconfirmed ones
 	void	Send( NetworkMessage &msg );				// Queues the messages to send
-	void	FlushMessages();							// Sends the queued messages
+	void	FlushMessages( bool ignoreSendRate = false );							// Sends the queued messages
 
 	// Current State - Messages
 	uint16_t GetLowestReliableIDToConfirm() const;
