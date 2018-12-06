@@ -107,6 +107,11 @@ private:
 	double const		 m_joinTimeoutSeconds	= 10.0;
 	Stopwatch			 m_joinTimeoutTimer;
 
+	// Net. Clock
+	uint				 m_lastReceivedHostTime_ms	= 0U;						// The time we received from the host + (RTT / 2)
+	uint				 m_desiredClientTime_ms		= 0U;						// Time we want the client to eventually be
+	uint				 m_currentClientTime_ms		= 0U;						// What the client will actually report return
+
 public:
 	// My Connections
 	NetworkConnectionsVector	 m_allConnections;								// Vector of all the connections
@@ -136,6 +141,8 @@ public:
 	void Render() const;
 
 private:
+	void UpdateNetClock();
+
 	void UpdateSessionDisconnected();
 	void UpdateSessionBound();
 	void UpdateSessionConnecting();
@@ -176,8 +183,9 @@ public:
 	bool ProcessJoinRequest				( char *networkID, NetworkAddress const &reqFromAddress );
 	bool ProcessJoinDeny				( eNetworkSessionError errorCode, NetworkAddress const &senderAddress );
 	bool ProcessJoinAccept				( uint8_t connectionIdx, NetworkAddress const &senderAddress );
-	bool ProcessJoinFinished			( NetworkAddress const &senderAddress );
+	bool ProcessJoinFinished			( NetworkAddress const &senderAddress, uint hostNetClockTime_ms );
 	bool ProcessUpdateConnectionState	( eNetworkConnectionState state, NetworkAddress const &senderAddress );
+	bool ProcessNetClockSyncFromHost	( uint hostNetClockTime_ms );
 
 	// Session Errors
 	void					SetError( eNetworkSessionError error, char const *str );
@@ -189,6 +197,8 @@ public:
 	inline bool				IsHosting()		const { return m_myConnection == m_hostConnection; }
 	inline bool				IsListening()	const { return m_state == NET_SESSION_READY; }
 	bool					IsLobbyFull()	const;
+
+	uint					GetNetTimeMilliseconds();
 
 private:
 	// Network Connections

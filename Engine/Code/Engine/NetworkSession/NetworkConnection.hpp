@@ -82,7 +82,7 @@ public:
 	uint64_t			 m_lastReceivedTimeHPC			= Clock::GetCurrentHPC();
 
 	float				 m_loss	= 0.f;												// [0, 1] Loss rate we perceive to this connection
-	float				 m_rtt	= 0.f;												// Latency perceived on this connection
+	float				 m_rtt	= 0.f;												// IN SECONDS; Latency perceived on this connection
 
 private:
 	// Outgoing-and-Sent Messages

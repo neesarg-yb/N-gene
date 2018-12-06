@@ -4,6 +4,7 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 bool OnPing( NetworkMessage const &msg, NetworkSender &from )
 {
@@ -36,14 +37,19 @@ bool OnPong( NetworkMessage const &msg, NetworkSender &from )
 
 bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
 {
-	UNUSED( msg );
-	
 	if( from.connection == nullptr )
 		return false;
 	else
 	{
-		// ConsolePrintf( "Heartbeat Received from [%d] connection.", from.connection->m_indexInSession );
-		return true;
+		uint netClockTime_ms = 0U;
+		msg.ReadBytes( &netClockTime_ms, sizeof(uint) );
+
+		// If it is host, we use passed time to sync NetClock
+		NetworkConnection *connection = from.connection;
+		if( connection->IsHost() == false )
+			return true;
+		
+		return from.session.ProcessNetClockSyncFromHost( netClockTime_ms );
 	}
 }
 
@@ -77,9 +83,10 @@ bool OnAccept( NetworkMessage const &msg, NetworkSender &from )
 
 bool OnJoinFinished( NetworkMessage const &msg, NetworkSender &from ) 
 {
-	UNUSED( msg );
+	uint hostNetTime_ms = 0U;
+	msg.ReadBytes( &hostNetTime_ms, sizeof(uint) );
 
-	return from.session.ProcessJoinFinished( from.address );
+	return from.session.ProcessJoinFinished( from.address, hostNetTime_ms );
 }
 
 bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from ) 
@@ -184,6 +191,7 @@ NetworkSession::~NetworkSession()
 
 void NetworkSession::Update()
 {
+	UpdateNetClock();
 	ProcessIncoming();
 
 	switch (m_state)
@@ -248,8 +256,10 @@ void NetworkSession::Render() const
 	AABB2		myAddressTitleBox	= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.00f, 0.5f ), Vector2( 1.f, 1.0f ) );
 	AABB2		myAddressBox		= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.01f, 0.0f ), Vector2( 1.f, 0.5f ) );
 	std::string myAddressTitle		= "My Socket Address:";
+	std::string clockStr			= m_myConnection->IsHost() ? std::to_string(GetMasterClock()->total.seconds) : std::to_string( m_currentClientTime_ms * 0.001 );
+	std::string netClockStr			= "[ NetClock  " + clockStr + "s ]";
 	std::string hostClientStr		= std::string( m_myConnection->IsHost() ? "Host" : "Client" ) + " as \"" + m_myConnection->GetNetworkID() + "\"";
-	std::string socketAddrStr		= m_mySocket->m_address.AddressToString() + " (" + hostClientStr + ")";
+	std::string socketAddrStr		= m_mySocket->m_address.AddressToString() + " (" + hostClientStr + ")" + " | " + netClockStr;
 	m_theRenderer->DrawTextInBox2D( myAddressTitle.c_str(), Vector2( 0.f, 0.5f ), myAddressTitleBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 	m_theRenderer->DrawTextInBox2D( socketAddrStr.c_str(),  Vector2( 0.f, 0.5f ), myAddressBox,      m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
@@ -330,6 +340,61 @@ void NetworkSession::Render() const
 		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-12s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", connectionLebelStr.c_str(), idxStr.c_str(), connectionStateStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 	}
+}
+
+// void NetworkSession::UpdateNetClock()
+// {
+// 	if( m_myConnection->IsHost() )
+// 		return;
+// 
+// 	uint deltaTime_ms = GetMasterClock()->frame.ms;
+// 	m_desiredClientTime_ms += deltaTime_ms;
+// 
+// 	uint clientTimeWithDelta = m_currentClientTime_ms + deltaTime_ms;
+// 	uint clientTimeDiff		 = m_desiredClientTime_ms - clientTimeWithDelta;
+// 
+// 	float deltaTimeScale = 1.f;
+// 	if( deltaTime_ms > clientTimeDiff )
+// 	{
+// 		// Scale the deltaTime down
+// 		float scaleDownBy = (float)( (double)clientTimeDiff / (double)deltaTime_ms );
+// 
+// 		float minScaleDownAllowed = 1.f - MAX_NETWORK_TIME_DILATION;
+// 		deltaTimeScale = (scaleDownBy < minScaleDownAllowed) ? minScaleDownAllowed : scaleDownBy; 
+// 	}
+// 	else
+// 	{
+// 		// Scale deltaTime up
+// 		float scaleUpBy = (float)( (double)clientTimeDiff / (double)deltaTime_ms );
+// 
+// 		float maxScaleUpAllowed = 1.f + MAX_NETWORK_TIME_DILATION;
+// 		deltaTimeScale = (scaleUpBy > maxScaleUpAllowed) ? maxScaleUpAllowed : scaleUpBy;
+// 	}
+// 
+// 	m_currentClientTime_ms += (uint)((double)deltaTime_ms * (double)deltaTimeScale);
+// 
+// 	DebugRender2DText( 0.f, Vector2::ZERO, 20.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf("%f", deltaTimeScale) );
+// }
+
+void NetworkSession::UpdateNetClock()
+{
+	if( m_myConnection->IsHost() )
+		return;
+
+	uint deltaTime_ms = GetMasterClock()->frame.ms;
+	m_desiredClientTime_ms += deltaTime_ms;
+
+	float scale = 1.f;
+	if( m_currentClientTime_ms + deltaTime_ms > m_desiredClientTime_ms )			// Scale down..
+		scale = 1.f - MAX_NETWORK_TIME_DILATION;
+	else if(  m_currentClientTime_ms + deltaTime_ms < m_desiredClientTime_ms  )		// Scale up..
+		scale = 1.f + MAX_NETWORK_TIME_DILATION;
+	else
+		scale = 1.f;
+
+	m_currentClientTime_ms += (uint)((double)deltaTime_ms * (double)scale);
+
+	DebugRender2DText( 0.f, Vector2::ZERO, 20.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf("%f", scale) );
 }
 
 void NetworkSession::UpdateSessionDisconnected()
@@ -618,7 +683,10 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTING, false );
 
 	// Send: JOIN_FINISHED
-	NetworkMessage joinFinishedMessage( "join_finished" );
+	NetworkMessage joinFinishedMessage( "join_finished", LITTLE_ENDIAN );
+	uint currentTime_ms = GetMasterClock()->total.ms;
+	joinFinishedMessage.WriteBytes( sizeof(uint), &currentTime_ms );
+
 	newConnection->Send( joinFinishedMessage );
 	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, false );
 
@@ -655,10 +723,21 @@ bool NetworkSession::ProcessJoinAccept( uint8_t connectionIdx, NetworkAddress co
 	return false;
 }
 
-bool NetworkSession::ProcessJoinFinished( NetworkAddress const &senderAddress )
+bool NetworkSession::ProcessJoinFinished( NetworkAddress const &senderAddress, uint hostNetClockTime_ms )
 {
 	if( m_hostConnection->GetAddress() == senderAddress )
 	{
+		if( hostNetClockTime_ms > m_lastReceivedHostTime_ms )
+		{
+			// Set desired and last received net time
+			uint halfRTT_ms	= (uint)((m_hostConnection->m_rtt * 1000.f) * 0.5f);			// m_rtt is in seconds
+			m_lastReceivedHostTime_ms = hostNetClockTime_ms + halfRTT_ms;
+			m_desiredClientTime_ms = m_lastReceivedHostTime_ms;
+
+			// Set current client net time to desired, because we're just starting!
+			m_currentClientTime_ms = m_desiredClientTime_ms;
+		}
+
 		m_myConnection->UpdateStateTo( NET_CONNECTION_READY, true );
 		m_hostConnection->UpdateStateTo( NET_CONNECTION_READY, false );
 
@@ -677,6 +756,19 @@ bool NetworkSession::ProcessUpdateConnectionState( eNetworkConnectionState state
 		return false;
 
 	connection->UpdateStateTo( state, false );
+	return true;
+}
+
+bool NetworkSession::ProcessNetClockSyncFromHost( uint hostNetClockTime_ms )
+{
+	// We only care if received time is greater than the last received time
+	if( hostNetClockTime_ms <= m_lastReceivedHostTime_ms )
+		return true;
+
+	uint halfRTT_ms = (uint)((m_hostConnection->m_rtt * 1000.f) * 0.5f);
+	m_lastReceivedHostTime_ms = hostNetClockTime_ms + halfRTT_ms;
+	m_desiredClientTime_ms = m_lastReceivedHostTime_ms;
+
 	return true;
 }
 
@@ -711,6 +803,11 @@ bool NetworkSession::IsLobbyFull() const
 	}
 
 	return true;
+}
+
+uint NetworkSession::GetNetTimeMilliseconds()
+{
+	return m_currentClientTime_ms;
 }
 
 void NetworkSession::SendPacket( NetworkPacket &packetToSend )
