@@ -148,6 +148,7 @@ NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 
 	// Timers
 	m_joinRequestTimer.SetTimer( m_joinTimerSeconds );
+	m_joinTimeoutTimer.SetTimer( m_joinTimeoutSeconds );
 }
 
 NetworkSession::~NetworkSession()
@@ -181,8 +182,6 @@ NetworkSession::~NetworkSession()
 
 void NetworkSession::Update()
 {
-	RemoveDisconnectedConnections();
-
 	ProcessIncoming();
 
 	switch (m_state)
@@ -210,6 +209,10 @@ void NetworkSession::Update()
 	default:
 		break;
 	}
+
+	CheckForConnectionTimeout();
+	RemoveDisconnectedConnections();
+	ProcessOutgoing();
 }
 
 void NetworkSession::Render() const
@@ -502,7 +505,7 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	m_allConnections.push_back( host );
 	m_boundConnections[0] = host;
 	
-	host->UpdateStateTo( NET_CONNECTION_DISCONNECTED, false );
+	host->UpdateStateTo( NET_CONNECTION_CONNECTING, false );
 
 	// Send join request to join
 	NetworkMessage joinRequestMessage("join_request", LITTLE_ENDIAN);
@@ -515,8 +518,12 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	DeleteConnection( m_myConnection );
 	m_myConnection = myConnection;
 	m_allConnections.push_back( m_myConnection );
+	m_myConnection->UpdateStateTo( NET_CONNECTION_CONNECTING, false );
 
 	UpdateStateTo( NET_SESSION_CONNECTING );
+
+	m_joinRequestTimer.Reset();
+	m_joinTimeoutTimer.Reset();
 }
 
 void NetworkSession::Disconnect()
@@ -832,6 +839,23 @@ void NetworkSession::RemoveDisconnectedConnections()
 		}
 		else
 			DeleteConnection( &thisConnection );
+	}
+}
+
+void NetworkSession::CheckForConnectionTimeout()
+{
+	for( int i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] == nullptr )
+			continue;
+
+		uint64_t currentHPC		 = Clock::GetCurrentHPC();
+		uint64_t lastReceivedHPC = m_boundConnections[i]->m_lastReceivedTimeHPC;
+		double	 idleTimeSeconds = Clock::GetSecondsFromHPC(currentHPC - lastReceivedHPC);
+
+		// Mark DISCONNECTED, if timed out
+		if( idleTimeSeconds > NETWORK_CONNECTION_TIMEOUT_SECONDS )
+			m_boundConnections[i]->UpdateStateTo( NET_CONNECTION_DISCONNECTED, false );
 	}
 }
 
