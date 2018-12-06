@@ -473,10 +473,6 @@ void theGame::BeginFrame()
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
-	// Network Session
-	if( m_session->IsRunning() )
-		m_session->ProcessIncoming();
-
 	m_currentGameState->BeginFrame();
 }
 
@@ -518,10 +514,6 @@ void theGame::EndFrame()
 			}
 		}
 	}
-
-	// Network Session
-	if( m_session->IsRunning() )
-		m_session->ProcessOutgoing();
 }
 
 void theGame::Update() 
@@ -538,6 +530,10 @@ void theGame::Update()
 
 	// Remote Command Service
 	g_rcs->Update( deltaSeconds );
+
+	// Network Session
+	if( m_session->IsRunning() )
+		m_session->Update();
 	
 	// For UBOTesting..
 	g_theRenderer->UpdateTime( deltaSeconds, deltaSeconds );
