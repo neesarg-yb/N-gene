@@ -46,10 +46,10 @@ bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
 
 		// If it is host, we use passed time to sync NetClock
 		NetworkConnection *connection = from.connection;
-		if( connection->IsHost() == false )
+		if( connection->IsClient() )		
+			return from.session.ProcessNetClockSyncFromHost( netClockTime_ms );
+		else
 			return true;
-		
-		return from.session.ProcessNetClockSyncFromHost( netClockTime_ms );
 	}
 }
 
@@ -256,7 +256,7 @@ void NetworkSession::Render() const
 	AABB2		myAddressTitleBox	= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.00f, 0.5f ), Vector2( 1.f, 1.0f ) );
 	AABB2		myAddressBox		= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.01f, 0.0f ), Vector2( 1.f, 0.5f ) );
 	std::string myAddressTitle		= "My Socket Address:";
-	std::string clockStr			= m_myConnection->IsHost() ? std::to_string(GetMasterClock()->total.seconds) : std::to_string( m_currentClientTime_ms * 0.001 );
+	std::string clockStr			= std::to_string( (double)GetNetTimeMilliseconds() * 0.001f );
 	std::string netClockStr			= "[ NetClock  " + clockStr + "s ]";
 	std::string hostClientStr		= std::string( m_myConnection->IsHost() ? "Host" : "Client" ) + " as \"" + m_myConnection->GetNetworkID() + "\"";
 	std::string socketAddrStr		= m_mySocket->m_address.AddressToString() + " (" + hostClientStr + ")" + " | " + netClockStr;
@@ -310,7 +310,8 @@ void NetworkSession::Render() const
 		std::string lossPercentStr = Stringf( "%.2f", m_boundConnections[i]->m_loss * 100.f );
 
 		// lrcv(s)
-		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_boundConnections[i]->m_lastReceivedTimeHPC;
+		TODO( "Make sure we're not using GetMasterClock()->GetCurrentHPC()! GetCurrentHPC() is a static function, you meant to use GetMasterClock().total.hpc..!" );
+		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_boundConnections[i]->m_lastReceivedTimeHPC; 
 		double	 lastReceivedDeltaSec = Clock::GetSecondsFromHPC( lastReceivedDeltaHPC );
 		std::string lrcvStr = Stringf( "%.3f", lastReceivedDeltaSec);
 
@@ -342,55 +343,20 @@ void NetworkSession::Render() const
 	}
 }
 
-// void NetworkSession::UpdateNetClock()
-// {
-// 	if( m_myConnection->IsHost() )
-// 		return;
-// 
-// 	uint deltaTime_ms = GetMasterClock()->frame.ms;
-// 	m_desiredClientTime_ms += deltaTime_ms;
-// 
-// 	uint clientTimeWithDelta = m_currentClientTime_ms + deltaTime_ms;
-// 	uint clientTimeDiff		 = m_desiredClientTime_ms - clientTimeWithDelta;
-// 
-// 	float deltaTimeScale = 1.f;
-// 	if( deltaTime_ms > clientTimeDiff )
-// 	{
-// 		// Scale the deltaTime down
-// 		float scaleDownBy = (float)( (double)clientTimeDiff / (double)deltaTime_ms );
-// 
-// 		float minScaleDownAllowed = 1.f - MAX_NETWORK_TIME_DILATION;
-// 		deltaTimeScale = (scaleDownBy < minScaleDownAllowed) ? minScaleDownAllowed : scaleDownBy; 
-// 	}
-// 	else
-// 	{
-// 		// Scale deltaTime up
-// 		float scaleUpBy = (float)( (double)clientTimeDiff / (double)deltaTime_ms );
-// 
-// 		float maxScaleUpAllowed = 1.f + MAX_NETWORK_TIME_DILATION;
-// 		deltaTimeScale = (scaleUpBy > maxScaleUpAllowed) ? maxScaleUpAllowed : scaleUpBy;
-// 	}
-// 
-// 	m_currentClientTime_ms += (uint)((double)deltaTime_ms * (double)deltaTimeScale);
-// 
-// 	DebugRender2DText( 0.f, Vector2::ZERO, 20.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf("%f", deltaTimeScale) );
-// }
-
 void NetworkSession::UpdateNetClock()
 {
 	if( m_myConnection->IsHost() )
 		return;
 
+	// Client only..
 	uint deltaTime_ms = GetMasterClock()->frame.ms;
 	m_desiredClientTime_ms += deltaTime_ms;
 
 	float scale = 1.f;
 	if( m_currentClientTime_ms + deltaTime_ms > m_desiredClientTime_ms )			// Scale down..
 		scale = 1.f - MAX_NETWORK_TIME_DILATION;
-	else if(  m_currentClientTime_ms + deltaTime_ms < m_desiredClientTime_ms  )		// Scale up..
+	else															// Scale up..
 		scale = 1.f + MAX_NETWORK_TIME_DILATION;
-	else
-		scale = 1.f;
 
 	m_currentClientTime_ms += (uint)((double)deltaTime_ms * (double)scale);
 
@@ -761,13 +727,18 @@ bool NetworkSession::ProcessUpdateConnectionState( eNetworkConnectionState state
 
 bool NetworkSession::ProcessNetClockSyncFromHost( uint hostNetClockTime_ms )
 {
+	if( m_myConnection->IsHost() )
+		return true;
+
 	// We only care if received time is greater than the last received time
 	if( hostNetClockTime_ms <= m_lastReceivedHostTime_ms )
 		return true;
 
-	uint halfRTT_ms = (uint)((m_hostConnection->m_rtt * 1000.f) * 0.5f);
-	m_lastReceivedHostTime_ms = hostNetClockTime_ms + halfRTT_ms;
-	m_desiredClientTime_ms = m_lastReceivedHostTime_ms;
+	m_lastReceivedHostTime_ms	= hostNetClockTime_ms;
+	uint halfRTT_ms				= (uint)((m_hostConnection->m_rtt * 1000.f) * 0.5f);
+	m_desiredClientTime_ms		= m_lastReceivedHostTime_ms + halfRTT_ms;
+
+	DebugRender2DText( 0.45f, Vector2( 0.f, 20.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, Stringf("receivedHostTime = %f; halfRTT = %f", hostNetClockTime_ms * 0.001, halfRTT_ms * 0.001) );
 
 	return true;
 }
@@ -805,9 +776,12 @@ bool NetworkSession::IsLobbyFull() const
 	return true;
 }
 
-uint NetworkSession::GetNetTimeMilliseconds()
+uint NetworkSession::GetNetTimeMilliseconds() const
 {
-	return m_currentClientTime_ms;
+	if( m_myConnection->IsHost() )
+		return GetMasterClock()->total.ms;
+	else
+		return m_currentClientTime_ms;
 }
 
 void NetworkSession::SendPacket( NetworkPacket &packetToSend )
