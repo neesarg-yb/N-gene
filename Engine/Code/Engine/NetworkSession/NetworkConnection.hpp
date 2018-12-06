@@ -24,6 +24,7 @@ typedef std::vector< NetworkMessage* > NetworkMessages;
 enum eNetworkConnectionState : uint8_t
 {
 	NET_CONNECTION_DISCONNECTED = 0,
+	NET_CONNECTION_CONNECTING,
 	NET_CONNECTION_CONNECTED,
 	NET_CONNECTION_READY,
 	NUM_NET_CONNECTIONS
@@ -64,6 +65,7 @@ public:
 	// Connection Info.
 	NetworkSession			&m_parentSession;
 	NetworkConnectionInfo	 m_info;
+
 private:
 	eNetworkConnectionState	 m_state					= NET_CONNECTION_DISCONNECTED;
 

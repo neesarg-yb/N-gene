@@ -694,6 +694,10 @@ std::string ToString( eNetworkConnectionState inEnum )
 		str = "Disconnected";
 		break;
 
+	case NET_CONNECTION_CONNECTING:
+		str = "Connecting";
+		break;
+
 	case NET_CONNECTION_CONNECTED:
 		str = "Connected";
 		break;

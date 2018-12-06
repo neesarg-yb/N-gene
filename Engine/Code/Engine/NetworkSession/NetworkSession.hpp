@@ -194,6 +194,7 @@ private:
 	void					DeleteConnection	( NetworkConnection* connection );		// Deletes the connection and removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections
 	void					DeleteAllConnections();										// Including myConnection & hostConnection
 	void					RemoveDisconnectedConnections();
+	void					CheckForConnectionTimeout();								// For the bound connections, if timed-out, marks that connection as disconnected..
 	
 	void					SetBoundConnectionsToNull();								// Deletes and sets all bound connections to nullptr
 	bool					ConnectionAlreadyExists	( NetworkAddress const &address );
