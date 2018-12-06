@@ -157,9 +157,12 @@ private:
 
 public:
 	// Sending
-	void SendPacket			( NetworkPacket &packetToSend );							// Replaces connectionIndex by sender's index
-	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
-	void BroadcastMessage	( NetworkMessage &messageToBroadcast, NetworkConnection const *excludeConnection = nullptr );
+	void SendPacket				( NetworkPacket &packetToSend );							// Replaces connectionIndex by sender's index
+	void SendDirectMessageTo	( NetworkMessage &messageToSend, NetworkAddress const &address );
+	void BroadcastMessage		( NetworkMessage &messageToBroadcast, NetworkConnection const *excludeConnection = nullptr );
+
+private:
+	void SendHangupToAllConnections();
 
 private:
 	// Session Setup

@@ -286,10 +286,10 @@ void NetworkConnection::Send( NetworkMessage &msg )
 		m_outgoingUnreliables.push_back( msgToSend );
 }
 
-void NetworkConnection::FlushMessages()
+void NetworkConnection::FlushMessages( bool ignoreSendRate /* = false */ )
 {
 	// If it hasn't been time to send, return
-	if( m_sendRateTimer.CheckAndReset() != true )
+	if( (m_sendRateTimer.CheckAndReset() != true) && (ignoreSendRate == false) )
 		return;
 
 	// If we need a heartbeat to be sent
