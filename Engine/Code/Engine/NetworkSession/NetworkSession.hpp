@@ -198,7 +198,7 @@ public:
 	inline bool				IsListening()	const { return m_state == NET_SESSION_READY; }
 	bool					IsLobbyFull()	const;
 
-	uint					GetNetTimeMilliseconds();
+	uint					GetNetTimeMilliseconds() const;
 
 private:
 	// Network Connections
