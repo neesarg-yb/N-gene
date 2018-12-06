@@ -298,6 +298,8 @@ void NetworkConnection::FlushMessages( bool ignoreSendRate /* = false */ )
 		m_immediatlyRespondForAck = false;
 
 		NetworkMessage heartbeat( "heartbeat" );
+		uint netTime_ms = GetMasterClock()->total.ms;
+		heartbeat.WriteBytes( sizeof(uint), &netTime_ms );
 		Send( heartbeat );
 	}
 	
