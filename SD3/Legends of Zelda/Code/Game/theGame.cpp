@@ -6,6 +6,7 @@
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Engine/Network/BytePacker.hpp"
 #include "Engine/Math/Quaternion.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
@@ -474,6 +475,8 @@ void theGame::BeginFrame()
 	PROFILE_SCOPE_FUNCTION();
 
 	m_currentGameState->BeginFrame();
+
+	DebugRendererBeginFrame( nullptr );
 }
 
 void theGame::EndFrame()
@@ -587,6 +590,8 @@ void theGame::Render() const
 	// Network Session UI
 	if( m_session->IsRunning() )
 		m_session->Render();
+
+	DebugRendererLateRender( m_gameCamera );
 }
 
 bool theGame::SetCurrentGameState( std::string const &gsName )
