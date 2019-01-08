@@ -19,12 +19,3 @@ How to Use:
 		Button_A to shoot
 - Juice implemented (1 total)
 	* Player have 3 lives; and if he dies 3 times, game will restart after 5 seconds.
-
-
-Deep Learning:
-	After implementing a feature, I don't take an extra step of making my code efficient. Many times, I just 
-keep the original somewhat-hacky code which I have written in first place. I need to take that extra step, every 
-time. 
-	Never procrastinate! Always be regular in your homework. I am going to improve it, that is for sure. 
-I faced it during last two submissions; I did not get enough time for my regular day-to-day tasks because I was 
-running late for my assignments & was coding all the weekend.
