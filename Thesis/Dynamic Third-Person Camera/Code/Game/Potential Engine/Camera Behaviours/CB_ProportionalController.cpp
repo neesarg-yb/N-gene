@@ -3,8 +3,8 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/CameraContext.hpp"
-#include "Game/Potential Engine/CameraManager.hpp"
+#include "Game/Potential Engine/Camera System/CameraContext.hpp"
+#include "Game/Potential Engine/Camera System/CameraManager.hpp"
 
 CB_ProportionalController::CB_ProportionalController( char const *name, CameraManager const *manager )
 	: CB_DegreesOfFreedom( name, manager )

@@ -6,11 +6,11 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/CameraState.hpp"
-#include "Game/Potential Engine/CameraContext.hpp"
-#include "Game/Potential Engine/CameraBehaviour.hpp"
-#include "Game/Potential Engine/CameraConstrain.hpp"
-#include "Game/Potential Engine/CameraMotionController.hpp"
+#include "Game/Potential Engine/Camera System/CameraState.hpp"
+#include "Game/Potential Engine/Camera System/CameraContext.hpp"
+#include "Game/Potential Engine/Camera System/CameraBehaviour.hpp"
+#include "Game/Potential Engine/Camera System/CameraConstrain.hpp"
+#include "Game/Potential Engine/Camera System/CameraMotionController.hpp"
 
 struct CustomCameraConstarinCompare
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/Potential Engine/CameraBehaviour.hpp"
+#include "Game/Potential Engine/Camera System/CameraBehaviour.hpp"
 
 enum eFreeLookInputSource
 {

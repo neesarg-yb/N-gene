@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/Potential Engine/CB_DegreesOfFreedom.hpp"
+#include "Game/Potential Engine/Camera Behaviours/CB_DegreesOfFreedom.hpp"
 
 class CB_Follow : public CB_DegreesOfFreedom
 {

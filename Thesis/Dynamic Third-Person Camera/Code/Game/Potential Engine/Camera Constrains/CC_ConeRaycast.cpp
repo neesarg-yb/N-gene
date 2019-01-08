@@ -4,9 +4,9 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/CameraContext.hpp"
-#include "Game/Potential Engine/CameraManager.hpp"
-#include "Game/Potential Engine/DebugCamera.hpp"
+#include "Game/Potential Engine/Camera System/CameraContext.hpp"
+#include "Game/Potential Engine/Camera System/CameraManager.hpp"
+#include "Game/Potential Engine/Camera System/DebugCamera.hpp"
 
 enum eWeightedRaycastDir : int
 {

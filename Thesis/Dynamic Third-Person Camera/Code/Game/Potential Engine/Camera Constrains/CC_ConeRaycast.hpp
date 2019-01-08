@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include "Engine/Core/RaycastResult.hpp"
-#include "Game/Potential Engine/CameraConstrain.hpp"
+#include "Game/Potential Engine/Camera System/CameraConstrain.hpp"
 
 
 //---------------------------------

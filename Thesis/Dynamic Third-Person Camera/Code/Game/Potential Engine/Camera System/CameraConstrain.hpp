@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/Potential Engine/CameraState.hpp"
+#include "Game/Potential Engine/Camera System/CameraState.hpp"
 
 class CameraManager;
 

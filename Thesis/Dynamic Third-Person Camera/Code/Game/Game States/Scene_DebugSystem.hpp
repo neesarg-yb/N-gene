@@ -1,9 +1,9 @@
 #pragma once
 #include "Engine/Math/Sphere.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
-#include "Game/Potential Engine/DebugCamera.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/CameraManager.hpp"
+#include "Game/Potential Engine/Camera System/DebugCamera.hpp"
+#include "Game/Potential Engine/Camera System/CameraManager.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/World/Player.hpp"
 #include "Game/World/Terrain.hpp"

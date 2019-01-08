@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/Renderer/Camera.hpp"
-#include "Game/Potential Engine/CameraBehaviour.hpp"
+#include "Game/Potential Engine/Camera System/CameraBehaviour.hpp"
 
 class DebugCamera : public Camera
 {

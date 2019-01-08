@@ -2,7 +2,7 @@
 #include <functional>
 #include "Engine/Math/Vector3.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/CameraState.hpp"
+#include "Game/Potential Engine/Camera System/CameraState.hpp"
 
 struct  RaycastResult;
 typedef std::function< RaycastResult(Vector3 const &startPosition, Vector3 const &rayDirection, float maxDistance) >	raycast_std_func;

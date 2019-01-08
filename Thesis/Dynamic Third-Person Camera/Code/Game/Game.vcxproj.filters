@@ -76,71 +76,71 @@
     <ClCompile Include="Potential Engine\GameObject.cpp">
       <Filter>PotentialEngine</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\CameraBehaviour.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CameraManager.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CB_DegreesOfFreedom.cpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CB_FreeLook.cpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Scene_FollowCamera.cpp">
       <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CameraConstrain.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CC_LineOfSight.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CameraContext.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CameraState.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CB_Follow.cpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
     <ClCompile Include="World\Building.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\CC_CameraCollision.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Scene_ProportionalController.cpp">
       <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CB_ProportionalController.cpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
     <ClCompile Include="Game States\Scene_DebugSystem.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\DebugCamera.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Scene_CollisionAvoidance.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\CC_ConeRaycast.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CameraMotionController.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CMC_ProportionalController.cpp">
-      <Filter>PotentialEngine\MotionControllers</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\CC_ModifiedConeRaycast.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
     <ClCompile Include="World\House.cpp">
       <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\CameraBehaviour.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\CameraConstrain.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\CameraContext.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\CameraManager.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\CameraMotionController.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\CameraState.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\DebugCamera.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Behaviours\CB_DegreesOfFreedom.cpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Behaviours\CB_Follow.cpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Behaviours\CB_FreeLook.cpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Behaviours\CB_ProportionalController.cpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constrains\CC_CameraCollision.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constrains\CC_ConeRaycast.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constrains\CC_LineOfSight.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constrains\CC_ModifiedConeRaycast.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Motion Controllers\CMC_ProportionalController.cpp">
+      <Filter>PotentialEngine\MotionControllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -180,71 +180,71 @@
     <ClInclude Include="Potential Engine\GameObject.hpp">
       <Filter>PotentialEngine</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\CameraBehaviour.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CameraManager.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CB_DegreesOfFreedom.hpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CB_FreeLook.hpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\Scene_FollowCamera.hpp">
       <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CameraConstrain.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CC_LineOfSight.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CameraContext.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CameraState.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CB_Follow.hpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClInclude>
     <ClInclude Include="World\Building.hpp">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\CC_CameraCollision.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\Scene_ProportionalController.hpp">
       <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CB_ProportionalController.hpp">
-      <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClInclude>
     <ClInclude Include="Game States\Scene_DebugSystem.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\DebugCamera.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\Scene_CollisionAvoidance.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\CC_ConeRaycast.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CameraMotionController.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CMC_ProportionalController.hpp">
-      <Filter>PotentialEngine\MotionControllers</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\CC_ModifiedConeRaycast.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
     <ClInclude Include="World\House.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\CameraBehaviour.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\CameraConstrain.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\CameraContext.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\CameraManager.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\CameraMotionController.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\CameraState.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\DebugCamera.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Behaviours\CB_DegreesOfFreedom.hpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Behaviours\CB_Follow.hpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Behaviours\CB_FreeLook.hpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Behaviours\CB_ProportionalController.hpp">
+      <Filter>PotentialEngine\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constrains\CC_CameraCollision.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constrains\CC_ConeRaycast.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constrains\CC_LineOfSight.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constrains\CC_ModifiedConeRaycast.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Motion Controllers\CMC_ProportionalController.hpp">
+      <Filter>PotentialEngine\MotionControllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 #include "Engine/Core/Tags.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/CameraState.hpp"
+#include "Game/Potential Engine/Camera System/CameraState.hpp"
 
 class CameraManager;
 

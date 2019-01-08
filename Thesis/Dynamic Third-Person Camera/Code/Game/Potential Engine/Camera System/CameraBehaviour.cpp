@@ -1,6 +1,6 @@
 #pragma once
 #include "CameraBehaviour.hpp"
-#include "Game/Potential Engine/CameraManager.hpp"
+#include "Game/Potential Engine/Camera System/CameraManager.hpp"
 
 CameraBehaviour::CameraBehaviour( std::string const &behaviourName, CameraManager const *manager )
 	: m_name( behaviourName )

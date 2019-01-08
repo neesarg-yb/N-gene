@@ -3,7 +3,7 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/CameraManager.hpp"
+#include "Game/Potential Engine/Camera System/CameraManager.hpp"
 
 CMC_ProportionalController::CMC_ProportionalController( char const *name, CameraManager const *manager )
 	: CameraMotionController( name, manager )

@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/Potential Engine/CameraMotionController.hpp"
+#include "Game/Potential Engine/Camera System/CameraMotionController.hpp"
 
 class CMC_ProportionalController : public CameraMotionController
 {

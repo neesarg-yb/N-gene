@@ -5,7 +5,7 @@
 #include "Engine/Renderer/OrbitCamera.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 #include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/CameraManager.hpp"
+#include "Game/Potential Engine/Camera System/CameraManager.hpp"
 #include "Game/World/Terrain.hpp"
 #include "Game/World/Player.hpp"
 

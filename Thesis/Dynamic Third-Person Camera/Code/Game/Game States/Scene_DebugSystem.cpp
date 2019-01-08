@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/CB_FreeLook.hpp"
+#include "Game/Potential Engine/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 
