@@ -3,7 +3,7 @@
 Read more about the project [here](https://www.neesarg.me/dynamic-third-person-camera).
 
 ### Quick links to project files
-* Camera System [directory](/Thesis/Dynamic Third-Person Camera/Code/Game/Potential Engine/Camera System/)
+* Camera System [directory](/Thesis/Dynamic%20Third-Person%20Camera/Code/Game/Potential%20Engine/Camera%20System/)
 ..* Camera Behaviors [directory](/Thesis/Dynamic Third-Person Camera/Code/Game/Potential Engine/Camera Behaviours/)
 ....* Follow
 ....* Degrees of Freedom
