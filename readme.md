@@ -15,8 +15,8 @@ Read more about the project [here](https://www.neesarg.me/dynamic-third-person-c
 		* Collision Check
 	* Camera Motion Controllers [(directory)](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/Potential%20Engine/Motion%20Controllers/) 
 		* Proportional Controller
-* Quaternion [(hpp)](Engine/Code/Engine/Math/Quaternion.hpp)
-* Transform [(hpp)](Engine/Code/Engine/Math/Transform.hpp)
-* Game Object [(hpp)](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/Potential%20Engine/GameObject.hpp)
-* Game Scenes [directory](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/Game%20States/) 
+* Quaternion [(hpp)](Engine/Code/Engine/Math/Quaternion.hpp?ts=4)
+* Transform [(hpp)](Engine/Code/Engine/Math/Transform.hpp?ts=4)
+* Game Object [(hpp)](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/Potential%20Engine/GameObject.hpp?ts=4)
+* Game Scenes [(directory)](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/Game%20States/) 
 	* Collision Avoidance
