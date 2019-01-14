@@ -12,7 +12,7 @@
 #include "Game/Potential Engine/Camera System/CameraConstraint.hpp"
 #include "Game/Potential Engine/Camera System/CameraMotionController.hpp"
 
-struct CustomCameraConstarinCompare
+struct CustomCameraConstarintCompare
 {
 	// Such that top element is the lowest priority, and bottom is the highest priority
 	bool operator() ( CameraConstraint const *lhs, CameraConstraint const *rhs ) const
@@ -23,7 +23,7 @@ struct CustomCameraConstarinCompare
 
 typedef std::vector< CameraBehaviour* >																	CameraBehaviourList;
 typedef std::vector< CameraConstraint* >																CameraConstraintList;
-typedef std::priority_queue< CameraConstraint*, CameraConstraintList, CustomCameraConstarinCompare >	CameraConstraintPriorityQueue;		// Top: lowest priority & Bottom: highest priority
+typedef std::priority_queue< CameraConstraint*, CameraConstraintList, CustomCameraConstarintCompare >	CameraConstraintPriorityQueue;		// Top: lowest priority & Bottom: highest priority
 
 class CameraManager
 {
