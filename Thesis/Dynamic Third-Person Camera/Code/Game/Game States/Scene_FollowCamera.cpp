@@ -82,10 +82,10 @@ Scene_FollowCamera::Scene_FollowCamera( Clock const *parentClock )
 	// Camera Constraints
 	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
 	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
-	m_cameraManager->RegisterConstrain( losConstarin );
-	m_cameraManager->RegisterConstrain( collisionConstrain );
-	followBehaviour->m_constrains.SetOrRemoveTags( "LineOfSight" );
-	followBehaviour->m_constrains.SetOrRemoveTags( "CameraCollision" );
+	m_cameraManager->RegisterConstraint( losConstarin );
+	m_cameraManager->RegisterConstraint( collisionConstrain );
+	followBehaviour->m_constraints.SetOrRemoveTags( "LineOfSight" );
+	followBehaviour->m_constraints.SetOrRemoveTags( "CameraCollision" );
 	
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
@@ -302,9 +302,9 @@ void Scene_FollowCamera::EnableDisableCameraConstrains()
 
 	if( toggleConstrainButton == true )
 	{
-		// Toggle the constrain
+		// Toggle the constraint
 		m_constrainsActive = !m_constrainsActive;
-		m_cameraManager->EnableConstrains( m_constrainsActive );
+		m_cameraManager->EnableConstraints( m_constrainsActive );
 
 		// Debug Print
 		float		yOffset;

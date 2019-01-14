@@ -21,9 +21,9 @@ struct CustomCameraConstarinCompare
 	}
 };
 
-typedef std::vector< CameraBehaviour* >																CameraBehaviourList;
-typedef std::vector< CameraConstraint* >																CameraConstrainList;
-typedef std::priority_queue< CameraConstraint*, CameraConstrainList, CustomCameraConstarinCompare >	CameraConstrainPriorityQueue;		// Top: lowest priority & Bottom: highest priority
+typedef std::vector< CameraBehaviour* >																	CameraBehaviourList;
+typedef std::vector< CameraConstraint* >																CameraConstraintList;
+typedef std::priority_queue< CameraConstraint*, CameraConstraintList, CustomCameraConstarinCompare >	CameraConstraintPriorityQueue;		// Top: lowest priority & Bottom: highest priority
 
 class CameraManager
 {
@@ -57,9 +57,9 @@ private:
 	float		m_behaviourTransitionTimeRemaining = 0.f;
 
 	// Camera Constraints
-	bool							m_constrainsEnabled = true;
-	CameraConstrainList				m_registeredConstrains;		// Stored without any sorting by priority
-	CameraConstrainPriorityQueue	m_activeConstrains;			// Lowest priority at top, highest at bottom
+	bool							m_constraintsEnabled = true;
+	CameraConstraintList			m_registeredConstraints;	// Stored without any sorting by priority
+	CameraConstraintPriorityQueue	m_activeConstraints;		// Lowest priority at top, highest at bottom
 
 public:
 	void Update( float deltaSeconds );
@@ -82,19 +82,19 @@ public:
 	void SetActiveCameraBehaviourTo	( std::string const &behaviourName );
 	void SetActiveMotionControllerTo( CameraMotionController *motionController );	// Sets m_activeMotionController
 
-	// Constrains
-	void RegisterConstrain	( CameraConstraint* newConstrain );
-	void DeregisterConstrain( char const *name );
-	void EnableConstrains	( bool enable = true );
+	// Constraints
+	void RegisterConstraint	 ( CameraConstraint* newConstraint );
+	void DeregisterConstraint( char const *name );
+	void EnableConstraints	 ( bool enable = true );
 
 private:
 	CameraMotionController* GetMotionController();
 
 	void SetCurrentCameraStateTo( CameraState newState );
-	void ResetActivateConstrainsFromTags ( Tags const &constrainsToActivate );
+	void ResetActivateConstraintsFromTags( Tags const &constraintsToActivate );
 
 private:
-	int GetCameraBehaviourIndex( CameraBehaviour *cb );					// Returns -1 if couldn't find it in the list
-	int GetCameraBehaviourIndex( std::string const &behaviourName );	// Returns -1 if couldn't find it in the list
-	int GetCameraConstrainIndex( std::string const &constrainName );	// Returns -1 if couldn't find it in the list
+	int GetCameraBehaviourIndex ( CameraBehaviour *cb );				// Returns -1 if couldn't find it in the list
+	int GetCameraBehaviourIndex ( std::string const &behaviourName );	// Returns -1 if couldn't find it in the list
+	int GetCameraConstraintIndex( std::string const &constraintName );	// Returns -1 if couldn't find it in the list
 };

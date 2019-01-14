@@ -72,8 +72,8 @@ Scene_ProportionalController::Scene_ProportionalController( Clock const *parentC
 	// Camera Constraints
 	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
 	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
-	m_cameraManager->RegisterConstrain( losConstarin );
-	m_cameraManager->RegisterConstrain( collisionConstrain );
+	m_cameraManager->RegisterConstraint( losConstarin );
+	m_cameraManager->RegisterConstraint( collisionConstrain );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->SetActiveCameraBehaviourTo( "PC" );
@@ -279,9 +279,9 @@ void Scene_ProportionalController::EnableDisableCameraConstrains()
 
 	if( toggleConstrainButton == true )
 	{
-		// Toggle the constrain
+		// Toggle the constraint
 		m_constrainsActive = !m_constrainsActive;
-		m_cameraManager->EnableConstrains( m_constrainsActive );
+		m_cameraManager->EnableConstraints( m_constrainsActive );
 
 		// Debug Print
 		float		yOffset;

@@ -33,19 +33,19 @@ void CameraManager::Update( float deltaSeconds )
 
 	m_lastSuggestedState = m_aciveBehaviour->Update( deltaSeconds, m_currentCameraState );
 
-	// Constrains, if enabled
-	if( m_constrainsEnabled == true )
+	// Constraints, if enabled
+	if( m_constraintsEnabled == true )
 	{
 		// From lower priority to higher
-		CameraConstrainPriorityQueue copiedConstrainQueue( m_activeConstrains );
+		CameraConstraintPriorityQueue copiedConstraintQueue( m_activeConstraints );
 
 		// Apply all
-		while ( copiedConstrainQueue.size() > 0 )
+		while ( copiedConstraintQueue.size() > 0 )
 		{
-			CameraConstraint *constrain = copiedConstrainQueue.top();
-			copiedConstrainQueue.pop();
+			CameraConstraint *constraint = copiedConstraintQueue.top();
+			copiedConstraintQueue.pop();
 
-			constrain->Execute( m_lastSuggestedState );
+			constraint->Execute( m_lastSuggestedState );
 		}
 	}
 
@@ -185,9 +185,9 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 		m_lastFinalCameraState = suggestedState;
 	}
 
-	// Update Active Constrains
-	Tags const &constrainsToActivate = m_aciveBehaviour->m_constrains;
-	ResetActivateConstrainsFromTags( constrainsToActivate );
+	// Update Active Constraints
+	Tags const &constraintsToActivate = m_aciveBehaviour->m_constraints;
+	ResetActivateConstraintsFromTags( constraintsToActivate );
 }
 
 void CameraManager::SetActiveMotionControllerTo( CameraMotionController *motionController )
@@ -199,44 +199,44 @@ void CameraManager::SetActiveMotionControllerTo( CameraMotionController *motionC
 	m_activeMotionController->m_manager = this;
 }
 
-void CameraManager::RegisterConstrain( CameraConstraint* newConstrain )
+void CameraManager::RegisterConstraint( CameraConstraint* newConstraint )
 {
-	// Delete if we have a registered constrain of the same name..
-	for( uint i = 0; i < m_registeredConstrains.size(); i++ )
+	// Delete if we have a registered constraint of the same name..
+	for( uint i = 0; i < m_registeredConstraints.size(); i++ )
 	{
-		if( m_registeredConstrains[i]->m_name == newConstrain->m_name )
+		if( m_registeredConstraints[i]->m_name == newConstraint->m_name )
 		{
-			delete m_registeredConstrains[i];
-			m_registeredConstrains[i] = nullptr;
+			delete m_registeredConstraints[i];
+			m_registeredConstraints[i] = nullptr;
 
-			m_registeredConstrains.erase( m_registeredConstrains.begin() + i );
+			m_registeredConstraints.erase( m_registeredConstraints.begin() + i );
 			break;
 		}
 	}
 
-	// Add new constrain
-	m_registeredConstrains.push_back( newConstrain );
+	// Add new constraint
+	m_registeredConstraints.push_back( newConstraint );
 }
 
-void CameraManager::DeregisterConstrain( char const *name )
+void CameraManager::DeregisterConstraint( char const *name )
 {
-	// Delete if we have a registered constrain of the same name..
-	for( uint i = 0; i < m_registeredConstrains.size(); i++ )
+	// Delete if we have a registered constraint of the same name..
+	for( uint i = 0; i < m_registeredConstraints.size(); i++ )
 	{
-		if( m_registeredConstrains[i]->m_name == name )
+		if( m_registeredConstraints[i]->m_name == name )
 		{
-			delete m_registeredConstrains[i];
-			m_registeredConstrains[i] = nullptr;
+			delete m_registeredConstraints[i];
+			m_registeredConstraints[i] = nullptr;
 
-			m_registeredConstrains.erase( m_registeredConstrains.begin() + i );
+			m_registeredConstraints.erase( m_registeredConstraints.begin() + i );
 			break;
 		}
 	}
 }
 
-void CameraManager::EnableConstrains( bool enable /*= true */ )
+void CameraManager::EnableConstraints( bool enable /*= true */ )
 {
-	m_constrainsEnabled = enable;
+	m_constraintsEnabled = enable;
 }
 
 CameraMotionController* CameraManager::GetMotionController()
@@ -255,21 +255,21 @@ void CameraManager::SetCurrentCameraStateTo( CameraState newState )
 	m_currentCameraState = newState;
 }
 
-void CameraManager::ResetActivateConstrainsFromTags( Tags const &constrainsToActivate )
+void CameraManager::ResetActivateConstraintsFromTags( Tags const &constraintsToActivate )
 {
 	// Reset the priority queue
-	m_activeConstrains = CameraConstrainPriorityQueue();
+	m_activeConstraints = CameraConstraintPriorityQueue();
 
-	// Add constrains which needs to be active
-	Strings allConstrains;
-	constrainsToActivate.GetTags( allConstrains );
-	for each (std::string constrainName in allConstrains)
+	// Add constraints which needs to be active
+	Strings allConstraints;
+	constraintsToActivate.GetTags( allConstraints );
+	for each (std::string constraintName in allConstraints)
 	{
-		int idx = GetCameraConstrainIndex( constrainName );
+		int idx = GetCameraConstraintIndex( constraintName );
 		if( idx < 0 )
 			continue;
 
-		m_activeConstrains.push( m_registeredConstrains[idx] );
+		m_activeConstraints.push( m_registeredConstraints[idx] );
 	}
 }
 
@@ -295,15 +295,15 @@ int CameraManager::GetCameraBehaviourIndex( std::string const &behaviourName )
 	return idx;
 }
 
-int CameraManager::GetCameraConstrainIndex( std::string const &constrainName )
+int CameraManager::GetCameraConstraintIndex( std::string const &constraintName )
 {
 	int idx = -1;
 
-	for( int constrainIdx = 0; constrainIdx < m_registeredConstrains.size(); constrainIdx++ )
+	for( int constraintIdx = 0; constraintIdx < m_registeredConstraints.size(); constraintIdx++ )
 	{
-		if( m_registeredConstrains[constrainIdx]->m_name == constrainName )
+		if( m_registeredConstraints[constraintIdx]->m_name == constraintName )
 		{
-			idx = constrainIdx;
+			idx = constraintIdx;
 			break;
 		}
 	}

@@ -17,7 +17,7 @@ protected:
 	CameraManager		&m_manager;
 
 public:
-	virtual void Execute( CameraState &suggestedCameraState ) = 0;	// Applies the constrain on suggestedDestination
+	virtual void Execute( CameraState &suggestedCameraState ) = 0;	// Applies the constraint on suggestedDestination
 
 public:
 	// Operators compares the priority

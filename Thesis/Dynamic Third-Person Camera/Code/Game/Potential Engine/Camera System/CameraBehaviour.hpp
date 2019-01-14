@@ -18,7 +18,7 @@ public:
 	Camera		const		*m_camera		= nullptr;
 	GameObject	const		*m_anchor		= nullptr;
 	InputSystem				*m_inputSystem	= nullptr;
-	Tags					 m_constrains;	// Which constrains to apply by Camera Manager
+	Tags					 m_constraints;	// Which constraints to apply by Camera Manager
 
 protected:
 	CameraManager const		*m_manager		= nullptr;
