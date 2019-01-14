@@ -3,11 +3,11 @@
 
 class CameraManager;
 
-class CameraConstrain
+class CameraConstraint
 {
 public:
-			 CameraConstrain( char const *name, CameraManager &manager, uint8_t priority );
-	virtual ~CameraConstrain();
+			 CameraConstraint( char const *name, CameraManager &manager, uint8_t priority );
+	virtual ~CameraConstraint();
 
 public:
 	uint8_t		const	 m_priority; // (0 to 255) : Higher the value, higher the priority
@@ -21,6 +21,6 @@ public:
 
 public:
 	// Operators compares the priority
-	bool operator < ( CameraConstrain const& b ) const;
-	bool operator > ( CameraConstrain const& b ) const;
+	bool operator < ( CameraConstraint const& b ) const;
+	bool operator > ( CameraConstraint const& b ) const;
 };

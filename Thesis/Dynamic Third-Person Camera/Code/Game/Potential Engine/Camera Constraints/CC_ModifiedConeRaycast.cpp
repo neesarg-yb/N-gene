@@ -25,7 +25,7 @@ WeightedRaycastResult_MCR::WeightedRaycastResult_MCR( RaycastResult const &inRes
 }
 
 CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority )
-	: CameraConstrain( name, manager, priority )
+	: CameraConstraint( name, manager, priority )
 {
 	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
 }

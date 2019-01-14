@@ -1,7 +1,7 @@
 #pragma once
-#include "Game/Potential Engine/Camera System/CameraConstrain.hpp"
+#include "Game/Potential Engine/Camera System/CameraConstraint.hpp"
 
-class CC_LineOfSight : public CameraConstrain
+class CC_LineOfSight : public CameraConstraint
 {
 public:
 	 CC_LineOfSight( char const *name, CameraManager &manager, uint8_t priority );

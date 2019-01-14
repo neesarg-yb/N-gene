@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include "Engine/Core/RaycastResult.hpp"
-#include "Game/Potential Engine/Camera System/CameraConstrain.hpp"
+#include "Game/Potential Engine/Camera System/CameraConstraint.hpp"
 
 
 //---------------------------------
@@ -23,7 +23,7 @@ public:
 //---------------------------------
 // Classes
 // 
-class CC_ConeRaycast : public CameraConstrain
+class CC_ConeRaycast : public CameraConstraint
 {
 public:
 	 CC_ConeRaycast( char const *name, CameraManager &manager, uint8_t priority );

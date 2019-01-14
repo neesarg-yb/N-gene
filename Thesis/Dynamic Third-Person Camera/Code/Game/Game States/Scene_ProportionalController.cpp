@@ -6,8 +6,8 @@
 #include "Game/Potential Engine/Camera Behaviours/CB_Follow.hpp"
 #include "Game/Potential Engine/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/Potential Engine/Camera Behaviours/CB_ProportionalController.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_LineOfSight.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_CameraCollision.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_LineOfSight.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 
@@ -69,7 +69,7 @@ Scene_ProportionalController::Scene_ProportionalController( Clock const *parentC
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 	m_cameraManager->AddNewCameraBehaviour( pcBehaviour );
 
-	// Camera Constrains
+	// Camera Constraints
 	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
 	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
 	m_cameraManager->RegisterConstrain( losConstarin );
@@ -286,7 +286,7 @@ void Scene_ProportionalController::EnableDisableCameraConstrains()
 		// Debug Print
 		float		yOffset;
 		Rgba		constarinsColor;
-		std::string constrainsActiveStr = Stringf( "Camera Constrains: ", m_constrainsActive );
+		std::string constrainsActiveStr = Stringf( "Camera Constraints: ", m_constrainsActive );
 		if( m_constrainsActive )
 		{
 			constrainsActiveStr += "ENABLED";

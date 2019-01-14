@@ -97,9 +97,6 @@
     <ClCompile Include="Potential Engine\Camera System\CameraBehaviour.cpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\Camera System\CameraConstrain.cpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClCompile>
     <ClCompile Include="Potential Engine\Camera System\CameraContext.cpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClCompile>
@@ -127,20 +124,23 @@
     <ClCompile Include="Potential Engine\Camera Behaviours\CB_ProportionalController.cpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClCompile>
-    <ClCompile Include="Potential Engine\Camera Constrains\CC_CameraCollision.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\Camera Constrains\CC_ConeRaycast.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\Camera Constrains\CC_LineOfSight.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
-    <ClCompile Include="Potential Engine\Camera Constrains\CC_ModifiedConeRaycast.cpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClCompile>
     <ClCompile Include="Potential Engine\Motion Controllers\CMC_ProportionalController.cpp">
       <Filter>PotentialEngine\MotionControllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constraints\CC_CameraCollision.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constraints\CC_ConeRaycast.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constraints\CC_LineOfSight.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera Constraints\CC_ModifiedConeRaycast.cpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Potential Engine\Camera System\CameraConstraint.cpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -201,9 +201,6 @@
     <ClInclude Include="Potential Engine\Camera System\CameraBehaviour.hpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\Camera System\CameraConstrain.hpp">
-      <Filter>PotentialEngine\CameraSystem</Filter>
-    </ClInclude>
     <ClInclude Include="Potential Engine\Camera System\CameraContext.hpp">
       <Filter>PotentialEngine\CameraSystem</Filter>
     </ClInclude>
@@ -231,20 +228,23 @@
     <ClInclude Include="Potential Engine\Camera Behaviours\CB_ProportionalController.hpp">
       <Filter>PotentialEngine\CameraBehaviours</Filter>
     </ClInclude>
-    <ClInclude Include="Potential Engine\Camera Constrains\CC_CameraCollision.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\Camera Constrains\CC_ConeRaycast.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\Camera Constrains\CC_LineOfSight.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
-    <ClInclude Include="Potential Engine\Camera Constrains\CC_ModifiedConeRaycast.hpp">
-      <Filter>PotentialEngine\CameraConstrains</Filter>
-    </ClInclude>
     <ClInclude Include="Potential Engine\Motion Controllers\CMC_ProportionalController.hpp">
       <Filter>PotentialEngine\MotionControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constraints\CC_CameraCollision.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constraints\CC_ConeRaycast.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constraints\CC_LineOfSight.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera Constraints\CC_ModifiedConeRaycast.hpp">
+      <Filter>PotentialEngine\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Potential Engine\Camera System\CameraConstraint.hpp">
+      <Filter>PotentialEngine\CameraSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

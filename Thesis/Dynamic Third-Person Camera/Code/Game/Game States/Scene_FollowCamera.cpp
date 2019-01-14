@@ -3,8 +3,8 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_CameraCollision.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_LineOfSight.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_CameraCollision.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_LineOfSight.hpp"
 #include "Game/Potential Engine/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/Potential Engine/Camera Behaviours/CB_Follow.hpp"
 #include "Game/theGame.hpp"
@@ -79,7 +79,7 @@ Scene_FollowCamera::Scene_FollowCamera( Clock const *parentClock )
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 
-	// Camera Constrains
+	// Camera Constraints
 	CC_LineOfSight*		losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 2 );
 	CC_CameraCollision*	collisionConstrain	= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 0xff );
 	m_cameraManager->RegisterConstrain( losConstarin );
@@ -309,7 +309,7 @@ void Scene_FollowCamera::EnableDisableCameraConstrains()
 		// Debug Print
 		float		yOffset;
 		Rgba		constarinsColor;
-		std::string constrainsActiveStr = Stringf( "Camera Constrains: ", m_constrainsActive );
+		std::string constrainsActiveStr = Stringf( "Camera Constraints: ", m_constrainsActive );
 		if( m_constrainsActive )
 		{
 			constrainsActiveStr += "ENABLED";

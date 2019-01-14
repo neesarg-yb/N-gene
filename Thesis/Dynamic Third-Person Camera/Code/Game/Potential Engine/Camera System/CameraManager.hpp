@@ -9,21 +9,21 @@
 #include "Game/Potential Engine/Camera System/CameraState.hpp"
 #include "Game/Potential Engine/Camera System/CameraContext.hpp"
 #include "Game/Potential Engine/Camera System/CameraBehaviour.hpp"
-#include "Game/Potential Engine/Camera System/CameraConstrain.hpp"
+#include "Game/Potential Engine/Camera System/CameraConstraint.hpp"
 #include "Game/Potential Engine/Camera System/CameraMotionController.hpp"
 
 struct CustomCameraConstarinCompare
 {
 	// Such that top element is the lowest priority, and bottom is the highest priority
-	bool operator() ( CameraConstrain const *lhs, CameraConstrain const *rhs ) const
+	bool operator() ( CameraConstraint const *lhs, CameraConstraint const *rhs ) const
 	{
 		return (*lhs > *rhs);
 	}
 };
 
 typedef std::vector< CameraBehaviour* >																CameraBehaviourList;
-typedef std::vector< CameraConstrain* >																CameraConstrainList;
-typedef std::priority_queue< CameraConstrain*, CameraConstrainList, CustomCameraConstarinCompare >	CameraConstrainPriorityQueue;		// Top: lowest priority & Bottom: highest priority
+typedef std::vector< CameraConstraint* >																CameraConstrainList;
+typedef std::priority_queue< CameraConstraint*, CameraConstrainList, CustomCameraConstarinCompare >	CameraConstrainPriorityQueue;		// Top: lowest priority & Bottom: highest priority
 
 class CameraManager
 {
@@ -56,7 +56,7 @@ private:
 	float const m_behaviourTransitionSeconds = 1.f;
 	float		m_behaviourTransitionTimeRemaining = 0.f;
 
-	// Camera Constrains
+	// Camera Constraints
 	bool							m_constrainsEnabled = true;
 	CameraConstrainList				m_registeredConstrains;		// Stored without any sorting by priority
 	CameraConstrainPriorityQueue	m_activeConstrains;			// Lowest priority at top, highest at bottom
@@ -83,7 +83,7 @@ public:
 	void SetActiveMotionControllerTo( CameraMotionController *motionController );	// Sets m_activeMotionController
 
 	// Constrains
-	void RegisterConstrain	( CameraConstrain* newConstrain );
+	void RegisterConstrain	( CameraConstraint* newConstrain );
 	void DeregisterConstrain( char const *name );
 	void EnableConstrains	( bool enable = true );
 

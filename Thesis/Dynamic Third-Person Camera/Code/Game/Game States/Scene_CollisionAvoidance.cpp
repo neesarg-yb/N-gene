@@ -5,10 +5,10 @@
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Potential Engine/Camera Behaviours/CB_Follow.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_LineOfSight.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_ConeRaycast.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_ModifiedConeRaycast.hpp"
-#include "Game/Potential Engine/Camera Constrains/CC_CameraCollision.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_LineOfSight.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_ConeRaycast.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_ModifiedConeRaycast.hpp"
+#include "Game/Potential Engine/Camera Constraints/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 #include "Game/World/House.hpp"
@@ -100,7 +100,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
 	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
 
-	// Camera Constrains
+	// Camera Constraints
 	CC_LineOfSight*			losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
 	CC_ConeRaycast*			conRaycastCC		= new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 2 );
 	CC_ModifiedConeRaycast*	modConRaycastCC		= new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1 );

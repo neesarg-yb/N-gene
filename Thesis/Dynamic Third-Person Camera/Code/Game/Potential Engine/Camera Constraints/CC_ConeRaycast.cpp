@@ -34,7 +34,7 @@ public:
 };
 
 CC_ConeRaycast::CC_ConeRaycast( char const *name, CameraManager &manager, uint8_t priority )
-	: CameraConstrain( name, manager, priority )
+	: CameraConstraint( name, manager, priority )
 {
 
 }

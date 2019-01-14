@@ -42,7 +42,7 @@ void CameraManager::Update( float deltaSeconds )
 		// Apply all
 		while ( copiedConstrainQueue.size() > 0 )
 		{
-			CameraConstrain *constrain = copiedConstrainQueue.top();
+			CameraConstraint *constrain = copiedConstrainQueue.top();
 			copiedConstrainQueue.pop();
 
 			constrain->Execute( m_lastSuggestedState );
@@ -199,7 +199,7 @@ void CameraManager::SetActiveMotionControllerTo( CameraMotionController *motionC
 	m_activeMotionController->m_manager = this;
 }
 
-void CameraManager::RegisterConstrain( CameraConstrain* newConstrain )
+void CameraManager::RegisterConstrain( CameraConstraint* newConstrain )
 {
 	// Delete if we have a registered constrain of the same name..
 	for( uint i = 0; i < m_registeredConstrains.size(); i++ )

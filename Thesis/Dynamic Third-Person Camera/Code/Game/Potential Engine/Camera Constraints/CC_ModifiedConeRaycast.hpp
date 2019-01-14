@@ -3,7 +3,7 @@
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Ray3.hpp"
 #include "Engine/Core/RaycastResult.hpp"
-#include "Game/Potential Engine/Camera System/CameraConstrain.hpp"
+#include "Game/Potential Engine/Camera System/CameraConstraint.hpp"
 
 
 //---------------------------------
@@ -33,7 +33,7 @@ public:
 //---------------------------------
 // Classes
 // 
-class CC_ModifiedConeRaycast : public CameraConstrain
+class CC_ModifiedConeRaycast : public CameraConstraint
 {
 public:
 	 CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority );

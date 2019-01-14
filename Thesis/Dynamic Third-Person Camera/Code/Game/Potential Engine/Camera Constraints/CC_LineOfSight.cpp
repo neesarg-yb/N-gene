@@ -3,7 +3,7 @@
 #include "Game/Potential Engine/Camera System/CameraManager.hpp"
 
 CC_LineOfSight::CC_LineOfSight( char const *name, CameraManager &manager, uint8_t priority )
-	: CameraConstrain( name, manager, priority )
+	: CameraConstraint( name, manager, priority )
 {
 
 }
