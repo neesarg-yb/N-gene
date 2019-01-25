@@ -30,7 +30,7 @@ constexpr uint16_t DEFAULT_PORT_RANGE = 10;
 //------
 // Enums
 //
-enum eNetworkSessionState
+enum eNetworkSessionState : uint8_t
 {
 	NET_SESSION_DISCONNECTED = 0,			// Session can be modified
 	NET_SESSION_BOUND,						// Bound to a socket, but no connections exists. Can send and receive connectionless messages. 
@@ -40,11 +40,14 @@ enum eNetworkSessionState
 	NUM_NET_SESSION_STATES
 };
 
-enum eNetworkSessionError
+std::string ToString( eNetworkSessionState inEnum );
+
+enum eNetworkSessionError : uint8_t
 {
 	NET_SESSION_OK = 0,						// No errors
 	NET_SESSION_ERROR_USER,					// User disconnected
 	NET_SESSION_ERROR_INTERNAL,				// Socket error
+	NET_SESSION_ERROR_TIMEOUT,				// Connection didn't respond for too long
 	
 	NET_SESSION_ERROR_JOIN_DENIED,			// Generic deny error (release)
 	NET_SESSION_ERROR_JOIN_DENIED_NOT_HOST,	// Debug - tried to join someone who isn't joining
@@ -52,7 +55,6 @@ enum eNetworkSessionError
 	NET_SESSION_ERROR_JOIN_DENIED_FULL,		// Debug - Session was full :(
 	NUM_NET_SESSION_ERRORS
 };
-
 
 //------------
 // Structures
@@ -92,11 +94,23 @@ public:
 
 private:
 	// My Socket
-	UDPSocket			*m_mySocket			= nullptr;
+	UDPSocket			*m_mySocket				= nullptr;
 
 	// Me & My Host
-	NetworkConnection	*m_myConnection		= nullptr;
-	NetworkConnection	*m_hostConnection	= nullptr;
+	NetworkConnection	*m_myConnection			= nullptr;
+	NetworkConnection	*m_hostConnection		= nullptr;
+
+	// Timers
+	double const		 m_joinTimerSeconds		= 0.1;
+	Stopwatch			 m_joinRequestTimer;
+
+	double const		 m_joinTimeoutSeconds	= 10.0;
+	Stopwatch			 m_joinTimeoutTimer;
+
+	// Net. Clock
+	uint				 m_lastReceivedHostTime_ms	= 0U;						// The time we received from the host + (RTT / 2)
+	uint				 m_desiredClientTime_ms		= 0U;						// Time we want the client to eventually be
+	uint				 m_currentClientTime_ms		= 0U;						// What the client will actually report return
 
 public:
 	// My Connections
@@ -126,6 +140,18 @@ public:
 	void Update();
 	void Render() const;
 
+private:
+	void UpdateNetClock();
+
+	void UpdateSessionDisconnected();
+	void UpdateSessionBound();
+	void UpdateSessionConnecting();
+	void UpdateSessionJoining();
+	void UpdateSessionReady();
+
+	void UpdateStateTo( eNetworkSessionState newState );								// Updates state and resets the timers for new state
+
+public:
 	void ProcessIncoming();
 	void ProcessOutgoing();
 
@@ -138,8 +164,12 @@ private:
 
 public:
 	// Sending
-	void SendPacket			( NetworkPacket &packetToSend );		// Replaces connectionIndex by sender's index
-	void SendDirectMessageTo( NetworkMessage &messageToSend, NetworkAddress const &address );
+	void SendPacket				( NetworkPacket &packetToSend );							// Replaces connectionIndex by sender's index
+	void SendDirectMessageTo	( NetworkMessage &messageToSend, NetworkAddress const &address );
+	void BroadcastMessage		( NetworkMessage &messageToBroadcast, NetworkConnection const *excludeConnection = nullptr );
+
+private:
+	void SendHangupToAllConnections();
 
 private:
 	// Session Setup
@@ -150,7 +180,12 @@ public:
 	void Join( char const *myID, NetworkAddress const &hostAddress );
 	void Disconnect();
 
-	bool ProcessJoinRequest( char *networkID, NetworkAddress const &reqFromAddress );
+	bool ProcessJoinRequest				( char *networkID, NetworkAddress const &reqFromAddress );
+	bool ProcessJoinDeny				( eNetworkSessionError errorCode, NetworkAddress const &senderAddress );
+	bool ProcessJoinAccept				( uint8_t connectionIdx, NetworkAddress const &senderAddress );
+	bool ProcessJoinFinished			( NetworkAddress const &senderAddress, uint hostNetClockTime_ms );
+	bool ProcessUpdateConnectionState	( eNetworkConnectionState state, NetworkAddress const &senderAddress );
+	bool ProcessNetClockSyncFromHost	( uint hostNetClockTime_ms );
 
 	// Session Errors
 	void					SetError( eNetworkSessionError error, char const *str );
@@ -163,18 +198,24 @@ public:
 	inline bool				IsListening()	const { return m_state == NET_SESSION_READY; }
 	bool					IsLobbyFull()	const;
 
+	uint					GetNetTimeMilliseconds() const;
+
 private:
 	// Network Connections
 	NetworkConnection*		CreateConnection	( NetworkConnectionInfo const &info );
-	void					DestroyConnection	( NetworkConnection *connection );
 	void					BindConnection		( uint8_t idx, NetworkConnection *connection );
+	void					DeleteConnection	( NetworkConnection* connection );		// Deletes the connection and removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections
+	void					DeleteAllConnections();										// Including myConnection & hostConnection
+	void					RemoveDisconnectedConnections();
+	void					CheckForConnectionTimeout();								// For the bound connections, if timed-out, marks that connection as disconnected..
 	
-	void					DeleteConnection		( NetworkConnection* &connection );	// Removes the connection from: m_myConnection, m_hostConnection, m_allConnections & m_boundConnections; deletes it and sets the passed connection to nullptr
+	void					SetBoundConnectionsToNull();								// Deletes and sets all bound connections to nullptr
 	bool					ConnectionAlreadyExists	( NetworkAddress const &address );
 	int						GetIndexForNewConnection() const;							// Returns -1, if no vacant slots found
 
 public:
 	NetworkConnection*		GetConnection( int idx );
+	NetworkConnection*		GetConnection( NetworkAddress const &address );
 	uint8_t					GetMyConnectionIndex() const;
 	bool					IsRegistered( NetworkConnection const *connection ) const;	// connection is in m_allConnections
 	
@@ -195,7 +236,7 @@ private:
 	uint			m_simulatedMinLatency_ms = 0U;
 	uint			m_simulatedMaxLatency_ms = 0U;
 	uint8_t			m_simulatedSendFrequency = 20;
-	float			m_heartbeatFrequency	 = 0.2f;
+	float			m_heartbeatFrequency	 = 2.f;
 
 private:
 	StampedNetworkPacketPriorityQueue m_receivedPackets;				// Priority Queue

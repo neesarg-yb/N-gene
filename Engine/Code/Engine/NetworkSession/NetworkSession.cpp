@@ -4,6 +4,7 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 bool OnPing( NetworkMessage const &msg, NetworkSender &from )
 {
@@ -36,14 +37,19 @@ bool OnPong( NetworkMessage const &msg, NetworkSender &from )
 
 bool OnHeartbeat( NetworkMessage const &msg, NetworkSender &from )
 {
-	UNUSED( msg );
-	
 	if( from.connection == nullptr )
 		return false;
 	else
 	{
-		// ConsolePrintf( "Heartbeat Received from [%d] connection.", from.connection->m_indexInSession );
-		return true;
+		uint netClockTime_ms = 0U;
+		msg.ReadBytes( &netClockTime_ms, sizeof(uint) );
+
+		// If it is host, we use passed time to sync NetClock
+		NetworkConnection *connection = from.connection;
+		if( connection->IsClient() )		
+			return from.session.ProcessNetClockSyncFromHost( netClockTime_ms );
+		else
+			return true;
 	}
 }
 
@@ -59,34 +65,28 @@ bool OnJoinRequest( NetworkMessage const &msg, NetworkSender &from )
 
 bool OnJoinDeny( NetworkMessage const &msg, NetworkSender &from ) 
 {
-	UNUSED( msg );
-	UNUSED( from );
+	eNetworkSessionError error = NUM_NET_SESSION_ERRORS;
+	msg.ReadBytes( &error, sizeof(eNetworkSessionError) );
 
-	return false;
+	return from.session.ProcessJoinDeny( error, from.address );
 }
 
 bool OnAccept( NetworkMessage const &msg, NetworkSender &from ) 
 {
-	UNUSED( msg );
-	UNUSED( from );
+	uint8_t connectionIdx = MAX_SESSION_CONNECTIONS;
+	char netID[ MAX_NETWORK_ID_LENGTH + 1 ];
+	msg.ReadString( netID, MAX_NETWORK_ID_LENGTH );
+	msg.ReadBytes( &connectionIdx, sizeof(uint8_t) );
 
-	return false;
-}
-
-bool OnNewConnection( NetworkMessage const &msg, NetworkSender &from ) 
-{
-	UNUSED( msg );
-	UNUSED( from );
-
-	return false;
+	return from.session.ProcessJoinAccept( connectionIdx, from.address );
 }
 
 bool OnJoinFinished( NetworkMessage const &msg, NetworkSender &from ) 
 {
-	UNUSED( msg );
-	UNUSED( from );
+	uint hostNetTime_ms = 0U;
+	msg.ReadBytes( &hostNetTime_ms, sizeof(uint) );
 
-	return false;
+	return from.session.ProcessJoinFinished( from.address, hostNetTime_ms );
 }
 
 bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from ) 
@@ -94,14 +94,60 @@ bool OnUpdateConnection( NetworkMessage const &msg, NetworkSender &from )
 	eNetworkConnectionState updatedState = NET_CONNECTION_DISCONNECTED;
 	msg.ReadBytes( &updatedState, sizeof(eNetworkConnectionState) );
 
-	from.connection->m_state = updatedState;
-	
-	return true;
+	return from.session.ProcessUpdateConnectionState( updatedState, from.address );
+}
+
+bool OnHangup( NetworkMessage const &msg, NetworkSender &from )
+{
+	UNUSED( msg );
+	ConsolePrintf( RGBA_RED_COLOR, "Connection \"%s\" hanged up!", from.connection->GetNetworkID().c_str() );
+
+	return from.session.ProcessUpdateConnectionState( NET_CONNECTION_DISCONNECTED, from.address );
+}
+
+std::string ToString( eNetworkSessionState inEnum )
+{
+	std::string str = "";
+
+	switch (inEnum)
+	{
+	case NET_SESSION_DISCONNECTED:
+		str = "Disconnected";
+		break;
+
+	case NET_SESSION_BOUND:
+		str = "Bound";
+		break;
+
+	case NET_SESSION_CONNECTING:
+		str = "Connecting";
+		break;
+
+	case NET_SESSION_JOINING:
+		str = "Joining";
+		break;
+
+	case NET_SESSION_READY:
+		str = "Ready";
+		break;
+
+	case NUM_NET_SESSION_STATES:
+		str = std::to_string( NUM_NET_SESSION_STATES );
+		break;
+
+	default:
+		str = "ERROR!";
+		break;
+	}
+
+	return str;
 }
 
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 	: m_theRenderer( currentRenderer )
 {
+	SetBoundConnectionsToNull();
+
 	// For UI
 	m_uiCamera = new Camera();
 
@@ -114,21 +160,19 @@ NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 		m_fonts = currentRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");
 	
 	RegisterCoreMessages();
+
+	// Timers
+	m_joinRequestTimer.SetTimer( m_joinTimerSeconds );
+	m_joinTimeoutTimer.SetTimer( m_joinTimeoutSeconds );
 }
 
 NetworkSession::~NetworkSession()
 {
-	// Delete all connections
-	for( size_t i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
-	{
-		// If nullptr, skip
-		if( m_boundConnections[i] == nullptr )
-			continue;
+	// Tell all connections that I'm quitting, directly!
+	SendHangupToAllConnections();
 
-		// Delete
-		delete m_boundConnections[i];
-		m_boundConnections[i] = nullptr;
-	}
+	// Delete all connections
+	DeleteAllConnections();
 
 	// Delete all message definitions
 	for( int i = 0; i < 256; i++ )
@@ -147,23 +191,38 @@ NetworkSession::~NetworkSession()
 
 void NetworkSession::Update()
 {
+	UpdateNetClock();
 	ProcessIncoming();
 
 	switch (m_state)
 	{
 	case NET_SESSION_DISCONNECTED:
+		UpdateSessionDisconnected();
 		break;
+
 	case NET_SESSION_BOUND:
+		UpdateSessionBound();
 		break;
+
 	case NET_SESSION_CONNECTING:
+		UpdateSessionConnecting();
 		break;
+
 	case NET_SESSION_JOINING:
+		UpdateSessionJoining();
 		break;
+
 	case NET_SESSION_READY:
+		UpdateSessionReady();
 		break;
+
 	default:
 		break;
 	}
+
+	CheckForConnectionTimeout();
+	RemoveDisconnectedConnections();
+	ProcessOutgoing();
 }
 
 void NetworkSession::Render() const
@@ -180,7 +239,7 @@ void NetworkSession::Render() const
 
 	// Title Box
 	AABB2		titleBox = backgroundBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.f ) );
-	std::string	titleStr = "NETWORK SESSION";
+	std::string	titleStr = "NETWORK SESSION (" + ToString(m_state) + ")";
 	m_theRenderer->DrawTextInBox2D( titleStr.c_str(), Vector2( 0.f, 0.5f ), titleBox, m_uiTitleFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Simulated Rate, Lag & Loss
@@ -188,16 +247,19 @@ void NetworkSession::Render() const
 	std::string lossPercentageStr	= Stringf( "%.2f%%", m_simulatedLossFraction * 100.f );
 	std::string simLagRangeStr		= Stringf( "%dms - %dms", m_simulatedMinLatency_ms, m_simulatedMaxLatency_ms );
 	std::string heartbeatHzStr		= Stringf( "%.2fhz", m_heartbeatFrequency );
-	AABB2		srllBox				= backgroundBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.6f ), Vector2( 1.f, 0.9f ) );
+	AABB2		srllBox				= backgroundBox.GetBoundsFromPercentage( Vector2( 0.01f, 0.6f ), Vector2( 1.f, 0.9f ) );
 	std::string srllStr				= Stringf( "%-8s: %s (%s: %s)\n%-8s: %s\n%-8s: %s", "rate", sendRateStr.c_str(), "heartbeat", heartbeatHzStr.c_str(), "sim_lag", simLagRangeStr.c_str(), "sim_loss", lossPercentageStr.c_str() );
 	m_theRenderer->DrawTextInBox2D( srllStr.c_str(), Vector2( 0.f, 1.f ), srllBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// My Socket Address
-	AABB2		myAddressBaseBox	= backgroundBox.GetBoundsFromPercentage   ( Vector2( 0.0f, 0.5f ), Vector2( 1.f, 0.7f ) );
-	AABB2		myAddressTitleBox	= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.0f, 0.5f ), Vector2( 1.f, 1.0f ) );
-	AABB2		myAddressBox		= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.1f, 0.0f ), Vector2( 1.f, 0.5f ) );
+	AABB2		myAddressBaseBox	= backgroundBox.GetBoundsFromPercentage   ( Vector2( 0.00f, 0.5f ), Vector2( 1.f, 0.7f ) );
+	AABB2		myAddressTitleBox	= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.00f, 0.5f ), Vector2( 1.f, 1.0f ) );
+	AABB2		myAddressBox		= myAddressBaseBox.GetBoundsFromPercentage( Vector2( 0.01f, 0.0f ), Vector2( 1.f, 0.5f ) );
 	std::string myAddressTitle		= "My Socket Address:";
-	std::string socketAddrStr		= m_mySocket->m_address.AddressToString();
+	std::string clockStr			= std::to_string( (double)GetNetTimeMilliseconds() * 0.001f );
+	std::string netClockStr			= "[ NetClock  " + clockStr + "s ]";
+	std::string hostClientStr		= std::string( m_myConnection->IsHost() ? "Host" : "Client" ) + " as \"" + m_myConnection->GetNetworkID() + "\"";
+	std::string socketAddrStr		= m_mySocket->m_address.AddressToString() + " (" + hostClientStr + ")" + " | " + netClockStr;
 	m_theRenderer->DrawTextInBox2D( myAddressTitle.c_str(), Vector2( 0.f, 0.5f ), myAddressTitleBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 	m_theRenderer->DrawTextInBox2D( socketAddrStr.c_str(),  Vector2( 0.f, 0.5f ), myAddressBox,      m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
@@ -207,9 +269,9 @@ void NetworkSession::Render() const
 	m_theRenderer->DrawTextInBox2D( connectionsHeadingStr.c_str(), Vector2( 0.f, 0.5f ), connectionsHeadingBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Title Column of Table: All Connections
-	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.1f, 0.f ), Vector2( 1.f, 0.4f ) );
-	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.f, 0.9f ), Vector2( 1.f, 1.0f ) );
-	std::string	columnTitleStr		= Stringf( "%-4s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
+	AABB2		allConnectionsBox	= backgroundBox.GetBoundsFromPercentage    ( Vector2( 0.01f, 0.0f ), Vector2( 1.f, 0.4f ) );
+	AABB2		columnTitlesBox		= allConnectionsBox.GetBoundsFromPercentage( Vector2( 0.00f, 0.9f ), Vector2( 1.f, 1.0f ) );
+	std::string	columnTitleStr		= Stringf( "%-2s  %-3s  %-12s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", "--", "idx", "state", "address", "simsndrt(hz)", "rtt(s)", "loss(%)", "lrcv(s)", "lsnt(s)", "nsntack", "hrcvack", "rcvbits", "ucnfrmR" );
 	m_theRenderer->DrawTextInBox2D( columnTitleStr.c_str(), Vector2( 0.f, 0.5f ), columnTitlesBox, m_uiBodyFontSize, RGBA_KHAKI_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
 
 	// Each Connections
@@ -224,13 +286,16 @@ void NetworkSession::Render() const
 		bool isLocal = m_boundConnections[i]->IsMe();
 		bool isHost  = m_boundConnections[i]->IsHost();
 		std::string connectionLebelStr = "";
-		if( isHost )
-			connectionLebelStr += "H ";
 		if( isLocal )
-			connectionLebelStr += "L ";
+			connectionLebelStr += "L";
+		if( isHost )
+			connectionLebelStr += "H";
 		
 		// idx
 		std::string idxStr = std::to_string( i );
+
+		// state
+		std::string connectionStateStr = ToString( m_boundConnections[i]->GetState() );
 
 		// address
 		std::string connectionAddrStr = m_boundConnections[i]->GetAddress().AddressToString();
@@ -245,7 +310,8 @@ void NetworkSession::Render() const
 		std::string lossPercentStr = Stringf( "%.2f", m_boundConnections[i]->m_loss * 100.f );
 
 		// lrcv(s)
-		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_boundConnections[i]->m_lastReceivedTimeHPC;
+		TODO( "Make sure we're not using GetMasterClock()->GetCurrentHPC()! GetCurrentHPC() is a static function, you meant to use GetMasterClock().total.hpc..!" );
+		uint64_t lastReceivedDeltaHPC = Clock::GetCurrentHPC() - m_boundConnections[i]->m_lastReceivedTimeHPC; 
 		double	 lastReceivedDeltaSec = Clock::GetSecondsFromHPC( lastReceivedDeltaHPC );
 		std::string lrcvStr = Stringf( "%.3f", lastReceivedDeltaSec);
 
@@ -272,8 +338,102 @@ void NetworkSession::Render() const
 		AABB2 connectionDetailBox = AABB2( mins, mins + connectionDetailBoxSize );
 
 		// Draw the string
-		std::string	connectionRowStr = Stringf( "%-4s  %-3s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", connectionLebelStr.c_str(), idxStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
+		std::string	connectionRowStr = Stringf( "%-2s  %-3s  %-12s  %-21s  %-12s  %-7s  %-7s  %-7s  %-7s  %-7s  %-7s  %-16s  %-7s", connectionLebelStr.c_str(), idxStr.c_str(), connectionStateStr.c_str(), connectionAddrStr.c_str(), simsndrt.c_str(),rttStr.c_str(), lossPercentStr.c_str(), lrcvStr.c_str(), lsntStr.c_str(), sntackSrt.c_str(), rcvackStr.c_str(), rcvbitsStr.c_str(), ncnfrm_relStr.c_str() );
 		m_theRenderer->DrawTextInBox2D( connectionRowStr.c_str(), Vector2( 0.f, 0.5f ), connectionDetailBox, m_uiBodyFontSize, RGBA_WHITE_COLOR, m_fonts, TEXT_DRAW_OVERRUN );
+	}
+}
+
+void NetworkSession::UpdateNetClock()
+{
+	if( m_myConnection->IsHost() )
+		return;
+
+	// Client only..
+	uint deltaTime_ms = GetMasterClock()->frame.ms;
+	m_desiredClientTime_ms += deltaTime_ms;
+
+	float scale = 1.f;
+	if( m_currentClientTime_ms + deltaTime_ms > m_desiredClientTime_ms )			// Scale down..
+		scale = 1.f - MAX_NETWORK_TIME_DILATION;
+	else															// Scale up..
+		scale = 1.f + MAX_NETWORK_TIME_DILATION;
+
+	m_currentClientTime_ms += (uint)((double)deltaTime_ms * (double)scale);
+
+	DebugRender2DText( 0.f, Vector2::ZERO, 20.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf("%f", scale) );
+}
+
+void NetworkSession::UpdateSessionDisconnected()
+{
+
+}
+
+void NetworkSession::UpdateSessionBound()
+{
+
+}
+
+void NetworkSession::UpdateSessionConnecting()
+{
+	if( m_myConnection->GetState() == NET_CONNECTION_CONNECTED )
+	{
+		UpdateStateTo( NET_SESSION_JOINING );
+		return;
+	}
+
+	// Not connected => send JOIN_REQUEST after some interval
+	if( m_joinRequestTimer.CheckAndReset() )
+	{
+		NetworkMessage msg( "join_request", LITTLE_ENDIAN );
+		msg.WriteString( m_myConnection->GetNetworkID().c_str() );
+
+		m_hostConnection->Send( msg );
+	}
+
+	// Timeout check
+	if( m_joinTimeoutTimer.CheckAndReset() )
+	{
+		SetError( NET_SESSION_ERROR_TIMEOUT, "Host didn't respond. Timed out!" );
+		UpdateStateTo( NET_SESSION_DISCONNECTED );
+	}
+}
+
+void NetworkSession::UpdateSessionJoining()
+{
+	// Does nothing
+	//	Just waits until my connection is marked as ready,
+	//	Which happens in ProcessJoinFinished(), called on NET_MESSAGE_JOIN_FINISHED
+}
+
+void NetworkSession::UpdateSessionReady()
+{
+
+}
+
+void NetworkSession::UpdateStateTo( eNetworkSessionState newState )
+{
+	// Reset timers
+	if( m_state != newState )
+	{
+		if( newState == NET_SESSION_DISCONNECTED )
+			m_joinTimeoutTimer.Reset();
+	}
+
+	// Change states
+	m_state = newState;
+}
+
+void NetworkSession::SendHangupToAllConnections()
+{
+	for( int i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] == nullptr )
+			continue;
+
+		NetworkMessage hangupMsg( "hangup", LITTLE_ENDIAN );
+
+		m_boundConnections[i]->Send( hangupMsg );
+		m_boundConnections[i]->FlushMessages( true );
 	}
 }
 
@@ -313,12 +473,12 @@ void NetworkSession::RegisterCoreMessages()
 	RegisterNetworkMessage( NET_MESSAGE_HEARTBEAT,					"heartbeat",			OnHeartbeat,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 	
 	// Connection Management
-	RegisterNetworkMessage( NET_MESSAGE_JOIN_REQUEST,				"join_request",			OnJoinRequest,		NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
+	RegisterNetworkMessage( NET_MESSAGE_JOIN_REQUEST,				"join_request",			OnJoinRequest,		NET_MESSAGE_OPTION_CONNECTIONLESS );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_DENY,					"join_deny",			OnJoinDeny,			NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_ACCEPT,				"join_accept",			OnAccept,			NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
-	RegisterNetworkMessage( NET_MESSAGE_NEW_CONNECTION,				"new_connection",		OnNewConnection,	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 	RegisterNetworkMessage( NET_MESSAGE_JOIN_FINISHED,				"join_finished",		OnJoinFinished,		NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
 	RegisterNetworkMessage( NET_MESSAGE_UPDATE_CONNECTION_STATE,	"update_connection",	OnUpdateConnection,	NET_MESSAGE_OPTION_RELIABLE_IN_ORDER );
+	RegisterNetworkMessage( NET_MESSAGE_HANGUP,						"hangup",				OnHangup,			NET_MESSAGE_OPTION_REQUIRES_CONNECTION );
 }
 
 void NetworkSession::ProcessIncoming()
@@ -366,10 +526,10 @@ void NetworkSession::Host( char const *myID, uint16_t port, uint16_t portRange /
 	m_boundConnections[ 0 ] = myConnectionAsHost;
 
 	// Connection: ready
-	myConnectionAsHost->m_state	= NET_CONNECTION_READY;
+	myConnectionAsHost->UpdateStateTo( NET_CONNECTION_READY, false );
 	
 	// Session: ready
-	m_state = NET_SESSION_READY;
+	UpdateStateTo( NET_SESSION_READY );
 }
 
 void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
@@ -377,9 +537,12 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	bool portBound = BindPort( hostAddress.port, MAX_SESSION_CONNECTIONS );
 	if( portBound == false )
 	{
+		UpdateStateTo( NET_SESSION_DISCONNECTED );
 		SetError( NET_SESSION_ERROR_INTERNAL, "Can't bind the port..!" );
 		return;
 	}
+	else
+		UpdateStateTo( NET_SESSION_BOUND );
 
 	// Make a connection for the host
 	NetworkConnection *host = new NetworkConnection( 0, hostAddress, "host", *this );
@@ -390,20 +553,31 @@ void NetworkSession::Join( char const *myID, NetworkAddress const &hostAddress )
 	m_allConnections.push_back( host );
 	m_boundConnections[0] = host;
 	
-	host->m_state = NET_CONNECTION_CONNECTED;
+	host->UpdateStateTo( NET_CONNECTION_CONNECTING, false );
+
+	// Send join request to join
+	NetworkMessage joinRequestMessage("join_request", LITTLE_ENDIAN);
+	joinRequestMessage.WriteString( myID );
+	host->Send( joinRequestMessage );
 
 	// Make a connection for yourself
 	NetworkConnection *myConnection = new NetworkConnection( INVALID_INDEX_IN_SESSION, m_mySocket->m_address, myID, *this );
 	
 	DeleteConnection( m_myConnection );
 	m_myConnection = myConnection;
+	m_allConnections.push_back( m_myConnection );
+	m_myConnection->UpdateStateTo( NET_CONNECTION_CONNECTING, false );
 
-	m_state = NET_SESSION_CONNECTING;
+	UpdateStateTo( NET_SESSION_CONNECTING );
+
+	m_joinRequestTimer.Reset();
+	m_joinTimeoutTimer.Reset();
 }
 
 void NetworkSession::Disconnect()
 {
-
+	DeleteAllConnections();
+	UpdateStateTo( NET_SESSION_DISCONNECTED );
 }
 
 bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &reqFromAddress )
@@ -454,19 +628,117 @@ bool NetworkSession::ProcessJoinRequest( char *networkID, NetworkAddress const &
 	// Bind as new connection
 	int idx = GetIndexForNewConnection();
 	NetworkConnection *newConnection = new NetworkConnection( idx, reqFromAddress, networkID, *this );
+
+	if( idx == -1 )
+	{
+		delete newConnection;
+		newConnection = nullptr;
+
+		return false;
+	}
 	
+	uint8_t idx_u8 = (uint8_t)idx;
 	m_allConnections.push_back( newConnection );
-	m_boundConnections[ idx ] = newConnection;
+	m_boundConnections[ idx_u8 ] = newConnection;
 
 	// Send: JOIN_ACCEPT
-	NetworkMessage acceptMessage( "join_accept" );
+	NetworkMessage acceptMessage( "join_accept", LITTLE_ENDIAN );
 	acceptMessage.WriteString( m_hostConnection->GetNetworkID().c_str() );
-	acceptMessage.WriteBytes( sizeof(int), &idx );
+	acceptMessage.WriteBytes( sizeof(uint8_t), &idx_u8 );
 	newConnection->Send( acceptMessage );
+	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTING, false );
 
 	// Send: JOIN_FINISHED
-	NetworkMessage joinFinishedMessage( "join_finished" );
+	NetworkMessage joinFinishedMessage( "join_finished", LITTLE_ENDIAN );
+	uint currentTime_ms = GetMasterClock()->total.ms;
+	joinFinishedMessage.WriteBytes( sizeof(uint), &currentTime_ms );
+
 	newConnection->Send( joinFinishedMessage );
+	newConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, false );
+
+	return true;
+}
+
+bool NetworkSession::ProcessJoinDeny( eNetworkSessionError errorCode, NetworkAddress const &senderAddress )
+{
+	if( (errorCode == NUM_NET_SESSION_ERRORS) || (senderAddress != m_hostConnection->GetAddress()) )
+		return false;
+
+	SetError( errorCode, "Join requested denied from the host!" );
+
+	// Connection, disconnected
+	m_myConnection->UpdateStateTo( NET_CONNECTION_DISCONNECTED, true );
+
+	// Session, disconnected
+	UpdateStateTo( NET_SESSION_DISCONNECTED );
+
+	return true;
+}
+
+bool NetworkSession::ProcessJoinAccept( uint8_t connectionIdx, NetworkAddress const &senderAddress )
+{
+	if( (connectionIdx == MAX_SESSION_CONNECTIONS) || (senderAddress != m_hostConnection->GetAddress()) )
+		return false;
+
+	BindConnection( connectionIdx, m_myConnection );
+	m_myConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, true );
+	m_hostConnection->UpdateStateTo( NET_CONNECTION_CONNECTED, false );
+
+	UpdateStateTo( NET_SESSION_JOINING );
+
+	return false;
+}
+
+bool NetworkSession::ProcessJoinFinished( NetworkAddress const &senderAddress, uint hostNetClockTime_ms )
+{
+	if( m_hostConnection->GetAddress() == senderAddress )
+	{
+		if( hostNetClockTime_ms > m_lastReceivedHostTime_ms )
+		{
+			// Set desired and last received net time
+			uint halfRTT_ms	= (uint)((m_hostConnection->m_rtt * 1000.f) * 0.5f);			// m_rtt is in seconds
+			m_lastReceivedHostTime_ms = hostNetClockTime_ms + halfRTT_ms;
+			m_desiredClientTime_ms = m_lastReceivedHostTime_ms;
+
+			// Set current client net time to desired, because we're just starting!
+			m_currentClientTime_ms = m_desiredClientTime_ms;
+		}
+
+		m_myConnection->UpdateStateTo( NET_CONNECTION_READY, true );
+		m_hostConnection->UpdateStateTo( NET_CONNECTION_READY, false );
+
+		UpdateStateTo( NET_SESSION_READY );
+		return true;
+	}
+	else
+		return false;
+}
+
+bool NetworkSession::ProcessUpdateConnectionState( eNetworkConnectionState state, NetworkAddress const &senderAddress )
+{
+	NetworkConnection *connection = GetConnection( senderAddress );
+
+	if( connection == nullptr )
+		return false;
+
+	connection->UpdateStateTo( state, false );
+	return true;
+}
+
+bool NetworkSession::ProcessNetClockSyncFromHost( uint hostNetClockTime_ms )
+{
+	if( m_myConnection->IsHost() )
+		return true;
+
+	// We only care if received time is greater than the last received time
+	if( hostNetClockTime_ms <= m_lastReceivedHostTime_ms )
+		return true;
+
+	m_lastReceivedHostTime_ms	= hostNetClockTime_ms;
+	uint halfRTT_ms				= (uint)((m_hostConnection->m_rtt * 1000.f) * 0.5f);
+	m_desiredClientTime_ms		= m_lastReceivedHostTime_ms + halfRTT_ms;
+
+	DebugRender2DText( 0.45f, Vector2( 0.f, 20.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, Stringf("receivedHostTime = %f; halfRTT = %f", hostNetClockTime_ms * 0.001, halfRTT_ms * 0.001) );
 
 	return true;
 }
@@ -504,6 +776,14 @@ bool NetworkSession::IsLobbyFull() const
 	return true;
 }
 
+uint NetworkSession::GetNetTimeMilliseconds() const
+{
+	if( m_myConnection->IsHost() )
+		return GetMasterClock()->total.ms;
+	else
+		return m_currentClientTime_ms;
+}
+
 void NetworkSession::SendPacket( NetworkPacket &packetToSend )
 {
 	uint8_t idx = packetToSend.m_header.connectionIndex;
@@ -526,6 +806,24 @@ void NetworkSession::SendDirectMessageTo( NetworkMessage &messageToSend, Network
 	m_mySocket->SendTo( address, packetToSend.GetBuffer(), packetToSend.GetWrittenByteCount() );
 }
 
+void NetworkSession::BroadcastMessage( NetworkMessage &messageToBroadcast, NetworkConnection const *excludeConnection /* = nullptr */ )
+{
+	for each (NetworkConnection* connection in m_boundConnections)
+	{
+		if( connection != nullptr )
+		{
+			bool exclude = false;
+
+			// Exclude if it is same connection..
+			if( excludeConnection != nullptr )
+				exclude = (*connection == *excludeConnection);
+
+			if( exclude == false )
+				connection->Send( messageToBroadcast );
+		}
+	}
+}
+
 NetworkConnection* NetworkSession::CreateConnection( NetworkConnectionInfo const &info )
 {
 	NetworkConnection *newConnection = new NetworkConnection( info, *this );
@@ -538,7 +836,7 @@ NetworkConnection* NetworkSession::CreateConnection( NetworkConnectionInfo const
 	return newConnection;
 }
 
-void NetworkSession::DestroyConnection( NetworkConnection *connection )
+void NetworkSession::DeleteConnection( NetworkConnection* connection )
 {
 	// If it's the convenience pointer, set it to nullptr
 	if( connection == m_hostConnection )
@@ -568,7 +866,10 @@ void NetworkSession::DestroyConnection( NetworkConnection *connection )
 
 	// It was never registered, return
 	if( connectionFound == false )
+	{
+		delete connection;
 		return;
+	}
 
 	// Remove it from bound connections
 	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
@@ -583,53 +884,77 @@ void NetworkSession::DestroyConnection( NetworkConnection *connection )
 
 void NetworkSession::BindConnection( uint8_t idx, NetworkConnection *connection )
 {
-	UNUSED( idx );
-	UNUSED( connection );
+	// Update its index
+	connection->m_info.indexInSession = idx;
+
+	// Delete if a connection is already there
+	if( m_boundConnections[idx] != nullptr )
+	{
+		delete m_boundConnections[idx];
+		m_boundConnections[idx] = nullptr;
+	}
+
+	// Bind the new one!
+	m_boundConnections[idx] = connection;
 }
 
-void NetworkSession::DeleteConnection( NetworkConnection* &connection )
+void NetworkSession::DeleteAllConnections()
 {
-	// Reset the pointers to nullptr
-	if( m_myConnection == connection )
-		m_myConnection = nullptr;
+	for( int i = 0; i < m_allConnections.size(); i++ )
+		DeleteConnection( m_allConnections[i] );
+}
 
-	if( m_hostConnection == connection )
+void NetworkSession::RemoveDisconnectedConnections()
+{
+	for( int i = 0; i < m_allConnections.size(); i++ )
 	{
-		m_hostConnection = nullptr;
-		m_state = NET_SESSION_DISCONNECTED;
-	}
-
-	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
-	{
-		if( m_boundConnections[i] == connection )
-			m_boundConnections[i] = nullptr;
-	}
-
-	// Delete the connection
-	bool isDeleted = false;
-	for( uint i = 0; i < m_allConnections.size(); i++ )
-	{
-		if( m_allConnections[i] != connection )
+		NetworkConnection	&thisConnection = *m_allConnections[i];
+		bool				 isDisconnected = (thisConnection.GetState() == NET_CONNECTION_DISCONNECTED);
+		
+		if( isDisconnected == false )
 			continue;
 
-		std::swap( m_allConnections[i], m_allConnections.back() );
-		delete m_allConnections.back();
-		m_allConnections.back() = nullptr;
-
-		m_allConnections.pop_back();
-		
-		isDeleted = true;
-		break;
-	}
-
-	// If connection was not registered, delete the provided connection at least
-	if( isDeleted == false )
-	{
-		if( connection != nullptr )
+		// This connection marked itself as disconnected..
+		bool isMyConnection		= (thisConnection == *m_myConnection);
+		bool isHostConnection	= (thisConnection == *m_hostConnection);
+		if( isMyConnection || isHostConnection )
 		{
-			delete connection;
-			connection = nullptr;
+			// If I or host gets disconnected, destroy all connections
+			DeleteAllConnections();
+
+			// Set session state to disconnected
+			UpdateStateTo( NET_SESSION_DISCONNECTED );
 		}
+		else
+			DeleteConnection( &thisConnection );
+	}
+}
+
+void NetworkSession::CheckForConnectionTimeout()
+{
+	for( int i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		if( m_boundConnections[i] == nullptr )
+			continue;
+
+		uint64_t currentHPC		 = Clock::GetCurrentHPC();
+		uint64_t lastReceivedHPC = m_boundConnections[i]->m_lastReceivedTimeHPC;
+		double	 idleTimeSeconds = Clock::GetSecondsFromHPC(currentHPC - lastReceivedHPC);
+
+		// Mark DISCONNECTED, if timed out
+		if( idleTimeSeconds > NETWORK_CONNECTION_TIMEOUT_SECONDS )
+			m_boundConnections[i]->UpdateStateTo( NET_CONNECTION_DISCONNECTED, false );
+	}
+}
+
+void NetworkSession::SetBoundConnectionsToNull()
+{
+	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
+	{
+		NetworkConnection* &connection = m_boundConnections[i];
+
+		if( connection != nullptr )
+			connection = nullptr;
 	}
 }
 
@@ -643,6 +968,9 @@ bool NetworkSession::ConnectionAlreadyExists( NetworkAddress const &address )
 
 	for( uint i = 0; i < MAX_SESSION_CONNECTIONS; i++ )
 	{
+		if( m_boundConnections[i] == nullptr )
+			continue;
+
 		if( m_boundConnections[i]->GetAddress() == address )
 			return true;
 	}
@@ -691,6 +1019,25 @@ NetworkConnection* NetworkSession::GetConnection( int idx )
 		return nullptr;
 	else
 		return m_boundConnections[idx];
+}
+
+NetworkConnection* NetworkSession::GetConnection( NetworkAddress const &address )
+{
+	NetworkConnection *connection = nullptr;
+
+	for each (NetworkConnection* boundConnection in m_boundConnections)
+	{
+		if( boundConnection == nullptr )
+			continue;
+
+		if( boundConnection->GetAddress() == address )
+		{
+			connection = boundConnection;
+			break;
+		}
+	}
+
+	return connection;
 }
 
 bool NetworkSession::IsRegistered( NetworkConnection const *connection ) const

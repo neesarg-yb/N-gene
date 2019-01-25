@@ -19,7 +19,8 @@ NetworkConnectionInfo::NetworkConnectionInfo( int index, std::string const &desi
 	std::string idLimitedLength = std::string( desiredNetworkID, 0, MAX_NETWORK_ID_LENGTH );
 	std::copy( idLimitedLength.begin(), idLimitedLength.end(), networkID );
 	
-	networkID[ MAX_NETWORK_ID_LENGTH ] = '\0';
+	uint lastCharAt = (desiredNetworkID.size() < MAX_NETWORK_ID_LENGTH) ? ((uint) desiredNetworkID.size()) : MAX_NETWORK_ID_LENGTH;
+	networkID[ lastCharAt ] = '\0';
 }
 
 bool NetworkConnectionInfo::operator==( NetworkConnectionInfo const &b ) const
@@ -61,6 +62,28 @@ bool NetworkConnection::operator==( NetworkConnection const &b ) const
 	bool isTheSameConnection	= ( this->m_info == b.m_info );
 
 	return (isInSameSession && isTheSameConnection);
+}
+
+bool NetworkConnection::operator!=( NetworkConnection const &b ) const
+{
+	return !(*this == b);
+}
+
+eNetworkConnectionState NetworkConnection::GetState() const
+{
+	return m_state;
+}
+
+void NetworkConnection::UpdateStateTo( eNetworkConnectionState newState, bool broadcast )
+{
+	if( broadcast == true && m_state != newState )
+	{
+		NetworkMessage msg( "update_connection", LITTLE_ENDIAN );
+		msg.WriteBytes( sizeof(eNetworkConnectionState), &newState );
+		m_parentSession.BroadcastMessage( msg, this );
+	}
+
+	m_state = newState;
 }
 
 void NetworkConnection::OnReceivePacket( NetworkPacketHeader receivedPacketHeader )
@@ -263,10 +286,10 @@ void NetworkConnection::Send( NetworkMessage &msg )
 		m_outgoingUnreliables.push_back( msgToSend );
 }
 
-void NetworkConnection::FlushMessages()
+void NetworkConnection::FlushMessages( bool ignoreSendRate /* = false */ )
 {
 	// If it hasn't been time to send, return
-	if( m_sendRateTimer.CheckAndReset() != true )
+	if( (m_sendRateTimer.CheckAndReset() != true) && (ignoreSendRate == false) )
 		return;
 
 	// If we need a heartbeat to be sent
@@ -275,6 +298,8 @@ void NetworkConnection::FlushMessages()
 		m_immediatlyRespondForAck = false;
 
 		NetworkMessage heartbeat( "heartbeat" );
+		uint netTime_ms = GetMasterClock()->total.ms;
+		heartbeat.WriteBytes( sizeof(uint), &netTime_ms );
 		Send( heartbeat );
 	}
 	
@@ -660,3 +685,37 @@ void NetworkConnection::MarkReliableReceived( uint16_t reliableID )
 		}
 	}
 */
+
+std::string ToString( eNetworkConnectionState inEnum )
+{
+	std::string str = "";
+
+	switch (inEnum)
+	{
+	case NET_CONNECTION_DISCONNECTED:
+		str = "Disconnected";
+		break;
+
+	case NET_CONNECTION_CONNECTING:
+		str = "Connecting";
+		break;
+
+	case NET_CONNECTION_CONNECTED:
+		str = "Connected";
+		break;
+
+	case NET_CONNECTION_READY:
+		str = "Ready";
+		break;
+
+	case NUM_NET_CONNECTIONS:
+		str = std::to_string( NUM_NET_CONNECTIONS );
+		break;
+
+	default:
+		str = "Error!";
+		break;
+	}
+
+	return str;
+}

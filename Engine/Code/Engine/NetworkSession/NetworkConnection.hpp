@@ -21,13 +21,16 @@ typedef std::vector< NetworkMessage* > NetworkMessages;
 //---------------------------------
 // Enums
 // 
-enum eNetworkConnectionState
+enum eNetworkConnectionState : uint8_t
 {
 	NET_CONNECTION_DISCONNECTED = 0,
+	NET_CONNECTION_CONNECTING,
 	NET_CONNECTION_CONNECTED,
 	NET_CONNECTION_READY,
 	NUM_NET_CONNECTIONS
 };
+
+std::string ToString( eNetworkConnectionState inEnum );
 
 
 //---------------------------------
@@ -62,6 +65,8 @@ public:
 	// Connection Info.
 	NetworkSession			&m_parentSession;
 	NetworkConnectionInfo	 m_info;
+
+private:
 	eNetworkConnectionState	 m_state					= NET_CONNECTION_DISCONNECTED;
 
 public:
@@ -77,7 +82,7 @@ public:
 	uint64_t			 m_lastReceivedTimeHPC			= Clock::GetCurrentHPC();
 
 	float				 m_loss	= 0.f;												// [0, 1] Loss rate we perceive to this connection
-	float				 m_rtt	= 0.f;												// Latency perceived on this connection
+	float				 m_rtt	= 0.f;												// IN SECONDS; Latency perceived on this connection
 
 private:
 	// Outgoing-and-Sent Messages
@@ -102,11 +107,16 @@ private:
 
 public:
 	bool operator == ( NetworkConnection const &b ) const;
+	bool operator != ( NetworkConnection const &b ) const;
 
 public:
 	inline NetworkAddress	GetAddress()		const { return m_info.address; }
 	inline uint8_t			GetIndexInSession()	const { return m_info.indexInSession; }
 	inline std::string		GetNetworkID()		const { return m_info.networkID; }
+
+	// Connection State
+	eNetworkConnectionState	GetState() const;
+	void					UpdateStateTo( eNetworkConnectionState newState, bool broadcast );
 
 	// Receiving End
 	void	OnReceivePacket( NetworkPacketHeader receivedPacketHeader );		// It is there for tracking the messages & packets, it doesn't process em!
@@ -115,7 +125,7 @@ public:
 	// Sending End
 	bool	HasNewMessagesToSend() const;				// New reliables or unreliable, not the unconfirmed ones
 	void	Send( NetworkMessage &msg );				// Queues the messages to send
-	void	FlushMessages();							// Sends the queued messages
+	void	FlushMessages( bool ignoreSendRate = false );							// Sends the queued messages
 
 	// Current State - Messages
 	uint16_t GetLowestReliableIDToConfirm() const;
