@@ -1,9 +1,11 @@
 #pragma once
 #include "Player.hpp"
+#include "Engine/Input/InputSystem.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Game/World/Terrain.hpp"
+#include "Game/GameCommon.hpp"
 
 Player::Player( Vector3 worldPosition, Terrain const &parentTerrain )
 	: GameObject( worldPosition, Vector3::ZERO, Vector3::ONE_ALL )

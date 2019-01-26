@@ -6,9 +6,9 @@
 #include "Engine/Math/Plane3.hpp"
 #include "Engine/Math/Quaternion.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/Camera System/CameraManager.hpp"
-#include "Game/Potential Engine/Camera System/DebugCamera.hpp"
+#include "Engine/CameraSystem/CameraManager.hpp"
 #include "Game/GameCommon.hpp"
+#include "Game/Camera System/DebugCamera.hpp"
 
 WeightedTargetPoint_MCR::WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeight )
 	: weight( inWeight )

@@ -1,6 +1,6 @@
 #pragma once
 #include "CC_LineOfSight.hpp"
-#include "Game/Potential Engine/Camera System/CameraManager.hpp"
+#include "Engine/CameraSystem/CameraManager.hpp"
 
 CC_LineOfSight::CC_LineOfSight( char const *name, CameraManager &manager, uint8_t priority )
 	: CameraConstraint( name, manager, priority )

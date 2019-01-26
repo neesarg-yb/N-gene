@@ -3,7 +3,7 @@
 #include "Engine/Math/Plane3.hpp"
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/RaycastResult.hpp"
-#include "Game/Potential Engine/GameObject.hpp"
+#include "Engine/Core/GameObject.hpp"
 
 class Scene;
 typedef std::vector< Renderable* > ChunkList;

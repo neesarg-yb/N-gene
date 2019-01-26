@@ -1,7 +1,7 @@
 #pragma once
 #include "CB_Follow.hpp"
+#include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/Camera System/CameraManager.hpp"
 
 CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager )
 	: CB_DegreesOfFreedom( name, manager )

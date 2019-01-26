@@ -1,7 +1,7 @@
 #pragma once
 #include "CC_CameraCollision.hpp"
-#include "Game/Potential Engine/Camera System/CameraManager.hpp"
-#include "Game/Potential Engine/Camera System/CameraContext.hpp"
+#include "Engine/CameraSystem/CameraManager.hpp"
+#include "Engine/CameraSystem/CameraContext.hpp"
 
 CC_CameraCollision::CC_CameraCollision( char const *name, CameraManager &manager, uint8_t priority )
 	: CameraConstraint( name, manager, priority )

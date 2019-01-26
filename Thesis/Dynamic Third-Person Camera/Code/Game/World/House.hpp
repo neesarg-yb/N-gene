@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Core/RaycastResult.hpp"
-#include "Game/Potential Engine/GameObject.hpp"
+#include "Engine/Core/GameObject.hpp"
 
 class Terrain;
 

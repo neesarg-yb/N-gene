@@ -3,12 +3,12 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/Camera Constraints/CC_CameraCollision.hpp"
-#include "Game/Potential Engine/Camera Constraints/CC_LineOfSight.hpp"
-#include "Game/Potential Engine/Camera Behaviours/CB_FreeLook.hpp"
-#include "Game/Potential Engine/Camera Behaviours/CB_Follow.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
+#include "Game/Camera System/Camera Constraints/CC_LineOfSight.hpp"
+#include "Game/Camera System/Camera Constraints/CC_CameraCollision.hpp"
 
 Scene_FollowCamera::Scene_FollowCamera( Clock const *parentClock )
 	: GameState( "FOLLOW CAMERA", parentClock )

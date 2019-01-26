@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/Potential Engine/Camera System/CameraConstraint.hpp"
+#include "Engine/CameraSystem/CameraConstraint.hpp"
 
 class CC_CameraCollision : public CameraConstraint
 {

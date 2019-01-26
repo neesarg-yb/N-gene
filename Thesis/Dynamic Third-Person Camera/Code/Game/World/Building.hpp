@@ -2,8 +2,8 @@
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/Sphere.hpp"
+#include "Engine/Core/GameObject.hpp"
 #include "Engine/Core/RaycastResult.hpp"
-#include "Game/Potential Engine/GameObject.hpp"
 
 class Terrain;
 

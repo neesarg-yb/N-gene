@@ -1,15 +1,15 @@
 #pragma once
 #include "Engine/Math/Sphere.hpp"
+#include "Engine/Core/GameObject.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
-#include "Game/Potential Engine/GameObject.hpp"
-#include "Game/Potential Engine/Camera System/DebugCamera.hpp"
-#include "Game/Potential Engine/Camera System/CameraManager.hpp"
-#include "Game/Potential Engine/Camera Behaviours/CB_FreeLook.hpp"
-#include "Game/Potential Engine/Motion Controllers/CMC_ProportionalController.hpp"
-#include "Game/Abstract Classes/GameState.hpp"
+#include "Engine/CameraSystem/CameraManager.hpp"
 #include "Game/World/Player.hpp"
 #include "Game/World/Terrain.hpp"
+#include "Game/Abstract Classes/GameState.hpp"
+#include "Game/Camera System/DebugCamera.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
+#include "Game/Camera System/Motion Controllers/CMC_ProportionalController.hpp"
 
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;

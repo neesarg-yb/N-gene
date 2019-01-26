@@ -2,10 +2,10 @@
 #include "Scene_DegreesOfFreedom.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Core/StringUtils.hpp"
-#include "Game/Potential Engine/Camera Behaviours/CB_Follow.hpp"
-#include "Game/Potential Engine/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Terrain.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
 
 Scene_DegreesOfFreedom::Scene_DegreesOfFreedom( Clock const *parentClock )
 	: GameState( "DEGREES OF FREEDOM", parentClock )

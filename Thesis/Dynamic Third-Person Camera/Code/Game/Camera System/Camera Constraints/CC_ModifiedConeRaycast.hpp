@@ -3,7 +3,7 @@
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/Ray3.hpp"
 #include "Engine/Core/RaycastResult.hpp"
-#include "Game/Potential Engine/Camera System/CameraConstraint.hpp"
+#include "Engine/CameraSystem/CameraConstraint.hpp"
 
 
 //---------------------------------

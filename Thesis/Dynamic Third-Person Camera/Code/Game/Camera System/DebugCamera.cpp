@@ -4,8 +4,9 @@
 #include "Engine/Core/Window.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-DebugCamera::DebugCamera( CameraBehaviour *newBehaviour , bool shadowMapDisabled /*= true*/ )
+DebugCamera::DebugCamera( CameraBehaviour *newBehaviour, InputSystem *inputSystem, bool shadowMapDisabled /* = true */ )
 	: m_behaviour( newBehaviour )
+	, m_inputSystem( inputSystem )
 {
 	// Setup the Camera
 	uint width	= Window::GetInstance()->GetWidth();
@@ -18,7 +19,7 @@ DebugCamera::DebugCamera( CameraBehaviour *newBehaviour , bool shadowMapDisabled
 	SetDepthStencilTarget( deapthTarget );
 
 	if( m_behaviour != nullptr )
-		m_behaviour->SetCameraAnchorAndInputSystemTo( this, nullptr, g_theInput );
+		m_behaviour->SetCameraAnchorAndInputSystemTo( this, nullptr, inputSystem );
 
 	// Setup the overlay camera
 	m_uiCamera = new Camera();

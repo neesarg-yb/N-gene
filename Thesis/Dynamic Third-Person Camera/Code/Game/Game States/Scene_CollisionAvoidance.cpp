@@ -4,14 +4,14 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/Camera Behaviours/CB_Follow.hpp"
-#include "Game/Potential Engine/Camera Constraints/CC_LineOfSight.hpp"
-#include "Game/Potential Engine/Camera Constraints/CC_ConeRaycast.hpp"
-#include "Game/Potential Engine/Camera Constraints/CC_ModifiedConeRaycast.hpp"
-#include "Game/Potential Engine/Camera Constraints/CC_CameraCollision.hpp"
 #include "Game/theGame.hpp"
 #include "Game/World/Building.hpp"
 #include "Game/World/House.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
+#include "Game/Camera System/Camera Constraints/CC_LineOfSight.hpp"
+#include "Game/Camera System/Camera Constraints/CC_ConeRaycast.hpp"
+#include "Game/Camera System/Camera Constraints/CC_ModifiedConeRaycast.hpp"
+#include "Game/Camera System/Camera Constraints/CC_CameraCollision.hpp"
 
 Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	: GameState( "COLLISION AVOIDANCE", parentClock )
@@ -32,8 +32,10 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 
 	// Setting up the Debug Camera
 	m_debugFreelook = new CB_FreeLook( 5.f, 35.f, -60.f, 60.f, "DebugFreeLook", nullptr, USE_KEYBOARD_MOUSE_FL );
-	m_debugCamera = new DebugCamera( m_debugFreelook );
+	m_debugCamera = new DebugCamera( m_debugFreelook, g_theInput );
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, 0.0001f, 1000.f );
+	g_activeDebugCamera = m_debugCamera;
+
 	// Add to Scene
 	m_scene->AddCamera( *m_debugCamera );
 

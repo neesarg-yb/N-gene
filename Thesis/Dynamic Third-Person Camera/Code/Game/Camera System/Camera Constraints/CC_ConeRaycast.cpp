@@ -3,10 +3,11 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/CameraSystem/CameraContext.hpp"
+#include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
-#include "Game/Potential Engine/Camera System/CameraContext.hpp"
-#include "Game/Potential Engine/Camera System/CameraManager.hpp"
-#include "Game/Potential Engine/Camera System/DebugCamera.hpp"
+#include "Game/GameCommon.hpp"
+#include "Game/Camera System/DebugCamera.hpp"
 
 enum eWeightedRaycastDir : int
 {
