@@ -2,7 +2,7 @@
 #include <functional>
 #include "Engine/Core/UIMenu.hpp"
 #include "Game/GameCommon.hpp"
-#include "Game/Abstract Classes/GameState.hpp"
+#include "Game/Game States/GameState.hpp"
 
 class LevelSelect : public GameState
 {

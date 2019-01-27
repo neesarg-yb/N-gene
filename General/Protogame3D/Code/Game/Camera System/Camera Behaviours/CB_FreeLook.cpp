@@ -10,7 +10,7 @@ CB_FreeLook::CB_FreeLook( float movementSpeed, float rotationSpeed, float minPit
 	, m_pitchRange( minPitchAngle, maxPitchAngle )
 	, m_inputSource( inputSource )
 {
-	TODO( "Sync pitchLimits with behaviour CB_DegreesOfFreedom!" );
+
 }
 
 CB_FreeLook::~CB_FreeLook()

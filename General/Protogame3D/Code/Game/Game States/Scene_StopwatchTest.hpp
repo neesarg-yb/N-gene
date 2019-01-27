@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/Stopwatch.hpp"
-#include "Game/Abstract Classes/GameState.hpp"
+#include "Game/Game States/GameState.hpp"
 
 class Scene_StopwatchTest : public GameState
 {

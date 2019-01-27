@@ -49,9 +49,6 @@
     <ClCompile Include="GameCommon.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Abstract Classes\GameState.cpp">
-      <Filter>Abstract Classes</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Attract.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
@@ -94,6 +91,9 @@
     <ClCompile Include="Game States\Scene_StopwatchTest.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\GameState.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -107,9 +107,6 @@
     </ClInclude>
     <ClInclude Include="EngineBuildPreferences.hpp">
       <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="Abstract Classes\GameState.hpp">
-      <Filter>Abstract Classes</Filter>
     </ClInclude>
     <ClInclude Include="Game States\Attract.hpp">
       <Filter>Game States</Filter>
@@ -151,6 +148,9 @@
       <Filter>Game States</Filter>
     </ClInclude>
     <ClInclude Include="Game States\Scene_StopwatchTest.hpp">
+      <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\GameState.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
