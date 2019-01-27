@@ -10,6 +10,15 @@ Transform::Transform( Vector3 const &position, Vector3 const &rotation, Vector3 
 	RecalculateTheMatrix();
 }
 
+Transform::Transform( Vector3 const &position, Quaternion const &rotation, Vector3 const &scale )
+	: m_position( position )
+	, m_rotation( rotation )
+	, m_scale( scale )
+	, m_isDirty( true )
+{
+	RecalculateTheMatrix();
+}
+
 Vector3 Transform::GetWorldPosition() const
 {
 	// If no parent

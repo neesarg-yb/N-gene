@@ -37,7 +37,19 @@ enum VK_Codes
 	DELETE_KEY	= 0x2E,				/* VK_DELETE */
 	ESCAPE		= 0x1B,				/* VK_ESCAPE */
 	ENTER		= 0x0D,				/* VK_RETURN */
-	SHIFT		= 0x10				/* VK_SHIFT */
+	SHIFT		= 0x10,				/* VK_SHIFT */
+	PAGE_UP		= 0x21,				/* VK_PRIOR */
+	PAGE_DOWN	= 0x22,				/* VK_NEXT */
+	NUM_PAD_0	= 0x60,				/* VK_NUMPAD0 */
+	NUM_PAD_1	= 0x61,				/* VK_NUMPAD1 */
+	NUM_PAD_2	= 0x62,				/* VK_NUMPAD2 */
+	NUM_PAD_3	= 0x63,				/* VK_NUMPAD3 */
+	NUM_PAD_4	= 0x64,				/* VK_NUMPAD4 */
+	NUM_PAD_5	= 0x65,				/* VK_NUMPAD5 */
+	NUM_PAD_6	= 0x66,				/* VK_NUMPAD6 */
+	NUM_PAD_7	= 0x67,				/* VK_NUMPAD7 */
+	NUM_PAD_8	= 0x68,				/* VK_NUMPAD8 */
+	NUM_PAD_9	= 0x69,				/* VK_NUMPAD9 */
 };
 
 typedef KeyButtonState MouseButtonState;

@@ -20,6 +20,7 @@ private:
 public:
 	Transform() { };
 	Transform( Vector3 const &position, Vector3 const &rotation, Vector3 const &scale );
+	Transform( Vector3 const &position, Quaternion const &rotation, Vector3 const &scale );
 
 public:
 	Vector3		GetWorldPosition() const;									// Gives position relative to its parent

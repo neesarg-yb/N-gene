@@ -82,3 +82,6 @@ std::vector<std::string>	SplitIntoStringsByDelimiter( std::string passedString, 
 void						ReplaceAllInString( std::string &stringToModify, std::string const &replaceFrom, std::string const &replaceTo );
 
 int	ModuloNonNegative( int operatingOn, int moduloBy );			// It is like normal modulo, but on negative values it wraps around the range => (-1) will give you (moduloBy - 1)
+
+bool		CycleLess	( uint16_t a, uint16_t b );				// returns true is (a < b); where for the greater value, the wrap-difference would be less than 0x8000'b
+inline bool CycleGreater( uint16_t a, uint16_t b ) { return !CycleLess(a, b); }	// returns true if (a > b); where for the greater value, the wrap-difference would be less than 0x8000'b

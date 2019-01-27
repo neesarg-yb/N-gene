@@ -28,7 +28,8 @@ public:
 	float		 m_shadowCameraPullback = 20.f;			// How much the shadow-camera gets pulled back from anchor position, if passed
 
 public:
-	void RenderSceneForCamera( Camera &camera, Scene &scene, Vector3 const *shadowCameraAnchorPos = nullptr ) const;
+	void RenderScene( Scene &scene, Vector3 const *shadowCameraAnchorPos = nullptr ) const;								// Renders scene for all of its cameras
+	void RenderSceneForCamera( Camera &camera, Scene &scene, Vector3 const *shadowCameraAnchorPos = nullptr ) const;	// Renders scene for the provided camera
 	void RenderSceneForShadowMap( Scene &scene, Vector3 const &cameraAnchorPosition ) const;
 
 private:

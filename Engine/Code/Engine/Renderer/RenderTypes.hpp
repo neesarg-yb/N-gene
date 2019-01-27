@@ -50,8 +50,11 @@ struct UBOTimeData
 
 struct UBOCameraMatrices
 {
-	Matrix44 viewMatrix;
-	Matrix44 projectionMatrix;
+	Vector3		padding_04;
+	float		usesShadowMap;
+
+	Matrix44	viewMatrix;
+	Matrix44	projectionMatrix;
 };
 
 enum eTextureFormat

@@ -44,6 +44,11 @@ bool NetworkAddress::operator==( NetworkAddress const &secondAddress ) const
 	return (addressMatches && portMatches);
 }
 
+bool NetworkAddress::operator!=( NetworkAddress const &secondAddress ) const
+{
+	return !(*this == secondAddress);
+}
+
 bool NetworkAddress::ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const
 {
 	if( addressIPv4 == 0U && port == 0 )

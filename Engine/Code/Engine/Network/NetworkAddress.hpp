@@ -17,6 +17,7 @@ public:
 
 public:
 	bool operator == ( NetworkAddress const &secondAddress ) const;
+	bool operator != ( NetworkAddress const &secondAddress ) const;
 
 public:
 	bool ToSocketAddress( sockaddr *out, size_t *out_addrlen ) const;

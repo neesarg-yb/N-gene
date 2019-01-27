@@ -30,7 +30,10 @@ Clock::~Clock()
 
 bool Clock::IsPaused() const
 {
-	return m_isPaused;
+	if( m_isPaused == true || m_timeScale == 0.f )
+		return true;
+	else
+		return false;
 }
 
 void Clock::Resume()
@@ -68,9 +71,18 @@ void Clock::AdvanceClock( uint64_t const hpcElapsed )
 	uint64_t relativeElapsed = hpcElapsed;
 
 	if( m_isPaused )
+	{
 		relativeElapsed = 0;
-	else 
+	}
+	else if( m_timeScale == 1.0 )
+	{
+		// Don't do anything, we already have the right hpc
+	}
+	else
+	{
+		// Beware.. We might loose the precision..!
 		relativeElapsed = (uint64_t)( (double)hpcElapsed * m_timeScale );
+	}
 
 	frame.hpc		= relativeElapsed;
 	frame.seconds	= GetSecondsFromHPC( relativeElapsed );
@@ -131,7 +143,7 @@ uint64_t Clock::GetHPCFromMilliSeconds( unsigned int ms )
 {
 	CheckInitalizeSecondsPerClockCycle();
 
-	return (uint64_t)(s_frequency * (ms/1000));
+	return (uint64_t)( (s_frequency * ms) / 1000 );
 }
 
 uint64_t Clock::GetCurrentHPC()

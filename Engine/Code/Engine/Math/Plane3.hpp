@@ -19,4 +19,9 @@ public:
 public:
 	float GetDistanceFromPoint( Vector3 const &point );
 	bool  IsValid() const;					// Returns false if normal is ZERO Vector
+
+	Vector3 VectorProjection( Vector3 const &vector );
 };
+
+Vector3 ProjectVectorOnPlane( Vector3 const &vector, Vector3 const &normal );
+

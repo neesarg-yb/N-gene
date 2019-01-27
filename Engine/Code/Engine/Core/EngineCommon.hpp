@@ -33,14 +33,33 @@ const   float	   g_aspectRatio = 1.77f;
         "|  TODO :   " ##x "\n" \
         " --------------------------------------------------------------------------------------\n" )
 #define UNIMPLEMENTED()  TODO( "IMPLEMENT: " QUOTE(__FILE__) " (" QUOTE(__LINE__) ")" ) GUARANTEE_RECOVERABLE( false, "Interesting..!");
-#define GL_BIND_FUNCTION(f)      wglGetTypedProcAddress( &f, #f )
+#define GL_BIND_FUNCTION(f) wglGetTypedProcAddress( &f, #f )
+
+
+// NETWORK SESSION
+#define MAX_SESSION_CONNECTIONS							(0xff)
+#define MAX_TRACKED_PACKETS								(128)
+#define MAX_RELIABLES_PER_PACKET						(32)
+#define MAX_NETWORK_MESSAGE_CHANNELS					(8)
+#define MAX_NETWORK_TIME_DILATION						(0.1f)		// This controls how much the clock is allowed to speed up/slow down to match a snapshot
+#define NETWORK_CONNECTION_TIMEOUT_SECONDS				(10)
+
+#define INVALID_INDEX_IN_SESSION						MAX_SESSION_CONNECTIONS
+#define INVALID_PACKET_ACK								(0xffff)
+#define NETWORK_PACKET_HEADER_SIZE						(8)
+#define NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE			(1)
+#define NETWORK_RELIABLE_MESSAGE_HEADER_SIZE			(3)
+#define NETWORK_RELIABLE_INORDER_MESSAGE_HEADER_SIZE	(5)
+
+constexpr uint16_t	RELIABLE_MESSAGES_WINDOW	= 64;
+constexpr uint		MAX_NETWORK_ID_LENGTH		= 16;
 
 
 // Use this to deduce type of the pointer so we can cast; 
 template <typename T>
 bool wglGetTypedProcAddress( T *out, char const *name ) 
 {
-	// Grab the function from the currently bound render contect
+	// Grab the function from the currently bound render contact
 	// most opengl 2.0+ features will be found here
 	*out = (T) wglGetProcAddress(name); 
 

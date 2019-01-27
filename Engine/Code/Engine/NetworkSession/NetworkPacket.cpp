@@ -1,6 +1,69 @@
 #pragma once
 #include "NetworkPacket.hpp"
+#include "Engine/NetworkSession/NetworkSession.hpp"
 
+// STRUCT - PACKET TRACKER
+PacketTracker::PacketTracker()
+{
+
+}
+
+PacketTracker::PacketTracker( uint16_t inAck )
+	: ack( inAck ) 
+{ 
+
+}
+
+PacketTracker::PacketTracker( uint16_t inAck, uint64_t inSentTimeHPC )
+	: ack( inAck )
+	, sentTimeHPC( inSentTimeHPC ) 
+{ 
+
+}
+
+bool PacketTracker::AddNewReliableID( uint16_t reliableID )
+{
+	if( reliablesCount >= MAX_RELIABLES_PER_PACKET )
+		return false;
+
+	int idx = reliablesCount++;
+	sentReliables[ idx ] = reliableID;
+	return true;
+}
+
+void PacketTracker::TrackForAck( uint16_t inAck )
+{
+	Invalidate();
+
+	ack			= inAck;
+	sentTimeHPC	= Clock::GetCurrentHPC();
+}
+
+void PacketTracker::Invalidate()
+{
+	ack = INVALID_PACKET_ACK;
+	reliablesCount = 0;
+}
+
+bool PacketTracker::IsValid() const
+{
+	return (ack != INVALID_PACKET_ACK);
+}
+
+// STRUCT - NETWORK PACKET HEADER
+NetworkPacketHeader::NetworkPacketHeader( uint8_t connectionIdx )
+{
+	connectionIndex = connectionIdx;
+}
+
+NetworkPacketHeader::NetworkPacketHeader( uint8_t connectionIdx, uint8_t msgCount )
+{
+	connectionIndex	 = connectionIdx;
+	messageCount	 = msgCount;
+}
+
+
+// CLASS - NETWORK PACKET
 NetworkPacket::NetworkPacket()
 	: BytePacker( PACKET_MTU, LITTLE_ENDIAN )
 {
@@ -21,25 +84,34 @@ NetworkPacket::~NetworkPacket()
 
 void NetworkPacket::WriteHeader( NetworkPacketHeader const &header )
 {
-	// Change header to LITTLE_ENDIAN
-	NetworkPacketHeader headerLittleEndian = header;
-	ChangeEndiannessTo( sizeof(NetworkPacketHeader), &headerLittleEndian, LITTLE_ENDIAN );
+	// Write header according to individual data variables
+	BytePacker networkHeaderBP( NETWORK_PACKET_HEADER_SIZE, LITTLE_ENDIAN );
+	networkHeaderBP.WriteBytes( sizeof( header.connectionIndex ),		&header.connectionIndex );
+	networkHeaderBP.WriteBytes( sizeof( header.ack ),					&header.ack );
+	networkHeaderBP.WriteBytes( sizeof( header.highestReceivedAck ),	&header.highestReceivedAck );
+	networkHeaderBP.WriteBytes( sizeof( header.receivedAcksHistory ),	&header.receivedAcksHistory );
+	networkHeaderBP.WriteBytes( sizeof( header.messageCount ),			&header.messageCount);
 	
 	// Rewrite it to buffer
-	NetworkPacketHeader *bufferPointer = (NetworkPacketHeader *)m_buffer;
-	bufferPointer[0] = headerLittleEndian;
+	if( GetWrittenByteCount() == 0 )
+		WriteBytes( networkHeaderBP.GetWrittenByteCount(), networkHeaderBP.GetBuffer(), false );
+	else
+		memcpy( m_buffer, networkHeaderBP.GetBuffer(), networkHeaderBP.GetWrittenByteCount() );
 }
 
-bool NetworkPacket::ReadHeader( NetworkPacketHeader &outHeader )
+bool NetworkPacket::ReadHeader( NetworkPacketHeader &outHeader ) const
 {
 	// To start reading from the beginning
 	ResetRead();
 
-	// Read bytes and change it to local ENDIANESS
-	size_t expectedBytes	= sizeof( NetworkPacketHeader );
-	size_t readHeaderBytes	= ReadBytes( &outHeader, expectedBytes );
-
-	return (expectedBytes == readHeaderBytes);
+	size_t totalReadBytes = 0;
+	totalReadBytes += ReadBytes( &outHeader.connectionIndex,		sizeof( outHeader.connectionIndex ) );
+	totalReadBytes += ReadBytes( &outHeader.ack,					sizeof( outHeader.ack ) );
+	totalReadBytes += ReadBytes( &outHeader.highestReceivedAck,		sizeof( outHeader.highestReceivedAck ) );
+	totalReadBytes += ReadBytes( &outHeader.receivedAcksHistory,	sizeof( outHeader.receivedAcksHistory ) );
+	totalReadBytes += ReadBytes( &outHeader.messageCount,			sizeof( outHeader.messageCount ) );
+	
+	return (totalReadBytes == NETWORK_PACKET_HEADER_SIZE);
 }
 
 bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
@@ -48,19 +120,37 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 	// If we didn't write header before, and it is the first message that we are writing
 	size_t bytesWritten = GetWrittenByteCount();
 	if( bytesWritten == 0U )
-		WriteBytes( sizeof( NetworkPacketHeader ), &m_header );															// Write the header
+		WriteHeader( m_header );															// Write the header
 
 	BytePacker messagePacker( LITTLE_ENDIAN );
 
+	// Set message header size according based on its nature
+	size_t messageHeaderSize;
+	if( msg.IsReliable() == false )
+		messageHeaderSize = NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE;
+	else
+	{
+		// Reliable message
+		messageHeaderSize = NETWORK_RELIABLE_MESSAGE_HEADER_SIZE;
+		
+		// In order
+		if( msg.IsInOrder() )
+			messageHeaderSize = NETWORK_RELIABLE_INORDER_MESSAGE_HEADER_SIZE;
+	}
+
 	size_t messageBytes			 = msg.GetWrittenByteCount();
-	size_t messagePlusHeaderSize = sizeof( NetworkMessageHeader ) + messageBytes;
+	size_t messagePlusHeaderSize = messageHeaderSize + messageBytes;
 	uint16_t bytesCountToWrite	 = ((uint16_t)messagePlusHeaderSize);
 
 	// Write bytes-to-read
 	messagePacker.WriteBytes( 2U, &bytesCountToWrite );
 
-	// Write message header
-	messagePacker.WriteBytes( sizeof( NetworkMessageHeader ), &msg.m_header );
+	// Write message header - all the variables, one by one
+	messagePacker.WriteBytes( sizeof(msg.m_header.networkMessageDefinitionIndex), &msg.m_header.networkMessageDefinitionIndex );
+	if( msg.IsReliable() )
+		messagePacker.WriteBytes( sizeof(msg.m_header.reliableID), &msg.m_header.reliableID );
+	if( msg.IsInOrder() )
+		messagePacker.WriteBytes( sizeof(msg.m_header.sequenceID), &msg.m_header.sequenceID );
 
 	// Write message
 	messagePacker.WriteBytes( messageBytes, msg.GetBuffer(), false );						// false because it is already in LITTLE_ENDIANESS
@@ -77,14 +167,14 @@ bool NetworkPacket::WriteMessage( NetworkMessage const &msg )
 		GUARANTEE_RECOVERABLE( writeSuccess, "Error: Couldn't write to Network Packet!" );
 		
 		// Update header for new unreliable message count
-		m_header.unreliableMessageCount++;
+		m_header.messageCount++;
 		WriteHeader( m_header );
 
 		return true;
 	}
 }
 
-bool NetworkPacket::ReadMessage( NetworkMessage &outMessage )
+bool NetworkPacket::ReadMessage( NetworkMessage &outMessage, NetworkSession const &session ) const
 {
 	// Get Length of Message & Header
 	uint16_t messageAndHeaderLength;
@@ -92,11 +182,36 @@ bool NetworkPacket::ReadMessage( NetworkMessage &outMessage )
 	if( sizeBytes != 2U )
 		return false;
 	
-	// Get Header
-	size_t messageHeaderSize = sizeof( NetworkMessageHeader );
-	size_t headerBytes		 = ReadBytes( &outMessage.m_header, messageHeaderSize );
-	if( headerBytes != messageHeaderSize )
+	// HEADER
+	// Get Message Def. Index
+	uint8_t  msgDefIdx;
+	uint16_t messageHeaderSize = NETWORK_UNRELIABLE_MESSAGE_HEADER_SIZE;
+	size_t headerBytes = ReadBytes( &msgDefIdx, 1U );
+	if( headerBytes != 1U )
 		return false;
+
+	// Set Message Definition
+	NetworkMessageDefinition const *msgDef = session.GetRegisteredMessageDefination( msgDefIdx );
+	outMessage.SetDefinition( msgDef );
+
+	// If reliable message, read the reliableID
+	if( msgDef->IsReliable() )
+	{
+		messageHeaderSize = NETWORK_RELIABLE_MESSAGE_HEADER_SIZE;
+
+		size_t reliableIDBytes = ReadBytes( &outMessage.m_header.reliableID, 2U );
+		if( reliableIDBytes != 2U )
+			return false;
+
+		if( msgDef->IsInOrder() )
+		{
+			messageHeaderSize = NETWORK_RELIABLE_INORDER_MESSAGE_HEADER_SIZE;
+			
+			size_t sequenceIDBytes = ReadBytes( &outMessage.m_header.sequenceID, 2U );
+			if( sequenceIDBytes != 2U )
+				return false;
+		}
+	}
 
 	// Get Message
 	uint16_t messageLength		= messageAndHeaderLength - (uint16_t)messageHeaderSize;
@@ -121,17 +236,17 @@ bool NetworkPacket::IsValid() const
 	// Start from beginning
 	ResetRead();
 
-	// Jump the Sender Index
-	MoveReadheadBy( 1 );
-
-	// Read Message Count
-	uint8_t	messageCount = 0x00;
-	size_t	countBytes	 = ReadBytes( &messageCount, 1U );
-	if( countBytes != 1U )
+	// Read PacketHeader
+	NetworkPacketHeader packetHeader;
+	bool readSuccess = ReadHeader( packetHeader );
+	if( readSuccess == false )
 	{
 		m_readHead = preservedReadHead;
 		return false;
 	}
+
+	// Fetch Message Count
+	uint8_t	messageCount = packetHeader.messageCount;
 
 	// Skip each messages..
 	while ( messageCount > 0 )
@@ -161,4 +276,9 @@ bool NetworkPacket::IsValid() const
 
 	m_readHead = preservedReadHead;
 	return (bytesLeftInBuffer == 0U);
+}
+
+bool NetworkPacket::HasMessages() const
+{
+	return m_header.messageCount > 0U;
 }

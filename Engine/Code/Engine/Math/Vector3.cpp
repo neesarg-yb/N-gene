@@ -93,6 +93,13 @@ float Vector3::GetLength() const
 	return length;
 }
 
+float Vector3::GetLengthSquared() const
+{
+	const float squaredLength = (x*x) + (y*y) + (z*z);
+	
+	return squaredLength;
+}
+
 Vector3 Vector3::GetNormalized() const 
 {
 	const float lengthOfVec	= GetLength();
@@ -191,12 +198,22 @@ void Vector3::SetFromText( const char* text )
 
 Vector3 PolarToCartesian( float radius, float rotation, float altitude )
 {
-	TODO( "This one is right, but according to my calculation x & z should be flipped.." );
-	float z = radius * SinDegree( altitude ) * SinDegree( rotation );
-	float x = radius * SinDegree( altitude ) * CosDegree( rotation );
+	float z = radius * SinDegree( altitude ) * SinDegree( -1.f * rotation );
+	float x = radius * SinDegree( altitude ) * CosDegree( -1.f * rotation );
 	float y = radius * CosDegree( altitude );
 
 	return Vector3( x, y, z );
+}
+
+void CartesianToPolar( Vector3 const &position, float &outRadius, float &outRotation, float &outAltitude )
+{
+	float r		= position.GetLength();
+	float alt	= acosf( position.y / r );
+	float rot	= atan2f( position.z, position.x );
+
+	outRadius	= r;
+	outAltitude	= fmodf( RadianToDegree( alt ), 360.f );
+	outRotation	= fmodf( RadianToDegree( rot ), 360.f ) * -1.f;
 }
 
 Vector3 Interpolate( const Vector3& start, const Vector3& end, float fractionTowardEnd )

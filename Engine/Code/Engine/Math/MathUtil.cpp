@@ -489,3 +489,31 @@ int ModuloNonNegative( int operatingOn, int moduloBy )
 
 	return nnMod;
 }
+
+bool CycleLess( uint16_t a, uint16_t b )
+{
+	// Converting (Negative Number) -> (Unsigned Number)
+	// --------------------------------------------------
+	// [ Way 1 ]: Taking 2's compliment
+	//
+	// Negative is calculated as 2's compliment for unsigned numbers
+	//		=>  6 = 110'b
+	//		=> -6 = 010'b
+	//		  ---------- (addition results into ZERO)
+	//			0 = 000'b
+	//
+	// 2's compliment is NOT( number-as-positive ), and then add 0001'b to it
+	//		=> (-6) = NOT(110'b) + 001'b
+	//				= 001'b + 001'b
+	//				= 010'b = 2
+	//
+	// [ Way 2 ]: MAX_NUM + 1 + (negative number)
+	//
+	//		=> -6 = (111'b) + (001'b) + (negative number)
+	//			  = 7 + 1 - 6
+	//			  = 8 - 6
+	//			  = 2 = (010)
+	uint16_t diff = b - a;
+
+	return (diff != 0) && (diff < 0x8000);
+}
