@@ -315,6 +315,10 @@
     <None Include="..\..\Run_win32\Data\Materials\bb8.material" />
     <None Include="..\..\Run_win32\Data\Materials\default.material" />
     <None Include="..\..\Run_win32\Data\Materials\pickbuffer.material" />
+    <None Include="..\..\Run_win32\Data\Materials\ship.material" />
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_a.material" />
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_body.material" />
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_lambert.material" />
     <None Include="..\..\Run_win32\Data\Materials\terrain_grass.material" />
     <None Include="..\..\Run_win32\Data\Materials\terrain_gridlines.material" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.fs" />

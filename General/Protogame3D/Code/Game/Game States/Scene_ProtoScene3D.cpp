@@ -1,8 +1,9 @@
 #pragma once
 #include "Scene_ProtoScene3D.hpp"
-#include "Engine/Core/StringUtils.hpp"
-#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/Core/DevConsole.hpp"
+#include "Engine/Core/StringUtils.hpp"
+#include "Engine/File/ModelLoader.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
@@ -37,6 +38,24 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager, USE_KEYBOARD_MOUSE_FL );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );					// MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR
+
+	// Loading Models
+	Vector3 snowMikuPosition = Vector3( -5.f, -3.f, 20.f );						// SNOW MIKU
+	Vector3 snowMikuRotation = Vector3( 0.f, 180.f, 0.f );
+	m_snowMiku		= new Renderable( snowMikuPosition, snowMikuRotation, Vector3::ONE_ALL );
+	bool mikuLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\snow_miku\\ROOMITEMS011_ALL.obj", *m_snowMiku );
+	GUARANTEE_RECOVERABLE( mikuLoaded, "Snow Miku obj model loading FAILED!" );
+	
+	Vector3 spaceshipPosition = Vector3( 5.f, -3.f, 21.f );
+	Vector3 spaceshipRotation = Vector3( 0.f, 180.f, 0.f );
+	m_spaceship		= new Renderable( spaceshipPosition, spaceshipRotation, Vector3::ONE_ALL );
+	bool shipLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceship );
+	GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
+
+	if( mikuLoaded )
+		m_scene->AddRenderable( *m_snowMiku );
+	if( shipLoaded )
+		m_scene->AddRenderable( *m_spaceship );
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
@@ -89,6 +108,13 @@ Scene_ProtoScene3D::~Scene_ProtoScene3D()
 	// Forward Rendering Path
 	delete m_renderingPath;
 	m_renderingPath = nullptr;
+
+	// Obj Models
+	delete m_snowMiku;
+	m_snowMiku = nullptr;
+
+	delete m_spaceship;
+	m_spaceship = nullptr;
 }
 
 void Scene_ProtoScene3D::JustFinishedTransition()
@@ -102,6 +128,8 @@ void Scene_ProtoScene3D::BeginFrame()
 
 	// Update Debug Renderer Objects
 	DebugRendererBeginFrame( m_clock );
+
+	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Mouse & WASD-QE: to move around." );
 }
 
 void Scene_ProtoScene3D::EndFrame()

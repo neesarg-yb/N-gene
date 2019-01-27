@@ -22,10 +22,14 @@ public:
 	ForwardRenderingPath	*m_renderingPath	= nullptr;
 	Scene					*m_scene			= nullptr;
 	Lights					 m_lights;
-	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.6f );
+	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.4f );
 
 	// Game Specific 
 	GameObjectList			 m_gameObjects[ NUM_ENTITIES ];
+
+	// Obj Models
+	Renderable				*m_snowMiku			= nullptr;
+	Renderable				*m_spaceship		= nullptr;
 
 private:
 	// Camera
@@ -43,7 +47,7 @@ public:
 	void Render( Camera *gameCamera ) const;
 
 private:
-	// GameObject Management
+	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
 };

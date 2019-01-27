@@ -14,9 +14,6 @@
     <Filter Include="Materials">
       <UniqueIdentifier>{10e2513c-1acf-485b-8d91-bfb6457f4ac0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Abstract Classes">
-      <UniqueIdentifier>{baa9b867-021f-45a9-aa32-24f1bc5d554e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Game States">
       <UniqueIdentifier>{2a0da71e-fb23-42e6-940e-396b0a3e32b7}</UniqueIdentifier>
     </Filter>
@@ -229,6 +226,18 @@
     </None>
     <None Include="..\..\Run_win32\Data\Shaders\lit_cull_none.shader">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\ship.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_a.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_body.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\snow_miku_lambert.material">
+      <Filter>Materials</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
