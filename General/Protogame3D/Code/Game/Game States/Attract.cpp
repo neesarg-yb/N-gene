@@ -4,8 +4,8 @@
 #include "Engine/Core/UIMenu.hpp"
 #include "Game/theGame.hpp"
 
-Attract::Attract()
-	: GameState( "ATTRACT" )
+Attract::Attract( Clock const *parentClock )
+	: GameState( "ATTRACT", parentClock )
 {
 	// Setting up the Attract Menu
 	m_attractMenu	= new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.45f, 0.45f, 0.55f, 0.55f ) );
@@ -37,10 +37,12 @@ void Attract::EndFrame()
 
 }
 
-void Attract::Update( float deltaSeconds )
+void Attract::Update()
 {
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
+
+	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 
 	// Menu handles the state transition
 	m_attractMenu->Update( deltaSeconds );

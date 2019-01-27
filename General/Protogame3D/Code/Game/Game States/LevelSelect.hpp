@@ -7,7 +7,7 @@
 class LevelSelect : public GameState
 {
 public:
-	 LevelSelect();
+	 LevelSelect( Clock const *parentClock );
 	~LevelSelect();
 
 public:
@@ -16,7 +16,7 @@ public:
 	void BeginFrame();
 	void EndFrame();
 
-	void Update( float deltaSeconds );
+	void Update();
 	void Render( Camera *gameCamera ) const;
 
 private:

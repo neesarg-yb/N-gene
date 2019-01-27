@@ -1,16 +1,16 @@
 #include "theGame.hpp"
+#include "Engine/Core/Clock.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
-#include "Engine/Network/BytePacker.hpp"
-#include "Engine/Math/Quaternion.hpp"
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
-#include "Game/Game States/Level1.hpp"
-#include "Game/Game States/LevelStopwatchTest.hpp"
+#include "Game/Game States/Scene_ProtoScene3D.hpp"
+#include "Game/Game States/Scene_StopwatchTest.hpp"
+#include "Game/Game States/Scene_QuaternionsTest.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -59,6 +59,7 @@ theGame::theGame()
 	m_gameCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );										// To set NDC styled ortho
+
 }
 
 theGame::~theGame()
@@ -88,16 +89,19 @@ void theGame::Startup()
 	ConsolePrintf( RGBA_GREEN_COLOR, "%i Hello World!", 1 );
 
 	// Setup the game states
-	GameState* attractGS = new Attract();
+	GameState* attractGS = new Attract( g_gameClock );
 	AddNewGameState( attractGS );
 
-	GameState* levelSelectGS = new LevelSelect();
+	GameState* levelSelectGS = new LevelSelect( g_gameClock );
 	AddNewGameState( levelSelectGS );
 
-	GameState* level1 = new Level1();
-	AddNewGameState( level1 );
+	GameState* collisionAvoidanceScene = new Scene_ProtoScene3D( g_gameClock );
+	AddNewGameState( collisionAvoidanceScene );
 
-	GameState* stopwatchTest = new LevelStopwatchTest();
+	GameState* quaternionsTest = new Scene_QuaternionsTest( g_gameClock );
+	AddNewGameState( quaternionsTest );
+
+	GameState* stopwatchTest = new Scene_StopwatchTest( g_gameClock );
 	AddNewGameState( stopwatchTest );
 
 	// Set game state to begin with
@@ -163,7 +167,7 @@ void theGame::Update()
 		m_fadeEffectAlpha		= 0.f;		
 
 	// Continue updating the currentGameState
-	m_currentGameState->Update( deltaSeconds );
+	m_currentGameState->Update();
 }
 
 void theGame::Render() const
@@ -282,14 +286,6 @@ void theGame::RenderLoadingScreen() const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	g_theRenderer->DrawTextInBox2D( "Loading..", Vector2(0.5f, 0.5f), m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-}
-
-float theGame::CalculateDeltaTime() {
-	double currentTime = GetCurrentTimeSeconds();
-	float deltaSeconds = (float)(currentTime - m_lastFramesTime);
-	m_lastFramesTime = currentTime;
-
-	return deltaSeconds;
 }
 
 double theGame::GetTimeSinceGameStarted() const

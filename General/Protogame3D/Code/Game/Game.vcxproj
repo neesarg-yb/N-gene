@@ -32,7 +32,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Asteroids</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
-    <ProjectName>Game</ProjectName>
+    <ProjectName>Protogame3D</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -280,33 +280,46 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Abstract Classes\GameObject.cpp" />
     <ClCompile Include="Abstract Classes\GameState.cpp" />
+    <ClCompile Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.cpp" />
+    <ClCompile Include="Camera System\Camera Behaviours\CB_Follow.cpp" />
+    <ClCompile Include="Camera System\Camera Behaviours\CB_FreeLook.cpp" />
+    <ClCompile Include="Camera System\DebugCamera.cpp" />
+    <ClCompile Include="Camera System\Motion Controllers\CMC_ProportionalController.cpp" />
+    <ClCompile Include="Game States\Scene_ProtoScene3D.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
     <ClCompile Include="Game States\LevelSelect.cpp" />
-    <ClCompile Include="Game States\Level1.cpp" />
-    <ClCompile Include="Game States\LevelStopwatchTest.cpp" />
+    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp" />
+    <ClCompile Include="Game States\Scene_StopwatchTest.cpp" />
     <ClCompile Include="GameCommon.cpp" />
     <ClCompile Include="Main_Win32.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
+    <ClCompile Include="World\Building.cpp" />
+    <ClCompile Include="World\House.cpp" />
+    <ClCompile Include="World\Player.cpp" />
+    <ClCompile Include="World\Terrain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
-      <Project>{e0fa82ef-eac2-4365-850a-8401eec91ca0}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Abstract Classes\GameObject.hpp" />
     <ClInclude Include="Abstract Classes\GameState.hpp" />
+    <ClInclude Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.hpp" />
+    <ClInclude Include="Camera System\Camera Behaviours\CB_Follow.hpp" />
+    <ClInclude Include="Camera System\Camera Behaviours\CB_FreeLook.hpp" />
+    <ClInclude Include="Camera System\DebugCamera.hpp" />
+    <ClInclude Include="Camera System\Motion Controllers\CMC_ProportionalController.hpp" />
+    <ClInclude Include="Game States\Scene_ProtoScene3D.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />
     <ClInclude Include="Game States\LevelSelect.hpp" />
-    <ClInclude Include="Game States\Level1.hpp" />
+    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
-    <ClInclude Include="Game States\LevelStopwatchTest.hpp" />
+    <ClInclude Include="Game States\Scene_StopwatchTest.hpp" />
     <ClInclude Include="GameCommon.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
+    <ClInclude Include="World\Building.hpp" />
+    <ClInclude Include="World\House.hpp" />
+    <ClInclude Include="World\Player.hpp" />
+    <ClInclude Include="World\Terrain.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Run_win32\Data\Materials\bb8.material" />
@@ -317,14 +330,21 @@
     <None Include="..\..\Run_win32\Data\Materials\Block_Stairs.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Void.material" />
     <None Include="..\..\Run_win32\Data\Materials\Block_Water.material" />
+    <None Include="..\..\Run_win32\Data\Materials\building.material" />
     <None Include="..\..\Run_win32\Data\Materials\default.material" />
     <None Include="..\..\Run_win32\Data\Materials\pickbuffer.material" />
+    <None Include="..\..\Run_win32\Data\Materials\terrain.material" />
+    <None Include="..\..\Run_win32\Data\Materials\terrain_grass.material" />
+    <None Include="..\..\Run_win32\Data\Materials\terrain_gridlines.material" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\combine_fs.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\combine_fs.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\combine_fs.vs" />
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.fs" />
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.shader" />
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\debug.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\debug.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\debug.vs" />
@@ -334,6 +354,7 @@
     <None Include="..\..\Run_win32\Data\Shaders\lit.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_alpha.shader" />
+    <None Include="..\..\Run_win32\Data\Shaders\lit_cull_none.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_bitangent.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_normal.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit_debug_tangent.shader" />
@@ -349,6 +370,11 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Engine\Code\Engine\Engine.vcxproj">
+      <Project>{e0fa82ef-eac2-4365-850a-8401eec91ca0}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

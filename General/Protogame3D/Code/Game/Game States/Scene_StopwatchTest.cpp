@@ -1,5 +1,5 @@
 #pragma once
-#include "LevelStopwatchTest.hpp"
+#include "Scene_StopwatchTest.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
@@ -7,15 +7,15 @@
 
 bool isOnLevelClock = true;
 
-LevelStopwatchTest::LevelStopwatchTest()
-	: GameState( "LEVEL STOPWATCH" )
+Scene_StopwatchTest::Scene_StopwatchTest( Clock const *parentClock )
+	: GameState( "CLOCK & STOPWATCH", parentClock )
 {
-	m_levelClock = new Clock( GetMasterClock() );
-	m_stopwatch = new Stopwatch( m_levelClock );
+	m_levelClock	= new Clock( parentClock );
+	m_stopwatch		= new Stopwatch( m_levelClock );
 	m_stopwatch->SetTimer( 10 );
 }
 
-LevelStopwatchTest::~LevelStopwatchTest()
+Scene_StopwatchTest::~Scene_StopwatchTest()
 {
 	delete m_stopwatch;
 	m_stopwatch = nullptr;
@@ -24,32 +24,30 @@ LevelStopwatchTest::~LevelStopwatchTest()
 	m_levelClock = nullptr;
 }
 
-void LevelStopwatchTest::JustFinishedTransition()
-{
-	DebugRendererChange3DCamera( nullptr );
-}
-
-void LevelStopwatchTest::BeginFrame()
+void Scene_StopwatchTest::JustFinishedTransition()
 {
 
 }
 
-void LevelStopwatchTest::EndFrame()
+void Scene_StopwatchTest::BeginFrame()
+{
+	DebugRendererBeginFrame( GetMasterClock() );
+}
+
+void Scene_StopwatchTest::EndFrame()
 {
 
 }
 
-void LevelStopwatchTest::Update( float deltaSeconds )
+void Scene_StopwatchTest::Update()
 {
-	DebugRendererUpdate( deltaSeconds );
-
-	ProcessInput( deltaSeconds );
+	ProcessInput( (float)GetMasterClock()->GetFrameDeltaSeconds() );
 	
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
 }
 
-void LevelStopwatchTest::Render( Camera *gameCamera ) const
+void Scene_StopwatchTest::Render( Camera *gameCamera ) const
 {
 	g_theRenderer->BindCamera( gameCamera );
 	g_theRenderer->ClearColor( RGBA_BLACK_COLOR );
@@ -75,11 +73,11 @@ void LevelStopwatchTest::Render( Camera *gameCamera ) const
 	DebugRender2DText( 0.f, Vector2( -850.f, -380.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Elapsed Time(s)         : %s", std::to_string(elapsedTime).c_str()) );
 	DebugRender2DText( 0.f, Vector2( -850.f, -400.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Normalized Elapsed Time : %s", std::to_string(normalizedElapsedTime).c_str()) );
 	DebugRender2DText( 0.f, Vector2( -850.f, -420.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Has Interval Elapsed?   : %s", (hasElapsed ? "YES" : "NO")) );
-	
-	DebugRendererRender();
+
+	DebugRendererLateRender( nullptr );
 }
 
-void LevelStopwatchTest::ProcessInput( float deltaSeconds )
+void Scene_StopwatchTest::ProcessInput( float deltaSeconds )
 {
 	if( g_theInput->WasKeyJustPressed( 'S' ) )
 		SwitchTheReferenceClock();
@@ -98,7 +96,7 @@ void LevelStopwatchTest::ProcessInput( float deltaSeconds )
 }
 
 float timescaleChangePerSeconds = 0.15f;
-void LevelStopwatchTest::IncrementLevelClockTimeScale( float deltaSeconds )
+void Scene_StopwatchTest::IncrementLevelClockTimeScale( float deltaSeconds )
 {
 	double currentTS = m_levelClock->GetTimeScale();
 	currentTS		+= timescaleChangePerSeconds * deltaSeconds;
@@ -106,7 +104,7 @@ void LevelStopwatchTest::IncrementLevelClockTimeScale( float deltaSeconds )
 	m_levelClock->SetTimeSclae( currentTS );
 }
 
-void LevelStopwatchTest::DecrementLevelClockTimeScale( float deltaSeconds )
+void Scene_StopwatchTest::DecrementLevelClockTimeScale( float deltaSeconds )
 {
 	double currentTS = m_levelClock->GetTimeScale();
 	currentTS		-= timescaleChangePerSeconds * deltaSeconds;
@@ -114,7 +112,7 @@ void LevelStopwatchTest::DecrementLevelClockTimeScale( float deltaSeconds )
 	m_levelClock->SetTimeSclae( currentTS );
 }
 
-void LevelStopwatchTest::SwitchTheReferenceClock()
+void Scene_StopwatchTest::SwitchTheReferenceClock()
 {
 	if( isOnLevelClock )
 		m_stopwatch->SetClock( nullptr );
@@ -124,7 +122,7 @@ void LevelStopwatchTest::SwitchTheReferenceClock()
 	isOnLevelClock = !isOnLevelClock;
 }
 
-void LevelStopwatchTest::PauseTheLevelClock()
+void Scene_StopwatchTest::PauseTheLevelClock()
 {
 	if( m_levelClock->IsPaused() )
 		m_levelClock->Resume();
@@ -132,19 +130,19 @@ void LevelStopwatchTest::PauseTheLevelClock()
 		m_levelClock->Pause();
 }
 
-void LevelStopwatchTest::ResetTheStopwatch()
+void Scene_StopwatchTest::ResetTheStopwatch()
 {
 	m_stopwatch->Reset();
 }
 
-void LevelStopwatchTest::DecrementTheStopwatch()
+void Scene_StopwatchTest::DecrementTheStopwatch()
 {
 	bool decrementSuccess = m_stopwatch->Decrement();
 
 	DebugRender2DText( 3.f, Vector2( -850.f, -460.f ), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("%s", (decrementSuccess ? "Decremented one time!" : "No Decrements.")) );
 }
 
-void LevelStopwatchTest::DecrementAllTheStopwatch()
+void Scene_StopwatchTest::DecrementAllTheStopwatch()
 {
 	uint decrementCount = m_stopwatch->DecrementAll();
 

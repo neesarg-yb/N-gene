@@ -1,10 +1,10 @@
-<shader  name      ="lit"
-         cull      ="back"
-         fill      ="solid"
-         frontface ="ccw"
-         layer		 ="0"
-         queue		 ="opaque">
-   <!--  queue		="opaque/alpha" -->
+<shader  name        ="lit"
+         cull        ="back"
+         fill        ="solid"
+         frontface   ="ccw"
+         layer	     ="0"
+         queue	     ="opaque">
+   <!--  queue	     ="opaque/alpha" -->
    
    <!--
    <program define="DEBUG_NORMAL">

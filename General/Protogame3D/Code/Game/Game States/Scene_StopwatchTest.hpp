@@ -3,11 +3,11 @@
 #include "Engine/Core/Stopwatch.hpp"
 #include "Game/Abstract Classes/GameState.hpp"
 
-class LevelStopwatchTest : public GameState
+class Scene_StopwatchTest : public GameState
 {
 public:
-	 LevelStopwatchTest();
-	~LevelStopwatchTest();
+	 Scene_StopwatchTest( Clock const *parentClock );
+	~Scene_StopwatchTest();
 
 private:
 	Clock		*m_levelClock	= nullptr;
@@ -19,7 +19,7 @@ public:
 	void BeginFrame();
 	void EndFrame();
 
-	void Update( float deltaSeconds );
+	void Update();
 	void Render( Camera *gameCamera ) const;
 
 private:

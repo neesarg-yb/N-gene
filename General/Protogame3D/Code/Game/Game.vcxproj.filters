@@ -20,6 +20,21 @@
     <Filter Include="Game States">
       <UniqueIdentifier>{2a0da71e-fb23-42e6-940e-396b0a3e32b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{89c136ec-ef1b-4b81-9238-ce5fce072008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera System">
+      <UniqueIdentifier>{9b2525ea-9641-42a5-8200-f0d14e714844}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera System\CameraBehaviours">
+      <UniqueIdentifier>{4579e831-70ce-41ac-a6c4-ebbcddcbc309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera System\CameraConstrains">
+      <UniqueIdentifier>{1fe26ba9-ee86-4c41-b4dc-7e0c53804464}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera System\MotionControllers">
+      <UniqueIdentifier>{726a2a86-c517-4d77-8d08-f84c75d4e081}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -37,19 +52,46 @@
     <ClCompile Include="Abstract Classes\GameState.cpp">
       <Filter>Abstract Classes</Filter>
     </ClCompile>
-    <ClCompile Include="Abstract Classes\GameObject.cpp">
-      <Filter>Abstract Classes</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Attract.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
     <ClCompile Include="Game States\LevelSelect.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="Game States\Level1.cpp">
+    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="Game States\LevelStopwatchTest.cpp">
+    <ClCompile Include="World\Terrain.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Player.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Building.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\House.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.cpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera System\Camera Behaviours\CB_Follow.cpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera System\Camera Behaviours\CB_FreeLook.cpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera System\Motion Controllers\CMC_ProportionalController.cpp">
+      <Filter>Camera System\MotionControllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera System\DebugCamera.cpp">
+      <Filter>Camera System</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_ProtoScene3D.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_StopwatchTest.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,19 +111,46 @@
     <ClInclude Include="Abstract Classes\GameState.hpp">
       <Filter>Abstract Classes</Filter>
     </ClInclude>
-    <ClInclude Include="Abstract Classes\GameObject.hpp">
-      <Filter>Abstract Classes</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\Attract.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
     <ClInclude Include="Game States\LevelSelect.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="Game States\Level1.hpp">
+    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="Game States\LevelStopwatchTest.hpp">
+    <ClInclude Include="World\Terrain.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Player.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Building.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\House.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.hpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Camera Behaviours\CB_Follow.hpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Camera Behaviours\CB_FreeLook.hpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Motion Controllers\CMC_ProportionalController.hpp">
+      <Filter>Camera System\MotionControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\DebugCamera.hpp">
+      <Filter>Camera System</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_ProtoScene3D.hpp">
+      <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_StopwatchTest.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
@@ -196,6 +265,30 @@
     </None>
     <None Include="..\..\Run_win32\Data\Materials\Block_Metal.material">
       <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\terrain.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\building.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\terrain_grass.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Materials\terrain_gridlines.material">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\lit_cull_none.shader">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

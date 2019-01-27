@@ -186,7 +186,7 @@ void theApp::Startup()
 	CommandRegister( "rc_echo", RCSSetEcho );
 	CommandRegister( "clone_process", CloneMyself );
 
-	DebugRendererStartup( g_theRenderer, nullptr );
+	DebugRendererStartup( g_theRenderer );
 
 	g_theGame->Startup();
 

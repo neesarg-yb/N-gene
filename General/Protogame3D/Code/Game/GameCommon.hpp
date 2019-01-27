@@ -1,7 +1,15 @@
 #pragma once
-
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Input/InputSystem.hpp"
+
+enum WorldEntityTypes
+{
+	ENTITY_PLAYER = 0,
+	ENTITY_TERRAIN,
+	ENTITY_BUILDING,
+	ENTITY_HOUSE,
+	NUM_ENTITIES
+};
 
 class  Blackboard;
 extern Blackboard* g_gameConfigBlackboard;
@@ -20,6 +28,9 @@ extern RemoteCommandService* g_rcs;
 
 extern Renderer* g_theRenderer;
 extern InputSystem* g_theInput;
+
+class DebugCamera;
+extern DebugCamera* g_activeDebugCamera;
 /*
 extern AudioSystem* g_theAudio;
 */

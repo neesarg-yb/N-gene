@@ -1,9 +1,8 @@
-<material id="terrain">
+<material id="terrain_gridlines">
 	<shadergroup>
    		<shader fileName="lit" />
    	</shadergroup>
 
-   	<!-- texture bind="0" src="Data\Images\Terrain\grass_green_d.jpg" /-->
    	<texture bind="0" src="Data\Images\Terrain\DebugWhiteGray.png" />
    	
    	<float bind="SPECULAR_AMOUNT" 	 value="0.5" />
