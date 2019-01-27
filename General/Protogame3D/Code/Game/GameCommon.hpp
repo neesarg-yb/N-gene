@@ -28,9 +28,6 @@ extern RemoteCommandService* g_rcs;
 
 extern Renderer* g_theRenderer;
 extern InputSystem* g_theInput;
-
-class DebugCamera;
-extern DebugCamera* g_activeDebugCamera;
 /*
 extern AudioSystem* g_theAudio;
 */
