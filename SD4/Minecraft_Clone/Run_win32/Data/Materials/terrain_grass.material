@@ -1,0 +1,10 @@
+<material id="terrain_grass">
+	<shadergroup>
+   		<shader fileName="lit" />
+   	</shadergroup>
+
+   	<texture bind="0" src="Data\Images\Terrain\grass_green_d.jpg" />
+   	
+   	<float bind="SPECULAR_AMOUNT" 	 value="0.5" />
+   	<float bind="SPECULAR_POWER" 	 value="1.0" />
+</material>
