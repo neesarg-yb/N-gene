@@ -8,7 +8,7 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Network/RemoteCommandService.hpp"
 #include "Game/GameCommon.hpp"
-#include "Game/Abstract Classes/GameState.hpp"
+#include "Game/Game States/GameState.hpp"
 
 class theGame
 {

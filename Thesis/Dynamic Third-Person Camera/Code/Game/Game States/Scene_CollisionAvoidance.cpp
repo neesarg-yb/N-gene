@@ -105,7 +105,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	// Camera Constraints
 	CC_LineOfSight*			losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
 	CC_ConeRaycast*			conRaycastCC		= new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 2 );
-	CC_ModifiedConeRaycast*	modConRaycastCC		= new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1 );
+	CC_ModifiedConeRaycast*	modConRaycastCC		= new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1, (CB_Follow *)followBehaviour );
 	CC_CameraCollision*	collisionConstrain		= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 4 );
 	m_cameraManager->RegisterConstraint( losConstarin );
 	m_cameraManager->RegisterConstraint( conRaycastCC );

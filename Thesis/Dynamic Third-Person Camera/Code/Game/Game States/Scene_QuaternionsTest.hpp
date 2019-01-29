@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
-#include "Game/Abstract Classes/GameState.hpp"
+#include "Game/Game States/GameState.hpp"
 
 class Scene_QuaternionsTest : public GameState
 {

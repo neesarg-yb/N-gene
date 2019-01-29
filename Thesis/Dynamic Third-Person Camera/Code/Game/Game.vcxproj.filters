@@ -14,9 +14,6 @@
     <Filter Include="Materials">
       <UniqueIdentifier>{10e2513c-1acf-485b-8d91-bfb6457f4ac0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Abstract Classes">
-      <UniqueIdentifier>{baa9b867-021f-45a9-aa32-24f1bc5d554e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Game States">
       <UniqueIdentifier>{2a0da71e-fb23-42e6-940e-396b0a3e32b7}</UniqueIdentifier>
     </Filter>
@@ -35,6 +32,9 @@
     <Filter Include="Camera System\MotionControllers">
       <UniqueIdentifier>{726a2a86-c517-4d77-8d08-f84c75d4e081}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game States\Scenes">
+      <UniqueIdentifier>{028b9046-8675-4d22-b407-38b8798cb705}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -49,19 +49,10 @@
     <ClCompile Include="GameCommon.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Abstract Classes\GameState.cpp">
-      <Filter>Abstract Classes</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Attract.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
     <ClCompile Include="Game States\LevelSelect.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Game States\Scene_DegreesOfFreedom.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
     <ClCompile Include="World\Terrain.cpp">
@@ -70,20 +61,8 @@
     <ClCompile Include="World\Player.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="Game States\Scene_FollowCamera.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
     <ClCompile Include="World\Building.cpp">
       <Filter>World</Filter>
-    </ClCompile>
-    <ClCompile Include="Game States\Scene_ProportionalController.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Game States\Scene_DebugSystem.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Game States\Scene_CollisionAvoidance.cpp">
-      <Filter>Game States</Filter>
     </ClCompile>
     <ClCompile Include="World\House.cpp">
       <Filter>World</Filter>
@@ -118,6 +97,27 @@
     <ClCompile Include="Camera System\DebugCamera.cpp">
       <Filter>Camera System</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\Scene_CollisionAvoidance.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_DebugSystem.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_DegreesOfFreedom.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_FollowCamera.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_ProportionalController.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\GameState.cpp">
+      <Filter>Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -132,19 +132,10 @@
     <ClInclude Include="EngineBuildPreferences.hpp">
       <Filter>General</Filter>
     </ClInclude>
-    <ClInclude Include="Abstract Classes\GameState.hpp">
-      <Filter>Abstract Classes</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\Attract.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
     <ClInclude Include="Game States\LevelSelect.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
     <ClInclude Include="World\Terrain.hpp">
@@ -153,20 +144,8 @@
     <ClInclude Include="World\Player.hpp">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="Game States\Scene_FollowCamera.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
     <ClInclude Include="World\Building.hpp">
       <Filter>World</Filter>
-    </ClInclude>
-    <ClInclude Include="Game States\Scene_ProportionalController.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Game States\Scene_DebugSystem.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Game States\Scene_CollisionAvoidance.hpp">
-      <Filter>Game States</Filter>
     </ClInclude>
     <ClInclude Include="World\House.hpp">
       <Filter>World</Filter>
@@ -200,6 +179,27 @@
     </ClInclude>
     <ClInclude Include="Camera System\DebugCamera.hpp">
       <Filter>Camera System</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_CollisionAvoidance.hpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_DebugSystem.hpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_FollowCamera.hpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_ProportionalController.hpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\GameState.hpp">
+      <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

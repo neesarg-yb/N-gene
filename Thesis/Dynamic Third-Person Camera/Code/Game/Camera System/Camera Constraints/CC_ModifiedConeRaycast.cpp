@@ -24,8 +24,9 @@ WeightedRaycastResult_MCR::WeightedRaycastResult_MCR( RaycastResult const &inRes
 
 }
 
-CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority )
+CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority, CB_Follow *followBehavior )
 	: CameraConstraint( name, manager, priority )
+	, m_followBehavior( followBehavior )
 {
 	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
 }
@@ -80,11 +81,21 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	// Calculate Reduction in Radius
 	float reductionInRadius = CalculateRadiusReduction( weightedRaycastResults, cameraRadius );
 
+	// Calculate rotation & altitude change
+	float rotationChange = 0.f;
+	float altitudeChange = 0.f;
+	CalculateRotationAltitudeChange( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, rotationChange, altitudeChange );
+
 	// Set new position!
-	cameraRadius -= reductionInRadius;
+	cameraRadius	-= reductionInRadius;
+	cameraRotation	+= rotationChange;
+	cameraAltitude	+= altitudeChange;
 	Vector3 newCamPos = PolarToCartesian( cameraRadius, cameraRotation, cameraAltitude ) + playerPosition;
 	suggestedCameraState.m_position = newCamPos;
 	
+	// Inform Follow Behavior the new polar coordinates
+	if( m_followBehavior != nullptr )
+		m_followBehavior->SuggestChangedPolarCoordinate( cameraRadius, cameraRotation, cameraAltitude );
 
 	// DEBUG RENDER
 	DebugRenderTag( 0.f, 0.25f, newCamPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf( "-%.2f", reductionInRadius ) );
@@ -95,8 +106,8 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 float CC_ModifiedConeRaycast::WeightCurve( float x, float maxHeight, float width ) const
 {
-	float shiftPickBy = 1;
-	x = x - shiftPickBy;
+	float shiftPeakBy = 1;
+	x = x - shiftPeakBy;
 
 	// Equation:
 	//			        width                 
@@ -312,9 +323,43 @@ float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRay
 	return weightedAvgReduction;
 }
 
+void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<WeightedTargetPoint_MCR> const &targetPoints, std::vector<WeightedRaycastResult_MCR> const &raycastResults, CameraState const &cameraState, float &radiusChange_out, float &altitudeChange_out )
+{
+	Vector3 playerPosition		= m_manager.GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
+	Vector3 cameraPosition		= cameraState.m_position;
+	Vector3 cameraRelToPlayer	= cameraPosition - playerPosition;
+
+	Matrix44 cameraTransformMatrix = cameraState.GetTransformMatrix();	// Camera to World
+	cameraTransformMatrix.SetTColumn( cameraRelToPlayer );				// Making it: Camera to Sphere
+
+	Matrix44 sphereToCameraMatrix;
+	bool inverseSuccess = cameraTransformMatrix.GetInverse( sphereToCameraMatrix );
+	GUARANTEE_RECOVERABLE( inverseSuccess, "Error: Failed inverting the camera transform matrix!" );
+
+	Vector2  xyOnSphere = Vector2::ZERO;
+
+	for( int i = 0; i < targetPoints.size(); i++ )
+	{
+		WeightedTargetPoint_MCR		thisTargetPoint = targetPoints[i];
+		WeightedRaycastResult_MCR	thisRaycast		= raycastResults[i];
+
+		if( thisRaycast.result.didImpact == false )
+			continue;
+
+		Vector3 pointOnSphere	= sphereToCameraMatrix.Multiply( thisTargetPoint.targetPoint, 1.f );
+		Vector2 xyPointOnSphere	= Vector2( pointOnSphere.x, pointOnSphere.y );
+
+		xyOnSphere += xyPointOnSphere.GetNormalized();
+	}
+
+	if( xyOnSphere == Vector2::ZERO )
+		return;		// No changes in rotation or altitude
+
+	DebugRender2DLine( 0.f, Vector2::ZERO, RGBA_RED_COLOR, xyOnSphere * 20.f, RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+}
+
 void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState, Vector3 const &projectedVelocity )
 {
-
 	Vector3 playerPosition		= m_manager.GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
 	Vector3 cameraPosition		= cameraState.m_position;
 	Vector3 cameraRelToPlayer	= cameraPosition - playerPosition;

@@ -4,6 +4,7 @@
 #include "Engine/Core/Ray3.hpp"
 #include "Engine/Core/RaycastResult.hpp"
 #include "Engine/CameraSystem/CameraConstraint.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 
 
 //---------------------------------
@@ -36,23 +37,24 @@ public:
 class CC_ModifiedConeRaycast : public CameraConstraint
 {
 public:
-	 CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority );
+	 CC_ModifiedConeRaycast( char const *name, CameraManager &manager, uint8_t priority, CB_Follow *followBehavior );
 	~CC_ModifiedConeRaycast();
 
 public:
 	std::function<float (float x)> m_curveCB;
 
 	// Curve's properties
-	float				m_curveHeight			= 1.00f;
-	float				m_curvewidthFactor		= 0.07f;
+	float				 m_curveHeight			= 1.00f;
+	float				 m_curvewidthFactor		= 0.07f;
 
 	// Sphere raycast properties
-	float				m_maxRotationDegrees	= 40.f;					// Allowed ROTATION from the camera's position (as in Polar Coordinates)
-	int					m_numCircularLayers		= 5;
-	std::vector< int >	m_numRaysInLayer		= { 5, 10, 15, 20, 25 };
+	float				 m_maxRotationDegrees	= 40.f;					// Allowed ROTATION from the camera's position (as in Polar Coordinates)
+	int					 m_numCircularLayers	= 5;
+	std::vector< int >	 m_numRaysInLayer		= { 5, 10, 15, 20, 25 };
 
 private:
-	float				m_fNumCircularLayers	= (float)m_numCircularLayers;
+	float				 m_fNumCircularLayers	= (float) m_numCircularLayers;
+	CB_Follow			*m_followBehavior		= nullptr;
 
 public:
 	void	Execute( CameraState &suggestedCameraState );
@@ -75,6 +77,9 @@ private:
 
 	// According to the wights of each RaycastResults, calculates reduction in current given radius
 	float	CalculateRadiusReduction( std::vector< WeightedRaycastResult_MCR > const &raycastResults, float currentRadius );
+
+	//
+	void	CalculateRotationAltitudeChange( std::vector< WeightedTargetPoint_MCR > const &targetPoints, std::vector< WeightedRaycastResult_MCR > const &raycastResults, CameraState const &cameraState, float &radiusChange_out, float &altitudeChange_out );
 
 	// Renders all the target points on a 2D canvas, for debugging their weights
 	void	DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState, Vector3 const &projectedVelocity );

@@ -1,6 +1,6 @@
 #pragma once
 #include <functional>
-#include "Game/Abstract Classes/GameState.hpp"
+#include "Game/Game States/GameState.hpp"
 
 class UIMenu;
 

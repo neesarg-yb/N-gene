@@ -5,8 +5,8 @@
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Game/World/Player.hpp"
 #include "Game/World/Terrain.hpp"
+#include "Game/Game States/GameState.hpp"
 #include "Game/Camera System/DebugCamera.hpp"
-#include "Game/Abstract Classes/GameState.hpp"
 
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;

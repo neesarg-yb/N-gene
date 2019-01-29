@@ -6,7 +6,7 @@
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Game/World/Player.hpp"
 #include "Game/World/Terrain.hpp"
-#include "Game/Abstract Classes/GameState.hpp"
+#include "Game/Game States/GameState.hpp"
 #include "Game/Camera System/DebugCamera.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/Camera System/Motion Controllers/CMC_ProportionalController.hpp"

@@ -34,6 +34,8 @@ public:
 	void		PreUpdate()  { }
 	void		PostUpdate() { }
 	CameraState Update( float deltaSeconds, CameraState const &currentState );
+
+	void		SuggestChangedPolarCoordinate( float radius, float rotation, float altitude );	// A Camera Constrain can used this; meant to be used by CC_ModifiedConeRaycast
 	
 private:
 	void CartesianToPolarTest( CameraState const &camState ) const;

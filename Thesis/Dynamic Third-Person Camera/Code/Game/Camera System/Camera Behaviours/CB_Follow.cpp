@@ -27,16 +27,16 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	
 	Vector2 rightStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;		// For Rotation
 	
-	bool leftShoulderPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown;				// For change in Distance from Anchor
-	bool rightShoulderPressed	= controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
+	bool leftShoulderPressed  = controller.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown;					// For change in Distance from Anchor
+	bool rightShoulderPressed = controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
 	
 	bool dPadUp		= controller.m_xboxButtonStates[ XBOX_BUTTON_UP ].keyIsDown;							// For Offset change
 	bool dPadDown	= controller.m_xboxButtonStates[ XBOX_BUTTON_DOWN ].keyIsDown;
 	bool dPadRight	= controller.m_xboxButtonStates[ XBOX_BUTTON_RIGHT ].keyIsDown;
 	bool dPadLeft	= controller.m_xboxButtonStates[ XBOX_BUTTON_LEFT ].keyIsDown;
 
-	float leftTrigger	= controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];								// For the FOV change
-	float rightTrigger	= controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
+	float leftTrigger  = controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];								// For the FOV change
+	float rightTrigger = controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
 	
 
 	// Distance from Anchor
@@ -57,14 +57,14 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 
 	// Vertical Offset
 	float verticalOffsetChange	 = 0.f;
-	verticalOffsetChange		+= dPadUp	 ? (  1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
+	verticalOffsetChange		+= dPadUp	? (  1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
 	verticalOffsetChange		+= dPadDown ? ( -1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
 	m_localVerticalOffset		+= verticalOffsetChange;
 
 	// Horizontal Offset
 	float horizontalOffsetChange = 0.f;
-	horizontalOffsetChange		+= dPadRight	? (  1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
-	horizontalOffsetChange		+= dPadLeft	? ( -1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
+	horizontalOffsetChange		+= dPadRight ? (  1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
+	horizontalOffsetChange		+= dPadLeft  ? ( -1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
 	m_localHorizontalOffset		+= horizontalOffsetChange;
 
 	// Field of View
@@ -79,6 +79,13 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	SetFOV( m_fov );
 	
 	return m_goalState;
+}
+
+void CB_Follow::SuggestChangedPolarCoordinate( float radius, float rotation, float altitude )
+{
+	UNUSED( radius );
+	m_rotationAroundAnchor = rotation;
+	m_altitudeAroundAnchor = altitude;
 }
 
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
