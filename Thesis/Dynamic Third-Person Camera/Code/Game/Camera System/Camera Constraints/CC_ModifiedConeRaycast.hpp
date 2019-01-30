@@ -13,21 +13,24 @@
 struct WeightedTargetPoint_MCR
 {
 public:
-	float	weight;					// Weight from curve
+	float	weightRR;					// Weight from curve, for Radius Reduction
+	float	weightAR;					// For Altitude & Rotation Reduction
 	Vector3	targetPoint;
 
 public:
-	WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeight );
+	WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeightRR );
+	WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeightRR, float inWeightAR );
 };
 
 struct WeightedRaycastResult_MCR
 {
 public:
 	RaycastResult	result;
-	float			weight;			// Weight from curve
+	float			weightRR;			// Weight from curve, for Radius Reduction
+	float			weightAR;			// For Altitude & Rotation Reduction
 
 public:
-	WeightedRaycastResult_MCR( RaycastResult const &inResult, float inWeight );
+	WeightedRaycastResult_MCR( RaycastResult const &inResult, float inWeightRR, float inWeightAR );
 };
 
 
@@ -70,7 +73,7 @@ private:
 	void	GeneratePointsOnSphere( std::vector< Vector3 > &outPoints, Vector3 referencePointOnSphere, Matrix44 const &cameraToWorldMatrix, float maxRotationDegrees, int numCircularLayers, std::vector< int > const &numPointsInLayer ) const;
 
 	// Assigns weights by doing dot product between directions of target point & reference
-	void	AssignWeightToTargetPoints( std::vector< WeightedTargetPoint_MCR > &outWeightedPoints, std::vector< Vector3 > const &targetPoints, Vector3 const &referenceVector );
+	void	AssignWeightToTargetPoints( std::vector< WeightedTargetPoint_MCR > &outWeightedPoints, std::vector< Vector3 > const &targetPoints, Vector3 const &cameraPosOnSphere, Vector3 const &projectedVelocity );
 
 	// Constructs Rays for raycasts
 	void	PerformRaycastOnTargetPoints( std::vector< WeightedRaycastResult_MCR > &outRaycastResult, std::vector< WeightedTargetPoint_MCR > const &pointsOnSphere, Vector3 const &sphereCenter );
