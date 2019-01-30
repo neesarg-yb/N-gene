@@ -6,16 +6,17 @@
 class FloatRange
 {
 public:
-	float min;
-	float max;
+	float min = (std::numeric_limits<float>::max)();
+	float max = (std::numeric_limits<float>::min)();
 
+	FloatRange();									// Initializes an invalid range where [min, max] = [positive max, negative min]
 	explicit FloatRange( float min , float max );
 	explicit FloatRange( float initialMinMax );
 	~FloatRange();
 
-	float GetRandomInRange() const;
-
-	void SetFromText( const char* text );
+	float	GetRandomInRange() const;
+	void	ExpandToInclude( float number );
+	void	SetFromText( const char* text );
 
 private:
 
