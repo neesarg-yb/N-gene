@@ -300,6 +300,7 @@
     <ClCompile Include="Math\AABB2.cpp" />
     <ClCompile Include="Math\AABB3.cpp" />
     <ClCompile Include="Math\BarGraph.cpp" />
+    <ClCompile Include="Math\Complex.cpp" />
     <ClCompile Include="Math\CubicSpline.cpp" />
     <ClCompile Include="Math\Disc2.cpp" />
     <ClCompile Include="Math\DoubleRange.cpp" />
@@ -421,6 +422,7 @@
     <ClInclude Include="Math\AABB2.hpp" />
     <ClInclude Include="Math\AABB3.hpp" />
     <ClInclude Include="Math\BarGraph.hpp" />
+    <ClInclude Include="Math\Complex.hpp" />
     <ClInclude Include="Math\CubicSpline.hpp" />
     <ClInclude Include="Math\Disc2.hpp" />
     <ClInclude Include="Math\DoubleRange.hpp" />
