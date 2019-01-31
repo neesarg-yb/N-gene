@@ -88,6 +88,11 @@ void CB_Follow::SuggestChangedPolarCoordinate( float radius, float rotation, flo
 	m_altitudeAroundAnchor = altitude;
 }
 
+void CB_Follow::SetTargetPolarCoordinates( float radius, float rotation, float altitude )
+{
+	m_targetPolar = Vector3( radius, rotation, altitude );
+}
+
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
 {
 	Vector3 anchorPos	= m_manager->GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();

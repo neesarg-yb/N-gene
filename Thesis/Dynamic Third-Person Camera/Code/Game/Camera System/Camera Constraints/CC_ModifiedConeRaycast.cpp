@@ -93,7 +93,7 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	// Calculate rotation & altitude change
 	float rotationChange = 0.f;
 	float altitudeChange = 0.f;
-	CalculateRotationAltitudeChange( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, rotationChange, altitudeChange );
+//	CalculateRotationAltitudeChange( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, rotationChange, altitudeChange );
 
 	// Set new position!
 	cameraRadius	-= reductionInRadius;
@@ -378,7 +378,7 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 	}
 
 	if( xyOnSphere == Vector2::ZERO )
-		return;		// No changes in rotation or altitude
+		return;															// No changes in rotation or altitude
 
 	DebugRender2DLine( 0.f, Vector2::ZERO, RGBA_RED_COLOR, xyOnSphere * 20.f, RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
 
