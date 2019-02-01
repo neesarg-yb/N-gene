@@ -1,0 +1,10 @@
+<material id="snow_miku_lambert">
+	<shadergroup>
+   		<shader fileName="lit_alpha" />
+   	</shadergroup>
+
+   	<texture bind="0" src="Data\Models\snow_miku\roomitem_s_kage.png" />
+
+   	<float bind="SPECULAR_AMOUNT" 	value="1.0" />
+   	<float bind="SPECULAR_POWER" 	value="16.0" />
+</material>
