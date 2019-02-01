@@ -88,6 +88,20 @@ void Complex::operator/=( Complex const &b )
 	a = a / b;
 }
 
+bool Complex::operator==( Complex const &b ) const
+{
+	Complex const &a = *this;
+
+	return (a.r == b.r) && (a.i == b.i);
+}
+
+bool Complex::operator!=( Complex const &b ) const
+{
+	Complex const &a = *this;
+
+	return (a.r != b.r) && (a.i != b.i);
+}
+
 float Complex::GetRotation() const
 {
 	return atan2fDegree( i, r );
@@ -101,4 +115,18 @@ float Complex::GetMagnitude() const
 float Complex::GetMagnitudeSquared() const
 {
 	return ((r * r) + (i * i));
+}
+
+void Complex::TurnToward( Complex const &target, float maxRotationDegrees )
+{
+	Complex &current( *this );
+	Complex diff = target/current;
+
+	float rotationDiff	 = fabs( diff.GetRotation() );
+	float rotationNeeded = (rotationDiff < maxRotationDegrees) ? rotationDiff : maxRotationDegrees; 
+
+	if( diff.i > 0.f )
+		current *= Complex( +rotationNeeded );
+	else
+		current *= Complex( -rotationNeeded );
 }
