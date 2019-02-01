@@ -10,6 +10,7 @@
 #include "Game/Game States/LevelSelect.hpp"
 #include "Game/Game States/Scene_DebugSystem.hpp"
 #include "Game/Game States/Scene_FollowCamera.hpp"
+#include "Game/Game States/Scene_ComplexRotation.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
 #include "Game/Game States/Scene_DegreesOfFreedom.hpp"
 #include "Game/Game States/Scene_CollisionAvoidance.hpp"
@@ -97,6 +98,9 @@ void theGame::Startup()
 
 	GameState* levelSelectGS = new LevelSelect( g_gameClock );
 	AddNewGameState( levelSelectGS );
+
+	GameState* complexRotationTest = new Scene_ComplexRotation( g_gameClock );
+	AddNewGameState( complexRotationTest );
 
 	GameState* quaternionsTest = new Scene_QuaternionsTest( g_gameClock );
 	AddNewGameState( quaternionsTest );

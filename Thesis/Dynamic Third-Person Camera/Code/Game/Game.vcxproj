@@ -292,6 +292,7 @@
     <ClCompile Include="Camera System\Motion Controllers\CMC_ProportionalController.cpp" />
     <ClCompile Include="Game States\GameState.cpp" />
     <ClCompile Include="Game States\Scene_CollisionAvoidance.cpp" />
+    <ClCompile Include="Game States\Scene_ComplexRotation.cpp" />
     <ClCompile Include="Game States\Scene_DebugSystem.cpp" />
     <ClCompile Include="Game States\Scene_DegreesOfFreedom.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
@@ -321,6 +322,7 @@
     <ClInclude Include="Camera System\Motion Controllers\CMC_ProportionalController.hpp" />
     <ClInclude Include="Game States\GameState.hpp" />
     <ClInclude Include="Game States\Scene_CollisionAvoidance.hpp" />
+    <ClInclude Include="Game States\Scene_ComplexRotation.hpp" />
     <ClInclude Include="Game States\Scene_DebugSystem.hpp" />
     <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />

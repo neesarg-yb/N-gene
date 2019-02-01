@@ -118,6 +118,9 @@
     <ClCompile Include="Game States\GameState.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\Scene_ComplexRotation.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -200,6 +203,9 @@
     </ClInclude>
     <ClInclude Include="Game States\GameState.hpp">
       <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_ComplexRotation.hpp">
+      <Filter>Game States\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
