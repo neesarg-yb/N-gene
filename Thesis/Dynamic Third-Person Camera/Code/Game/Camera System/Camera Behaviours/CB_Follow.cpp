@@ -1,5 +1,6 @@
 #pragma once
 #include "CB_Follow.hpp"
+#include "Engine/Math/Complex.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
@@ -45,11 +46,54 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	distanceChange			+= leftTrigger  *  1.f * m_distanceChangeSpeed * deltaSeconds;
 	m_distanceFromAnchor	+= distanceChange;
 
-	// Altitude & Rotation
-	float rotationChange	 = -1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
-	float altitudeChange	 = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
-	m_rotationAroundAnchor	+= rotationChange;
-	m_altitudeAroundAnchor	+= altitudeChange;
+	if( rightStick != Vector2::ZERO )
+	{
+		// Altitude & Rotation
+		float rotationChange	 = -1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
+		float altitudeChange	 = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
+		m_rotationAroundAnchor	+= rotationChange;
+		m_altitudeAroundAnchor	+= altitudeChange;
+
+		m_autoRotationEnabled = false;
+	}
+	else
+	{
+		Vector3 cameraFront		= currentState.GetTransformMatrix().GetKColumn();
+		Vector2 cameraFrontXZ	= Vector2( cameraFront.x, cameraFront.z );
+		cameraFrontXZ.NormalizeAndGetLength();
+
+		// Player is rotating the camera
+		Vector3 anchorVelocity	 = m_manager->GetCameraContext().anchorGameObject->m_velocity;
+		Vector2 anchorVelocityXZ = Vector2( anchorVelocity.x, anchorVelocity.z );
+		float	anchorSpeedXZ	 = anchorVelocityXZ.NormalizeAndGetLength();
+
+		if( m_autoRotationEnabled == false )
+		{
+			// Check if player is moving on the opposite direction of the camera
+			if( anchorSpeedXZ > 0.05f )
+			{
+				float dotProduct = Vector2::DotProduct( cameraFrontXZ, anchorVelocityXZ );
+				if( dotProduct < -0.5f )
+				{
+					// Reorient the camera to behind the player
+					m_autoRotationEnabled = true;
+				}
+			}
+		}
+		else
+		{
+			float rotationForBehindPlayer = GetRotationToFaceXZDirection( anchorVelocityXZ );
+			Complex targetRot( rotationForBehindPlayer );
+			Complex currentRot( m_rotationAroundAnchor );
+
+			currentRot.TurnToward( targetRot, m_rotationSpeed * 3.f * deltaSeconds );
+			m_rotationAroundAnchor = currentRot.GetRotation();
+
+			if( currentRot.GetRotation() == targetRot.GetRotation() )
+				m_autoRotationEnabled = false;
+		}
+	}
+	
 
 	// Clamp the Altitude
 	float clampedAltitude	= ClampFloat( m_altitudeAroundAnchor, m_pitchRange.min, m_pitchRange.max );
@@ -88,11 +132,6 @@ void CB_Follow::SuggestChangedPolarCoordinate( float radius, float rotation, flo
 	m_altitudeAroundAnchor = altitude;
 }
 
-void CB_Follow::SetTargetPolarCoordinates( float radius, float rotation, float altitude )
-{
-	m_targetPolar = Vector3( radius, rotation, altitude );
-}
-
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
 {
 	Vector3 anchorPos	= m_manager->GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
@@ -107,4 +146,9 @@ void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
 
 	DebugRenderPoint( 0.f, 1.f, anchorPos, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_XRAY );
 	DebugRenderWireSphere( 3.f, anchorPos + cartPosition, 0.2f, RGBA_GREEN_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_XRAY );
+}
+
+float CB_Follow::GetRotationToFaceXZDirection( Vector2 const &xzDir ) const
+{
+	return -xzDir.GetOrientationDegrees();
 }
