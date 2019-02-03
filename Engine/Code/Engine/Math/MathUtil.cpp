@@ -4,13 +4,16 @@
 
 using namespace std;
 
-bool AreEqualFloats( float a, float b, uint precision )
+bool AreEqualFloats( float a, float b, uint ulp )
 {
 	float absDiff	= std::fabsf( a - b );
 	float absSum	= std::fabsf( a + b );
 
-	return (	absDiff <= (std::numeric_limits<float>::epsilon() * absSum * precision)
-			||  absDiff <   std::numeric_limits<float>::min() );
+	// the machine epsilon has to be scaled to the magnitude of the values used
+	// and multiplied by the desired precision in ULPs (units in the last place)
+	return (	absDiff <= (std::numeric_limits<float>::epsilon() * absSum * ulp)
+			 // unless the result is subnormal
+			 || absDiff <   std::numeric_limits<float>::min()	);
 }
 
 bool SolveQuadraticEquation( Vector2& out, float a, float b, float c )
