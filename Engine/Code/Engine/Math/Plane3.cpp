@@ -24,7 +24,7 @@ Plane3::~Plane3()
 
 }
 
-float Plane3::GetDistanceFromPoint( Vector3 const &point )
+float Plane3::GetDistanceFromPoint( Vector3 const &point ) const
 {
 	float distance = (normal.x * point.x) + (normal.y * point.y) + (normal.z * point.z) - d;
 
