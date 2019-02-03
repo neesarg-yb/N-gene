@@ -9,7 +9,7 @@
 
 class Vector2;
 
-bool	AreEqualFloats( float a, float b, uint precision );							// Precision is in terms if the decimal points
+bool	AreEqualFloats( float a, float b, uint ulp );								// ulp = units of least precision
 
 bool	SolveQuadraticEquation( Vector2& out, float a, float b, float c );			// Solves a*(t^2) + b*t + c = 0. If roots found, returns true. Note: Always returns two roots. 
 float	AreaOfTriangle2D( Vector2 p1, Vector2 p2, Vector2 p3 );
