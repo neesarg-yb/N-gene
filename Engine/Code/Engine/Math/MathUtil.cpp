@@ -4,6 +4,15 @@
 
 using namespace std;
 
+bool AreEqualFloats( float a, float b, uint precision )
+{
+	float absDiff	= std::fabsf( a - b );
+	float absSum	= std::fabsf( a + b );
+
+	return (	absDiff <= (std::numeric_limits<float>::epsilon() * absSum * precision)
+			||  absDiff <   std::numeric_limits<float>::min() );
+}
+
 bool SolveQuadraticEquation( Vector2& out, float a, float b, float c )
 {
 	//	Quadratic Equation:
