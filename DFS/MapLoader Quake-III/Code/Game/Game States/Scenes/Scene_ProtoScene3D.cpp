@@ -56,6 +56,26 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 		m_scene->AddRenderable( *m_snowMiku );
 	if( shipLoaded )
 		m_scene->AddRenderable( *m_spaceship );
+
+
+	// TESTING CONVEX POLYHEDRON
+	Plane3 plane1( Vector3::UP,				4.5f );
+	Plane3 plane2( Vector3::UP * -1.f,		4.5f );
+	Plane3 plane3( Vector3::RIGHT,			4.5f );
+	Plane3 plane4( Vector3::RIGHT * -1.f,	4.5f );
+	Plane3 plane5( Vector3::FRONT,			4.5f );
+	Plane3 plane6( Vector3::FRONT * -1.f,	4.5f );
+	Plane3 plane7( Vector3( 0.f, 1.f, 1.f).GetNormalized(), 3.f );
+
+	m_testHedron.AddPlane( plane1 );
+	m_testHedron.AddPlane( plane2 );
+	m_testHedron.AddPlane( plane3 );
+	m_testHedron.AddPlane( plane4 );
+	m_testHedron.AddPlane( plane5 );
+	m_testHedron.AddPlane( plane6 );
+	m_testHedron.AddPlane( plane7 );
+
+	m_testHedron.Rebuild();
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
@@ -162,17 +182,20 @@ void Scene_ProtoScene3D::Update()
 
 	// Debug Render
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	m_testHedron.DebugRenderVertices( 0.f, 1.f, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 {
-	UNUSED( gameCamera );
 	PROFILE_SCOPE_FUNCTION();
 
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
 	m_renderingPath->RenderScene( *m_scene );
+
+	// Debug Renderer
+	DebugRendererLateRender( gameCamera );
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )

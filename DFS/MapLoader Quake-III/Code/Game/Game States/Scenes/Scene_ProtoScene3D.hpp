@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Math/Sphere.hpp"
+#include "Engine/Math/ConvexPolyhedron.hpp"
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
@@ -38,6 +39,8 @@ private:
 	float const				 m_initialFOV				= 45.f;			// Degrees
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
+
+	ConvexPolyhedron		 m_testHedron;
 
 public:
 	void JustFinishedTransition();
