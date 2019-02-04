@@ -39,6 +39,8 @@ private:
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
 
+	Renderable*				 m_testCubeRenderable		= nullptr;
+
 public:
 	void JustFinishedTransition();
 	void BeginFrame();

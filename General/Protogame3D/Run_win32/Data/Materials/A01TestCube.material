@@ -1,0 +1,10 @@
+<material id="A01TestCube">
+	<shadergroup>
+   		<shader fileName="lit_alpha" />
+   	</shadergroup>
+
+   	<texture bind="0" src="Data\Images\Test_StbiAndDirectX.png" />
+
+   	<float bind="SPECULAR_AMOUNT" 	value="1.0" />
+   	<float bind="SPECULAR_POWER" 	value="16.0" />
+</material>

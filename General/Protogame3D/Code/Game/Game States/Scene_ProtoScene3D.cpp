@@ -4,6 +4,7 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Profiler/Profiler.hpp"
+#include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
@@ -56,6 +57,13 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 		m_scene->AddRenderable( *m_snowMiku );
 	if( shipLoaded )
 		m_scene->AddRenderable( *m_spaceship );
+
+	// Test Cube
+	Mesh *cubeMesh = MeshBuilder::CreateCube( Vector3::ONE_ALL, Vector3( 5.f, 0.f, 5.f), RGBA_WHITE_COLOR, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE );
+	Material *testMaterial = Material::CreateNewFromFile( "Data\\Materials\\A01TestCube.material" );
+	m_testCubeRenderable = new Renderable( cubeMesh, testMaterial );
+
+	m_scene->AddRenderable( *m_testCubeRenderable );
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
