@@ -5,21 +5,19 @@
 class IntRange
 {
 public:
-	int min;
-	int max;
-
+			 IntRange();						// Initializes an invalid range where [min, max] = [positive max, negative min]
 	explicit IntRange( int min , int max );
 	explicit IntRange( int initialMinMax );
-	~IntRange();
+			~IntRange();
 
-	int GetRandomInRange() const;
+public:
+	int min =  INT_MAX;
+	int max = -INT_MAX;
 
-	void SetFromText( const char* text );
-
-private:
-
+public:
+	int		GetRandomInRange() const;
+	void	SetFromText( const char* text );
 };
 
-bool DoRangesOverlap( const IntRange& a , const IntRange& b );
-
-const IntRange Interpolate( const IntRange& start, const IntRange& end, float fractionTowardEnd );
+		bool		DoRangesOverlap	( const IntRange& a , const IntRange& b );
+const	IntRange	Interpolate		( const IntRange& start, const IntRange& end, float fractionTowardEnd );
