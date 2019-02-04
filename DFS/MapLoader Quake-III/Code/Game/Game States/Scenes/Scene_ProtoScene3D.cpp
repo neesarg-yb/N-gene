@@ -75,6 +75,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_testHedron.AddPlane( plane6 );
 	m_testHedron.AddPlane( plane7 );
 
+	m_testHedron.SetFaceWindingOrder( WIND_COUNTER_CLOCKWISE );
 	m_testHedron.Rebuild();
 }
 
@@ -182,9 +183,9 @@ void Scene_ProtoScene3D::Update()
 
 	// Debug Render
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-	m_testHedron.DebugRenderVertices( 0.f, 1.f, DEBUG_RENDER_USE_DEPTH );
-
+	
 	Matrix44 cameraMatrix = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	m_testHedron.DebugRenderVertices( 0.f, 1.f, 0.5f, cameraMatrix.GetJColumn(), cameraMatrix.GetIColumn(), DEBUG_RENDER_USE_DEPTH );
 	m_testHedron.DebugRenderVertexIndicesTag( 0.f, 0.5f, cameraMatrix.GetJColumn(), cameraMatrix.GetIColumn() );
 }
 
