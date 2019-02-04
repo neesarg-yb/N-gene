@@ -8,10 +8,13 @@ CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchA
 	: CB_DegreesOfFreedom( name, manager )
 	, m_rotationSpeed( rotationSpeed )
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )
-	, m_maxDistFromAnchor( distFromAnchor )
 	, m_distanceFromAnchor( distFromAnchor )
 {
+	float maxRotAllowed = 160.f;	// Degrees
 
+	Vector2 xOne( 1.f, 0.f );
+	Vector2 maxRot( CosDegree(maxRotAllowed), SinDegree(maxRotAllowed) );
+	m_reorientDotThreshold = Vector2::DotProduct( xOne, maxRot );
 }
 
 CB_Follow::~CB_Follow()
@@ -21,105 +24,73 @@ CB_Follow::~CB_Follow()
 
 CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentState )
 {
-	UNUSED( currentState );
+	// Contextual Info.
+	CameraContext	context		= m_manager->GetCameraContext();
+	Vector3			playerFront	= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
+	Matrix44		cameraMat	= currentState.GetTransformMatrix();
 
-	// Get input from Xbox Controller
-	XboxController &controller = m_inputSystem->m_controller[0];
-	
-	Vector2 rightStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;		// For Rotation
-	
-	bool leftShoulderPressed  = controller.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown;					// For change in Distance from Anchor
-	bool rightShoulderPressed = controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
-	
-	bool dPadUp		= controller.m_xboxButtonStates[ XBOX_BUTTON_UP ].keyIsDown;							// For Offset change
-	bool dPadDown	= controller.m_xboxButtonStates[ XBOX_BUTTON_DOWN ].keyIsDown;
-	bool dPadRight	= controller.m_xboxButtonStates[ XBOX_BUTTON_RIGHT ].keyIsDown;
-	bool dPadLeft	= controller.m_xboxButtonStates[ XBOX_BUTTON_LEFT ].keyIsDown;
+	// Controller input
+	float distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput;
+	GetPlayerInput( distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput );
 
-	float leftTrigger  = controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];								// For the FOV change
-	float rightTrigger = controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
-	
+	// Scripted Reorient Camera Behavior
+	Vector3 cameraFront		 = cameraMat.GetKColumn();
+	Vector2 playerFrontDirXZ = Vector2( playerFront.x, playerFront.z ).GetNormalized();
+	Vector2 cameraFrontDirXZ = Vector2( cameraFront.x, cameraFront.z ).GetNormalized();
+	bool noPlayerInputRot = AreEqualFloats( fabsf(rotChangePerInput), 0.f, 2 );
 
-	// Distance from Anchor
-	float distanceChange	 = 0.f;
-	distanceChange			+= rightTrigger * -1.f * m_distanceChangeSpeed * deltaSeconds;
-	distanceChange			+= leftTrigger  *  1.f * m_distanceChangeSpeed * deltaSeconds;
-	m_distanceFromAnchor	+= distanceChange;
-
-	if( rightStick != Vector2::ZERO )
+	if( noPlayerInputRot )
 	{
-		// Altitude & Rotation
-		float rotationChange	 = -1.f * rightStick.x * m_rotationSpeed * deltaSeconds;
-		float altitudeChange	 = -1.f * rightStick.y * m_rotationSpeed * deltaSeconds;
-		m_rotationAroundAnchor	+= rotationChange;
-		m_altitudeAroundAnchor	+= altitudeChange;
-
-		m_autoRotationEnabled = false;
+		if( m_reorientCameraRotation == false )
+		{
+			float dotProduct = Vector2::DotProduct( playerFrontDirXZ, cameraFrontDirXZ );
+			if( dotProduct <= m_reorientDotThreshold )
+			{
+				// Enable scripted reorientation behavior
+				m_reorientCameraRotation = true;
+			}
+		}
 	}
 	else
 	{
-		Vector3 cameraFront		= currentState.GetTransformMatrix().GetKColumn();
-		Vector2 cameraFrontXZ	= Vector2( cameraFront.x, cameraFront.z );
-		cameraFrontXZ.NormalizeAndGetLength();
-
-		// Player is rotating the camera
-		Vector3 anchorVelocity	 = m_manager->GetCameraContext().anchorGameObject->m_velocity;
-		Vector2 anchorVelocityXZ = Vector2( anchorVelocity.x, anchorVelocity.z );
-		float	anchorSpeedXZ	 = anchorVelocityXZ.NormalizeAndGetLength();
-
-		if( m_autoRotationEnabled == false )
-		{
-			// Check if player is moving on the opposite direction of the camera
-			if( anchorSpeedXZ > 0.05f )
-			{
-				float dotProduct = Vector2::DotProduct( cameraFrontXZ, anchorVelocityXZ );
-				if( dotProduct < -0.5f )
-				{
-					// Reorient the camera to behind the player
-					m_autoRotationEnabled = true;
-				}
-			}
-		}
-		else
-		{
-			float rotationForBehindPlayer = GetRotationToFaceXZDirection( anchorVelocityXZ );
-			Complex targetRot( rotationForBehindPlayer );
-			Complex currentRot( m_rotationAroundAnchor );
-
-			currentRot.TurnToward( targetRot, m_rotationSpeed * 3.f * deltaSeconds );
-			m_rotationAroundAnchor = currentRot.GetRotation();
-
-			if( currentRot.GetRotation() == targetRot.GetRotation() )
-				m_autoRotationEnabled = false;
-		}
+		// Player input overrides the scripted behavior
+		m_reorientCameraRotation = false;
 	}
-	
 
-	// Clamp the Altitude
-	float clampedAltitude	= ClampFloat( m_altitudeAroundAnchor, m_pitchRange.min, m_pitchRange.max );
-	m_altitudeAroundAnchor	= clampedAltitude;
+	if( m_reorientCameraRotation )
+	{
+		TODO( "Get rid of magic number 180 degrees here.....!!!!!!" );
+		float targetDegrees = GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;
+		Complex currentRot( m_rotationAroundAnchor );
+		Complex targetRot( targetDegrees );
 
-	// Vertical Offset
-	float verticalOffsetChange	 = 0.f;
-	verticalOffsetChange		+= dPadUp	? (  1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
-	verticalOffsetChange		+= dPadDown ? ( -1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
-	m_localVerticalOffset		+= verticalOffsetChange;
+		currentRot.TurnToward( targetRot, m_rotationSpeed * 3.f * deltaSeconds );
+		float newRotation = currentRot.GetRotation();
+		float oldRotation = m_rotationAroundAnchor;
+		m_rotationAroundAnchor = newRotation;
 
-	// Horizontal Offset
-	float horizontalOffsetChange = 0.f;
-	horizontalOffsetChange		+= dPadRight ? (  1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
-	horizontalOffsetChange		+= dPadLeft  ? ( -1.f * m_offsetChangeSpeed * deltaSeconds ) : 0.f;
-	m_localHorizontalOffset		+= horizontalOffsetChange;
+		// Done reorienting the camera, if near to the target rotation..
+		if( fabsf(newRotation - oldRotation) <= 5.f )
+			m_reorientCameraRotation = false;
+	}
+	else
+		m_rotationAroundAnchor	+= rotChangePerInput * m_rotationSpeed * deltaSeconds;
 
-	// Field of View
-	m_fov += leftShoulderPressed  ?  1.f * m_fovChangeSpeed * deltaSeconds : 0.f;
-	m_fov += rightShoulderPressed ? -1.f * m_fovChangeSpeed * deltaSeconds : 0.f;
-
-
-	// Set the current CameraState
+	// Polar Coordinates
+	m_distanceFromAnchor	+= distChangePerInput * m_distanceChangeSpeed * deltaSeconds;
+	m_altitudeAroundAnchor	+= altChangePerInput * m_rotationSpeed * deltaSeconds;
+	m_altitudeAroundAnchor	 = ClampFloat( m_altitudeAroundAnchor, m_pitchRange.min, m_pitchRange.max );
 	SetWorldPosition( m_distanceFromAnchor, m_rotationAroundAnchor, m_altitudeAroundAnchor );
 	SetOrientationToLookAtAnchor();
-	SetOffsetToWorldPosition( m_localHorizontalOffset, m_localVerticalOffset );
+	
+	// Local Offsets
+	m_localHorizontalOffset	+= hOffsetChangePerInput * m_offsetChangeSpeed * deltaSeconds;
+	m_localVerticalOffset	+= vOffsetChangePerInput * m_offsetChangeSpeed * deltaSeconds;
+	//	Turned off b/c it won't work well with Modified Cone Raycast
+	//--->	SetOffsetToWorldPosition( m_localHorizontalOffset, m_localVerticalOffset );
+
+	// FOV
+	m_fov += fovChangePerInput * m_fovChangeSpeed * deltaSeconds;
 	SetFOV( m_fov );
 	
 	return m_goalState;
@@ -130,6 +101,55 @@ void CB_Follow::SuggestChangedPolarCoordinate( float radius, float rotation, flo
 	UNUSED( radius );
 	m_rotationAroundAnchor = rotation;
 	m_altitudeAroundAnchor = altitude;
+}
+
+void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, float &altChange_out, float &hOffsetChange_out, float &vOffsetChange_out, float &fovChange_out ) const
+{
+	// Get input from Xbox Controller
+	XboxController &controller = m_inputSystem->m_controller[0];
+	
+	// For Rotation
+	Vector2 rightStick = controller.m_xboxStickStates[ XBOX_STICK_RIGHT ].correctedNormalizedPosition;
+
+	// For change in Distance from Anchor
+	bool leftShoulderPressed  = controller.m_xboxButtonStates[ XBOX_BUTTON_LB ].keyIsDown;
+	bool rightShoulderPressed = controller.m_xboxButtonStates[ XBOX_BUTTON_RB ].keyIsDown;
+
+	// For Offset change
+	bool dPadUp		= controller.m_xboxButtonStates[ XBOX_BUTTON_UP ].keyIsDown;
+	bool dPadDown	= controller.m_xboxButtonStates[ XBOX_BUTTON_DOWN ].keyIsDown;
+	bool dPadRight	= controller.m_xboxButtonStates[ XBOX_BUTTON_RIGHT ].keyIsDown;
+	bool dPadLeft	= controller.m_xboxButtonStates[ XBOX_BUTTON_LEFT ].keyIsDown;
+
+	// For the FOV change
+	float leftTrigger  = controller.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];
+	float rightTrigger = controller.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];
+	
+	// Setting the out variables
+	float distanceChange = 0.f;
+	distanceChange += rightTrigger * -1.f;
+	distanceChange += leftTrigger  *  1.f;
+	distChange_out  = distanceChange;
+
+	float rotationChange = -1.f * rightStick.x;
+	float altitudeChange = -1.f * rightStick.y;
+	rotChange_out = rotationChange;
+	altChange_out = altitudeChange;
+
+	float horizontalOffsetChange = 0.f;
+	horizontalOffsetChange += dPadRight ?  1.f : 0.f;
+	horizontalOffsetChange += dPadLeft  ? -1.f : 0.f;
+	hOffsetChange_out = horizontalOffsetChange;
+
+	float verticalOffsetChange = 0.f;
+	verticalOffsetChange += dPadUp   ?  1.f : 0.f;
+	verticalOffsetChange += dPadDown ? -1.f : 0.f;
+	vOffsetChange_out = verticalOffsetChange;
+
+	float fovChange = 0.f;
+	fovChange += leftShoulderPressed  ?  1.f : 0.f;
+	fovChange += rightShoulderPressed ? -1.f : 0.f;
+	fovChange_out = fovChange;
 }
 
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const

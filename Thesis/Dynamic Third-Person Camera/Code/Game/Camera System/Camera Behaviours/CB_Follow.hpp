@@ -16,13 +16,13 @@ private:
 	float const	m_distanceChangeSpeed		= 3.5f;
 	float const m_fovChangeSpeed			= 10.f;
 	float const m_offsetChangeSpeed			= 1.f;
-	float const m_maxDistFromAnchor			= 0.f;
 
 	// Spherical Coordinates													_______
 	float		m_distanceFromAnchor		= 0.f;							// |current|
 	float		m_rotationAroundAnchor		= 0.f;							// | polar |
 	float		m_altitudeAroundAnchor		= 0.f;							// |_______|
-	bool		m_autoRotationEnabled		= false;
+	bool		m_reorientCameraRotation	= false;
+	float		m_reorientDotThreshold		= 0.f;
 
 	// Local Offsets
 	float		m_localHorizontalOffset		= 0.f;
@@ -39,6 +39,7 @@ public:
 	void		SuggestChangedPolarCoordinate( float radius, float rotation, float altitude );	// A Camera Constrain can used this; meant to be used by CC_ModifiedConeRaycast
 	
 private:
+	void	GetPlayerInput( float &distChange_out, float &rotChange_out, float &altChange_out, float &hOffsetChange_out, float &vOffsetChange_out, float &fovChange_out ) const;
 	void	CartesianToPolarTest( CameraState const &camState ) const;
 	float	GetRotationToFaceXZDirection( Vector2 const &xzDir ) const;
 };

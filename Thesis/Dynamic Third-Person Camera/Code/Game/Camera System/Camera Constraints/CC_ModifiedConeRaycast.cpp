@@ -85,6 +85,7 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 	// Polar coordinate of camera, relative to the player position
 	float cameraRadius, cameraRotation, cameraAltitude;
+	TODO( "See if you can make this code local-offset compativble.. Checkout CB_Follow!" );
 	CartesianToPolar( cameraPosRelativeToPlayer, cameraRadius, cameraRotation, cameraAltitude );
 
 	// Calculate Reduction in Radius
