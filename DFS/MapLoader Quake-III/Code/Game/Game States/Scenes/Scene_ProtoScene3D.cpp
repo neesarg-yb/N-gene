@@ -183,10 +183,14 @@ void Scene_ProtoScene3D::Update()
 	// Debug Render
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 	m_testHedron.DebugRenderVertices( 0.f, 1.f, DEBUG_RENDER_USE_DEPTH );
+
+	Matrix44 cameraMatrix = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	m_testHedron.DebugRenderVertexIndicesTag( 0.f, 0.5f, cameraMatrix.GetJColumn(), cameraMatrix.GetIColumn() );
 }
 
 void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 {
+	UNUSED( gameCamera );
 	PROFILE_SCOPE_FUNCTION();
 
 	// Ambient Light
@@ -195,7 +199,7 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 	m_renderingPath->RenderScene( *m_scene );
 
 	// Debug Renderer
-	DebugRendererLateRender( gameCamera );
+	DebugRendererLateRender( m_camera );
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
