@@ -399,6 +399,12 @@
     <ClCompile Include="Math\Complex.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="Math\ConvexHull.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\ConvexPolyhedron.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -768,6 +774,12 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Math\Complex.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\ConvexHull.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\ConvexPolyhedron.hpp">
       <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
