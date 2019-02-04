@@ -3,13 +3,15 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
-ConvexPolyhedron::ConvexPolyhedron()
+ConvexPolyhedron::ConvexPolyhedron( eWindOrder faceWindOrder /* = WIND_COUNTER_CLOCKWISE */ )
+	: m_winding( faceWindOrder )
 {
 
 }
 
-ConvexPolyhedron::ConvexPolyhedron( ConvexHull const &hull )
+ConvexPolyhedron::ConvexPolyhedron( ConvexHull const &hull, eWindOrder faceWindOrder /* = WIND_COUNTER_CLOCKWISE */ )
 	: m_hull( hull )
+	, m_winding( faceWindOrder )
 {
 
 }
@@ -27,22 +29,33 @@ void ConvexPolyhedron::AddPlane( Plane3 const &plane )
 	m_isDirty = true;
 }
 
+void ConvexPolyhedron::SetFaceWindingOrder( eWindOrder winding )
+{
+	m_winding = winding;
+	m_isDirty = true;
+}
+
 void ConvexPolyhedron::Rebuild()
 {
 	// Get vertices on each planes
 	PerformPlaneIntersections();
 
 	// Sort vertices according to culling order
-	SortFaceVerticesWinding( WIND_COUNTER_CLOCKWISE );
+	SortFaceVerticesWinding( m_winding );
 
 	// Baked data represents the Convex Hull accurately, now..
 	m_isDirty = false;
 }
 
-void ConvexPolyhedron::DebugRenderVertices( float lifetime, float pointSize, eDebugRenderMode renderMode ) const
+void ConvexPolyhedron::DebugRenderVertices( float lifetime, float pointSize, float fontSize, Vector3 const &camUpDir, Vector3 const &camRightDir, eDebugRenderMode renderMode ) const
 {
-	for each (Vector3 vert in m_vertices)
+	for( uint i = 0; i < m_vertices.size(); i++ )
+	{
+		Vector3 const &vert = m_vertices[i];
+
 		DebugRenderPoint( lifetime, pointSize, vert, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, renderMode );
+		DebugRenderTag( lifetime, fontSize, vert, camUpDir, camRightDir, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("(%u)", i) );
+	}
 }
 
 void ConvexPolyhedron::DebugRenderVertexIndicesTag( float lifetime, float height, Vector3 const &cameraUp, Vector3 const &cameraRight ) const
@@ -56,7 +69,7 @@ void ConvexPolyhedron::DebugRenderVertexIndicesTag( float lifetime, float height
 		{
 			Vector3 vertex = m_vertices[ faceVertsIndices[vIdx] ];
 			avgFacePos += vertex;
-			vertex.y -= (height * fIdx);
+			vertex.y -= (height * (fIdx+1));
 			DebugRenderTag( lifetime, height, vertex, cameraUp, cameraRight, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("f:%u v:%u", fIdx, vIdx) );
 		}
 
@@ -115,8 +128,6 @@ void ConvexPolyhedron::PerformPlaneIntersections()
 
 void ConvexPolyhedron::SortFaceVerticesWinding( eWindOrder windOrder )
 {
-	UNUSED( windOrder );
-
 	// For each face
 	for ( uint fInd = 0; fInd < m_faces.size(); fInd++ )
 	{
@@ -142,26 +153,27 @@ void ConvexPolyhedron::SortFaceVerticesWinding( eWindOrder windOrder )
 			Vector3 thisVert	= m_vertices[ vertexIndex ];
 
 			uint closestPlaneIdx;
-			float distance = GetClosestPlaneForVertex( thisVert, comparisionPlanes, closestPlaneIdx );
+			float multiplier	= (windOrder == WIND_COUNTER_CLOCKWISE) ? -1.f : +1.f;
+			float distance		= multiplier * GetClosestPlaneForVertex( thisVert, comparisionPlanes, closestPlaneIdx );
 
 			if( distance >= 0.f )
 			{
 				// Point is on the front side of the normal of cmpPlane
 				// i.e. add the point at the end of second vertex of this edge
-				uint newVertAtIndex = closestPlaneIdx + 1U + 1U;
-				sortedFaceVertsInd.insert( sortedFaceVertsInd.begin() + newVertAtIndex, vInd );
+				uint newVertAtIndex = closestPlaneIdx + 2U;
+				sortedFaceVertsInd.insert( sortedFaceVertsInd.begin() + newVertAtIndex, vertexIndex );
 			}
 			else
 			{
 				// Point is on the back side of the normal of cmpPlane
 				// i.e. add the point in between the two vertices forming this edge
 				uint newVertAtIndex = closestPlaneIdx + 1U;
-				sortedFaceVertsInd.insert( sortedFaceVertsInd.begin() + newVertAtIndex, vInd );
+				sortedFaceVertsInd.insert( sortedFaceVertsInd.begin() + newVertAtIndex, vertexIndex );
 			}
 			
 			// Let's add a comparison plane for the second and third vertices
-			Vector3 vert2 = m_vertices[ closestPlaneIdx + 1 ];
-			Vector3 vert3 = m_vertices[ closestPlaneIdx + 2 ];
+			Vector3 vert2 = m_vertices[ sortedFaceVertsInd[closestPlaneIdx + 1U] ];
+			Vector3 vert3 = m_vertices[ sortedFaceVertsInd[closestPlaneIdx + 2U] ];
 			Plane3 comparisionPlane2 = MakeComparisionPlaneForPolygonEdge( vert2, vert3, facePlane );
 			comparisionPlanes.insert( comparisionPlanes.begin() + closestPlaneIdx + 1, comparisionPlane2 );
 			
@@ -170,7 +182,7 @@ void ConvexPolyhedron::SortFaceVerticesWinding( eWindOrder windOrder )
 				// It means that we added a new vertex in between old two (which formed the edge)
 				// So, we also need to update comparison plane for the first and newly added second vertices
 				// Plane for 2nd and 3rd vertices is already updated
-				Vector3 vert1 = m_vertices[ closestPlaneIdx + 0 ];
+				Vector3 vert1 = m_vertices[ sortedFaceVertsInd[closestPlaneIdx + 0U] ];
 				Plane3 comparisionPlane1 = MakeComparisionPlaneForPolygonEdge( vert1, vert2, facePlane );
 				comparisionPlanes[ closestPlaneIdx ] = comparisionPlane1;
 			}

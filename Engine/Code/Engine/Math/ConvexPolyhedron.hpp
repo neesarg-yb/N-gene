@@ -11,8 +11,8 @@ typedef std::vector< VertexIndices > Faces;
 class ConvexPolyhedron
 {
 public:
-	 ConvexPolyhedron();
-	 ConvexPolyhedron( ConvexHull const &hull );
+	 ConvexPolyhedron( eWindOrder faceWindOrder = WIND_COUNTER_CLOCKWISE );
+	 ConvexPolyhedron( ConvexHull const &hull, eWindOrder faceWindOrder = WIND_COUNTER_CLOCKWISE  );
 	~ConvexPolyhedron();
 
 private:
@@ -24,11 +24,14 @@ private:
 	Faces			 m_faces;								// Indices of vertices
 	bool			 m_isDirty	= true;						// Need to rebuild?
 
+	eWindOrder		 m_winding	= WIND_COUNTER_CLOCKWISE;	// The order in which vertices of the faces are sorted
+
 public:
 	void AddPlane( Plane3 const &plane );
+	void SetFaceWindingOrder( eWindOrder winding );			// Changes the sorting order of vertices of the faces. [Note: Rebuild required]
 	void Rebuild();											// Calculates the baked data, again
 
-	void DebugRenderVertices( float lifetime, float pointSize, eDebugRenderMode renderMode ) const;
+	void DebugRenderVertices( float lifetime, float pointSize, float fontSize, Vector3 const &camUpDir, Vector3 const &camRightDir, eDebugRenderMode renderMode ) const;
 	void DebugRenderVertexIndicesTag( float lifetime, float height, Vector3 const &cameraUp, Vector3 const &cameraRight ) const;
 
 private:
