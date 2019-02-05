@@ -11,9 +11,10 @@ bool AreEqualFloats( float a, float b, uint ulp )
 
 	// the machine epsilon has to be scaled to the magnitude of the values used
 	// and multiplied by the desired precision in ULPs (units in the last place)
-	return (	absDiff <= (std::numeric_limits<float>::epsilon() * absSum * ulp)
-			 // unless the result is subnormal
-			 || absDiff <   std::numeric_limits<float>::min()	);
+	float scaledEpsilon			= std::numeric_limits<float>::epsilon() * absSum * ulp;
+	float epsilonForSubnormals	= std::numeric_limits<float>::min();						// unless the result is subnormal
+
+	return (absDiff <= scaledEpsilon) || (absDiff < epsilonForSubnormals);
 }
 
 bool SolveQuadraticEquation( Vector2& out, float a, float b, float c )
