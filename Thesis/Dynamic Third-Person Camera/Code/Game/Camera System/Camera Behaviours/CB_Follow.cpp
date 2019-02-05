@@ -61,8 +61,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 
 	if( m_reorientCameraRotation )
 	{
-		TODO( "Get rid of magic number 180 degrees here.....!!!!!!" );
-		float targetDegrees = GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;
+		float targetDegrees = GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
 		Complex targetRot( targetDegrees );
 
 		Complex currentRot( m_rotationAroundAnchor );
@@ -172,5 +171,6 @@ void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
 
 float CB_Follow::GetRotationToFaceXZDirection( Vector2 const &xzDir ) const
 {
-	return -xzDir.GetOrientationDegrees();
+	// Mult by -1: because orientation from Vec2 is calculated based on Right Handed rotation (counter clock-wise); Our polar coords works based on clock-wise rotation..
+	return ( -1.f * xzDir.GetOrientationDegrees() );
 }
