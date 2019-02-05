@@ -78,6 +78,48 @@ void ConvexPolyhedron::DebugRenderVertexIndicesTag( float lifetime, float height
 	}
 }
 
+Mesh* ConvexPolyhedron::ConstructMesh( Rgba const &color ) const
+{
+	MeshBuilder mb;
+	mb.Begin( PRIMITIVE_TRIANGES, false );
+
+	for( int fId = 0; fId < m_faces.size(); fId++ )
+	{
+		// This face
+		VertexIndices const	&faceVertIndices = m_faces[ fId ];
+		Plane3 const		&facePlane		 = m_hull.m_planes[ fId ];
+
+		// From this vert, let's triangulate the polygon
+		Vector3 vert0 = m_vertices[ faceVertIndices[0] ];
+
+		for( int v = 1; v < (faceVertIndices.size() - 1); v++ )
+		{
+			IntVector2	edgeVertIndices = IntVector2( faceVertIndices[ v ], faceVertIndices[ v+1 ] );
+			Vector3		vertA			= m_vertices[ edgeVertIndices.x ];
+			Vector3		vertB			= m_vertices[ edgeVertIndices.y ];
+			
+			mb.SetColor( color );
+			mb.SetUV( Vector2::ZERO );
+			mb.SetNormal( facePlane.normal );
+			mb.PushVertex( vert0 );
+
+			mb.SetColor( color );
+			mb.SetUV( Vector2::ZERO );
+			mb.SetNormal( facePlane.normal );
+			mb.PushVertex( vertA );
+
+			mb.SetColor( color );
+			mb.SetUV( Vector2::ZERO );
+			mb.SetNormal( facePlane.normal );
+			mb.PushVertex( vertB );
+		}
+	}
+
+	mb.End();
+
+	return mb.ConstructMesh<Vertex_Lit>();
+}
+
 void ConvexPolyhedron::PerformPlaneIntersections()
 {
 	uint const numPlanes = m_hull.GetPlaneCount();
@@ -153,7 +195,7 @@ void ConvexPolyhedron::SortFaceVerticesWinding( eWindOrder windOrder )
 			Vector3 thisVert	= m_vertices[ vertexIndex ];
 
 			uint closestPlaneIdx;
-			float multiplier	= (windOrder == WIND_COUNTER_CLOCKWISE) ? -1.f : +1.f;
+			float multiplier	= (windOrder != WIND_COUNTER_CLOCKWISE) ? -1.f : +1.f;
 			float distance		= multiplier * GetClosestPlaneForVertex( thisVert, comparisionPlanes, closestPlaneIdx );
 
 			if( distance >= 0.f )
