@@ -41,6 +41,7 @@ private:
 	float const				 m_cameraFar				= 100.f;
 
 	ConvexPolyhedron		 m_testHedron;
+	Renderable				*m_testHedronRenderable		= nullptr;
 
 public:
 	void JustFinishedTransition();

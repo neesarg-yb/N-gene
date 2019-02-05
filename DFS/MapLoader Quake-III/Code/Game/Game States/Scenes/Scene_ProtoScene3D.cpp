@@ -77,6 +77,14 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	m_testHedron.SetFaceWindingOrder( WIND_COUNTER_CLOCKWISE );
 	m_testHedron.Rebuild();
+
+	// TESTING PLYHEDRON'S RENDERABLE
+	Vector3		 testMeshLocation	= Vector3( 15.f, 0.f, 0.f );
+	Mesh		*testHedronMesh		= m_testHedron.ConstructMesh( RGBA_WHITE_COLOR );
+	Material	*testHedronMaterial	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
+	m_testHedronRenderable			= new Renderable( Transform(testMeshLocation, Vector3::ZERO, Vector3::ONE_ALL), testHedronMesh, testHedronMaterial );
+
+	m_scene->AddRenderable( *m_testHedronRenderable );
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
@@ -136,6 +144,10 @@ Scene_ProtoScene3D::~Scene_ProtoScene3D()
 
 	delete m_spaceship;
 	m_spaceship = nullptr;
+
+	// Test ConvexHull Mesh
+	delete m_testHedronRenderable;
+
 }
 
 void Scene_ProtoScene3D::JustFinishedTransition()
