@@ -10,10 +10,8 @@ CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchA
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )
 	, m_distanceFromAnchor( distFromAnchor )
 {
-	float maxRotAllowed = 145.f;	// Degrees
-
 	Vector2 xOne( 1.f, 0.f );
-	Vector2 maxRot( CosDegree(maxRotAllowed), SinDegree(maxRotAllowed) );
+	Vector2 maxRot( CosDegree(m_reorientAfterDegreeDiff), SinDegree(m_reorientAfterDegreeDiff) );
 	m_reorientDotThreshold = Vector2::DotProduct( xOne, maxRot );
 }
 
@@ -25,9 +23,10 @@ CB_Follow::~CB_Follow()
 CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentState )
 {
 	// Contextual Info.
+	Matrix44		cameraMat	= currentState.GetTransformMatrix();
 	CameraContext	context		= m_manager->GetCameraContext();
 	Vector3			playerFront	= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
-	Matrix44		cameraMat	= currentState.GetTransformMatrix();
+	float			playerSpeed	= context.anchorGameObject->m_velocity.GetLength();
 
 	// Controller input
 	float distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput;
@@ -44,7 +43,10 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 		if( m_reorientCameraRotation == false )
 		{
 			float dotProduct = Vector2::DotProduct( playerFrontDirXZ, cameraFrontDirXZ );
-			if( dotProduct <= m_reorientDotThreshold )
+			bool angleThresholdIsCrossed = dotProduct <= m_reorientDotThreshold;
+			bool playerHasEnoughSpeed	 = playerSpeed >= m_minSpeedReqToReorient;
+
+			if( playerHasEnoughSpeed && angleThresholdIsCrossed )
 			{
 				// Enable scripted reorientation behavior
 				m_reorientCameraRotation = true;
@@ -61,10 +63,11 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	{
 		TODO( "Get rid of magic number 180 degrees here.....!!!!!!" );
 		float targetDegrees = GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;
-		Complex currentRot( m_rotationAroundAnchor );
 		Complex targetRot( targetDegrees );
 
-		currentRot.TurnToward( targetRot, m_rotationSpeed * 3.f * deltaSeconds );
+		Complex currentRot( m_rotationAroundAnchor );
+		currentRot.TurnToward( targetRot, m_rotationSpeed * 2.f * deltaSeconds );
+		
 		m_rotationAroundAnchor = currentRot.GetRotation();
 
 		// Done reorienting the camera, if near to the target rotation..

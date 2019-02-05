@@ -21,8 +21,12 @@ private:
 	float		m_distanceFromAnchor		= 0.f;							// |current|
 	float		m_rotationAroundAnchor		= 0.f;							// | polar |
 	float		m_altitudeAroundAnchor		= 0.f;							// |_______|
+	
+	// Camera reorientation around anchor
 	bool		m_reorientCameraRotation	= false;
-	float		m_reorientDotThreshold		= 0.f;
+	float		m_minSpeedReqToReorient		= 10.f;							// Min speed of anchor, after which the reorientation starts
+	float		m_reorientAfterDegreeDiff	= 145.f;						// Degree difference between camera forward and anchor forward
+	float 		m_reorientDotThreshold		= 0.f;
 
 	// Local Offsets
 	float		m_localHorizontalOffset		= 0.f;
