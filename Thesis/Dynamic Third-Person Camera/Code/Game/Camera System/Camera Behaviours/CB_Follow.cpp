@@ -10,7 +10,7 @@ CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchA
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )
 	, m_distanceFromAnchor( distFromAnchor )
 {
-	float maxRotAllowed = 160.f;	// Degrees
+	float maxRotAllowed = 145.f;	// Degrees
 
 	Vector2 xOne( 1.f, 0.f );
 	Vector2 maxRot( CosDegree(maxRotAllowed), SinDegree(maxRotAllowed) );
@@ -37,7 +37,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	Vector3 cameraFront		 = cameraMat.GetKColumn();
 	Vector2 playerFrontDirXZ = Vector2( playerFront.x, playerFront.z ).GetNormalized();
 	Vector2 cameraFrontDirXZ = Vector2( cameraFront.x, cameraFront.z ).GetNormalized();
-	bool noPlayerInputRot = AreEqualFloats( fabsf(rotChangePerInput), 0.f, 2 );
+	bool noPlayerInputRot	 = AreEqualFloats( fabsf(rotChangePerInput), 0.f, 2 );
 
 	if( noPlayerInputRot )
 	{
@@ -65,12 +65,11 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 		Complex targetRot( targetDegrees );
 
 		currentRot.TurnToward( targetRot, m_rotationSpeed * 3.f * deltaSeconds );
-		float newRotation = currentRot.GetRotation();
-		float oldRotation = m_rotationAroundAnchor;
-		m_rotationAroundAnchor = newRotation;
+		m_rotationAroundAnchor = currentRot.GetRotation();
 
 		// Done reorienting the camera, if near to the target rotation..
-		if( fabsf(newRotation - oldRotation) <= 5.f )
+		Complex pendingRot = targetRot / currentRot;
+		if( fabsf( pendingRot.GetRotation() ) <= 5.f )
 			m_reorientCameraRotation = false;
 	}
 	else
