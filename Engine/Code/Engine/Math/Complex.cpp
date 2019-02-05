@@ -1,4 +1,5 @@
 #include "Complex.hpp"
+#include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/MathUtil.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
@@ -90,16 +91,16 @@ void Complex::operator/=( Complex const &b )
 
 bool Complex::operator==( Complex const &b ) const
 {
-	Complex const &a = *this;
-
-	return (a.r == b.r) && (a.i == b.i);
+	Vector2 vec1( this->r, this->i );
+	Vector2 vec2( b.r, b.i );
+	float dotProduct = Vector2::DotProduct( vec1, vec2 );
+	
+	return AreEqualFloats( dotProduct, 1.f, 1U );
 }
 
 bool Complex::operator!=( Complex const &b ) const
 {
-	Complex const &a = *this;
-
-	return (a.r != b.r) && (a.i != b.i);
+	return !(b == *this);
 }
 
 float Complex::GetRotation() const
@@ -117,16 +118,20 @@ float Complex::GetMagnitudeSquared() const
 	return ((r * r) + (i * i));
 }
 
-void Complex::TurnToward( Complex const &target, float maxRotationDegrees )
+void Complex::TurnToward( Complex const &target, float maxRotationDegreesPositive )
 {
 	Complex &current( *this );
-	Complex diff = target/current;
+	Complex diff	= target/current;
+	Complex maxRot	= Complex( maxRotationDegreesPositive );
 
-	float rotationDiff	 = fabs( diff.GetRotation() );
-	float rotationNeeded = (rotationDiff < maxRotationDegrees) ? rotationDiff : maxRotationDegrees; 
+	bool rotateByMax = maxRot.r > diff.r;			// i.e. max rotation is smaller than the difference
+	bool cwRotation	 = diff.i < 0.f;				// clock-wise rotation?
 
-	if( diff.i > 0.f )
-		current *= Complex( +rotationNeeded );
-	else
-		current *= Complex( -rotationNeeded );
+	Complex rotator = rotateByMax ? maxRot : diff;
+
+	// If we need to rotate in clock-wise direction
+	if( rotateByMax && cwRotation )
+		rotator.i *= -1.f;							// rotator = Complex( -maxRotationDegrees )
+
+	current *= rotator;
 }

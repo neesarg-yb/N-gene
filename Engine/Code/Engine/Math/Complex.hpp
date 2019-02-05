@@ -1,12 +1,16 @@
 #pragma once
 #include "Engine/Core/EngineCommon.hpp"
 
+// Note:
+//		This class is ONLY meant to use FOR rotations with NORMALIZED COMPLEX NUMBERS
 class Complex
 {
 public:
 	 Complex( float rotation );						// Constructs a complex number with unit magnitude
-	 Complex( float real, float imaginary );	
 	~Complex();
+
+private:
+	Complex( float real, float imaginary );
 
 public:
 	float r = 1.f;									// real part
@@ -31,5 +35,5 @@ public:
 	inline	float GetMagnitudeSquared() const;
 
 public:
-	void TurnToward( Complex const &target, float maxRotationDegrees );	// maxRotationDegrees should be a positive float
+	void TurnToward( Complex const &target, float maxRotationDegreesPositive );	// maxRotationDegrees should be a positive float
 };
