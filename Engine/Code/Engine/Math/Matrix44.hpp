@@ -64,6 +64,10 @@ public:
 	void Scale3D		( Vector3 const &scale );
 	void ScaleUniform3D	( float uniformScale );
 
+	void RotateX3D( float rotDegrees );
+	void RotateY3D( float rotDegrees );
+	void RotateZ3D( float rotDegrees );
+
 	bool operator == ( Matrix44 const &b ) const;
 
 	// Producers

@@ -49,7 +49,8 @@ void Camera::Finalize()
 
 void Camera::UpdateUBO()
 {
-	UpdateViewMatrix();
+	if( m_updateView )
+		UpdateViewMatrix();
 
 	*m_cameraUBO->As<UBOCameraMatrices>() = GetUBOCameraMatrices();
 	 m_cameraUBO->UpdateGPU();
@@ -131,6 +132,12 @@ Matrix44 Camera::GetProjectionMatrix() const
 void Camera::SetProjectionMatrixUnsafe( Matrix44 const &projMatrix )
 {
 	m_projMatrix = projMatrix;
+}
+
+void Camera::SetViewMatrixUnsafe( Matrix44 const &viewMat )
+{
+	m_updateView = false;
+	m_viewMatrix = viewMat;
 }
 
 void Camera::SetAspectRatioForPerspective( float aspectRatio )

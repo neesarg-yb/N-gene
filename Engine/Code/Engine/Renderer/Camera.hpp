@@ -40,10 +40,11 @@ public:
 
 	// projection settings
 	void SetProjectionOrtho( float size, float screen_near, float screen_far ); 
-	void IncrementCameraSizeBy( float sizeIncrement );									// If using Orthographic Camera
+	void IncrementCameraSizeBy( float sizeIncrement );										// If using Orthographic Camera
 	void SetPerspectiveCameraProjectionMatrix( float fovDegrees, float aspectRatio, float nearZ, float farZ );
-	void CopyTransformViewAndProjection( Camera const &referenceCamera );				// Caution!: Copies View and Projection Matrices from referenceCamera
-	void SetProjectionMatrixUnsafe( Matrix44 const &projMatrix );						// Caution!: It doesn't set internal variables like: m_size, m_fov, etc..
+	void CopyTransformViewAndProjection( Camera const &referenceCamera );					// Caution!: Copies View and Projection Matrices from referenceCamera
+	void SetProjectionMatrixUnsafe( Matrix44 const &projMatrix );							// Caution!: It doesn't set internal variables like: m_size, m_fov, etc..
+	void SetViewMatrixUnsafe( Matrix44 const &viewMat );									// This will force camera to never recalculate the View Matrix on UpdateUBO(). It has to be set every frame by the game
 
 	// Camera's movement and rotation
 	void SetCameraPositionTo			( Vector3 const &newPosition );						// Reset the position
@@ -59,7 +60,7 @@ public:
 	UBOCameraMatrices	GetUBOCameraMatrices() const;
 
 	// Skybox
-	void SetupForSkybox	( std::string pathToSkyboxImage );								// Enables the Skybox using the image at path
+	void SetupForSkybox	( std::string pathToSkyboxImage );									// Enables the Skybox using the image at path
 	void RenderSkyBox	( Renderer &theRenderer );
 
 	// NDC to World
@@ -72,6 +73,7 @@ public:
 public:
 	Transform		 m_cameraTransform;
 protected:
+	bool			 m_updateView = true;
 	Matrix44		 m_viewMatrix;		// inverse of cameraMatrix (used for shader) (World to Camera)
 	Matrix44		 m_projMatrix;		// projection, identity by default.. (Camera to Clip)
 
