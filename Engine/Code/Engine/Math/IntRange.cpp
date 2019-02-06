@@ -14,6 +14,11 @@ IntRange::IntRange( int initialMinMax )
 	this->max = initialMinMax;
 }
 
+IntRange::IntRange()
+{
+
+}
+
 IntRange::~IntRange()
 {
 

@@ -3,6 +3,10 @@
 #include "FloatRange.hpp"
 #include "Engine/Math/MathUtil.hpp"
 
+FloatRange::FloatRange()
+{
+
+}
 
 FloatRange::FloatRange( float min , float max )
 {
@@ -26,6 +30,11 @@ float FloatRange::GetRandomInRange() const
 	return GetRandomFloatInRange( this->min , this->max );
 }
 
+void FloatRange::ExpandToInclude( float number )
+{
+	min = (number < min) ? number : min;
+	max = (number > max) ? number : max;
+}
 
 void FloatRange::SetFromText( const char* text )
 {
