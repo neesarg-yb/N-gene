@@ -254,6 +254,42 @@ void Matrix44::ScaleUniform3D( float uniformScale )
 	Append( scaleMatrix );
 }
 
+void Matrix44::RotateX3D( float rotDegrees )
+{
+	// Left handed rotation
+	Matrix44 rotationAroundXMatrix;
+	rotationAroundXMatrix.Jy =  CosDegree( rotDegrees );
+	rotationAroundXMatrix.Ky = -SinDegree( rotDegrees );
+	rotationAroundXMatrix.Jz =  SinDegree( rotDegrees );
+	rotationAroundXMatrix.Kz =  CosDegree( rotDegrees );
+
+	Append( rotationAroundXMatrix );
+}
+
+void Matrix44::RotateY3D( float rotDegrees )
+{
+	// Left handed rotation
+	Matrix44 rotationAroundYMatrix;
+	rotationAroundYMatrix.Ix =  CosDegree( rotDegrees );
+	rotationAroundYMatrix.Kx =  SinDegree( rotDegrees );
+	rotationAroundYMatrix.Iz = -SinDegree( rotDegrees );
+	rotationAroundYMatrix.Kz =  CosDegree( rotDegrees );
+
+	Append( rotationAroundYMatrix );
+}
+
+void Matrix44::RotateZ3D( float rotDegrees )
+{
+	// Left handed rotation
+	Matrix44 rotationAroundZMatrix;
+	rotationAroundZMatrix.Ix =  CosDegree( rotDegrees );
+	rotationAroundZMatrix.Jx = -SinDegree( rotDegrees );
+	rotationAroundZMatrix.Iy =  SinDegree( rotDegrees );
+	rotationAroundZMatrix.Jy =  CosDegree( rotDegrees );
+
+	Append( rotationAroundZMatrix );
+}
+
 bool Matrix44::operator == ( Matrix44 const &b ) const
 {
 	bool iColumnMatches = GetIColumn() == b.GetIColumn();
