@@ -73,6 +73,9 @@
     <ClCompile Include="Game States\GameState.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="MCamera.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -116,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="Game States\GameState.hpp">
       <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="MCamera.hpp">
+      <Filter>General</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

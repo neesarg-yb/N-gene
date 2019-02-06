@@ -4,9 +4,8 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
+#include "Game/MCamera.hpp"
 #include "Game/Game States/GameState.hpp"
-#include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
-#include "Game/Camera System/Motion Controllers/CMC_ProportionalController.hpp"
 
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
@@ -32,12 +31,10 @@ public:
 	Renderable				*m_spaceship		= nullptr;
 
 private:
-	// Camera
-	Camera					*m_camera					= nullptr;
-	CameraManager			*m_cameraManager			= nullptr;
-	float const				 m_initialFOV				= 45.f;			// Degrees
-	float const				 m_cameraNear				= 0.01f;
-	float const				 m_cameraFar				= 100.f;
+	// Game Camera
+	MCamera					*m_camera			= nullptr;
+	float					 m_flySpeed			= 10.f;
+	float					 m_camRotationSpeed = 10.f;
 
 public:
 	void JustFinishedTransition();
@@ -45,6 +42,8 @@ public:
 	void EndFrame();
 	void Update();
 	void Render( Camera *gameCamera ) const;
+
+	void ProcessInput( float deltaSeconds );
 
 private:
 	// Scene Management
