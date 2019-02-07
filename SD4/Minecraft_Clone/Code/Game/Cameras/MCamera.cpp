@@ -34,10 +34,10 @@ void MCamera::RebuildMatrices()
 	// View Matrix
 	m_view.SetIdentity();
 	m_view.Append( m_flip );
-	m_view.RotateX3D( m_rollDegreesAboutX  * -1.f );
-	m_view.RotateY3D( m_pitchDegreesAboutY * -1.f );
-	m_view.RotateZ3D( m_yawDegreesAboutZ   * -1.f );
-	m_view.Translate3D( m_position * -1.f );
+	m_view.RotateX3D( -m_rollDegreesAboutX  );
+	m_view.RotateY3D( -m_pitchDegreesAboutY );
+	m_view.RotateZ3D( -m_yawDegreesAboutZ );
+	m_view.Translate3D( -m_position );
 
 	// Projection Matrix
 	m_projection = Matrix44::MakePerspective3D( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
