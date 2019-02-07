@@ -29,6 +29,7 @@ public:
 	static Vector2 BOTTOM_DIR;
 
 	// Operators
+	const Vector2 operator - () const;
 	const Vector2 operator + ( const Vector2& vecToAdd ) const;		// vec2 + vec2
 	const Vector2 operator - ( const Vector2& vecToSubtract ) const;// vec2 - vec2
 	const Vector2 operator * ( float uniformScale ) const;			// vec2 * float
