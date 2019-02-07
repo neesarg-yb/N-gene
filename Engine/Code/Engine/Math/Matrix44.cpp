@@ -256,7 +256,6 @@ void Matrix44::ScaleUniform3D( float uniformScale )
 
 void Matrix44::RotateX3D( float rotDegrees )
 {
-	// Left handed rotation
 	Matrix44 rotationAroundXMatrix;
 	rotationAroundXMatrix.Jy =  CosDegree( rotDegrees );
 	rotationAroundXMatrix.Ky = -SinDegree( rotDegrees );
@@ -268,7 +267,6 @@ void Matrix44::RotateX3D( float rotDegrees )
 
 void Matrix44::RotateY3D( float rotDegrees )
 {
-	// Left handed rotation
 	Matrix44 rotationAroundYMatrix;
 	rotationAroundYMatrix.Ix =  CosDegree( rotDegrees );
 	rotationAroundYMatrix.Kx =  SinDegree( rotDegrees );
@@ -280,7 +278,6 @@ void Matrix44::RotateY3D( float rotDegrees )
 
 void Matrix44::RotateZ3D( float rotDegrees )
 {
-	// Left handed rotation
 	Matrix44 rotationAroundZMatrix;
 	rotationAroundZMatrix.Ix =  CosDegree( rotDegrees );
 	rotationAroundZMatrix.Jx = -SinDegree( rotDegrees );
