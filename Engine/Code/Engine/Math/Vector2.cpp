@@ -38,6 +38,11 @@ const Vector2 Vector2::operator + ( const Vector2& vecToAdd ) const
 }
 
 
+const Vector2 Vector2::operator-() const
+{
+	return Vector2( -x, -y );
+}
+
 //-----------------------------------------------------------------------------------------------
 const Vector2 Vector2::operator-( const Vector2& vecToSubtract ) const
 {
