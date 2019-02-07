@@ -6,23 +6,18 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
-#include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
 {
-	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
-	m_scene			= new Scene();
-
 	// A directional light
 	Light *directionalLight = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
 	directionalLight->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
 	directionalLight->UsesShadowMap( true );
-	AddNewLightToScene( directionalLight );
+	m_lights.push_back( directionalLight );
 	
 	// Setting up the Camera
 	m_camera = new MCamera( *g_theRenderer );
-	m_scene->AddCamera( *m_camera->GetCamera() );
 
 	// Loading Models
 	Vector3 snowMikuPosition = Vector3( -5.f, -3.f, 20.f );						// SNOW MIKU
@@ -40,30 +35,12 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
 {
-	// GameObjects
-	for( int i = 0; i < NUM_ENTITIES; i++ )
-	{
-		while ( m_gameObjects[i].size() > 0 )
-		{
-			GameObject* &lastGameObject = m_gameObjects[i].back();
-
-			lastGameObject->RemoveRenderablesFromScene( *m_scene );
-			delete lastGameObject;
-			lastGameObject = nullptr;
-
-			m_gameObjects[i].pop_back();
-		}
-	}
-
 	// Lights
 	while ( m_lights.size() > 0 )
 	{
 		// Get the light from the back of m_lights
 		Light* lastLight = m_lights.back();
 		m_lights.pop_back();
-
-		// Remove its renderable
-		m_scene->RemoveRenderable( *lastLight->m_renderable );
 
 		// Delete the light
 		delete lastLight;
@@ -73,14 +50,6 @@ Scene_ProtoScene3D::~Scene_ProtoScene3D()
 	// Camera
 	delete m_camera;
 	m_camera = nullptr;
-
-	// Scene
-	delete m_scene;
-	m_scene = nullptr;
-
-	// Forward Rendering Path
-	delete m_renderingPath;
-	m_renderingPath = nullptr;
 
 	// Obj Models
 	delete m_snowMiku;
@@ -117,13 +86,6 @@ void Scene_ProtoScene3D::Update()
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 	ProcessInput( deltaSeconds );
 
-	// Update Game Objects
-	for( int i = 0; i < NUM_ENTITIES; i++ )
-	{
-		for each( GameObject* go in m_gameObjects[i] )
-			go->Update( deltaSeconds );
-	}
-
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
@@ -153,6 +115,8 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 
 	g_theRenderer->EnableLight( 0, *m_lights[0] );
 	RenderBasis( 1.f );
+	g_theRenderer->SetCurrentDiffuseTexture( g_theRenderer->CreateOrGetTexture( "Data\\Images\\Test_StbiAndDirectX.png" ) );
+	g_theRenderer->DrawMesh( *m_testCube.m_mesh, Matrix44() );
 
 	// camera.PostRender( *g_theRenderer );
 }
@@ -193,27 +157,6 @@ void Scene_ProtoScene3D::ProcessInput( float deltaSeconds )
 
 	Vector3 positionChange = (forwardDir * forwardMovement) + (leftDir * leftMovement) + (upDir * upMovement);
 	m_camera->m_position += positionChange;
-}
-
-void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
-{
-	// Add game object which gets updated every frame
-	m_gameObjects[ entityType ].push_back( go );
-
-	// Add its Renderable(s) to the Scene
-	go->AddRenderablesToScene( *m_scene );
-}
-
-void Scene_ProtoScene3D::AddNewLightToScene( Light *light )
-{
-	// Add to list, so we can delete it at deconstruction
-	m_lights.push_back( light );
-
-	// Add light to scene
-	m_scene->AddLight( *light );
-
-	// Add its renderable
-	m_scene->AddRenderable( *light->m_renderable );
 }
 
 void Scene_ProtoScene3D::RenderBasis( float length ) const

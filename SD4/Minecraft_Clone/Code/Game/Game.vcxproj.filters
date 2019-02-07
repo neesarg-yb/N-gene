@@ -17,17 +17,11 @@
     <Filter Include="Game States">
       <UniqueIdentifier>{2a0da71e-fb23-42e6-940e-396b0a3e32b7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera System">
-      <UniqueIdentifier>{9b2525ea-9641-42a5-8200-f0d14e714844}</UniqueIdentifier>
+    <Filter Include="Cameras">
+      <UniqueIdentifier>{36c9e488-a35a-4d02-8e10-03384c263e35}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera System\CameraBehaviours">
-      <UniqueIdentifier>{4579e831-70ce-41ac-a6c4-ebbcddcbc309}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Camera System\CameraConstrains">
-      <UniqueIdentifier>{1fe26ba9-ee86-4c41-b4dc-7e0c53804464}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Camera System\MotionControllers">
-      <UniqueIdentifier>{726a2a86-c517-4d77-8d08-f84c75d4e081}</UniqueIdentifier>
+    <Filter Include="World">
+      <UniqueIdentifier>{c1a7953a-4967-4b03-aec7-f77944c895ae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -52,18 +46,6 @@
     <ClCompile Include="Game States\Scene_QuaternionsTest.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.cpp">
-      <Filter>Camera System\CameraBehaviours</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera System\Camera Behaviours\CB_Follow.cpp">
-      <Filter>Camera System\CameraBehaviours</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera System\Camera Behaviours\CB_FreeLook.cpp">
-      <Filter>Camera System\CameraBehaviours</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera System\Motion Controllers\CMC_ProportionalController.cpp">
-      <Filter>Camera System\MotionControllers</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\Scene_ProtoScene3D.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
@@ -73,8 +55,11 @@
     <ClCompile Include="Game States\GameState.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="MCamera.cpp">
-      <Filter>General</Filter>
+    <ClCompile Include="Cameras\MCamera.cpp">
+      <Filter>Cameras</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Cube.cpp">
+      <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,18 +84,6 @@
     <ClInclude Include="Game States\Scene_QuaternionsTest.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.hpp">
-      <Filter>Camera System\CameraBehaviours</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera System\Camera Behaviours\CB_Follow.hpp">
-      <Filter>Camera System\CameraBehaviours</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera System\Camera Behaviours\CB_FreeLook.hpp">
-      <Filter>Camera System\CameraBehaviours</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera System\Motion Controllers\CMC_ProportionalController.hpp">
-      <Filter>Camera System\MotionControllers</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\Scene_ProtoScene3D.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
@@ -120,8 +93,11 @@
     <ClInclude Include="Game States\GameState.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="MCamera.hpp">
-      <Filter>General</Filter>
+    <ClInclude Include="Cameras\MCamera.hpp">
+      <Filter>Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Cube.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

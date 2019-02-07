@@ -4,10 +4,10 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
-#include "Game/MCamera.hpp"
+#include "Game/World/Cube.hpp"
+#include "Game/Cameras/MCamera.hpp"
 #include "Game/Game States/GameState.hpp"
 
-typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
 
 class Scene_ProtoScene3D : public GameState
@@ -18,13 +18,11 @@ public:
 
 public:
 	// Rendering Specific
-	ForwardRenderingPath	*m_renderingPath	= nullptr;
-	Scene					*m_scene			= nullptr;
 	Lights					 m_lights;
 	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.4f );
 
 	// Game Specific 
-	GameObjectList			 m_gameObjects[ NUM_ENTITIES ];
+	Cube					 m_testCube			= Cube( Vector3::ONE_ALL );
 
 	// Obj Models
 	Renderable				*m_snowMiku			= nullptr;
@@ -46,9 +44,6 @@ public:
 	void ProcessInput( float deltaSeconds );
 
 private:
-	// Scene Management
-	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
-	void AddNewLightToScene( Light *light );
 	void RenderBasis( float length ) const;
 
 };
