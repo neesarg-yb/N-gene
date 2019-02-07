@@ -36,11 +36,6 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_spaceship		= new Renderable( spaceshipPosition, spaceshipRotation, Vector3::ONE_ALL );
 	bool shipLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceship );
 	GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
-
-	if( mikuLoaded )
-		m_scene->AddRenderable( *m_snowMiku );
-	if( shipLoaded )
-		m_scene->AddRenderable( *m_spaceship );
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
@@ -133,9 +128,6 @@ void Scene_ProtoScene3D::Update()
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
 
-	// Debug Render
-	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-
 	m_camera->RebuildMatrices();
 }
 
@@ -147,45 +139,60 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
-	m_renderingPath->RenderScene( *m_scene );
+	Camera &camera = *m_camera->GetCamera();
+
+	// Bind the camera
+	g_theRenderer->BindCamera( &camera );
+	
+	// Do the camera cleanup operations
+	g_theRenderer->ClearColor( RGBA_BLACK_COLOR );
+	g_theRenderer->ClearDepth( 1.0f ); 
+	g_theRenderer->EnableDepth( COMPARE_LESS, true );
+
+	// camera.PreRender( *g_theRenderer );
+
+	g_theRenderer->EnableLight( 0, *m_lights[0] );
+	RenderBasis( 1.f );
+
+	// camera.PostRender( *g_theRenderer );
 }
 
 void Scene_ProtoScene3D::ProcessInput( float deltaSeconds )
 {
+	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
+
 	// Camera Rotation
-	Vector3 camRotation = m_camera->GetRotation();
 	Vector2 mouseChange = g_theInput->GetMouseDelta();
+	float const curentCamPitch = m_camera->GetPitchDegreesAboutY();
 
-	camRotation.y += mouseChange.x * m_camRotationSpeed * deltaSeconds;
-	camRotation.x += mouseChange.y * m_camRotationSpeed * deltaSeconds;
-
-	m_camera->SetRotation( camRotation );
+	m_camera->m_yawDegreesAboutZ	-= mouseChange.x * m_camRotationSpeed;
+	m_camera->SetPitchDegreesAboutY( curentCamPitch + (mouseChange.y * m_camRotationSpeed) );
 
 	// Camera Position
-	Vector3 camPosition		= m_camera->GetPosition();
-	Vector3 positionChange	= Vector3::ZERO;
+	float	const camYaw	 = m_camera->m_yawDegreesAboutZ;
+	Vector3 const forwardDir = Vector3( CosDegree(camYaw), SinDegree(camYaw), 0.f );
+	Vector3 const leftDir	 = Vector3( forwardDir.y * -1.f, forwardDir.x, 0.f );
+	Vector3 const upDir		 = Vector3( 0.f, 0.f, 1.f );
+
+	float forwardMovement = 0.f;
+	float leftMovement = 0.f;
+	float upMovement = 0.f;
 
 	if( g_theInput->IsKeyPressed( 'W' ) )
-		positionChange.z += m_flySpeed * deltaSeconds;
+		forwardMovement += m_flySpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'S' ) )
-		positionChange.z -= m_flySpeed * deltaSeconds;
-	if( g_theInput->IsKeyPressed( 'D' ) )
-		positionChange.x += m_flySpeed * deltaSeconds;
+		forwardMovement -= m_flySpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'A' ) )
-		positionChange.x -= m_flySpeed * deltaSeconds;
+		leftMovement += m_flySpeed * deltaSeconds;
+	if( g_theInput->IsKeyPressed( 'D' ) )
+		leftMovement -= m_flySpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'Q' ) )
-		positionChange.y += m_flySpeed * deltaSeconds;
+		upMovement += m_flySpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'E' ) )
-		positionChange.y -= m_flySpeed * deltaSeconds;
+		upMovement -= m_flySpeed * deltaSeconds;
 
-	// Position change relative to camera's new rotation
-	Vector2 xDir = Vector2( CosDegree(camRotation.y), SinDegree(camRotation.y) );
-	Vector2 zDir = Vector2( -xDir.y, xDir.x );
-
-	positionChange.x = Vector2::DotProduct( xDir, Vector2(positionChange.x, positionChange.z) );
-	positionChange.z = Vector2::DotProduct( zDir, Vector2(positionChange.x, positionChange.z) );
-
-	m_camera->SetPosition( camPosition + positionChange );
+	Vector3 positionChange = (forwardDir * forwardMovement) + (leftDir * leftMovement) + (upDir * upMovement);
+	m_camera->m_position += positionChange;
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
@@ -207,4 +214,27 @@ void Scene_ProtoScene3D::AddNewLightToScene( Light *light )
 
 	// Add its renderable
 	m_scene->AddRenderable( *light->m_renderable );
+}
+
+void Scene_ProtoScene3D::RenderBasis( float length ) const
+{
+	Vertex_3DPCU vBuffer[6];
+	
+	vBuffer[0].m_color		= RGBA_RED_COLOR;
+	vBuffer[0].m_position	= Vector3( 0.f, 0.f, 0.f );
+	vBuffer[1].m_color		= RGBA_RED_COLOR;
+	vBuffer[1].m_position	= Vector3( length, 0.f, 0.f );
+
+
+	vBuffer[2].m_color		= RGBA_GREEN_COLOR;
+	vBuffer[2].m_position	= Vector3( 0.f, 0.f, 0.f );
+	vBuffer[3].m_color		= RGBA_GREEN_COLOR;
+	vBuffer[3].m_position	= Vector3( 0.f, length, 0.f );
+	
+	vBuffer[4].m_color		= RGBA_BLUE_COLOR;
+	vBuffer[4].m_position	= Vector3( 0.f, 0.f, 0.f );
+	vBuffer[5].m_color		= RGBA_BLUE_COLOR;
+	vBuffer[5].m_position	= Vector3( 0.f, 0.f, length );
+
+	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
 }

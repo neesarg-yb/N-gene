@@ -33,8 +33,8 @@ public:
 private:
 	// Game Camera
 	MCamera					*m_camera			= nullptr;
-	float					 m_flySpeed			= 10.f;
-	float					 m_camRotationSpeed = 10.f;
+	float					 m_flySpeed			= 5.f;
+	float					 m_camRotationSpeed = 0.2f;
 
 public:
 	void JustFinishedTransition();
@@ -49,4 +49,6 @@ private:
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
+	void RenderBasis( float length ) const;
+
 };

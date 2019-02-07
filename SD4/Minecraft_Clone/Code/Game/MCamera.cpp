@@ -12,6 +12,10 @@ MCamera::MCamera( Renderer &activeRenderer )
 
 	m_camera->EnableShadowMap();
 	m_camera->RenderDebugObjects( true );
+
+	m_flip.SetIColumn( Vector3( 0.f, 0.f, 1.f) );
+	m_flip.SetJColumn( Vector3(-1.f, 0.f, 0.f) );
+	m_flip.SetKColumn( Vector3( 0.f, 1.f, 0.f) );
 }
 
 MCamera::~MCamera()
@@ -19,34 +23,6 @@ MCamera::~MCamera()
 	delete m_camera;
 	m_camera = nullptr;
 }
-
-void MCamera::SetPosition( Vector3 const &position )
-{
-	m_position = position;
-}
-
-void MCamera::SetRotation( float x, float y, float z )
-{
-	m_rotation.x = x;
-	m_rotation.y = y;
-	m_rotation.z = z;
-}
-
-void MCamera::SetRotation( Vector3 const &eulerRotDegrees )
-{
-	SetRotation( eulerRotDegrees.x, eulerRotDegrees.y, eulerRotDegrees.z );
-}
-
-Vector3 MCamera::GetPosition() const
-{
-	return m_position;
-}
-
-Vector3 MCamera::GetRotation() const
-{
-	return m_rotation;
-}
-
 Camera* MCamera::GetCamera()
 {
 	RebuildMatrices();
@@ -58,9 +34,9 @@ void MCamera::RebuildMatrices()
 	// View Matrix
 	m_view.SetIdentity();
 	m_view.Append( m_flip );
-	m_view.RotateZ3D( m_rotation.z * -1.f );
-	m_view.RotateX3D( m_rotation.x * -1.f );
-	m_view.RotateY3D( m_rotation.y * -1.f );
+	m_view.RotateX3D( m_rollDegreesAboutX  * -1.f );
+	m_view.RotateY3D( m_pitchDegreesAboutY * -1.f );
+	m_view.RotateZ3D( m_yawDegreesAboutZ   * -1.f );
 	m_view.Translate3D( m_position * -1.f );
 
 	// Projection Matrix
@@ -69,4 +45,12 @@ void MCamera::RebuildMatrices()
 	// Hammer the matrices on camera!
 	m_camera->SetViewMatrixUnsafe( m_view );
 	m_camera->SetProjectionMatrixUnsafe( m_projection );
+}
+
+float MCamera::SetPitchDegreesAboutY( float desiredPitch )
+{
+	m_pitchDegreesAboutY = desiredPitch;
+	m_pitchDegreesAboutY = ClampFloat( m_pitchDegreesAboutY, -m_pitchLimit, +m_pitchLimit );
+
+	return m_pitchDegreesAboutY;
 }

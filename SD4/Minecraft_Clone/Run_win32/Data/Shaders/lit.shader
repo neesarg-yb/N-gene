@@ -1,7 +1,7 @@
 <shader  name        ="lit"
          cull        ="back"
          fill        ="solid"
-         frontface   ="ccw"
+         frontface   ="cw"
          layer	     ="0"
          queue	     ="opaque">
    <!--  queue	     ="opaque/alpha" -->
