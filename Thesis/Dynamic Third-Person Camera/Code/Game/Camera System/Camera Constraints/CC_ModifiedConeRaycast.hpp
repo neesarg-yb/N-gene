@@ -82,7 +82,7 @@ private:
 	float	CalculateRadiusReduction( std::vector< WeightedRaycastResult_MCR > const &raycastResults, float currentRadius );
 
 	// According to which raycast did impact, it calculates the change in rotation and altitude of camera's polar coordinates, so the collision can be avoided
-	void	CalculateRotationAltitudeChange( std::vector< WeightedTargetPoint_MCR > const &targetPoints, std::vector< WeightedRaycastResult_MCR > const &raycastResults, CameraState const &cameraState, float &radiusChange_out, float &altitudeChange_out );
+	void	CalculateRotationAltitudeChange( std::vector< WeightedTargetPoint_MCR > const &targetPoints, std::vector< WeightedRaycastResult_MCR > const &raycastResults, CameraState const &cameraState, float &rotationChange_out, float &altitudeChange_out );
 
 	// Renders all the target points on a 2D canvas, for debugging their weights
 	void	DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState, Vector3 const &projectedVelocity );
