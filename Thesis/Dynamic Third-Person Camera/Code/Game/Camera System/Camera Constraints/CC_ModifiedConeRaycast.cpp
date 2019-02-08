@@ -12,11 +12,23 @@
 #include "Game/GameCommon.hpp"
 #include "Game/Camera System/DebugCamera.hpp"
 
-float s_raMultiplier = 3.f;
+float s_raMultiplier				= 3.f;
+float s_rotDegreesChangeSpeed		= 55.f;
+float s_minRotChangePerFrameReqired	= 0.6f;
 
-void ChaneRAMultiplier( Command& cmd )
+void ChaneRAMultiplier( Command &cmd )
 {
 	SetFromText( s_raMultiplier, cmd.GetNextString().c_str() );
+}
+
+void ChangeRotationDegreesChangeSpeed( Command &cmd )
+{
+	SetFromText( s_rotDegreesChangeSpeed, cmd.GetNextString().c_str() );
+}
+
+void ChangeMinRotationRequired( Command &cmd )
+{
+	SetFromText( s_minRotChangePerFrameReqired, cmd.GetNextString().c_str() );
 }
 
 WeightedTargetPoint_MCR::WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeightRR )
@@ -49,6 +61,8 @@ CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager 
 	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
 
 	CommandRegister( "changeMultRA", ChaneRAMultiplier );
+	CommandRegister( "changeRotSpeed", ChangeRotationDegreesChangeSpeed );
+	CommandRegister( "changeMinRot", ChangeMinRotationRequired );
 }
 
 CC_ModifiedConeRaycast::~CC_ModifiedConeRaycast()
@@ -271,6 +285,7 @@ void CC_ModifiedConeRaycast::AssignWeightToTargetPoints( std::vector<WeightedTar
 	Vector3 cameraDirection		= cameraPosOnSphere.GetNormalized();
 	
 	int zeroDotProductCount = 0;
+	FloatRange dotProductRange;	// Initialized as [ maxFloat, -maxFloat ]
 
 	for each (Vector3 point in targetPoints)
 	{
@@ -290,9 +305,30 @@ void CC_ModifiedConeRaycast::AssignWeightToTargetPoints( std::vector<WeightedTar
 		}
 
 		outWeightedPoints.push_back( WeightedTargetPoint_MCR( point, weightRR, dotProductAR ) );
+
+		// Because the center point will have zero weight, and we don't wanna change it
+		if( dotProductAR != 0.f )
+			dotProductRange.ExpandToInclude( dotProductAR );
 	}
 
-	DebugRender2DText( 0.f, Vector2::ZERO, 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Count(targets weighting zero) = %d", zeroDotProductCount) );
+	float const rangeMapMinimum = 0.f;
+	float const rangeMapMaximum = 1.f;
+	for( int wpInd = 0; wpInd < outWeightedPoints.size(); wpInd++ )
+	{
+		WeightedTargetPoint_MCR &thisWeightedPoint = outWeightedPoints[ wpInd ];
+
+		// Because the center point will have zero weight, and we don't wanna change it
+		if( thisWeightedPoint.weightAR != 0.f )
+			thisWeightedPoint.weightAR = RangeMapFloat( thisWeightedPoint.weightAR, dotProductRange.min, dotProductRange.max, rangeMapMinimum, rangeMapMaximum );
+	}
+
+	Vector2 zeroDotProductCountPos	= Vector2::ZERO;
+	Vector2 dotProductRangePos		= Vector2( zeroDotProductCountPos.x, zeroDotProductCountPos.y + 20.f );
+	Vector2 mappedFloatRangePos		= Vector2( dotProductRangePos.x, dotProductRangePos.y + 20.f );
+
+	DebugRender2DText( 0.f, mappedFloatRangePos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Mapped Dot Product Range      = [ %.2f, %.2f ]", rangeMapMinimum, rangeMapMaximum) );
+	DebugRender2DText( 0.f, dotProductRangePos,		15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Dot Product Initial Range     = [ %.2f, %.2f ]", dotProductRange.min, dotProductRange.max) );
+	DebugRender2DText( 0.f, zeroDotProductCountPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Count(targets weighting zero) = %d", zeroDotProductCount) );
 }
 
 void CC_ModifiedConeRaycast::PerformRaycastOnTargetPoints( std::vector< WeightedRaycastResult_MCR > &outRaycastResult, std::vector< WeightedTargetPoint_MCR > const &pointsOnSphere, Vector3 const &sphereCenter )
@@ -365,6 +401,8 @@ float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRay
 
 void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<WeightedTargetPoint_MCR> const &targetPoints, std::vector<WeightedRaycastResult_MCR> const &raycastResults, CameraState const &cameraState, float &rotationChange_out, float &altitudeChange_out )
 {
+	UNUSED( altitudeChange_out );
+
 	// Contextual Info.
 	Vector3 playerPosition		= m_manager.GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
 	Vector3 cameraPosition		= cameraState.m_position;
@@ -408,7 +446,7 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 	Vector2 radiusReductionPos		= Vector2( raMultPos.x, raMultPos.y - 20.f );
 	Vector2 altitudeReductionPos	= Vector2( radiusReductionPos.x, radiusReductionPos.y - 20.f );
 	DebugRender2DText( 0.f, reactionVectorPos,		15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Reduction Vector   = (%.3f, %.3f)", reactionVector.x, reactionVector.y) );
-	DebugRender2DText( 0.f, raMultPos,				15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("RA Multiplier      =  %.3f", s_raMultiplier) );
+	DebugRender2DText( 0.f, raMultPos,				15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("RA Multiplier      =  %.3f", s_raMultiplier) );
 
 	// Apply multiplier
 	reactionVector.x *= s_raMultiplier;
@@ -421,20 +459,25 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 	Complex currentRotChange( 0.f );
 	Complex targetRotChange( rotationChange );
 
-	float const degreesChangeSpeed	= 55.f;
 	float const deltaSeconds		= (float) GetMasterClock()->GetFrameDeltaSeconds();
-	currentRotChange.TurnToward( targetRotChange, degreesChangeSpeed * deltaSeconds );
+	currentRotChange.TurnToward( targetRotChange, s_rotDegreesChangeSpeed * deltaSeconds );
 
-	Vector2 rotChangePerFramePos = Vector2( altitudeReductionPos.x, altitudeReductionPos.y - 20.f );
-	DebugRender2DText( 0.f, rotChangePerFramePos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rot Change / Frame =  %.3f", degreesChangeSpeed * deltaSeconds) );
+	Vector2 rotSpeedPos = Vector2( altitudeReductionPos.x, altitudeReductionPos.y - 20.f );
+	DebugRender2DText( 0.f, rotSpeedPos,			15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Rot Speed          =  %.1f (deg/sec)", s_rotDegreesChangeSpeed) );
+
+	Vector2 rotChangePerFramePos = Vector2( rotSpeedPos.x, rotSpeedPos.y - 20.f );
+	DebugRender2DText( 0.f, rotChangePerFramePos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rot Change / Frame =  %.3f", s_rotDegreesChangeSpeed * deltaSeconds) );
 
 	rotationChange = currentRotChange.GetRotation();
 	Vector2 rotChangeAppliedPos  = Vector2( rotChangePerFramePos.x, rotChangePerFramePos.y - 20.f );
-	Vector2 appliedNotAppliedPos = Vector2( rotChangeAppliedPos.x, rotChangeAppliedPos.y - 20.f );
 	DebugRender2DText( 0.f, rotChangeAppliedPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Applied Rot Change =  %.3f", rotationChange) );
 
+	Vector2 minRotPerFramePos = Vector2( rotChangeAppliedPos.x, rotChangeAppliedPos.y - 20.f );
+	DebugRender2DText( 0.f, minRotPerFramePos,		15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Min Rot Change Req =  %.1f / frame", s_minRotChangePerFrameReqired) );
+
 	// If rotation change is greater than some threshold, apply it!
-	if( fabsf(rotationChange) > 0.6f )
+	Vector2 appliedNotAppliedPos = Vector2( minRotPerFramePos.x, minRotPerFramePos.y - 20.f );
+	if( fabsf(rotationChange) > s_minRotChangePerFrameReqired )
 	{
 		rotationChange_out = rotationChange;
 		DebugRender2DText( 0.f, appliedNotAppliedPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("[APPLIED]") );
