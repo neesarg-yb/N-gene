@@ -59,6 +59,10 @@ public:
 	Matrix44			GetCameraModelMatrix() const;
 	UBOCameraMatrices	GetUBOCameraMatrices() const;
 
+	// Bloom
+	void SetupForBloom( char const *bloomFullScreenShaderName = "bloom_fs", char const *combineFullScreenShaderName = "combine_fs" );
+	void PostProcessBloom( Renderer &theRenderer );
+
 	// Skybox
 	void SetupForSkybox	( std::string pathToSkyboxImage );									// Enables the Skybox using the image at path
 	void RenderSkyBox	( Renderer &theRenderer );
@@ -104,8 +108,11 @@ protected:
 	bool			m_shadowMapEnabled	 = false;
 	bool			m_renderDebugObjects = true;
 
-	// Post Processing 
+	// Bloom
+	bool			m_bloomEnabled		= false;
 	Texture*		m_bloomTexture		= nullptr;
+	std::string		m_bloomFSShader		= "";
+	std::string		m_combineFSShader	= "";
 
 	// Skybox
 	bool			m_skyboxEnabled		= false;
