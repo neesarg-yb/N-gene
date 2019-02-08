@@ -1,7 +1,0 @@
-<material id="pickbuffer">
-	<shadergroup>
-   	<shader fileName="pickbuffer" />
-   </shadergroup>
-
-   <texture bind="0" src="Data\Images\Defaults\white.png" />
-</material>

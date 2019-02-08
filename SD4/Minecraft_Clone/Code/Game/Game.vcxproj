@@ -313,36 +313,11 @@
     <None Include="..\..\Run_win32\Data\Materials\snow_miku_lambert.material" />
     <None Include="..\..\Run_win32\Data\Materials\terrain_grass.material" />
     <None Include="..\..\Run_win32\Data\Materials\terrain_gridlines.material" />
-    <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.fs" />
-    <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\bloom_fs.vs" />
-    <None Include="..\..\Run_win32\Data\Shaders\combine_fs.fs" />
-    <None Include="..\..\Run_win32\Data\Shaders\combine_fs.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\combine_fs.vs" />
-    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.fs" />
-    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\deapth_only.vs" />
-    <None Include="..\..\Run_win32\Data\Shaders\debug.fs" />
-    <None Include="..\..\Run_win32\Data\Shaders\debug.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\debug.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\default.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\default.vs" />
     <None Include="..\..\Run_win32\Data\Shaders\lit.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\lit.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit.vs" />
-    <None Include="..\..\Run_win32\Data\Shaders\lit_alpha.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\lit_cull_none.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_bitangent.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_normal.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_tangent.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\lit_debug_uv.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\lit_xray_normals.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.fs" />
-    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\pickbuffer.vs" />
-    <None Include="..\..\Run_win32\Data\Shaders\skybox.fs" />
-    <None Include="..\..\Run_win32\Data\Shaders\skybox.shader" />
-    <None Include="..\..\Run_win32\Data\Shaders\skybox.vs" />
     <None Include="..\..\Run_win32\Protogame.exe" />
   </ItemGroup>
   <ItemGroup>

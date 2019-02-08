@@ -8,8 +8,6 @@
 #include "Game/Cameras/MCamera.hpp"
 #include "Game/Game States/GameState.hpp"
 
-typedef std::vector< Light* > Lights;
-
 class MinecraftWorld : public GameState
 {
 public:
@@ -18,15 +16,11 @@ public:
 
 public:
 	// Rendering Specific
-	Lights					 m_lights;
-	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.4f );
+	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.7f );
 
 	// Game Specific 
 	Cube					 m_testCube			= Cube( Vector3::ONE_ALL );
-
-	// Obj Models
-	Renderable				*m_snowMiku			= nullptr;
-	Renderable				*m_spaceship		= nullptr;
+	Material				*m_cubeMaterial		= nullptr;
 
 private:
 	// Game Camera
@@ -45,5 +39,4 @@ public:
 
 private:
 	void RenderBasis( float length ) const;
-
 };

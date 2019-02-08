@@ -9,69 +9,30 @@
 
 MinecraftWorld::MinecraftWorld( Clock const *parentClock, char const *sceneName )
 	: GameState( sceneName, parentClock )
-{
-	// A directional light
-	Light *directionalLight = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
-	directionalLight->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
-	directionalLight->UsesShadowMap( true );
-	m_lights.push_back( directionalLight );
-	
+{	
 	// Setting up the Camera
 	m_camera = new MCamera( *g_theRenderer );
-
-	// Loading Models
-	Vector3 snowMikuPosition = Vector3( -5.f, -3.f, 20.f );						// SNOW MIKU
-	Vector3 snowMikuRotation = Vector3( 0.f, 180.f, 0.f );
-	m_snowMiku		= new Renderable( snowMikuPosition, snowMikuRotation, Vector3::ONE_ALL );
-	bool mikuLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\snow_miku\\ROOMITEMS011_ALL.obj", *m_snowMiku );
-	GUARANTEE_RECOVERABLE( mikuLoaded, "Snow Miku obj model loading FAILED!" );
-	
-	Vector3 spaceshipPosition = Vector3( 5.f, -3.f, 21.f );
-	Vector3 spaceshipRotation = Vector3( 0.f, 180.f, 0.f );
-	m_spaceship		= new Renderable( spaceshipPosition, spaceshipRotation, Vector3::ONE_ALL );
-	bool shipLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceship );
-	GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
+	m_camera->m_position = Vector3( -3.f, 3.f, 3.f );
+	m_camera->m_yawDegreesAboutZ = -40.f;
+	m_camera->SetPitchDegreesAboutY( 25.f );
 }
 
 MinecraftWorld::~MinecraftWorld()
 {
-	// Lights
-	while ( m_lights.size() > 0 )
-	{
-		// Get the light from the back of m_lights
-		Light* lastLight = m_lights.back();
-		m_lights.pop_back();
-
-		// Delete the light
-		delete lastLight;
-		lastLight = nullptr;
-	}
-
 	// Camera
 	delete m_camera;
 	m_camera = nullptr;
-
-	// Obj Models
-	delete m_snowMiku;
-	m_snowMiku = nullptr;
-
-	delete m_spaceship;
-	m_spaceship = nullptr;
 }
 
 void MinecraftWorld::JustFinishedTransition()
 {
-
+	g_theInput->ShowCursor( false );
+	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
 }
 
 void MinecraftWorld::BeginFrame()
 {
-	PROFILE_SCOPE_FUNCTION();
 
-	// Update Debug Renderer Objects
-	DebugRendererBeginFrame( m_clock );
-
-	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Mouse & WASD-QE: to move around." );
 }
 
 void MinecraftWorld::EndFrame()
@@ -88,7 +49,12 @@ void MinecraftWorld::Update()
 
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
+	{
+		g_theInput->SetMouseModeTo( MOUSE_MODE_ABSOLUTE );
+		g_theInput->ShowCursor( true );
+
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
+	}
 
 	m_camera->RebuildMatrices();
 }
@@ -101,29 +67,28 @@ void MinecraftWorld::Render( Camera *gameCamera ) const
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 	
-	// Bind the camera
+	// Camera
 	Camera &camera = *m_camera->GetCamera();
 	g_theRenderer->BindCamera( &camera );
-	
-	// Do the camera cleanup operations
 	g_theRenderer->ClearColor( RGBA_BLACK_COLOR );
 	g_theRenderer->ClearDepth( 1.0f ); 
 	g_theRenderer->EnableDepth( COMPARE_LESS, true );
 
-	// camera.PreRender( *g_theRenderer );
-
-	g_theRenderer->EnableLight( 0, *m_lights[0] );
+	// Pre Render
+	camera.PreRender( *g_theRenderer );
+	
+	//----------------------------
+	// The Rendering starts here..
+	//
 	RenderBasis( 1.f );
-	g_theRenderer->SetCurrentDiffuseTexture( g_theRenderer->CreateOrGetTexture( "Data\\Images\\Test_StbiAndDirectX.png" ) );
-	g_theRenderer->DrawMesh( *m_testCube.m_mesh, Matrix44() );
-
-	// camera.PostRender( *g_theRenderer );
+	m_testCube.Render( *g_theRenderer );
+	
+	// Post Render
+	camera.PostRender( *g_theRenderer );
 }
 
 void MinecraftWorld::ProcessInput( float deltaSeconds )
 {
-	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
-
 	// Camera Rotation
 	Vector2 mouseChange = g_theInput->GetMouseDelta();
 	float const curentCamPitch = m_camera->GetPitchDegreesAboutY();

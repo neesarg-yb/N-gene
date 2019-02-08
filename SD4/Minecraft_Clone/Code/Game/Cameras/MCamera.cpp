@@ -8,10 +8,6 @@ MCamera::MCamera( Renderer &activeRenderer )
 
 	m_camera->SetColorTarget( m_renderer.GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( m_renderer.GetDefaultDepthTarget() );
-	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
-
-	m_camera->EnableShadowMap();
-	m_camera->RenderDebugObjects( true );
 
 	m_flip.SetIColumn( Vector3( 0.f, 0.f, 1.f) );
 	m_flip.SetJColumn( Vector3(-1.f, 0.f, 0.f) );

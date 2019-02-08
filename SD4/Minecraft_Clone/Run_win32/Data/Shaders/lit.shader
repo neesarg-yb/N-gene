@@ -1,7 +1,7 @@
 <shader  name        ="lit"
          cull        ="back"
          fill        ="solid"
-         frontface   ="cw"
+         frontface   ="ccw"
          layer	     ="0"
          queue	     ="opaque">
    <!--  queue	     ="opaque/alpha" -->
@@ -28,7 +28,7 @@
    		<texture bind="2" src="Data\Images\Defaults\black.png" />
    		
    		<float bind="SPECULAR_AMOUNT" 	 value="1.0" />
-   		<float bind="SPECULAR_POWER" 	    value="16.0" />
+   		<float bind="SPECULAR_POWER" 	 value="16.0" />
    </material>
 
 </shader>

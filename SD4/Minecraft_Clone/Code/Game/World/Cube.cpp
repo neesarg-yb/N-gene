@@ -1,16 +1,39 @@
 #pragma once
 #include "Cube.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 Cube::Cube( Vector3 const &center )
 {
+	m_material		= Material::CreateNewFromFile( "Data\\Materials\\Cube.material" );
+	m_spriteSheet	= new SpriteSheet( *m_material->GetTexture(0), 32, 32 );
+
+	IntVector2 topSpriteCoord ( 1, 31-0 );
+	IntVector2 botSpriteCoord ( 4, 31-3 );
+	IntVector2 sideSpriteCoord( 3, 31-3 );
+	AABB2 topUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( topSpriteCoord );
+	AABB2 botUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( botSpriteCoord );
+	AABB2 sideUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( sideSpriteCoord );
+
+	m_mesh		 = Cube::ConstructMesh( center, Vector3::ONE_ALL, sideUVBounds, botUVBounds, topUVBounds ); 
 	m_wordBounds = AABB3( center, 1.f, 1.f, 1.f );
-	m_mesh = Cube::ConstructMesh( center, Vector3::ONE_ALL );
 }
 
 Cube::~Cube()
 {
+	delete m_material;
+	m_material = nullptr;
+
 	delete m_mesh;
 	m_mesh = nullptr;
+}
+
+void Cube::Render( Renderer &theRenderer ) const
+{
+	// Bind Material
+	theRenderer.BindMaterialForShaderIndex( *m_material );
+
+	// Draw Mesh
+	theRenderer.DrawMesh( *m_mesh, Matrix44() );
 }
 
 Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 const &uvSide /* = AABB2::ONE_BY_ONE */, AABB2 const &uvBottom /* = AABB2::ONE_BY_ONE */, AABB2 const &uvTop /* = AABB2::ONE_BY_ONE */, Rgba const &color /* = RGBA_WHITE_COLOR */ )
@@ -45,23 +68,23 @@ Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 con
 	// 0 1
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-	mb.SetNormal( 0.f, 0.f, -1.f );
-	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( -1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	unsigned int idx = mb.PushVertex( vertexPos[0] );						// 0
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-	mb.SetNormal( 0.f, 0.f, -1.f );
-	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( -1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[1] );											// 1
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-	mb.SetNormal( 0.f, 0.f, -1.f );
-	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( -1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[5] );											// 5
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-	mb.SetNormal( 0.f, 0.f, -1.f );
-	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( -1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[4] );											// 4
 
 	mb.AddFace( idx + 0, idx + 1, idx + 2 );
@@ -72,23 +95,23 @@ Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 con
 	// 2 3
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-	mb.SetNormal( 0.f, 0.f, 1.f );
-	mb.SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	idx = mb.PushVertex( vertexPos[2] );									// 2
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-	mb.SetNormal( 0.f, 0.f, 1.f );
-	mb.SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[3] );											// 3
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-	mb.SetNormal( 0.f, 0.f, 1.f );
-	mb.SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[7] );											// 7
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-	mb.SetNormal( 0.f, 0.f, 1.f );
-	mb.SetTangent4( -1.f, 0.f, 0.f, 1.f );
+	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[6] );											// 6
 
 	mb.AddFace( idx + 0, idx + 1, idx + 2 );
@@ -99,23 +122,23 @@ Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 con
 	// 3 0
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-	mb.SetNormal( -1.f, 0.f, 0.f );
-	mb.SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	idx = mb.PushVertex( vertexPos[3] );									// 3
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-	mb.SetNormal( -1.f, 0.f, 0.f );
-	mb.SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[0] );											// 0
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-	mb.SetNormal( -1.f, 0.f, 0.f );
-	mb.SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[4] );											// 4
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-	mb.SetNormal( -1.f, 0.f, 0.f );
-	mb.SetTangent4( 0.f, 0.f, -1.f, 1.f );
+	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[7] );											// 7
 
 	mb.AddFace( idx + 0, idx + 1, idx + 2 );
@@ -126,22 +149,22 @@ Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 con
 	// 1 2
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetNormal( 0.f, -1.f, 0.f );
 	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	idx = mb.PushVertex( vertexPos[1] );									// 1
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetNormal( 0.f, -1.f, 0.f );
 	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[2] );											// 2
 	mb.SetColor( color );
 	mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetNormal( 0.f, -1.f, 0.f );
 	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[6] );											// 6
 	mb.SetColor( color );
 	mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-	mb.SetNormal( 1.f, 0.f, 0.f );
+	mb.SetNormal( 0.f, -1.f, 0.f );
 	mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 	mb.PushVertex( vertexPos[5] );											// 5
 
@@ -153,22 +176,22 @@ Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 con
 	// 4 5
 	mb.SetColor( color );
 	mb.SetUV( uvTop.mins.x, uvTop.mins.y );
-	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, 1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	idx = mb.PushVertex( vertexPos[4] );									// 4
 	mb.SetColor( color );
 	mb.SetUV( uvTop.maxs.x, uvTop.mins.y );
-	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, 1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	mb.PushVertex( vertexPos[5] );											// 5
 	mb.SetColor( color );
 	mb.SetUV( uvTop.maxs.x, uvTop.maxs.y );
-	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, 1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	mb.PushVertex( vertexPos[6] );											// 6
 	mb.SetColor( color );
 	mb.SetUV( uvTop.mins.x, uvTop.maxs.y );
-	mb.SetNormal( 0.f, 1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, 1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	mb.PushVertex( vertexPos[7] );											// 7
 
@@ -180,22 +203,22 @@ Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 con
 	// 3 2
 	mb.SetColor( color );
 	mb.SetUV( uvBottom.mins.x, uvBottom.mins.y );
-	mb.SetNormal( 0.f, -1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, -1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	idx = mb.PushVertex( vertexPos[3] );									// 3
 	mb.SetColor( color );
 	mb.SetUV( uvBottom.maxs.x, uvBottom.mins.y );
-	mb.SetNormal( 0.f, -1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, -1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	mb.PushVertex( vertexPos[2] );											// 2
 	mb.SetColor( color );
 	mb.SetUV( uvBottom.maxs.x, uvBottom.maxs.y );
-	mb.SetNormal( 0.f, -1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, -1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	mb.PushVertex( vertexPos[1] );											// 1
 	mb.SetColor( color );
 	mb.SetUV( uvBottom.mins.x, uvBottom.maxs.y );
-	mb.SetNormal( 0.f, -1.f, 0.f );
+	mb.SetNormal( 0.f, 0.f, -1.f );
 	mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 	mb.PushVertex( vertexPos[0] );											// 0
 
