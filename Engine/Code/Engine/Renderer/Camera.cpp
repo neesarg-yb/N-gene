@@ -12,17 +12,10 @@
 Camera::Camera()
 {
 	m_cameraUBO = UniformBuffer::For<UBOCameraMatrices>( GetUBOCameraMatrices() );
-
-
-	uint width	= Window::GetInstance()->GetWidth();
-	uint height = Window::GetInstance()->GetHeight();
-
-	m_bloomTexture = Renderer::CreateRenderTarget( width, height );
 }
 
 Camera::~Camera()
 {
-	delete m_bloomTexture;
 	delete m_cameraUBO;
 
 	if( m_skyboxEnabled )
@@ -30,6 +23,9 @@ Camera::~Camera()
 		delete m_skyboxTexture;
 		delete m_skyboxMesh;
 	}
+
+	if( m_bloomEnabled )
+		delete m_bloomTexture;
 }
 
 void Camera::SetColorTarget( Texture *color_target, uint slot /* = 0 */ )
@@ -49,7 +45,8 @@ void Camera::Finalize()
 
 void Camera::UpdateUBO()
 {
-	UpdateViewMatrix();
+	if( m_updateView )
+		UpdateViewMatrix();
 
 	*m_cameraUBO->As<UBOCameraMatrices>() = GetUBOCameraMatrices();
 	 m_cameraUBO->UpdateGPU();
@@ -76,23 +73,16 @@ void Camera::PreRender( Renderer &theRenderer )
 		RenderSkyBox( theRenderer );
 
 	// Bind the Bloom Texture
-	SetColorTarget( m_bloomTexture, 1 );
+	if( m_bloomEnabled )
+		SetColorTarget( m_bloomTexture, 1 );
 }
 
 void Camera::PostRender( Renderer &theRenderer )
 {
 	PROFILE_SCOPE_FUNCTION();
 
-	Shader *bloomShader = theRenderer.CreateOrGetShader( "bloom_fs" );
-
-	// Apply the Bloom Effect
-	ApplyEffect( bloomShader, theRenderer, 3 );
-
-	this->Finalize();
-	Shader *combineShader = theRenderer.CreateOrGetShader( "combine_fs" );
-	
-	theRenderer.UseShader( combineShader );
-	theRenderer.DrawTexturedAABB( AABB2::NDC_SIZE, *m_bloomTexture, Vector2::ZERO, Vector2::ONE_ONE, RGBA_WHITE_COLOR );
+	if( m_bloomEnabled )
+		PostProcessBloom( theRenderer );
 }
 
 void Camera::LookAt( Vector3 position, Vector3 target, Vector3 up /* = Vector3::UP */ )
@@ -131,6 +121,12 @@ Matrix44 Camera::GetProjectionMatrix() const
 void Camera::SetProjectionMatrixUnsafe( Matrix44 const &projMatrix )
 {
 	m_projMatrix = projMatrix;
+}
+
+void Camera::SetViewMatrixUnsafe( Matrix44 const &viewMat )
+{
+	m_updateView = false;
+	m_viewMatrix = viewMat;
 }
 
 void Camera::SetAspectRatioForPerspective( float aspectRatio )
@@ -250,6 +246,40 @@ UBOCameraMatrices Camera::GetUBOCameraMatrices() const
 	return toReturn;
 }
 
+void Camera::SetupForBloom( char const *bloomFullScreenShaderName /* = "bloom_fs" */, char const *combineFullScreenShaderName /* = "combine_fs" */ )
+{
+	// Shaders
+	m_bloomFSShader		= bloomFullScreenShaderName;
+	m_combineFSShader	= combineFullScreenShaderName;
+
+	// Texture
+	if( m_bloomEnabled )
+	{
+		delete m_bloomTexture;
+		m_bloomTexture = nullptr;
+	}
+
+	uint width	= Window::GetInstance()->GetWidth();
+	uint height = Window::GetInstance()->GetHeight();
+	m_bloomTexture = Renderer::CreateRenderTarget( width, height );
+
+	m_bloomEnabled = true;
+}
+
+void Camera::PostProcessBloom( Renderer &theRenderer )
+{
+	Shader *bloomShader = theRenderer.CreateOrGetShader( m_bloomFSShader.c_str() );
+
+	// Apply the Bloom Effect
+	ApplyEffect( bloomShader, theRenderer, 3 );
+
+	this->Finalize();
+	Shader *combineShader = theRenderer.CreateOrGetShader( m_combineFSShader.c_str() );
+
+	theRenderer.UseShader( combineShader );
+	theRenderer.DrawTexturedAABB( AABB2::NDC_SIZE, *m_bloomTexture, Vector2::ZERO, Vector2::ONE_ONE, RGBA_WHITE_COLOR );
+}
+
 void Camera::SetupForSkybox( std::string pathToSkyboxImage )
 {
 	// If Skybox was already setup, delete the older texture
@@ -358,9 +388,7 @@ void Camera::ApplyEffect( Shader *fullScreenEffect, Renderer &theRenderer, uint 
 
 	theRenderer.UseShader( fullScreenEffect );
 
-	// Blur Passes
+	// Passes
 	for( uint pass = 0; pass < totalPasses; pass++ )
-	{
 		theRenderer.DrawTexturedAABB( AABB2::NDC_SIZE, *secondaryTexture, Vector2::ZERO, Vector2::ONE_ONE, RGBA_WHITE_COLOR );
-	}
 }

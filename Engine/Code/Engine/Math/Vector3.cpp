@@ -44,6 +44,11 @@ const Vector3 Vector3::operator - ( const Vector3& vecToSubtract ) const
 	return Vector3( x - vecToSubtract.x, y - vecToSubtract.y, z - vecToSubtract.z );
 }
 
+const Vector3 Vector3::operator-() const
+{
+	return Vector3( -x, -y, -z );
+}
+
 const Vector3 Vector3::operator * ( float uniformScale ) const
 {
 	return Vector3( x * uniformScale, y * uniformScale, z * uniformScale );
