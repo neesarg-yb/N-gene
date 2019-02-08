@@ -43,15 +43,6 @@
     <ClCompile Include="Game States\LevelSelect.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
-    <ClCompile Include="Game States\Scene_QuaternionsTest.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Game States\Scene_ProtoScene3D.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
-    <ClCompile Include="Game States\Scene_StopwatchTest.cpp">
-      <Filter>Game States</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\GameState.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
@@ -60,6 +51,9 @@
     </ClCompile>
     <ClCompile Include="World\Cube.cpp">
       <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\MinecraftWorld.cpp">
+      <Filter>Game States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -81,15 +75,6 @@
     <ClInclude Include="Game States\LevelSelect.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
-    <ClInclude Include="Game States\Scene_QuaternionsTest.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Game States\Scene_ProtoScene3D.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="Game States\Scene_StopwatchTest.hpp">
-      <Filter>Game States</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\GameState.hpp">
       <Filter>Game States</Filter>
     </ClInclude>
@@ -98,6 +83,9 @@
     </ClInclude>
     <ClInclude Include="World\Cube.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\MinecraftWorld.hpp">
+      <Filter>Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

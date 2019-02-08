@@ -8,9 +8,7 @@
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
-#include "Game/Game States/Scene_ProtoScene3D.hpp"
-#include "Game/Game States/Scene_StopwatchTest.hpp"
-#include "Game/Game States/Scene_QuaternionsTest.hpp"
+#include "Game/Game States/MinecraftWorld.hpp"
 
 void EchoTestCommand( Command& cmd )
 {
@@ -95,14 +93,8 @@ void theGame::Startup()
 	GameState* levelSelectGS = new LevelSelect( g_gameClock );
 	AddNewGameState( levelSelectGS );
 
-	GameState* collisionAvoidanceScene = new Scene_ProtoScene3D( g_gameClock );
+	GameState* collisionAvoidanceScene = new MinecraftWorld( g_gameClock, "World 1" );	// If you change sceneName, change it in LevelSelect::LevelSelected(), too!
 	AddNewGameState( collisionAvoidanceScene );
-
-	GameState* quaternionsTest = new Scene_QuaternionsTest( g_gameClock );
-	AddNewGameState( quaternionsTest );
-
-	GameState* stopwatchTest = new Scene_StopwatchTest( g_gameClock );
-	AddNewGameState( stopwatchTest );
 
 	// Set game state to begin with
 	SetCurrentGameState( attractGS->m_name );

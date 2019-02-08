@@ -8,13 +8,13 @@
 #include "Game/Cameras/MCamera.hpp"
 #include "Game/Game States/GameState.hpp"
 
-typedef std::vector< Light* >		Lights;
+typedef std::vector< Light* > Lights;
 
-class Scene_ProtoScene3D : public GameState
+class MinecraftWorld : public GameState
 {
 public:
-			 Scene_ProtoScene3D( Clock const *parentClock );
-	virtual ~Scene_ProtoScene3D();
+			 MinecraftWorld( Clock const *parentClock, char const *sceneName );
+	virtual ~MinecraftWorld();
 
 public:
 	// Rendering Specific

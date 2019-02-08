@@ -1,5 +1,5 @@
 #pragma once
-#include "Scene_ProtoScene3D.hpp"
+#include "MinecraftWorld.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/File/ModelLoader.hpp"
@@ -7,8 +7,8 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
 
-Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
-	: GameState( "PROTOSCENE 3D", parentClock )
+MinecraftWorld::MinecraftWorld( Clock const *parentClock, char const *sceneName )
+	: GameState( sceneName, parentClock )
 {
 	// A directional light
 	Light *directionalLight = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
@@ -33,7 +33,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
 }
 
-Scene_ProtoScene3D::~Scene_ProtoScene3D()
+MinecraftWorld::~MinecraftWorld()
 {
 	// Lights
 	while ( m_lights.size() > 0 )
@@ -59,12 +59,12 @@ Scene_ProtoScene3D::~Scene_ProtoScene3D()
 	m_spaceship = nullptr;
 }
 
-void Scene_ProtoScene3D::JustFinishedTransition()
+void MinecraftWorld::JustFinishedTransition()
 {
 
 }
 
-void Scene_ProtoScene3D::BeginFrame()
+void MinecraftWorld::BeginFrame()
 {
 	PROFILE_SCOPE_FUNCTION();
 
@@ -74,12 +74,12 @@ void Scene_ProtoScene3D::BeginFrame()
 	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Mouse & WASD-QE: to move around." );
 }
 
-void Scene_ProtoScene3D::EndFrame()
+void MinecraftWorld::EndFrame()
 {
 
 }
 
-void Scene_ProtoScene3D::Update()
+void MinecraftWorld::Update()
 {
 	PROFILE_SCOPE_FUNCTION();
 
@@ -93,17 +93,16 @@ void Scene_ProtoScene3D::Update()
 	m_camera->RebuildMatrices();
 }
 
-void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
+void MinecraftWorld::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
 	PROFILE_SCOPE_FUNCTION();
 
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
-
-	Camera &camera = *m_camera->GetCamera();
-
+	
 	// Bind the camera
+	Camera &camera = *m_camera->GetCamera();
 	g_theRenderer->BindCamera( &camera );
 	
 	// Do the camera cleanup operations
@@ -121,7 +120,7 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 	// camera.PostRender( *g_theRenderer );
 }
 
-void Scene_ProtoScene3D::ProcessInput( float deltaSeconds )
+void MinecraftWorld::ProcessInput( float deltaSeconds )
 {
 	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
 
@@ -159,7 +158,7 @@ void Scene_ProtoScene3D::ProcessInput( float deltaSeconds )
 	m_camera->m_position += positionChange;
 }
 
-void Scene_ProtoScene3D::RenderBasis( float length ) const
+void MinecraftWorld::RenderBasis( float length ) const
 {
 	Vertex_3DPCU vBuffer[6];
 	
