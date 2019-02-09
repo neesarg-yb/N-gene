@@ -56,6 +56,23 @@ bool IntVector2::operator != ( const IntVector2& vecToCompare ) const
 	return true;
 }
 
+bool IntVector2::operator < ( const IntVector2& vecToCompate ) const
+{
+	// Note! This comparison is there just so that I can use std:map with IntVector2
+	//		 I compare Y-Axis first, and then X-Axis to have a consistent < behavior..
+
+	IntVector2 const &left	= *this;
+	IntVector2 const &right	= vecToCompate;
+
+	if( left.y < right.y )
+		return true;
+	else if( left.y > right.y )
+		return false;
+	else if( left.x < right.x )
+		return true;
+	else //( left.x >= right.y )
+		return false;
+}
 
 void IntVector2::SetFromText( const char* text )
 {

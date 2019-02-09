@@ -23,6 +23,9 @@ public:
 	bool			 operator == ( const IntVector2& vecToCompare ) const;	 // IntVec2 == IntVec2 
 	bool			 operator != ( const IntVector2& vecToCompare ) const;	 // IntVec2 != IntVec2 
 
+	// Just for std::map< IntVector2, TypeB >
+	bool			 operator <  ( const IntVector2& vecToCompate ) const;
+
 	int x;
 	int y;
 
