@@ -5,11 +5,11 @@
 
 class Renderer;
 
-class Cube 
+class Chunk 
 {
 public:
-	 Cube( Vector3 const &center );
-	~Cube();
+	 Chunk( Vector3 const &center );
+	~Chunk();
 
 public:
 	Mesh		*m_mesh			= nullptr;

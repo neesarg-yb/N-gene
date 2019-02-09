@@ -1,4 +1,4 @@
-<material id="cube">
+<material id="chunk">
 	<shadergroup>
    		<shader fileName="lit" />
    	</shadergroup>

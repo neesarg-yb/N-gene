@@ -1,10 +1,10 @@
 #pragma once
-#include "Cube.hpp"
+#include "Chunk.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-Cube::Cube( Vector3 const &center )
+Chunk::Chunk( Vector3 const &center )
 {
-	m_material		= Material::CreateNewFromFile( "Data\\Materials\\Cube.material" );
+	m_material		= Material::CreateNewFromFile( "Data\\Materials\\chunk.material" );
 	m_spriteSheet	= new SpriteSheet( *m_material->GetTexture(0), 32, 32 );
 
 	IntVector2 topSpriteCoord ( 1, 31-0 );
@@ -14,11 +14,11 @@ Cube::Cube( Vector3 const &center )
 	AABB2 botUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( botSpriteCoord );
 	AABB2 sideUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( sideSpriteCoord );
 
-	m_mesh		 = Cube::ConstructMesh( center, Vector3::ONE_ALL, sideUVBounds, botUVBounds, topUVBounds ); 
+	m_mesh		 = Chunk::ConstructMesh( center, Vector3::ONE_ALL, sideUVBounds, botUVBounds, topUVBounds ); 
 	m_wordBounds = AABB3( center, 1.f, 1.f, 1.f );
 }
 
-Cube::~Cube()
+Chunk::~Chunk()
 {
 	delete m_material;
 	m_material = nullptr;
@@ -27,7 +27,7 @@ Cube::~Cube()
 	m_mesh = nullptr;
 }
 
-void Cube::Render( Renderer &theRenderer ) const
+void Chunk::Render( Renderer &theRenderer ) const
 {
 	// Bind Material
 	theRenderer.BindMaterialForShaderIndex( *m_material );
@@ -36,7 +36,7 @@ void Cube::Render( Renderer &theRenderer ) const
 	theRenderer.DrawMesh( *m_mesh, Matrix44() );
 }
 
-Mesh* Cube::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 const &uvSide /* = AABB2::ONE_BY_ONE */, AABB2 const &uvBottom /* = AABB2::ONE_BY_ONE */, AABB2 const &uvTop /* = AABB2::ONE_BY_ONE */, Rgba const &color /* = RGBA_WHITE_COLOR */ )
+Mesh* Chunk::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 const &uvSide /* = AABB2::ONE_BY_ONE */, AABB2 const &uvBottom /* = AABB2::ONE_BY_ONE */, AABB2 const &uvTop /* = AABB2::ONE_BY_ONE */, Rgba const &color /* = RGBA_WHITE_COLOR */ )
 {
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, true );

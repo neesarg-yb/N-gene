@@ -49,11 +49,14 @@
     <ClCompile Include="Cameras\MCamera.cpp">
       <Filter>Cameras</Filter>
     </ClCompile>
-    <ClCompile Include="World\Cube.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
     <ClCompile Include="Game States\MinecraftWorld.cpp">
       <Filter>Game States</Filter>
+    </ClCompile>
+    <ClCompile Include="World\World.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Chunk.cpp">
+      <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -81,11 +84,14 @@
     <ClInclude Include="Cameras\MCamera.hpp">
       <Filter>Cameras</Filter>
     </ClInclude>
-    <ClInclude Include="World\Cube.hpp">
-      <Filter>World</Filter>
-    </ClInclude>
     <ClInclude Include="Game States\MinecraftWorld.hpp">
       <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="World\World.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Chunk.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -289,7 +289,8 @@
     <ClCompile Include="Main_Win32.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
-    <ClCompile Include="World\Cube.cpp" />
+    <ClCompile Include="World\Chunk.cpp" />
+    <ClCompile Include="World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cameras\MCamera.hpp" />
@@ -301,7 +302,8 @@
     <ClInclude Include="GameCommon.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
-    <ClInclude Include="World\Cube.hpp" />
+    <ClInclude Include="World\Chunk.hpp" />
+    <ClInclude Include="World\World.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Run_win32\Data\Materials\bb8.material" />
