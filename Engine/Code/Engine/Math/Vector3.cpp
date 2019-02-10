@@ -59,6 +59,11 @@ const Vector3 Vector3::operator / ( float inverseScale ) const
 	return Vector3( x / inverseScale, y / inverseScale, z / inverseScale );
 }
 
+const Vector3 Vector3::operator*=( float uniformScale ) const
+{
+	return (*this * uniformScale);
+}
+
 void Vector3::operator-=( const Vector3& vetToSubtract )
 {
 	*this = *this - vetToSubtract;
