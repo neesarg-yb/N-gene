@@ -14,7 +14,7 @@ public:
 	virtual ~MinecraftWorld();
 
 private:
-	World m_world;
+	World *m_world = nullptr;
 
 public:
 	void JustFinishedTransition();

@@ -6,17 +6,22 @@
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
+#include "Game/World/BlockDefinition.hpp"
 
 MinecraftWorld::MinecraftWorld( Clock const *parentClock, char const *sceneName )
 	: GameState( sceneName, parentClock )
-	, m_world( m_clock )
 {
+	BlockDefinition::LoadDefinitions();
 
+	m_world = new World( m_clock );
 }
 
 MinecraftWorld::~MinecraftWorld()
 {
+	delete m_world;
+	m_world = nullptr;
 
+	BlockDefinition::DestroyDefinitions();
 }
 
 void MinecraftWorld::JustFinishedTransition()
@@ -39,7 +44,7 @@ void MinecraftWorld::Update()
 {
 	PROFILE_SCOPE_FUNCTION();
 
-	m_world.Update();
+	m_world->Update();
 	
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
@@ -56,5 +61,5 @@ void MinecraftWorld::Render( Camera *gameCamera ) const
 	UNUSED( gameCamera );
 	PROFILE_SCOPE_FUNCTION();
 
-	m_world.Render();
+	m_world->Render();
 }

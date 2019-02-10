@@ -1,26 +1,39 @@
 #pragma once
-#include "Engine/Renderer/Material.hpp"
-#include "Engine/Renderer/SpriteSheet.hpp"
+#include "Engine/Math/AABB3.hpp"
+#include "Engine/Math/IntVector2.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Game/GameCommon.hpp"
+#include "Game/World/Block.hpp"
 
-class Renderer;
-
-class Chunk 
+class Chunk
 {
 public:
-	 Chunk( Vector3 const &center );
+	 Chunk( ChunkCoord position );
 	~Chunk();
 
-public:
-	Mesh		*m_mesh			= nullptr;
-	Material	*m_material		= nullptr;
-	SpriteSheet *m_spriteSheet	= nullptr;
-	AABB3		 m_wordBounds;
+private:
+	// Position in world
+	AABB3 m_worldBounds;
+
+	// Blocks
+	Block m_blocks[ NUM_BLOCKS_PER_CHUNK ];
+
+	// Mesh
+	MeshBuilder		*m_cpuMesh = nullptr;
+	Mesh			*m_gpuMesh = nullptr;
 
 public:
-	void Render( Renderer &theRenderer ) const;
+	void		Render( Renderer &theRenderer ) const;
+	void		RebuildMesh();
 
 public:
-	static Mesh* ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 const &uvSide = AABB2::ONE_BY_ONE, AABB2 const &uvBottom = AABB2::ONE_BY_ONE, AABB2 const &uvTop = AABB2::ONE_BY_ONE, Rgba const &color = RGBA_WHITE_COLOR );
-	
+	int			GetIndexFromBlockCoord	( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const;
+	IntVector3	GetBlockCoordFromIndex	( uint blockIndex ) const;
+	inline int	GetIndexFromBlockCoord	( BlockCoord pos ) const { return GetIndexFromBlockCoord( pos.x, pos.y, pos.z ); }
+	AABB3		GetBlockWorldBounds		( int blockIndex, float blockSize ) const;
+
+private:
+	void		AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder );
+	void		SetBlockType( int xBlockCoord, int yBlockCoord, int zBlockCoord, eBlockType type );
+	inline void	SetBlockType( BlockCoord pos, eBlockType type ) { SetBlockType( pos.x, pos.y, pos.z, type ); }
 };

@@ -10,10 +10,35 @@ World::World( Clock *parentClock )
 	m_camera->m_position = Vector3( -3.f, 3.f, 3.f );
 	m_camera->m_yawDegreesAboutZ = -40.f;
 	m_camera->SetPitchDegreesAboutY( 25.f );
+
+	ChunkCoord chunk1Coord( 0, 0 );
+	Chunk *chunk1 = new Chunk( chunk1Coord );
+	ChunkCoord chunk2Coord( 1, 0 );
+	Chunk *chunk2 = new Chunk( chunk2Coord );
+	ChunkCoord chunk3Coord( 0, 1 );
+	Chunk *chunk3 = new Chunk( chunk3Coord );
+	ChunkCoord chunk4Coord( 2, 0 );
+	Chunk *chunk4 = new Chunk( chunk4Coord );
+	ChunkCoord chunk5Coord( 0, -1 );
+	Chunk *chunk5 = new Chunk( chunk5Coord );
+
+	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk1Coord, chunk1 ) );
+	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk2Coord, chunk2 ) );
+	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk3Coord, chunk3 ) );
+	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk4Coord, chunk4 ) );
+	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk5Coord, chunk5 ) );
 }
 
 World::~World()
 {
+	for( ChunkMap::iterator it = m_activeChunks.begin(); it != m_activeChunks.end(); it = m_activeChunks.begin() )
+	{
+		delete it->second;
+		it->second = nullptr;
+
+		m_activeChunks.erase( it );
+	}
+
 	// Camera
 	delete m_camera;
 	m_camera = nullptr;
@@ -44,9 +69,13 @@ void World::Render() const
 
 	//----------------------------
 	// The Rendering starts here..
-	//
+	//	
 	RenderBasis( 1.f );
-	m_testCube.Render( *g_theRenderer );
+	for( ChunkMap::const_iterator it = m_activeChunks.begin(); it != m_activeChunks.end(); it++ )
+	{
+		Chunk const *thisChunk = it->second;
+		thisChunk->Render( *g_theRenderer );
+	}
 
 	// Post Render
 	camera.PostRender( *g_theRenderer );
@@ -111,7 +140,7 @@ void World::ProcessInput( float deltaSeconds )
 	m_camera->m_position += positionChange;
 }
 
-Chunk* World::GetChunkAtChunkCoordinates( IntVector2 const &chunckCoord )
+Block* World::GetChunkAtChunkCoordinates( IntVector2 const &chunckCoord )
 {
 	UNUSED( chunckCoord );
 

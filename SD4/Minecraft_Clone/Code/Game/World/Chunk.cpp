@@ -1,45 +1,134 @@
 #pragma once
 #include "Chunk.hpp"
-#include "Engine/Renderer/Renderer.hpp"
+#include "Game/World/BlockDefinition.hpp"
 
-Chunk::Chunk( Vector3 const &center )
+Chunk::Chunk( ChunkCoord position )
 {
-	m_material		= Material::CreateNewFromFile( "Data\\Materials\\chunk.material" );
-	m_spriteSheet	= new SpriteSheet( *m_material->GetTexture(0), 32, 32 );
+	// World Bounds
+	m_worldBounds.mins.x = (float) position.x * BLOCKS_WIDE_X;			// Mins
+	m_worldBounds.mins.y = (float) position.y * BLOCKS_WIDE_Y;
+	m_worldBounds.mins.z = 0.f;
+	m_worldBounds.maxs.x = m_worldBounds.mins.x + (float)BLOCKS_WIDE_X;	// Maxs
+	m_worldBounds.maxs.y = m_worldBounds.mins.y + (float)BLOCKS_WIDE_Y;
+	m_worldBounds.maxs.z = m_worldBounds.mins.z + (float)BLOCKS_WIDE_Z;
 
-	IntVector2 topSpriteCoord ( 1, 31-0 );
-	IntVector2 botSpriteCoord ( 4, 31-3 );
-	IntVector2 sideSpriteCoord( 3, 31-3 );
-	AABB2 topUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( topSpriteCoord );
-	AABB2 botUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( botSpriteCoord );
-	AABB2 sideUVBounds	= m_spriteSheet->GetTexCoordsForSpriteCoords( sideSpriteCoord );
+	// Construct Block
+	int seaLevel = BLOCKS_WIDE_Z / 5;
+	for( int blockZ = 0; blockZ < BLOCKS_WIDE_Z; blockZ++ )
+	{
+		for( int blockY = 0; blockY < BLOCKS_WIDE_Y; blockY++ )
+		{
+			for( int blockX = 0; blockX < BLOCKS_WIDE_X; blockX++ )
+			{
+				if( blockZ > seaLevel )
+					SetBlockType( blockX, blockY, blockZ, BLOCK_AIR );
+				else if( blockZ == seaLevel )
+					SetBlockType( blockX, blockY, blockZ, BLOCK_GRASS );
+				else if( blockZ < seaLevel )
+					SetBlockType( blockX, blockY, blockZ, BLOCK_STONE );
+			}
+		}
+	}
 
-	m_mesh		 = Chunk::ConstructMesh( center, Vector3::ONE_ALL, sideUVBounds, botUVBounds, topUVBounds ); 
-	m_wordBounds = AABB3( center, 1.f, 1.f, 1.f );
+	RebuildMesh();
 }
 
 Chunk::~Chunk()
 {
-	delete m_material;
-	m_material = nullptr;
+	if( m_cpuMesh != nullptr )
+		delete m_cpuMesh;
 
-	delete m_mesh;
-	m_mesh = nullptr;
+	if( m_gpuMesh != nullptr )
+		delete m_gpuMesh;
+
+	m_cpuMesh = nullptr;
+	m_gpuMesh = nullptr;
 }
 
 void Chunk::Render( Renderer &theRenderer ) const
 {
 	// Bind Material
-	theRenderer.BindMaterialForShaderIndex( *m_material );
+	theRenderer.BindMaterialForShaderIndex( *BlockDefinition::GetMaterial() );
 
 	// Draw Mesh
-	theRenderer.DrawMesh( *m_mesh, Matrix44() );
+	theRenderer.DrawMesh( *m_gpuMesh, Matrix44() );
 }
 
-Mesh* Chunk::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 const &uvSide /* = AABB2::ONE_BY_ONE */, AABB2 const &uvBottom /* = AABB2::ONE_BY_ONE */, AABB2 const &uvTop /* = AABB2::ONE_BY_ONE */, Rgba const &color /* = RGBA_WHITE_COLOR */ )
+void Chunk::RebuildMesh()
 {
-	MeshBuilder mb;
-	mb.Begin( PRIMITIVE_TRIANGES, true );
+	// CPU side mesh
+	if( m_cpuMesh != nullptr )
+	{
+		delete m_cpuMesh;
+		m_cpuMesh = nullptr;
+	}
+
+	m_cpuMesh = new MeshBuilder();
+	m_cpuMesh->Begin( PRIMITIVE_TRIANGES, true );
+
+	for( int bIdx = 0; bIdx < NUM_BLOCKS_PER_CHUNK; bIdx++ )
+		AddVertsForBlock( bIdx, *m_cpuMesh );
+
+	m_cpuMesh->End();
+
+
+	// GPU side mesh
+	if( m_gpuMesh != nullptr )
+	{
+		delete m_gpuMesh;
+		m_gpuMesh = nullptr;
+	}
+
+	m_gpuMesh = m_cpuMesh->ConstructMesh<Vertex_Lit>();
+}
+
+int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const
+{
+	return xBlockCoord + (yBlockCoord * BLOCKS_WIDE_X) + (zBlockCoord * (BLOCKS_WIDE_X * BLOCKS_WIDE_Y));
+}
+
+AABB3 Chunk::GetBlockWorldBounds( int blockIndex, float blockSize ) const
+{
+	IntVector3 blockCoordInt = GetBlockCoordFromIndex( blockIndex );
+
+	Vector3 blockWorldMins;
+	blockWorldMins.x = m_worldBounds.mins.x + (float)blockCoordInt.x;
+	blockWorldMins.y = m_worldBounds.mins.y + (float)blockCoordInt.y;
+	blockWorldMins.z = m_worldBounds.mins.z + (float)blockCoordInt.z;
+
+	Vector3 blockWorldMaxs = blockWorldMins + Vector3(blockSize, blockSize, blockSize);
+
+	return AABB3( blockWorldMins, blockWorldMaxs );
+}
+
+IntVector3 Chunk::GetBlockCoordFromIndex( uint blockIndex ) const
+{
+	int x = (blockIndex & BITS_MASK_X);
+	int y = (blockIndex & BITS_MASK_Y) >> BITS_WIDE_X;
+	int z = (blockIndex >> (BITS_WIDE_X + BITS_WIDE_Y));
+
+	return IntVector3(x, y, z);
+}
+
+void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
+{
+	MeshBuilder &mb = meshBuilder;
+
+	Block			&block			= m_blocks[ blockIndex ];
+	Vector3	const	size			= Vector3::ONE_ALL;
+	Vector3 const	halfDim			= size * 0.5f;
+	AABB3	const	blockBounds		= GetBlockWorldBounds( blockIndex, size.x );
+	Vector3 const	center			= blockBounds.GetCenter();
+
+	BlockDefinition const &blockDef	= BlockDefinition::GetDefinitionForType( block.GetType() );
+	Rgba	const	color			= RGBA_WHITE_COLOR;
+	AABB2	const	uvSide			= blockDef.m_uvSide;
+	AABB2	const	uvBottom		= blockDef.m_uvBottom;
+	AABB2	const	uvTop			= blockDef.m_uvTop;
+
+	if( blockDef.m_type == BLOCK_AIR )
+		return;
+
 	/*
 	      7_________ 6			VERTEX[8] ORDER:
 		  /|       /|				( 0, 1, 2, 3, 4, 5, 6, 7 )
@@ -51,7 +140,6 @@ Mesh* Chunk::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 co
 		|/_______|/			y ______|/ 
 		0         1
 	*/
-	Vector3 const halfDim  = size * 0.5f;
 	Vector3 const vertexPos[8] = {
 		Vector3( center.x - halfDim.x,	center.y + halfDim.y,	center.z - halfDim.z ),
 		Vector3( center.x - halfDim.x,	center.y - halfDim.y,	center.z - halfDim.z ),
@@ -224,9 +312,12 @@ Mesh* Chunk::ConstructMesh( Vector3 const &center, Vector3 const &size, AABB2 co
 
 	mb.AddFace( idx + 0, idx + 1, idx + 2 );
 	mb.AddFace( idx + 2, idx + 3, idx + 0 );
-
-	mb.End();
-
-	return mb.ConstructMesh<Vertex_Lit>();
 }
 
+void Chunk::SetBlockType( int xBlockCoord, int yBlockCoord, int zBlockCoord, eBlockType type )
+{
+	int		 blockIndex		= GetIndexFromBlockCoord( xBlockCoord, yBlockCoord, zBlockCoord );
+	Block	&blockToChange	= m_blocks[ blockIndex ];
+
+	blockToChange.SetType( type );
+}

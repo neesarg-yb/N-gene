@@ -23,6 +23,9 @@
     <Filter Include="World">
       <UniqueIdentifier>{c1a7953a-4967-4b03-aec7-f77944c895ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="World\Definitions">
+      <UniqueIdentifier>{672e82a8-db83-4403-8e75-2a7d48aec488}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -55,8 +58,14 @@
     <ClCompile Include="World\World.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="World\Block.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
     <ClCompile Include="World\Chunk.cpp">
       <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\BlockDefinition.cpp">
+      <Filter>World\Definitions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -90,8 +99,14 @@
     <ClInclude Include="World\World.hpp">
       <Filter>World</Filter>
     </ClInclude>
+    <ClInclude Include="World\Block.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
     <ClInclude Include="World\Chunk.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\BlockDefinition.hpp">
+      <Filter>World\Definitions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
