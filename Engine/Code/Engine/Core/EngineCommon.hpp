@@ -8,6 +8,7 @@ class Clock;
 typedef tinyxml2::XMLElement XMLElement;
 typedef tinyxml2::XMLAttribute XMLAttribute;
 typedef unsigned int	uint;
+typedef unsigned char	uchar;
 typedef unsigned char	byte_t;
 
 #define MAX_LIGHTS 8U
