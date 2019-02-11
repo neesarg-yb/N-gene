@@ -33,7 +33,7 @@ void GameObject::Update( float deltaSeconds )
 	float	velocityY	= m_velocity.y;
 	float	speedXZ		= velocityXZ.GetLength();
 
-	if( speedXZ <= 0.1f )
+	if( speedXZ <= (m_maxSpeed * 0.07f) )
 	{
 		// Speed is too small, ignore it
 		velocityXZ = Vector2::ZERO;
