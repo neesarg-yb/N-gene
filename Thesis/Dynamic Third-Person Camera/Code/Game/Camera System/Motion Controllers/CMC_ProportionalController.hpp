@@ -10,9 +10,9 @@ public:
 public:
 	// Proportional Controller
 	bool		m_mpcEnabled				= true;
-	float		m_controllingFactor			= 8.5f;
-	float		m_accelerationLimitXZ		= 35.f;							// Units per second^2
-	float		m_leadFactor				= 1.5f;
+	float		m_controllingFactor			= 12.f;
+	float		m_accelerationLimitXZ		= 80.f;							// Units per second^2
+	float		m_leadFactor				= 1.0f;
 
 public:
 	CameraState MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds );
