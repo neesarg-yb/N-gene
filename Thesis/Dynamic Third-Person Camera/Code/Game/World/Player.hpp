@@ -10,9 +10,13 @@ public:
 	~Player();
 
 public:
-	float	const	 m_bodyRadius	= 0.5f;
-	float	const	 m_mass			= 10.f;
-	Terrain const	*m_terrain		= nullptr;		// The terrain this player is on
+	float	const	 m_bodyRadius		= 0.5f;
+	Terrain const	*m_terrain			= nullptr;		// The terrain this player is on
+
+	float	const	 m_mass				= 10.f;
+	float	const	 m_friction			= 30.f;
+	float	const	 m_xzMovementForce	= 1000.f;
+	float			 m_defaultMaxSpeed	= 0.f;
 
 	bool m_isPlayerOnTerrainSurface = false;
 

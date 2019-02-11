@@ -100,7 +100,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
-	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
+//	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
 
 	// Camera Constraints
 	CC_LineOfSight*			losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
@@ -113,7 +113,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->RegisterConstraint( collisionConstrain );
 
 //	followBehaviour->m_constrains.SetOrRemoveTags( "ConeRaycast" );
-	followBehaviour->m_constraints.SetOrRemoveTags( "M_ConeRaycast" );
+//	followBehaviour->m_constraints.SetOrRemoveTags( "M_ConeRaycast" );
 	TODO( "CameraCollision contraint is not working as expected when I enabled culling to none!" );
 	followBehaviour->m_constraints.SetOrRemoveTags( "CameraCollision" );
 	followBehaviour->m_constraints.SetOrRemoveTags( "LineOfSight" );

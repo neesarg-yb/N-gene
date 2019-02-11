@@ -11,6 +11,10 @@ Player::Player( Vector3 worldPosition, Terrain const &parentTerrain )
 	: GameObject( worldPosition, Vector3::ZERO, Vector3::ONE_ALL )
 	, m_terrain( &parentTerrain )
 {
+	// Movement Presets
+	m_maxSpeed = 7.f;
+	m_defaultMaxSpeed = m_maxSpeed;
+	
 	// Setup the Renderable - BB8
 	m_renderable		= new Renderable( Vector3::ZERO, Vector3::ZERO, Vector3( 0.007f, 0.007f, 0.007f ) );
 	m_renderable->m_modelTransform.SetParentAs( &m_transform );
@@ -94,7 +98,7 @@ void Player::ApplyResistantForces()
 		return;
 
 	Vector3 frictionForce		= m_velocity.GetNormalized() * -1.f;		// Friction Direction = (Velocity Direction) * (Normal Force)
-	float	frictionCoefficient	= 4.f * m_mass;
+	float	frictionCoefficient	= m_friction * m_mass;
 	frictionForce =  frictionForce * frictionCoefficient;					// Friction Force = (Friction Direction) * coefficient
 
 	ApplyForce( frictionForce );
@@ -125,8 +129,7 @@ void Player::ApplyMovementForces()
 	bool			jump				= controller.m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed;
 
 	// Applying input force
-	float	xzMovementForce			= 100.f;
-	Vector2 forceXZ					= inputDirectionXZ * xzMovementForce;
+	Vector2 forceXZ					= inputDirectionXZ * m_xzMovementForce;
 	Vector3 forceRelativeToCamera	= ( cameraForward * forceXZ.y ) + ( cameraRight * forceXZ.x );
 	ApplyForce( forceRelativeToCamera );
 
@@ -137,6 +140,13 @@ void Player::ApplyMovementForces()
 		Vector3 jumpImpulse			 = Vector3( 0.f, 1.f, 0.f ) * jumpImpulseMagnitude;
 		ApplyForce( jumpImpulse );
 	}
+
+	// Sprint - Change Max Speed
+	bool isSprinting = controller.m_xboxButtonStates[ XBOX_BUTTON_B ].keyIsDown;
+	if( isSprinting )
+		m_maxSpeed = m_defaultMaxSpeed * 2.f;
+	else
+		m_maxSpeed = m_defaultMaxSpeed;
 }
 
 void Player::CheckAndSnapOnTerrainSurface()
