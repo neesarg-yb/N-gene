@@ -68,6 +68,9 @@ theGame::~theGame()
 		m_gameStates.pop_back();
 	}
 
+	delete g_defaultMaterial;
+	g_defaultMaterial = nullptr;
+
 	delete m_textBmpFont;
 }
 
@@ -77,6 +80,9 @@ void theGame::Startup()
 	g_theRenderer->BeginFrame();
 	RenderLoadingScreen();
 	g_theRenderer->EndFrame();
+	
+	// Default Material
+	g_defaultMaterial = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 
 	// Console stuffs
 	CommandRegister( "echo", EchoTestCommand );

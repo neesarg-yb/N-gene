@@ -13,13 +13,13 @@ World::World( Clock *parentClock )
 
 	ChunkCoord chunk1Coord( 0, 0 );
 	Chunk *chunk1 = new Chunk( chunk1Coord );
-	ChunkCoord chunk2Coord( 1, 0 );
+	ChunkCoord chunk2Coord( -1, 2 );
 	Chunk *chunk2 = new Chunk( chunk2Coord );
-	ChunkCoord chunk3Coord( 0, 1 );
+	ChunkCoord chunk3Coord( 0, 2 );
 	Chunk *chunk3 = new Chunk( chunk3Coord );
-	ChunkCoord chunk4Coord( 2, 0 );
+	ChunkCoord chunk4Coord( 1, 2 );
 	Chunk *chunk4 = new Chunk( chunk4Coord );
-	ChunkCoord chunk5Coord( 0, -1 );
+	ChunkCoord chunk5Coord( 0, 3 );
 	Chunk *chunk5 = new Chunk( chunk5Coord );
 
 	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk1Coord, chunk1 ) );
@@ -70,7 +70,6 @@ void World::Render() const
 	//----------------------------
 	// The Rendering starts here..
 	//	
-	RenderBasis( 1.f );
 	for( ChunkMap::const_iterator it = m_activeChunks.begin(); it != m_activeChunks.end(); it++ )
 	{
 		Chunk const *thisChunk = it->second;
@@ -81,27 +80,43 @@ void World::Render() const
 	camera.PostRender( *g_theRenderer );
 }
 
-void World::RenderBasis( float length ) const
+void World::RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer )
 {
 	Vertex_3DPCU vBuffer[6];
 
 	vBuffer[0].m_color		= RGBA_RED_COLOR;
-	vBuffer[0].m_position	= Vector3( 0.f, 0.f, 0.f );
+	vBuffer[0].m_position	= position;
 	vBuffer[1].m_color		= RGBA_RED_COLOR;
-	vBuffer[1].m_position	= Vector3( length, 0.f, 0.f );
+	vBuffer[1].m_position	= position + Vector3( length, 0.f, 0.f );
 
 
 	vBuffer[2].m_color		= RGBA_GREEN_COLOR;
-	vBuffer[2].m_position	= Vector3( 0.f, 0.f, 0.f );
+	vBuffer[2].m_position	= position;
 	vBuffer[3].m_color		= RGBA_GREEN_COLOR;
-	vBuffer[3].m_position	= Vector3( 0.f, length, 0.f );
+	vBuffer[3].m_position	= position + Vector3( 0.f, length, 0.f );
 
 	vBuffer[4].m_color		= RGBA_BLUE_COLOR;
-	vBuffer[4].m_position	= Vector3( 0.f, 0.f, 0.f );
+	vBuffer[4].m_position	= position;
 	vBuffer[5].m_color		= RGBA_BLUE_COLOR;
-	vBuffer[5].m_position	= Vector3( 0.f, 0.f, length );
+	vBuffer[5].m_position	= position + Vector3( 0.f, 0.f, length );
 
-	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+	// First Render Pass [ Normal ]
+	activeRenderer.BindMaterialForShaderIndex( *g_defaultMaterial );
+	activeRenderer.EnableDepth( COMPARE_LESS, true );
+	activeRenderer.DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+
+	// For, Second Render Pass [ X-Ray ]
+	for( int i = 0; i < 6; i++ )
+	{
+		Rgba &vertColor = vBuffer[i].m_color;
+
+		vertColor.r = (uchar)( (float)vertColor.r * 0.5f );
+		vertColor.g = (uchar)( (float)vertColor.g * 0.5f );
+		vertColor.b = (uchar)( (float)vertColor.b * 0.5f );
+	}
+
+	activeRenderer.EnableDepth( COMPARE_GREATER, false );	// To Draw X-Ray without affecting the depth
+	activeRenderer.DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
 }
 
 void World::ProcessInput( float deltaSeconds )

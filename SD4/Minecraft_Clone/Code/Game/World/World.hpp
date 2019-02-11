@@ -23,7 +23,7 @@ private:
 
 	// Game Camera
 	MCamera		*m_camera			= nullptr;
-	float		 m_flySpeed			= 5.f;
+	float		 m_flySpeed			= 12.f;
 	float		 m_camRotationSpeed = 0.2f;
 
 	// Gameplay
@@ -32,9 +32,11 @@ private:
 public:
 	void	Update();
 	void	Render() const;
-	void	RenderBasis( float length ) const;
 
 public:
 	void	ProcessInput( float deltaSeconds );
 	Block*	GetChunkAtChunkCoordinates( IntVector2 const &chunckCoord );
+
+public:
+	static void RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );
 };

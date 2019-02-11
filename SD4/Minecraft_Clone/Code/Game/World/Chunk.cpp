@@ -1,5 +1,7 @@
 #pragma once
 #include "Chunk.hpp"
+#include "Engine/Math/SmoothNoise.hpp"
+#include "Game/World/World.hpp"
 #include "Game/World/BlockDefinition.hpp"
 
 Chunk::Chunk( ChunkCoord position )
@@ -13,22 +15,27 @@ Chunk::Chunk( ChunkCoord position )
 	m_worldBounds.maxs.z = m_worldBounds.mins.z + (float)BLOCKS_WIDE_Z;
 
 	// Construct Block
-	int seaLevel = BLOCKS_WIDE_Z / 5;
-	for( int blockZ = 0; blockZ < BLOCKS_WIDE_Z; blockZ++ )
+	for( int blockY = 0; blockY < BLOCKS_WIDE_Y; blockY++ )
 	{
-		for( int blockY = 0; blockY < BLOCKS_WIDE_Y; blockY++ )
+		for( int blockX = 0; blockX < BLOCKS_WIDE_X; blockX++ )
 		{
-			for( int blockX = 0; blockX < BLOCKS_WIDE_X; blockX++ )
+			int		blockZ0Index		= GetIndexFromBlockCoord( blockX, blockY, 0 );
+			AABB3	blockZ0WorldBound	= GetBlockWorldBounds( blockZ0Index, 1.f );
+			float	perlinNoise			= Compute2dPerlinNoise(blockZ0WorldBound.mins.x, blockZ0WorldBound.mins.y, 300.f, 10);;
+			float	seaLevel			= RangeMapFloat( perlinNoise, -1.f, 1.f, 50.f, 128.f );
+
+			for( int blockZ = 0; blockZ < BLOCKS_WIDE_Z; blockZ++ )
 			{
-				if( blockZ > seaLevel )
+				if( blockZ > (int)seaLevel )
 					SetBlockType( blockX, blockY, blockZ, BLOCK_AIR );
-				else if( blockZ == seaLevel )
+				else if( blockZ == (int)seaLevel )
 					SetBlockType( blockX, blockY, blockZ, BLOCK_GRASS );
-				else if( blockZ < seaLevel )
+				else if( blockZ < (int)seaLevel )
 					SetBlockType( blockX, blockY, blockZ, BLOCK_STONE );
 			}
 		}
 	}
+	
 
 	RebuildMesh();
 }
@@ -52,6 +59,9 @@ void Chunk::Render( Renderer &theRenderer ) const
 
 	// Draw Mesh
 	theRenderer.DrawMesh( *m_gpuMesh, Matrix44() );
+
+	// Indicating the start location
+	World::RenderBasis( m_worldBounds.mins, 1.f, theRenderer );
 }
 
 void Chunk::RebuildMesh()
