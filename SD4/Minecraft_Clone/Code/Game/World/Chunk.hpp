@@ -13,7 +13,8 @@ public:
 
 private:
 	// Position in world
-	AABB3 m_worldBounds;
+	ChunkCoord	m_coord;
+	AABB3		m_worldBounds;
 
 	// Blocks
 	Block m_blocks[ NUM_BLOCKS_PER_CHUNK ];

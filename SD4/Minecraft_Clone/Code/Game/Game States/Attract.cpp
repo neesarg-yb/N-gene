@@ -61,7 +61,7 @@ void Attract::Render( Camera *gameCamera ) const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 	
 	g_theRenderer->DrawTextInBox2D( "Minecraft Clone", Vector2(0.5f, 0.6f), g_theGame->m_default_screen_bounds, 0.08f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
-	g_theRenderer->DrawTextInBox2D( "( Use Keyboard )", Vector2(0.5f, 0.02f), g_theGame->m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
+	g_theRenderer->DrawTextInBox2D( "( Use SPACE to select )", Vector2(0.5f, 0.02f), g_theGame->m_default_screen_bounds, 0.035f, RGBA_RED_COLOR, g_theGame->m_textBmpFont, TEXT_DRAW_SHRINK_TO_FIT );
 
 	// Menu
 	m_attractMenu->Render();

@@ -5,10 +5,11 @@
 #include "Game/World/BlockDefinition.hpp"
 
 Chunk::Chunk( ChunkCoord position )
+	: m_coord( position )
 {
 	// World Bounds
-	m_worldBounds.mins.x = (float) position.x * BLOCKS_WIDE_X;			// Mins
-	m_worldBounds.mins.y = (float) position.y * BLOCKS_WIDE_Y;
+	m_worldBounds.mins.x = (float) m_coord.x * BLOCKS_WIDE_X;			// Mins
+	m_worldBounds.mins.y = (float) m_coord.y * BLOCKS_WIDE_Y;
 	m_worldBounds.mins.z = 0.f;
 	m_worldBounds.maxs.x = m_worldBounds.mins.x + (float)BLOCKS_WIDE_X;	// Maxs
 	m_worldBounds.maxs.y = m_worldBounds.mins.y + (float)BLOCKS_WIDE_Y;
@@ -30,13 +31,14 @@ Chunk::Chunk( ChunkCoord position )
 					SetBlockType( blockX, blockY, blockZ, BLOCK_AIR );
 				else if( blockZ == (int)seaLevel )
 					SetBlockType( blockX, blockY, blockZ, BLOCK_GRASS );
-				else if( blockZ < (int)seaLevel )
+				else if( blockZ >= (int)seaLevel - 2 )
+					SetBlockType( blockX, blockY, blockZ, BLOCK_DIRT );
+				else if( blockZ < (int)seaLevel - 2 )
 					SetBlockType( blockX, blockY, blockZ, BLOCK_STONE );
 			}
 		}
 	}
 	
-
 	RebuildMesh();
 }
 

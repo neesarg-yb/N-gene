@@ -137,19 +137,22 @@ void World::ProcessInput( float deltaSeconds )
 	float forwardMovement = 0.f;
 	float leftMovement = 0.f;
 	float upMovement = 0.f;
+	float speedScale = 1.f;
 
+	if( g_theInput->IsKeyPressed( VK_SHIFT ) )
+		speedScale = 6.f;
 	if( g_theInput->IsKeyPressed( 'W' ) )
-		forwardMovement += m_flySpeed * deltaSeconds;
+		forwardMovement += m_flySpeed * speedScale * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'S' ) )
-		forwardMovement -= m_flySpeed * deltaSeconds;
+		forwardMovement -= m_flySpeed * speedScale * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'A' ) )
-		leftMovement += m_flySpeed * deltaSeconds;
+		leftMovement += m_flySpeed * speedScale * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'D' ) )
-		leftMovement -= m_flySpeed * deltaSeconds;
+		leftMovement -= m_flySpeed * speedScale * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'Q' ) )
-		upMovement += m_flySpeed * deltaSeconds;
+		upMovement += m_flySpeed * speedScale * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'E' ) )
-		upMovement -= m_flySpeed * deltaSeconds;
+		upMovement -= m_flySpeed * speedScale * deltaSeconds;
 
 	Vector3 positionChange = (forwardDir * forwardMovement) + (leftDir * leftMovement) + (upDir * upMovement);
 	m_camera->m_position += positionChange;

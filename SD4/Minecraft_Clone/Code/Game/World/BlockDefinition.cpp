@@ -50,6 +50,7 @@ void BlockDefinition::LoadDefinitions()
 
 	s_definitions[ BLOCK_AIR ]	 = BlockDefinition( BLOCK_AIR, IntVector2(0, 0), IntVector2(0, 0), IntVector2(0, 0) );
 	s_definitions[ BLOCK_GRASS ] = BlockDefinition( BLOCK_GRASS, IntVector2(3, 3), IntVector2(4, 3), IntVector2(1, 0) );
+	s_definitions[ BLOCK_DIRT ]	 = BlockDefinition( BLOCK_DIRT, IntVector2(4, 3), IntVector2(4, 3), IntVector2(4, 3) );
 	s_definitions[ BLOCK_STONE ] = BlockDefinition( BLOCK_STONE, IntVector2(0, 4), IntVector2(0, 4), IntVector2(0, 4) );
 }
 

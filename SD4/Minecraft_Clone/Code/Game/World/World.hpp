@@ -23,7 +23,7 @@ private:
 
 	// Game Camera
 	MCamera		*m_camera			= nullptr;
-	float		 m_flySpeed			= 12.f;
+	float		 m_flySpeed			= 8.f;
 	float		 m_camRotationSpeed = 0.2f;
 
 	// Gameplay

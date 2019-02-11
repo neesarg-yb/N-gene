@@ -31,6 +31,7 @@ enum eBlockType : uchar
 {
 	BLOCK_AIR = 0,
 	BLOCK_GRASS,
+	BLOCK_DIRT,
 	BLOCK_STONE,
 	NUM_BLOCK_TYPES
 };
