@@ -21,7 +21,11 @@ public:
 	Vector3 IgnoreW() const;
 	Vector4 GetNormalized() const;
 
-	bool operator == ( Vector4 const b ) const;
+	Vector4	operator +  ( Vector4 const &b );
+	Vector4 operator -  ( Vector4 const &b );
+	Vector4 operator *  ( float uniformScale );
+	Vector4 operator *= ( float uniformScale );
+	bool	operator == ( Vector4 const &b ) const;
 
 public:
 	float x = 0.f;

@@ -90,7 +90,33 @@ Vector4 Vector4::GetNormalized() const
 	return Vector4( x/lengthOfVec, y/lengthOfVec, z/lengthOfVec, w/lengthOfVec );
 }
 
-bool Vector4::operator == ( Vector4 const b ) const
+Vector4 Vector4::operator+( Vector4 const &b )
+{
+	Vector4 const &a = *this;
+
+	return Vector4( (a.x + b.x), (a.y + b.y), (a.z + b.z), (a.w + b.w) );
+}
+
+Vector4 Vector4::operator-( Vector4 const &b )
+{
+	Vector4 const &a = *this;
+
+	return Vector4( (a.x - b.x), (a.y - b.y), (a.z - b.z), (a.w - b.w) );
+}
+
+Vector4 Vector4::operator*( float uniformScale )
+{
+	Vector4 const &a = *this;
+
+	return Vector4( (a.x * uniformScale), (a.y * uniformScale), (a.z * uniformScale), (a.w * uniformScale) );
+}
+
+Vector4 Vector4::operator*=( float uniformScale )
+{
+	return (*this * uniformScale);
+}
+
+bool Vector4::operator == ( Vector4 const &b ) const
 {
 	return (x == b.x) && (y == b.y) && (z == b.z) && (w == b.w);
 }
