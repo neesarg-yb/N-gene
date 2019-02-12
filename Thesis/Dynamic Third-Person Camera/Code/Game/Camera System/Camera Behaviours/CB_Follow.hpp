@@ -2,6 +2,17 @@
 #include "Game/Camera System/Camera Behaviours/CB_DegreesOfFreedom.hpp"
 
 struct CameraContext;
+struct ConstraintSuggestionOverwriteState
+{
+public:
+	bool	m_playerHasCameraControl = false;			// If the player currently has the control over camera
+	Vector3	m_playerPositionOnBegin	 = Vector3::ZERO;	// Position at where the player overtook the camera control
+	double	m_timeElapsedSecondsIdle = 0.0;				// Time elapsed since the player had camera controls but is not doing anything with it
+
+public:
+	ConstraintSuggestionOverwriteState() { }
+	ConstraintSuggestionOverwriteState( bool playerHasControl, Vector3 playerPositionOnBegin );
+};
 
 class CB_Follow : public CB_DegreesOfFreedom
 {
@@ -38,6 +49,9 @@ private:
 	// Field of View
 	float		m_fov						= m_goalState.m_fov;
 
+	float		m_constrainTakeOverTime		= 1.0;							// Seconds
+	ConstraintSuggestionOverwriteState m_suggestionOverwriteState;
+
 public:
 	void		PreUpdate()  { }
 	void		PostUpdate() { }
@@ -48,6 +62,8 @@ public:
 private:
 	void	GetPlayerInput( float &distChange_out, float &rotChange_out, float &altChange_out, float &hOffsetChange_out, float &vOffsetChange_out, float &fovChange_out ) const;
 	void	CheckEnableCameraReorientation( CameraState const &currentState, CameraContext const &context, float rotationChangeInput );
+	bool	CheckToTurnOnConstraintSuggestions( ConstraintSuggestionOverwriteState const &suggestionOverwriteState ) const;
+
 	void	CartesianToPolarTest( CameraState const &camState ) const;
 	float	GetRotationToFaceXZDirection( Vector2 const &xzDir ) const;
 };

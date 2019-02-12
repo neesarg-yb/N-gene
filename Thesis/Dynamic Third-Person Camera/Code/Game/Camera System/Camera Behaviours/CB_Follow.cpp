@@ -1,9 +1,17 @@
 #pragma once
 #include "CB_Follow.hpp"
 #include "Engine/Math/Complex.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
+
+ConstraintSuggestionOverwriteState::ConstraintSuggestionOverwriteState( bool playerHasControl, Vector3 playerPositionOnBegin )
+	: m_playerHasCameraControl( playerHasControl )
+	, m_playerPositionOnBegin( playerPositionOnBegin )
+{
+
+}
 
 CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager )
 	: CB_DegreesOfFreedom( name, manager )
@@ -70,10 +78,37 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	// FOV
 	m_fov += fovChangePerInput * m_fovChangeSpeed * deltaSeconds;
 	SetFOV( m_fov );
-
-	// Player overwrites the constrains' suggestions
+	
+	// If there's player input
 	if( fabsf(altChangePerInput) > 0.f || fabsf(rotChangePerInput) > 0.f )
-		m_goalState.m_constraintType = APPLY_CORRECTION;
+	{
+		// Player takes the control over camera
+		m_suggestionOverwriteState.m_playerHasCameraControl	= true;
+		m_suggestionOverwriteState.m_playerPositionOnBegin	= context.anchorGameObject->m_transform.GetWorldPosition();
+		m_suggestionOverwriteState.m_timeElapsedSecondsIdle	= 0.0;
+	}
+	else
+	{
+		// If there's no player input, increase the idle time
+		m_suggestionOverwriteState.m_timeElapsedSecondsIdle += deltaSeconds;
+
+		// Check if Camera Constraint should get the total control over camera
+		bool turnOnContraintSuggesion = CheckToTurnOnConstraintSuggestions( m_suggestionOverwriteState );
+
+		// Yes
+		if( turnOnContraintSuggesion )
+		{
+			// Register that we're taking away the control from the player
+			m_suggestionOverwriteState.m_playerHasCameraControl	= false;
+			m_suggestionOverwriteState.m_playerPositionOnBegin	= context.anchorGameObject->m_transform.GetWorldPosition();
+		}
+	}
+
+	DebugRender2DText( 0.f, Vector2( 0.f, -100.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Player has controls: %s", m_suggestionOverwriteState.m_playerHasCameraControl ? "true" : "false" ) );
+	DebugRender2DText( 0.f, Vector2( 0.f, -120.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("Time Elapsed Idle: %.2lf", m_suggestionOverwriteState.m_timeElapsedSecondsIdle ) );
+
+	if( m_suggestionOverwriteState.m_playerHasCameraControl )
+		m_goalState.m_constraintType =  APPLY_CORRECTION;
 	else
 		m_goalState.m_constraintType = (APPLY_CORRECTION | APPLY_SUGGESTION);
 	
@@ -179,6 +214,14 @@ void CB_Follow::CheckEnableCameraReorientation( CameraState const &currentState,
  		if( m_reorientCameraRotation == false )
  			m_reorientCameraRotation = true;
  	}
+}
+
+bool CB_Follow::CheckToTurnOnConstraintSuggestions( ConstraintSuggestionOverwriteState const &suggestionOverwriteState ) const
+{
+	if( suggestionOverwriteState.m_timeElapsedSecondsIdle >= m_constrainTakeOverTime )
+		return true;
+	else
+		return false;
 }
 
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
