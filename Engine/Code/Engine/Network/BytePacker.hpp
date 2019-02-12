@@ -2,8 +2,6 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Network/Endianness.hpp"
 
-#define BIT_FLAG(f)	(1U << (f))
-
 enum eBytePackerOptionBit : uint
 {
 	// a byte packer allocated its own memory and 
