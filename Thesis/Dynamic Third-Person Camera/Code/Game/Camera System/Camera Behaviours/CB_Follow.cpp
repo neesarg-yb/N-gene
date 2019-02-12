@@ -32,7 +32,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 
 	// Scripted Reorient Camera Behavior
 	UNUSED( currentState );
-//	CheckEnableCameraReorientation( currentState, context, rotChangePerInput );
+	CheckEnableCameraReorientation( currentState, context, rotChangePerInput );
 
 	if( m_reorientCameraRotation )
 	{
@@ -70,6 +70,12 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	// FOV
 	m_fov += fovChangePerInput * m_fovChangeSpeed * deltaSeconds;
 	SetFOV( m_fov );
+
+	// Player overwrites the constrains' suggestions
+	if( fabsf(altChangePerInput) > 0.f || fabsf(rotChangePerInput) > 0.f )
+		m_goalState.m_constraintType = APPLY_CORRECTION;
+	else
+		m_goalState.m_constraintType = (APPLY_CORRECTION | APPLY_SUGGESTION);
 	
 	return m_goalState;
 }
@@ -132,44 +138,47 @@ void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, flo
 
 void CB_Follow::CheckEnableCameraReorientation( CameraState const &currentState, CameraContext const &context, float rotationChangeInput )
 {
-	Matrix44		cameraMat	= currentState.GetTransformMatrix();
-	Vector3			playerFront	= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
-	float			playerSpeed	= context.anchorGameObject->m_velocity.GetLength();
-
-	Vector3 cameraFront		 = cameraMat.GetKColumn();
-	Vector2 playerFrontDirXZ = Vector2( playerFront.x, playerFront.z ).GetNormalized();
-	Vector2 cameraFrontDirXZ = Vector2( cameraFront.x, cameraFront.z ).GetNormalized();
-	bool noPlayerInputRot	 = AreEqualFloats( fabsf(rotationChangeInput), 0.f, 2 );
-
-	if( noPlayerInputRot )
-	{
-		if( m_reorientCameraRotation == false )
-		{
-			float dotProduct = Vector2::DotProduct( playerFrontDirXZ, cameraFrontDirXZ );
-			bool angleThresholdIsCrossed = dotProduct <= m_reorientDotThreshold;
-			bool playerHasEnoughSpeed	 = playerSpeed >= m_minSpeedReqToReorient;
-
-			if( playerHasEnoughSpeed && angleThresholdIsCrossed )
-			{
-				// Enable scripted reorientation behavior
-				m_reorientCameraRotation = true;
-			}
-		}
-	}
-	else
-	{
-		// Player input overrides the scripted behavior
-		m_reorientCameraRotation = false;
-	}
+	UNUSED( currentState );
+	UNUSED( context );
+	UNUSED( rotationChangeInput );
+	// Triggers the reorientation at certain speed and if velocity is withing a certain rotation range
+// 	Matrix44		cameraMat	= currentState.GetTransformMatrix();
+// 	Vector3			playerFront	= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
+// 	float			playerSpeed	= context.anchorGameObject->m_velocity.GetLength();
+// 
+// 	Vector3 cameraFront		 = cameraMat.GetKColumn();
+// 	Vector2 playerFrontDirXZ = Vector2( playerFront.x, playerFront.z ).GetNormalized();
+// 	Vector2 cameraFrontDirXZ = Vector2( cameraFront.x, cameraFront.z ).GetNormalized();
+// 	bool noPlayerInputRot	 = AreEqualFloats( fabsf(rotationChangeInput), 0.f, 2 );
+// 
+// 	if( noPlayerInputRot )
+// 	{
+// 		if( m_reorientCameraRotation == false )
+// 		{
+// 			float dotProduct = Vector2::DotProduct( playerFrontDirXZ, cameraFrontDirXZ );
+// 			bool angleThresholdIsCrossed = dotProduct <= m_reorientDotThreshold;
+// 			bool playerHasEnoughSpeed	 = playerSpeed >= m_minSpeedReqToReorient;
+// 
+// 			if( playerHasEnoughSpeed && angleThresholdIsCrossed )
+// 			{
+// 				// Enable scripted reorientation behavior
+// 				m_reorientCameraRotation = true;
+// 			}
+// 		}
+// 	}
+// 	else
+// 	{
+// 		// Player input overrides the scripted behavior
+// 		m_reorientCameraRotation = false;
+// 	}
 
 
 	// Manually triggers the reorientation when (B) button is pressed
-//
-// 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed )
-// 	{
-// 		if( m_reorientCameraRotation == false )
-// 			m_reorientCameraRotation = true;
-// 	}
+ 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed )
+ 	{
+ 		if( m_reorientCameraRotation == false )
+ 			m_reorientCameraRotation = true;
+ 	}
 }
 
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const

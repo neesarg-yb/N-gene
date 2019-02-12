@@ -123,7 +123,15 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	// Calculate rotation & altitude change
 	float rotationChange = 0.f;
 	float altitudeChange = 0.f;
-	CalculateRotationAltitudeChange( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, rotationChange, altitudeChange );
+	if( (suggestedCameraState.m_constraintType & APPLY_SUGGESTION) == APPLY_SUGGESTION )
+	{
+		// i.e. There is no player input. The constraint is allowed to apply its suggestion
+		CalculateRotationAltitudeChange( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, rotationChange, altitudeChange );
+	}
+	else
+	{
+		// i.e. Constraint should not overwrite the player input..
+	}
 
 	// Set new position!
 	cameraRadius	-= reductionInRadius;
