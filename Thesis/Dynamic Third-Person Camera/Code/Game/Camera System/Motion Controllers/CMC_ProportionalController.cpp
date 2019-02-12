@@ -27,44 +27,22 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 	// Proportional Controller
 	Vector3 const diffInPosition	= goalState.m_position - currentState.m_position;
 	Vector3 const suggestVelocity	= diffInPosition * m_controllingFactor;
-	
-	// Velocities
-	Vector2 currentVelocityXZ	= Vector2( currentState.m_velocity.x, currentState.m_velocity.z );	// Current
-	float	currentVelocityY	= currentState.m_velocity.y;
-	Vector2 suggestedVelocityXZ	= Vector2( suggestVelocity.x, suggestVelocity.z );					// Suggested
-	float	suggestedVelocityY	= suggestVelocity.y;
-
-	if( m_mpcEnabled )
-	{
-		Vector3 anchorVelocity	 = context.anchorGameObject->m_velocity;
-		Vector2 anchorVelocityXZ = Vector2( anchorVelocity.x, anchorVelocity.z );
-
-		// MPC takes account of anchor's velocity in suggestion
-		suggestedVelocityXZ += anchorVelocityXZ * m_leadFactor;
-	}
-
-	// Control exit characteristics
-	Vector2 differenceInVelocityXZ	= suggestedVelocityXZ - currentVelocityXZ;
-	float	differenceInVelocityY	= suggestedVelocityY  - currentVelocityY;
-	float	maxDeltaVelocity		= m_accelerationLimitXZ * deltaSeconds;
-	float	velocityDiffLength		= differenceInVelocityXZ.GetLength();
-
-	Vector2 deltaVelocityXZ;
-	if( velocityDiffLength < maxDeltaVelocity )
-		deltaVelocityXZ = differenceInVelocityXZ;
-	else
-		deltaVelocityXZ = (differenceInVelocityXZ / velocityDiffLength) * maxDeltaVelocity;
+	Vector3 const velocityAtTarget	= context.anchorGameObject->m_velocity;
+	Vector3 const mpcVelocity		= suggestVelocity + velocityAtTarget;
 
 	// Final State to return
 	CameraState finalState( goalState );
 	finalState.m_position	= currentState.m_position;
-	
-	Vector2 finalVelocityXZ = currentVelocityXZ + deltaVelocityXZ;
-	float	finalVelocityY	= currentVelocityY  + differenceInVelocityY;	// For now I'm not applying limit to Y-Velocity
-	finalState.m_velocity	= Vector3( finalVelocityXZ.x, finalVelocityY, finalVelocityXZ.y );
+	finalState.m_velocity	= mpcVelocity;
 
 	// Move according to velocity
 	finalState.m_position += finalState.m_velocity * deltaSeconds;
+
+	// Making sure that the camera is looking at the target position
+	Vector3		anchorWorldPosition	= context.anchorGameObject->m_transform.GetWorldPosition();
+	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition, finalState.m_position );
+	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix ).GetInverse();
+	finalState.m_orientation		= cameraOrientation;
 
 	return finalState;
 }
