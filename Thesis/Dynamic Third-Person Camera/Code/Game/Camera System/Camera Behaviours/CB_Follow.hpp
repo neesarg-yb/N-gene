@@ -1,21 +1,24 @@
 #pragma once
 #include "Game/Camera System/Camera Behaviours/CB_DegreesOfFreedom.hpp"
 
+struct CameraContext;
+
 class CB_Follow : public CB_DegreesOfFreedom
 {
 public:
 	 CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager );
 	~CB_Follow();
 
-private:
-	// Limits
-	FloatRange	m_pitchRange				= FloatRange( -60.f, 35.f );	// In Degrees
-
+public:
 	// Speed - To change variables by
-	float		m_rotationSpeed				= 50.f;							// Degrees per Second
+	float const	m_rotationSpeed				= 50.f;							// Degrees per Second
 	float const	m_distanceChangeSpeed		= 3.5f;
 	float const m_fovChangeSpeed			= 10.f;
 	float const m_offsetChangeSpeed			= 1.f;
+
+private:
+	// Limits
+	FloatRange	m_pitchRange				= FloatRange( -60.f, 35.f );	// In Degrees
 
 	// Spherical Coordinates													_______
 	float		m_distanceFromAnchor		= 0.f;							// |current|
@@ -44,6 +47,7 @@ public:
 	
 private:
 	void	GetPlayerInput( float &distChange_out, float &rotChange_out, float &altChange_out, float &hOffsetChange_out, float &vOffsetChange_out, float &fovChange_out ) const;
+	void	CheckEnableCameraReorientation( CameraState const &currentState, CameraContext const &context, float rotationChangeInput );
 	void	CartesianToPolarTest( CameraState const &camState ) const;
 	float	GetRotationToFaceXZDirection( Vector2 const &xzDir ) const;
 };

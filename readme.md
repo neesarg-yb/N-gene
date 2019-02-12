@@ -1,4 +1,4 @@
-# Dynamic Third-Person Camera (Master's Thesis)
+# Dynamic Third-Person Camera (Master's Thesis) | WIP
 
 Read more about the project [here](https://www.neesarg.me/dynamic-third-person-camera).
 

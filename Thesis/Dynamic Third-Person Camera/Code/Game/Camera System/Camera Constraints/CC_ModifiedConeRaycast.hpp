@@ -48,12 +48,15 @@ public:
 
 	// Curve's properties
 	float				 m_curveHeight			= 1.00f;
-	float				 m_curvewidthFactor		= 0.07f;
+	float				 m_curveWidthFactor		= 0.07f;
 
 	// Sphere raycast properties
 	float				 m_maxRotationDegrees	= 40.f;					// Allowed ROTATION from the camera's position (as in Polar Coordinates)
 	int					 m_numCircularLayers	= 5;
 	std::vector< int >	 m_numRaysInLayer		= { 5, 10, 15, 20, 25 };
+
+	// Raycast Reduction Weight Reaction
+	float const			 m_velocityReactionFrac = 0.38f;				// How much weights reacts to the projected velocity
 
 private:
 	float				 m_fNumCircularLayers	= (float) m_numCircularLayers;

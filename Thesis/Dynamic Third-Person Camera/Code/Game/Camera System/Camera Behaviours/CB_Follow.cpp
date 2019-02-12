@@ -3,6 +3,7 @@
 #include "Engine/Math/Complex.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/GameCommon.hpp"
 
 CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager )
 	: CB_DegreesOfFreedom( name, manager )
@@ -23,45 +24,21 @@ CB_Follow::~CB_Follow()
 CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentState )
 {
 	// Contextual Info.
-	Matrix44		cameraMat	= currentState.GetTransformMatrix();
-	CameraContext	context		= m_manager->GetCameraContext();
-	Vector3			playerFront	= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
-	float			playerSpeed	= context.anchorGameObject->m_velocity.GetLength();
+	CameraContext context = m_manager->GetCameraContext();
 
 	// Controller input
 	float distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput;
 	GetPlayerInput( distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput );
 
 	// Scripted Reorient Camera Behavior
-	Vector3 cameraFront		 = cameraMat.GetKColumn();
-	Vector2 playerFrontDirXZ = Vector2( playerFront.x, playerFront.z ).GetNormalized();
-	Vector2 cameraFrontDirXZ = Vector2( cameraFront.x, cameraFront.z ).GetNormalized();
-	bool noPlayerInputRot	 = AreEqualFloats( fabsf(rotChangePerInput), 0.f, 2 );
-
-	if( noPlayerInputRot )
-	{
-		if( m_reorientCameraRotation == false )
-		{
-			float dotProduct = Vector2::DotProduct( playerFrontDirXZ, cameraFrontDirXZ );
-			bool angleThresholdIsCrossed = dotProduct <= m_reorientDotThreshold;
-			bool playerHasEnoughSpeed	 = playerSpeed >= m_minSpeedReqToReorient;
-
-			if( playerHasEnoughSpeed && angleThresholdIsCrossed )
-			{
-				// Enable scripted reorientation behavior
-				m_reorientCameraRotation = true;
-			}
-		}
-	}
-	else
-	{
-		// Player input overrides the scripted behavior
-		m_reorientCameraRotation = false;
-	}
+	UNUSED( currentState );
+//	CheckEnableCameraReorientation( currentState, context, rotChangePerInput );
 
 	if( m_reorientCameraRotation )
 	{
-		float targetDegrees = GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
+		Vector3	playerFront			= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
+		Vector2	playerFrontDirXZ	= Vector2( playerFront.x, playerFront.z ).GetNormalized();
+		float	targetDegrees		= GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
 		Complex targetRot( targetDegrees );
 
 		Complex currentRot( m_rotationAroundAnchor );
@@ -151,6 +128,48 @@ void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, flo
 	fovChange += leftShoulderPressed  ?  1.f : 0.f;
 	fovChange += rightShoulderPressed ? -1.f : 0.f;
 	fovChange_out = fovChange;
+}
+
+void CB_Follow::CheckEnableCameraReorientation( CameraState const &currentState, CameraContext const &context, float rotationChangeInput )
+{
+	Matrix44		cameraMat	= currentState.GetTransformMatrix();
+	Vector3			playerFront	= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
+	float			playerSpeed	= context.anchorGameObject->m_velocity.GetLength();
+
+	Vector3 cameraFront		 = cameraMat.GetKColumn();
+	Vector2 playerFrontDirXZ = Vector2( playerFront.x, playerFront.z ).GetNormalized();
+	Vector2 cameraFrontDirXZ = Vector2( cameraFront.x, cameraFront.z ).GetNormalized();
+	bool noPlayerInputRot	 = AreEqualFloats( fabsf(rotationChangeInput), 0.f, 2 );
+
+	if( noPlayerInputRot )
+	{
+		if( m_reorientCameraRotation == false )
+		{
+			float dotProduct = Vector2::DotProduct( playerFrontDirXZ, cameraFrontDirXZ );
+			bool angleThresholdIsCrossed = dotProduct <= m_reorientDotThreshold;
+			bool playerHasEnoughSpeed	 = playerSpeed >= m_minSpeedReqToReorient;
+
+			if( playerHasEnoughSpeed && angleThresholdIsCrossed )
+			{
+				// Enable scripted reorientation behavior
+				m_reorientCameraRotation = true;
+			}
+		}
+	}
+	else
+	{
+		// Player input overrides the scripted behavior
+		m_reorientCameraRotation = false;
+	}
+
+
+	// Manually triggers the reorientation when (B) button is pressed
+//
+// 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed )
+// 	{
+// 		if( m_reorientCameraRotation == false )
+// 			m_reorientCameraRotation = true;
+// 	}
 }
 
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const

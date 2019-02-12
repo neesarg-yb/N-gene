@@ -19,6 +19,8 @@ CMC_ProportionalController::~CMC_ProportionalController()
 
 CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds )
 {
+	DebugRender2DText( 0.f, Vector2( 0.f, 100.f), 15.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf( "Current Cam Velocity: %.1f", currentState.m_velocity.GetLength() ) );
+
 	ProcessInput();
 	DebugPrintInformation();
 
@@ -29,7 +31,7 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 	Vector3 const suggestVelocity	= diffInPosition * m_controllingFactor;
 	Vector3 const velocityAtTarget	= context.anchorGameObject->m_velocity;
 	Vector3 const mpcVelocity		= suggestVelocity + velocityAtTarget;
-
+	
 	// Final State to return
 	CameraState finalState( goalState );
 	finalState.m_position	= currentState.m_position;
@@ -55,9 +57,9 @@ void CMC_ProportionalController::ProcessInput()
 	if( g_theInput->IsKeyPressed( DOWN ) )
 		m_controllingFactor -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->IsKeyPressed( RIGHT ) )
-		m_accelerationLimitXZ += 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_accelerationLimitXZ += 10.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->IsKeyPressed( LEFT ) )
-		m_accelerationLimitXZ -= 3.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_accelerationLimitXZ -= 10.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->WasKeyJustPressed( 'M' ) )
 		m_mpcEnabled = !m_mpcEnabled;
 	if( g_theInput->IsKeyPressed( PAGE_DOWN ) )

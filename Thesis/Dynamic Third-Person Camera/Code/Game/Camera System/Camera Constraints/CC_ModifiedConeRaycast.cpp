@@ -58,11 +58,13 @@ CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager 
 	: CameraConstraint( name, manager, priority )
 	, m_followBehavior( followBehavior )
 {
-	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
+	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curveWidthFactor ); };
 
 	CommandRegister( "changeMultRA", ChaneRAMultiplier );
 	CommandRegister( "changeRotSpeed", ChangeRotationDegreesChangeSpeed );
 	CommandRegister( "changeMinRot", ChangeMinRotationRequired );
+
+	s_rotDegreesChangeSpeed = m_followBehavior->m_rotationSpeed;
 }
 
 CC_ModifiedConeRaycast::~CC_ModifiedConeRaycast()
@@ -190,9 +192,9 @@ void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
 	if( g_theInput->IsKeyPressed( NUM_PAD_2 ) )
 		m_curveHeight -= hightChangeSpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( NUM_PAD_6 ) )
-		m_curvewidthFactor += widthChangeSpeed * deltaSeconds;
+		m_curveWidthFactor += widthChangeSpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( NUM_PAD_4 ) )
-		m_curvewidthFactor -= widthChangeSpeed * deltaSeconds;
+		m_curveWidthFactor -= widthChangeSpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'K' ) )
 		IncrementMaxRotationDegrees( deltaSeconds,  1.f );			// Increment
 	if( g_theInput->IsKeyPressed( 'H' ) )
@@ -203,9 +205,9 @@ void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
 		IncrementNumCircularLayers( deltaSeconds, -1.f );			// Decrement
 
 	m_curveHeight		= ClampFloat( m_curveHeight, 0.0001f, 10.f );
-	m_curvewidthFactor	= ClampFloat( m_curvewidthFactor, 0.0001f, 10.f );
+	m_curveWidthFactor	= ClampFloat( m_curveWidthFactor, 0.0001f, 10.f );
 
-	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curvewidthFactor ); };
+	m_curveCB = [ this ] ( float x ) { return WeightCurve( x, m_curveHeight, m_curveWidthFactor ); };
 }
 
 void CC_ModifiedConeRaycast::IncrementMaxRotationDegrees( float deltaSeconds, float multiplier )
@@ -280,7 +282,7 @@ void CC_ModifiedConeRaycast::GeneratePointsOnSphere( std::vector<Vector3> &outPo
 
 void CC_ModifiedConeRaycast::AssignWeightToTargetPoints( std::vector<WeightedTargetPoint_MCR> &outWeightedPoints, std::vector<Vector3> const &targetPoints, Vector3 const &cameraPosOnSphere, Vector3 const &projectedVelocity )
 {
-	Vector3 referenceVector		= cameraPosOnSphere + projectedVelocity;
+	Vector3 referenceVector		= cameraPosOnSphere + (projectedVelocity * m_velocityReactionFrac);
 	Vector3 referenceDirection	= referenceVector.GetNormalized();
 	Vector3 cameraDirection		= cameraPosOnSphere.GetNormalized();
 	
@@ -401,9 +403,8 @@ float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRay
 
 void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<WeightedTargetPoint_MCR> const &targetPoints, std::vector<WeightedRaycastResult_MCR> const &raycastResults, CameraState const &cameraState, float &rotationChange_out, float &altitudeChange_out )
 {
-	UNUSED( altitudeChange_out );
-
 	// Contextual Info.
+	float const deltaSeconds	= (float) GetMasterClock()->GetFrameDeltaSeconds();
 	Vector3 playerPosition		= m_manager.GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
 	Vector3 cameraPosition		= cameraState.m_position;
 	Vector3 cameraRelToPlayer	= cameraPosition - playerPosition;
@@ -445,48 +446,66 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 	Vector2 raMultPos				= Vector2( reactionVectorPos.x, reactionVectorPos.y - 20.f );
 	Vector2 radiusReductionPos		= Vector2( raMultPos.x, raMultPos.y - 20.f );
 	Vector2 altitudeReductionPos	= Vector2( radiusReductionPos.x, radiusReductionPos.y - 20.f );
-	DebugRender2DText( 0.f, reactionVectorPos,		15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Reduction Vector   = (%.3f, %.3f)", reactionVector.x, reactionVector.y) );
-	DebugRender2DText( 0.f, raMultPos,				15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("RA Multiplier      =  %.3f", s_raMultiplier) );
+	DebugRender2DText( 0.f, reactionVectorPos, 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Reduction Vector   = (%.3f, %.3f)", reactionVector.x, reactionVector.y) );
 
 	// Apply multiplier
 	reactionVector.x *= s_raMultiplier;
 	reactionVector.y *= s_raMultiplier;
-	DebugRender2DText( 0.f, radiusReductionPos,		15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rotation Reduction =  %.3f", reactionVector.x ) );
-	DebugRender2DText( 0.f, altitudeReductionPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Altitude Reduction =  %.3f", reactionVector.y ) );
 
-	// Turn towards target rotation
+	// Turn toward the target rotation
 	float rotationChange = reactionVector.x;
 	Complex currentRotChange( 0.f );
 	Complex targetRotChange( rotationChange );
-
-	float const deltaSeconds		= (float) GetMasterClock()->GetFrameDeltaSeconds();
 	currentRotChange.TurnToward( targetRotChange, s_rotDegreesChangeSpeed * deltaSeconds );
 
-	Vector2 rotSpeedPos = Vector2( altitudeReductionPos.x, altitudeReductionPos.y - 20.f );
-	DebugRender2DText( 0.f, rotSpeedPos,			15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Rot Speed          =  %.1f (deg/sec)", s_rotDegreesChangeSpeed) );
+	// Turn toward the target altitude
+	float altitudeChange = reactionVector.y;
+	Complex currentAltChange( 0.f );
+	Complex targetAltChange( altitudeChange );
+	currentAltChange.TurnToward( targetAltChange, s_rotDegreesChangeSpeed * deltaSeconds );
 
-	Vector2 rotChangePerFramePos = Vector2( rotSpeedPos.x, rotSpeedPos.y - 20.f );
-	DebugRender2DText( 0.f, rotChangePerFramePos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rot Change / Frame =  %.3f", s_rotDegreesChangeSpeed * deltaSeconds) );
+	// Out the difference
+	float rotationChangeDegrees = currentRotChange.GetRotation();
+	float altitudeChangeDegrees = currentAltChange.GetRotation();
 
-	rotationChange = currentRotChange.GetRotation();
-	Vector2 rotChangeAppliedPos  = Vector2( rotChangePerFramePos.x, rotChangePerFramePos.y - 20.f );
-	DebugRender2DText( 0.f, rotChangeAppliedPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Applied Rot Change =  %.3f", rotationChange) );
-
-	Vector2 minRotPerFramePos = Vector2( rotChangeAppliedPos.x, rotChangeAppliedPos.y - 20.f );
-	DebugRender2DText( 0.f, minRotPerFramePos,		15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Min Rot Change Req =  %.1f / frame", s_minRotChangePerFrameReqired) );
-
-	// If rotation change is greater than some threshold, apply it!
-	Vector2 appliedNotAppliedPos = Vector2( minRotPerFramePos.x, minRotPerFramePos.y - 20.f );
-	if( fabsf(rotationChange) > s_minRotChangePerFrameReqired )
-	{
-		rotationChange_out = rotationChange;
-		DebugRender2DText( 0.f, appliedNotAppliedPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf("[APPLIED]") );
-	}
+	if( fabsf(rotationChangeDegrees) > s_minRotChangePerFrameReqired )
+		rotationChange_out = rotationChangeDegrees;
 	else
-	{
 		rotationChange_out = 0.f;
-		DebugRender2DText( 0.f, appliedNotAppliedPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("[IGNORED]") );
-	}
+
+	UNUSED( altitudeChange_out );
+	UNUSED( altitudeChangeDegrees );
+// 	if( fabsf(altitudeChangeDegrees) > s_minRotChangePerFrameReqired )
+// 		altitudeChange_out = altitudeChangeDegrees;
+// 	else
+// 		altitudeChange_out = 0.f;
+// 	
+// 
+// 	//--------------------------
+// 	// Debug Stuffs [ No Logic ]
+// 	//
+// 	DebugRender2DText( 0.f, raMultPos,				15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("RA Multiplier      =  %.3f", s_raMultiplier) );
+// 	DebugRender2DText( 0.f, radiusReductionPos,		15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rotation Reduction =  %.3f", reactionVector.x ) );
+// 	DebugRender2DText( 0.f, altitudeReductionPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Altitude Reduction =  %.3f", reactionVector.y ) );
+// 
+// 	Vector2 rotSpeedPos = Vector2( altitudeReductionPos.x, altitudeReductionPos.y - 20.f );
+// 	DebugRender2DText( 0.f, rotSpeedPos,			15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Rot Speed          =  %.1f (deg/sec)", s_rotDegreesChangeSpeed) );
+// 
+// 	Vector2 rotChangePerFramePos = Vector2( rotSpeedPos.x, rotSpeedPos.y - 20.f );
+// 	DebugRender2DText( 0.f, rotChangePerFramePos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rot Change / Frame =  %.3f", s_rotDegreesChangeSpeed * deltaSeconds) );
+// 
+// 	Vector2 rotChangeAppliedPos  = Vector2( rotChangePerFramePos.x, rotChangePerFramePos.y - 20.f );
+// 	DebugRender2DText( 0.f, rotChangeAppliedPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Applied Rot Change =  %.3f", rotationChangeDegrees) );
+// 
+// 	Vector2 minRotPerFramePos = Vector2( rotChangeAppliedPos.x, rotChangeAppliedPos.y - 20.f );
+// 	DebugRender2DText( 0.f, minRotPerFramePos,		15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Min Rot Change Req =  %.1f / frame", s_minRotChangePerFrameReqired) );
+// 
+//  	// If rotation change is greater than some threshold, apply it!
+//  	Vector2 rotAppliedNotAppliedPos = Vector2( minRotPerFramePos.x, minRotPerFramePos.y - 20.f );
+// 	if( fabsf(rotationChangeDegrees) > s_minRotChangePerFrameReqired )
+// 		rotationChange_out = rotationChangeDegrees;
+// 	else
+// 		DebugRender2DText( 0.f, rotAppliedNotAppliedPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("Rot [IGNORED]") );
 }
 
 void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState, Vector3 const &projectedVelocity )
@@ -538,7 +557,7 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 								backgroundBounds.maxs.y - radiusOfPoint - 2.f	);
 	
 	// Render velocity-line
-	Vector3 projVelInCameraSpace	= sphereToCameraMatrix.Multiply( projectedVelocity, 1.f );
+	Vector3 projVelInCameraSpace	= sphereToCameraMatrix.Multiply( projectedVelocity, 1.f ) * m_velocityReactionFrac;
 	float	projVelScreenPositionX	= RangeMapFloat( projVelInCameraSpace.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
 	float	projVelScreenPositionY	= RangeMapFloat( projVelInCameraSpace.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
 	Vector2 projVelInCameraSpaceXY	= Vector2( projVelScreenPositionX, projVelScreenPositionY );
