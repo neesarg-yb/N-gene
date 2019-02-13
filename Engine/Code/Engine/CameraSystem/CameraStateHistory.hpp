@@ -16,6 +16,7 @@ private:
 	int m_lastAddedEntryIndex = -1;
 
 public:
+	bool			IsNotEmpty() const;
 	void			AddNewEntry( CameraState const &newState );
 	CameraState		GetRecentEntry( int numEntriesToSkip ) const;
 	CameraState		GetAverageOfRecentEntries( int numEntries ) const;

@@ -13,6 +13,11 @@ CameraStateHistoy::~CameraStateHistoy()
 
 }
 
+bool CameraStateHistoy::IsNotEmpty() const
+{
+	return (m_history.size() > 0U);
+}
+
 void CameraStateHistoy::AddNewEntry( CameraState const &newState )
 {
 	// Increment the last entry index
@@ -52,7 +57,7 @@ CameraState CameraStateHistoy::GetRecentEntry( int numEntriesToSkip ) const
 
 CameraState CameraStateHistoy::GetAverageOfRecentEntries( int numEntries ) const
 {
-	GUARANTEE_RECOVERABLE( numEntries <= 0, "CameraStateHistory: Provided invalid numEntries for average calculation!" );
+	GUARANTEE_RECOVERABLE( numEntries > 0, "CameraStateHistory: Provided invalid numEntries for average calculation!" );
 
 	std::vector< CameraState > fetchedEntries;
 	for( int entriesToSkip = 0; entriesToSkip < numEntries; entriesToSkip++ )
@@ -65,7 +70,7 @@ CameraState CameraStateHistoy::GetAverageOfRecentEntries( int numEntries ) const
 	float const scaleDownBy		= 1.f / numEntries;
 
 	// From most oldest to most recent
-	for( int i = numEntries-1; i >= 0; i++ )
+	for( int i = numEntries-1; i >= 0; i-- )
 	{
 		CameraState const &ithState = fetchedEntries[i];
 		avgVelocity += (ithState.m_velocity * scaleDownBy);
@@ -73,7 +78,7 @@ CameraState CameraStateHistoy::GetAverageOfRecentEntries( int numEntries ) const
 		avgFOV		+= (ithState.m_fov		* scaleDownBy);
 
 		Quaternion scaledDownQuaternion = Quaternion::Slerp( Quaternion::IDENTITY, ithState.m_orientation, scaleDownBy );
-		avgOrientation.Multiply( scaledDownQuaternion );
+		avgOrientation = avgOrientation.Multiply( scaledDownQuaternion );
 	}
 
 	return CameraState( avgVelocity, avgPosition, avgOrientation, avgFOV );
