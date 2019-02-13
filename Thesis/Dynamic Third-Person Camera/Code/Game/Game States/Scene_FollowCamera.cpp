@@ -174,7 +174,7 @@ void Scene_FollowCamera::Update()
 {
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 
-	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
+	m_player->InformAboutCameraForward( m_cameraManager->GetCameraMatrixForInputReference().GetKColumn() );
 
 	// Update Game Objects
 	for( int i = 0; i < NUM_ENTITIES; i++ )

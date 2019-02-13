@@ -232,7 +232,9 @@ void Scene_CollisionAvoidance::Update()
 	DebugRenderHotkeys();
 
 	// Player moves relative to the direction of camera
-	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
+	Vector3 cameraForward = m_cameraManager->GetCameraMatrixForInputReference().GetKColumn();
+	m_player->InformAboutCameraForward( cameraForward );
+	DebugRenderVector( 0.f, m_player->m_transform.GetWorldPosition(), cameraForward, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 	
 	// Update Game Objects
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();

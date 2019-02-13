@@ -123,7 +123,7 @@ void Scene_DegreesOfFreedom::Update()
 {
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 
-	m_player->InformAboutCameraForward( m_camera->GetForwardVector() );
+	m_player->InformAboutCameraForward( m_cameraManager->GetCameraMatrixForInputReference().GetKColumn() );
 
 	// Update Game Objects
 	for each (GameObject* go in m_gameObjects)

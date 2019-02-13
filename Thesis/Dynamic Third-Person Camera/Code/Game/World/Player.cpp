@@ -113,11 +113,7 @@ void Player::ApplyMovementForces()
 	Vector3 cameraForward = m_cameraForward;
 	cameraForward.y = 0.f;
 	if( cameraForward.GetLength() != 0.f )
-	{
-		cameraForward	 = cameraForward.GetNormalized();
-		cameraForward.x *= -1.f;
-		TODO( "Figureout why I need to flip the x-coordinate sign!" );
-	}
+		cameraForward = cameraForward.GetNormalized();
 	else
 		cameraForward = Vector3::FRONT;
 
