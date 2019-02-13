@@ -583,7 +583,7 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 		Vector2	screenPosition( screenPositionX, screenPositionY );
 		Rgba	weightColor = GetColorFromWeight( weight );
 
-		DebugRender2DRound( 0.f, screenPosition, radiusOfPoint, weightColor, weightColor );
+		DebugRender2DRound( 0.f, screenPosition, radiusOfPoint, 10U, weightColor, weightColor );
 	}
 }
 

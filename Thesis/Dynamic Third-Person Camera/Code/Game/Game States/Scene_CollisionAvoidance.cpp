@@ -232,9 +232,10 @@ void Scene_CollisionAvoidance::Update()
 	DebugRenderHotkeys();
 
 	// Player moves relative to the direction of camera
-	Vector3 cameraForward = m_cameraManager->GetCameraMatrixForInputReference().GetKColumn();
-	m_player->InformAboutCameraForward( cameraForward );
+	Matrix44 inputRefCamMatrix	= m_cameraManager->GetCameraMatrixForInputReference();
+	Vector3	 cameraForward		= inputRefCamMatrix.GetKColumn();
 	DebugRenderVector( 0.f, m_player->m_transform.GetWorldPosition(), cameraForward, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	m_player->InformAboutCameraForward( cameraForward );
 	
 	// Update Game Objects
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
@@ -252,6 +253,11 @@ void Scene_CollisionAvoidance::Update()
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
 
 	m_cameraManager->PostUpdate();
+
+	// Debug Print for visualizing the input interpolation done by camera system
+	Matrix44 actualCamMatrix	= m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	Vector2  rightStickVisPos	= Vector2( 139.f, -340.f );
+	DebugRenderRightStickInputVisualizer( rightStickVisPos, inputRefCamMatrix, actualCamMatrix );
 }
 
 void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const
@@ -449,4 +455,65 @@ void Scene_CollisionAvoidance::DebugRenderHotkeys()
 	// Mouse Instruction
 	std::string mouseLock = Stringf( "Disable the Debug Camera to release mouse!" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, mouseLock.c_str() );
+}
+
+void Scene_CollisionAvoidance::DebugRenderRightStickInputVisualizer( Vector2 screenPosition, Matrix44 const &inputReferenceMat, Matrix44 const &actualCameraMat )
+{
+	float indicatorLength = 100.f;
+	Vector2 leftStick = g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+
+	//---------------------------------------
+	// Input relative to the REFERENCE matrix
+	Vector3 cameraForward = inputReferenceMat.GetKColumn();
+	cameraForward.y = 0.f;
+	if( cameraForward.GetLength() != 0.f )
+		cameraForward = cameraForward.GetNormalized();
+	else
+		cameraForward = Vector3::ZERO;
+
+	Vector3	cameraRight				= Vector3::CrossProduct( Vector3::UP, cameraForward );
+	Vector3	forceRelativeToCamera	= ( cameraForward * leftStick.y ) + ( cameraRight * leftStick.x );
+	Vector2	refMatDebugLineEndPoint	= (Vector2( forceRelativeToCamera.x, forceRelativeToCamera.z ) * indicatorLength) + screenPosition;
+
+	//---------------------------------------
+	// Input relative to ACTUAL CAMERA matrix
+	cameraForward = actualCameraMat.GetKColumn();
+	cameraForward.y = 0.f;
+	if( cameraForward.GetLength() != 0.f )
+		cameraForward = cameraForward.GetNormalized();
+	else
+		cameraForward = Vector3::ZERO;
+
+			cameraRight				= Vector3::CrossProduct( Vector3::UP, cameraForward );
+			forceRelativeToCamera	= ( cameraForward * leftStick.y ) + ( cameraRight * leftStick.x );
+	Vector2 camMatDebugLineEndPoint	= (Vector2( forceRelativeToCamera.x, forceRelativeToCamera.z ) * indicatorLength) + screenPosition;
+	
+
+	// Points to draw the frame
+	AABB2	frameBounds				= AABB2( screenPosition, indicatorLength * 1.2f, indicatorLength * 1.2f );
+	Vector2 topMiddle				= Vector2( (frameBounds.mins.x + frameBounds.maxs.x) * 0.5f, frameBounds.maxs.y );
+	Vector2 botMiddle				= Vector2( topMiddle.x, frameBounds.mins.y );
+	Vector2 rightMiddle				= Vector2( frameBounds.maxs.x, (frameBounds.mins.y + frameBounds.maxs.y) * 0.5f );
+	Vector2 leftMiddle				= Vector2( frameBounds.mins.x, rightMiddle.y );
+
+	// Frame
+	DebugRender2DQuad( 0.f, frameBounds, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
+	
+	// Boundary Circle
+	DebugRender2DRound( 0.f, screenPosition, indicatorLength * 1.05f, 25U, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
+	DebugRender2DRound( 0.f, screenPosition, indicatorLength * 1.03f, 25U, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
+	
+	// Cross with lines
+	DebugRender2DLine( 0.f, botMiddle, RGBA_GRAY_COLOR, topMiddle, RGBA_GRAY_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	DebugRender2DLine( 0.f, leftMiddle, RGBA_GRAY_COLOR, rightMiddle, RGBA_GRAY_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+
+	// World direction labels: North, West, East, South
+	DebugRender2DText( 0.f, Vector2(topMiddle.x + 2.f, topMiddle.y - 16.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "N" );
+	DebugRender2DText( 0.f, Vector2(botMiddle.x + 1.f, botMiddle.y - 1.f), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "S" );
+	DebugRender2DText( 0.f, Vector2(leftMiddle.x, leftMiddle.y), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "W" );
+	DebugRender2DText( 0.f, Vector2(rightMiddle.x - 15.f, rightMiddle.y), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "E" );
+
+	// Interpolated Player input relative to work
+	DebugRender2DLine( 0.f, screenPosition, RGBA_GRAY_COLOR, camMatDebugLineEndPoint, RGBA_GRAY_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );		// Actual Camera Matrix - Input Line
+	DebugRender2DLine( 0.f, screenPosition, RGBA_KHAKI_COLOR, refMatDebugLineEndPoint, RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );		// Reference Matrix - Input Line
 }

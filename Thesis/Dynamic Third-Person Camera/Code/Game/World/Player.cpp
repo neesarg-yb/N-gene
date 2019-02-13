@@ -99,7 +99,7 @@ void Player::ApplyResistantForces()
 
 	Vector3 frictionForce		= m_velocity.GetNormalized() * -1.f;		// Friction Direction = (Velocity Direction) * (Normal Force)
 	float	frictionCoefficient	= m_friction * m_mass;
-	frictionForce =  frictionForce * frictionCoefficient;					// Friction Force = (Friction Direction) * coefficient
+	frictionForce = frictionForce * frictionCoefficient;					// Friction Force = (Friction Direction) * coefficient
 
 	ApplyForce( frictionForce );
 }
