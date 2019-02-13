@@ -266,6 +266,7 @@
     <ClCompile Include="CameraSystem\CameraManager.cpp" />
     <ClCompile Include="CameraSystem\CameraMotionController.cpp" />
     <ClCompile Include="CameraSystem\CameraState.cpp" />
+    <ClCompile Include="CameraSystem\CameraStateHistory.cpp" />
     <ClCompile Include="Core\Blackboard.cpp" />
     <ClCompile Include="Core\Clock.cpp" />
     <ClCompile Include="Core\ContactPoint.cpp" />
@@ -391,6 +392,7 @@
     <ClInclude Include="CameraSystem\CameraManager.hpp" />
     <ClInclude Include="CameraSystem\CameraMotionController.hpp" />
     <ClInclude Include="CameraSystem\CameraState.hpp" />
+    <ClInclude Include="CameraSystem\CameraStateHistory.hpp" />
     <ClInclude Include="Core\Blackboard.hpp" />
     <ClInclude Include="Core\Clock.hpp" />
     <ClInclude Include="Core\ContactPoint.hpp" />

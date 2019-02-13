@@ -411,6 +411,9 @@
     <ClCompile Include="Math\SmoothNoise.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="CameraSystem\CameraStateHistory.cpp">
+      <Filter>CameraSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\Vector2.hpp">
@@ -793,6 +796,9 @@
     </ClInclude>
     <ClInclude Include="Math\SmoothNoise.hpp">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraSystem\CameraStateHistory.hpp">
+      <Filter>CameraSystem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
