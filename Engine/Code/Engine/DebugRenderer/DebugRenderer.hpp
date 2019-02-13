@@ -46,6 +46,7 @@ void ClearAllRenderingObjects( Command& cmd );
 void DebugRender2DRound( float lifetime,
 	Vector2 const	&center,
 	float const		 radius,
+	uint const		 numSlices,
 	Rgba const		&startColor,
 	Rgba const		&endColor );
 
