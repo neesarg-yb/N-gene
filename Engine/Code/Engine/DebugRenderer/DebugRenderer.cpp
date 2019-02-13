@@ -200,12 +200,11 @@ void AddTexturedAABBToMeshBuilder( MeshBuilder& mb, Vector3 const &mins, float h
 	mb.PushVertex( bottomLeftPos );
 }
 
-void DebugRender2DRound( float lifetime, Vector2 const &center, float const radius, Rgba const &startColor, Rgba const &endColor )
+void DebugRender2DRound( float lifetime, Vector2 const &center, float const radius, uint const numSlices, Rgba const &startColor, Rgba const &endColor )
 {
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, true );
 
-	uint  const numSlices = 10U;
 	float const degreesPerSlice = 360.f / (float)numSlices;
 
 	// Push Center Vertex: idx = 0
