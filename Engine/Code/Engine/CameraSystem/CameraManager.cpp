@@ -6,6 +6,7 @@ CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem, float ca
 	: m_camera( camera )
 	, m_cameraRadius( cameraRadius )
 	, m_inputSystem( inputSystem )
+	, m_previousCameraStates( CAMERASTATE_HISTORY_LENGTH )
 {
 	m_defaultMotionController = new CameraMotionController( "default", this );
 }
@@ -74,7 +75,8 @@ void CameraManager::Update( float deltaSeconds )
 		SetCurrentCameraStateTo( constrainedCameraState );
 	}
 
-	m_lastFinalCameraState = constrainedCameraState;
+	// Add the final camera state to history
+	m_previousCameraStates.AddNewEntry( constrainedCameraState );
 }
 
 void CameraManager::PreUpdate()
@@ -109,7 +111,13 @@ void CameraManager::SetSphereCollisionCallback( sphere_collision_func collisionF
 
 CameraContext CameraManager::GetCameraContext() const
 {
-	return CameraContext( m_anchor, m_raycastCB, m_cameraRadius, m_collisionCB, m_lastFinalCameraState );
+	CameraState lastFramesCameraState = CameraState();		// In case this is the first frame
+
+	// If not, get most recent entry from the history
+	if( m_previousCameraStates.IsNotEmpty() )
+		lastFramesCameraState = m_previousCameraStates.GetRecentEntry( 0 );
+
+	return CameraContext( m_anchor, m_raycastCB, m_cameraRadius, m_collisionCB, lastFramesCameraState );
 }
 
 int CameraManager::AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour )
@@ -157,7 +165,7 @@ void CameraManager::DeleteCameraBehaviour( CameraBehaviour *cameraBehaviourToDel
 
 void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName )
 {
-	// If setting the behaviour for the first time
+	// If setting the behavior for the first time
 	bool immediatlySetCurrentState = false;
 
 	// If there is a camera behavior already active
@@ -182,7 +190,7 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 		CameraState suggestedState = m_aciveBehaviour->Update( 0.f, m_currentCameraState );
 		
 		SetCurrentCameraStateTo( suggestedState );
-		m_lastFinalCameraState = suggestedState;
+		m_previousCameraStates.AddNewEntry( suggestedState );
 	}
 
 	// Update Active Constraints
@@ -237,6 +245,23 @@ void CameraManager::DeregisterConstraint( char const *name )
 void CameraManager::EnableConstraints( bool enable /*= true */ )
 {
 	m_constraintsEnabled = enable;
+}
+
+CameraState CameraManager::GetCameraStateForInputReference() const
+{
+	return m_previousCameraStates.GetAverageOfRecentEntries( m_averageWithNumPreviousCameraStates );
+}
+
+Matrix44 CameraManager::GetCameraMatrixForInputReference() const
+{
+	CameraState	const averagedState	= GetCameraStateForInputReference();
+	Vector3		const worldPosition	= averagedState.m_position;
+	Quaternion	const rotation		= averagedState.m_orientation;
+
+	Matrix44 cameraMatrix = rotation.GetAsMatrix44();
+	cameraMatrix.SetTColumn( worldPosition );
+
+	return cameraMatrix;
 }
 
 CameraMotionController* CameraManager::GetMotionController()
