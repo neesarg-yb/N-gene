@@ -11,7 +11,7 @@ class CameraManager;
 class CameraBehaviour
 {
 public:
-			 CameraBehaviour( std::string const &behaviourName, CameraManager const *manager );
+			 CameraBehaviour( std::string const &behaviourName, CameraManager *manager );
 	virtual ~CameraBehaviour();
 
 public:
@@ -22,7 +22,7 @@ public:
 	Tags					 m_constraints;	// Which constraints to apply by Camera Manager
 
 protected:
-	CameraManager const		*m_manager		= nullptr;
+	CameraManager			*m_manager		= nullptr;
 
 public:
 	virtual void			PreUpdate () = 0;

@@ -94,6 +94,7 @@ public:
 	void EnableConstraints	 ( bool enable = true );
 
 	// Reference for game-side player input
+	void		SetAverageCountForInputReferenceMatrixCalculation( int avgCount );
 	CameraState GetCameraStateForInputReference() const;
 	Matrix44	GetCameraMatrixForInputReference() const;
 

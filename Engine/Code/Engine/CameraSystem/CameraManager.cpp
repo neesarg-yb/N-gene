@@ -247,6 +247,11 @@ void CameraManager::EnableConstraints( bool enable /*= true */ )
 	m_constraintsEnabled = enable;
 }
 
+void CameraManager::SetAverageCountForInputReferenceMatrixCalculation( int avgCount )
+{
+	m_averageWithNumPreviousCameraStates = (uint)avgCount;
+}
+
 CameraState CameraManager::GetCameraStateForInputReference() const
 {
 	return m_previousCameraStates.GetAverageOfRecentEntries( m_averageWithNumPreviousCameraStates );
