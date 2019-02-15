@@ -2,7 +2,7 @@
 #include "CameraBehaviour.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 
-CameraBehaviour::CameraBehaviour( std::string const &behaviourName, CameraManager const *manager )
+CameraBehaviour::CameraBehaviour( std::string const &behaviourName, CameraManager *manager )
 	: m_name( behaviourName )
 	, m_manager( manager )
 {
