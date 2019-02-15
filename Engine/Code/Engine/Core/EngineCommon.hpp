@@ -8,6 +8,7 @@ class Clock;
 typedef tinyxml2::XMLElement XMLElement;
 typedef tinyxml2::XMLAttribute XMLAttribute;
 typedef unsigned int	uint;
+typedef unsigned char	uchar;
 typedef unsigned char	byte_t;
 
 #define MAX_LIGHTS 8U
@@ -53,6 +54,8 @@ const   float	   g_aspectRatio = 1.77f;
 
 constexpr uint16_t	RELIABLE_MESSAGES_WINDOW	= 64;
 constexpr uint		MAX_NETWORK_ID_LENGTH		= 16;
+
+#define BIT_FLAG(f)	(1U << (f))
 
 
 // Use this to deduce type of the pointer so we can cast; 

@@ -10,6 +10,7 @@
 #include "Engine/CameraSystem/CameraContext.hpp"
 #include "Engine/CameraSystem/CameraBehaviour.hpp"
 #include "Engine/CameraSystem/CameraConstraint.hpp"
+#include "Engine/CameraSystem/CameraStateHistory.hpp"
 #include "Engine/CameraSystem/CameraMotionController.hpp"
 
 struct CustomCameraConstarintCompare
@@ -24,6 +25,8 @@ struct CustomCameraConstarintCompare
 typedef std::vector< CameraBehaviour* >																	CameraBehaviourList;
 typedef std::vector< CameraConstraint* >																CameraConstraintList;
 typedef std::priority_queue< CameraConstraint*, CameraConstraintList, CustomCameraConstarintCompare >	CameraConstraintPriorityQueue;		// Top: lowest priority & Bottom: highest priority
+
+constexpr int CAMERASTATE_HISTORY_LENGTH = 60;
 
 class CameraManager
 {
@@ -50,8 +53,11 @@ private:
 	CameraBehaviourList		 m_cameraBehaviours;		// All the behaviors that can be run on Camera
 	CameraBehaviour			*m_aciveBehaviour = nullptr;
 	CameraState				 m_lastSuggestedState;		// It is set before applying any constraints or motion controller changes
-	CameraState				 m_lastFinalCameraState;	// It is set at the end of Update(), after all the contraint and motion controller changes
+	CameraStateHistoy		 m_previousCameraStates;	// It is set at the end of Update(), after all the contraint and motion controller changes
 	CameraState				 m_stateOnTransitionBegin;
+
+	// Camera's State for game-side input's reference
+	uint					 m_averageWithNumPreviousCameraStates = 1;
 	
 	float const m_behaviourTransitionSeconds = 1.f;
 	float		m_behaviourTransitionTimeRemaining = 0.f;
@@ -86,6 +92,11 @@ public:
 	void RegisterConstraint	 ( CameraConstraint* newConstraint );
 	void DeregisterConstraint( char const *name );
 	void EnableConstraints	 ( bool enable = true );
+
+	// Reference for game-side player input
+	void		SetAverageCountForInputReferenceMatrixCalculation( int avgCount );
+	CameraState GetCameraStateForInputReference() const;
+	Matrix44	GetCameraMatrixForInputReference() const;
 
 private:
 	CameraMotionController* GetMotionController();

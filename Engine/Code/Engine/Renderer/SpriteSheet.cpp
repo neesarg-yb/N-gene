@@ -58,6 +58,7 @@ AABB2 SpriteSheet::GetTexCoordsForSpriteIndex( int spriteIndex ) const
 	return GetTexCoordsForSpriteCoords(spriteCoords);
 }
 
-int SpriteSheet::GetNumSprites() const {
-	return m_spriteLayout.x * m_spriteLayout.y;
+IntVector2 SpriteSheet::GetSpriteLayout() const
+{
+	return m_spriteLayout;
 }

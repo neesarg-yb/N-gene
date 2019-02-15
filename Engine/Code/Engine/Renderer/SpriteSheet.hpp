@@ -12,9 +12,9 @@ public:
 	 SpriteSheet( const Texture& texture, int tilesWide, int tilesHigh );
 	~SpriteSheet();
 	
-	AABB2 GetTexCoordsForSpriteCoords( IntVector2 spriteCoords ) const;			// Assumes that bottom-left coordinate is (0, 0)
-	AABB2 GetTexCoordsForSpriteIndex( int spriteIndex ) const;					// Assumes that zero-index starts from top-left..
-	int GetNumSprites() const;
+	AABB2		GetTexCoordsForSpriteCoords( IntVector2 spriteCoords ) const;			// Assumes that bottom-left coordinate is (0, 0)
+	AABB2		GetTexCoordsForSpriteIndex( int spriteIndex ) const;					// Assumes that zero-index starts from top-left..
+	IntVector2	GetSpriteLayout() const;
 
 private:
 	IntVector2		m_spriteLayout;			// # of sprites across, and down, on the sheet
