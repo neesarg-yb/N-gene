@@ -3,7 +3,7 @@
 #include "Engine/Core/Window.hpp"
 #include "Game/GameCommon.hpp"
 
-CB_FreeLook::CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager const *manager, eFreeLookInputSource inputSource )
+CB_FreeLook::CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager *manager, eFreeLookInputSource inputSource )
 	: CameraBehaviour( behaviourName, manager )
 	, m_movementSpeed( movementSpeed )
 	, m_rotationSpeed( rotationSpeed )

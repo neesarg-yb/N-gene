@@ -7,7 +7,7 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
 
-CB_ProportionalController::CB_ProportionalController( char const *name, CameraManager const *manager )
+CB_ProportionalController::CB_ProportionalController( char const *name, CameraManager *manager )
 	: CB_DegreesOfFreedom( name, manager )
 {
 

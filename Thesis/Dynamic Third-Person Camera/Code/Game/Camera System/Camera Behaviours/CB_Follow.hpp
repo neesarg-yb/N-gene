@@ -17,7 +17,7 @@ public:
 class CB_Follow : public CB_DegreesOfFreedom
 {
 public:
-	 CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager );
+	 CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager );
 	~CB_Follow();
 
 public:
@@ -38,6 +38,7 @@ private:
 	
 	// Camera reorientation around anchor
 	bool		m_reorientCameraRotation	= false;
+	uint		m_framesSinceReorientBegan	= 1U;							// How many frames has passed since the reorientation procedure has began, most recently
 	float		m_minSpeedReqToReorient		= 10.f;							// Min speed of anchor, after which the reorientation starts
 	float		m_reorientAfterDegreeDiff	= 145.f;						// Degree difference between camera forward and anchor forward
 	float 		m_reorientDotThreshold		= 0.f;

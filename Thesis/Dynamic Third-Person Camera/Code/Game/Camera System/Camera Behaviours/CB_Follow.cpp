@@ -13,7 +13,7 @@ ConstraintSuggestionOverwriteState::ConstraintSuggestionOverwriteState( bool pla
 
 }
 
-CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager )
+CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager )
 	: CB_DegreesOfFreedom( name, manager )
 	, m_rotationSpeed( rotationSpeed )
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )
@@ -44,6 +44,12 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 
 	if( m_reorientCameraRotation )
 	{
+		// Start input interpolation
+		m_framesSinceReorientBegan++;
+		uint averageCountForInputReference = (m_framesSinceReorientBegan > CAMERASTATE_HISTORY_LENGTH) ? CAMERASTATE_HISTORY_LENGTH : m_framesSinceReorientBegan;
+		m_manager->SetAverageCountForInputReferenceMatrixCalculation( averageCountForInputReference );
+
+		// Do the reorientation
 		Vector3	playerFront			= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
 		Vector2	playerFrontDirXZ	= Vector2( playerFront.x, playerFront.z ).GetNormalized();
 		float	targetDegrees		= GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
@@ -60,7 +66,18 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 			m_reorientCameraRotation = false;
 	}
 	else
+	{
+		// No input interpolation
+		m_framesSinceReorientBegan = (m_framesSinceReorientBegan > CAMERASTATE_HISTORY_LENGTH) ? CAMERASTATE_HISTORY_LENGTH : m_framesSinceReorientBegan;
+
+		if( m_framesSinceReorientBegan > 1U )
+			m_framesSinceReorientBegan--;
+
+		m_manager->SetAverageCountForInputReferenceMatrixCalculation( m_framesSinceReorientBegan );
+
+		// Change the rotation, normally
 		m_rotationAroundAnchor	+= rotChangePerInput * m_rotationSpeed * deltaSeconds;
+	}
 
 	// Polar Coordinates
 	m_distanceFromAnchor	+= distChangePerInput * m_distanceChangeSpeed * deltaSeconds;
