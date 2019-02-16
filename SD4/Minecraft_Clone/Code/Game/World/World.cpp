@@ -1,5 +1,6 @@
 #pragma once
 #include "World.hpp"
+#include <algorithm>
 #include "Game/GameCommon.hpp"
 
 World::World( Clock *parentClock )
@@ -7,26 +8,15 @@ World::World( Clock *parentClock )
 {
 	// Setting up the Camera
 	m_camera = new MCamera( *g_theRenderer );
-	m_camera->m_position = Vector3( -3.f, 3.f, 3.f );
+	m_camera->m_cameraNear = 0.001f;
+	m_camera->m_cameraFar = 2000.f;
+
+	m_camera->m_position = Vector3( -3.f, 3.f, BLOCKS_WIDE_Z );
 	m_camera->m_yawDegreesAboutZ = -40.f;
 	m_camera->SetPitchDegreesAboutY( 25.f );
 
-	ChunkCoord chunk1Coord( 0, 0 );
-	Chunk *chunk1 = new Chunk( chunk1Coord );
-	ChunkCoord chunk2Coord( -1, 2 );
-	Chunk *chunk2 = new Chunk( chunk2Coord );
-	ChunkCoord chunk3Coord( 0, 2 );
-	Chunk *chunk3 = new Chunk( chunk3Coord );
-	ChunkCoord chunk4Coord( 1, 2 );
-	Chunk *chunk4 = new Chunk( chunk4Coord );
-	ChunkCoord chunk5Coord( 0, 3 );
-	Chunk *chunk5 = new Chunk( chunk5Coord );
-
-	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk1Coord, chunk1 ) );
-	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk2Coord, chunk2 ) );
-	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk3Coord, chunk3 ) );
-	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk4Coord, chunk4 ) );
-	m_activeChunks.insert( std::pair<ChunkCoord, Chunk*>( chunk5Coord, chunk5 ) );
+	// Activation Cheatsheet
+	PopulateChunkActivationCheatsheet( m_deactivationRadius );
 }
 
 World::~World()
@@ -47,7 +37,13 @@ World::~World()
 void World::Update()
 {
 	float const deltaSeconds = (float) m_clock.GetFrameDeltaSeconds();
+
+	// Moves the camera, for now
 	ProcessInput( deltaSeconds );
+
+	// Chunk Management
+	ActivateChunkNearestToPosition( m_camera->m_position );
+	DeactivateChunkForPosition( m_camera->m_position );
 
 	m_camera->RebuildMatrices();
 }
@@ -158,9 +154,106 @@ void World::ProcessInput( float deltaSeconds )
 	m_camera->m_position += positionChange;
 }
 
-Block* World::GetChunkAtChunkCoordinates( IntVector2 const &chunckCoord )
+void World::ActivateChunkNearestToPosition( Vector3 const &playerWorldPos )
 {
-	UNUSED( chunckCoord );
+	ChunkCoord	const originChunkCoord			= ChunkCoordFromWorldPosition( playerWorldPos );
+	float		const activationRadiusSquared	= (float)(m_activationRadius * m_activationRadius);
 
-	return nullptr;
+	// Activate the next chunk according to priority..
+	for( int i = 0; i < m_activationPriorityCheatSheet.size(); i++ )
+	{
+		ChunkCoord const &relativeOffset		= m_activationPriorityCheatSheet[i];
+		ChunkCoord const  activationChunkCoord	= originChunkCoord + relativeOffset;
+
+		// Make sure we're inside activation radius
+		float distanceFromOriginSquared = (activationChunkCoord - originChunkCoord).GetLengthSquared();
+		if( distanceFromOriginSquared > activationRadiusSquared )
+			return;
+
+		// See the chunk at this coord exist in the map
+		ChunkMap::iterator it = m_activeChunks.find( activationChunkCoord );
+		if( it == m_activeChunks.end() )
+		{
+			// Create the chunk, add it to activation list
+			Chunk *newChunk = new Chunk( activationChunkCoord );		// It should mark it dirty!
+			m_activeChunks[ activationChunkCoord ] = newChunk;
+
+			it = m_activeChunks.find( activationChunkCoord );
+		}
+
+		// Activate it, if needed
+		Chunk &chunkToAct = *it->second;
+		if( chunkToAct.IsDirty() )
+		{
+			// Construct the mesh
+			chunkToAct.RebuildMesh();
+			return;
+		}
+	}
+}
+
+void World::DeactivateChunkForPosition( Vector3 const &playerWorldPos )
+{
+	ChunkCoord	const	originChunkCoord			= ChunkCoordFromWorldPosition( playerWorldPos );
+	float		const	deactivationRadiusSquared	= (float)(m_deactivationRadius * m_deactivationRadius);
+	float				chunkAtMaxDistanceSquared	= 0.f;
+	ChunkMap::iterator	chunkToDeactivate			= m_activeChunks.end();
+
+	for( ChunkMap::iterator it = m_activeChunks.begin(); it != m_activeChunks.end(); it++ )
+	{
+		ChunkCoord	const thisChunkCoord = it->first;
+		float		const distanceFromOriginSquared = (thisChunkCoord - originChunkCoord).GetLengthSquared();
+
+		// Only do if outside deactivation radius
+		if( distanceFromOriginSquared < deactivationRadiusSquared )
+			continue;
+
+		// Not the chunk at the largest distance
+		if( distanceFromOriginSquared > chunkAtMaxDistanceSquared )
+		{
+			chunkAtMaxDistanceSquared = distanceFromOriginSquared;
+			chunkToDeactivate = it;
+		}
+	}
+
+	// Deactivate if we found any
+	if( chunkToDeactivate != m_activeChunks.end() )
+	{
+		Chunk* &chunkToDelete = chunkToDeactivate->second;
+
+		delete chunkToDelete;
+		chunkToDelete = nullptr;
+
+		m_activeChunks.erase( chunkToDeactivate );
+	}
+}
+
+void World::PopulateChunkActivationCheatsheet( int deactivationRadius )
+{
+	m_activationPriorityCheatSheet.clear();
+
+	for( int x = -deactivationRadius; x <= deactivationRadius; x++ )
+	{
+		for( int y = -deactivationRadius; y <= deactivationRadius; y++ )
+			m_activationPriorityCheatSheet.push_back( ChunkCoord(x,y) );
+	}
+
+	std::sort( m_activationPriorityCheatSheet.begin(), m_activationPriorityCheatSheet.end(), World::CheetsheetCompare );
+}
+
+bool World::CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b )
+{
+	float aFromOriginDistSquared = a.GetLengthSquared();
+	float bFromOriginDistSquared = b.GetLengthSquared();
+
+	return (aFromOriginDistSquared < bFromOriginDistSquared);
+}
+
+ChunkCoord World::ChunkCoordFromWorldPosition( Vector3 const &position )
+{
+	Vector2 positionXY = Vector2( position.x, position.y );
+	positionXY.x = floorf( positionXY.x / (float)BLOCKS_WIDE_X );
+	positionXY.y = floorf( positionXY.y / (float)BLOCKS_WIDE_Y );
+
+	return ChunkCoord( (int)positionXY.x, (int)positionXY.y );
 }

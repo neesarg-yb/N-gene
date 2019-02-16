@@ -28,15 +28,24 @@ private:
 
 	// Gameplay
 	ChunkMap	 m_activeChunks;
+	int			 m_activationRadius		= 4;	// chunks
+	int			 m_deactivationRadius	= 5;	// chunks
+	
+	// Relative offsets from origin
+	std::vector< ChunkCoord > m_activationPriorityCheatSheet;	// Sorted: smallest to largest distance from origin
 
 public:
 	void	Update();
 	void	Render() const;
 
-public:
+private:
 	void	ProcessInput( float deltaSeconds );
-	Block*	GetChunkAtChunkCoordinates( IntVector2 const &chunckCoord );
+	void	ActivateChunkNearestToPosition( Vector3 const &playerWorldPos );
+	void	DeactivateChunkForPosition( Vector3 const &playerWorldPos );
+	void	PopulateChunkActivationCheatsheet( int deactivationRadius );
 
 public:
-	static void RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );
+	static void			RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );
+	static bool			CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b );
+	static ChunkCoord	ChunkCoordFromWorldPosition( Vector3 const &position );
 };

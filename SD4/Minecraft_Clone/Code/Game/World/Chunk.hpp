@@ -22,10 +22,12 @@ private:
 	// Mesh
 	MeshBuilder		*m_cpuMesh = nullptr;
 	Mesh			*m_gpuMesh = nullptr;
+	bool			 m_isDirty = true;		// i.e. we need to rebuild the CPU & GPU Mesh
 
 public:
 	void		Render( Renderer &theRenderer ) const;
 	void		RebuildMesh();
+	inline bool	IsDirty() const { return m_isDirty; }
 
 public:
 	int			GetIndexFromBlockCoord	( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const;

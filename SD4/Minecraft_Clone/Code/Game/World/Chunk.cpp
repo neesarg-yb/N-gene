@@ -38,8 +38,9 @@ Chunk::Chunk( ChunkCoord position )
 			}
 		}
 	}
-	
-	RebuildMesh();
+
+	// Mark as Dirty
+	m_isDirty = true;
 }
 
 Chunk::~Chunk()
@@ -68,30 +69,34 @@ void Chunk::Render( Renderer &theRenderer ) const
 
 void Chunk::RebuildMesh()
 {
-	// CPU side mesh
+	// Only rebuild, if dirty
+	if( m_isDirty == false )
+		return;
+
+	// Delete older meshes
 	if( m_cpuMesh != nullptr )
 	{
 		delete m_cpuMesh;
 		m_cpuMesh = nullptr;
 	}
-
-	m_cpuMesh = new MeshBuilder();
-	m_cpuMesh->Begin( PRIMITIVE_TRIANGES, true );
-
-	for( int bIdx = 0; bIdx < NUM_BLOCKS_PER_CHUNK; bIdx++ )
-		AddVertsForBlock( bIdx, *m_cpuMesh );
-
-	m_cpuMesh->End();
-
-
-	// GPU side mesh
 	if( m_gpuMesh != nullptr )
 	{
 		delete m_gpuMesh;
 		m_gpuMesh = nullptr;
 	}
 
+	// CPU side mesh
+	m_cpuMesh = new MeshBuilder();
+	m_cpuMesh->Begin( PRIMITIVE_TRIANGES, true );
+	for( int bIdx = 0; bIdx < NUM_BLOCKS_PER_CHUNK; bIdx++ )
+		AddVertsForBlock( bIdx, *m_cpuMesh );
+	m_cpuMesh->End();
+
+	// GPU side mesh
 	m_gpuMesh = m_cpuMesh->ConstructMesh<Vertex_Lit>();
+	
+	// Not dirty, anymore..
+	m_isDirty = false;
 }
 
 int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const
