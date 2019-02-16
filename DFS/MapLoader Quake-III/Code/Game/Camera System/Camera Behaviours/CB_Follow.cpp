@@ -3,7 +3,7 @@
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
-CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager const *manager )
+CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager )
 	: CB_DegreesOfFreedom( name, manager )
 	, m_rotationSpeed( rotationSpeed )
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )

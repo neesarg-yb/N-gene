@@ -9,7 +9,7 @@
 #include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/Camera System/Motion Controllers/CMC_ProportionalController.hpp"
 
-typedef std::vector< GameObject* >	GameObjectList;
+typedef std::vector< Renderable* >	RenderableList;
 typedef std::vector< Light* >		Lights;
 
 class Scene_ProtoScene3D : public GameState
@@ -25,12 +25,7 @@ public:
 	Lights					 m_lights;
 	Vector4					 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.4f );
 
-	// Game Specific 
-	GameObjectList			 m_gameObjects[ NUM_ENTITIES ];
-
-	// Obj Models
-	Renderable				*m_snowMiku			= nullptr;
-	Renderable				*m_spaceship		= nullptr;
+	RenderableList			 m_renderables;
 
 private:
 	// Camera
@@ -40,8 +35,6 @@ private:
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
 
-	ConvexPolyhedron		 m_testHedron;
-	Renderable				*m_testHedronRenderable		= nullptr;
 
 public:
 	void JustFinishedTransition();
@@ -52,6 +45,6 @@ public:
 
 private:
 	// Scene Management
-	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
+	void AddNewRenderableToScene( Renderable *renderable );
 };

@@ -292,6 +292,8 @@
     <ClCompile Include="Game States\Scenes\Scene_StopwatchTest.cpp" />
     <ClCompile Include="GameCommon.cpp" />
     <ClCompile Include="Main_Win32.cpp" />
+    <ClCompile Include="ParserMAP\BrushMAP.cpp" />
+    <ClCompile Include="ParserMAP\EntityMAP.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
   </ItemGroup>
@@ -308,6 +310,8 @@
     <ClInclude Include="Game States\Scenes\Scene_QuaternionsTest.hpp" />
     <ClInclude Include="Game States\Scenes\Scene_StopwatchTest.hpp" />
     <ClInclude Include="GameCommon.hpp" />
+    <ClInclude Include="ParserMAP\BrushMAP.hpp" />
+    <ClInclude Include="ParserMAP\EntityMAP.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
   </ItemGroup>

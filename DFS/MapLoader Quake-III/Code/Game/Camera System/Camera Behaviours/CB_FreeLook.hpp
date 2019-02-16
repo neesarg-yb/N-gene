@@ -10,7 +10,7 @@ enum eFreeLookInputSource
 class CB_FreeLook : public CameraBehaviour
 {
 public:
-	 CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager const *manager, eFreeLookInputSource inputSource );
+	 CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager *manager, eFreeLookInputSource inputSource );
 	~CB_FreeLook();
 
 public:

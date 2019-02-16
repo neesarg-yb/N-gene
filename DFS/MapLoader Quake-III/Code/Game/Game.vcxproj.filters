@@ -32,6 +32,9 @@
     <Filter Include="Game States\Scenes">
       <UniqueIdentifier>{751e8837-22a4-420b-a1e4-c35724e287d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ParserMAP">
+      <UniqueIdentifier>{d912cbda-6312-45ef-a3d7-2113f2cecd8f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -76,6 +79,12 @@
     <ClCompile Include="Game States\Scenes\Scene_StopwatchTest.cpp">
       <Filter>Game States\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="ParserMAP\BrushMAP.cpp">
+      <Filter>ParserMAP</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserMAP\EntityMAP.cpp">
+      <Filter>ParserMAP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -119,6 +128,12 @@
     </ClInclude>
     <ClInclude Include="Game States\Scenes\Scene_StopwatchTest.hpp">
       <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserMAP\BrushMAP.hpp">
+      <Filter>ParserMAP</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserMAP\EntityMAP.hpp">
+      <Filter>ParserMAP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

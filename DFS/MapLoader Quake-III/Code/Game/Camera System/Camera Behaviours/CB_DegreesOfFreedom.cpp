@@ -2,7 +2,7 @@
 #include "CB_DegreesOfFreedom.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
-CB_DegreesOfFreedom::CB_DegreesOfFreedom( char const *name, CameraManager const *manager )
+CB_DegreesOfFreedom::CB_DegreesOfFreedom( char const *name, CameraManager *manager )
 	: CameraBehaviour( name, manager )
 {
 
