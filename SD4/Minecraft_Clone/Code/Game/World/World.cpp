@@ -44,6 +44,7 @@ void World::Update()
 	// Chunk Management
 	ActivateChunkNearestToPosition( m_camera->m_position );
 	DeactivateChunkForPosition( m_camera->m_position );
+	RebuiltOneChunkIfRequired( m_camera->m_position );
 
 	m_camera->RebuildMatrices();
 }
@@ -69,7 +70,9 @@ void World::Render() const
 	for( ChunkMap::const_iterator it = m_activeChunks.begin(); it != m_activeChunks.end(); it++ )
 	{
 		Chunk const *thisChunk = it->second;
-		thisChunk->Render( *g_theRenderer );
+
+		if( thisChunk->HasMesh() )
+			thisChunk->Render( *g_theRenderer );
 	}
 
 	// Post Render
@@ -154,6 +157,36 @@ void World::ProcessInput( float deltaSeconds )
 	m_camera->m_position += positionChange;
 }
 
+void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
+{
+	ChunkCoord	const originChunkCoord			= ChunkCoordFromWorldPosition( playerWorldPos );
+	float		const meshUpdateRadiusSuqared	= (float)(m_activationRadius * m_activationRadius);
+
+	for( int i = 0; i < m_activationPriorityCheatSheet.size(); i++ )
+	{
+		ChunkCoord const &relativeOffset		= m_activationPriorityCheatSheet[i];
+		ChunkCoord const  rebuilChunkAtCoord	= originChunkCoord + relativeOffset;
+
+		// Make sure we're inside activation radius
+		float distanceFromOriginSquared = (rebuilChunkAtCoord - originChunkCoord).GetLengthSquared();
+		if( distanceFromOriginSquared > meshUpdateRadiusSuqared )
+			return;
+
+		// See the chunk at this coord exist in the map
+		ChunkMap::iterator it = m_activeChunks.find( rebuilChunkAtCoord );
+		if( it != m_activeChunks.end() )
+		{
+			Chunk &chunkToAct = *it->second;
+			if( chunkToAct.IsDirty() )
+			{
+				// Construct the mesh
+				chunkToAct.RebuildMesh();
+				return;
+			}
+		}
+	}
+}
+
 void World::ActivateChunkNearestToPosition( Vector3 const &playerWorldPos )
 {
 	ChunkCoord	const originChunkCoord			= ChunkCoordFromWorldPosition( playerWorldPos );
@@ -179,15 +212,6 @@ void World::ActivateChunkNearestToPosition( Vector3 const &playerWorldPos )
 			m_activeChunks[ activationChunkCoord ] = newChunk;
 
 			it = m_activeChunks.find( activationChunkCoord );
-		}
-
-		// Activate it, if needed
-		Chunk &chunkToAct = *it->second;
-		if( chunkToAct.IsDirty() )
-		{
-			// Construct the mesh
-			chunkToAct.RebuildMesh();
-			return;
 		}
 	}
 }

@@ -40,6 +40,7 @@ public:
 
 private:
 	void	ProcessInput( float deltaSeconds );
+	void	RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos );
 	void	ActivateChunkNearestToPosition( Vector3 const &playerWorldPos );
 	void	DeactivateChunkForPosition( Vector3 const &playerWorldPos );
 	void	PopulateChunkActivationCheatsheet( int deactivationRadius );

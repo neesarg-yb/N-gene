@@ -28,6 +28,7 @@ public:
 	void		Render( Renderer &theRenderer ) const;
 	void		RebuildMesh();
 	inline bool	IsDirty() const { return m_isDirty; }
+	inline bool HasMesh() const { return m_gpuMesh != nullptr; }
 
 public:
 	int			GetIndexFromBlockCoord	( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const;
