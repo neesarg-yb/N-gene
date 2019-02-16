@@ -32,7 +32,7 @@
     <Filter Include="Game States\Scenes">
       <UniqueIdentifier>{751e8837-22a4-420b-a1e4-c35724e287d7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ParserMAP">
+    <Filter Include="MapParser">
       <UniqueIdentifier>{d912cbda-6312-45ef-a3d7-2113f2cecd8f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -79,11 +79,14 @@
     <ClCompile Include="Game States\Scenes\Scene_StopwatchTest.cpp">
       <Filter>Game States\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="ParserMAP\BrushMAP.cpp">
-      <Filter>ParserMAP</Filter>
+    <ClCompile Include="MapParser\MapBrush.cpp">
+      <Filter>MapParser</Filter>
     </ClCompile>
-    <ClCompile Include="ParserMAP\EntityMAP.cpp">
-      <Filter>ParserMAP</Filter>
+    <ClCompile Include="MapParser\MapEntity.cpp">
+      <Filter>MapParser</Filter>
+    </ClCompile>
+    <ClCompile Include="MapParser\MapParser.cpp">
+      <Filter>MapParser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,11 +132,14 @@
     <ClInclude Include="Game States\Scenes\Scene_StopwatchTest.hpp">
       <Filter>Game States\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="ParserMAP\BrushMAP.hpp">
-      <Filter>ParserMAP</Filter>
+    <ClInclude Include="MapParser\MapBrush.hpp">
+      <Filter>MapParser</Filter>
     </ClInclude>
-    <ClInclude Include="ParserMAP\EntityMAP.hpp">
-      <Filter>ParserMAP</Filter>
+    <ClInclude Include="MapParser\MapEntity.hpp">
+      <Filter>MapParser</Filter>
+    </ClInclude>
+    <ClInclude Include="MapParser\MapParser.hpp">
+      <Filter>MapParser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

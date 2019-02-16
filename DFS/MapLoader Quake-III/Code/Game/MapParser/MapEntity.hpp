@@ -1,17 +1,22 @@
 #pragma once
 #include <map>
 #include <string>
+#include "Engine/File/File.hpp"
 #include "Engine/Renderer/Renderable.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
-#include "Game/ParserMAP/BrushMAP.hpp"
+#include "Game/MapParser/MapBrush.hpp"
 
 typedef std::map< std::string, std::string > NameValueMap;
 
-class EntiryMAP
+class MapParser;
+
+class MapEntity
 {
+	friend MapParser;
+
 public:
-	 EntiryMAP();
-	~EntiryMAP();
+	 MapEntity();
+	~MapEntity();
 
 public:
 	// Properties
@@ -20,13 +25,13 @@ public:
 
 private:
 	// Geometry
-	std::vector< BrushMAP > m_geometry;
+	std::vector< MapBrush > m_geometry;
 
 public:
 	int				GetGeometryCount() const;
 	MeshBuilder*	ConstructMeshBuilderForGeometryAtIndex( int gIdx ) const;
 	Renderable*		ConstructRenderableForGeometryAtIndex( int gIdx ) const;
 
-public:
-	static bool		LoadFromFile( char const * mapFilePath, EntiryMAP* &entityMapPtr_out );
+private:
+	static bool		ParseFromLines( std::vector<std::string> &linesOfEntity, MapEntity* &entity_out );
 };

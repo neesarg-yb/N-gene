@@ -54,6 +54,9 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	AddNewRenderableToScene( snowMiku );
 	AddNewRenderableToScene( spaceship );
+
+	// TESTING MAP FILE LOADING
+
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()

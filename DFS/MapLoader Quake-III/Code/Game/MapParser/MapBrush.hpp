@@ -3,7 +3,7 @@
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Math/Vector3.hpp"
 
-struct BrushMAP
+struct MapBrush
 {
 public:
 	// Plane
@@ -18,6 +18,6 @@ public:
 	Vector2			textureScale				= Vector2::ONE_ONE;
 
 public:
-	BrushMAP();
-	BrushMAP( Vector3 *planeDescriptionThreePoints, std::string const &texName, Vector2 const &texPositionOffset, float texRotation, Vector2 const &texScale );
+	MapBrush();
+	MapBrush( Vector3 *planeDescriptionThreePoints, std::string const &texName, Vector2 const &texPositionOffset, float texRotation, Vector2 const &texScale );
 };
