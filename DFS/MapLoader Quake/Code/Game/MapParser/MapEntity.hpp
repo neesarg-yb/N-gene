@@ -26,16 +26,16 @@ public:
 
 private:
 	// Geometry
-	std::vector< MapBrush > m_geometry;
+	std::vector< MapBrush > m_brushes;
 
 public:
 	// Properties
 	void			SetProperty( std::string const &pName, std::string const &pValue );		// Overwrites, if already exists
 
 	// Geometry
-	int				GetGeometryCount() const;
-	MeshBuilder*	ConstructMeshBuilderForGeometryAtIndex( int gIdx ) const;
-	Renderable*		ConstructRenderableForGeometryAtIndex( int gIdx ) const;
+	int				GetBrushCount() const;
+	MeshBuilder*	ConstructMeshBuilderForGeometryAtIndex( int bIdx ) const;
+	Renderable*		ConstructRenderableForBrushAtIndex( int bIdx ) const;
 
 private:
 	static MapEntity*	ParseFromBuffer	( MapFileBuffer &buffer );							// Returns nullptr on failure

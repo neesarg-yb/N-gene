@@ -1,5 +1,7 @@
 #pragma once
 #include "MapEntity.hpp"
+#include "Engine/Math/ConvexPolyhedron.hpp"
+#include "Game/GameCommon.hpp"
 
 MapEntity::MapEntity()
 {
@@ -14,6 +16,44 @@ MapEntity::~MapEntity()
 void MapEntity::SetProperty( std::string const &pName, std::string const &pValue )
 {
 	m_properties[ pName ] = pValue;
+}
+
+int MapEntity::GetBrushCount() const
+{
+	return (int)m_brushes.size();
+}
+
+Renderable* MapEntity::ConstructRenderableForBrushAtIndex( int bIdx ) const
+{
+	std::vector< Plane3 > brushPlanes;
+	MapBrush const &operationBrush = m_brushes[ bIdx ];
+	for( int p = 0; p < operationBrush.m_planes.size(); p++ )
+	{
+		MapPlane const &parsedPlane = operationBrush.m_planes[p];
+
+		// Get the normal
+		// Vector3 aToB = parsedPlane.planeDescriptionPoints[1] - parsedPlane.planeDescriptionPoints[0];
+		// Vector3 bToC = parsedPlane.planeDescriptionPoints[2] - parsedPlane.planeDescriptionPoints[1];
+		// Vector3 normal = Vector3::CrossProduct( aToB, bToC ).GetNormalized();
+
+		TODO( "How to calculate Normal for each brush?" );
+ 		Vector3 cToB = parsedPlane.planeDescriptionPoints[2] - parsedPlane.planeDescriptionPoints[1];
+ 		Vector3 bToA = parsedPlane.planeDescriptionPoints[1] - parsedPlane.planeDescriptionPoints[0];
+ 		Vector3 normal = Vector3::CrossProduct( cToB, bToA ).GetNormalized();
+
+		// Create the plane
+		Plane3 newPlane = Plane3( normal, parsedPlane.planeDescriptionPoints[0] );
+		brushPlanes.push_back( newPlane );
+	}
+
+	ConvexPolyhedron brushPolygon;
+	for( int p = 0; p < brushPlanes.size(); p++ )
+		brushPolygon.AddPlane( brushPlanes[p] );
+
+	brushPolygon.Rebuild();
+	Mesh* mesh = brushPolygon.ConstructMesh( RGBA_WHITE_COLOR );
+	Material* mat = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
+	return new Renderable( mesh, mat );
 }
 
 MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
@@ -53,7 +93,7 @@ MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
 			if( parsedBrush != nullptr )
 			{
 				// Success
-				entity->m_geometry.push_back( *parsedBrush );
+				entity->m_brushes.push_back( *parsedBrush );
 
 				delete parsedBrush;
 				parsedBrush = nullptr;

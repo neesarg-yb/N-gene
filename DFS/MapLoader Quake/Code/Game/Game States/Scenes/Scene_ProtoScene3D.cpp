@@ -15,10 +15,15 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_scene			= new Scene();
 
 	// A directional light
-	Light *directionalLight = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
-	directionalLight->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
-	directionalLight->UsesShadowMap( true );
-	AddNewLightToScene( directionalLight );
+	Light *directionalLight1 = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
+	directionalLight1->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
+	directionalLight1->UsesShadowMap( true );
+	AddNewLightToScene( directionalLight1 );
+	
+	Light *directionalLight2 = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 90.f, 135.f, 0.f ) );
+	directionalLight2->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f), RGBA_KHAKI_COLOR );
+	directionalLight2->UsesShadowMap( true );
+	AddNewLightToScene( directionalLight2 );
 	
 	// Setting up the Camera
 	m_camera = new Camera();
@@ -56,18 +61,37 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	AddNewRenderableToScene( spaceship );
 
 	// TESTING MAP FILE LOADING
-	MapParser *testMapParsed = MapParser::LoadFromFile( "Data\\MAP\\START.MAP" );
-//	MapParser *testMapParsed = MapParser::LoadFromFile( "Data\\MAP\\Test1.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\START.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_BARREL.MAP" );
+	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_KEY1.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\Test1.MAP" );
 
-	if( testMapParsed != nullptr )
+	for( int e = 0; e < m_parsedMap->m_entities.size(); e++ )
 	{
-		delete testMapParsed;
-		testMapParsed = nullptr;
+		MapEntity const &entity = m_parsedMap->m_entities[e];
+		
+		if( entity.m_className != "worldspawn" )
+			continue;
+
+		for( int g = 0; g < entity.GetBrushCount(); g++ )
+		{
+			Renderable *geometryRenderable = entity.ConstructRenderableForBrushAtIndex(g);
+
+			if( geometryRenderable != nullptr )
+				AddNewRenderableToScene( geometryRenderable );
+		}
 	}
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
 {
+	// MAP Parser
+	if( m_parsedMap != nullptr )
+	{
+		delete m_parsedMap;
+		m_parsedMap = nullptr;
+	}
+
 	// Camera Behaviour
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
 

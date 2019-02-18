@@ -36,6 +36,8 @@ private:
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
 
+	// MAP Files
+	MapParser				*m_parsedMap				= nullptr;
 
 public:
 	void JustFinishedTransition();
