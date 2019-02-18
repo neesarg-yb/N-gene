@@ -81,7 +81,7 @@ float IntVector2::GetLength() const
 
 float IntVector2::GetLengthSquared() const
 {
-	return (x*x) + (y*y);
+	return (float)((x*x) + (y*y));
 }
 
 void IntVector2::SetFromText( const char* text )
