@@ -294,6 +294,7 @@
     <ClCompile Include="Main_Win32.cpp" />
     <ClCompile Include="MapParser\MapBrush.cpp" />
     <ClCompile Include="MapParser\MapEntity.cpp" />
+    <ClCompile Include="MapParser\MapFileBuffer.cpp" />
     <ClCompile Include="MapParser\MapParser.cpp" />
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
@@ -313,6 +314,7 @@
     <ClInclude Include="GameCommon.hpp" />
     <ClInclude Include="MapParser\MapBrush.hpp" />
     <ClInclude Include="MapParser\MapEntity.hpp" />
+    <ClInclude Include="MapParser\MapFileBuffer.hpp" />
     <ClInclude Include="MapParser\MapParser.hpp" />
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />

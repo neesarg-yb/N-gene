@@ -2,51 +2,26 @@
 #include "MapParser.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
-MapParser::MapParser( File &mapFile, bool &parseSuccessful )
+MapParser::MapParser( MapFileBuffer &buffer, bool &parseSuccessful )
 {
-	std::string thisLine;
-	while( mapFile.ReadNextLine(thisLine) == true )
+	while ( buffer.SeekNext('{') )	// Will put you right before the '{' character
 	{
-		if( thisLine[0] == '{' )
+		MapEntity* parsedEntity = MapEntity::ParseFromBuffer( buffer );
+		if( parsedEntity != nullptr )
 		{
-			std::vector< std::string > linesOfThisEntity;
-			linesOfThisEntity.push_back( thisLine );
+			m_entities.push_back( *parsedEntity );
 
-			int bracketStack = 1;
-			while( bracketStack > 0 )
-			{
-				mapFile.ReadNextLine( thisLine );
-
-				if( thisLine[0] == '}' )
-					bracketStack--;
-				else if( thisLine[0] == '{' )
-					bracketStack++;
-
-				linesOfThisEntity.push_back( thisLine );
-			}
-
-			MapEntity *thisEntity = nullptr;
-			bool parseSuccess = MapEntity::ParseFromLines( linesOfThisEntity, thisEntity );
-
-			if( parseSuccess )
-			{
-				m_entities.push_back( *thisEntity );
-
-				delete thisEntity;
-				thisEntity = nullptr;
-			}
-			else
-			{
-				parseSuccessful = false;
-				return;
-			}
+			delete parsedEntity;
+			parsedEntity = nullptr;
+		}
+		else
+		{
+			// Can't parse any more entities
+			break;
 		}
 	}
 
-	if( m_entities.size() == 0 )
-		parseSuccessful = false;
-	else
-		parseSuccessful = true;
+	parseSuccessful = (m_entities.empty() == false);
 }
 
 MapParser::~MapParser()
@@ -54,34 +29,23 @@ MapParser::~MapParser()
 
 }
 
-bool MapParser::LoadFromFile( const char *mapFilePath, MapParser* &parsedMap_out )
+MapParser* MapParser::LoadFromFile( const char *mapFilePath )
 {
-	File mapFile;
-	bool fileOpened = mapFile.Open( mapFilePath, FILE_OPEN_MODE_READ );
-	
-	// If can't open the file
-	if( !fileOpened )
+	MapFileBuffer buffer;
+	MapParser* parsedMap = nullptr;
+
+	if( buffer.LoadFromFile( mapFilePath ) )
 	{
-		parsedMap_out = nullptr;
-		return false;
+		bool parseSuccess = false;
+		parsedMap = new MapParser( buffer, parseSuccess );
+
+		// If it was a failure, cleanup
+		if( parseSuccess == false )
+		{
+			delete parsedMap;
+			parsedMap = nullptr;
+		}
 	}
 
-	// Let's start parsing it!
-	bool parsedSuccessfully = false;
-	MapParser *parsedFile = new MapParser( mapFile, parsedSuccessfully );
-
-	// If wasn't able to parse
-	if( !parsedSuccessfully )
-	{
-		delete parsedFile;
-		parsedFile = nullptr;
-
-		parsedMap_out = nullptr;
-		return false;
-	}
-	else
-	{
-		parsedMap_out = parsedFile;
-		return true;
-	}
+	return parsedMap;
 }

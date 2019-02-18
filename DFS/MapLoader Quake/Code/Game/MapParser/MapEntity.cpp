@@ -11,100 +11,86 @@ MapEntity::~MapEntity()
 
 }
 
-int MapEntity::GetGeometryCount() const
+void MapEntity::SetProperty( std::string const &pName, std::string const &pValue )
 {
-	return -1;
+	m_properties[ pName ] = pValue;
 }
 
-MeshBuilder* MapEntity::ConstructMeshBuilderForGeometryAtIndex( int gIdx ) const
+MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
 {
-	UNUSED( gIdx );
-	return nullptr;
-}
+	MapEntity *entiry = new MapEntity();
+	bool parseSuccess = true;
 
-Renderable* MapEntity::ConstructRenderableForGeometryAtIndex( int gIdx ) const
-{
-	UNUSED( gIdx );
-	return nullptr;
-}
+	// buffer's next character should be '{'
+	if( buffer.ReadNextCharacter() != '{' )
+		parseSuccess = false;
 
-bool MapEntity::ParseFromLines( std::vector<std::string> &linesOfEntity, MapEntity* &entity_out )
-{
-	MapEntity *thisEntity = new MapEntity();
-
-	// Removing the starting and ending brackets { ... }
-	linesOfEntity.pop_back();
-	std::swap( linesOfEntity.front(), linesOfEntity.back() );
-	linesOfEntity.pop_back();
-
-	for( int lineNum = 0; lineNum < linesOfEntity.size(); lineNum++ )
+	while( parseSuccess )
 	{
-		int braketStack = 1;
-		std::string &thisLine = linesOfEntity[ lineNum ];
+		buffer.SkipLeadingWhiteSpaces();
 
-		if( thisLine[0] == '"' )
+		// What's being parsed? A PROPERTY or A BRUSH
+		char indicatorChar = buffer.PeekNextCharacter();
+		if( indicatorChar == '"' )												// A PROPERTY
 		{
-			std::string propertyName, propertyValue;
+			std::string propName, propValue;
+			parseSuccess = MapEntity::ParseProperty( buffer, propName, propValue );
 
-			bool nameFetched = FetchFirstString( thisLine, propertyName );
-			RemoveInitialWhiteSpaces( thisLine );
-			bool valueFetched = FetchFirstString( thisLine, propertyValue );
-
-			if( (nameFetched && valueFetched) != true )
+			if( parseSuccess )
 			{
-				delete thisEntity;
-				thisEntity = nullptr;
-
-				return false;
+				// Success
+				entiry->SetProperty( propName, propValue );
 			}
-
-			if( propertyName == "classname" )
-				thisEntity->m_className = propertyValue;
-			else
-				thisEntity->m_properties[ propertyName ] = propertyValue;
 		}
-		else if( thisLine[0] == '{' )
+		else if( indicatorChar == '{' )											// A BRUSH
 		{
-			lineNum++;
-			thisLine = linesOfEntity[ lineNum ];
-			while( thisLine[0] != '}' )
+			MapBrush* parsedBrush = nullptr;
+			parsedBrush  = MapBrush::ParseFromBuffer( buffer );
+
+			if( parsedBrush != nullptr )
 			{
-				Vector3		point1, point2, point3;
-				std::string	textureName;
-				float		texPosX, texPosY, texRot, texScaleX, texScaleY;
+				// Success
+				entiry->m_geometry.push_back( *parsedBrush );
 
-				bool fetchSuccess = true;
-				fetchSuccess &= FetchVector3( thisLine, point1 );
-				RemoveInitialWhiteSpaces( thisLine );
-				fetchSuccess &= FetchVector3( thisLine, point2 );
-				RemoveInitialWhiteSpaces( thisLine );
-				fetchSuccess &= FetchVector3( thisLine, point3 );
-				RemoveInitialWhiteSpaces( thisLine );
-
-				fetchSuccess &= FetchNextWord( textureName );
-				RemoveInitialWhiteSpaces( thisLine );
-
-				fetchSuccess &= FetchNextFloat( texPosX );
-				RemoveInitialWhiteSpaces( thisLine );
-				fetchSuccess &= FetchNextFloat( texPosY );
-				RemoveInitialWhiteSpaces( thisLine );
-				fetchSuccess &= FetchNextFloat( texRot );
-				RemoveInitialWhiteSpaces( thisLine );
-				fetchSuccess &= FetchNextFloat( texScaleX );
-				RemoveInitialWhiteSpaces( thisLine );
-				fetchSuccess &= FetchNextFloat( texScaleY );
-				RemoveInitialWhiteSpaces( thisLine );
-
-				if( !fetchSuccess )
-				{
-					delete thisEntity;
-					thisEntity = nullptr;
-
-					return false;
-				}
-				
-				lineNum++;
+				delete parsedBrush;
+				parsedBrush = nullptr;
 			}
+			else
+			{
+				// Failure
+				parseSuccess = false;
+			}
+		}
+		else if( indicatorChar == '}' )											// END of Entity
+		{
+			buffer.ReadNextCharacter();
+			break;
+		}
+		else
+		{
+			// Failure															// Unexpected Character Indicator
+			parseSuccess = false;
 		}
 	}
+
+	// Delete if not successful
+	if( parseSuccess == false )
+	{
+		delete entiry;
+		entiry = nullptr;
+	}
+
+	return entiry;
+}
+
+bool MapEntity::ParseProperty( MapFileBuffer &buffer, std::string &pName_out, std::string &pValue_out )
+{
+	// name
+	bool nameReadSuccess = buffer.ReadNextString( pName_out, '"' );
+	
+	// value
+	buffer.SkipLeadingWhiteSpaces();
+	bool valueReadSuccess = buffer.ReadNextString( pValue_out, '"' );
+
+	return (nameReadSuccess && valueReadSuccess);
 }
