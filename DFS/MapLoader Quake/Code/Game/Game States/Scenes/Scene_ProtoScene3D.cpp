@@ -20,7 +20,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	directionalLight1->UsesShadowMap( true );
 	AddNewLightToScene( directionalLight1 );
 	
-	Light *directionalLight2 = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 90.f, 135.f, 0.f ) );
+	Light *directionalLight2 = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( -40.f, -45.f, 0.f ) );
 	directionalLight2->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f), RGBA_KHAKI_COLOR );
 	directionalLight2->UsesShadowMap( true );
 	AddNewLightToScene( directionalLight2 );

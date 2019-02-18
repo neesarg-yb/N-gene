@@ -36,13 +36,19 @@ Renderable* MapEntity::ConstructRenderableForBrushAtIndex( int bIdx ) const
 		// Vector3 bToC = parsedPlane.planeDescriptionPoints[2] - parsedPlane.planeDescriptionPoints[1];
 		// Vector3 normal = Vector3::CrossProduct( aToB, bToC ).GetNormalized();
 
-		TODO( "How to calculate Normal for each brush?" );
- 		Vector3 cToB = parsedPlane.planeDescriptionPoints[2] - parsedPlane.planeDescriptionPoints[1];
- 		Vector3 bToA = parsedPlane.planeDescriptionPoints[1] - parsedPlane.planeDescriptionPoints[0];
- 		Vector3 normal = Vector3::CrossProduct( cToB, bToA ).GetNormalized();
+		// TODO( "How to calculate Normal for each brush?" );
+ 		// Vector3 cToB = parsedPlane.planeDescriptionPoints[2] - parsedPlane.planeDescriptionPoints[1];
+ 		// Vector3 bToA = parsedPlane.planeDescriptionPoints[1] - parsedPlane.planeDescriptionPoints[0];
+ 		// Vector3 normal = Vector3::CrossProduct( cToB, bToA ).GetNormalized();
+
+		Vector3 const &p0 = parsedPlane.planeDescriptionPoints[0];
+		Vector3 const &p1 = parsedPlane.planeDescriptionPoints[1];
+		Vector3 const &p2 = parsedPlane.planeDescriptionPoints[2];
+		Vector3 normal	= Vector3::CrossProduct( p0 - p1, p2 - p1 ).GetNormalized();
+		float	dist	= Vector3::DotProduct( normal, p1 );
 
 		// Create the plane
-		Plane3 newPlane = Plane3( normal, parsedPlane.planeDescriptionPoints[0] );
+		Plane3 newPlane = Plane3( normal, dist );
 		brushPlanes.push_back( newPlane );
 	}
 
