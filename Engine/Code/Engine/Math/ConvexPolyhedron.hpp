@@ -31,7 +31,7 @@ private:
 public:
 	void	AddPlane( Plane3 const &plane );
 	void	SetFaceWindingOrder( eWindOrder winding );			// Changes the sorting order of vertices of the faces. [Note: Rebuild required]
-	void	Rebuild();											// Calculates the baked data, again
+	void	Rebuild( float floatDistanceErrorTolerance );		// Calculates the baked data, again
 
 	void	DebugRenderVertices( float lifetime, float pointSize, float fontSize, Vector3 const &camUpDir, Vector3 const &camRightDir, eDebugRenderMode renderMode ) const;
 	void	DebugRenderVertexIndicesTag( float lifetime, float height, Vector3 const &cameraUp, Vector3 const &cameraRight ) const;
@@ -39,7 +39,7 @@ public:
 	Mesh*	ConstructMesh( Rgba const &color ) const;
 
 private:
-	void	PerformPlaneIntersections();						// Uses three plane intersection approach
+	void	PerformPlaneIntersections( float floatDistanceErrorTolerance );						// Uses three plane intersection approach
 	void	SortFaceVerticesWinding( eWindOrder windOrder );
 
 	bool	GetIntersection( Plane3 const &p1, Plane3 const &p2, Plane3 const &p3, Vector3 &intersectionPoint_out ) const;

@@ -18,7 +18,7 @@ private:
 
 public:
 	void AddPlane		( Plane3 const &newPlane );
-	bool IsPointOutside	( Vector3 const &testP ) const;
+	bool IsPointOutside	( Vector3 const &testP, float floatDistanceErrorTolerance ) const;
 
 public:
 	inline uint GetPlaneCount() const { return (uint)m_planes.size(); }
