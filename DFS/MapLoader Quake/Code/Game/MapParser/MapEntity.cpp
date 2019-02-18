@@ -44,7 +44,7 @@ Renderable* MapEntity::ConstructRenderableForBrushAtIndex( int bIdx ) const
 		Vector3 const &p0 = parsedPlane.planeDescriptionPoints[0];
 		Vector3 const &p1 = parsedPlane.planeDescriptionPoints[1];
 		Vector3 const &p2 = parsedPlane.planeDescriptionPoints[2];
-		Vector3 normal	= Vector3::CrossProduct( p0 - p1, p2 - p1 ).GetNormalized();
+		Vector3 normal	= Vector3::CrossProduct( p2 - p1, p0 - p1 ).GetNormalized();
 		float	dist	= Vector3::DotProduct( normal, p1 );
 
 		// Create the plane
@@ -56,7 +56,7 @@ Renderable* MapEntity::ConstructRenderableForBrushAtIndex( int bIdx ) const
 	for( int p = 0; p < brushPlanes.size(); p++ )
 		brushPolygon.AddPlane( brushPlanes[p] );
 
-	brushPolygon.Rebuild();
+	brushPolygon.Rebuild( FLOAT_ERROR_TOLERANCE_MAPFILE );
 	Mesh* mesh = brushPolygon.ConstructMesh( RGBA_WHITE_COLOR );
 	Material* mat = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
 	return new Renderable( mesh, mat );

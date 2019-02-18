@@ -34,7 +34,7 @@ private:
 	CameraManager			*m_cameraManager			= nullptr;
 	float const				 m_initialFOV				= 45.f;			// Degrees
 	float const				 m_cameraNear				= 0.01f;
-	float const				 m_cameraFar				= 100.f;
+	float const				 m_cameraFar				= 10000.f;
 
 	// MAP Files
 	MapParser				*m_parsedMap				= nullptr;

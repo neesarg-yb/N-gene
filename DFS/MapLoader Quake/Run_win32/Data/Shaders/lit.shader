@@ -1,5 +1,5 @@
 <shader  name        ="lit"
-         cull        ="back"
+         cull        ="none"
          fill        ="solid"
          frontface   ="ccw"
          layer	     ="0"

@@ -50,11 +50,32 @@ MapBrush* MapBrush::ParseFromBuffer( MapFileBuffer &buffer )
 			MapPlane parsedPlane;
 
 			// Plane Description Points
-			bool p1ReadSuccess = buffer.ReadNextVector3( parsedPlane.planeDescriptionPoints[0] );
+			Vector3 &p1 = parsedPlane.planeDescriptionPoints[0];
+			Vector3 &p2 = parsedPlane.planeDescriptionPoints[1];
+			Vector3 &p3 = parsedPlane.planeDescriptionPoints[2];
+
+			bool p1ReadSuccess = buffer.ReadNextVector3( p1 );
 			buffer.SkipLeadingWhiteSpaces();
-			bool p2ReadSuccess = buffer.ReadNextVector3( parsedPlane.planeDescriptionPoints[1] );
+			bool p2ReadSuccess = buffer.ReadNextVector3( p2 );
 			buffer.SkipLeadingWhiteSpaces();
-			bool p3ReadSuccess = buffer.ReadNextVector3( parsedPlane.planeDescriptionPoints[2] );
+			bool p3ReadSuccess = buffer.ReadNextVector3( p3 );
+
+			//   Map File's                         My Game's            
+			//     Coordinate System                   Coordinate System 
+			//                                                           
+			//       Z |                                 Y |             
+			//         |                                   |             
+			//         |                                   |             
+			//    Y \  |           ---( to )--->      Z \  |             
+			//       \ |                                 \ |             
+			//        \|_________                         \|_________    
+			//                  X                                   X    
+			Vector3 flippedP1( p1.x, p1.z, p1.y );
+			Vector3 flippedP2( p2.x, p2.z, p2.y );
+			Vector3 flippedP3( p3.x, p3.z, p3.y );
+			p1 = flippedP1;
+			p2 = flippedP2;
+			p3 = flippedP3;
 
 			// Texture Name
 			buffer.SkipLeadingWhiteSpaces();

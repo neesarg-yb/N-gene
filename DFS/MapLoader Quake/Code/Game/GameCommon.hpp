@@ -2,14 +2,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Input/InputSystem.hpp"
 
-enum WorldEntityTypes
-{
-	ENTITY_PLAYER = 0,
-	ENTITY_TERRAIN,
-	ENTITY_BUILDING,
-	ENTITY_HOUSE,
-	NUM_ENTITIES
-};
+constexpr float FLOAT_ERROR_TOLERANCE_MAPFILE = 0.001f;
 
 class  Blackboard;
 extern Blackboard* g_gameConfigBlackboard;

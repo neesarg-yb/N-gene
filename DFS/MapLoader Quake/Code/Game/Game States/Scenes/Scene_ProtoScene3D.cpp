@@ -14,16 +14,33 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_renderingPath = new ForwardRenderingPath( *g_theRenderer );
 	m_scene			= new Scene();
 
-	// A directional light
-	Light *directionalLight1 = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( 40.f, -45.f, 0.f ) );
-	directionalLight1->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f) );
-	directionalLight1->UsesShadowMap( true );
+	// Point light on camera
+	Light *pointLight = new Light( Vector3::ZERO, Vector3::ZERO );
+	pointLight->SetUpForPointLight( 300.f );
+	pointLight->UsesShadowMap( false );
+	m_lights.push_back( pointLight );
+	m_scene->AddLight( *pointLight );
+
+	// Directional lights
+	Light *directionalLight1 = new Light( Vector3( 10.f, 0.f, 0.f ), Vector3( 45.f, -45.f, 0.f ) );
+	directionalLight1->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f), RGBA_RED_COLOR );
+	directionalLight1->UsesShadowMap( false );
 	AddNewLightToScene( directionalLight1 );
-	
-	Light *directionalLight2 = new Light( Vector3( 10.f, 10.f, 0.f ), Vector3( -40.f, -45.f, 0.f ) );
-	directionalLight2->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f), RGBA_KHAKI_COLOR );
-	directionalLight2->UsesShadowMap( true );
+
+	Light *directionalLight2 = new Light( Vector3( -10.f, 0.f, 0.f ), Vector3( 45.f, 45.f, 0.f ) );
+	directionalLight2->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f), RGBA_BLUE_COLOR );
+	directionalLight2->UsesShadowMap( false );
 	AddNewLightToScene( directionalLight2 );
+
+	Light *directionalLight3 = new Light( Vector3( 10.f, -20.f, 20.f ), Vector3( -45.f, 225.f, 0.f ) );
+	directionalLight3->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f), RGBA_GREEN_COLOR );
+	directionalLight3->UsesShadowMap( false );
+	AddNewLightToScene( directionalLight3 );
+
+	Light *directionalLight4 = new Light( Vector3( -10.f, -20.f, 20.f ), Vector3( -45.f, 135.f, 0.f ) );
+	directionalLight4->SetUpForDirectionalLight( 50.f, Vector3( 1.f, 0.f, 0.f), RGBA_YELLOW_COLOR );
+	directionalLight4->UsesShadowMap( false );
+	AddNewLightToScene( directionalLight4 );
 	
 	// Setting up the Camera
 	m_camera = new Camera();
@@ -35,12 +52,15 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_camera->RenderDebugObjects( true );
 	m_scene->AddCamera( *m_camera );
 
+	// Point light follows the camera
+	pointLight->m_transform.SetParentAs( &m_camera->m_cameraTransform );
+
 	// Camera Manager
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput, 0.1f );
 	m_cameraManager->SetAnchor( nullptr );
 
 	// Camera Behaviour
-	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager, USE_KEYBOARD_MOUSE_FL );
+	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 100.f, 40.f, -85.f, 85.f, "FreeLook", m_cameraManager, USE_KEYBOARD_MOUSE_FL );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );					// MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR
 
@@ -62,23 +82,39 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	// TESTING MAP FILE LOADING
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\START.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\END.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\e2m10.map" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\E3M5.MAP" );
+	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\DM3.MAP" );
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_BARREL.MAP" );
-	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_KEY1.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_KEY1.MAP" );
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\Test1.MAP" );
 
 	for( int e = 0; e < m_parsedMap->m_entities.size(); e++ )
 	{
 		MapEntity const &entity = m_parsedMap->m_entities[e];
-		
-		if( entity.m_className != "worldspawn" )
-			continue;
-
 		for( int g = 0; g < entity.GetBrushCount(); g++ )
 		{
 			Renderable *geometryRenderable = entity.ConstructRenderableForBrushAtIndex(g);
 
 			if( geometryRenderable != nullptr )
 				AddNewRenderableToScene( geometryRenderable );
+		}
+
+		if( entity.m_className == "info_player_start" )
+		{
+			std::string startPosStr  = entity.m_properties.at( "origin" );
+			Strings posFloatsStrings = SplitIntoStringsByDelimiter( startPosStr, ' ' );
+
+			if( posFloatsStrings.size() == 3 )
+			{
+				float x, y, z;
+				::SetFromText( x, posFloatsStrings[0].c_str() );
+				::SetFromText( z, posFloatsStrings[1].c_str() );
+				::SetFromText( y, posFloatsStrings[2].c_str() );
+
+				m_camera->m_cameraTransform.SetPosition( Vector3(x, y, z) );
+			}
 		}
 	}
 }
