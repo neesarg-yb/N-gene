@@ -18,7 +18,7 @@ void MapEntity::SetProperty( std::string const &pName, std::string const &pValue
 
 MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
 {
-	MapEntity *entiry = new MapEntity();
+	MapEntity *entity = new MapEntity();
 	bool parseSuccess = true;
 
 	// buffer's next character should be '{'
@@ -39,7 +39,7 @@ MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
 			if( parseSuccess )
 			{
 				// Success
-				entiry->SetProperty( propName, propValue );
+				entity->SetProperty( propName, propValue );
 			}
 		}
 		else if( indicatorChar == '{' )											// A BRUSH
@@ -50,7 +50,7 @@ MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
 			if( parsedBrush != nullptr )
 			{
 				// Success
-				entiry->m_geometry.push_back( *parsedBrush );
+				entity->m_geometry.push_back( *parsedBrush );
 
 				delete parsedBrush;
 				parsedBrush = nullptr;
@@ -76,11 +76,11 @@ MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
 	// Delete if not successful
 	if( parseSuccess == false )
 	{
-		delete entiry;
-		entiry = nullptr;
+		delete entity;
+		entity = nullptr;
 	}
 
-	return entiry;
+	return entity;
 }
 
 bool MapEntity::ParseProperty( MapFileBuffer &buffer, std::string &pName_out, std::string &pValue_out )
