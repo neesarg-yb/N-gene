@@ -40,6 +40,9 @@ MapEntity* MapEntity::ParseFromBuffer( MapFileBuffer &buffer )
 			{
 				// Success
 				entity->SetProperty( propName, propValue );
+				
+				if( propName == "classname" )
+					entity->m_className = propValue;
 			}
 		}
 		else if( indicatorChar == '{' )											// A BRUSH

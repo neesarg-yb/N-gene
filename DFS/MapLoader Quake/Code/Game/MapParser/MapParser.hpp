@@ -7,6 +7,8 @@ class MapParser
 {
 private:
 	 MapParser( MapFileBuffer &buffer, bool &parseSuccessful );
+
+public:
 	~MapParser();
 
 public:

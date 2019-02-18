@@ -56,7 +56,14 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	AddNewRenderableToScene( spaceship );
 
 	// TESTING MAP FILE LOADING
+	MapParser *testMapParsed = MapParser::LoadFromFile( "Data\\MAP\\START.MAP" );
+//	MapParser *testMapParsed = MapParser::LoadFromFile( "Data\\MAP\\Test1.MAP" );
 
+	if( testMapParsed != nullptr )
+	{
+		delete testMapParsed;
+		testMapParsed = nullptr;
+	}
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()

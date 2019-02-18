@@ -6,6 +6,7 @@
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Game/Game States/GameState.hpp"
+#include "Game/MapParser/MapParser.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/Camera System/Motion Controllers/CMC_ProportionalController.hpp"
 
