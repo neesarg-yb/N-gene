@@ -59,6 +59,7 @@ Renderable* MapEntity::ConstructRenderableForBrushAtIndex( int bIdx ) const
 	brushPolygon.Rebuild( FLOAT_ERROR_TOLERANCE_MAPFILE );
 	Mesh* mesh = brushPolygon.ConstructMesh( RGBA_WHITE_COLOR );
 	Material* mat = Material::CreateNewFromFile( "Data\\Materials\\default.material" );
+//	Material* mat = Material::CreateNewFromFile( "Data\\Materials\\default_debug.material" );
 	return new Renderable( mesh, mat );
 }
 
