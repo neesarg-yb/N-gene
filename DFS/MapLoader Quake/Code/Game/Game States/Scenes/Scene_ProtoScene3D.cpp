@@ -81,13 +81,13 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	AddNewRenderableToScene( spaceship );
 
 	// TESTING MAP FILE LOADING
+	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\DM3.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_KEY1.MAP" );
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\START.MAP" );
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\END.MAP" );
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\e2m10.map" );
-	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\E3M5.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\DM3.MAP" );
+//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\E3M5.MAP" );
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_BARREL.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_KEY1.MAP" );
 //	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\Test1.MAP" );
 
 	for( int e = 0; e < m_parsedMap->m_entities.size(); e++ )

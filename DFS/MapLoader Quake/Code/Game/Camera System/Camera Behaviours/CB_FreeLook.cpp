@@ -38,6 +38,8 @@ CameraState CB_FreeLook::Update( float deltaSeconds, CameraState const &currentS
 	
 	// Process Input
 	ProcessInput( xzMovementChange, xyRotationChange, yAxisChange );
+	bool isShiftPressed = g_theInput->IsKeyPressed( VK_SHIFT );
+	float movementSpeedMultiplier = isShiftPressed ? 3.f : 1.f;
 
 	// Position Change
 	Vector3  cameraPosition	 = m_camera->m_cameraTransform.GetWorldPosition();
@@ -51,7 +53,7 @@ CameraState CB_FreeLook::Update( float deltaSeconds, CameraState const &currentS
 	cameraForward = cameraForward.GetNormalized();
 	
 	Vector3 cameraRight = Vector3::CrossProduct( Vector3::UP, cameraForward );
-	cameraPosition += ( (cameraForward * xzMovementChange.y) + (cameraRight * xzMovementChange.x) + Vector3( 0.f, yAxisChange, 0.f ) ) * m_movementSpeed * deltaSeconds;
+	cameraPosition += ( (cameraForward * xzMovementChange.y) + (cameraRight * xzMovementChange.x) + Vector3( 0.f, yAxisChange, 0.f ) ) * m_movementSpeed * movementSpeedMultiplier * deltaSeconds;
 	
 	// Orientation Change
 	Vector3 cameraOrientation = m_camera->m_cameraTransform.GetRotation();
