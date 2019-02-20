@@ -4,6 +4,13 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Input/InputSystem.hpp"
 
+
+//-----------------
+// TYPE DEFINITIONS
+typedef IntVector2 ChunkCoord;
+typedef IntVector3 BlockCoord;
+
+
 //----------
 // CONSTANTS
 uint constexpr BITS_WIDE_X	= 4;
@@ -18,12 +25,10 @@ uint constexpr BLOCKS_WIDE_Y	= (1 << BITS_WIDE_Y);	// Number of blocks in y-dir 
 uint constexpr BLOCKS_WIDE_Z	= (1 << BITS_WIDE_Z);	// Number of blocks in z-dir of a chunk
 uint constexpr NUM_BLOCKS_PER_CHUNK = (BLOCKS_WIDE_X * BLOCKS_WIDE_Y * BLOCKS_WIDE_Z);
 
-
-//-----------------
-// TYPE DEFINITIONS
-typedef IntVector2 ChunkCoord;
-typedef IntVector3 BlockCoord;
-
+ChunkCoord const EAST_CHUNKCOORD  = ChunkCoord(  1,  0 );
+ChunkCoord const WEST_CHUNKCOORD  = ChunkCoord( -1,  0 );
+ChunkCoord const NORTH_CHUNKCOORD = ChunkCoord(  0,  1 );
+ChunkCoord const SOUTH_CHUNKCOORD = ChunkCoord(  0, -1 );
 
 //------
 // Enums
@@ -34,6 +39,15 @@ enum eBlockType : uchar
 	BLOCK_DIRT,
 	BLOCK_STONE,
 	NUM_BLOCK_TYPES
+};
+
+enum eNeighborChunkDirection
+{
+	NORTH_NEIGHBOR_CHUNK = 0,
+	WEST_NEIGHBOR_CHUNK,
+	SOUTH_NEIGHBOR_CHUNK,
+	EAST_NEIGHBOR_CHUNK,
+	NUM_NEIGHBOR_CHUNKS
 };
 
 

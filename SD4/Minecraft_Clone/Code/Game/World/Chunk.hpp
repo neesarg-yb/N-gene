@@ -13,20 +13,26 @@ public:
 
 private:
 	// Position in world
-	ChunkCoord	m_coord;
-	AABB3		m_worldBounds;
+	ChunkCoord	 m_coord;
+	AABB3		 m_worldBounds;
+
+	// Neighbors..
+	Chunk		*m_neighbor[ NUM_NEIGHBOR_CHUNKS ] = { nullptr, nullptr, nullptr, nullptr };
 
 	// Blocks
-	Block m_blocks[ NUM_BLOCKS_PER_CHUNK ];
+	Block		 m_blocks[ NUM_BLOCKS_PER_CHUNK ];
 
 	// Mesh
-	MeshBuilder		*m_cpuMesh = nullptr;
-	Mesh			*m_gpuMesh = nullptr;
-	bool			 m_isDirty = true;		// i.e. we need to rebuild the CPU & GPU Mesh
+	MeshBuilder	*m_cpuMesh = nullptr;
+	Mesh		*m_gpuMesh = nullptr;
+	bool		 m_isDirty = true;		// i.e. we need to rebuild the CPU & GPU Mesh
 
 public:
 	void		Render( Renderer &theRenderer ) const;
 	void		RebuildMesh();
+	void		SetNeighborAtCoordinate( Chunk *newNeighbor, ChunkCoord const & neighborCoord );
+	bool		HasAllNeighbors() const;
+
 	inline bool	IsDirty() const { return m_isDirty; }
 	inline bool HasMesh() const { return m_gpuMesh != nullptr; }
 

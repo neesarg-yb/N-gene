@@ -44,6 +44,7 @@ private:
 	void	ActivateChunkNearestToPosition( Vector3 const &playerWorldPos );
 	void	DeactivateChunkForPosition( Vector3 const &playerWorldPos );
 	void	PopulateChunkActivationCheatsheet( int deactivationRadius );
+	void	GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out );
 
 public:
 	static void			RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );

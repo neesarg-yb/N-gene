@@ -99,6 +99,67 @@ void Chunk::RebuildMesh()
 	m_isDirty = false;
 }
 
+void Chunk::SetNeighborAtCoordinate( Chunk *newNeighbor, ChunkCoord const & neighborCoord )
+{
+	ChunkCoord coordDiff = neighborCoord - m_coord;
+	bool aNeighborGotChanged = false;
+
+	if( coordDiff == EAST_CHUNKCOORD )
+	{
+		// Set as east neighbor
+		Chunk* &eastNeighbor = m_neighbor[ EAST_NEIGHBOR_CHUNK ];
+		if( eastNeighbor != newNeighbor )
+		{
+			eastNeighbor = newNeighbor;
+			aNeighborGotChanged = true;
+		}
+	}
+	else if( coordDiff == WEST_CHUNKCOORD )
+	{
+		// Set as west neighbor
+		Chunk* &westNeighbor = m_neighbor[ WEST_NEIGHBOR_CHUNK ];
+		if( westNeighbor != newNeighbor )
+		{
+			westNeighbor = newNeighbor;
+			aNeighborGotChanged = true;
+		}
+	}
+	else if( coordDiff == NORTH_CHUNKCOORD )
+	{
+		// Set as north neighbor
+		Chunk* &northNeighbor = m_neighbor[ NORTH_NEIGHBOR_CHUNK ];
+		if( northNeighbor != newNeighbor )
+		{
+			northNeighbor = newNeighbor;
+			aNeighborGotChanged = true;
+		}
+	}
+	else if( coordDiff == SOUTH_CHUNKCOORD )
+	{
+		// Set as south neighbor
+		Chunk* &southNeighbor = m_neighbor[ SOUTH_NEIGHBOR_CHUNK ];
+		if( southNeighbor != newNeighbor )
+		{
+			southNeighbor = newNeighbor;
+			aNeighborGotChanged = true;
+		}
+	}
+
+	// Mark dirty if a neighbor got changed
+	m_isDirty = aNeighborGotChanged ? true : m_isDirty;
+}
+
+bool Chunk::HasAllNeighbors() const
+{
+	for( int nIdx = 0; nIdx < NUM_NEIGHBOR_CHUNKS; nIdx++ )
+	{
+		if( m_neighbor[nIdx] == nullptr )
+			return false;
+	}
+
+	return true;
+}
+
 int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const
 {
 	return xBlockCoord + (yBlockCoord * BLOCKS_WIDE_X) + (zBlockCoord * (BLOCKS_WIDE_X * BLOCKS_WIDE_Y));

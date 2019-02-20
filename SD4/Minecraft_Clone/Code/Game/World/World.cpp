@@ -177,7 +177,7 @@ void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
 		if( it != m_activeChunks.end() )
 		{
 			Chunk &chunkToAct = *it->second;
-			if( chunkToAct.IsDirty() )
+			if( chunkToAct.HasAllNeighbors() && chunkToAct.IsDirty() )
 			{
 				// Construct the mesh
 				chunkToAct.RebuildMesh();
@@ -204,14 +204,26 @@ void World::ActivateChunkNearestToPosition( Vector3 const &playerWorldPos )
 			return;
 
 		// See the chunk at this coord exist in the map
-		ChunkMap::iterator it = m_activeChunks.find( activationChunkCoord );
-		if( it == m_activeChunks.end() )
+		ChunkMap::iterator itChunkToActivate = m_activeChunks.find( activationChunkCoord );
+		if( itChunkToActivate == m_activeChunks.end() )
 		{
 			// Create the chunk, add it to activation list
 			Chunk *newChunk = new Chunk( activationChunkCoord );		// It should mark it dirty!
 			m_activeChunks[ activationChunkCoord ] = newChunk;
 
-			it = m_activeChunks.find( activationChunkCoord );
+			// Link Neighbors with each other
+			ChunkMap neighbourChunks;
+			GetNeighborsOfChunkAt( activationChunkCoord, neighbourChunks );
+			for( ChunkMap::iterator itNeighbor = neighbourChunks.begin(); itNeighbor != neighbourChunks.end(); itNeighbor++ )
+			{
+				Chunk* &neighborChunk			= itNeighbor->second;
+				ChunkCoord neighborChunkCoord	= itNeighbor->first;
+
+				neighborChunk->SetNeighborAtCoordinate( newChunk, activationChunkCoord );
+				newChunk->SetNeighborAtCoordinate( neighborChunk, neighborChunkCoord );
+			}
+
+			itChunkToActivate = m_activeChunks.find( activationChunkCoord );
 		}
 	}
 }
@@ -263,6 +275,36 @@ void World::PopulateChunkActivationCheatsheet( int deactivationRadius )
 	}
 
 	std::sort( m_activationPriorityCheatSheet.begin(), m_activationPriorityCheatSheet.end(), World::CheetsheetCompare );
+}
+
+void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out )
+{
+	neighborChunks_out.clear();
+	ChunkMap::iterator nIt;
+
+	// East Neighbor
+	ChunkCoord eastNeighborCoord  = chunkCoord + EAST_CHUNKCOORD;
+	nIt = m_activeChunks.find( eastNeighborCoord );
+	if( nIt != m_activeChunks.end() )
+		neighborChunks_out[ nIt->first ] = nIt->second;
+
+	// West..
+	ChunkCoord westNeighborCoord  = chunkCoord + WEST_CHUNKCOORD;
+	nIt = m_activeChunks.find( westNeighborCoord );
+	if( nIt != m_activeChunks.end() )
+		neighborChunks_out[ nIt->first ] = nIt->second;
+
+	// North..
+	ChunkCoord northNeighborCoord = chunkCoord + NORTH_CHUNKCOORD;
+	nIt = m_activeChunks.find( northNeighborCoord );
+	if( nIt != m_activeChunks.end() )
+		neighborChunks_out[ nIt->first ] = nIt->second;
+
+	// South..
+	ChunkCoord southNeighborCoord = chunkCoord + SOUTH_CHUNKCOORD;
+	nIt = m_activeChunks.find( southNeighborCoord );
+	if( nIt != m_activeChunks.end() )
+		neighborChunks_out[ nIt->first ] = nIt->second;
 }
 
 bool World::CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b )
