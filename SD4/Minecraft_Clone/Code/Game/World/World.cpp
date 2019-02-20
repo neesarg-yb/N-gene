@@ -255,7 +255,17 @@ void World::DeactivateChunkForPosition( Vector3 const &playerWorldPos )
 	// Deactivate if we found any
 	if( chunkToDeactivate != m_activeChunks.end() )
 	{
-		Chunk* &chunkToDelete = chunkToDeactivate->second;
+		Chunk* &chunkToDelete			= chunkToDeactivate->second;
+		ChunkCoord chunkCoordToDelete	= chunkToDeactivate->first;
+		
+		// Unlink Neighbors with each other
+		ChunkMap neighbourChunks;
+		GetNeighborsOfChunkAt( chunkCoordToDelete, neighbourChunks );
+		for( ChunkMap::iterator itNeighbor = neighbourChunks.begin(); itNeighbor != neighbourChunks.end(); itNeighbor++ )
+		{
+			Chunk* &neighborChunk = itNeighbor->second;
+			neighborChunk->SetNeighborAtCoordinate( nullptr, chunkCoordToDelete );
+		}
 
 		delete chunkToDelete;
 		chunkToDelete = nullptr;
