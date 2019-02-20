@@ -35,10 +35,10 @@ void ConvexPolyhedron::SetFaceWindingOrder( eWindOrder winding )
 	m_isDirty = true;
 }
 
-void ConvexPolyhedron::Rebuild()
+void ConvexPolyhedron::Rebuild( float floatDistanceErrorTolerance )
 {
 	// Get vertices on each planes
-	PerformPlaneIntersections();
+	PerformPlaneIntersections( floatDistanceErrorTolerance );
 
 	// Sort vertices according to culling order
 	SortFaceVerticesWinding( m_winding );
@@ -120,7 +120,7 @@ Mesh* ConvexPolyhedron::ConstructMesh( Rgba const &color ) const
 	return mb.ConstructMesh<Vertex_Lit>();
 }
 
-void ConvexPolyhedron::PerformPlaneIntersections()
+void ConvexPolyhedron::PerformPlaneIntersections( float floatDistanceErrorTolerance )
 {
 	uint const numPlanes = m_hull.GetPlaneCount();
 	GUARANTEE_OR_DIE( numPlanes >= 4, "Error: Convex Polyhedron needs at least four planes to operate.." );
@@ -156,7 +156,7 @@ void ConvexPolyhedron::PerformPlaneIntersections()
 				// Skip if,
 				//  1. Plane does not intersect [OR]
 				//  2. The intersection point is outside the convex hull
-				if( !intersectsAtOnePoint || m_hull.IsPointOutside( intersection ) )
+				if( !intersectsAtOnePoint || m_hull.IsPointOutside( intersection, floatDistanceErrorTolerance ) )
 					continue;
 
 				// Add the vertex index to face(s)
