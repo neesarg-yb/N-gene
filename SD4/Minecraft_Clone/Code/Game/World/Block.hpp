@@ -13,4 +13,7 @@ private:
 public:
 	void		SetType( eBlockType type );
 	eBlockType	GetType() const;
+
+public:
+	static Block INVALID;
 };

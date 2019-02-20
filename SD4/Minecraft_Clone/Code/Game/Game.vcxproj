@@ -291,6 +291,7 @@
     <ClCompile Include="theGame.cpp" />
     <ClCompile Include="World\Block.cpp" />
     <ClCompile Include="World\BlockDefinition.cpp" />
+    <ClCompile Include="World\BlockLocator.cpp" />
     <ClCompile Include="World\Chunk.cpp" />
     <ClCompile Include="World\World.cpp" />
   </ItemGroup>
@@ -306,6 +307,7 @@
     <ClInclude Include="theGame.hpp" />
     <ClInclude Include="World\Block.hpp" />
     <ClInclude Include="World\BlockDefinition.hpp" />
+    <ClInclude Include="World\BlockLocator.hpp" />
     <ClInclude Include="World\Chunk.hpp" />
     <ClInclude Include="World\World.hpp" />
   </ItemGroup>

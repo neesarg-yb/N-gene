@@ -5,8 +5,12 @@
 #include "Game/GameCommon.hpp"
 #include "Game/World/Block.hpp"
 
+class BlockLocator;
+
 class Chunk
 {
+	friend BlockLocator;
+
 public:
 	 Chunk( ChunkCoord position );
 	~Chunk();

@@ -67,6 +67,9 @@
     <ClCompile Include="World\BlockDefinition.cpp">
       <Filter>World\Definitions</Filter>
     </ClCompile>
+    <ClCompile Include="World\BlockLocator.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -107,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="World\BlockDefinition.hpp">
       <Filter>World\Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="World\BlockLocator.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
