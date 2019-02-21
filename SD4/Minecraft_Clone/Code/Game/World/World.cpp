@@ -46,8 +46,8 @@ void World::Update()
 	DeactivateChunkForPosition( m_camera->m_position );
 	RebuiltOneChunkIfRequired( m_camera->m_position );
 
-	// Test Raycast
-	CheckSpawnTestRaycast();
+	// Block Selection
+	PerformRaycast();
 
 	m_camera->RebuildMatrices();
 }
@@ -78,7 +78,10 @@ void World::Render() const
 			thisChunk->Render( *g_theRenderer );
 	}
 
-	RenderRaycast( m_testRaycastResult, *g_theRenderer );
+	// Raycast Selection
+	RenderBlockSelection( m_blockSelectionRaycastResult );
+	if( m_raycastIsLocked )
+		RenderRaycast( m_blockSelectionRaycastResult, *g_theRenderer );
 
 	// Post Render
 	camera.PostRender( *g_theRenderer );
@@ -428,10 +431,144 @@ void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neigh
 		neighborChunks_out[ nIt->first ] = nIt->second;
 }
 
-void World::CheckSpawnTestRaycast()
+void World::PerformRaycast()
 {
-	if( g_theInput->WasKeyJustPressed( 'R' ) )
-		m_testRaycastResult = Raycast( m_camera->m_position, m_camera->GetForwardDirection(), 30.f );
+	bool raycastLockJustGotChanged = false;
+	bool oldRaycastLockState = m_raycastIsLocked;
+
+	if( g_theInput->WasKeyJustPressed('R') )
+		m_raycastIsLocked = !m_raycastIsLocked;
+
+	raycastLockJustGotChanged = (m_raycastIsLocked != oldRaycastLockState);
+
+	// If just got locked..
+	if( (raycastLockJustGotChanged == true) && m_raycastIsLocked )
+	{
+		m_lockedRayStartPos		= m_camera->m_position;
+		m_lockedRayDirection	= m_camera->GetForwardDirection();
+	}
+
+	// If not locked..
+	if( m_raycastIsLocked == false )
+	{
+		m_lockedRayStartPos		= m_camera->m_position;
+		m_lockedRayDirection	= m_camera->GetForwardDirection();
+	}
+
+	m_blockSelectionRaycastResult = Raycast( m_lockedRayStartPos, m_lockedRayDirection, m_raycastMaxDistance );
+}
+
+void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
+{
+	if( raycastResult.DidImpact() == false )
+		return;
+
+	Vector3 const blockWorldCenter		= raycastResult.m_impactBlock.GetBlockWorldPosition() + Vector3(0.5f, 0.5f, 0.5f);
+	Vector3 const blockHalfDimensions	= Vector3( 1.1f, 1.1f, 1.1f ) * 0.5f;
+
+	/*
+	      7_________ 6			VERTEX[8] ORDER:
+		  /|       /|				( 0, 1, 2, 3, 4, 5, 6, 7 )
+		 / | top  / |				
+	   4/__|_____/5 |			
+		|  |_____|__|			   z|   
+		| 3/     |  /2				|  / x
+		| /  bot | /				| /
+		|/_______|/			y ______|/ 
+		0         1
+	*/
+	Rgba const &vertexColor = RGBA_RED_COLOR;
+	Vector3 const vertexPos[8] = {
+		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
+		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
+		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
+		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
+		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z ),
+		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z ),
+		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z ),
+		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z )
+	};
+
+	Vertex_3DPCU vBuffer[24];
+	// Bottom Side
+	// Line 01
+	vBuffer[0].m_color = vertexColor;
+	vBuffer[0].m_position = vertexPos[0];
+	vBuffer[1].m_color = vertexColor;
+	vBuffer[1].m_position = vertexPos[1];
+
+	// Line 12
+	vBuffer[2].m_color = vertexColor;
+	vBuffer[2].m_position = vertexPos[1];
+	vBuffer[3].m_color = vertexColor;
+	vBuffer[3].m_position = vertexPos[2];
+
+	// Line 23
+	vBuffer[4].m_color = vertexColor;
+	vBuffer[4].m_position = vertexPos[2];
+	vBuffer[5].m_color = vertexColor;
+	vBuffer[5].m_position = vertexPos[3];
+
+	// Line 30
+	vBuffer[6].m_color = vertexColor;
+	vBuffer[6].m_position = vertexPos[3];
+	vBuffer[7].m_color = vertexColor;
+	vBuffer[7].m_position = vertexPos[0];
+
+	// Top Side
+	// Line 45
+	vBuffer[8].m_color = vertexColor;
+	vBuffer[8].m_position = vertexPos[4];
+	vBuffer[9].m_color = vertexColor;
+	vBuffer[9].m_position = vertexPos[5];
+
+	// Line 56
+	vBuffer[10].m_color = vertexColor;
+	vBuffer[10].m_position = vertexPos[5];
+	vBuffer[11].m_color = vertexColor;
+	vBuffer[11].m_position = vertexPos[6];
+
+	// Line 67
+	vBuffer[12].m_color = vertexColor;
+	vBuffer[12].m_position = vertexPos[6];
+	vBuffer[13].m_color = vertexColor;
+	vBuffer[13].m_position = vertexPos[7];
+
+	// Line 74
+	vBuffer[14].m_color = vertexColor;
+	vBuffer[14].m_position = vertexPos[7];
+	vBuffer[15].m_color = vertexColor;
+	vBuffer[15].m_position = vertexPos[4];
+	
+	// Vertical Four Edges
+	// Line 40
+	vBuffer[16].m_color = vertexColor;
+	vBuffer[16].m_position = vertexPos[4];
+	vBuffer[17].m_color = vertexColor;
+	vBuffer[17].m_position = vertexPos[0];
+
+	// Line 51
+	vBuffer[18].m_color = vertexColor;
+	vBuffer[18].m_position = vertexPos[5];
+	vBuffer[19].m_color = vertexColor;
+	vBuffer[19].m_position = vertexPos[1];
+
+	// Line 62
+	vBuffer[20].m_color = vertexColor;
+	vBuffer[20].m_position = vertexPos[6];
+	vBuffer[21].m_color = vertexColor;
+	vBuffer[21].m_position = vertexPos[2];
+
+	// Line 73
+	vBuffer[22].m_color = vertexColor;
+	vBuffer[22].m_position = vertexPos[7];
+	vBuffer[23].m_color = vertexColor;
+	vBuffer[23].m_position = vertexPos[3];
+
+	// Render
+	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
+	g_theRenderer->EnableDepth( COMPARE_LESS, true );
+	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 24, PRIMITIVE_LINES );
 }
 
 bool World::CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b )

@@ -36,7 +36,11 @@ private:
 	std::vector< ChunkCoord > m_activationPriorityCheatSheet;	// Sorted: smallest to largest distance from origin
 
 	// Raycast
-	RaycastResult_MC m_testRaycastResult;
+	float const			m_raycastMaxDistance			= 10.f;
+	bool				m_raycastIsLocked				= false;
+	Vector3				m_lockedRayStartPos				= Vector3::ZERO;
+	Vector3				m_lockedRayDirection			= Vector3( 1.f, 0.f, 0.f );
+	RaycastResult_MC	m_blockSelectionRaycastResult	= RaycastResult_MC();
 
 public:
 	void	Update();
@@ -53,8 +57,9 @@ private:
 	void	DeactivateChunkForPosition( Vector3 const &playerWorldPos );
 	void	PopulateChunkActivationCheatsheet( int deactivationRadius );
 	void	GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out );
-
-	void	CheckSpawnTestRaycast();
+	
+	void	PerformRaycast();
+	void	RenderBlockSelection( RaycastResult_MC const &raycastResult ) const;
 
 public:
 	static void			RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );

@@ -192,7 +192,8 @@ IntVector3 Chunk::GetBlockCoordFromIndex( uint blockIndex )
 Vector3 Chunk::GetBlockWorldPositionFromIndex( uint blockIndex ) const
 {
 	BlockCoord blockCoords		= GetBlockCoordFromIndex( blockIndex );
-	Vector3 blockWorldPosition	= Vector3( (float)(m_coord.x + blockCoords.x), (float)(m_coord.y + blockCoords.y), (float)(0.f + blockCoords.z) );
+	Vector3 chunkWorldPosition	= Vector3( (float)m_coord.x * (float)BLOCKS_WIDE_X, (float)m_coord.y * (float)BLOCKS_WIDE_Y, 0.f );
+	Vector3 blockWorldPosition	= Vector3( chunkWorldPosition.x + (float)blockCoords.x, chunkWorldPosition.y + (float)blockCoords.y, chunkWorldPosition.z + (float)blockCoords.z );
 
 	return blockWorldPosition;
 }
