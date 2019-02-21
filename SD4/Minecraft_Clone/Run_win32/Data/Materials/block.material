@@ -1,11 +1,9 @@
 <material id="block">
 	<shadergroup>
-   		<shader fileName="lit" />
+   		<shader fileName="default" />
    	</shadergroup>
 
    	<texture bind="0" src="Data\Images\Terrain_32x32.png" />
-    <texture bind="1" src="Data\Images\Defaults\normal.png" />
-   	<texture bind="2" src="Data\Images\Defaults\black.png" />
    		
    	<float bind="SPECULAR_AMOUNT" 	 value="1.0" />
    	<float bind="SPECULAR_POWER" 	 value="16.0" />

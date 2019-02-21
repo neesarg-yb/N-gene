@@ -3,13 +3,6 @@
 // create a uniform for our sampler2D.
 // layout binding = 0 is us binding it to texture slot 0.  
 layout(binding = 0) uniform sampler2D gTexDiffuse;
-layout(binding = 1, std140) uniform uboTimeClock
-{
-	float GAME_DELTA_TIME;
-	float GAME_TOTAL_TIME;
-	float SYSTEM_DELTA_TIME;
-	float SYSTEM_TOTAL_TIME;
-};
 
 in vec4 passColor;
 in vec2 passUV;

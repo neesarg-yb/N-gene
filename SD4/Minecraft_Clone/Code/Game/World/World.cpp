@@ -8,14 +8,14 @@ World::World( Clock *parentClock )
 {
 	// Setting up the Camera
 	m_camera = new MCamera( *g_theRenderer );
-	m_camera->m_cameraNear = 0.001f;
+	m_camera->m_cameraNear = 0.01f;
 	m_camera->m_cameraFar = 2000.f;
 
 	m_camera->m_position = Vector3( -3.f, 3.f, BLOCKS_WIDE_Z );
 	m_camera->m_yawDegreesAboutZ = -40.f;
 	m_camera->SetPitchDegreesAboutY( 25.f );
 
-	// Activation Cheatsheet
+	// Activation Cheat sheet
 	PopulateChunkActivationCheatsheet( m_deactivationRadius );
 }
 

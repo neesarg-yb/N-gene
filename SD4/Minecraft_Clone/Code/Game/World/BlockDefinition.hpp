@@ -7,7 +7,7 @@ class BlockDefinition
 {
 public:
 	 BlockDefinition();
-	 BlockDefinition( eBlockType type, IntVector2 const &sideTileCoord_TL, IntVector2 const &botTileCoord_TL, IntVector2 const &topTileCoord_TL );
+	 BlockDefinition( eBlockType type, bool isOpaque, IntVector2 const &sideTileCoord_TL, IntVector2 const &botTileCoord_TL, IntVector2 const &topTileCoord_TL );
 	~BlockDefinition();
 
 private:
@@ -19,6 +19,7 @@ private:
 public:
 	// Definition Specific
 	eBlockType	m_type		= BLOCK_AIR;
+	bool		m_isOpaque	= false;
 	AABB2		m_uvSide	= AABB2::ONE_BY_ONE;
 	AABB2		m_uvBottom	= AABB2::ONE_BY_ONE;
 	AABB2		m_uvTop		= AABB2::ONE_BY_ONE;

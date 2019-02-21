@@ -94,7 +94,7 @@ void Chunk::RebuildMesh()
 	m_cpuMesh->End();
 
 	// GPU side mesh
-	m_gpuMesh = m_cpuMesh->ConstructMesh<Vertex_Lit>();
+	m_gpuMesh = m_cpuMesh->ConstructMesh<Vertex_3DPCU>();
 	
 	// Not dirty, anymore..
 	m_isDirty = false;
@@ -239,180 +239,132 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	BlockLocator locNorth	= locCurrent.GetNorthBlockLocator();
 	BlockLocator locSouth	= locCurrent.GetSouthBlockLocator();
 
-	if( locWest.GetBlock().GetType() == BLOCK_AIR )
+	if( locWest.GetBlock().IsOpaque() == false )
 	{
 		// Back Face (towards you)
 		// 4 5
 		// 0 1
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-		mb.SetNormal( -1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
-		idx = mb.PushVertex( vertexPos[0] );						// 0
+		idx = mb.PushVertex( vertexPos[0] );									// 0
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-		mb.SetNormal( -1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[1] );											// 1
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-		mb.SetNormal( -1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[5] );											// 5
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-		mb.SetNormal( -1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[4] );											// 4
 
 		mb.AddFace( idx + 0, idx + 1, idx + 2 );
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 	
-	if( locEast.GetBlock().GetType() == BLOCK_AIR )
+	if( locEast.GetBlock().IsOpaque() == false )
 	{
 		// Front Face (away from you)
 		// 6 7
 		// 2 3
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-		mb.SetNormal( 1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		idx = mb.PushVertex( vertexPos[2] );									// 2
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-		mb.SetNormal( 1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[3] );											// 3
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-		mb.SetNormal( 1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[7] );											// 7
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-		mb.SetNormal( 1.f, 0.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[6] );											// 6
 
 		mb.AddFace( idx + 0, idx + 1, idx + 2 );
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 	
-	if( locNorth.GetBlock().GetType() == BLOCK_AIR )
+	if( locNorth.GetBlock().IsOpaque() == false )
 	{
 		// Left Face
 		// 7 4
 		// 3 0
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-		mb.SetNormal( 0.f, 1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		idx = mb.PushVertex( vertexPos[3] );									// 3
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-		mb.SetNormal( 0.f, 1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[0] );											// 0
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-		mb.SetNormal( 0.f, 1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[4] );											// 4
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-		mb.SetNormal( 0.f, 1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[7] );											// 7
 
 		mb.AddFace( idx + 0, idx + 1, idx + 2 );
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 	
-	if( locSouth.GetBlock().GetType() == BLOCK_AIR )
+	if( locSouth.GetBlock().IsOpaque() == false )
 	{
 		// Right Face
 		// 5 6
 		// 1 2
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.mins.y );
-		mb.SetNormal( 0.f, -1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		idx = mb.PushVertex( vertexPos[1] );									// 1
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.mins.y );
-		mb.SetNormal( 0.f, -1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[2] );											// 2
 		mb.SetColor( color );
 		mb.SetUV( uvSide.maxs.x, uvSide.maxs.y );
-		mb.SetNormal( 0.f, -1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[6] );											// 6
 		mb.SetColor( color );
 		mb.SetUV( uvSide.mins.x, uvSide.maxs.y );
-		mb.SetNormal( 0.f, -1.f, 0.f );
-		mb.SetTangent4( 0.f, 0.f, 1.f, 1.f );
 		mb.PushVertex( vertexPos[5] );											// 5
 
 		mb.AddFace( idx + 0, idx + 1, idx + 2 );
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 
-	if( locUp.GetBlock().GetType() == BLOCK_AIR )
+	if( locUp.GetBlock().IsOpaque() == false )
 	{
 		// Top Face
 		// 7 6
 		// 4 5
 		mb.SetColor( color );
 		mb.SetUV( uvTop.mins.x, uvTop.mins.y );
-		mb.SetNormal( 0.f, 0.f, 1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		idx = mb.PushVertex( vertexPos[4] );									// 4
 		mb.SetColor( color );
 		mb.SetUV( uvTop.maxs.x, uvTop.mins.y );
-		mb.SetNormal( 0.f, 0.f, 1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		mb.PushVertex( vertexPos[5] );											// 5
 		mb.SetColor( color );
 		mb.SetUV( uvTop.maxs.x, uvTop.maxs.y );
-		mb.SetNormal( 0.f, 0.f, 1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		mb.PushVertex( vertexPos[6] );											// 6
 		mb.SetColor( color );
 		mb.SetUV( uvTop.mins.x, uvTop.maxs.y );
-		mb.SetNormal( 0.f, 0.f, 1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		mb.PushVertex( vertexPos[7] );											// 7
 
 		mb.AddFace( idx + 0, idx + 1, idx + 2 );
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 
-	if( locDown.GetBlock().GetType() == BLOCK_AIR )
+	if( locDown.GetBlock().IsOpaque() == false )
 	{
 		// Bottom Face
 		// 0 1
 		// 3 2
 		mb.SetColor( color );
 		mb.SetUV( uvBottom.mins.x, uvBottom.mins.y );
-		mb.SetNormal( 0.f, 0.f, -1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		idx = mb.PushVertex( vertexPos[3] );									// 3
 		mb.SetColor( color );
 		mb.SetUV( uvBottom.maxs.x, uvBottom.mins.y );
-		mb.SetNormal( 0.f, 0.f, -1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		mb.PushVertex( vertexPos[2] );											// 2
 		mb.SetColor( color );
 		mb.SetUV( uvBottom.maxs.x, uvBottom.maxs.y );
-		mb.SetNormal( 0.f, 0.f, -1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		mb.PushVertex( vertexPos[1] );											// 1
 		mb.SetColor( color );
 		mb.SetUV( uvBottom.mins.x, uvBottom.maxs.y );
-		mb.SetNormal( 0.f, 0.f, -1.f );
-		mb.SetTangent4( 1.f, 0.f, 0.f, 1.f );
 		mb.PushVertex( vertexPos[0] );											// 0
 
 		mb.AddFace( idx + 0, idx + 1, idx + 2 );

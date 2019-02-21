@@ -1,5 +1,6 @@
 #pragma once
 #include "Game/GameCommon.hpp"
+#include "Game/World/BlockDefinition.hpp"
 
 class Block 
 {
@@ -13,7 +14,13 @@ private:
 public:
 	void		SetType( eBlockType type );
 	eBlockType	GetType() const;
+	bool		IsOpaque() const;
 
 public:
 	static Block INVALID;
 };
+
+inline bool Block::IsOpaque() const
+{
+	return BlockDefinition::GetDefinitionForType( (eBlockType)m_type ).m_isOpaque;
+}
