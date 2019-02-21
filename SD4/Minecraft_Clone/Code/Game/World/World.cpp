@@ -46,6 +46,9 @@ void World::Update()
 	DeactivateChunkForPosition( m_camera->m_position );
 	RebuiltOneChunkIfRequired( m_camera->m_position );
 
+	// Test Raycast
+	CheckSpawnTestRaycast();
+
 	m_camera->RebuildMatrices();
 }
 
@@ -75,8 +78,74 @@ void World::Render() const
 			thisChunk->Render( *g_theRenderer );
 	}
 
+	RenderRaycastHitPoint();
+
 	// Post Render
 	camera.PostRender( *g_theRenderer );
+}
+
+RaycastResult_MC World::Raycast( Vector3 const &start, Vector3 const &forwardDir, float maxDistance ) const
+{
+	// Settings
+	float const stepSize = 0.01f;
+
+	// Pre-calculated results for edge cases
+	BlockLocator const startBlockLocator	= GetBlockLocatorForWorldPosition( start );
+	BlockLocator const endBlockLocator		= GetBlockLocatorForWorldPosition( start + (forwardDir * maxDistance) );
+	RaycastResult_MC const &startInSolidResult	= RaycastResult_MC( start, forwardDir, maxDistance, 0.f, startBlockLocator, -forwardDir );
+	RaycastResult_MC const &noImpactResult		= RaycastResult_MC( start, forwardDir, maxDistance, 1.f, endBlockLocator, Vector3::ZERO );
+
+	// Started in solid
+	if( startBlockLocator.GetBlock().GetType() != BLOCK_AIR )
+		return startInSolidResult;
+
+	// Starting from an AIR block
+	BlockLocator previousBlockLocator = startBlockLocator;
+
+	// Step-and-sample
+	for( float fractionTravelled = stepSize; fractionTravelled <= (1.f - stepSize); fractionTravelled += stepSize )
+	{
+		Vector3 currentPosition = start + (forwardDir * (maxDistance * fractionTravelled));
+		BlockLocator currentBlockLocator = GetBlockLocatorForWorldPosition( currentPosition );
+
+		// If on the same block as before, proceed to the next step
+		if( currentBlockLocator == previousBlockLocator )
+			continue;
+
+		// If current block is AIR
+		if( currentBlockLocator.GetBlock().GetType() == BLOCK_AIR )
+		{
+			// No impact, keep going..
+			previousBlockLocator = currentBlockLocator;
+			continue;
+		}
+
+		// If current block is NOT AIR, i.e. we did impact!
+		Vector3 impactNormal = ( previousBlockLocator.GetBlockWorldPosition() - currentBlockLocator.GetBlockWorldPosition() ).GetNormalized();
+		RaycastResult_MC impactResult = RaycastResult_MC( start, forwardDir, maxDistance, fractionTravelled, currentBlockLocator, impactNormal );
+		
+		return impactResult;
+	}
+
+	// No impact
+	return noImpactResult;
+}
+
+BlockLocator const World::GetBlockLocatorForWorldPosition( Vector3 const &worldPosition ) const
+{
+	ChunkCoord	chunkAtPosition			= World::ChunkCoordFromWorldPosition( worldPosition );
+	Vector3		blockPosChunkRelative	= Vector3( worldPosition.x - (float)chunkAtPosition.x, worldPosition.y - (float)chunkAtPosition.y, worldPosition.z - 0.f );
+	
+	BlockCoord blockCoord;
+	blockCoord.x = (int) floorf( blockPosChunkRelative.x );
+	blockCoord.y = (int) floorf( blockPosChunkRelative.y );
+	blockCoord.z = (int) floorf( blockPosChunkRelative.z );
+
+	ChunkMap::const_iterator itChunk = m_activeChunks.find( chunkAtPosition );
+	if( itChunk == m_activeChunks.end() )
+		return BlockLocator::INVALID;
+	else
+		return BlockLocator( itChunk->second, Chunk::GetIndexFromBlockCoord(blockCoord) );
 }
 
 void World::RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer )
@@ -98,6 +167,42 @@ void World::RenderBasis( Vector3 const &position, float length, Renderer &active
 	vBuffer[4].m_position	= position;
 	vBuffer[5].m_color		= RGBA_BLUE_COLOR;
 	vBuffer[5].m_position	= position + Vector3( 0.f, 0.f, length );
+
+	// First Render Pass [ Normal ]
+	activeRenderer.BindMaterialForShaderIndex( *g_defaultMaterial );
+	activeRenderer.EnableDepth( COMPARE_LESS, true );
+	activeRenderer.DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+
+	// For, Second Render Pass [ X-Ray ]
+	for( int i = 0; i < 6; i++ )
+	{
+		Rgba &vertColor = vBuffer[i].m_color;
+
+		vertColor.r = (uchar)( (float)vertColor.r * 0.5f );
+		vertColor.g = (uchar)( (float)vertColor.g * 0.5f );
+		vertColor.b = (uchar)( (float)vertColor.b * 0.5f );
+	}
+
+	activeRenderer.EnableDepth( COMPARE_GREATER, false );	// To Draw X-Ray without affecting the depth
+	activeRenderer.DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+}
+
+void World::RenderRaycast( RaycastResult_MC const &raycastResult, Renderer &activeRenderer )
+{
+	// Render line which did not hit
+	RenderLineXRay( raycastResult.m_startPosition, RGBA_GREEN_COLOR, raycastResult.m_impactPosition, RGBA_GREEN_COLOR, activeRenderer );
+
+	// Render line which did hit
+	RenderLineXRay( raycastResult.m_impactPosition, RGBA_RED_COLOR, raycastResult.m_endPosition, RGBA_RED_COLOR, activeRenderer );
+}
+
+void World::RenderLineXRay( Vector3 const &startPos, Rgba const &startColor, Vector3 const &endPos, Rgba const &endColor, Renderer &activeRenderer )
+{
+	Vertex_3DPCU vBuffer[2];
+	vBuffer[0].m_color		= startColor;
+	vBuffer[0].m_position	= startPos;
+	vBuffer[1].m_color		= endColor;
+	vBuffer[1].m_position	= endPos;
 
 	// First Render Pass [ Normal ]
 	activeRenderer.BindMaterialForShaderIndex( *g_defaultMaterial );
@@ -315,6 +420,22 @@ void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neigh
 	nIt = m_activeChunks.find( southNeighborCoord );
 	if( nIt != m_activeChunks.end() )
 		neighborChunks_out[ nIt->first ] = nIt->second;
+}
+
+void World::CheckSpawnTestRaycast()
+{
+	if( g_theInput->WasKeyJustPressed( 'R' ) )
+		m_testRaycastResult = Raycast( m_camera->m_position, m_camera->GetForwardDirection(), 10.f );
+}
+
+void World::RenderRaycastHitPoint() const
+{
+	// Raycast Test
+	Vector3 rayStartPos		= m_camera->m_position;
+	Vector3 rayDirection	= m_camera->GetForwardDirection();
+	float	maxDistRaycast	= 10.f;
+
+	RenderRaycast( m_testRaycastResult, *g_theRenderer );
 }
 
 bool World::CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b )

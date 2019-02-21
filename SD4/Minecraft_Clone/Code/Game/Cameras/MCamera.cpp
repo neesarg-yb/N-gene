@@ -50,3 +50,14 @@ float MCamera::SetPitchDegreesAboutY( float desiredPitch )
 
 	return m_pitchDegreesAboutY;
 }
+
+Vector3 MCamera::GetForwardDirection() const
+{
+	Matrix44 rotationMatrix;
+
+	rotationMatrix.RotateZ3D( m_yawDegreesAboutZ );
+	rotationMatrix.RotateY3D( m_pitchDegreesAboutY );
+	rotationMatrix.RotateX3D( m_rollDegreesAboutX );
+
+	return rotationMatrix.Multiply( Vector3( 1.f, 0.f, 0.f ), 0.f );
+}

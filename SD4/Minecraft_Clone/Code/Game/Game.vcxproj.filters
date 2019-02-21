@@ -26,6 +26,9 @@
     <Filter Include="World\Definitions">
       <UniqueIdentifier>{672e82a8-db83-4403-8e75-2a7d48aec488}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{895f0e1a-20fb-4f31-b5ff-9e1d10fe61c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -70,6 +73,9 @@
     <ClCompile Include="World\BlockLocator.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="Utility\RaycastResult_MC.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -113,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="World\BlockLocator.hpp">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\RaycastResult_MC.hpp">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

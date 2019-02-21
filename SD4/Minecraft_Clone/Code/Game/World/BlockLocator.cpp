@@ -15,12 +15,19 @@ BlockLocator::~BlockLocator()
 
 }
 
-Block& BlockLocator::GetBlock()
+bool BlockLocator::operator==( BlockLocator const &b ) const
+{
+	BlockLocator const &a = *this;
+
+	return (a.m_chunk == b.m_chunk) && (a.m_blockIndex == b.m_blockIndex);
+}
+
+Vector3 BlockLocator::GetBlockWorldPosition() const
 {
 	if( m_chunk == nullptr )
-		return Block::INVALID;
+		return Vector3::ZERO;
 	else
-		return m_chunk->m_blocks[ m_blockIndex ];
+		return m_chunk->GetBlockWorldPositionFromIndex( m_blockIndex );
 }
 
 BlockLocator BlockLocator::GetUpBlockLocator() const

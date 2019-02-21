@@ -5,6 +5,7 @@
 #include "Game/GameCommon.hpp"
 #include "Game/World/Chunk.hpp"
 #include "Game/Cameras/MCamera.hpp"
+#include "Game/Utility/RaycastResult_MC.hpp"
 
 typedef std::map< ChunkCoord, Chunk* > ChunkMap;
 
@@ -34,9 +35,16 @@ private:
 	// Relative offsets from origin
 	std::vector< ChunkCoord > m_activationPriorityCheatSheet;	// Sorted: smallest to largest distance from origin
 
+	// Raycast
+	RaycastResult_MC m_testRaycastResult;
+
 public:
 	void	Update();
 	void	Render() const;
+
+public:
+	RaycastResult_MC	Raycast( Vector3 const &start, Vector3 const &forwardDir, float maxDistance ) const;
+	BlockLocator const	GetBlockLocatorForWorldPosition( Vector3 const &worldPosition ) const;
 
 private:
 	void	ProcessInput( float deltaSeconds );
@@ -46,8 +54,13 @@ private:
 	void	PopulateChunkActivationCheatsheet( int deactivationRadius );
 	void	GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out );
 
+	void	CheckSpawnTestRaycast();
+	void	RenderRaycastHitPoint() const;
+
 public:
 	static void			RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );
+	static void			RenderRaycast( RaycastResult_MC const &raycastResult, Renderer &activeRenderer );
+	static void			RenderLineXRay( Vector3 const &startPos, Rgba const &startColor, Vector3 const &endPos, Rgba const &endColor, Renderer &activeRenderer );
 	static bool			CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b );
 	static ChunkCoord	ChunkCoordFromWorldPosition( Vector3 const &position );
 };

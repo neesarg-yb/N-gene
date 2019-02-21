@@ -33,6 +33,7 @@ public:
 	Camera*			GetCamera();
 	void			RebuildMatrices();
 	float			SetPitchDegreesAboutY( float desiredPitch );		// Returns the clamped pitch
+	Vector3			GetForwardDirection() const;
 	
 public:
 	inline float	GetPitchDegreesAboutY() const { return m_pitchDegreesAboutY; }

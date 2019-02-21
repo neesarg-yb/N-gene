@@ -12,8 +12,15 @@ private:
 	int		 m_blockIndex	= 0;
 
 public:
-	Block&		 GetBlock();
+	bool operator == ( BlockLocator const &b ) const;
 
+public:
+	// Self
+	Block&		 GetBlock();
+	Block const& GetBlock() const;
+	Vector3		 GetBlockWorldPosition() const;
+
+	// Neighbors
 	BlockLocator GetUpBlockLocator() const;
 	BlockLocator GetDownBlockLocator() const;
 	BlockLocator GetWestBlockLocator() const;
@@ -24,3 +31,19 @@ public:
 public:
 	static BlockLocator INVALID;
 };
+
+inline Block& BlockLocator::GetBlock()
+{
+	if( m_chunk == nullptr )
+		return Block::INVALID;
+	else
+		return m_chunk->m_blocks[ m_blockIndex ];
+}
+
+inline Block const& BlockLocator::GetBlock() const
+{
+	if( m_chunk == nullptr )
+		return Block::INVALID;
+	else
+		return m_chunk->m_blocks[ m_blockIndex ];
+}

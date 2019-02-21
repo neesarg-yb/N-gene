@@ -41,10 +41,13 @@ public:
 	inline bool HasMesh() const { return m_gpuMesh != nullptr; }
 
 public:
-	int			GetIndexFromBlockCoord	( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const;
-	IntVector3	GetBlockCoordFromIndex	( uint blockIndex ) const;
-	inline int	GetIndexFromBlockCoord	( BlockCoord pos ) const { return GetIndexFromBlockCoord( pos.x, pos.y, pos.z ); }
-	AABB3		GetBlockWorldBounds		( int blockIndex, float blockSize ) const;
+	Vector3	GetBlockWorldPositionFromIndex	( uint blockIndex ) const;
+	AABB3	GetBlockWorldBounds				( int blockIndex, float blockSize ) const;
+
+public:
+	static	int			GetIndexFromBlockCoord			( int xBlockCoord, int yBlockCoord, int zBlockCoord );
+	static	IntVector3	GetBlockCoordFromIndex			( uint blockIndex );
+	static	inline int	GetIndexFromBlockCoord			( BlockCoord pos ) { return GetIndexFromBlockCoord( pos.x, pos.y, pos.z ); }
 
 private:
 	void		AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder );

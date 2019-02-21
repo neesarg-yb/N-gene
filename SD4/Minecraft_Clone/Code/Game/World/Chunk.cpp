@@ -161,7 +161,7 @@ bool Chunk::HasAllNeighbors() const
 	return true;
 }
 
-int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord ) const
+int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord )
 {
 	return xBlockCoord + (yBlockCoord * BLOCKS_WIDE_X) + (zBlockCoord * (BLOCKS_WIDE_X * BLOCKS_WIDE_Y));
 }
@@ -180,13 +180,21 @@ AABB3 Chunk::GetBlockWorldBounds( int blockIndex, float blockSize ) const
 	return AABB3( blockWorldMins, blockWorldMaxs );
 }
 
-IntVector3 Chunk::GetBlockCoordFromIndex( uint blockIndex ) const
+IntVector3 Chunk::GetBlockCoordFromIndex( uint blockIndex )
 {
 	int x = (blockIndex & BITS_MASK_X);
 	int y = (blockIndex & BITS_MASK_Y) >> BITS_WIDE_X;
 	int z = (blockIndex >> (BITS_WIDE_X + BITS_WIDE_Y));
 
 	return IntVector3(x, y, z);
+}
+
+Vector3 Chunk::GetBlockWorldPositionFromIndex( uint blockIndex ) const
+{
+	BlockCoord blockCoords		= GetBlockCoordFromIndex( blockIndex );
+	Vector3 blockWorldPosition	= Vector3( (float)(m_coord.x + blockCoords.x), (float)(m_coord.y + blockCoords.y), (float)(0.f + blockCoords.z) );
+
+	return blockWorldPosition;
 }
 
 void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
