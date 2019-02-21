@@ -36,7 +36,7 @@ private:
 	std::vector< ChunkCoord > m_activationPriorityCheatSheet;	// Sorted: smallest to largest distance from origin
 
 	// Raycast
-	float const			m_raycastMaxDistance			= 10.f;
+	float const			m_raycastMaxDistance			= 8.f;
 	bool				m_raycastIsLocked				= false;
 	Vector3				m_lockedRayStartPos				= Vector3::ZERO;
 	Vector3				m_lockedRayDirection			= Vector3( 1.f, 0.f, 0.f );
@@ -59,6 +59,7 @@ private:
 	void	GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out );
 	
 	void	PerformRaycast();
+	void	PlaceOrDigBlock();
 	void	RenderBlockSelection( RaycastResult_MC const &raycastResult ) const;
 
 public:

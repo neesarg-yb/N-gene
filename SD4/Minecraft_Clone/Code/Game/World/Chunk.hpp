@@ -37,6 +37,7 @@ public:
 	void		SetNeighborAtCoordinate( Chunk *newNeighbor, ChunkCoord const & neighborCoord );
 	bool		HasAllNeighbors() const;
 
+	inline void SetDirty() { m_isDirty = true; }
 	inline bool	IsDirty() const { return m_isDirty; }
 	inline bool HasMesh() const { return m_gpuMesh != nullptr; }
 

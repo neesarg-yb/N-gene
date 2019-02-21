@@ -16,11 +16,16 @@ public:
 
 public:
 	// Self
+	bool		 IsValid() const;
 	Block&		 GetBlock();
 	Block const& GetBlock() const;
 	Vector3		 GetBlockWorldPosition() const;
 
+	// Chunk
+	Chunk*		GetChunk();
+
 	// Neighbors
+	void		 SetNeighborBlockChunksDirty();
 	BlockLocator GetUpBlockLocator() const;
 	BlockLocator GetDownBlockLocator() const;
 	BlockLocator GetWestBlockLocator() const;
@@ -31,6 +36,16 @@ public:
 public:
 	static BlockLocator INVALID;
 };
+
+inline bool BlockLocator::IsValid() const
+{
+	return (m_chunk != nullptr);
+}
+
+inline Chunk* BlockLocator::GetChunk()
+{
+	return m_chunk;
+}
 
 inline Block& BlockLocator::GetBlock()
 {

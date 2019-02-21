@@ -30,6 +30,23 @@ Vector3 BlockLocator::GetBlockWorldPosition() const
 		return m_chunk->GetBlockWorldPositionFromIndex( m_blockIndex );
 }
 
+void BlockLocator::SetNeighborBlockChunksDirty()
+{
+	BlockLocator north = GetNorthBlockLocator();
+	BlockLocator east = GetEastBlockLocator();
+	BlockLocator south = GetSouthBlockLocator();
+	BlockLocator west = GetWestBlockLocator();
+
+	if( north.IsValid() )
+		north.GetChunk()->SetDirty();
+	if( east.IsValid() )
+		east.GetChunk()->SetDirty();
+	if( south.IsValid() )
+		south.GetChunk()->SetDirty();
+	if( west.IsValid() )
+		west.GetChunk()->SetDirty();
+}
+
 BlockLocator BlockLocator::GetUpBlockLocator() const
 {
 	if( (m_blockIndex & BITS_MASK_Z) != BITS_MASK_Z )

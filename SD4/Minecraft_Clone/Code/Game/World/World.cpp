@@ -48,6 +48,7 @@ void World::Update()
 
 	// Block Selection
 	PerformRaycast();
+	PlaceOrDigBlock();
 
 	m_camera->RebuildMatrices();
 }
@@ -458,6 +459,39 @@ void World::PerformRaycast()
 	m_blockSelectionRaycastResult = Raycast( m_lockedRayStartPos, m_lockedRayDirection, m_raycastMaxDistance );
 }
 
+void World::PlaceOrDigBlock()
+{
+	if( m_blockSelectionRaycastResult.DidImpact() == false )
+		return;
+
+	bool digABlock	 = g_theInput->WasMousButtonJustPressed( MOUSE_BUTTON_LEFT );
+	bool placeABlock = g_theInput->WasMousButtonJustPressed( MOUSE_BUTTON_RIGHT );
+
+	if( digABlock )
+	{
+		BlockLocator selectedBlock = m_blockSelectionRaycastResult.m_impactBlock;
+		if( selectedBlock.IsValid() )
+		{
+			selectedBlock.GetBlock().SetType( BLOCK_AIR );
+			selectedBlock.GetChunk()->SetDirty();
+
+			selectedBlock.SetNeighborBlockChunksDirty();
+		}
+	}
+	else if( placeABlock )
+	{
+		BlockLocator selectedBlock	= m_blockSelectionRaycastResult.m_impactBlock;
+		BlockLocator targetBlock	= GetBlockLocatorForWorldPosition( selectedBlock.GetBlockWorldPosition() + m_blockSelectionRaycastResult.m_impactNormal );
+		if( targetBlock.IsValid() )
+		{
+			targetBlock.GetBlock().SetType( BLOCK_STONE );
+			targetBlock.GetChunk()->SetDirty();
+
+			targetBlock.SetNeighborBlockChunksDirty();
+		}
+	}
+}
+
 void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
 {
 	if( raycastResult.DidImpact() == false )
@@ -478,7 +512,7 @@ void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
 		0         1
 	*/
 	Rgba const &blockSelectionColor = RGBA_RED_COLOR;
-	Rgba const &faceSelectionColor = RGBA_BLUE_COLOR;
+	Rgba const &faceSelectionColor  = RGBA_WHITE_COLOR;
 	Vector3 const vertexPos[8] = {
 		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
 		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
@@ -569,11 +603,11 @@ void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
 	// Selected Side
 	float	halfFaceDim	 = 0.5f;
 	Vector3 topDirection = Vector3( 0.f, 0.f, 1.f );
-	if( raycastResult.m_impactNormal == topDirection )
+	if( fabsf( Vector3::DotProduct(raycastResult.m_impactNormal, topDirection) ) == 1.f  )
 		topDirection = Vector3( 1.f, 0.f, 0.f );
 
 	Vector3 rightDirection	= Vector3::CrossProduct( topDirection, raycastResult.m_impactNormal );
-	Vector3 sideCenter	= blockWorldCenter + (raycastResult.m_impactNormal * 0.51f);
+	Vector3 sideCenter	= blockWorldCenter + (raycastResult.m_impactNormal * 0.52f);
 	Vector3 ssTopLeft	= sideCenter + ( topDirection * halfFaceDim ) + (-rightDirection * halfFaceDim );
 	Vector3 ssTopRight	= sideCenter + ( topDirection * halfFaceDim ) + ( rightDirection * halfFaceDim );
 	Vector3 ssBotLeft	= sideCenter + (-topDirection * halfFaceDim ) + (-rightDirection * halfFaceDim );
