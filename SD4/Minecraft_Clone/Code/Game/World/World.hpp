@@ -29,8 +29,8 @@ private:
 
 	// Gameplay
 	ChunkMap	 m_activeChunks;
-	int			 m_activationRadius		= 20;	// chunks
-	int			 m_deactivationRadius	= 23;	// chunks
+	int			 m_activationRadius		= 2;	// chunks
+	int			 m_deactivationRadius	= 3;	// chunks
 	
 	// Relative offsets from origin
 	std::vector< ChunkCoord > m_activationPriorityCheatSheet;	// Sorted: smallest to largest distance from origin
@@ -55,7 +55,6 @@ private:
 	void	GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out );
 
 	void	CheckSpawnTestRaycast();
-	void	RenderRaycastHitPoint() const;
 
 public:
 	static void			RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );

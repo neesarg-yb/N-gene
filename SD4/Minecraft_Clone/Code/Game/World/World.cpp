@@ -78,7 +78,7 @@ void World::Render() const
 			thisChunk->Render( *g_theRenderer );
 	}
 
-	RenderRaycastHitPoint();
+	RenderRaycast( m_testRaycastResult, *g_theRenderer );
 
 	// Post Render
 	camera.PostRender( *g_theRenderer );
@@ -88,6 +88,7 @@ RaycastResult_MC World::Raycast( Vector3 const &start, Vector3 const &forwardDir
 {
 	// Settings
 	float const stepSize = 0.01f;
+	int const totalSteps = (int)(maxDistance/stepSize);
 
 	// Pre-calculated results for edge cases
 	BlockLocator const startBlockLocator	= GetBlockLocatorForWorldPosition( start );
@@ -103,9 +104,11 @@ RaycastResult_MC World::Raycast( Vector3 const &start, Vector3 const &forwardDir
 	BlockLocator previousBlockLocator = startBlockLocator;
 
 	// Step-and-sample
-	for( float fractionTravelled = stepSize; fractionTravelled <= (1.f - stepSize); fractionTravelled += stepSize )
+	for( int stepNum = 1; stepNum <= totalSteps; stepNum++ )
 	{
-		Vector3 currentPosition = start + (forwardDir * (maxDistance * fractionTravelled));
+		float const distanceTravelled = stepSize * stepNum;
+
+		Vector3 currentPosition = start + (forwardDir * distanceTravelled);
 		BlockLocator currentBlockLocator = GetBlockLocatorForWorldPosition( currentPosition );
 
 		// If on the same block as before, proceed to the next step
@@ -122,7 +125,7 @@ RaycastResult_MC World::Raycast( Vector3 const &start, Vector3 const &forwardDir
 
 		// If current block is NOT AIR, i.e. we did impact!
 		Vector3 impactNormal = ( previousBlockLocator.GetBlockWorldPosition() - currentBlockLocator.GetBlockWorldPosition() ).GetNormalized();
-		RaycastResult_MC impactResult = RaycastResult_MC( start, forwardDir, maxDistance, fractionTravelled, currentBlockLocator, impactNormal );
+		RaycastResult_MC impactResult = RaycastResult_MC( start, forwardDir, maxDistance, distanceTravelled/maxDistance, currentBlockLocator, impactNormal );
 		
 		return impactResult;
 	}
@@ -134,7 +137,8 @@ RaycastResult_MC World::Raycast( Vector3 const &start, Vector3 const &forwardDir
 BlockLocator const World::GetBlockLocatorForWorldPosition( Vector3 const &worldPosition ) const
 {
 	ChunkCoord	chunkAtPosition			= World::ChunkCoordFromWorldPosition( worldPosition );
-	Vector3		blockPosChunkRelative	= Vector3( worldPosition.x - (float)chunkAtPosition.x, worldPosition.y - (float)chunkAtPosition.y, worldPosition.z - 0.f );
+	Vector3		chunkWorldPosition		= Vector3( (float)chunkAtPosition.x * (float)BLOCKS_WIDE_X, (float)chunkAtPosition.y * (float)BLOCKS_WIDE_Y, 0.f );
+	Vector3		blockPosChunkRelative	= Vector3( worldPosition.x - chunkWorldPosition.x, worldPosition.y - chunkWorldPosition.y, worldPosition.z - chunkWorldPosition.z );
 	
 	BlockCoord blockCoord;
 	blockCoord.x = (int) floorf( blockPosChunkRelative.x );
@@ -191,6 +195,8 @@ void World::RenderRaycast( RaycastResult_MC const &raycastResult, Renderer &acti
 {
 	// Render line which did not hit
 	RenderLineXRay( raycastResult.m_startPosition, RGBA_GREEN_COLOR, raycastResult.m_impactPosition, RGBA_GREEN_COLOR, activeRenderer );
+
+	RenderBasis( raycastResult.m_impactPosition, 0.5f, activeRenderer );
 
 	// Render line which did hit
 	RenderLineXRay( raycastResult.m_impactPosition, RGBA_RED_COLOR, raycastResult.m_endPosition, RGBA_RED_COLOR, activeRenderer );
@@ -425,17 +431,7 @@ void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neigh
 void World::CheckSpawnTestRaycast()
 {
 	if( g_theInput->WasKeyJustPressed( 'R' ) )
-		m_testRaycastResult = Raycast( m_camera->m_position, m_camera->GetForwardDirection(), 10.f );
-}
-
-void World::RenderRaycastHitPoint() const
-{
-	// Raycast Test
-	Vector3 rayStartPos		= m_camera->m_position;
-	Vector3 rayDirection	= m_camera->GetForwardDirection();
-	float	maxDistRaycast	= 10.f;
-
-	RenderRaycast( m_testRaycastResult, *g_theRenderer );
+		m_testRaycastResult = Raycast( m_camera->m_position, m_camera->GetForwardDirection(), 30.f );
 }
 
 bool World::CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b )

@@ -32,7 +32,19 @@ void MinecraftWorld::JustFinishedTransition()
 
 void MinecraftWorld::BeginFrame()
 {
+	// Lock Mouse
+	if( g_theInput->WasKeyJustPressed('L') )
+	{
+		g_theInput->ShowCursor( false );
+		g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
+	}
 
+	// Unlock Mouse
+	if( g_theInput->WasKeyJustPressed('U') )
+	{
+		g_theInput->SetMouseModeTo( MOUSE_MODE_ABSOLUTE );
+		g_theInput->ShowCursor( true );
+	}
 }
 
 void MinecraftWorld::EndFrame()
