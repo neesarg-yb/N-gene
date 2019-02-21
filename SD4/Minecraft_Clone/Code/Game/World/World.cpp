@@ -567,8 +567,11 @@ void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
 	vBuffer[23].m_position = vertexPos[3];
 
 	// Selected Side
-	float	halfFaceDim		= 0.5f;
-	Vector3 topDirection	= Vector3( 0.f, 0.5f, 0.f );
+	float	halfFaceDim	 = 0.5f;
+	Vector3 topDirection = Vector3( 0.f, 0.f, 1.f );
+	if( raycastResult.m_impactNormal == topDirection )
+		topDirection = Vector3( 1.f, 0.f, 0.f );
+
 	Vector3 rightDirection	= Vector3::CrossProduct( topDirection, raycastResult.m_impactNormal );
 	Vector3 sideCenter	= blockWorldCenter + (raycastResult.m_impactNormal * 0.51f);
 	Vector3 ssTopLeft	= sideCenter + ( topDirection * halfFaceDim ) + (-rightDirection * halfFaceDim );

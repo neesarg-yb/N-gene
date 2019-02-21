@@ -29,8 +29,8 @@ private:
 
 	// Gameplay
 	ChunkMap	 m_activeChunks;
-	int			 m_activationRadius		= 2;	// chunks
-	int			 m_deactivationRadius	= 3;	// chunks
+	int			 m_activationRadius		= 20;	// chunks
+	int			 m_deactivationRadius	= 22;	// chunks
 	
 	// Relative offsets from origin
 	std::vector< ChunkCoord > m_activationPriorityCheatSheet;	// Sorted: smallest to largest distance from origin
