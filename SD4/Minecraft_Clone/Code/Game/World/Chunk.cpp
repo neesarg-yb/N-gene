@@ -42,6 +42,9 @@ Chunk::Chunk( ChunkCoord position )
 
 	// Mark as Dirty
 	m_isDirty = true;
+
+	// Isn't modified, no new changes to save
+	m_needsSaving = false;
 }
 
 Chunk::~Chunk()
@@ -381,10 +384,21 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	}
 }
 
+void Chunk::SetBlockType( int blockIndex, eBlockType newType )
+{
+	Block &blockToChange = m_blocks[ blockIndex ];
+
+	if( blockToChange.GetType() != newType )
+	{
+		blockToChange.SetType( newType );
+		
+		m_isDirty		= true;
+		m_needsSaving	= true;
+	}
+}
+
 void Chunk::SetBlockType( int xBlockCoord, int yBlockCoord, int zBlockCoord, eBlockType type )
 {
-	int		 blockIndex		= GetIndexFromBlockCoord( xBlockCoord, yBlockCoord, zBlockCoord );
-	Block	&blockToChange	= m_blocks[ blockIndex ];
-
-	blockToChange.SetType( type );
+	int blockIndex = GetIndexFromBlockCoord( xBlockCoord, yBlockCoord, zBlockCoord );
+	SetBlockType( blockIndex, type );
 }

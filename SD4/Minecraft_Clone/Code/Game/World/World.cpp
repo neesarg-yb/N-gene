@@ -472,9 +472,7 @@ void World::PlaceOrDigBlock()
 		BlockLocator selectedBlock = m_blockSelectionRaycastResult.m_impactBlock;
 		if( selectedBlock.IsValid() )
 		{
-			selectedBlock.GetBlock().SetType( BLOCK_AIR );
-			selectedBlock.GetChunk()->SetDirty();
-
+			selectedBlock.ChangeTypeTo( BLOCK_AIR );
 			selectedBlock.SetNeighborBlockChunksDirty();
 		}
 	}
@@ -484,9 +482,7 @@ void World::PlaceOrDigBlock()
 		BlockLocator targetBlock	= GetBlockLocatorForWorldPosition( selectedBlock.GetBlockWorldPosition() + m_blockSelectionRaycastResult.m_impactNormal );
 		if( targetBlock.IsValid() )
 		{
-			targetBlock.GetBlock().SetType( BLOCK_STONE );
-			targetBlock.GetChunk()->SetDirty();
-
+			targetBlock.ChangeTypeTo( BLOCK_STONE );
 			targetBlock.SetNeighborBlockChunksDirty();
 		}
 	}

@@ -20,6 +20,7 @@ public:
 	Block&		 GetBlock();
 	Block const& GetBlock() const;
 	Vector3		 GetBlockWorldPosition() const;
+	void		 ChangeTypeTo( eBlockType newType );
 
 	// Chunk
 	Chunk*		GetChunk();

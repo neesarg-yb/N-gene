@@ -27,9 +27,12 @@ private:
 	Block		 m_blocks[ NUM_BLOCKS_PER_CHUNK ];
 
 	// Mesh
-	MeshBuilder	*m_cpuMesh = nullptr;
-	Mesh		*m_gpuMesh = nullptr;
-	bool		 m_isDirty = true;		// i.e. we need to rebuild the CPU & GPU Mesh
+	MeshBuilder	*m_cpuMesh		= nullptr;
+	Mesh		*m_gpuMesh		= nullptr;
+	bool		 m_isDirty		= true;		// i.e. we need to rebuild the CPU & GPU Mesh
+
+	// Save to the disk
+	bool		 m_needsSaving	= false;
 
 public:
 	void		Render( Renderer &theRenderer ) const;
@@ -52,6 +55,9 @@ public:
 
 private:
 	void		AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder );
+
+	// If changed the block type, marks the mesh dirty and marks that the chunk needs to be saved to the disk
+	void		SetBlockType( int blockIndex, eBlockType newType );
 	void		SetBlockType( int xBlockCoord, int yBlockCoord, int zBlockCoord, eBlockType type );
 	inline void	SetBlockType( BlockCoord pos, eBlockType type ) { SetBlockType( pos.x, pos.y, pos.z, type ); }
 };

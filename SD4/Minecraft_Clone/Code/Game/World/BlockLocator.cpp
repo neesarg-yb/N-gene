@@ -30,6 +30,14 @@ Vector3 BlockLocator::GetBlockWorldPosition() const
 		return m_chunk->GetBlockWorldPositionFromIndex( m_blockIndex );
 }
 
+void BlockLocator::ChangeTypeTo( eBlockType newType )
+{
+	if( m_chunk == nullptr )
+		return;
+
+	m_chunk->SetBlockType( m_blockIndex, newType );
+}
+
 void BlockLocator::SetNeighborBlockChunksDirty()
 {
 	BlockLocator north = GetNorthBlockLocator();
