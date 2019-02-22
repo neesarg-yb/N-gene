@@ -76,6 +76,12 @@
     <ClCompile Include="Utility\RaycastResult_MC.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="Utility\ChunkFile.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\ChunkFileHeader.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -121,6 +127,12 @@
       <Filter>World</Filter>
     </ClInclude>
     <ClInclude Include="Utility\RaycastResult_MC.hpp">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\ChunkFile.hpp">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\ChunkFileHeader.hpp">
       <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>

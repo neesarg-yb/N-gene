@@ -1,9 +1,13 @@
 #pragma once
 #include "Chunk.hpp"
 #include "Engine/Math/SmoothNoise.hpp"
+#include "Engine/Core/StringUtils.hpp"
+#include "Engine/Core/ErrorWarningAssert.hpp"
 #include "Game/World/World.hpp"
 #include "Game/World/BlockLocator.hpp"
 #include "Game/World/BlockDefinition.hpp"
+#include "Game/Utility/ChunkFile.hpp"
+#include "Game/Utility/ChunkFileHeader.hpp"
 
 Chunk::Chunk( ChunkCoord position )
 	: m_coord( position )
@@ -16,26 +20,30 @@ Chunk::Chunk( ChunkCoord position )
 	m_worldBounds.maxs.y = m_worldBounds.mins.y + (float)BLOCKS_WIDE_Y;
 	m_worldBounds.maxs.z = m_worldBounds.mins.z + (float)BLOCKS_WIDE_Z;
 
-	// Construct Block
-	for( int blockY = 0; blockY < BLOCKS_WIDE_Y; blockY++ )
+	// If we there's no .chunk file
+	if( LoadFromFile() == false )
 	{
-		for( int blockX = 0; blockX < BLOCKS_WIDE_X; blockX++ )
+		// Construct Block
+		for( int blockY = 0; blockY < BLOCKS_WIDE_Y; blockY++ )
 		{
-			int		blockZ0Index		= GetIndexFromBlockCoord( blockX, blockY, 0 );
-			AABB3	blockZ0WorldBound	= GetBlockWorldBounds( blockZ0Index, 1.f );
-			float	perlinNoise			= Compute2dPerlinNoise(blockZ0WorldBound.mins.x, blockZ0WorldBound.mins.y, 300.f, 10);;
-			float	seaLevel			= RangeMapFloat( perlinNoise, -1.f, 1.f, 50.f, 128.f );
-
-			for( int blockZ = 0; blockZ < BLOCKS_WIDE_Z; blockZ++ )
+			for( int blockX = 0; blockX < BLOCKS_WIDE_X; blockX++ )
 			{
-				if( blockZ > (int)seaLevel )
-					SetBlockType( blockX, blockY, blockZ, BLOCK_AIR );
-				else if( blockZ == (int)seaLevel )
-					SetBlockType( blockX, blockY, blockZ, BLOCK_GRASS );
-				else if( blockZ >= (int)seaLevel - 2 )
-					SetBlockType( blockX, blockY, blockZ, BLOCK_DIRT );
-				else if( blockZ < (int)seaLevel - 2 )
-					SetBlockType( blockX, blockY, blockZ, BLOCK_STONE );
+				int		blockZ0Index		= GetIndexFromBlockCoord( blockX, blockY, 0 );
+				AABB3	blockZ0WorldBound	= GetBlockWorldBounds( blockZ0Index, 1.f );
+				float	perlinNoise			= Compute2dPerlinNoise(blockZ0WorldBound.mins.x, blockZ0WorldBound.mins.y, 300.f, 10);;
+				float	seaLevel			= RangeMapFloat( perlinNoise, -1.f, 1.f, 50.f, 128.f );
+
+				for( int blockZ = 0; blockZ < BLOCKS_WIDE_Z; blockZ++ )
+				{
+					if( blockZ > (int)seaLevel )
+						SetBlockType( blockX, blockY, blockZ, BLOCK_AIR );
+					else if( blockZ == (int)seaLevel )
+						SetBlockType( blockX, blockY, blockZ, BLOCK_GRASS );
+					else if( blockZ >= (int)seaLevel - 2 )
+						SetBlockType( blockX, blockY, blockZ, BLOCK_DIRT );
+					else if( blockZ < (int)seaLevel - 2 )
+						SetBlockType( blockX, blockY, blockZ, BLOCK_STONE );
+				}
 			}
 		}
 	}
@@ -199,6 +207,59 @@ Vector3 Chunk::GetBlockWorldPositionFromIndex( uint blockIndex ) const
 	Vector3 blockWorldPosition	= Vector3( chunkWorldPosition.x + (float)blockCoords.x, chunkWorldPosition.y + (float)blockCoords.y, chunkWorldPosition.z + (float)blockCoords.z );
 
 	return blockWorldPosition;
+}
+
+bool Chunk::LoadFromFile()
+{
+	std::string const fileName = Stringf( "Chunk_%d,%d.chunk", m_coord.x, m_coord.y );
+	std::string const filePath = "Saves\\" + fileName;
+
+	// Try to open the chunk file
+	ChunkFile chunkFile;
+	bool fileOpened = chunkFile.Open( filePath );
+
+	if( fileOpened == false )
+		return false;
+
+	// File is opened, create the chunk from file
+	ChunkFileHeader chunkFileHeader;
+	bool headerReadSuccess = chunkFile.ReadHeader( chunkFileHeader );
+	GUARANTEE_RECOVERABLE( headerReadSuccess, "Could not read the chunk's header!" );
+
+	if( headerReadSuccess == false )
+		return false;
+
+	// To set block type from file
+	int lastBlockSetAtIndex = -1;
+
+	// Start reading all the blocks
+	int	 numBlocksPendingToRead		= chunkFileHeader.GetBlocksCount();
+	bool lastBlockReadSuccessfully	= true;
+	while( lastBlockReadSuccessfully && (numBlocksPendingToRead > 0) )
+	{
+		int			numBlocks = 0;
+		eBlockType	blockType = BLOCK_AIR;
+
+		// Read from file
+		lastBlockReadSuccessfully = chunkFile.GetNextBlocks( numBlocks, blockType );
+
+		// Set these blocks of chunk
+		for( int setBlockCount = 0; setBlockCount < numBlocks; setBlockCount++ )
+		{
+			m_blocks[ ++lastBlockSetAtIndex ].SetType( blockType );
+		}
+
+		numBlocksPendingToRead -= numBlocks;
+	}
+
+	// If we still have blocks to read, but last attempt was a failure
+	if( (numBlocksPendingToRead != 0) && (lastBlockReadSuccessfully == false) )
+	{
+		GUARANTEE_RECOVERABLE( false, "Block read was a failure from .chunk file!" );
+		return false;
+	}
+
+	return true;
 }
 
 void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )

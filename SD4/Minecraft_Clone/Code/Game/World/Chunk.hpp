@@ -54,6 +54,7 @@ public:
 	static	inline int	GetIndexFromBlockCoord			( BlockCoord pos ) { return GetIndexFromBlockCoord( pos.x, pos.y, pos.z ); }
 
 private:
+	bool		LoadFromFile();
 	void		AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder );
 
 	// If changed the block type, marks the mesh dirty and marks that the chunk needs to be saved to the disk
