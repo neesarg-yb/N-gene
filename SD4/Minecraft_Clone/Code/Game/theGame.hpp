@@ -50,7 +50,7 @@ private:
 	double			m_timeSinceStartOfTheGame			=	0;
 	double			m_lastFramesTime;
 	double			m_timeSinceTransitionBegan			=	0;
-	const float		m_transitionTime					=	2.5;
+	const float		m_transitionTime					=	0.5f;
 	const float		m_halfTransitionTime				=	m_transitionTime * 0.5f;
 	float			m_fadeEffectAlpha					=	0.f;						// 0 to 1
 

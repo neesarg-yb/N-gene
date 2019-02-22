@@ -3,6 +3,7 @@
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
 #include "Game/theApp.hpp"
@@ -111,6 +112,8 @@ void theGame::BeginFrame()
 	// Profiler Test
 	PROFILE_SCOPE_FUNCTION();
 
+	DebugRendererBeginFrame( GetMasterClock() );
+
 	m_currentGameState->BeginFrame();
 }
 
@@ -166,6 +169,8 @@ void theGame::Update()
 
 	// Continue updating the currentGameState
 	m_currentGameState->Update();
+
+	DebugRender2DText( 0.f, Vector2( 700.f, 400.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("FPS %3.d", (int)(1.f / deltaSeconds)) );
 }
 
 void theGame::Render() const
@@ -185,6 +190,8 @@ void theGame::Render() const
 	g_theRenderer->EnableDepth( COMPARE_ALWAYS, false );
 
 	g_theRenderer->DrawAABB( m_default_screen_bounds, overlayBoxColor );
+
+	DebugRendererLateRender( m_gameCamera );
 }
 
 bool theGame::SetCurrentGameState( std::string const &gsName )
