@@ -15,5 +15,6 @@ public:
 	uchar	m_format	 = 'R';							// 'R' (or 82, 0x52) for "RLE Compressed"
 
 public:
-	int GetBlocksCount() const;							// How many total blocks in this chunk?
+	int			GetBlocksCount() const;							// How many total blocks in this chunk?
+	std::string	GetString4CC() const;
 };

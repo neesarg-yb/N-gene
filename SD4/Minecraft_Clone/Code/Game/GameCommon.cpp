@@ -14,3 +14,11 @@ RemoteCommandService*	g_rcs					= nullptr;
 /*
 AudioSystem* g_theAudio = nullptr;
 */
+
+eBlockType GetBlockTypeFromInteger( int typeInt )
+{
+	if( typeInt >= NUM_BLOCK_TYPES || typeInt < 0 )
+		return BLOCK_INVALID;
+	else
+		return (eBlockType) typeInt;
+}

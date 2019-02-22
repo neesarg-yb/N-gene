@@ -40,8 +40,10 @@ enum eBlockType : uchar
 	BLOCK_GRASS,
 	BLOCK_DIRT,
 	BLOCK_STONE,
+	BLOCK_INVALID,
 	NUM_BLOCK_TYPES
 };
+eBlockType GetBlockTypeFromInteger( int typeInt );
 
 enum eNeighborChunkDirection
 {

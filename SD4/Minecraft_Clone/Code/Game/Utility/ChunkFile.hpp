@@ -11,11 +11,14 @@ public:
 	~ChunkFile();
 
 private:
-	char	*m_buffer	= nullptr;
-	int		 m_readFrom	= 0;
+	char	*m_buffer			= nullptr;
+	int		 m_bufferSizeBytes	= 0;
+	int		 m_readFrom			= 0;
 
 public:
 	bool	Open( std::string const &filePath );
 	bool	ReadHeader( ChunkFileHeader &header_out );
 	bool	GetNextBlocks( int &numBlocks_out, eBlockType &blockType_out );
 };
+
+void* ReadBinaryFileToNewBuffer( char const *filePath, size_t &bufferSize_out );

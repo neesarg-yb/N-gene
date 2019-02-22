@@ -9,3 +9,13 @@ int ChunkFileHeader::GetBlocksCount() const
 
 	return (blocksOnX * blocksOnY * blocksOnZ);
 }
+
+std::string ChunkFileHeader::GetString4CC() const
+{
+	std::string ccString;
+
+	for( int c = 0; c < 4; c++ )
+		ccString += m_4cc[c];
+
+	return ccString;
+}
