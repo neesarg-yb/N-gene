@@ -1,8 +1,14 @@
 #pragma once
 #include "ChunkFile.hpp"
-#include "Game/Utility/ChunkFileHeader.hpp"
+#include "Game/World/Block.hpp"
 
 ChunkFile::ChunkFile()
+{
+
+}
+
+ChunkFile::ChunkFile( ChunkFileHeader const &headerToSave )
+	: m_headerToSave( headerToSave )
 {
 
 }
@@ -84,6 +90,87 @@ bool ChunkFile::GetNextBlocks( int &numBlocks_out, eBlockType &blockType_out )
 	blockType_out = GetBlockTypeFromInteger( (int)runType );
 
 	return true;
+}
+
+void ChunkFile::AddNewBlock( Block const &block )
+{
+	m_blocksToSave.push_back( block.GetType() );
+}
+
+void ChunkFile::SaveToFile( std::string const &filePath )
+{
+	std::vector< uchar > outByteVector;
+
+	// Store the file header
+	outByteVector.push_back( m_headerToSave.m_4cc[0] );
+	outByteVector.push_back( m_headerToSave.m_4cc[1] );
+	outByteVector.push_back( m_headerToSave.m_4cc[2] );
+	outByteVector.push_back( m_headerToSave.m_4cc[3] );
+
+	outByteVector.push_back( m_headerToSave.m_version );
+
+	outByteVector.push_back( m_headerToSave.m_chunkBitsX );
+	outByteVector.push_back( m_headerToSave.m_chunkBitsY );
+	outByteVector.push_back( m_headerToSave.m_chunkBitsZ );
+
+	outByteVector.push_back( m_headerToSave.m_reserved1 );
+	outByteVector.push_back( m_headerToSave.m_reserved2 );
+	outByteVector.push_back( m_headerToSave.m_reserved3 );
+
+	outByteVector.push_back( m_headerToSave.m_format );
+
+	// Store the blocks using RLE
+	int blocksCompressed		= 1;
+	int			runBlockCount	= 1;
+	eBlockType	runBlockType	= m_blocksToSave[0];
+	do
+	{
+		eBlockType &thisBlockType = m_blocksToSave[ blocksCompressed ];
+
+		// This block type is different than what we're caching
+		if( thisBlockType != runBlockType )
+		{
+			// Encode the previous pending blocks
+			outByteVector.push_back( (uchar) runBlockType );
+			outByteVector.push_back( (uchar) runBlockCount );
+
+			// Start new batch
+			runBlockType = thisBlockType;
+			runBlockCount = 0;
+		}
+
+		// It is the same run block type!
+		// If reached to the max count that can be represented by a uchar
+		if( runBlockCount >= 255 )
+		{
+			// Encode the previous one batch
+			outByteVector.push_back( (uchar) runBlockType );
+			outByteVector.push_back( (uchar) runBlockCount );
+
+			// Start new batch
+			runBlockType = thisBlockType;
+			runBlockCount = 0;
+		}
+		
+		runBlockCount++;
+		blocksCompressed++;
+
+	} while( blocksCompressed < m_blocksToSave.size() );
+
+	// Push the last encoded batch
+	outByteVector.push_back( (uchar) runBlockType );
+	outByteVector.push_back( (uchar) runBlockCount );
+
+
+	// Write to the file!
+	FILE *fp = nullptr;
+	fopen_s( &fp, filePath.c_str(), "wb" );
+
+	if (fp == nullptr)
+		return;
+
+	fwrite( outByteVector.data(), 1U, outByteVector.size(), fp );
+	fclose( fp );
 }
 
 void* ReadBinaryFileToNewBuffer( char const *filePath, size_t &bufferSize_out )

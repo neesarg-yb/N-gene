@@ -54,6 +54,7 @@ public:
 	static	inline int	GetIndexFromBlockCoord			( BlockCoord pos ) { return GetIndexFromBlockCoord( pos.x, pos.y, pos.z ); }
 
 private:
+	void		SaveToFile() const;
 	bool		LoadFromFile();
 	void		AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder );
 

@@ -57,6 +57,9 @@ Chunk::Chunk( ChunkCoord position )
 
 Chunk::~Chunk()
 {
+	if( m_needsSaving )
+		SaveToFile();
+
 	if( m_cpuMesh != nullptr )
 		delete m_cpuMesh;
 
@@ -207,6 +210,26 @@ Vector3 Chunk::GetBlockWorldPositionFromIndex( uint blockIndex ) const
 	Vector3 blockWorldPosition	= Vector3( chunkWorldPosition.x + (float)blockCoords.x, chunkWorldPosition.y + (float)blockCoords.y, chunkWorldPosition.z + (float)blockCoords.z );
 
 	return blockWorldPosition;
+}
+
+void Chunk::SaveToFile() const
+{
+	std::string const fileName = Stringf( "Chunk_%d,%d.chunk", m_coord.x, m_coord.y );
+	std::string const filePath = "Saves\\" + fileName;
+
+	ChunkFileHeader fileHeader;
+	fileHeader.SetString4CC( "SMCD" );
+	fileHeader.m_version = 1;
+	fileHeader.m_chunkBitsX = BITS_WIDE_X;
+	fileHeader.m_chunkBitsY = BITS_WIDE_Y;
+	fileHeader.m_chunkBitsZ = BITS_WIDE_Z;
+	fileHeader.m_format		= 'R';
+
+	ChunkFile chunkFile( fileHeader );
+	for( int b = 0; b < NUM_BLOCKS_PER_CHUNK; b++ )
+		chunkFile.AddNewBlock( m_blocks[b] );
+
+	chunkFile.SaveToFile( filePath );
 }
 
 bool Chunk::LoadFromFile()

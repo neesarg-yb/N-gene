@@ -19,3 +19,14 @@ std::string ChunkFileHeader::GetString4CC() const
 
 	return ccString;
 }
+
+void ChunkFileHeader::SetString4CC( std::string const &str4CC )
+{
+	if( str4CC.length() < 4 )
+		return;
+
+	m_4cc[0] = str4CC[0];
+	m_4cc[1] = str4CC[1];
+	m_4cc[2] = str4CC[2];
+	m_4cc[3] = str4CC[3];
+}
