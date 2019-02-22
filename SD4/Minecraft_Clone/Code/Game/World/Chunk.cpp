@@ -224,8 +224,8 @@ bool Chunk::LoadFromFile()
 	// File is opened, create the chunk from file
 	ChunkFileHeader chunkFileHeader;
 	bool headerReadSuccess = chunkFile.ReadHeader( chunkFileHeader );
-	GUARANTEE_RECOVERABLE( headerReadSuccess, "Could not read the chunk's header!" );
 
+	GUARANTEE_RECOVERABLE( headerReadSuccess, "Could not read the chunk's header!" );
 	if( headerReadSuccess == false )
 		return false;
 

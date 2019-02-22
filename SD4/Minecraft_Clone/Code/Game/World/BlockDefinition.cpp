@@ -49,10 +49,11 @@ void BlockDefinition::LoadDefinitions()
 	s_material		= Material::CreateNewFromFile( "Data\\Materials\\block.material" );
 	s_spriteSheet	= new SpriteSheet( *s_material->GetTexture(0), 32, 32 );
 
-	s_definitions[ BLOCK_AIR ]	 = BlockDefinition( BLOCK_AIR, false, IntVector2(0, 0), IntVector2(0, 0), IntVector2(0, 0) );
-	s_definitions[ BLOCK_GRASS ] = BlockDefinition( BLOCK_GRASS, true, IntVector2(3, 3), IntVector2(4, 3), IntVector2(1, 0) );
-	s_definitions[ BLOCK_DIRT ]	 = BlockDefinition( BLOCK_DIRT, true, IntVector2(4, 3), IntVector2(4, 3), IntVector2(4, 3) );
-	s_definitions[ BLOCK_STONE ] = BlockDefinition( BLOCK_STONE, true, IntVector2(0, 4), IntVector2(0, 4), IntVector2(0, 4) );
+	s_definitions[ BLOCK_AIR ]		= BlockDefinition( BLOCK_AIR,		false,	IntVector2(0, 0), IntVector2(0, 0), IntVector2(0, 0) );
+	s_definitions[ BLOCK_GRASS ]	= BlockDefinition( BLOCK_GRASS,		true,	IntVector2(3, 3), IntVector2(4, 3), IntVector2(1, 0) );
+	s_definitions[ BLOCK_DIRT ]		= BlockDefinition( BLOCK_DIRT,		true,	IntVector2(4, 3), IntVector2(4, 3), IntVector2(4, 3) );
+	s_definitions[ BLOCK_STONE ]	= BlockDefinition( BLOCK_STONE,		true,	IntVector2(0, 4), IntVector2(0, 4), IntVector2(0, 4) );
+	s_definitions[ BLOCK_INVALID ]	= BlockDefinition( BLOCK_INVALID,	true,	IntVector2(2, 2), IntVector2(2, 2), IntVector2(2, 2) );
 }
 
 void BlockDefinition::DestroyDefinitions()
