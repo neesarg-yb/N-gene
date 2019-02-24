@@ -74,6 +74,16 @@ bool IntVector2::operator < ( const IntVector2& vecToCompate ) const
 		return false;
 }
 
+float IntVector2::GetLength() const
+{
+	return sqrtf( GetLengthSquared() );
+}
+
+float IntVector2::GetLengthSquared() const
+{
+	return (float)((x*x) + (y*y));
+}
+
 void IntVector2::SetFromText( const char* text )
 {
 	std::string inputStr = text;

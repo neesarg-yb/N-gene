@@ -1,5 +1,6 @@
 #pragma once
 #include "ConvexHull.hpp"
+#include "Engine/Math/MathUtil.hpp"
 
 ConvexHull::ConvexHull()
 {
@@ -16,7 +17,7 @@ void ConvexHull::AddPlane( Plane3 const &newPlane )
 	m_planes.push_back( newPlane );
 }
 
-bool ConvexHull::IsPointOutside( Vector3 const &testP ) const
+bool ConvexHull::IsPointOutside( Vector3 const &testP, float floatDistanceErrorTolerance ) const
 {
 	for ( uint i = 0; i < m_planes.size(); i++ )
 	{
@@ -24,7 +25,7 @@ bool ConvexHull::IsPointOutside( Vector3 const &testP ) const
 
 		// If the point is in front side of this plane's normal
 		float distFromPlane = thisPlane.GetDistanceFromPoint( testP );
-		if( distFromPlane > 0.f )
+		if( distFromPlane > floatDistanceErrorTolerance )
 			return true;
 	}
 
