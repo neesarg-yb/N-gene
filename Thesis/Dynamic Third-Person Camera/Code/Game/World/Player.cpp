@@ -12,7 +12,7 @@ Player::Player( Vector3 worldPosition, Terrain const &parentTerrain )
 	, m_terrain( &parentTerrain )
 {
 	// Movement Presets
-	m_maxSpeed = 7.f;
+	m_maxSpeed = PLAYER_MAX_SPEED;
 	m_defaultMaxSpeed = m_maxSpeed;
 	
 	// Setup the Renderable - BB8

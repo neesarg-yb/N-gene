@@ -26,11 +26,16 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 
 	CameraContext context = m_manager->GetCameraContext();
 
+	// Look ahead according to player velocity
+	UpdateLeadOffset( *context.anchorGameObject, deltaSeconds );
+
 	// Proportional Controller
-	Vector3 const diffInPosition	= goalState.m_position - currentState.m_position;
-	Vector3 const suggestVelocity	= diffInPosition * m_controllingFactor;
-	Vector3 const velocityAtTarget	= context.anchorGameObject->m_velocity;
-	Vector3 const mpcVelocity		= suggestVelocity + velocityAtTarget;
+	Vector3 const leadOffsetFromGoal	= Vector3( m_leadOffsetFromGoal.x, 0.f, m_leadOffsetFromGoal.y );
+	Vector3 const goalPosWithOffset		= goalState.m_position + leadOffsetFromGoal;
+	Vector3 const diffInPosition		= goalPosWithOffset - currentState.m_position;
+	Vector3 const suggestVelocity		= diffInPosition * m_controllingFactor;
+	Vector3 const velocityAtTarget		= context.anchorGameObject->m_velocity;
+	Vector3 const mpcVelocity			= suggestVelocity + velocityAtTarget;
 	
 	// Final State to return
 	CameraState finalState( goalState );
@@ -42,7 +47,7 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 
 	// Making sure that the camera is looking at the target position
 	Vector3		anchorWorldPosition	= context.anchorGameObject->m_transform.GetWorldPosition();
-	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition, finalState.m_position );
+	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition + leadOffsetFromGoal, finalState.m_position );
 	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix ).GetInverse();
 	finalState.m_orientation		= cameraOrientation;
 
@@ -63,14 +68,35 @@ void CMC_ProportionalController::ProcessInput()
 	if( g_theInput->WasKeyJustPressed( 'M' ) )
 		m_mpcEnabled = !m_mpcEnabled;
 	if( g_theInput->IsKeyPressed( PAGE_DOWN ) )
-		m_leadFactor -= 2.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_leadInterpolationFactor -= 0.1f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->IsKeyPressed( PAGE_UP ) )
-		m_leadFactor += 2.f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+		m_leadInterpolationFactor += 0.1f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 
 	// Clamp the factors
-	m_controllingFactor		= (m_controllingFactor < 0.f)	 ? 0.f : m_controllingFactor;
-	m_accelerationLimitXZ	= (m_accelerationLimitXZ < 0.f ) ? 0.f : m_accelerationLimitXZ;
-	m_leadFactor			= (m_leadFactor < 0.f)			 ? 0.f : m_leadFactor;
+	m_controllingFactor			= (m_controllingFactor < 0.f)	 ? 0.f : m_controllingFactor;
+	m_accelerationLimitXZ		= (m_accelerationLimitXZ < 0.f ) ? 0.f : m_accelerationLimitXZ;
+	m_leadInterpolationFactor	= ClampFloat01( m_leadInterpolationFactor );
+}
+
+Vector2 CMC_ProportionalController::UpdateLeadOffset( GameObject const &player, float deltaSeconds )
+{
+	Vector2	const playerCurrentVelocity	= Vector2( player.m_velocity.x, player.m_velocity.z );
+	float	const playerCurrentSpeed	= playerCurrentVelocity.GetLength();
+
+	// Get XZ Direction of player's velocity
+	Vector2 playerVelocityDir = playerCurrentVelocity.GetNormalized();
+
+	// Set the desired offset
+	float	playerSpeedFraction		= ClampFloat01( playerCurrentSpeed / PLAYER_MAX_SPEED );
+	Vector2 desiredOffsetFromGoal	= playerVelocityDir * playerSpeedFraction;
+
+	// Interpolate towards it..
+	m_leadOffsetFromGoal = Interpolate( m_leadOffsetFromGoal, desiredOffsetFromGoal, m_leadInterpolationFactor * deltaSeconds );
+
+	// Debug Render the offset relative to player
+	DebugRenderPoint( 0.f, 1.f, player.m_transform.GetWorldPosition() + Vector3( m_leadOffsetFromGoal.x, 0.f, m_leadOffsetFromGoal.y ), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+
+	return m_leadOffsetFromGoal;
 }
 
 void CMC_ProportionalController::DebugPrintInformation() const
@@ -88,14 +114,14 @@ void CMC_ProportionalController::DebugPrintInformation() const
 	DebugRender2DText( 0.f, Vector2(-850.f, 300.f), 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, trianglesStr.c_str() );
 
 	// Controlling Factor
-	std::string controllingFractionStr = Stringf( "%-24s = %f", "Controlling Factor", m_controllingFactor );
+	std::string controllingFractionStr = Stringf( "%-26s = %f", "Controlling Factor", m_controllingFactor );
 	DebugRender2DText( 0.f, Vector2(-850.f, 280.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, controllingFractionStr.c_str() );
 
 	// Acceleration Limit
-	std::string accelerationLimitStr = Stringf( "%-24s = %f", "Acceleration Limit XZ", m_accelerationLimitXZ );
+	std::string accelerationLimitStr = Stringf( "%-26s = %f", "Acceleration Limit XZ", m_accelerationLimitXZ );
 	DebugRender2DText( 0.f, Vector2(-850.f, 260.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, accelerationLimitStr.c_str() );
 
 	// Lead Factor
-	std::string leadFactorStr = Stringf( "%-24s = %f", "Lead Factor", m_leadFactor );
+	std::string leadFactorStr = Stringf( "%-26s = %f", "Lead Interpolation Factor", m_leadInterpolationFactor );
 	DebugRender2DText( 0.f, Vector2(-850.f, 240.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, leadFactorStr.c_str() );
 }

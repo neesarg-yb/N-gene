@@ -2,6 +2,9 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Input/InputSystem.hpp"
 
+//-------------------
+// ENUM
+//
 enum WorldEntityTypes
 {
 	ENTITY_PLAYER = 0,
@@ -11,6 +14,14 @@ enum WorldEntityTypes
 	NUM_ENTITIES
 };
 
+
+//--------------------
+// GLOBAL CONSTANTS
+float constexpr PLAYER_MAX_SPEED = 7.f;
+
+
+//--------------------
+// GLOBAL VARIABLES
 class  Blackboard;
 extern Blackboard* g_gameConfigBlackboard;
 
