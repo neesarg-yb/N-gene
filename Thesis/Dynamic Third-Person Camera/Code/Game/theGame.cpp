@@ -12,6 +12,7 @@
 #include "Game/Game States/Scene_FollowCamera.hpp"
 #include "Game/Game States/Scene_ComplexRotation.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
+#include "Game/Game States/Scene_AverageRotation.hpp"
 #include "Game/Game States/Scene_DegreesOfFreedom.hpp"
 #include "Game/Game States/Scene_CollisionAvoidance.hpp"
 #include "Game/Game States/Scene_ProportionalController.hpp"
@@ -104,6 +105,9 @@ void theGame::Startup()
 
 	GameState* quaternionsTest = new Scene_QuaternionsTest( g_gameClock );
 	AddNewGameState( quaternionsTest );
+
+	GameState* averageRotation = new Scene_AverageRotation( g_gameClock );
+	AddNewGameState( averageRotation );
 
 	GameState* degreesOfFreedom = new Scene_DegreesOfFreedom( g_gameClock );
 	AddNewGameState( degreesOfFreedom );

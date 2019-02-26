@@ -9,12 +9,12 @@ LevelSelect::LevelSelect( Clock const *parentClock )
 {
 	// Setup the LevelSelection UI
 	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.35f, 0.30f, 0.65f, 0.55f ) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(5) Camera Behavior and Controls ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(4) Collision Avoidance          ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(3) Debug System                 ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Proportional Controller      ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Degrees of Freedom           ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Average Rotation             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Complex Rotation             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->m_selectionIndex = 6;
@@ -76,6 +76,8 @@ void LevelSelect::LevelSelected( char const * levelName )
 		g_theGame->StartTransitionToState( "COMPLEX ROTATION" );
 	else if( std::string(levelName) == "--> Quaternion Basis             " )
 		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
+	else if( std::string(levelName) == "--> Average Rotation             " )
+		g_theGame->StartTransitionToState( "AVERAGE ROTATION" );
 	else if( std::string(levelName) == "--> Degrees of Freedom           " )
 		g_theGame->StartTransitionToState( "DEGREES OF FREEDOM" );
 	else if( std::string(levelName) == "(1) Follow Camera                " )
