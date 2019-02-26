@@ -14,7 +14,7 @@ LevelSelect::LevelSelect( Clock const *parentClock )
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Proportional Controller      ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Degrees of Freedom           ", &m_levelSelectedStdFunc) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Average Rotation             ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Camera State Average         ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Complex Rotation             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->m_selectionIndex = 6;
@@ -76,8 +76,8 @@ void LevelSelect::LevelSelected( char const * levelName )
 		g_theGame->StartTransitionToState( "COMPLEX ROTATION" );
 	else if( std::string(levelName) == "--> Quaternion Basis             " )
 		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
-	else if( std::string(levelName) == "--> Average Rotation             " )
-		g_theGame->StartTransitionToState( "AVERAGE ROTATION" );
+	else if( std::string(levelName) == "--> Camera State Average         " )
+		g_theGame->StartTransitionToState( "CAMERA STATE AVERAGE" );
 	else if( std::string(levelName) == "--> Degrees of Freedom           " )
 		g_theGame->StartTransitionToState( "DEGREES OF FREEDOM" );
 	else if( std::string(levelName) == "(1) Follow Camera                " )

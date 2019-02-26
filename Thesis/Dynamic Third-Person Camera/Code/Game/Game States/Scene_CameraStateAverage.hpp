@@ -9,11 +9,11 @@
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
 
-class Scene_AverageRotation : public GameState
+class Scene_CameraStateAverage : public GameState
 {
 public:
-	 Scene_AverageRotation( Clock const *parentClock );
-	~Scene_AverageRotation();
+	 Scene_CameraStateAverage( Clock const *parentClock );
+	~Scene_CameraStateAverage();
 
 private:
 	// Rendering Specific
@@ -33,6 +33,13 @@ private:
 	float const				 m_cameraNear				= 0.001f;
 	float const				 m_cameraFar				= 1000.f;
 
+	// Camera State History for testing its average
+	int const				 m_historyLength			= 10;
+	CameraStateHistoy		 m_camStateHistory			= CameraStateHistoy( m_historyLength );
+	float const				 m_historyIndexLabelSize	= 0.077f;		// Text Size
+	Rgba const				&m_historyStateTintColor	= Rgba( 100, 100, 100, 255 );
+	Rgba const				&m_historyAverageTintColor	= RGBA_WHITE_COLOR;
+
 public:
 	void JustFinishedTransition();
 	void BeginFrame();
@@ -42,6 +49,13 @@ public:
 	void Render( Camera *gameCamera ) const;
 
 private:
+	void AddCurrentCameraStateToHistoryForAverage();
+
+	void DebugRenderHowToUseInstructions() const;
+	void DebugRenderCameraStateHistory() const;
+	void DebugRenderCameraStateAverage() const;
+	void DebugRenderCameraOrientationCompare() const;
+
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
