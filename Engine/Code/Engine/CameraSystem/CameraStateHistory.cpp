@@ -13,11 +13,6 @@ CameraStateHistoy::~CameraStateHistoy()
 
 }
 
-bool CameraStateHistoy::IsNotEmpty() const
-{
-	return (m_history.size() > 0U);
-}
-
 void CameraStateHistoy::AddNewEntry( CameraState const &newState )
 {
 	// Increment the last entry index
