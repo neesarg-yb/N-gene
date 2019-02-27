@@ -254,7 +254,7 @@ void CameraManager::SetAverageCountForInputReferenceMatrixCalculation( int avgCo
 
 CameraState CameraManager::GetCameraStateForInputReference() const
 {
-	return m_previousCameraStates.GetAverageOfRecentEntries( m_averageWithNumPreviousCameraStates );
+	return m_previousCameraStates.GetProgressiveAverageOfRecentEntries( m_averageWithNumPreviousCameraStates );
 }
 
 Matrix44 CameraManager::GetCameraMatrixForInputReference() const
