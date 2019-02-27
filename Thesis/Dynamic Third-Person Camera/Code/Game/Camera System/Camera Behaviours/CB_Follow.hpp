@@ -38,6 +38,7 @@ private:
 	
 	// Camera reorientation around anchor
 	bool		m_reorientCameraRotation	= false;
+	float		m_reorientTargetRotDegrees	= 0.f;
 	uint		m_framesSinceReorientBegan	= 1U;							// How many frames has passed since the reorientation procedure has began, most recently
 	float		m_minSpeedReqToReorient		= 10.f;							// Min speed of anchor, after which the reorientation starts
 	float		m_reorientAfterDegreeDiff	= 145.f;						// Degree difference between camera forward and anchor forward

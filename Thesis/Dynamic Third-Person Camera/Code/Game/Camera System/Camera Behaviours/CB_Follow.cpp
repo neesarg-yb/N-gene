@@ -50,11 +50,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 		m_manager->SetAverageCountForInputReferenceMatrixCalculation( averageCountForInputReference );
 
 		// Do the reorientation
-		Vector3	playerFront			= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
-		Vector2	playerFrontDirXZ	= Vector2( playerFront.x, playerFront.z ).GetNormalized();
-		float	targetDegrees		= GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
-		Complex targetRot( targetDegrees );
-
+		Complex targetRot( m_reorientTargetRotDegrees );
 		Complex currentRot( m_rotationAroundAnchor );
 		currentRot.TurnToward( targetRot, m_rotationSpeed * 2.f * deltaSeconds );
 		
@@ -62,7 +58,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 
 		// Done reorienting the camera, if near to the target rotation..
 		Complex pendingRot = targetRot / currentRot;
-		if( fabsf( pendingRot.GetRotation() ) <= 5.f )
+		if( fabsf( pendingRot.GetRotation() ) <= 2.f )
 			m_reorientCameraRotation = false;
 	}
 	else
@@ -191,45 +187,22 @@ void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, flo
 void CB_Follow::CheckEnableCameraReorientation( CameraState const &currentState, CameraContext const &context, float rotationChangeInput )
 {
 	UNUSED( currentState );
-	UNUSED( context );
 	UNUSED( rotationChangeInput );
-	// Triggers the reorientation at certain speed and if velocity is withing a certain rotation range
-// 	Matrix44		cameraMat	= currentState.GetTransformMatrix();
-// 	Vector3			playerFront	= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
-// 	float			playerSpeed	= context.anchorGameObject->m_velocity.GetLength();
-// 
-// 	Vector3 cameraFront		 = cameraMat.GetKColumn();
-// 	Vector2 playerFrontDirXZ = Vector2( playerFront.x, playerFront.z ).GetNormalized();
-// 	Vector2 cameraFrontDirXZ = Vector2( cameraFront.x, cameraFront.z ).GetNormalized();
-// 	bool noPlayerInputRot	 = AreEqualFloats( fabsf(rotationChangeInput), 0.f, 2 );
-// 
-// 	if( noPlayerInputRot )
-// 	{
-// 		if( m_reorientCameraRotation == false )
-// 		{
-// 			float dotProduct = Vector2::DotProduct( playerFrontDirXZ, cameraFrontDirXZ );
-// 			bool angleThresholdIsCrossed = dotProduct <= m_reorientDotThreshold;
-// 			bool playerHasEnoughSpeed	 = playerSpeed >= m_minSpeedReqToReorient;
-// 
-// 			if( playerHasEnoughSpeed && angleThresholdIsCrossed )
-// 			{
-// 				// Enable scripted reorientation behavior
-// 				m_reorientCameraRotation = true;
-// 			}
-// 		}
-// 	}
-// 	else
-// 	{
-// 		// Player input overrides the scripted behavior
-// 		m_reorientCameraRotation = false;
-// 	}
-
 
 	// Manually triggers the reorientation when (B) button is pressed
  	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed )
  	{
  		if( m_reorientCameraRotation == false )
+		{
+			// Enable reorientation
  			m_reorientCameraRotation = true;
+
+			// Set the target degrees
+			Vector3	playerFront			= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
+			Vector2	playerFrontDirXZ	= Vector2( playerFront.x, playerFront.z ).GetNormalized();
+			float	targetDegrees		= GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
+			m_reorientTargetRotDegrees	= targetDegrees;
+		}
  	}
 }
 
