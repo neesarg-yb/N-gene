@@ -78,3 +78,45 @@ CameraState CameraStateHistoy::GetAverageOfRecentEntries( int numEntries ) const
 
 	return CameraState( avgVelocity, avgPosition, avgOrientation, avgFOV );
 }
+
+CameraState CameraStateHistoy::GetProgressiveAverageOfRecentEntries( int numEntries ) const
+{
+	GUARANTEE_RECOVERABLE( numEntries > 0, "CameraStateHistory: Provided invalid numEntries for average calculation!" );
+
+	// Order of entries: [ most recent, .. , most older ]
+	std::vector< CameraState > fetchedEntriesNewestToOldest;
+	for( int entriesToSkip = 0; entriesToSkip < numEntries; entriesToSkip++ )
+		fetchedEntriesNewestToOldest.push_back( GetRecentEntry( entriesToSkip ) );
+
+	// As if we got average of just one entry: the oldest one.
+	int const	oldestEntryIndex		= numEntries - 1;
+	CameraState progressiveAvgCamState	= fetchedEntriesNewestToOldest[ oldestEntryIndex ];
+
+	// Starting from second entry
+	for( int i = 2; i <= numEntries; i++ )
+	{
+		// Oldest to the most recent
+		CameraState const &fetchedCamState	= fetchedEntriesNewestToOldest[ numEntries - i ];
+		float const blendTowardsNewEntry	= 1.f / i;
+
+		// Average of Q1, Q2, Q3, Q4 with Quaternions::Slerp( Qa, Qb, t )
+		//   _______________________________________________
+		//  |  ______________________________               |
+		//  | |  _____________               |              |
+		//  | | | Q1 ----> Q2 |              |              |
+		//  | | |    0.5 t    | ------>  Q3  |  -------> Q4 |
+		//  | | |-------------|  0.33 t      |    0.25 t    |
+		//  | |------------------------------|              |
+		//  |                                               |
+		//  |-----------------------------------------------|
+		//
+		// It works as if we're distributing equal probability, progressively 
+		//
+		progressiveAvgCamState.m_velocity	 = Interpolate( progressiveAvgCamState.m_velocity, fetchedCamState.m_velocity, blendTowardsNewEntry );
+		progressiveAvgCamState.m_position	 = Interpolate( progressiveAvgCamState.m_position, fetchedCamState.m_position, blendTowardsNewEntry );
+		progressiveAvgCamState.m_fov		 = Interpolate( progressiveAvgCamState.m_fov, fetchedCamState.m_fov, blendTowardsNewEntry );
+		progressiveAvgCamState.m_orientation = Quaternion::Slerp( progressiveAvgCamState.m_orientation, fetchedCamState.m_orientation, blendTowardsNewEntry );
+	}
+
+	return progressiveAvgCamState;
+}
