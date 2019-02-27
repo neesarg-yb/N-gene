@@ -21,6 +21,7 @@ public:
 	void			AddNewEntry( CameraState const &newState );
 	CameraState		GetRecentEntry( int numEntriesToSkip ) const;
 	CameraState		GetAverageOfRecentEntries( int numEntries ) const;
+	CameraState		GetProgressiveAverageOfRecentEntries( int numEntries ) const;
 };
 
 
