@@ -209,7 +209,7 @@ void Scene_CameraStateAverage::DebugRenderCameraStateAverage() const
 	if( m_camStateHistory.GetCurrentCountOfEntries() != m_historyLength )
 		return;
 
-	CameraState averageCamState = m_camStateHistory.GetAverageOfRecentEntries( m_historyLength );
+	CameraState averageCamState = m_getAverageOfMostRecentCameraHistoryCount_cb( m_historyLength );
 
 	// Draw the camera state as basis
 	Matrix44 cameraMatrixOfEntry = averageCamState.GetTransformMatrix();
@@ -228,7 +228,7 @@ void Scene_CameraStateAverage::DebugRenderCameraOrientationCompare() const
 
 	// Get average camera state
 	int totalEntries = m_camStateHistory.GetCurrentCountOfEntries();
-	CameraState averageCamState = m_camStateHistory.GetAverageOfRecentEntries( totalEntries );
+	CameraState averageCamState = m_getAverageOfMostRecentCameraHistoryCount_cb( totalEntries );
 	Matrix44 averageCamStateMat = averageCamState.GetTransformMatrix();
 
 	// For each entries in the history

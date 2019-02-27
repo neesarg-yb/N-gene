@@ -40,6 +40,10 @@ private:
 	Rgba const				&m_historyStateTintColor	= Rgba( 100, 100, 100, 255 );
 	Rgba const				&m_historyAverageTintColor	= RGBA_WHITE_COLOR;
 
+	// Which history method is being used?
+//	std::function< CameraState( int ) > m_getAverageOfMostRecentCameraHistoryCount_cb = std::bind( &CameraStateHistoy::GetAverageOfRecentEntries, &m_camStateHistory, std::placeholders::_1 );
+	std::function< CameraState( int ) > m_getAverageOfMostRecentCameraHistoryCount_cb = std::bind( &CameraStateHistoy::GetProgressiveAverageOfRecentEntries, &m_camStateHistory, std::placeholders::_1 );
+
 public:
 	void JustFinishedTransition();
 	void BeginFrame();
