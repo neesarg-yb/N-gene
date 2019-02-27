@@ -28,21 +28,22 @@ private:
 	Terrain					*m_terrain			= nullptr;
 
 	// Camera
-	CameraManager			*m_cameraManager			= nullptr;
-	float const				 m_initialFOV				= 45.f;			// Degrees
-	float const				 m_cameraNear				= 0.001f;
-	float const				 m_cameraFar				= 1000.f;
+	CameraManager			*m_cameraManager			 = nullptr;
+	float const				 m_initialFOV				 = 45.f;			// Degrees
+	float const				 m_cameraNear				 = 0.001f;
+	float const				 m_cameraFar				 = 1000.f;
 
 	// Camera State History for testing its average
-	int const				 m_historyLength			= 10;
-	CameraStateHistoy		 m_camStateHistory			= CameraStateHistoy( m_historyLength );
-	float const				 m_historyIndexLabelSize	= 0.077f;		// Text Size
-	Rgba const				&m_historyStateTintColor	= Rgba( 100, 100, 100, 255 );
-	Rgba const				&m_historyAverageTintColor	= RGBA_WHITE_COLOR;
+	int const				 m_historyLength			 = 10;
+	CameraStateHistoy		 m_camStateHistory			 = CameraStateHistoy( m_historyLength );
+	float const				 m_historyIndexLabelSize	 = 0.077f;			// Text Size
+	Rgba const				&m_historyStateTintColor	 = Rgba( 100, 100, 100, 255 );
+	Rgba const				&m_historyAverageV1TintColor = Rgba( 190, 190, 190, 255 );
+	Rgba const				&m_historyAverageV2TintColor = RGBA_WHITE_COLOR;
 
 	// Which history method is being used?
-//	std::function< CameraState( int ) > m_getAverageOfMostRecentCameraHistoryCount_cb = std::bind( &CameraStateHistoy::GetAverageOfRecentEntries, &m_camStateHistory, std::placeholders::_1 );
-	std::function< CameraState( int ) > m_getAverageOfMostRecentCameraHistoryCount_cb = std::bind( &CameraStateHistoy::GetProgressiveAverageOfRecentEntries, &m_camStateHistory, std::placeholders::_1 );
+	std::function< CameraState( int ) > m_getAverageOfMostRecentCameraHistoryCount_v1_cb = std::bind( &CameraStateHistoy::GetAverageOfRecentEntries, &m_camStateHistory, std::placeholders::_1 );
+	std::function< CameraState( int ) > m_getAverageOfMostRecentCameraHistoryCount_v2_cb = std::bind( &CameraStateHistoy::GetProgressiveAverageOfRecentEntries, &m_camStateHistory, std::placeholders::_1 );
 
 public:
 	void JustFinishedTransition();
@@ -57,7 +58,8 @@ private:
 
 	void DebugRenderHowToUseInstructions() const;
 	void DebugRenderCameraStateHistory() const;
-	void DebugRenderCameraStateAverage() const;
+	void DebugRenderCameraStateAverageV1() const;
+	void DebugRenderCameraStateAverageV2() const;
 	void DebugRenderCameraOrientationCompare() const;
 
 	// Scene Management

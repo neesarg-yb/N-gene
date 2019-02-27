@@ -158,7 +158,8 @@ void Scene_CameraStateAverage::Render( Camera *gameCamera ) const
 	// Render the debug objects
 	DebugRenderHowToUseInstructions();
 	DebugRenderCameraStateHistory();
-	DebugRenderCameraStateAverage();
+	DebugRenderCameraStateAverageV1();
+	DebugRenderCameraStateAverageV2();
 	DebugRenderCameraOrientationCompare();
 
 	DebugRendererLateRender( m_camera );
@@ -203,21 +204,38 @@ void Scene_CameraStateAverage::DebugRenderCameraStateHistory() const
 	}
 }
 
-void Scene_CameraStateAverage::DebugRenderCameraStateAverage() const
+void Scene_CameraStateAverage::DebugRenderCameraStateAverageV1() const
 {
 	// Render only if the history is full
 	if( m_camStateHistory.GetCurrentCountOfEntries() != m_historyLength )
 		return;
 
-	CameraState averageCamState = m_getAverageOfMostRecentCameraHistoryCount_cb( m_historyLength );
+	CameraState averageCamState = m_getAverageOfMostRecentCameraHistoryCount_v1_cb( m_historyLength );
 
 	// Draw the camera state as basis
 	Matrix44 cameraMatrixOfEntry = averageCamState.GetTransformMatrix();
-	DebugRenderBasis( 0.f, cameraMatrixOfEntry, m_historyAverageTintColor, m_historyAverageTintColor, DEBUG_RENDER_XRAY );
+	DebugRenderBasis( 0.f, cameraMatrixOfEntry, m_historyAverageV1TintColor, m_historyAverageV1TintColor, DEBUG_RENDER_XRAY );
 
 	// Label the number of drawn camera state
 	Matrix44 activeCamMatrix = m_camera->m_cameraTransform.GetWorldTransformMatrix();
-	DebugRenderTag( 0.f, m_historyIndexLabelSize, cameraMatrixOfEntry.GetTColumn() + cameraMatrixOfEntry.GetKColumn(), activeCamMatrix.GetJColumn(), activeCamMatrix.GetIColumn(), m_historyAverageTintColor, m_historyAverageTintColor, Stringf("AVG(%d)", m_historyLength) );
+	DebugRenderTag( 0.f, m_historyIndexLabelSize, cameraMatrixOfEntry.GetTColumn() + cameraMatrixOfEntry.GetKColumn(), activeCamMatrix.GetJColumn(), activeCamMatrix.GetIColumn(), m_historyAverageV1TintColor, m_historyAverageV1TintColor, Stringf("AVG(%d)", m_historyLength) );
+}
+
+void Scene_CameraStateAverage::DebugRenderCameraStateAverageV2() const
+{
+	// Render only if the history is full
+	if( m_camStateHistory.GetCurrentCountOfEntries() != m_historyLength )
+		return;
+
+	CameraState averageCamState = m_getAverageOfMostRecentCameraHistoryCount_v2_cb( m_historyLength );
+
+	// Draw the camera state as basis
+	Matrix44 cameraMatrixOfEntry = averageCamState.GetTransformMatrix();
+	DebugRenderBasis( 0.f, cameraMatrixOfEntry, m_historyAverageV2TintColor, m_historyAverageV2TintColor, DEBUG_RENDER_XRAY );
+
+	// Label the number of drawn camera state
+	Matrix44 activeCamMatrix = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	DebugRenderTag( 0.f, m_historyIndexLabelSize, cameraMatrixOfEntry.GetTColumn() + cameraMatrixOfEntry.GetKColumn() + (activeCamMatrix.GetJColumn() * m_historyIndexLabelSize), activeCamMatrix.GetJColumn(), activeCamMatrix.GetIColumn(), m_historyAverageV2TintColor, m_historyAverageV2TintColor, Stringf("PAVG(%d)", m_historyLength) );
 }
 
 void Scene_CameraStateAverage::DebugRenderCameraOrientationCompare() const
@@ -228,7 +246,7 @@ void Scene_CameraStateAverage::DebugRenderCameraOrientationCompare() const
 
 	// Get average camera state
 	int totalEntries = m_camStateHistory.GetCurrentCountOfEntries();
-	CameraState averageCamState = m_getAverageOfMostRecentCameraHistoryCount_cb( totalEntries );
+	CameraState averageCamState = m_getAverageOfMostRecentCameraHistoryCount_v1_cb( totalEntries );
 	Matrix44 averageCamStateMat = averageCamState.GetTransformMatrix();
 
 	// For each entries in the history
