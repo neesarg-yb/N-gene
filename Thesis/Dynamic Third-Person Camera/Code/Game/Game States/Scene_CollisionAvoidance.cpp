@@ -96,13 +96,15 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->SetSphereCollisionCallback( collisionFunc );
 
 	// Camera Behaviour
-	CameraBehaviour* followBehaviour	= new CB_Follow( 6.3f, 80.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
-	CameraBehaviour* shoulderBehavior	= new CB_ShoulderView( 0.17f, 0.33f, 0.36f, -45.f, 45.f, "Shoulder View", m_cameraManager );
+	CameraBehaviour* followBehaviour		= new CB_Follow( 6.3f, 80.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
+	CameraBehaviour* shoulderBehavior		= new CB_ShoulderView( 0.17f, 0.33f, 0.36f, -45.f, 45.f, "Shoulder View", m_cameraManager );
+	followBehaviour->m_motionControllerName = "Proportional Controller";	
+
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 	m_cameraManager->AddNewCameraBehaviour( shoulderBehavior );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
-	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
+	m_cameraManager->RegisterMotionController( m_proportionalController );
 
 	// Camera Constraints
 	CC_LineOfSight*			losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
@@ -533,15 +535,7 @@ void Scene_CollisionAvoidance::SwitchBetweenFollowAndShoulderBehavior()
 	std::string activeBehavior = m_cameraManager->GetActiveCameraBehaviorName();
 	
 	if( activeBehavior != "Shoulder View" )
-	{
-		// Change to shoulder view
 		m_cameraManager->SetActiveCameraBehaviourTo( "Shoulder View" );
-		m_cameraManager->SetActiveMotionControllerTo( nullptr );
-	}
 	else
-	{
-		// Change to follow
 		m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
-		m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
-	}
 }
