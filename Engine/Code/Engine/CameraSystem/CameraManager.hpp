@@ -71,9 +71,9 @@ private:
 	CameraMotionControllerMap		m_motionControllers;
 
 public:
-	void Update( float deltaSeconds );
-	void PreUpdate();
-	void PostUpdate();
+	void			Update( float deltaSeconds );
+	void			PreUpdate();
+	void			PostUpdate();
 
 public:
 	CameraState		GetCurrentCameraState() const;
