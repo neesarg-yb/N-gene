@@ -15,11 +15,12 @@ public:
 	virtual ~CameraBehaviour();
 
 public:
-	std::string	const		 m_name			= "NAME NOT ASSIGNED!";
-	Camera		const		*m_camera		= nullptr;
-	GameObject	const		*m_anchor		= nullptr;
-	InputSystem				*m_inputSystem	= nullptr;
-	Tags					 m_constraints;	// Which constraints to apply by Camera Manager
+	std::string	const		 m_name					= "NAME NOT ASSIGNED!";
+	Camera		const		*m_camera				= nullptr;
+	GameObject	const		*m_anchor				= nullptr;
+	InputSystem				*m_inputSystem			= nullptr;
+	std::string				 m_motionControllerName	= "";
+	Tags					 m_constraints;			// Which constraints to apply by Camera Manager
 
 protected:
 	CameraManager			*m_manager		= nullptr;
