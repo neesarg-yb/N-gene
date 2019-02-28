@@ -24,7 +24,6 @@ void CB_DegreesOfFreedom::SetWorldPosition( float distanceFromAnchor, float rota
 
 void CB_DegreesOfFreedom::SetOrientationToLookAtAnchor()
 {
-	TODO( "Find out: Why cameraOrientation.GetInverse() works?!" );
 	Vector3		anchorWorldPosition	= m_anchor->m_transform.GetWorldPosition();
 	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition, m_goalState.m_position );
 	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix ).GetInverse();

@@ -284,6 +284,7 @@
     <ClCompile Include="Camera System\Camera Behaviours\CB_Follow.cpp" />
     <ClCompile Include="Camera System\Camera Behaviours\CB_FreeLook.cpp" />
     <ClCompile Include="Camera System\Camera Behaviours\CB_ProportionalController.cpp" />
+    <ClCompile Include="Camera System\Camera Behaviours\CB_ShoulderView.cpp" />
     <ClCompile Include="Camera System\Camera Constraints\CC_CameraCollision.cpp" />
     <ClCompile Include="Camera System\Camera Constraints\CC_ConeRaycast.cpp" />
     <ClCompile Include="Camera System\Camera Constraints\CC_LineOfSight.cpp" />
@@ -315,6 +316,7 @@
     <ClInclude Include="Camera System\Camera Behaviours\CB_Follow.hpp" />
     <ClInclude Include="Camera System\Camera Behaviours\CB_FreeLook.hpp" />
     <ClInclude Include="Camera System\Camera Behaviours\CB_ProportionalController.hpp" />
+    <ClInclude Include="Camera System\Camera Behaviours\CB_ShoulderView.hpp" />
     <ClInclude Include="Camera System\Camera Constraints\CC_CameraCollision.hpp" />
     <ClInclude Include="Camera System\Camera Constraints\CC_ConeRaycast.hpp" />
     <ClInclude Include="Camera System\Camera Constraints\CC_LineOfSight.hpp" />

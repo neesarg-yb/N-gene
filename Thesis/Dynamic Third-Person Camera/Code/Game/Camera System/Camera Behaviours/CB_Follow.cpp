@@ -39,7 +39,6 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	GetPlayerInput( distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput );
 
 	// Scripted Reorient Camera Behavior
-	UNUSED( currentState );
 	CheckEnableCameraReorientation( currentState, context, rotChangePerInput );
 
 	if( m_reorientCameraRotation )

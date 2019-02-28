@@ -124,6 +124,9 @@
     <ClCompile Include="Game States\Scene_CameraStateAverage.cpp">
       <Filter>Game States\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Camera System\Camera Behaviours\CB_ShoulderView.cpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -212,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="Game States\Scene_CameraStateAverage.hpp">
       <Filter>Game States\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Camera Behaviours\CB_ShoulderView.hpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
