@@ -102,7 +102,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->AddNewCameraBehaviour( shoulderBehavior );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
-//	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
+	m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
 
 	// Camera Constraints
 	CC_LineOfSight*			losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
@@ -120,8 +120,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	followBehaviour->m_constraints.SetOrRemoveTags( "LineOfSight" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-//	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
-	m_cameraManager->SetActiveCameraBehaviourTo( "Shoulder View" );
+	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
 }
 
 Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
@@ -201,6 +200,8 @@ void Scene_CollisionAvoidance::BeginFrame()
 {
 	PROFILE_SCOPE_FUNCTION();
 	ChangeDebugCameraSettings();
+
+	SwitchBetweenFollowAndShoulderBehavior();
 
 	// Update Debug Renderer Objects
 	DebugRendererBeginFrame( m_clock );
@@ -457,6 +458,10 @@ void Scene_CollisionAvoidance::DebugRenderHotkeys()
 	// Mouse Instruction
 	std::string mouseLock = Stringf( "Disable the Debug Camera to release mouse!" );
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, mouseLock.c_str() );
+
+	// Change Camera Behavior
+	std::string camBehaviourChange = Stringf( "[B] Change Camera Behavior to \"%s\"", m_cameraManager->GetActiveCameraBehaviorName() != "Shoulder View" ? "Shoulder View" : "Follow" );
+	DebugRender2DText( 0.f, Vector2(160.f, 460.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, camBehaviourChange.c_str() );
 }
 
 void Scene_CollisionAvoidance::DebugRenderRightStickInputVisualizer( Vector2 screenPosition, Matrix44 const &inputReferenceMat, Matrix44 const &actualCameraMat )
@@ -518,4 +523,25 @@ void Scene_CollisionAvoidance::DebugRenderRightStickInputVisualizer( Vector2 scr
 	// Interpolated Player input relative to work
 	DebugRender2DLine( 0.f, screenPosition, RGBA_GRAY_COLOR, camMatDebugLineEndPoint, RGBA_GRAY_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );		// Actual Camera Matrix - Input Line
 	DebugRender2DLine( 0.f, screenPosition, RGBA_KHAKI_COLOR, refMatDebugLineEndPoint, RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );		// Reference Matrix - Input Line
+}
+
+void Scene_CollisionAvoidance::SwitchBetweenFollowAndShoulderBehavior()
+{
+	if( g_theInput->WasKeyJustPressed( 'B' ) == false )
+		return;
+
+	std::string activeBehavior = m_cameraManager->GetActiveCameraBehaviorName();
+	
+	if( activeBehavior != "Shoulder View" )
+	{
+		// Change to shoulder view
+		m_cameraManager->SetActiveCameraBehaviourTo( "Shoulder View" );
+		m_cameraManager->SetActiveMotionControllerTo( nullptr );
+	}
+	else
+	{
+		// Change to follow
+		m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+		m_cameraManager->SetActiveMotionControllerTo( m_proportionalController );
+	}
 }

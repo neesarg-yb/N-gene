@@ -73,4 +73,6 @@ private:
 	void ChangeDebugCameraSettings();
 	void DebugRenderHotkeys();
 	void DebugRenderRightStickInputVisualizer( Vector2 screenPosition, Matrix44 const &inputReferenceMat, Matrix44 const &actualCameraMat );
+
+	void SwitchBetweenFollowAndShoulderBehavior();
 };
