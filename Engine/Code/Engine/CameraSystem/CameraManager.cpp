@@ -35,7 +35,7 @@ void CameraManager::Update( float deltaSeconds )
 {
 	PROFILE_SCOPE_FUNCTION();
 
-	m_lastSuggestedState = m_aciveBehaviour->Update( deltaSeconds, m_currentCameraState );
+	m_lastSuggestedState = m_activeBehaviour->Update( deltaSeconds, m_currentCameraState );
 
 	// Constraints, if enabled
 	if( m_constraintsEnabled == true )
@@ -80,16 +80,21 @@ void CameraManager::Update( float deltaSeconds )
 
 	// Add the final camera state to history
 	m_previousCameraStates.AddNewEntry( constrainedCameraState );
+
+
+	// If there was a request to change to new behavior
+	if( m_cameraBehaviorToActivate != m_activeBehaviour->m_name )
+		SetActiveCameraBehaviourTo( m_cameraBehaviorToActivate );
 }
 
 void CameraManager::PreUpdate()
 {
-	m_aciveBehaviour->PreUpdate();
+	m_activeBehaviour->PreUpdate();
 }
 
 void CameraManager::PostUpdate()
 {
-	m_aciveBehaviour->PostUpdate();
+	m_activeBehaviour->PostUpdate();
 }
 
 CameraState CameraManager::GetCurrentCameraState() const
@@ -166,44 +171,58 @@ void CameraManager::DeleteCameraBehaviour( CameraBehaviour *cameraBehaviourToDel
 	DeleteCameraBehaviour( cameraBehaviourToDelete->m_name );
 }
 
-void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName )
+void CameraManager::ChangeCameraBehaviourTo( std::string const &behaviourName, float transitionTime )
 {
+	m_cameraBehaviorToActivate = behaviourName;
+
 	// If setting the behavior for the first time
 	bool immediatlySetCurrentState = false;
 
 	// If there is a camera behavior already active
-	if( m_aciveBehaviour != nullptr )
+	if( m_activeBehaviour != nullptr )
 	{
 		// Start interpolation towards new behavior
 		m_stateOnTransitionBegin			= m_lastSuggestedState;
-		m_behaviourTransitionTimeRemaining	= m_behaviourTransitionSeconds;
+		m_behaviourTransitionSeconds		= (transitionTime != 0.f) ? transitionTime : 1.f;
+		m_behaviourTransitionTimeRemaining	= (transitionTime != 0.f) ? transitionTime : 0.f;
 	}
 	else
 	{
 		immediatlySetCurrentState = true;
 	}
-	
-	// Sets the new camera behavior to active
-	int idx = GetCameraBehaviourIndex( behaviourName );
-	m_aciveBehaviour = m_cameraBehaviours[ idx ];
 
-	// Change Camera Position to wherever that behavior wants it to
+	// If it is first time setting the behavior
 	if( immediatlySetCurrentState )
 	{
-		CameraState suggestedState = m_aciveBehaviour->Update( 0.f, m_currentCameraState );
-		
+		// Activate immediately
+		SetActiveCameraBehaviourTo( m_cameraBehaviorToActivate );
+
+		// To spawn the camera where the behavior wants
+		CameraState suggestedState = m_activeBehaviour->Update( 0.f, m_currentCameraState );
 		SetCurrentCameraStateTo( suggestedState );
 		m_previousCameraStates.AddNewEntry( suggestedState );
 	}
+	else
+	{
+		// The behavior will get activated, at the end of this frame
+		//  by Update();
+	}
+}
+
+void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName )
+{
+	// Sets the new camera behavior to active
+	int idx = GetCameraBehaviourIndex( behaviourName );
+	m_activeBehaviour = m_cameraBehaviours[ idx ];
 
 	// Update Active Constraints
-	Tags const &constraintsToActivate = m_aciveBehaviour->m_constraints;
+	Tags const &constraintsToActivate = m_activeBehaviour->m_constraints;
 	ResetActivateConstraintsFromTags( constraintsToActivate );
 }
 
 std::string CameraManager::GetActiveCameraBehaviorName() const
 {
-	return m_aciveBehaviour->m_name;
+	return m_activeBehaviour->m_name;
 }
 
 void CameraManager::RegisterConstraint( CameraConstraint* newConstraint )
@@ -285,7 +304,7 @@ Matrix44 CameraManager::GetCameraMatrixForInputReference() const
 
 CameraMotionController* CameraManager::GetActiveMotionController()
 {
-	CameraMotionControllerMap::iterator mcIt = m_motionControllers.find( m_aciveBehaviour->m_motionControllerName );
+	CameraMotionControllerMap::iterator mcIt = m_motionControllers.find( m_activeBehaviour->m_motionControllerName );
 
 	if( mcIt == m_motionControllers.end() )
 		return &m_defaultMotionController;			// If not found, return the default one

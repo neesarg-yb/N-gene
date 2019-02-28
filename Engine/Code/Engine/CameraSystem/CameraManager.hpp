@@ -49,7 +49,8 @@ private:
 
 	// Camera Behaviours
 	CameraBehaviourList		 m_cameraBehaviours;		// All the behaviors that can be run on Camera
-	CameraBehaviour			*m_aciveBehaviour = nullptr;
+	std::string				 m_cameraBehaviorToActivate;
+	CameraBehaviour			*m_activeBehaviour = nullptr;
 	CameraState				 m_lastSuggestedState;		// It is set before applying any constraints or motion controller changes
 	CameraStateHistoy		 m_previousCameraStates;	// It is set at the end of Update(), after all the contraint and motion controller changes
 	CameraState				 m_stateOnTransitionBegin;
@@ -57,7 +58,7 @@ private:
 	// Camera's State for game-side input's reference
 	uint					 m_averageWithNumPreviousCameraStates = 1;
 	
-	float const				 m_behaviourTransitionSeconds		= 1.f;
+	float 					 m_behaviourTransitionSeconds		= 1.f;
 	float					 m_behaviourTransitionTimeRemaining = 0.f;
 
 	// Camera Constraints
@@ -84,10 +85,10 @@ public:
 	CameraContext	GetCameraContext() const;
 	
 	// Behaviours
-	int				AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour );		// Now I'll manage this behavior, including deletion
-	void			DeleteCameraBehaviour( CameraBehaviour *cameraBehaviourToDelete );	// Deletes it
-	void			DeleteCameraBehaviour( std::string const &behaviourName );			// Deletes it
-	void			SetActiveCameraBehaviourTo( std::string const &behaviourName );
+	int				AddNewCameraBehaviour( CameraBehaviour *newCameraBehaviour );						// Now I'll manage this behavior, including deletion
+	void			DeleteCameraBehaviour( CameraBehaviour *cameraBehaviourToDelete );					// Deletes it
+	void			DeleteCameraBehaviour( std::string const &behaviourName );							// Deletes it
+	void			ChangeCameraBehaviourTo( std::string const &behaviourName, float transitionTime );	// If another behavior already active, it changes the new behavior gets activated next frame..
 	std::string		GetActiveCameraBehaviorName() const;
 
 	// Constraints
@@ -108,6 +109,7 @@ private:
 	CameraMotionController* GetActiveMotionController();
 
 	void SetCurrentCameraStateTo( CameraState newState );
+	void SetActiveCameraBehaviourTo( std::string const &behaviourName );
 	void ResetActivateConstraintsFromTags( Tags const &constraintsToActivate );
 
 private:
