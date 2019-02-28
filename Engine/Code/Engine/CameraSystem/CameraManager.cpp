@@ -2,20 +2,20 @@
 #include "CameraManager.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 
+#define DEFAULT_MOTION_CONTROLLER_NAME "default"
+
 CameraManager::CameraManager( Camera &camera, InputSystem &inputSystem, float cameraRadius )
 	: m_camera( camera )
 	, m_cameraRadius( cameraRadius )
 	, m_inputSystem( inputSystem )
 	, m_previousCameraStates( CAMERASTATE_HISTORY_LENGTH )
+	, m_defaultMotionController( DEFAULT_MOTION_CONTROLLER_NAME, this )
 {
-	m_defaultMotionController = new CameraMotionController( "default", this );
+	
 }
 
 CameraManager::~CameraManager()
 {
-	delete m_defaultMotionController;
-	m_defaultMotionController = nullptr;
-
 	// Delete all the camera behaviors
 	while( m_cameraBehaviours.size() > 0 )
 	{
@@ -26,6 +26,9 @@ CameraManager::~CameraManager()
 
 		m_cameraBehaviours.pop_back();
 	}
+
+	// Erase the map
+	m_motionControllers.clear();
 }
 
 void CameraManager::Update( float deltaSeconds )
@@ -57,7 +60,7 @@ void CameraManager::Update( float deltaSeconds )
 	if( m_behaviourTransitionTimeRemaining <= 0.f )
 	{
 		// If not in transition of changing Camera Behaviour..
-		constrainedCameraState = GetMotionController()->MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
+		constrainedCameraState = GetActiveMotionController()->MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
 		SetCurrentCameraStateTo( constrainedCameraState );
 	}
 	else
@@ -71,7 +74,7 @@ void CameraManager::Update( float deltaSeconds )
 		m_behaviourTransitionTimeRemaining -= deltaSeconds;
 
 		// Update the current state
-		constrainedCameraState = m_defaultMotionController->MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
+		constrainedCameraState = m_defaultMotionController.MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
 		SetCurrentCameraStateTo( constrainedCameraState );
 	}
 
@@ -198,16 +201,6 @@ void CameraManager::SetActiveCameraBehaviourTo( std::string const &behaviourName
 	ResetActivateConstraintsFromTags( constraintsToActivate );
 }
 
-void CameraManager::SetActiveMotionControllerTo( CameraMotionController *motionController )
-{
-	// Set it
-	m_activeMotionController = motionController;
-
-	// For safety, change its manager to this!
-	if( m_activeMotionController != nullptr )
-		m_activeMotionController->m_manager = this;
-}
-
 std::string CameraManager::GetActiveCameraBehaviorName() const
 {
 	return m_aciveBehaviour->m_name;
@@ -253,6 +246,21 @@ void CameraManager::EnableConstraints( bool enable /*= true */ )
 	m_constraintsEnabled = enable;
 }
 
+void CameraManager::RegisterMotionController( CameraMotionController *motionController )
+{
+	std::string controllerName = motionController->m_name;
+	GUARANTEE_RECOVERABLE( controllerName != DEFAULT_MOTION_CONTROLLER_NAME, "CameraManager: Trying to REPLACE the default motion controller! Be careful." );
+
+	m_motionControllers[ controllerName ] = motionController;
+}
+
+void CameraManager::DeregisterMotionController( char const *name )
+{
+	CameraMotionControllerMap::iterator it = m_motionControllers.find( name );
+	if( it != m_motionControllers.end() )
+		m_motionControllers.erase( it );
+}
+
 void CameraManager::SetAverageCountForInputReferenceMatrixCalculation( int avgCount )
 {
 	m_averageWithNumPreviousCameraStates = (uint)avgCount;
@@ -275,9 +283,14 @@ Matrix44 CameraManager::GetCameraMatrixForInputReference() const
 	return cameraMatrix;
 }
 
-CameraMotionController* CameraManager::GetMotionController()
+CameraMotionController* CameraManager::GetActiveMotionController()
 {
-	return (m_activeMotionController == nullptr) ? m_defaultMotionController : m_activeMotionController;
+	CameraMotionControllerMap::iterator mcIt = m_motionControllers.find( m_aciveBehaviour->m_motionControllerName );
+
+	if( mcIt == m_motionControllers.end() )
+		return &m_defaultMotionController;			// If not found, return the default one
+	else
+		return mcIt->second;						// Else, return the found one
 }
 
 void CameraManager::SetCurrentCameraStateTo( CameraState newState )
