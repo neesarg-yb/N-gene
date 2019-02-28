@@ -88,7 +88,7 @@ Scene_FollowCamera::Scene_FollowCamera( Clock const *parentClock )
 	followBehaviour->m_constraints.SetOrRemoveTags( "CameraCollision" );
 	
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+	m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.f );
 }
 
 Scene_FollowCamera::~Scene_FollowCamera()
@@ -288,7 +288,7 @@ void Scene_FollowCamera::ChangeCameraBehaviour()
 		std::string behaviourToActivate = dofBehaviourActive ? "FreeLook" : "Follow";
 		dofBehaviourActive = !dofBehaviourActive;
 
-		m_cameraManager->SetActiveCameraBehaviourTo( behaviourToActivate );
+		m_cameraManager->ChangeCameraBehaviourTo( behaviourToActivate, 0.33f );
 
 		std::string activeBehaviourMessage = Stringf( "Active Camera Behavior: \"%s\"", behaviourToActivate.c_str() );
 		DebugRender2DText( 5.f, Vector2(-850.f, 460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, activeBehaviourMessage.c_str() );

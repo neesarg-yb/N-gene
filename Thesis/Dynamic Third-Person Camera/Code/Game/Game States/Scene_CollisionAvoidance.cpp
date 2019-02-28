@@ -122,7 +122,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	followBehaviour->m_constraints.SetOrRemoveTags( "LineOfSight" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+	m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.f );
 }
 
 Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
@@ -535,7 +535,7 @@ void Scene_CollisionAvoidance::SwitchBetweenFollowAndShoulderBehavior()
 	std::string activeBehavior = m_cameraManager->GetActiveCameraBehaviorName();
 	
 	if( activeBehavior != "Shoulder View" )
-		m_cameraManager->SetActiveCameraBehaviourTo( "Shoulder View" );
+		m_cameraManager->ChangeCameraBehaviourTo( "Shoulder View", 0.33f );
 	else
-		m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+		m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.33f );
 }

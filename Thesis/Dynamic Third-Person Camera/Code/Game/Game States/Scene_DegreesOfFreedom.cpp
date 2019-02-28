@@ -48,7 +48,7 @@ Scene_DegreesOfFreedom::Scene_DegreesOfFreedom( Clock const *parentClock )
 	CameraBehaviour* dofBehaviour		= new CB_Follow( 5.f, 40.f, 30.f, 100.f, "Follow", m_cameraManager );
 	CameraBehaviour* followBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager, USE_CONTROLLER_FL );
 	m_cameraManager->AddNewCameraBehaviour( dofBehaviour );
-	m_cameraManager->SetActiveCameraBehaviourTo( "Follow" );
+	m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.f );
 	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
 }
 
@@ -185,7 +185,7 @@ void Scene_DegreesOfFreedom::ChangeCameraBehaviour()
 		std::string behaviourToActivate = dofBehaviourActive ? "FreeLook" : "Follow";
 		dofBehaviourActive = !dofBehaviourActive;
 
-		m_cameraManager->SetActiveCameraBehaviourTo( behaviourToActivate );
+		m_cameraManager->ChangeCameraBehaviourTo( behaviourToActivate, 1.f );
 
 		std::string activeBehaviourMessage = Stringf( "Active Camera Behavior: \"%s\"", behaviourToActivate.c_str() );
 		DebugRender2DText( 5.f, Vector2(-850.f, 460.f), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, activeBehaviourMessage.c_str() );

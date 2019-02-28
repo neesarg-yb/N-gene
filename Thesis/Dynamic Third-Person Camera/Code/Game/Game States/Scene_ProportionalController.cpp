@@ -76,7 +76,7 @@ Scene_ProportionalController::Scene_ProportionalController( Clock const *parentC
 	m_cameraManager->RegisterConstraint( collisionConstrain );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "PC" );
+	m_cameraManager->ChangeCameraBehaviourTo( "PC", 0.f );
 }
 
 Scene_ProportionalController::~Scene_ProportionalController()

@@ -56,7 +56,7 @@ Scene_DebugSystem::Scene_DebugSystem( Clock const *parentClock )
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );
+	m_cameraManager->ChangeCameraBehaviourTo( "FreeLook", 0.f );
 }
 
 Scene_DebugSystem::~Scene_DebugSystem()
