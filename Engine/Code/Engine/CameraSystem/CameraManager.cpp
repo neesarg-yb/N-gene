@@ -204,7 +204,13 @@ void CameraManager::SetActiveMotionControllerTo( CameraMotionController *motionC
 	m_activeMotionController = motionController;
 
 	// For safety, change its manager to this!
-	m_activeMotionController->m_manager = this;
+	if( m_activeMotionController != nullptr )
+		m_activeMotionController->m_manager = this;
+}
+
+std::string CameraManager::GetActiveCameraBehaviorName() const
+{
+	return m_aciveBehaviour->m_name;
 }
 
 void CameraManager::RegisterConstraint( CameraConstraint* newConstraint )

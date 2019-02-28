@@ -88,6 +88,8 @@ public:
 	void SetActiveCameraBehaviourTo	( std::string const &behaviourName );
 	void SetActiveMotionControllerTo( CameraMotionController *motionController );	// Sets m_activeMotionController
 
+	std::string GetActiveCameraBehaviorName() const;
+
 	// Constraints
 	void RegisterConstraint	 ( CameraConstraint* newConstraint );
 	void DeregisterConstraint( char const *name );
