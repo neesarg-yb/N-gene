@@ -50,7 +50,7 @@ void CameraManager::Update( float deltaSeconds )
 		}
 	}
 
-	// This might change if in transition
+	// Before using motion controller, this might change if in transition
 	CameraState constrainedCameraState = m_lastSuggestedState;
 
 	// Camera Motion Controller
@@ -62,6 +62,8 @@ void CameraManager::Update( float deltaSeconds )
 	}
 	else
 	{
+		GUARANTEE_RECOVERABLE( m_behaviourTransitionSeconds != 0, "CameraManager: About to divided by ZERO!!" );
+
 		// Camera Behavior Transition is ongoing..
 		float t = ( m_behaviourTransitionSeconds - m_behaviourTransitionTimeRemaining ) / m_behaviourTransitionSeconds;
 		t = ClampFloat01(t);
