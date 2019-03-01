@@ -73,22 +73,14 @@ CameraState CB_ShoulderView::Update( float deltaSeconds, CameraState const &curr
 	return newCameraState;
 }
 
-void CB_ShoulderView::SetupForIncomingHandover( float rotationAroundAnchor, bool isOnRightShoulder )
+void CB_ShoulderView::SetupForIncomingHandover( float rotationAroundAnchor, Vector3 const &currentCameraPos )
 {
-	m_rotationAroundAnchor	= rotationAroundAnchor;
-	
-	if( isOnRightShoulder )
-	{
-		// Offset should be on RIGHT SHOULDER
-		bool currentlyOnLeftShoulder = m_localCameraOffsetX < 0.f;
-		m_localCameraOffsetX *= currentlyOnLeftShoulder ? -1.f : 1.f;
-	}
-	else
-	{
-		// Offset should be on LEFT SHOULDER
-		bool currentlyOnRightShoulder = m_localCameraOffsetX > 0.f;
-		m_localCameraOffsetX *= currentlyOnRightShoulder ? -1.f : 0.f;
-	}
+	// Set rotation
+	m_rotationAroundAnchor = rotationAroundAnchor;
+
+	// Set left-or-right shoulder
+	bool isNearToRightShoulder = IsCurrentCameraPositionNearToRightShoulder( rotationAroundAnchor, currentCameraPos ); 
+	m_localCameraOffsetX = fabsf(m_localCameraOffsetX) * (isNearToRightShoulder ? 1.f : -1.f);
 }
 
 void CB_ShoulderView::ProcessInput( float deltaSeconds )
@@ -133,6 +125,17 @@ void CB_ShoulderView::ProcessInput( float deltaSeconds )
 	m_localPitchOffset = ClampFloat( m_localPitchOffset, m_cameraPitchOffsetLimits.min, m_cameraPitchOffsetLimits.max );
 }
 
+bool CB_ShoulderView::IsCurrentCameraPositionNearToRightShoulder( float rotationAroundAnchor, Vector3 const &cameraPos )
+{
+	Vector3 camePosOnRightShoulder	= GetCameraPosition( true,  rotationAroundAnchor );
+	Vector3 camePosOnLeftShoulder	= GetCameraPosition( false, rotationAroundAnchor );
+
+	float distSqFromRightShoulder	= (cameraPos - camePosOnRightShoulder).GetLengthSquared();
+	float distSqFromLeftShoulder	= (cameraPos - camePosOnLeftShoulder).GetLengthSquared();
+
+	return (distSqFromRightShoulder <= distSqFromLeftShoulder);
+}
+
 void CB_ShoulderView::DebugPrintInputInformation() const
 {
 	// Print it on Debug Screen
@@ -144,4 +147,30 @@ void CB_ShoulderView::DebugPrintInputInformation() const
 	DebugRender2DText( 0.f, Vector2(-850.f, 340.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, leftRightPressStr.c_str() );
 	std::string upDownPressStr = "[UP] [DOWN]       : Move camera in-and-out";
 	DebugRender2DText( 0.f, Vector2(-850.f, 320.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, upDownPressStr.c_str() );
+}
+
+Vector3 CB_ShoulderView::GetCameraPosition( bool onRightShoulder, float rotation ) const
+{
+	float radius	= m_radiusFromAnchor;
+	float altitude	= 90.f;
+
+	// Get World Position
+	Vector3 anchorWorldPosition				 = m_manager->GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
+	Vector3 cameraPosRelativeToAnchor		 = PolarToCartesian( radius, rotation, altitude );
+	Vector3 cameraWorldPositionWithoutHeight = anchorWorldPosition + cameraPosRelativeToAnchor;
+	Vector3 cameraWorldPosition				 = cameraWorldPositionWithoutHeight  + Vector3( 0.f, m_heightFromAnchorPosition, 0.f );
+
+	// Get World Orientation
+	Matrix44	lookAtViewMatrix			= Matrix44::MakeLookAtView( anchorWorldPosition, cameraWorldPositionWithoutHeight );
+	Quaternion	cameraOrientation			= Quaternion::FromMatrix( lookAtViewMatrix ).GetInverse();
+
+	// Camera Right Direction
+	Matrix44	cameraOrientationMatrix		= cameraOrientation.GetAsMatrix44();
+	Vector3		cameraRightDirection		= cameraOrientationMatrix.GetIColumn();
+
+	// Account for local x-offset (in right direction)
+	float offsetOnShoulder = fabsf( m_localCameraOffsetX ) * ( onRightShoulder ? 1.f : -1.f );
+	cameraWorldPosition += cameraRightDirection * offsetOnShoulder;
+
+	return cameraWorldPosition;
 }

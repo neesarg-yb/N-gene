@@ -36,8 +36,7 @@ void CC_HandoverToFollow::Execute( CameraState &suggestedCameraState )
 	DebugRenderRaycast( 0.f, startPosition, hitResults, 1.f, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 
 	// Compare if hit distance is > threshold
-	float thresholdToActivate = 1.5f;
-	if( distanceTravelled > thresholdToActivate )
+	if( distanceTravelled > m_thresholdDistance )
 	{
 		m_manager.ChangeCameraBehaviourTo( m_followBehavior.m_name, 0.2f );
 		m_followBehavior.SetupForIncomingHandover( m_shoulderBehavior.m_rotationAroundAnchor, altitudeFromTop );

@@ -24,10 +24,10 @@ void CC_HandoverToShoulder::Execute( CameraState &suggestedCameraState )
 	float distanceFromAnchor = (anchorWorldPos - suggestedCameraState.m_position).GetLength();
 
 	// If too close from anchor
-	if( distanceFromAnchor < 1.f )
+	if( distanceFromAnchor < m_thresholdDistance )
 	{
 		// Change to shoulder view
 		m_manager.ChangeCameraBehaviourTo( m_shoulderBehavior.m_name, 0.2f );
-		m_shoulderBehavior.SetupForIncomingHandover( m_followBehavior.m_rotationAroundAnchor, true );
+		m_shoulderBehavior.SetupForIncomingHandover( m_followBehavior.m_rotationAroundAnchor, suggestedCameraState.m_position );
 	}
 }

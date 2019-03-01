@@ -13,6 +13,7 @@ public:
 private:
 	CB_Follow		&m_followBehavior;
 	CB_ShoulderView	&m_shoulderBehavior;
+	float			 m_thresholdDistance = 1.f;		// Minimum required dist( camera, player ) to switch to Shoulder Behavior
 
 public:
 	void Execute( CameraState &suggestedCameraState );

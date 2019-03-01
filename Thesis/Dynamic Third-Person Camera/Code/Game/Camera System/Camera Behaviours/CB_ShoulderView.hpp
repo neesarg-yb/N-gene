@@ -26,9 +26,12 @@ public:
 	void		PostUpdate();
 	CameraState	Update( float deltaSeconds, CameraState const &currentState );
 
-	void		SetupForIncomingHandover( float rotationAroundAnchor, bool isOnRightShoulder );
+	void		SetupForIncomingHandover( float rotationAroundAnchor, Vector3 const &currentCameraPos );
 
 private:
 	void		ProcessInput( float deltaSeconds );
 	void		DebugPrintInputInformation() const;
+
+	Vector3		GetCameraPosition( bool onRightShoulder, float rotation ) const;
+	bool		IsCurrentCameraPositionNearToRightShoulder( float rotationAroundAnchor, Vector3 const &cameraPos );		// If near left shoulder, it returns false
 };
