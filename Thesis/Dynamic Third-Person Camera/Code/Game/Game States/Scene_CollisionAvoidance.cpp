@@ -11,8 +11,10 @@
 #include "Game/Camera System/Camera Behaviours/CB_ShoulderView.hpp"
 #include "Game/Camera System/Camera Constraints/CC_LineOfSight.hpp"
 #include "Game/Camera System/Camera Constraints/CC_ConeRaycast.hpp"
-#include "Game/Camera System/Camera Constraints/CC_ModifiedConeRaycast.hpp"
 #include "Game/Camera System/Camera Constraints/CC_CameraCollision.hpp"
+#include "Game/Camera System/Camera Constraints/CC_HandoverToFollow.hpp"
+#include "Game/Camera System/Camera Constraints/CC_HandoverToShoulder.hpp"
+#include "Game/Camera System/Camera Constraints/CC_ModifiedConeRaycast.hpp"
 
 Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	: GameState( "COLLISION AVOIDANCE", parentClock )
@@ -107,19 +109,26 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->RegisterMotionController( m_proportionalController );
 
 	// Camera Constraints
-	CC_LineOfSight*			losConstarin		= new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
-	CC_ConeRaycast*			conRaycastCC		= new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 2 );
-	CC_ModifiedConeRaycast*	modConRaycastCC		= new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1, (CB_Follow *)followBehaviour );
-	CC_CameraCollision*	collisionConstrain		= new CC_CameraCollision( "CameraCollision", *m_cameraManager, 4 );
+	CC_LineOfSight*			losConstarin		 = new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
+	CC_ConeRaycast*			conRaycastCC		 = new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 2 );
+	CC_ModifiedConeRaycast*	modConRaycastCC		 = new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1, (CB_Follow *)followBehaviour );
+	CC_CameraCollision*		collisionConstrain	 = new CC_CameraCollision( "CameraCollision", *m_cameraManager, 4 );
+	CC_HandoverToFollow*	handOverToFollowCC	 = new CC_HandoverToFollow( "HandoverToFollow", *m_cameraManager, 5, *(CB_ShoulderView *)shoulderBehavior, *(CB_Follow *)followBehaviour );
+	CC_HandoverToShoulder*	handOverToShoulderCC = new CC_HandoverToShoulder( "HandoverToShoulder", *m_cameraManager, 5, *(CB_ShoulderView *)shoulderBehavior, *(CB_Follow *)followBehaviour );
 	m_cameraManager->RegisterConstraint( losConstarin );
 	m_cameraManager->RegisterConstraint( conRaycastCC );
 	m_cameraManager->RegisterConstraint( modConRaycastCC );
 	m_cameraManager->RegisterConstraint( collisionConstrain );
+	m_cameraManager->RegisterConstraint( handOverToFollowCC );
+	m_cameraManager->RegisterConstraint( handOverToShoulderCC );
 
-	followBehaviour->m_constraints.SetOrRemoveTags( "M_ConeRaycast" );
+	shoulderBehavior->m_constraints.SetOrRemoveTags( "HandoverToFollow" );
+
 	TODO( "CameraCollision contraint is not working as expected when I enabled culling to none!" );
 	followBehaviour->m_constraints.SetOrRemoveTags( "CameraCollision" );
+	followBehaviour->m_constraints.SetOrRemoveTags( "M_ConeRaycast" );
 	followBehaviour->m_constraints.SetOrRemoveTags( "LineOfSight" );
+	followBehaviour->m_constraints.SetOrRemoveTags( "HandoverToShoulder" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.f );

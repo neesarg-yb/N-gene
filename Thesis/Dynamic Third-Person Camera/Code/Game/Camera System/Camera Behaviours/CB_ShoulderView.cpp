@@ -73,6 +73,24 @@ CameraState CB_ShoulderView::Update( float deltaSeconds, CameraState const &curr
 	return newCameraState;
 }
 
+void CB_ShoulderView::SetupForIncomingHandover( float rotationAroundAnchor, bool isOnRightShoulder )
+{
+	m_rotationAroundAnchor	= rotationAroundAnchor;
+	
+	if( isOnRightShoulder )
+	{
+		// Offset should be on RIGHT SHOULDER
+		bool currentlyOnLeftShoulder = m_localCameraOffsetX < 0.f;
+		m_localCameraOffsetX *= currentlyOnLeftShoulder ? -1.f : 1.f;
+	}
+	else
+	{
+		// Offset should be on LEFT SHOULDER
+		bool currentlyOnRightShoulder = m_localCameraOffsetX > 0.f;
+		m_localCameraOffsetX *= currentlyOnRightShoulder ? -1.f : 0.f;
+	}
+}
+
 void CB_ShoulderView::ProcessInput( float deltaSeconds )
 {
 	float const offsetChangeSpeed = 0.5f;
@@ -111,7 +129,7 @@ void CB_ShoulderView::ProcessInput( float deltaSeconds )
 		m_localCameraOffsetX *= -1.f;
 
 	m_rotationAroundAnchor	+= rightStickPosition.x * -1.f * m_rotationChangeSpeed * deltaSeconds;
-	m_localPitchOffset		+= rightStickPosition.y * -1.f * (m_rotationChangeSpeed * 0.7f) * deltaSeconds;
+	m_localPitchOffset		+= rightStickPosition.y * +1.f * (m_rotationChangeSpeed * 0.7f) * deltaSeconds;
 	m_localPitchOffset = ClampFloat( m_localPitchOffset, m_cameraPitchOffsetLimits.min, m_cameraPitchOffsetLimits.max );
 }
 

@@ -12,4 +12,8 @@
     <LocalDebuggerWorkingDirectory>$(SolutionDir)/Run_win32</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FastDebug|x64'">
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)/Run_win32</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

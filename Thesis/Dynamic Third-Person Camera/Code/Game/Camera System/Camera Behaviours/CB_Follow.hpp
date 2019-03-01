@@ -1,5 +1,7 @@
 #pragma once
 #include "Game/Camera System/Camera Behaviours/CB_DegreesOfFreedom.hpp"
+#include "Game/Camera System/Camera Constraints/CC_HandoverToFollow.hpp"
+#include "Game/Camera System/Camera Constraints/CC_HandoverToShoulder.hpp"
 
 struct CameraContext;
 struct ConstraintSuggestionOverwriteState
@@ -16,6 +18,9 @@ public:
 
 class CB_Follow : public CB_DegreesOfFreedom
 {
+	friend CC_HandoverToFollow;
+	friend CC_HandoverToShoulder;
+
 public:
 	 CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager );
 	~CB_Follow();
@@ -59,6 +64,7 @@ public:
 	void		PostUpdate() { }
 	CameraState Update( float deltaSeconds, CameraState const &currentState );
 
+	void		SetupForIncomingHandover( float rotationAroundAnchor, float altitudeFromTop );
 	void		SuggestChangedPolarCoordinate( float radius, float rotation, float altitude );	// A Camera Constrain can used this; meant to be used by CC_ModifiedConeRaycast
 	
 private:

@@ -1,8 +1,12 @@
 #pragma once
 #include "Engine/CameraSystem/CameraBehaviour.hpp"
 
+class CC_HandoverToFollow;
+
 class CB_ShoulderView : public CameraBehaviour
 {
+	friend CC_HandoverToFollow;
+
 public:
 	 CB_ShoulderView( float heightRelativeToAnchorPos, float radiusFromAnchor, float localCameraOffsetX, float minPitchOffset, float maxPitchOffset, char const *name, CameraManager *manager );
 	~CB_ShoulderView();
@@ -21,6 +25,8 @@ public:
 	void		PreUpdate();
 	void		PostUpdate();
 	CameraState	Update( float deltaSeconds, CameraState const &currentState );
+
+	void		SetupForIncomingHandover( float rotationAroundAnchor, bool isOnRightShoulder );
 
 private:
 	void		ProcessInput( float deltaSeconds );

@@ -127,6 +127,12 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	return m_goalState;
 }
 
+void CB_Follow::SetupForIncomingHandover( float rotationAroundAnchor, float altitudeFromTop )
+{
+	m_rotationAroundAnchor = rotationAroundAnchor;
+	m_altitudeAroundAnchor = altitudeFromTop;
+}
+
 void CB_Follow::SuggestChangedPolarCoordinate( float radius, float rotation, float altitude )
 {
 	UNUSED( radius );

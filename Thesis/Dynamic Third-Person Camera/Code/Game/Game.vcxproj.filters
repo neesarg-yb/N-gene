@@ -127,6 +127,12 @@
     <ClCompile Include="Camera System\Camera Behaviours\CB_ShoulderView.cpp">
       <Filter>Camera System\CameraBehaviours</Filter>
     </ClCompile>
+    <ClCompile Include="Camera System\Camera Constraints\CC_HandoverToShoulder.cpp">
+      <Filter>Camera System\CameraConstrains</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera System\Camera Constraints\CC_HandoverToFollow.cpp">
+      <Filter>Camera System\CameraConstrains</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -218,6 +224,12 @@
     </ClInclude>
     <ClInclude Include="Camera System\Camera Behaviours\CB_ShoulderView.hpp">
       <Filter>Camera System\CameraBehaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Camera Constraints\CC_HandoverToShoulder.hpp">
+      <Filter>Camera System\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Camera Constraints\CC_HandoverToFollow.hpp">
+      <Filter>Camera System\CameraConstrains</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
