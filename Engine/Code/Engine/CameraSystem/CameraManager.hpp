@@ -68,9 +68,9 @@ private:
 	CameraConstraintPriorityQueue	m_activeConstraints;		// Lowest priority at top, highest at bottom
 
 public:
-	void			Update( float deltaSeconds );
-	void			PreUpdate();
-	void			PostUpdate();
+	void Update( float deltaSeconds );
+	void PreUpdate();
+	void PostUpdate();
 
 public:
 	CameraState		GetCurrentCameraState() const;
