@@ -120,3 +120,5 @@ PFNGLVIEWPORTPROC						glViewport					= nullptr;
 PFNGLSAMPLERPARAMETERFVPROC				glSamplerParameterfv		= nullptr;
 PFNGLGENERATEMIPMAPPROC					glGenerateMipmap			= nullptr;
 PFNGLSAMPLERPARAMETERFPROC				glSamplerParameterf			= nullptr;
+
+PFNWGLSWAPINTERVALEXTPROC				wglSwapIntervalEXT			= nullptr;
