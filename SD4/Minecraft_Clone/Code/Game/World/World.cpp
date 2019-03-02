@@ -482,7 +482,12 @@ void World::PlaceOrDigBlock()
 		BlockLocator targetBlock	= GetBlockLocatorForWorldPosition( selectedBlock.GetBlockWorldPosition() + m_blockSelectionRaycastResult.m_impactNormal );
 		if( targetBlock.IsValid() )
 		{
-			targetBlock.ChangeTypeTo( BLOCK_STONE );
+			eBlockType newBlockType = BLOCK_STONE;
+
+			if( g_theInput->IsKeyPressed( VK_Codes::CONTROL ) )
+				newBlockType = BLOCK_GLOWSTONE;
+
+			targetBlock.ChangeTypeTo( newBlockType );
 			targetBlock.SetNeighborBlockChunksDirty();
 		}
 	}

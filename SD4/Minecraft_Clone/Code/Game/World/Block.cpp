@@ -27,6 +27,9 @@ void Block::UpdateBitflagFromDefinition()
 {
 	BlockDefinition const &myDefinition = BlockDefinition::GetDefinitionForType( (eBlockType) m_type );
 
+	// Set the indoor lighting
+	m_lighting |= ( BLOCK_LIGHT_MASK_INDOOR & (uchar)m_lighting );
+
 	// Is Fully Opaque
 	if( myDefinition.m_isFullyOpaque )
 		SetIsFullyOpaque();

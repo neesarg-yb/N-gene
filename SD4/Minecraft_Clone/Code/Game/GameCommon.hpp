@@ -25,6 +25,9 @@ uint constexpr BLOCKS_WIDE_Y	= (1 << BITS_WIDE_Y);			// Number of blocks in y-di
 uint constexpr BLOCKS_WIDE_Z	= (1 << BITS_WIDE_Z);			// Number of blocks in z-dir of a chunk
 uint constexpr NUM_BLOCKS_PER_CHUNK = (BLOCKS_WIDE_X * BLOCKS_WIDE_Y * BLOCKS_WIDE_Z);
 
+uchar constexpr BLOCK_LIGHT_MASK_INDOOR		= 0b0000'1111;
+uchar constexpr BLOCK_LIGHT_MASK_OUTDOOR	= 0b1111'0000;
+
 uchar constexpr BLOCK_BIT_IS_SKY			= 0b1000'0000;		// I am non-opaque & no opaque blocks directly above me
 uchar constexpr BLOCK_BIT_IS_LIGHT_DIRTY	= 0b0100'0000;		// A BlockLocator for me is currently in the dirty light opaque
 uchar constexpr BLOCK_BIT_IS_FULLY_OPAQUE	= 0b0010'0000;		// I block light, visibility, and hide my neighbors' faces
@@ -38,6 +41,7 @@ ChunkCoord const SOUTH_CHUNKCOORD = ChunkCoord(  0, -1 );
 
 int constexpr ACTIVATION_RANGE_NUM_CHUNKS = 13;
 
+
 //------
 // Enums
 enum eBlockType : uchar
@@ -46,6 +50,7 @@ enum eBlockType : uchar
 	BLOCK_GRASS,
 	BLOCK_DIRT,
 	BLOCK_STONE,
+	BLOCK_GLOWSTONE,
 	BLOCK_INVALID,
 	NUM_BLOCK_TYPES
 };
