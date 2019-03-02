@@ -287,7 +287,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	AABB2	const	uvBottom		= blockDef.m_uvBottom;
 	AABB2	const	uvTop			= blockDef.m_uvTop;
 
-	if( blockDef.m_type == BLOCK_AIR )
+	if( blockDef.m_isNeverVisible )
 		return;
 
 	/*
@@ -321,7 +321,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	BlockLocator locNorth	= locCurrent.GetNorthBlockLocator();
 	BlockLocator locSouth	= locCurrent.GetSouthBlockLocator();
 
-	if( locWest.GetBlock().IsOpaque() == false )
+	if( locWest.GetBlock().IsFullyOpaque() == false )
 	{
 		// Back Face (towards you)
 		// 4 5
@@ -343,7 +343,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 	
-	if( locEast.GetBlock().IsOpaque() == false )
+	if( locEast.GetBlock().IsFullyOpaque() == false )
 	{
 		// Front Face (away from you)
 		// 6 7
@@ -365,7 +365,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 	
-	if( locNorth.GetBlock().IsOpaque() == false )
+	if( locNorth.GetBlock().IsFullyOpaque() == false )
 	{
 		// Left Face
 		// 7 4
@@ -387,7 +387,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 	
-	if( locSouth.GetBlock().IsOpaque() == false )
+	if( locSouth.GetBlock().IsFullyOpaque() == false )
 	{
 		// Right Face
 		// 5 6
@@ -409,7 +409,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 
-	if( locUp.GetBlock().IsOpaque() == false )
+	if( locUp.GetBlock().IsFullyOpaque() == false )
 	{
 		// Top Face
 		// 7 6
@@ -431,7 +431,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
 	}
 
-	if( locDown.GetBlock().IsOpaque() == false )
+	if( locDown.GetBlock().IsFullyOpaque() == false )
 	{
 		// Bottom Face
 		// 0 1
@@ -461,7 +461,8 @@ void Chunk::SetBlockType( int blockIndex, eBlockType newType )
 	if( blockToChange.GetType() != newType )
 	{
 		blockToChange.SetType( newType );
-		
+		blockToChange.UpdateBitflagFromDefinition();
+
 		m_isDirty		= true;
 		m_needsSaving	= true;
 	}

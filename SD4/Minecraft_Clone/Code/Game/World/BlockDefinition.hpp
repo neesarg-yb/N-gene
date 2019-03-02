@@ -7,7 +7,7 @@ class BlockDefinition
 {
 public:
 	 BlockDefinition();
-	 BlockDefinition( eBlockType type, bool isOpaque, IntVector2 const &sideTileCoord_TL, IntVector2 const &botTileCoord_TL, IntVector2 const &topTileCoord_TL );
+	 BlockDefinition( eBlockType type, bool isSolid, bool isFullyOpaque, bool isNeverVisible, IntVector2 const &sideTileCoord_TL, IntVector2 const &botTileCoord_TL, IntVector2 const &topTileCoord_TL );
 	~BlockDefinition();
 
 private:
@@ -18,11 +18,15 @@ private:
 
 public:
 	// Definition Specific
-	eBlockType	m_type		= BLOCK_AIR;
-	bool		m_isOpaque	= false;
-	AABB2		m_uvSide	= AABB2::ONE_BY_ONE;
-	AABB2		m_uvBottom	= AABB2::ONE_BY_ONE;
-	AABB2		m_uvTop		= AABB2::ONE_BY_ONE;
+	eBlockType	m_type				= BLOCK_AIR;
+
+	bool		m_isSolid			= false;
+	bool		m_isFullyOpaque		= false;
+	bool		m_isNeverVisible	= true;
+	
+	AABB2		m_uvSide			= AABB2::ONE_BY_ONE;
+	AABB2		m_uvBottom			= AABB2::ONE_BY_ONE;
+	AABB2		m_uvTop				= AABB2::ONE_BY_ONE;
 
 public:
 	static Material*				GetMaterial();
@@ -32,5 +36,4 @@ public:
 public:
 	static void LoadDefinitions();
 	static void DestroyDefinitions();
-
 };
