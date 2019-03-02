@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Protogame", "Code\Game\Game.vcxproj", "{82E9B1B6-E227-48B7-869C-C53512A406FB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Minecraft_Clone", "Code\Game\Game.vcxproj", "{82E9B1B6-E227-48B7-869C-C53512A406FB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "..\..\Engine\Code\Engine\Engine.vcxproj", "{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}"
 EndProject
@@ -13,6 +13,8 @@ Global
 		Debug|x86 = Debug|x86
 		DebugInline|x64 = DebugInline|x64
 		DebugInline|x86 = DebugInline|x86
+		FastBreak|x64 = FastBreak|x64
+		FastBreak|x86 = FastBreak|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
@@ -25,6 +27,10 @@ Global
 		{82E9B1B6-E227-48B7-869C-C53512A406FB}.DebugInline|x64.Build.0 = DebugInline|x64
 		{82E9B1B6-E227-48B7-869C-C53512A406FB}.DebugInline|x86.ActiveCfg = DebugInline|Win32
 		{82E9B1B6-E227-48B7-869C-C53512A406FB}.DebugInline|x86.Build.0 = DebugInline|Win32
+		{82E9B1B6-E227-48B7-869C-C53512A406FB}.FastBreak|x64.ActiveCfg = FastBreak|x64
+		{82E9B1B6-E227-48B7-869C-C53512A406FB}.FastBreak|x64.Build.0 = FastBreak|x64
+		{82E9B1B6-E227-48B7-869C-C53512A406FB}.FastBreak|x86.ActiveCfg = FastBreak|Win32
+		{82E9B1B6-E227-48B7-869C-C53512A406FB}.FastBreak|x86.Build.0 = FastBreak|Win32
 		{82E9B1B6-E227-48B7-869C-C53512A406FB}.Release|x64.ActiveCfg = Release|x64
 		{82E9B1B6-E227-48B7-869C-C53512A406FB}.Release|x64.Build.0 = Release|x64
 		{82E9B1B6-E227-48B7-869C-C53512A406FB}.Release|x86.ActiveCfg = Release|Win32
@@ -37,6 +43,10 @@ Global
 		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.DebugInline|x64.Build.0 = DebugInline|x64
 		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.DebugInline|x86.ActiveCfg = DebugInline|Win32
 		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.DebugInline|x86.Build.0 = DebugInline|Win32
+		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.FastBreak|x64.ActiveCfg = FastBreak|x64
+		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.FastBreak|x64.Build.0 = FastBreak|x64
+		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.FastBreak|x86.ActiveCfg = FastBreak|Win32
+		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.FastBreak|x86.Build.0 = FastBreak|Win32
 		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.Release|x64.ActiveCfg = Release|x64
 		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.Release|x64.Build.0 = Release|x64
 		{E0FA82EF-EAC2-4365-850A-8401EEC91CA0}.Release|x86.ActiveCfg = Release|Win32
