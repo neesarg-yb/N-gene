@@ -38,7 +38,7 @@ void CC_HandoverToFollow::Execute( CameraState &suggestedCameraState )
 	// Compare if hit distance is > threshold
 	if( distanceTravelled > m_thresholdDistance )
 	{
-		m_manager.ChangeCameraBehaviourTo( m_followBehavior.m_name, 0.2f );
+		m_manager.ChangeCameraBehaviourTo( m_followBehavior.m_name, 0.5f );
 		m_followBehavior.SetupForIncomingHandover( m_shoulderBehavior.m_rotationAroundAnchor, altitudeFromTop );
 	}
 }

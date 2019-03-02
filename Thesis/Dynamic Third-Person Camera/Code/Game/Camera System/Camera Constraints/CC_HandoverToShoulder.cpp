@@ -27,7 +27,7 @@ void CC_HandoverToShoulder::Execute( CameraState &suggestedCameraState )
 	if( distanceFromAnchor < m_thresholdDistance )
 	{
 		// Change to shoulder view
-		m_manager.ChangeCameraBehaviourTo( m_shoulderBehavior.m_name, 0.2f );
+		m_manager.ChangeCameraBehaviourTo( m_shoulderBehavior.m_name, 0.5f );
 		m_shoulderBehavior.SetupForIncomingHandover( m_followBehavior.m_rotationAroundAnchor, suggestedCameraState.m_position );
 	}
 }
