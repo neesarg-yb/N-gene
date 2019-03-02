@@ -51,7 +51,7 @@ public:
 public:
 	static	int			GetIndexFromBlockCoord			( int xBlockCoord, int yBlockCoord, int zBlockCoord );
 	static	IntVector3	GetBlockCoordFromIndex			( uint blockIndex );
-	static	inline int	GetIndexFromBlockCoord			( BlockCoord pos ) { return GetIndexFromBlockCoord( pos.x, pos.y, pos.z ); }
+	static	int			GetIndexFromBlockCoord			( BlockCoord pos );
 
 private:
 	void		SaveToFile() const;
@@ -63,3 +63,22 @@ private:
 	void		SetBlockType( int xBlockCoord, int yBlockCoord, int zBlockCoord, eBlockType type );
 	inline void	SetBlockType( BlockCoord pos, eBlockType type ) { SetBlockType( pos.x, pos.y, pos.z, type ); }
 };
+
+inline int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord )
+{
+	return xBlockCoord + (yBlockCoord * BLOCKS_WIDE_X) + (zBlockCoord * (BLOCKS_WIDE_X * BLOCKS_WIDE_Y));
+}
+
+inline IntVector3 Chunk::GetBlockCoordFromIndex( uint blockIndex )
+{
+	int x = (blockIndex & BITS_MASK_X);
+	int y = (blockIndex & BITS_MASK_Y) >> BITS_WIDE_X;
+	int z = (blockIndex >> (BITS_WIDE_X + BITS_WIDE_Y));
+
+	return IntVector3(x, y, z);
+}
+
+inline int Chunk::GetIndexFromBlockCoord ( BlockCoord pos )
+{ 
+	return GetIndexFromBlockCoord( pos.x, pos.y, pos.z ); 
+}

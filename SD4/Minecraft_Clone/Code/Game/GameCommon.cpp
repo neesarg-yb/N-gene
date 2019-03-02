@@ -10,7 +10,6 @@ theGame*				g_theGame				= nullptr;
 Renderer*				g_theRenderer			= nullptr;
 Material*				g_defaultMaterial		= nullptr;
 InputSystem*			g_theInput				= nullptr;
-RemoteCommandService*	g_rcs					= nullptr;
 /*
 AudioSystem* g_theAudio = nullptr;
 */

@@ -175,11 +175,6 @@ bool Chunk::HasAllNeighbors() const
 	return true;
 }
 
-int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord )
-{
-	return xBlockCoord + (yBlockCoord * BLOCKS_WIDE_X) + (zBlockCoord * (BLOCKS_WIDE_X * BLOCKS_WIDE_Y));
-}
-
 AABB3 Chunk::GetBlockWorldBounds( int blockIndex, float blockSize ) const
 {
 	IntVector3 blockCoordInt = GetBlockCoordFromIndex( blockIndex );
@@ -192,15 +187,6 @@ AABB3 Chunk::GetBlockWorldBounds( int blockIndex, float blockSize ) const
 	Vector3 blockWorldMaxs = blockWorldMins + Vector3(blockSize, blockSize, blockSize);
 
 	return AABB3( blockWorldMins, blockWorldMaxs );
-}
-
-IntVector3 Chunk::GetBlockCoordFromIndex( uint blockIndex )
-{
-	int x = (blockIndex & BITS_MASK_X);
-	int y = (blockIndex & BITS_MASK_Y) >> BITS_WIDE_X;
-	int z = (blockIndex >> (BITS_WIDE_X + BITS_WIDE_Y));
-
-	return IntVector3(x, y, z);
 }
 
 Vector3 Chunk::GetBlockWorldPositionFromIndex( uint blockIndex ) const
