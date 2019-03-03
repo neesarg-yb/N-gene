@@ -67,6 +67,8 @@ void BlockLocator::MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocks
 	Block &north = northBL.GetBlock();
 	if( north.IsLightDirty() == false )
 	{
+		northBL.GetChunk()->SetDirty();
+
 		north.SetIsLightDirty();
 		activeDirtyBlocksQue.push_back( northBL );
 	}
@@ -74,6 +76,8 @@ void BlockLocator::MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocks
 	Block &east = eastBL.GetBlock();
 	if( east.IsLightDirty() == false )
 	{
+		eastBL.GetChunk()->SetDirty();
+
 		east.SetIsLightDirty();
 		activeDirtyBlocksQue.push_back( eastBL );
 	}
@@ -81,6 +85,8 @@ void BlockLocator::MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocks
 	Block &south = southBL.GetBlock();
 	if( south.IsLightDirty() == false )
 	{
+		southBL.GetChunk()->SetDirty();
+
 		south.SetIsLightDirty();
 		activeDirtyBlocksQue.push_back( southBL );
 	}
@@ -88,6 +94,8 @@ void BlockLocator::MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocks
 	Block &west = westBL.GetBlock();
 	if( west.IsLightDirty() == false )
 	{
+		westBL.GetChunk()->SetDirty();
+
 		west.SetIsLightDirty();
 		activeDirtyBlocksQue.push_back( westBL );
 	}
@@ -95,6 +103,8 @@ void BlockLocator::MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocks
 	Block &up = upBL.GetBlock();
 	if( up.IsLightDirty() == false )
 	{
+		upBL.GetChunk()->SetDirty();
+
 		up.SetIsLightDirty();
 		activeDirtyBlocksQue.push_back( upBL );
 	}
@@ -102,6 +112,8 @@ void BlockLocator::MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocks
 	Block &down = downBL.GetBlock();
 	if( down.IsLightDirty() == false )
 	{
+		downBL.GetChunk()->SetDirty();
+
 		down.SetIsLightDirty();
 		activeDirtyBlocksQue.push_back( downBL );
 	}

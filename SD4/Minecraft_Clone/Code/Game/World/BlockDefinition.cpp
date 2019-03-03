@@ -41,7 +41,7 @@ void BlockDefinition::LoadDefinitions()
 	s_definitions[ BLOCK_GRASS ]		= BlockDefinition( BLOCK_GRASS,		true,  true,  false, 00,	IntVector2(3, 3),	IntVector2(4, 3),	IntVector2(1, 0) );
 	s_definitions[ BLOCK_DIRT ]			= BlockDefinition( BLOCK_DIRT,		true,  true,  false, 00,	IntVector2(4, 3),	IntVector2(4, 3),	IntVector2(4, 3) );
 	s_definitions[ BLOCK_STONE ]		= BlockDefinition( BLOCK_STONE,		true,  true,  false, 00,	IntVector2(0, 4),	IntVector2(0, 4),	IntVector2(0, 4) );
-	s_definitions[ BLOCK_GLOWSTONE ]	= BlockDefinition( BLOCK_GLOWSTONE,	true,  true,  false, 15,	IntVector2(3, 13),	IntVector2(3, 13),	IntVector2(3, 13) );
+	s_definitions[ BLOCK_GLOWSTONE ]	= BlockDefinition( BLOCK_GLOWSTONE,	true,  true,  false, 14,	IntVector2(3, 13),	IntVector2(3, 13),	IntVector2(3, 13) );
 	s_definitions[ BLOCK_INVALID ]		= BlockDefinition( BLOCK_INVALID,	true,  true,  false, 00,	IntVector2(2, 2),	IntVector2(2, 2),	IntVector2(2, 2) );
 }
 

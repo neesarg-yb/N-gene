@@ -84,8 +84,12 @@ void World::Render() const
 
 	// Raycast Selection
 	RenderBlockSelection( m_blockSelectionRaycastResult );
+
 	if( m_raycastIsLocked )
 		RenderRaycast( m_blockSelectionRaycastResult, *g_theRenderer );
+
+	if( m_debugStepLighting )
+		RenderDirtyLights();
 
 	// Post Render
 	camera.PostRender( *g_theRenderer );
@@ -435,13 +439,43 @@ void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neigh
 		neighborChunks_out[ nIt->first ] = nIt->second;
 }
 
+void World::RenderDirtyLights() const
+{
+	for( int i = 0; i < m_dirtyLightBlocks.size(); i++ )
+	{
+		Vector3 worldPos = m_dirtyLightBlocks[i].GetBlockWorldPosition() + Vector3( 0.5f, 0.5f, 0.5f );
+		
+		MeshBuilder mb;
+		mb.Begin( PRIMITIVE_POINTS, false );
+
+		mb.SetColor( RGBA_RED_COLOR );
+		mb.PushVertex( worldPos );
+		mb.End();
+
+		g_theRenderer->DrawMesh( *mb.ConstructMesh<Vertex_3DPCU>() );
+	}
+}
+
 void World::UpdateDirtyLighting()
 {
-	while( m_dirtyLightBlocks.size() > 0 )
+	BlockLocQue  dirtyBlocksThisFrame;
+	BlockLocQue *operationQue = &m_dirtyLightBlocks;
+	
+	if( m_debugStepLighting )
+	{
+		if( g_theInput->WasKeyJustPressed('L') == false )
+			return;
+
+		// If debugging, we'll operate on the dirty lights just for this frame!
+		dirtyBlocksThisFrame.swap( m_dirtyLightBlocks );
+		operationQue = &dirtyBlocksThisFrame;
+	}
+
+	while( operationQue->size() > 0 )
 	{
 		// Pop the front
-		BlockLocator fDirtyBlock = m_dirtyLightBlocks.front();
-		m_dirtyLightBlocks.pop_front();
+		BlockLocator fDirtyBlock = operationQue->front();
+		operationQue->pop_front();
 
 		// Remove its dirty flag
 		fDirtyBlock.GetBlock().ClearIsLightDirty();
@@ -457,7 +491,7 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 
 	// Sky has the highest outdoor light!
 	if( dBlock.IsSky() )
-		dBlock.SetOutdoorLightLevel( 15 );
+		dBlock.SetOutdoorLightLevel( 14 );
 
 	// Block's lighting never goes below these
 	int const minIndoorLightLevel	= dBlock.GetIndoorLightLevelFromDefinition();
@@ -489,6 +523,8 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 	if( dBlock.GetIndoorLightLevel() != finalIndoorLighting )
 	{
 		// Only if calculated light levels are different
+		blockLocator.GetChunk()->SetDirty();
+
 		dBlock.SetIndoorLightLevel( finalIndoorLighting );
 		blockLocator.MarkNeighborsDirtyForLighting( m_dirtyLightBlocks );
 	}
@@ -497,6 +533,8 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 	if( dBlock.GetOutdoorLightLevel() != finalOutdoorLighting )
 	{
 		// Only if calculated light levels are different
+		blockLocator.GetChunk()->SetDirty();
+
 		dBlock.SetOutdoorLightLevel( finalOutdoorLighting );
 		blockLocator.MarkNeighborsDirtyForLighting( m_dirtyLightBlocks );
 	}
@@ -607,6 +645,14 @@ void World::PlaceOrDigBlock()
 
 			targetBlock.ChangeTypeTo( newBlockType );
 			targetBlock.SetNeighborBlockChunksDirty();
+
+			if( newBlockType == BLOCK_GLOWSTONE )
+			{
+				targetBlock.GetBlock().SetIndoorLightLevel( 0 );
+				targetBlock.GetBlock().SetIsLightDirty();
+
+				m_dirtyLightBlocks.push_back( targetBlock );
+			}
 		}
 	}
 }
