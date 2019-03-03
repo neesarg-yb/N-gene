@@ -55,6 +55,58 @@ void BlockLocator::SetNeighborBlockChunksDirty()
 		west.GetChunk()->SetDirty();
 }
 
+void BlockLocator::MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocksQue )
+{
+	BlockLocator northBL = GetNorthBlockLocator();
+	BlockLocator eastBL	 = GetEastBlockLocator();
+	BlockLocator southBL = GetSouthBlockLocator();
+	BlockLocator westBL	 = GetWestBlockLocator();
+	BlockLocator upBL	 = GetUpBlockLocator();
+	BlockLocator downBL	 = GetDownBlockLocator();
+
+	Block &north = northBL.GetBlock();
+	if( north.IsLightDirty() == false )
+	{
+		north.SetIsLightDirty();
+		activeDirtyBlocksQue.push_back( northBL );
+	}
+
+	Block &east = eastBL.GetBlock();
+	if( east.IsLightDirty() == false )
+	{
+		east.SetIsLightDirty();
+		activeDirtyBlocksQue.push_back( eastBL );
+	}
+
+	Block &south = southBL.GetBlock();
+	if( south.IsLightDirty() == false )
+	{
+		south.SetIsLightDirty();
+		activeDirtyBlocksQue.push_back( southBL );
+	}
+
+	Block &west = westBL.GetBlock();
+	if( west.IsLightDirty() == false )
+	{
+		west.SetIsLightDirty();
+		activeDirtyBlocksQue.push_back( westBL );
+	}
+
+	Block &up = upBL.GetBlock();
+	if( up.IsLightDirty() == false )
+	{
+		up.SetIsLightDirty();
+		activeDirtyBlocksQue.push_back( upBL );
+	}
+
+	Block &down = downBL.GetBlock();
+	if( down.IsLightDirty() == false )
+	{
+		down.SetIsLightDirty();
+		activeDirtyBlocksQue.push_back( downBL );
+	}
+}
+
 BlockLocator BlockLocator::GetUpBlockLocator() const
 {
 	if( (m_blockIndex & BITS_MASK_Z) != BITS_MASK_Z )

@@ -46,6 +46,9 @@ void World::Update()
 	DeactivateChunkForPosition( m_camera->m_position );
 	RebuiltOneChunkIfRequired( m_camera->m_position );
 
+	// Lighting
+	UpdateDirtyLighting();
+
 	// Block Selection
 	PerformRaycast();
 	PlaceOrDigBlock();
@@ -430,6 +433,121 @@ void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neigh
 	nIt = m_activeChunks.find( southNeighborCoord );
 	if( nIt != m_activeChunks.end() )
 		neighborChunks_out[ nIt->first ] = nIt->second;
+}
+
+void World::UpdateDirtyLighting()
+{
+	while( m_dirtyLightBlocks.size() > 0 )
+	{
+		// Pop the front
+		BlockLocator fDirtyBlock = m_dirtyLightBlocks.front();
+		m_dirtyLightBlocks.pop_front();
+
+		// Remove its dirty flag
+		fDirtyBlock.GetBlock().ClearIsLightDirty();
+
+		// Computes the block's theoretical indoor-outdoor lighting
+		RecomputeLighting( fDirtyBlock );
+	}
+}
+
+void World::RecomputeLighting( BlockLocator &blockLocator )
+{
+	Block &dBlock = blockLocator.GetBlock();
+
+	// Sky has the highest outdoor light!
+	if( dBlock.IsSky() )
+		dBlock.SetOutdoorLightLevel( 15 );
+
+	// Block's lighting never goes below these
+	int const minIndoorLightLevel	= dBlock.GetIndoorLightLevelFromDefinition();
+	int const minOutdoorLightLevel	= dBlock.GetOutdoorLightLevel();
+
+	// Compute the final lighting
+	int finalIndoorLighting  = 0;
+	int finalOutdoorLighting = 0;
+
+	if( dBlock.IsFullyOpaque() == false )
+	{
+		// Not fully opaque => it CAN receive light from neighbors
+		int maxIndoorLightFromNeighbors  = 0;
+		int maxOutdoorLightFromNeighbors = 0;
+		GetMaxIncomingLightFromNeighbors( blockLocator, maxIndoorLightFromNeighbors, maxOutdoorLightFromNeighbors );
+
+		// The max value wins: inherent or incoming
+		finalIndoorLighting	 = max( minIndoorLightLevel,  maxIndoorLightFromNeighbors  );
+		finalOutdoorLighting = max( minOutdoorLightLevel, maxOutdoorLightFromNeighbors );
+	}
+	else
+	{
+		// Fully opaque => it CAN'T receive light from neighbors
+		finalIndoorLighting  = minIndoorLightLevel;
+		finalOutdoorLighting = minOutdoorLightLevel;
+	}
+	
+	// Set Indoor Light
+	if( dBlock.GetIndoorLightLevel() != finalIndoorLighting )
+	{
+		// Only if calculated light levels are different
+		dBlock.SetIndoorLightLevel( finalIndoorLighting );
+		blockLocator.MarkNeighborsDirtyForLighting( m_dirtyLightBlocks );
+	}
+
+	// Set Outdoor Light
+	if( dBlock.GetOutdoorLightLevel() != finalOutdoorLighting )
+	{
+		// Only if calculated light levels are different
+		dBlock.SetOutdoorLightLevel( finalOutdoorLighting );
+		blockLocator.MarkNeighborsDirtyForLighting( m_dirtyLightBlocks );
+	}
+}
+
+void World::GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const
+{
+	maxIndoorLightReceived_out  = 0;
+	maxOutdoorLightReceived_out = 0;
+
+	// Influence from North
+	Block &northNeighbor	 = receivingBlock.GetWestBlockLocator().GetBlock();
+	int northMaxIndoorLight	 = northNeighbor.GetIndoorLightLevel() - 1;
+	int northMaxOutdoorLight = northNeighbor.GetOutdoorLightLevel() - 1;
+	maxIndoorLightReceived_out	= ( northMaxIndoorLight  > maxIndoorLightReceived_out  ) ? northMaxIndoorLight  : maxIndoorLightReceived_out;
+	maxOutdoorLightReceived_out	= ( northMaxOutdoorLight > maxOutdoorLightReceived_out ) ? northMaxOutdoorLight : maxOutdoorLightReceived_out;
+
+	// Influence from South
+	Block &southNeighbor	 = receivingBlock.GetWestBlockLocator().GetBlock();
+	int southMaxIndoorLight	 = southNeighbor.GetIndoorLightLevel() - 1;
+	int southMaxOutdoorLight = southNeighbor.GetOutdoorLightLevel() - 1;
+	maxIndoorLightReceived_out	= ( southMaxIndoorLight  > maxIndoorLightReceived_out  ) ? southMaxIndoorLight  : maxIndoorLightReceived_out;
+	maxOutdoorLightReceived_out	= ( southMaxOutdoorLight > maxOutdoorLightReceived_out ) ? southMaxOutdoorLight : maxOutdoorLightReceived_out;
+
+	// Influence from East
+	Block &eastNeighbor		 = receivingBlock.GetWestBlockLocator().GetBlock();
+	int eastMaxIndoorLight	 = eastNeighbor.GetIndoorLightLevel() - 1;
+	int eastMaxOutdoorLight	 = eastNeighbor.GetOutdoorLightLevel() - 1;
+	maxIndoorLightReceived_out	= ( eastMaxIndoorLight  > maxIndoorLightReceived_out  ) ? eastMaxIndoorLight  : maxIndoorLightReceived_out;
+	maxOutdoorLightReceived_out	= ( eastMaxOutdoorLight > maxOutdoorLightReceived_out ) ? eastMaxOutdoorLight : maxOutdoorLightReceived_out;
+
+	// Influence from West
+	Block &westNeighbor		 = receivingBlock.GetWestBlockLocator().GetBlock();
+	int westMaxIndoorLight	 = westNeighbor.GetIndoorLightLevel() - 1;
+	int westMaxOutdoorLight	 = westNeighbor.GetOutdoorLightLevel() - 1;
+	maxIndoorLightReceived_out	= ( westMaxIndoorLight  > maxIndoorLightReceived_out  ) ? westMaxIndoorLight  : maxIndoorLightReceived_out;
+	maxOutdoorLightReceived_out	= ( westMaxOutdoorLight > maxOutdoorLightReceived_out ) ? westMaxOutdoorLight : maxOutdoorLightReceived_out;
+
+	// Influence from Down
+	Block &downNeighbor		 = receivingBlock.GetDownBlockLocator().GetBlock();
+	int downMaxIndoorLight	 = downNeighbor.GetIndoorLightLevel() - 1;
+	int downMaxOutdoorLight	 = downNeighbor.GetOutdoorLightLevel() - 1;
+	maxIndoorLightReceived_out	= ( downMaxIndoorLight  > maxIndoorLightReceived_out  ) ? downMaxIndoorLight  : maxIndoorLightReceived_out;
+	maxOutdoorLightReceived_out	= ( downMaxOutdoorLight > maxOutdoorLightReceived_out ) ? downMaxOutdoorLight : maxOutdoorLightReceived_out;
+
+	// Influence from Up
+	Block &upNeighbor		 = receivingBlock.GetUpBlockLocator().GetBlock();
+	int upMaxIndoorLight	 = upNeighbor.GetIndoorLightLevel() - 1;
+	int upMaxOutdoorLight	 = upNeighbor.GetOutdoorLightLevel() - 1;
+	maxIndoorLightReceived_out	= ( upMaxIndoorLight  > maxIndoorLightReceived_out  ) ? upMaxIndoorLight  : maxIndoorLightReceived_out;
+	maxOutdoorLightReceived_out	= ( upMaxOutdoorLight > maxOutdoorLightReceived_out ) ? upMaxOutdoorLight : maxOutdoorLightReceived_out;
 }
 
 void World::PerformRaycast()

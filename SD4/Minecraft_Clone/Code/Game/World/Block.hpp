@@ -10,14 +10,25 @@ public:
 
 private:
 	uchar m_type		= BLOCK_AIR;
-	uchar m_lighting	= 0x00;
+	uchar m_lighting	= 0x00;			// Bit representation: [ Outdoor lighting, Indoor lighting ]
 	uchar m_bitflag		= 0x00;
 
 public:
+	// Type
 	eBlockType	GetType() const;
 	void		SetType( eBlockType type );
-	void		UpdateBitflagFromDefinition();
+	
+	// Lighting
+	int			GetIndoorLightLevel() const;
+	void		SetIndoorLightLevel( int newLevel );
+	int			GetIndoorLightLevelFromDefinition() const;
 
+	int			GetOutdoorLightLevel() const;
+	void		SetOutdoorLightLevel( int newLevel );
+
+	// Bitflag
+	void		UpdateBitflagFromDefinition();
+	
 	bool		IsSky() const;
 	void		SetIsSky();
 	void		ClearIsSky();
@@ -41,6 +52,28 @@ public:
 public:
 	static Block INVALID;
 };
+
+inline int Block::GetIndoorLightLevel() const
+{
+	return (int)(m_lighting & BLOCK_LIGHT_MASK_INDOOR);
+}
+
+inline void Block::SetIndoorLightLevel( int newLevel )
+{
+	m_lighting &= (~BLOCK_LIGHT_MASK_INDOOR);
+	m_lighting |= (newLevel & BLOCK_LIGHT_MASK_INDOOR);
+}
+
+inline int Block::GetOutdoorLightLevel() const
+{
+	return (int)((m_lighting & BLOCK_LIGHT_MASK_OUTDOOR) >> 4);
+}
+
+inline void Block::SetOutdoorLightLevel( int newLevel )
+{
+	m_lighting &= (~BLOCK_LIGHT_MASK_OUTDOOR);
+	m_lighting |= ((newLevel << 4) & BLOCK_LIGHT_MASK_OUTDOOR);
+}
 
 inline bool Block::IsSky() const
 {

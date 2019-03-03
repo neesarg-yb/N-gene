@@ -38,3 +38,18 @@ public:
 	static void LoadDefinitions();
 	static void DestroyDefinitions();
 };
+
+inline Material* BlockDefinition::GetMaterial()
+{
+	return s_material;
+}
+
+inline SpriteSheet* BlockDefinition::GetSpriteSheet()
+{
+	return s_spriteSheet;
+}
+
+inline BlockDefinition const & BlockDefinition::GetDefinitionForType( eBlockType type )
+{
+	return s_definitions[ type ];
+}

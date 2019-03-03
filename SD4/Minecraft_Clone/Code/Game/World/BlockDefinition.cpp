@@ -32,21 +32,6 @@ BlockDefinition::~BlockDefinition()
 
 }
 
-Material* BlockDefinition::GetMaterial()
-{
-	return s_material;
-}
-
-SpriteSheet* BlockDefinition::GetSpriteSheet()
-{
-	return s_spriteSheet;
-}
-
-BlockDefinition const & BlockDefinition::GetDefinitionForType( eBlockType type )
-{
-	return s_definitions[ type ];
-}
-
 void BlockDefinition::LoadDefinitions()
 {
 	s_material		= Material::CreateNewFromFile( "Data\\Materials\\block.material" );

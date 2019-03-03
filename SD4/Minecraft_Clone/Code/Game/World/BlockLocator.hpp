@@ -1,5 +1,8 @@
 #pragma once
+#include <deque>
 #include "Game/World/Chunk.hpp"
+
+typedef std::deque< BlockLocator > BlockLocQue;
 
 class BlockLocator
 {
@@ -23,10 +26,12 @@ public:
 	void		 ChangeTypeTo( eBlockType newType );
 
 	// Chunk
-	Chunk*		GetChunk();
+	Chunk*		 GetChunk();
 
 	// Neighbors
 	void		 SetNeighborBlockChunksDirty();
+	void		 MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocksQue );
+
 	BlockLocator GetUpBlockLocator() const;
 	BlockLocator GetDownBlockLocator() const;
 	BlockLocator GetWestBlockLocator() const;

@@ -9,8 +9,9 @@ Block::Block()
 {
 	ClearIsSolid();
 	ClearIsFullyOpaque();
-
 	SetIsNeverVisible();
+
+	ClearIsLightDirty();
 }
 
 Block::~Block()
@@ -23,9 +24,18 @@ void Block::SetType( eBlockType type )
 	m_type = type;
 }
 
+int Block::GetIndoorLightLevelFromDefinition() const
+{
+	eBlockType type = GetBlockTypeFromInteger( m_type );
+	BlockDefinition const &blockDef = BlockDefinition::GetDefinitionForType( type );
+
+	return blockDef.m_indoorLightLevel;
+}
+
 void Block::UpdateBitflagFromDefinition()
 {
-	BlockDefinition const &myDefinition = BlockDefinition::GetDefinitionForType( (eBlockType) m_type );
+	eBlockType type = GetBlockTypeFromInteger( m_type );
+	BlockDefinition const &myDefinition = BlockDefinition::GetDefinitionForType( type );
 
 	// Set the indoor lighting
 	m_lighting |= ( BLOCK_LIGHT_MASK_INDOOR & (uchar)m_lighting );

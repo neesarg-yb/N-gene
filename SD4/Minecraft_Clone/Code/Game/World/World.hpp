@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 #include <map>
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Math/IntVector2.hpp"
@@ -7,7 +8,8 @@
 #include "Game/Cameras/MCamera.hpp"
 #include "Game/Utility/RaycastResult_MC.hpp"
 
-typedef std::map< ChunkCoord, Chunk* > ChunkMap;
+typedef std::map< ChunkCoord, Chunk* >	ChunkMap;
+typedef std::deque< BlockLocator >		BlockLocQue;
 
 class World
 {
@@ -31,9 +33,12 @@ private:
 	ChunkMap	 m_activeChunks;
 	int			 m_activationRadius		= ACTIVATION_RANGE_NUM_CHUNKS;	// chunks
 	int			 m_deactivationRadius	= m_activationRadius - 2;		// chunks
+
+	// Lighting
+	BlockLocQue	 m_dirtyLightBlocks;									// Block Locaters whose lighting is dirty
 	
 	// Relative offsets from origin
-	std::vector< ChunkCoord > m_activationPriorityCheatSheet;	// Sorted: smallest to largest distance from origin
+	std::vector< ChunkCoord > m_activationPriorityCheatSheet;			// Sorted: smallest to largest distance from origin
 
 	// Raycast
 	float const			m_raycastMaxDistance			= 8.f;
@@ -51,13 +56,24 @@ public:
 	BlockLocator const	GetBlockLocatorForWorldPosition( Vector3 const &worldPosition ) const;
 
 private:
+	// Input
 	void	ProcessInput( float deltaSeconds );
+	
+	// Chunk Management
 	void	RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos );
 	void	ActivateChunkNearestToPosition( Vector3 const &playerWorldPos );
 	void	DeactivateChunkForPosition( Vector3 const &playerWorldPos );
-	void	PopulateChunkActivationCheatsheet( int deactivationRadius );
 	void	GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out );
+
+	// Volumetric Lighting
+	void	UpdateDirtyLighting();
+	void	RecomputeLighting( BlockLocator &blockLocator );
+	void	GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const;
+
+	// Pre-computation
+	void	PopulateChunkActivationCheatsheet( int deactivationRadius );
 	
+	// Actions on Block
 	void	PerformRaycast();
 	void	PlaceOrDigBlock();
 	void	RenderBlockSelection( RaycastResult_MC const &raycastResult ) const;
