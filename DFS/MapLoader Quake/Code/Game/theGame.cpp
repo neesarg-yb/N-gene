@@ -135,9 +135,6 @@ void theGame::Update()
 
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
 	m_timeSinceStartOfTheGame	+=	deltaSeconds;
-
-	// Remote Command Service
-	g_rcs->Update( deltaSeconds );
 	
 	// For UBOTesting..
 	g_theRenderer->UpdateTime( deltaSeconds, deltaSeconds );

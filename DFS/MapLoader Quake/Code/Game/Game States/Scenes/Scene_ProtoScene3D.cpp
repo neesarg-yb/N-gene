@@ -62,7 +62,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	// Camera Behaviour
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 100.f, 40.f, -85.f, 85.f, "FreeLook", m_cameraManager, USE_KEYBOARD_MOUSE_FL );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
-	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );					// MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR
+	m_cameraManager->ChangeCameraBehaviourTo( "FreeLook", 0.f );				// MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR
 
 	// Loading Models
 	Vector3 snowMikuPosition = Vector3( -5.f, -3.f, 20.f );						// SNOW MIKU
