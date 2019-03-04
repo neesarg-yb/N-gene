@@ -110,6 +110,8 @@ void Renderer::GLShutdown()
 
 void Renderer::PostStartup()
 {
+	wglSwapIntervalEXT( 0 );
+
 	// default_vao is a GLuint member variable
 	glGenVertexArrays( 1, &s_default_vao ); 
 	glBindVertexArray( s_default_vao ); 
@@ -550,6 +552,8 @@ void BindGLFunctions()
 
 	GL_BIND_FUNCTION( glGenerateMipmap );
 	GL_BIND_FUNCTION( glSamplerParameterf );
+
+	GL_BIND_FUNCTION( wglSwapIntervalEXT );
 }
 	
 //------------------------------------------------------------------------

@@ -17,7 +17,22 @@ private:
 
 public:
 	bool			IsNotEmpty() const;
+	int				GetCurrentCountOfEntries() const;
 	void			AddNewEntry( CameraState const &newState );
 	CameraState		GetRecentEntry( int numEntriesToSkip ) const;
 	CameraState		GetAverageOfRecentEntries( int numEntries ) const;
+	CameraState		GetProgressiveAverageOfRecentEntries( int numEntries ) const;
 };
+
+
+//-------------------
+// Inline Definitions
+inline int CameraStateHistoy::GetCurrentCountOfEntries() const
+{
+	return (int)m_history.size();
+}
+
+inline bool CameraStateHistoy::IsNotEmpty() const
+{
+	return (m_history.size() > 0U);
+}

@@ -14,7 +14,8 @@ void EngineStartup()
 	g_engineClock = new Clock();
 
 	// LogSystem Startup
-	LogSystem::GetInstance()->LoggerStartup();
+	if( g_logSystemEnabled )	
+		LogSystem::GetInstance()->LoggerStartup();
 
 	// Renderer Startup
 	Renderer::RendererStartup();
@@ -23,18 +24,22 @@ void EngineStartup()
 	Profiler::Startup();
 
 	// Network Startup
-	Network::Startup();
+	if( g_networkSessionEnabled )
+		Network::Startup();
 }
 
 void EngineShutdown()
 {
-	Network::Shutdown();
+	if( g_networkSessionEnabled )
+		Network::Shutdown();
+	
 	Profiler::Shutdown();
 
 	Renderer::RendererShutdown();
 	Renderer::GLShutdown();
 
-	LogSystem::GetInstance()->LoggerShutdown();
+	if( g_logSystemEnabled )
+		LogSystem::GetInstance()->LoggerShutdown();
 
 	delete g_engineClock;
 }
