@@ -80,47 +80,18 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	AddNewRenderableToScene( snowMiku );
 	AddNewRenderableToScene( spaceship );
 
-	// TESTING MAP FILE LOADING
-	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\DM3.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_KEY1.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\START.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\END.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\e2m10.map" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\E3M5.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_BARREL.MAP" );
-//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\Test1.MAP" );
-
-	for( int e = 0; e < m_parsedMap->m_entities.size(); e++ )
-	{
-		MapEntity const &entity = m_parsedMap->m_entities[e];
-		for( int g = 0; g < entity.GetBrushCount(); g++ )
-		{
-			Renderable *geometryRenderable = entity.ConstructRenderableForBrushAtIndex(g);
-
-			if( geometryRenderable != nullptr )
-				AddNewRenderableToScene( geometryRenderable );
-		}
-
-		if( entity.m_className == "info_player_start" )
-		{
-			std::string startPosStr  = entity.m_properties.at( "origin" );
-			Strings posFloatsStrings = SplitIntoStringsByDelimiter( startPosStr, ' ' );
-
-			if( posFloatsStrings.size() == 3 )
-			{
-				float x, y, z;
-				::SetFromText( x, posFloatsStrings[0].c_str() );
-				::SetFromText( z, posFloatsStrings[1].c_str() );
-				::SetFromText( y, posFloatsStrings[2].c_str() );
-
-				m_camera->m_cameraTransform.SetPosition( Vector3(x, y, z) );
-			}
-		}
-	}
+//	AddTestConvexPolyhedronToScene();
+	AddTestQuakeMapToScene();
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
 {
+	if( m_testHedronRenderable != nullptr )
+	{
+		delete m_testHedronRenderable;
+		m_testHedronRenderable = nullptr;
+	}
+
 	// MAP Parser
 	if( m_parsedMap != nullptr )
 	{
@@ -250,4 +221,76 @@ void Scene_ProtoScene3D::AddNewRenderableToScene( Renderable *renderable )
 {
 	m_renderables.push_back( renderable );
 	m_scene->AddRenderable( *renderable );
+}
+
+void Scene_ProtoScene3D::AddTestConvexPolyhedronToScene()
+{
+	// TESTING CONVEX POLYHEDRON
+	Plane3 plane1( Vector3::UP,				4.5f );
+	Plane3 plane2( Vector3::UP * -1.f,		4.5f );
+	Plane3 plane3( Vector3::RIGHT,			4.5f );
+	Plane3 plane4( Vector3::RIGHT * -1.f,	4.5f );
+	Plane3 plane5( Vector3::FRONT,			4.5f );
+	Plane3 plane6( Vector3::FRONT * -1.f,	4.5f );
+	Plane3 plane7( Vector3( 0.f, 1.f, 1.f).GetNormalized(), 3.f );
+
+	m_testHedron.AddPlane( plane1 );
+	m_testHedron.AddPlane( plane2 );
+	m_testHedron.AddPlane( plane3 );
+	m_testHedron.AddPlane( plane4 );
+	m_testHedron.AddPlane( plane5 );
+	m_testHedron.AddPlane( plane6 );
+	m_testHedron.AddPlane( plane7 );
+
+	m_testHedron.SetFaceWindingOrder( WIND_COUNTER_CLOCKWISE );
+	m_testHedron.Rebuild( 0.01f );
+
+	// TESTING PLYHEDRON'S RENDERABLE
+	Vector3		 testMeshLocation	= Vector3( 15.f, 0.f, 0.f );
+	Mesh		*testHedronMesh		= m_testHedron.ConstructMesh( RGBA_WHITE_COLOR );
+	Material	*testHedronMaterial	= Material::CreateNewFromFile( "Data\\Materials\\default.material" );
+	m_testHedronRenderable			= new Renderable( Transform(testMeshLocation, Vector3::ZERO, Vector3::ONE_ALL), testHedronMesh, testHedronMaterial );
+
+	m_scene->AddRenderable( *m_testHedronRenderable );
+}
+
+void Scene_ProtoScene3D::AddTestQuakeMapToScene()
+{
+	// TESTING MAP FILE LOADING
+	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\DM3.MAP" );
+	//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_KEY1.MAP" );
+	//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\START.MAP" );
+	//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\END.MAP" );
+	//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\e2m10.map" );
+	//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\E3M5.MAP" );
+	//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\B_BARREL.MAP" );
+	//	m_parsedMap = MapParser::LoadFromFile( "Data\\MAP\\Test1.MAP" );
+	
+	for( int e = 0; e < m_parsedMap->m_entities.size(); e++ )
+	{
+		MapEntity const &entity = m_parsedMap->m_entities[e];
+		for( int g = 0; g < entity.GetBrushCount(); g++ )
+		{
+			Renderable *geometryRenderable = entity.ConstructRenderableForBrushAtIndex(g);
+
+			if( geometryRenderable != nullptr )
+				AddNewRenderableToScene( geometryRenderable );
+		}
+
+		if( entity.m_className == "info_player_start" )
+		{
+			std::string startPosStr  = entity.m_properties.at( "origin" );
+			Strings posFloatsStrings = SplitIntoStringsByDelimiter( startPosStr, ' ' );
+
+			if( posFloatsStrings.size() == 3 )
+			{
+				float x, y, z;
+				::SetFromText( x, posFloatsStrings[0].c_str() );
+				::SetFromText( z, posFloatsStrings[1].c_str() );
+				::SetFromText( y, posFloatsStrings[2].c_str() );
+
+				m_camera->m_cameraTransform.SetPosition( Vector3(x, y, z) );
+			}
+		}
+	}
 }

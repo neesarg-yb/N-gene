@@ -36,6 +36,10 @@ private:
 	float const				 m_cameraNear				= 0.1f;
 	float const				 m_cameraFar				= 10000.f;
 
+	// ConvexPolyhedron
+	ConvexPolyhedron		 m_testHedron;
+	Renderable				*m_testHedronRenderable		= nullptr;
+
 	// MAP Files
 	MapParser				*m_parsedMap				= nullptr;
 
@@ -50,4 +54,8 @@ private:
 	// Scene Management
 	void AddNewLightToScene( Light *light );
 	void AddNewRenderableToScene( Renderable *renderable );
+
+	// Testing
+	void AddTestConvexPolyhedronToScene();
+	void AddTestQuakeMapToScene();
 };

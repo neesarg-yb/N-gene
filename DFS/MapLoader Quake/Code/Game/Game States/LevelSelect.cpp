@@ -13,7 +13,7 @@ LevelSelect::LevelSelect( Clock const *parentClock )
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Protoscene 3D                ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Clock & Stopwatch            ", &m_levelSelectedStdFunc) );
-	m_levelSelectionMenu->m_selectionIndex = 0;
+	m_levelSelectionMenu->m_selectionIndex = 1;
 }
 
 LevelSelect::~LevelSelect()
