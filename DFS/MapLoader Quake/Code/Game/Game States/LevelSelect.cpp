@@ -9,7 +9,8 @@ LevelSelect::LevelSelect( Clock const *parentClock )
 {
 	// Setup the LevelSelection UI
 	m_levelSelectionMenu = new UIMenu( *g_theInput, *g_theRenderer, AABB2( 0.35f, 0.45f, 0.65f, 0.55f ) );
-	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Protoscene 3D               ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> BSP Debug                    ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Protoscene 3D                ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Clock & Stopwatch            ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->m_selectionIndex = 0;
@@ -71,6 +72,8 @@ void LevelSelect::LevelSelected( char const * levelName )
 		g_theGame->StartTransitionToState( "CLOCK & STOPWATCH" );
 	else if( std::string(levelName) == "--> Quaternion Basis             " )
 		g_theGame->StartTransitionToState( "QUATERNIONS TEST" );
-	else if( std::string(levelName) == "--> Protoscene 3D               " )
+	else if( std::string(levelName) == "--> Protoscene 3D                " )
 		g_theGame->StartTransitionToState( "PROTOSCENE 3D" );
+	else if( std::string(levelName) == "--> BSP Debug                    ")
+		g_theGame->StartTransitionToState( "BSP DEBUG" );
 }

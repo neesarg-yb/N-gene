@@ -370,6 +370,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BSP\BSPGraph.cpp" />
     <ClCompile Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.cpp" />
     <ClCompile Include="Camera System\Camera Behaviours\CB_Follow.cpp" />
     <ClCompile Include="Camera System\Camera Behaviours\CB_FreeLook.cpp" />
@@ -377,6 +378,7 @@
     <ClCompile Include="Game States\GameState.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
     <ClCompile Include="Game States\LevelSelect.cpp" />
+    <ClCompile Include="Game States\Scenes\Scene_BSPDebug.cpp" />
     <ClCompile Include="Game States\Scenes\Scene_ProtoScene3D.cpp" />
     <ClCompile Include="Game States\Scenes\Scene_QuaternionsTest.cpp" />
     <ClCompile Include="Game States\Scenes\Scene_StopwatchTest.cpp" />
@@ -390,6 +392,7 @@
     <ClCompile Include="theGame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BSP\BSPGraph.hpp" />
     <ClInclude Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.hpp" />
     <ClInclude Include="Camera System\Camera Behaviours\CB_Follow.hpp" />
     <ClInclude Include="Camera System\Camera Behaviours\CB_FreeLook.hpp" />
@@ -398,6 +401,7 @@
     <ClInclude Include="Game States\Attract.hpp" />
     <ClInclude Include="Game States\LevelSelect.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
+    <ClInclude Include="Game States\Scenes\Scene_BSPDebug.hpp" />
     <ClInclude Include="Game States\Scenes\Scene_ProtoScene3D.hpp" />
     <ClInclude Include="Game States\Scenes\Scene_QuaternionsTest.hpp" />
     <ClInclude Include="Game States\Scenes\Scene_StopwatchTest.hpp" />

@@ -35,6 +35,9 @@
     <Filter Include="MapParser">
       <UniqueIdentifier>{d912cbda-6312-45ef-a3d7-2113f2cecd8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BSP">
+      <UniqueIdentifier>{45cfbb81-b13f-48b9-a80e-65d36848af84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main_Win32.cpp">
@@ -91,6 +94,12 @@
     <ClCompile Include="MapParser\MapFileBuffer.cpp">
       <Filter>MapParser</Filter>
     </ClCompile>
+    <ClCompile Include="BSP\BSPGraph.cpp">
+      <Filter>BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="Game States\Scenes\Scene_BSPDebug.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -146,6 +155,12 @@
     </ClInclude>
     <ClInclude Include="MapParser\MapFileBuffer.hpp">
       <Filter>MapParser</Filter>
+    </ClInclude>
+    <ClInclude Include="BSP\BSPGraph.hpp">
+      <Filter>BSP</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scenes\Scene_BSPDebug.hpp">
+      <Filter>Game States\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

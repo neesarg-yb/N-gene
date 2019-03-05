@@ -8,6 +8,7 @@
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
+#include "Game/Game States/Scenes/Scene_BSPDebug.hpp"
 #include "Game/Game States/Scenes/Scene_ProtoScene3D.hpp"
 #include "Game/Game States/Scenes/Scene_StopwatchTest.hpp"
 #include "Game/Game States/Scenes/Scene_QuaternionsTest.hpp"
@@ -95,8 +96,11 @@ void theGame::Startup()
 	GameState* levelSelectGS = new LevelSelect( g_gameClock );
 	AddNewGameState( levelSelectGS );
 
-	GameState* collisionAvoidanceScene = new Scene_ProtoScene3D( g_gameClock );
-	AddNewGameState( collisionAvoidanceScene );
+	GameState* protogameScene = new Scene_ProtoScene3D( g_gameClock );
+	AddNewGameState( protogameScene );
+
+	GameState* bspDebug = new Scene_BSPDebug( g_gameClock );
+	AddNewGameState( bspDebug );
 
 	GameState* quaternionsTest = new Scene_QuaternionsTest( g_gameClock );
 	AddNewGameState( quaternionsTest );
