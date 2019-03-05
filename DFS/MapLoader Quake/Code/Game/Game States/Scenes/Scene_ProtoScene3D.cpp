@@ -80,8 +80,8 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	AddNewRenderableToScene( snowMiku );
 	AddNewRenderableToScene( spaceship );
 
-//	AddTestConvexPolyhedronToScene();
-	AddTestQuakeMapToScene();
+	AddTestConvexPolyhedronToScene();
+//	AddTestQuakeMapToScene();
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
@@ -232,7 +232,6 @@ void Scene_ProtoScene3D::AddTestConvexPolyhedronToScene()
 	Plane3 plane4( Vector3::RIGHT * -1.f,	4.5f );
 	Plane3 plane5( Vector3::FRONT,			4.5f );
 	Plane3 plane6( Vector3::FRONT * -1.f,	4.5f );
-	Plane3 plane7( Vector3( 0.f, 1.f, 1.f).GetNormalized(), 3.f );
 
 	m_testHedron.AddPlane( plane1 );
 	m_testHedron.AddPlane( plane2 );
@@ -240,7 +239,10 @@ void Scene_ProtoScene3D::AddTestConvexPolyhedronToScene()
 	m_testHedron.AddPlane( plane4 );
 	m_testHedron.AddPlane( plane5 );
 	m_testHedron.AddPlane( plane6 );
-	m_testHedron.AddPlane( plane7 );
+
+// 	// Adding extra plane near the top-back edge
+// 	Plane3 plane7( Vector3( 0.f, 1.f, 1.f).GetNormalized(), 3.f );
+// 	m_testHedron.AddPlane( plane7 );
 
 	m_testHedron.SetFaceWindingOrder( WIND_COUNTER_CLOCKWISE );
 	m_testHedron.Rebuild( 0.01f );
