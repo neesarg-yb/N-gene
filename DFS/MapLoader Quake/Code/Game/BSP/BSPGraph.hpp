@@ -2,7 +2,7 @@
 #include <string>
 #include "Engine/Math/Vector2.hpp"
 
-#define BSP_LEAF_RECT_SIZE Vector2( 3.f, 1.5f )
+#define BSP_LEAF_RECT_SIZE Vector2( 60.f, 35.f )
 
 class BSPGraph
 {

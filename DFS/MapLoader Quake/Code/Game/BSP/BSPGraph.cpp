@@ -77,8 +77,9 @@ Vector2 BSPGraph::DebugRender( Vector2 const &centerPos ) const
 		Vector2 rightChildCenterPos = rightChildAABB2.GetCenter();
 
 		// Draw left & right children
-		Vector2 leftChildRootPos = m_left->DebugRender( leftChildCenterPos );
-		Vector2 rightChildRootPos = m_right->DebugRender( rightChildCenterPos );
+		float	circleRadius		= min( BSP_LEAF_RECT_SIZE.x, BSP_LEAF_RECT_SIZE.y) * 0.5f;
+		Vector2 leftChildRootPos	= m_left->DebugRender( leftChildCenterPos ) + Vector2( 0.f, circleRadius );
+		Vector2 rightChildRootPos	= m_right->DebugRender( rightChildCenterPos ) + Vector2( 0.f, circleRadius );
 		
 		// Draw connecting line from root to its children
 		DebugRender2DLine( 0.f, rootCenterPos, RGBA_GRAY_COLOR, leftChildRootPos,  RGBA_GRAY_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
@@ -93,14 +94,22 @@ Vector2 BSPGraph::DebugRender( Vector2 const &centerPos ) const
 
 void BSPGraph::DebugRenderRoot( Vector2 const &centerPos ) const
 {
-	AABB2 rectAABB2		= AABB2( centerPos, m_rectSize.x * 0.5f, m_rectSize.y * 0.5f );
-	float circleRadius	= min( m_rectSize.x, m_rectSize.y) * 0.5f;
+	bool isLeafNode		= IsLeafNode();
+	float circleRadius	= min( BSP_LEAF_RECT_SIZE.x, BSP_LEAF_RECT_SIZE.y) * 0.5f;
+	AABB2 rectAABB2		= AABB2( centerPos, BSP_LEAF_RECT_SIZE.x * 0.4f, BSP_LEAF_RECT_SIZE.y * 0.5f );
 
-	// Draw background circle
-	DebugRender2DRound( 0.f, centerPos, circleRadius, 12U, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
-
+	// Draw background
+	if( isLeafNode )
+		DebugRender2DQuad( 0.f, rectAABB2, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );							// Rectangle for a leaf root
+	else
+		DebugRender2DRound( 0.f, centerPos, circleRadius, 12U, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );		// Circle for a non-leaf root
+		
 	// Print the ID
-	DebugRender2DText ( 0.f, rectAABB2.mins, m_rectSize.y, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, m_id );
+	Vector2 textPosition = centerPos - (Vector2( circleRadius, circleRadius ) * 0.5f);
+	if( isLeafNode )
+		textPosition = rectAABB2.mins + (rectAABB2.GetDimensions() * 0.15f);
+
+	DebugRender2DText ( 0.f, textPosition, circleRadius, RGBA_RED_COLOR, RGBA_RED_COLOR, m_id );
 }
 
 bool BSPGraph::RecomputeRectSize() const
