@@ -554,6 +554,7 @@ void BindGLFunctions()
 	GL_BIND_FUNCTION( glSamplerParameterf );
 
 	GL_BIND_FUNCTION( wglSwapIntervalEXT );
+	GL_BIND_FUNCTION( glPointSize );
 }
 	
 //------------------------------------------------------------------------
@@ -1444,6 +1445,11 @@ void Renderer::SetCullingMode( eCullMode newCullMode )
 	}
 	else
 		glDisable( GL_CULL_FACE );
+}
+
+void Renderer::SetGLPointSize( float pixels )
+{
+	glPointSize( pixels );
 }
 
 Texture* Renderer::CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt /* = TEXTURE_FORMAT_RGBA8 */ )
