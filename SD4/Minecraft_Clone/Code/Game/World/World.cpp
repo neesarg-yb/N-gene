@@ -667,7 +667,12 @@ void World::PlaceOrDigBlock()
 			eBlockType newBlockType = BLOCK_STONE;
 
 			if( g_theInput->IsKeyPressed( VK_Codes::CONTROL ) )
-				newBlockType = BLOCK_GLOWSTONE;
+			{
+				newBlockType = BLOCK_TEST_WHITE;
+
+				if( g_theInput->IsKeyPressed( VK_Codes::SHIFT ) )
+					newBlockType = BLOCK_GLOWSTONE;
+			}
 
 			targetBlock.ChangeTypeTo( newBlockType );
 			targetBlock.SetNeighborBlockChunksDirty();
