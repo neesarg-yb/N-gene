@@ -85,6 +85,10 @@ void World::Render() const
 	// Raycast Selection
 	RenderBlockSelection( m_blockSelectionRaycastResult );
 
+	// Dirty Lights Debug
+	if( DEBUG_RENDER_DIRTY_LIGHTS )
+		RenderDirtyLightMesh();
+
 	if( m_raycastIsLocked )
 		RenderRaycast( m_blockSelectionRaycastResult, *g_theRenderer );
 
@@ -463,6 +467,33 @@ void World::UpdateDirtyLighting()
 		// Computes the block's theoretical indoor-outdoor lighting
 		RecomputeLighting( fDirtyBlock );
 	}
+
+	// Dirty light debug mesh
+	if( DEBUG_RENDER_DIRTY_LIGHTS )
+		UpdateDirtyLightDebugMesh();
+}
+
+void World::UpdateDirtyLightDebugMesh()
+{
+	if( m_dirtyLightsMesh != nullptr )
+	{
+		delete m_dirtyLightsMesh;
+		m_dirtyLightsMesh = nullptr;
+	}
+
+	m_dirtyLightsMesh = new MeshBuilder();
+	m_dirtyLightsMesh->Begin( PRIMITIVE_POINTS, false );
+
+	for( int i = 0; i < m_dirtyLightBlocks.size(); i++ )
+	{
+		BlockLocator const &dBlockLoc = m_dirtyLightBlocks[i];
+		Vector3 debugPointPosition = dBlockLoc.GetBlockWorldPosition() + Vector3( 0.5f, 0.5f, 0.5f );
+
+		m_dirtyLightsMesh->SetColor( RGBA_RED_COLOR );
+		m_dirtyLightsMesh->PushVertex( debugPointPosition );
+	}
+
+	m_dirtyLightsMesh->End();
 }
 
 void World::RecomputeLighting( BlockLocator &blockLocator )
@@ -566,6 +597,21 @@ void World::GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock
 	int upMaxOutdoorLight	 = upNeighbor.GetOutdoorLightLevel() - 1;
 	maxIndoorLightReceived_out	= ( upMaxIndoorLight  > maxIndoorLightReceived_out  ) ? upMaxIndoorLight  : maxIndoorLightReceived_out;
 	maxOutdoorLightReceived_out	= ( upMaxOutdoorLight > maxOutdoorLightReceived_out ) ? upMaxOutdoorLight : maxOutdoorLightReceived_out;
+}
+
+void World::RenderDirtyLightMesh() const
+{
+	if( m_dirtyLightsMesh == nullptr )
+		return;
+
+	if( m_dirtyLightsMesh->m_vertices.size() > 0 )
+	{
+		g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
+		g_theRenderer->EnableDepth( COMPARE_ALWAYS, true );
+
+		g_theRenderer->SetGLPointSize( 5.f );
+		g_theRenderer->DrawMesh( *m_dirtyLightsMesh->ConstructMesh<Vertex_3DPCU>() );
+	}
 }
 
 void World::PerformRaycast()

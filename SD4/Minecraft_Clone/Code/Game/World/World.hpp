@@ -33,6 +33,9 @@ private:
 	ChunkMap	 m_activeChunks;
 	int			 m_activationRadius		= ACTIVATION_RANGE_NUM_CHUNKS;	// chunks
 	int			 m_deactivationRadius	= m_activationRadius - 2;		// chunks
+	
+	// Debug Mesh
+	MeshBuilder	*m_dirtyLightsMesh = nullptr;
 
 	// Lighting
 	BlockLocQue	 m_dirtyLightBlocks;									// Block Locater(s) whose lighting is dirty
@@ -67,8 +70,11 @@ private:
 
 	// Volumetric Lighting
 	void	UpdateDirtyLighting();
+	void	UpdateDirtyLightDebugMesh();
 	void	RecomputeLighting( BlockLocator &blockLocator );
 	void	GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const;
+
+	void	RenderDirtyLightMesh() const;
 
 	// Pre-computation
 	void	PopulateChunkActivationCheatsheet( int deactivationRadius );

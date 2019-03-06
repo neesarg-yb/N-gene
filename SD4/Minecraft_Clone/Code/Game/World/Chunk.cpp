@@ -57,12 +57,6 @@ Chunk::Chunk( ChunkCoord position )
 
 Chunk::~Chunk()
 {
-	if( m_dirtyLightsMesh != nullptr )
-	{
-		delete m_dirtyLightsMesh;
-		m_dirtyLightsMesh = nullptr;
-	}
-
 	if( m_needsSaving )
 		SaveToFile();
 
@@ -83,20 +77,7 @@ void Chunk::Render( Renderer &theRenderer ) const
 
 	// Draw Mesh
 	theRenderer.DrawMesh( *m_gpuMesh, Matrix44() );
-
-	// Draw Debug Mesh
-	if( DEBUG_RENDER_DIRTY_LIGHTS )
-	{
-		if( m_dirtyLightsMesh->m_vertices.size() > 0 )
-		{
-			g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
-			theRenderer.EnableDepth( COMPARE_ALWAYS, true );
-
-			theRenderer.SetGLPointSize( 5.f );
-			theRenderer.DrawMesh( *m_dirtyLightsMesh->ConstructMesh<Vertex_3DPCU>() );
-		}
-	}
-
+	
 	// Indicating the start location
 	World::RenderBasis( m_worldBounds.mins, 1.f, theRenderer );
 }
@@ -118,22 +99,10 @@ void Chunk::RebuildMesh()
 		delete m_gpuMesh;
 		m_gpuMesh = nullptr;
 	}
-	if( m_dirtyLightsMesh != nullptr )
-	{
-		delete m_dirtyLightsMesh;
-		m_dirtyLightsMesh = nullptr;
-	}
 
 	// CPU side mesh
 	m_cpuMesh = new MeshBuilder();
 	m_cpuMesh->Begin( PRIMITIVE_TRIANGES, true );
-
-	// Debug Mesh for lights
-	if( DEBUG_RENDER_DIRTY_LIGHTS )
-	{
-		m_dirtyLightsMesh = new MeshBuilder();
-		m_dirtyLightsMesh->Begin( PRIMITIVE_POINTS, false );
-	}
 
 	for( int bIdx = 0; bIdx < NUM_BLOCKS_PER_CHUNK; bIdx++ )
 	{
@@ -141,9 +110,6 @@ void Chunk::RebuildMesh()
 		// 2. Adds points for m_dirtyLightsMesh
 		AddVertsForBlock( bIdx, *m_cpuMesh );
 	}
-	
-	if( DEBUG_RENDER_DIRTY_LIGHTS )
-		m_dirtyLightsMesh->End();
 
 	m_cpuMesh->End();
 
@@ -325,15 +291,6 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	AABB2	const	uvSide			= blockDef.m_uvSide;
 	AABB2	const	uvBottom		= blockDef.m_uvBottom;
 	AABB2	const	uvTop			= blockDef.m_uvTop;
-
-	if( DEBUG_RENDER_DIRTY_LIGHTS )
-	{
-		if( block.IsLightDirty() )
-		{
-			m_dirtyLightsMesh->SetColor( RGBA_RED_COLOR );
-			m_dirtyLightsMesh->PushVertex( blockBounds.GetCenter() );
-		}	
-	}
 
 	if( blockDef.m_isNeverVisible )
 		return;
