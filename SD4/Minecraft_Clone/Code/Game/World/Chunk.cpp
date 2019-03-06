@@ -57,6 +57,12 @@ Chunk::Chunk( ChunkCoord position )
 
 Chunk::~Chunk()
 {
+	if( m_dirtyLightsMesh != nullptr )
+	{
+		delete m_dirtyLightsMesh;
+		m_dirtyLightsMesh = nullptr;
+	}
+
 	if( m_needsSaving )
 		SaveToFile();
 
@@ -77,6 +83,16 @@ void Chunk::Render( Renderer &theRenderer ) const
 
 	// Draw Mesh
 	theRenderer.DrawMesh( *m_gpuMesh, Matrix44() );
+
+	// Draw Debug Mesh
+	if( m_dirtyLightsMesh->m_vertices.size() > 0 )
+	{
+		g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
+		theRenderer.EnableDepth( COMPARE_ALWAYS, true );
+
+		theRenderer.SetGLPointSize( 5.f );
+		theRenderer.DrawMesh( *m_dirtyLightsMesh->ConstructMesh<Vertex_3DPCU>() );
+	}
 
 	// Indicating the start location
 	World::RenderBasis( m_worldBounds.mins, 1.f, theRenderer );
@@ -99,12 +115,33 @@ void Chunk::RebuildMesh()
 		delete m_gpuMesh;
 		m_gpuMesh = nullptr;
 	}
+	if( m_dirtyLightsMesh != nullptr )
+	{
+		delete m_dirtyLightsMesh;
+		m_dirtyLightsMesh = nullptr;
+	}
 
 	// CPU side mesh
 	m_cpuMesh = new MeshBuilder();
 	m_cpuMesh->Begin( PRIMITIVE_TRIANGES, true );
+
+	// Debug Mesh for lights
+	if( DEBUG_RENDER_DIRTY_LIGHTS )
+	{
+		m_dirtyLightsMesh = new MeshBuilder();
+		m_dirtyLightsMesh->Begin( PRIMITIVE_POINTS, false );
+	}
+
 	for( int bIdx = 0; bIdx < NUM_BLOCKS_PER_CHUNK; bIdx++ )
+	{
+		// 1. Adds verts for m_cpuMesh
+		// 2. Adds points for m_dirtyLightsMesh
 		AddVertsForBlock( bIdx, *m_cpuMesh );
+	}
+	
+	if( DEBUG_RENDER_DIRTY_LIGHTS )
+		m_dirtyLightsMesh->End();
+
 	m_cpuMesh->End();
 
 	// GPU side mesh
@@ -286,6 +323,15 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	AABB2	const	uvBottom		= blockDef.m_uvBottom;
 	AABB2	const	uvTop			= blockDef.m_uvTop;
 
+	if( DEBUG_RENDER_DIRTY_LIGHTS )
+	{
+		if( block.IsLightDirty() )
+		{
+			m_dirtyLightsMesh->SetColor( RGBA_RED_COLOR );
+			m_dirtyLightsMesh->PushVertex( blockBounds.GetCenter() );
+		}	
+	}
+
 	if( blockDef.m_isNeverVisible )
 		return;
 
@@ -324,7 +370,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	if( west.IsFullyOpaque() == false )
 	{
 		int indoorLight		= west.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.1f, 1.f );
+		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
 		
 		Rgba color;
 		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
@@ -353,7 +399,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	if( east.IsFullyOpaque() == false )
 	{
 		int indoorLight		= east.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.1f, 1.f );
+		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
 
 		Rgba color;
 		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
@@ -382,7 +428,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	if( north.IsFullyOpaque() == false )
 	{
 		int indoorLight		= north.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.1f, 1.f );
+		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
 
 		Rgba color;
 		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
@@ -411,7 +457,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	if( south.IsFullyOpaque() == false )
 	{
 		int indoorLight		= south.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.1f, 1.f );
+		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
 
 		Rgba color;
 		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
@@ -440,7 +486,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	if( up.IsFullyOpaque() == false )
 	{
 		int indoorLight		= up.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.1f, 1.f );
+		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
 
 		Rgba color;
 		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
@@ -469,7 +515,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	if( down.IsFullyOpaque() == false )
 	{
 		int indoorLight		= down.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.1f, 1.f );
+		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
 
 		Rgba color;
 		color.SetAsFloats( lightFraction, lightFraction, lightFraction );

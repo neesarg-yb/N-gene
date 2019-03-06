@@ -88,9 +88,6 @@ void World::Render() const
 	if( m_raycastIsLocked )
 		RenderRaycast( m_blockSelectionRaycastResult, *g_theRenderer );
 
-	if( m_debugStepLighting )
-		RenderDirtyLights();
-
 	// Post Render
 	camera.PostRender( *g_theRenderer );
 }
@@ -439,29 +436,12 @@ void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neigh
 		neighborChunks_out[ nIt->first ] = nIt->second;
 }
 
-void World::RenderDirtyLights() const
-{
-	for( int i = 0; i < m_dirtyLightBlocks.size(); i++ )
-	{
-		Vector3 worldPos = m_dirtyLightBlocks[i].GetBlockWorldPosition() + Vector3( 0.5f, 0.5f, 0.5f );
-		
-		MeshBuilder mb;
-		mb.Begin( PRIMITIVE_POINTS, false );
-
-		mb.SetColor( RGBA_RED_COLOR );
-		mb.PushVertex( worldPos );
-		mb.End();
-
-		g_theRenderer->DrawMesh( *mb.ConstructMesh<Vertex_3DPCU>() );
-	}
-}
-
 void World::UpdateDirtyLighting()
 {
 	BlockLocQue  dirtyBlocksThisFrame;
 	BlockLocQue *operationQue = &m_dirtyLightBlocks;
 	
-	if( m_debugStepLighting )
+	if( DEBUG_STEP_LIGHTING )
 	{
 		if( g_theInput->WasKeyJustPressed('L') == false )
 			return;
@@ -804,7 +784,7 @@ void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
 
 	// Render
 	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
-	g_theRenderer->EnableDepth( COMPARE_LESS, true );
+	g_theRenderer->EnableDepth( COMPARE_LESS, false );
 	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 32, PRIMITIVE_LINES );
 }
 

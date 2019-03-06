@@ -31,6 +31,9 @@ private:
 	Mesh		*m_gpuMesh		= nullptr;
 	bool		 m_isDirty		= true;		// i.e. we need to rebuild the CPU & GPU Mesh
 
+	// Debug Mesh
+	MeshBuilder	*m_dirtyLightsMesh = nullptr;
+
 	// Save to the disk
 	bool		 m_needsSaving	= false;
 

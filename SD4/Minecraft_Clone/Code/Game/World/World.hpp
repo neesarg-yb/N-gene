@@ -35,7 +35,6 @@ private:
 	int			 m_deactivationRadius	= m_activationRadius - 2;		// chunks
 
 	// Lighting
-	bool		 m_debugStepLighting	= false;
 	BlockLocQue	 m_dirtyLightBlocks;									// Block Locater(s) whose lighting is dirty
 	
 	// Relative offsets from origin
@@ -67,7 +66,6 @@ private:
 	void	GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neighborChunks_out );
 
 	// Volumetric Lighting
-	void	RenderDirtyLights() const;
 	void	UpdateDirtyLighting();
 	void	RecomputeLighting( BlockLocator &blockLocator );
 	void	GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const;
