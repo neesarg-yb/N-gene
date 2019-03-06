@@ -13,6 +13,7 @@ LevelSelect::LevelSelect( Clock const *parentClock )
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(3) Debug System                 ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(2) Proportional Controller      ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("(1) Follow Camera                ", &m_levelSelectedStdFunc) );
+	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Effecient Raycast            ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Degrees of Freedom           ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Camera State Average         ", &m_levelSelectedStdFunc) );
 	m_levelSelectionMenu->AddNewMenuAction( MenuAction("--> Quaternion Basis             ", &m_levelSelectedStdFunc) );
@@ -80,6 +81,8 @@ void LevelSelect::LevelSelected( char const * levelName )
 		g_theGame->StartTransitionToState( "CAMERA STATE AVERAGE" );
 	else if( std::string(levelName) == "--> Degrees of Freedom           " )
 		g_theGame->StartTransitionToState( "DEGREES OF FREEDOM" );
+	else if( std::string(levelName) == "--> Effecient Raycast            " )
+		g_theGame->StartTransitionToState( "EFFICIENT RAYCASTS" );
 	else if( std::string(levelName) == "(1) Follow Camera                " )
 		g_theGame->StartTransitionToState( "FOLLOW CAMERA" );
 	else if( std::string(levelName) == "(2) Proportional Controller      " )

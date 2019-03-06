@@ -391,6 +391,7 @@
     <ClCompile Include="Game States\Scene_DegreesOfFreedom.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
     <ClCompile Include="Game States\LevelSelect.cpp" />
+    <ClCompile Include="Game States\Scene_EfficientRaycast.cpp" />
     <ClCompile Include="Game States\Scene_FollowCamera.cpp" />
     <ClCompile Include="Game States\Scene_ProportionalController.cpp" />
     <ClCompile Include="Game States\Scene_QuaternionsTest.cpp" />
@@ -425,6 +426,7 @@
     <ClInclude Include="Game States\Scene_DegreesOfFreedom.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />
     <ClInclude Include="Game States\LevelSelect.hpp" />
+    <ClInclude Include="Game States\Scene_EfficientRaycast.hpp" />
     <ClInclude Include="Game States\Scene_FollowCamera.hpp" />
     <ClInclude Include="Game States\Scene_ProportionalController.hpp" />
     <ClInclude Include="Game States\Scene_QuaternionsTest.hpp" />

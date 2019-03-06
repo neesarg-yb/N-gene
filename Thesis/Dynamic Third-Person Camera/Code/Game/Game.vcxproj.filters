@@ -133,6 +133,9 @@
     <ClCompile Include="Camera System\Camera Constraints\CC_HandoverToFollow.cpp">
       <Filter>Camera System\CameraConstrains</Filter>
     </ClCompile>
+    <ClCompile Include="Game States\Scene_EfficientRaycast.cpp">
+      <Filter>Game States\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -230,6 +233,9 @@
     </ClInclude>
     <ClInclude Include="Camera System\Camera Constraints\CC_HandoverToFollow.hpp">
       <Filter>Camera System\CameraConstrains</Filter>
+    </ClInclude>
+    <ClInclude Include="Game States\Scene_EfficientRaycast.hpp">
+      <Filter>Game States\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

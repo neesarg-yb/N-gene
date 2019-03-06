@@ -12,6 +12,7 @@
 #include "Game/Game States/Scene_FollowCamera.hpp"
 #include "Game/Game States/Scene_ComplexRotation.hpp"
 #include "Game/Game States/Scene_QuaternionsTest.hpp"
+#include "Game/Game States/Scene_EfficientRaycast.hpp"
 #include "Game/Game States/Scene_CameraStateAverage.hpp"
 #include "Game/Game States/Scene_DegreesOfFreedom.hpp"
 #include "Game/Game States/Scene_CollisionAvoidance.hpp"
@@ -108,6 +109,9 @@ void theGame::Startup()
 
 	GameState* averageRotation = new Scene_CameraStateAverage( g_gameClock );
 	AddNewGameState( averageRotation );
+
+	GameState* effecientRaycast = new Scene_EffecientRaycast( g_gameClock );
+	AddNewGameState( effecientRaycast );
 
 	GameState* degreesOfFreedom = new Scene_DegreesOfFreedom( g_gameClock );
 	AddNewGameState( degreesOfFreedom );
