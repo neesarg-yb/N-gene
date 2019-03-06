@@ -85,13 +85,16 @@ void Chunk::Render( Renderer &theRenderer ) const
 	theRenderer.DrawMesh( *m_gpuMesh, Matrix44() );
 
 	// Draw Debug Mesh
-	if( m_dirtyLightsMesh->m_vertices.size() > 0 )
+	if( DEBUG_RENDER_DIRTY_LIGHTS )
 	{
-		g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
-		theRenderer.EnableDepth( COMPARE_ALWAYS, true );
+		if( m_dirtyLightsMesh->m_vertices.size() > 0 )
+		{
+			g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
+			theRenderer.EnableDepth( COMPARE_ALWAYS, true );
 
-		theRenderer.SetGLPointSize( 5.f );
-		theRenderer.DrawMesh( *m_dirtyLightsMesh->ConstructMesh<Vertex_3DPCU>() );
+			theRenderer.SetGLPointSize( 5.f );
+			theRenderer.DrawMesh( *m_dirtyLightsMesh->ConstructMesh<Vertex_3DPCU>() );
+		}
 	}
 
 	// Indicating the start location

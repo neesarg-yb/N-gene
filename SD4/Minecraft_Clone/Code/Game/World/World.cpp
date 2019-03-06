@@ -526,21 +526,21 @@ void World::GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock
 	maxOutdoorLightReceived_out = 0;
 
 	// Influence from North
-	Block &northNeighbor	 = receivingBlock.GetWestBlockLocator().GetBlock();
+	Block &northNeighbor	 = receivingBlock.GetNorthBlockLocator().GetBlock();
 	int northMaxIndoorLight	 = northNeighbor.GetIndoorLightLevel() - 1;
 	int northMaxOutdoorLight = northNeighbor.GetOutdoorLightLevel() - 1;
 	maxIndoorLightReceived_out	= ( northMaxIndoorLight  > maxIndoorLightReceived_out  ) ? northMaxIndoorLight  : maxIndoorLightReceived_out;
 	maxOutdoorLightReceived_out	= ( northMaxOutdoorLight > maxOutdoorLightReceived_out ) ? northMaxOutdoorLight : maxOutdoorLightReceived_out;
 
 	// Influence from South
-	Block &southNeighbor	 = receivingBlock.GetWestBlockLocator().GetBlock();
+	Block &southNeighbor	 = receivingBlock.GetSouthBlockLocator().GetBlock();
 	int southMaxIndoorLight	 = southNeighbor.GetIndoorLightLevel() - 1;
 	int southMaxOutdoorLight = southNeighbor.GetOutdoorLightLevel() - 1;
 	maxIndoorLightReceived_out	= ( southMaxIndoorLight  > maxIndoorLightReceived_out  ) ? southMaxIndoorLight  : maxIndoorLightReceived_out;
 	maxOutdoorLightReceived_out	= ( southMaxOutdoorLight > maxOutdoorLightReceived_out ) ? southMaxOutdoorLight : maxOutdoorLightReceived_out;
 
 	// Influence from East
-	Block &eastNeighbor		 = receivingBlock.GetWestBlockLocator().GetBlock();
+	Block &eastNeighbor		 = receivingBlock.GetEastBlockLocator().GetBlock();
 	int eastMaxIndoorLight	 = eastNeighbor.GetIndoorLightLevel() - 1;
 	int eastMaxOutdoorLight	 = eastNeighbor.GetOutdoorLightLevel() - 1;
 	maxIndoorLightReceived_out	= ( eastMaxIndoorLight  > maxIndoorLightReceived_out  ) ? eastMaxIndoorLight  : maxIndoorLightReceived_out;
