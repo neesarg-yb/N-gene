@@ -551,7 +551,6 @@ void Chunk::SetBlockType( int blockIndex, eBlockType newType )
 	if( blockToChange.GetType() != newType )
 	{
 		blockToChange.SetType( newType );
-		blockToChange.UpdateBitflagFromDefinition();
 
 		m_isDirty		= true;
 		m_needsSaving	= true;

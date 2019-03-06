@@ -22,6 +22,7 @@ Block::~Block()
 void Block::SetType( eBlockType type )
 {
 	m_type = type;
+	UpdateBitflagFromDefinition();
 }
 
 int Block::GetIndoorLightLevelFromDefinition() const

@@ -26,9 +26,11 @@ public:
 	int			GetOutdoorLightLevel() const;
 	void		SetOutdoorLightLevel( int newLevel );
 
+private:
 	// Bitflag
 	void		UpdateBitflagFromDefinition();
 	
+public:
 	bool		IsSky() const;
 	void		SetIsSky();
 	void		ClearIsSky();
