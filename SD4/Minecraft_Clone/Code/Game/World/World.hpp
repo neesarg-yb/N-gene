@@ -61,6 +61,7 @@ public:
 private:
 	// Input
 	void	ProcessInput( float deltaSeconds );
+	void	DebugRenderInputKeyInfo() const;
 	
 	// Chunk Management
 	void	RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos );

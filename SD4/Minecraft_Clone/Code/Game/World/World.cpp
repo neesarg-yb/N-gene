@@ -1,6 +1,7 @@
 #pragma once
 #include "World.hpp"
 #include <algorithm>
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
 
 World::World( Clock *parentClock )
@@ -94,6 +95,8 @@ void World::Render() const
 
 	// Post Render
 	camera.PostRender( *g_theRenderer );
+
+	DebugRenderInputKeyInfo();
 }
 
 RaycastResult_MC World::Raycast( Vector3 const &start, Vector3 const &forwardDir, float maxDistance ) const
@@ -278,6 +281,27 @@ void World::ProcessInput( float deltaSeconds )
 
 	Vector3 positionChange = (forwardDir * forwardMovement) + (leftDir * leftMovement) + (upDir * upMovement);
 	m_camera->m_position += positionChange;
+}
+
+void World::DebugRenderInputKeyInfo() const
+{
+	Vector2 mouseClickTxtPos = Vector2( -820.f, 450.f );
+	DebugRender2DText( 0.f, mouseClickTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Mouse Clicks: [Left - Dig] [Right - Place]" );
+	Vector2 movementTxtPos = mouseClickTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, movementTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Movement: [W, A, S, D - Horizontal] [Q, E - Vertical]" );
+	Vector2 shiftFastTxtPos = movementTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, shiftFastTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Faster  : [SHIFT]" );
+
+	Vector2 placeTestBlockTxtPos = shiftFastTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, placeTestBlockTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "White Test-Block: [CTRL]" );
+	Vector2 placeGlowStoneTxtPos = placeTestBlockTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, placeGlowStoneTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Glowstone Block : [CTRL][SHIFT]" );
+
+	Vector2 lightStepTxtPos = placeGlowStoneTxtPos + Vector2( 0.f, -20.f );
+	if( DEBUG_STEP_LIGHTING )
+		DebugRender2DText( 0.f, lightStepTxtPos, 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "Step-Light: [L]" );
+	Vector2 raycastTxtPos = lightStepTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, raycastTxtPos, 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "Raycast   : [R]" );
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
