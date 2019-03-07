@@ -51,6 +51,8 @@ public:
 	void		SetIsSolid();
 	void		ClearIsSolid();
 
+	bool		DoesEmitLight() const;
+
 public:
 	static Block INVALID;
 };

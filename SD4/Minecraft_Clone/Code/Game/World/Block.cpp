@@ -62,5 +62,11 @@ void Block::UpdateBitflagFromDefinition()
 
 eBlockType Block::GetType() const
 {
-	return eBlockType(m_type);
+	return GetBlockTypeFromInteger(m_type);
+}
+
+bool Block::DoesEmitLight() const
+{
+	BlockDefinition const &def = BlockDefinition::GetDefinitionForType( GetType() );
+	return def.m_indoorLightLevel > 0;
 }

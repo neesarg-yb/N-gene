@@ -58,6 +58,8 @@ private:
 	bool		LoadFromFile();
 	void		AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder );
 
+	void		InitializeLightingOnActivation();
+
 	// If changed the block type, marks the mesh dirty and marks that the chunk needs to be saved to the disk
 	void		SetBlockType( int blockIndex, eBlockType newType );
 	void		SetBlockType( int xBlockCoord, int yBlockCoord, int zBlockCoord, eBlockType type );

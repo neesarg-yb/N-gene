@@ -48,6 +48,9 @@ Chunk::Chunk( ChunkCoord position )
 		}
 	}
 
+	// Initialize Lighting
+	InitializeLightingOnActivation();
+
 	// Mark as Dirty
 	m_isDirty = true;
 
@@ -498,6 +501,128 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 
 		mb.AddFace( idx + 0, idx + 1, idx + 2 );
 		mb.AddFace( idx + 2, idx + 3, idx + 0 );
+	}
+}
+
+void Chunk::InitializeLightingOnActivation()
+{
+	// MARK BLOCKS AS SKY
+	//
+	// For each column
+	for( int x = 0; x < BLOCKS_WIDE_X; x++ )
+	{
+		for( int y = 0; y < BLOCKS_WIDE_Y; y++ )
+		{
+			// Top-most block in the column
+			int const	 topMostZ			= BLOCKS_WIDE_Z - 1;
+			BlockCoord	 topMostBlockCoord	= BlockCoord( x, y, BLOCKS_WIDE_Z - 1 );
+			Block		&topMostBlock		= m_blocks[ GetIndexFromBlockCoord( topMostBlockCoord ) ];
+
+			// If top is fully opaque, like a stone, none blocks below are sky
+			if( topMostBlock.IsFullyOpaque() )
+				break;
+
+			// Start setting blocks as sky, going down
+			topMostBlock.SetIsSky();
+
+			// Traverse down to each block
+			for( int z = (topMostZ - 1); z >= 0; z-- )
+			{
+				BlockCoord	 thisBlockCoord	= BlockCoord( x, y, z );
+				Block		&thisBlock		= m_blocks[ GetIndexFromBlockCoord(thisBlockCoord) ];
+
+				// Until we hit the ground
+				if( thisBlock.IsFullyOpaque() )
+					break;
+
+				// Marks blocks as sky
+				thisBlock.SetIsSky();
+			}
+		}
+	}
+
+	// MARK NON-OPAQUE NEIGHBORS OF THE SKY BLOCKS, DIRTY
+	//
+	// For each column
+	for( int x = 0; x < BLOCKS_WIDE_X; x++ )
+	{
+		for( int y = 0; y < BLOCKS_WIDE_Y; y++ )
+		{
+			// Traverse down to each block
+			for( int z = (BLOCKS_WIDE_Z - 1); z >= 0; z-- )
+			{
+				BlockCoord	 thisBlockCoord	= BlockCoord( x, y, z );
+				int			 thisBlockIndex = GetIndexFromBlockCoord(thisBlockCoord);
+				Block		&thisBlock		= m_blocks[ thisBlockIndex ];
+
+				// Only for the sky blocks
+				if( thisBlock.IsSky() == false )
+					break;
+
+				// Set my outdoor light to max
+				thisBlock.SetOutdoorLightLevel( 14 );
+
+				// Mark non-opaque neighbors, dirty
+				BlockLocator thisBL	= BlockLocator( this, thisBlockIndex );
+				BlockLocator north	= thisBL.GetNorthBlockLocator();
+				BlockLocator south	= thisBL.GetSouthBlockLocator();
+				BlockLocator east	= thisBL.GetEastBlockLocator();
+				BlockLocator west	= thisBL.GetWestBlockLocator();
+				
+				Block &southNeighbor = south.GetBlock();
+				if( south.IsValid() && southNeighbor.IsFullyOpaque() == false )
+				{
+					southNeighbor.SetIsLightDirty();
+					south.GetChunk()->SetDirty();
+				}
+
+				Block &westNeighbor = west.GetBlock();
+				if( west.IsValid() && westNeighbor.IsFullyOpaque() == false )
+				{
+					westNeighbor.SetIsLightDirty();
+					west.GetChunk()->SetDirty();
+				}
+
+				Block &eastNeighbor = east.GetBlock();
+				if( east.IsValid() && eastNeighbor.IsFullyOpaque() == false )
+				{
+					eastNeighbor.SetIsLightDirty();
+					east.GetChunk()->SetDirty();
+				}
+
+				Block &northNeighbor = north.GetBlock();
+				if( north.IsValid() && northNeighbor.IsFullyOpaque() == false )
+				{
+					northNeighbor.SetIsLightDirty();
+					north.GetChunk()->SetDirty();
+				}
+			}
+		}
+	}
+
+	// MARK ALL INDOOR LIGHT-SOURCES, DIRTY
+	//
+	// For each column
+	for( int x = 0; x < BLOCKS_WIDE_X; x++ )
+	{
+		for( int y = 0; y < BLOCKS_WIDE_Y; y++ )
+		{
+			// Traverse down to each block
+			for( int z = (BLOCKS_WIDE_Z - 1); z >= 0; z-- )
+			{
+				BlockCoord	 thisBlockCoord	= BlockCoord( x, y, z );
+				int			 thisBlockIndex = GetIndexFromBlockCoord(thisBlockCoord);
+				Block		&thisBlock		= m_blocks[ thisBlockIndex ];
+
+				// Only if emits light
+				if( thisBlock.DoesEmitLight() == false )
+					break;
+
+				// Set its light as dirty
+				thisBlock.SetIsLightDirty();
+				thisBlock.SetIndoorLightLevel( 0 );
+			}
+		}
 	}
 }
 
