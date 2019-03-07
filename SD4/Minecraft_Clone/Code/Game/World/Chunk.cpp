@@ -333,11 +333,10 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	Block const &west = locWest.GetBlock();
 	if( west.IsFullyOpaque() == false )
 	{
-		int indoorLight		= west.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
-		
 		Rgba color;
-		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
+		float r = (1.f/16.f) * (float)( 1 + west.GetIndoorLightLevel() );
+		float g = (1.f/15.f) * (float)( 0 + west.GetOutdoorLightLevel() );
+		color.SetAsFloats( r, g, 0.f );
 
 		// Back Face (towards you)
 		// 4 5
@@ -362,11 +361,10 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	Block const &east = locEast.GetBlock(); 
 	if( east.IsFullyOpaque() == false )
 	{
-		int indoorLight		= east.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
-
 		Rgba color;
-		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
+		float r = (1.f/16.f) * (float)( 1 + east.GetIndoorLightLevel() );
+		float g = (1.f/15.f) * (float)( 0 + east.GetOutdoorLightLevel() );
+		color.SetAsFloats( r, g, 0.f );
 
 		// Front Face (away from you)
 		// 6 7
@@ -391,11 +389,10 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	Block const &north = locNorth.GetBlock();
 	if( north.IsFullyOpaque() == false )
 	{
-		int indoorLight		= north.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
-
 		Rgba color;
-		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
+		float r = (1.f/16.f) * (float)( 1 + north.GetIndoorLightLevel() );
+		float g = (1.f/15.f) * (float)( 0 + north.GetOutdoorLightLevel() );
+		color.SetAsFloats( r, g, 0.f );
 
 		// Left Face
 		// 7 4
@@ -420,11 +417,10 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	Block const &south = locSouth.GetBlock();
 	if( south.IsFullyOpaque() == false )
 	{
-		int indoorLight		= south.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
-
 		Rgba color;
-		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
+		float r = (1.f/16.f) * (float)( 1 + south.GetIndoorLightLevel() );
+		float g = (1.f/15.f) * (float)( 0 + south.GetOutdoorLightLevel() );
+		color.SetAsFloats( r, g, 0.f );
 
 		// Right Face
 		// 5 6
@@ -449,11 +445,10 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	Block const &up = locUp.GetBlock();
 	if( up.IsFullyOpaque() == false )
 	{
-		int indoorLight		= up.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
-
 		Rgba color;
-		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
+		float r = (1.f/16.f) * (float)( 1 + up.GetIndoorLightLevel() );
+		float g = (1.f/15.f) * (float)( 0 + up.GetOutdoorLightLevel() );
+		color.SetAsFloats( r, g, 0.f );
 
 		// Top Face
 		// 7 6
@@ -478,11 +473,10 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 	Block const &down = locDown.GetBlock();
 	if( down.IsFullyOpaque() == false )
 	{
-		int indoorLight		= down.GetIndoorLightLevel();
-		float lightFraction	= RangeMapFloat( indoorLight / 14.f, 0.f, 1.f, 0.3f, 1.f );
-
 		Rgba color;
-		color.SetAsFloats( lightFraction, lightFraction, lightFraction );
+		float r = (1.f/16.f) * (float)( 1 + down.GetIndoorLightLevel() );
+		float g = (1.f/15.f) * (float)( 0 + down.GetOutdoorLightLevel() );
+		color.SetAsFloats( r, g, 0.f );
 
 		// Bottom Face
 		// 0 1
