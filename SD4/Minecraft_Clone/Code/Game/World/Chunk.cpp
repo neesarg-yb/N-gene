@@ -336,7 +336,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		Rgba color;
 		float r = (1.f/16.f) * (float)( 1 + west.GetIndoorLightLevel() );
 		float g = (1.f/15.f) * (float)( 0 + west.GetOutdoorLightLevel() );
-		color.SetAsFloats( r, g, 0.f );
+		color.SetAsFloats( r, g, 0.5f );
 
 		// Back Face (towards you)
 		// 4 5
@@ -364,7 +364,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		Rgba color;
 		float r = (1.f/16.f) * (float)( 1 + east.GetIndoorLightLevel() );
 		float g = (1.f/15.f) * (float)( 0 + east.GetOutdoorLightLevel() );
-		color.SetAsFloats( r, g, 0.f );
+		color.SetAsFloats( r, g, 0.5f );
 
 		// Front Face (away from you)
 		// 6 7
@@ -392,7 +392,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		Rgba color;
 		float r = (1.f/16.f) * (float)( 1 + north.GetIndoorLightLevel() );
 		float g = (1.f/15.f) * (float)( 0 + north.GetOutdoorLightLevel() );
-		color.SetAsFloats( r, g, 0.f );
+		color.SetAsFloats( r, g, 0.5f );
 
 		// Left Face
 		// 7 4
@@ -420,7 +420,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		Rgba color;
 		float r = (1.f/16.f) * (float)( 1 + south.GetIndoorLightLevel() );
 		float g = (1.f/15.f) * (float)( 0 + south.GetOutdoorLightLevel() );
-		color.SetAsFloats( r, g, 0.f );
+		color.SetAsFloats( r, g, 0.5f );
 
 		// Right Face
 		// 5 6
@@ -448,7 +448,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		Rgba color;
 		float r = (1.f/16.f) * (float)( 1 + up.GetIndoorLightLevel() );
 		float g = (1.f/15.f) * (float)( 0 + up.GetOutdoorLightLevel() );
-		color.SetAsFloats( r, g, 0.f );
+		color.SetAsFloats( r, g, 0.5f );
 
 		// Top Face
 		// 7 6
@@ -476,7 +476,7 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 		Rgba color;
 		float r = (1.f/16.f) * (float)( 1 + down.GetIndoorLightLevel() );
 		float g = (1.f/15.f) * (float)( 0 + down.GetOutdoorLightLevel() );
-		color.SetAsFloats( r, g, 0.f );
+		color.SetAsFloats( r, g, 0.5f );
 
 		// Bottom Face
 		// 0 1

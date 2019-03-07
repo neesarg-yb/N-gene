@@ -416,9 +416,14 @@ void World::DeactivateChunkForPosition( Vector3 const &playerWorldPos )
 			neighborChunk->SetNeighborAtCoordinate( nullptr, chunkCoordToDelete );
 		}
 
+		// Remove its blocks from dirty lights list
+		UndirtyAllBlocksLightInChunk( chunkToDelete );
+
+		// Delete the chunk
 		delete chunkToDelete;
 		chunkToDelete = nullptr;
 
+		// Erase the map entry
 		m_activeChunks.erase( chunkToDeactivate );
 	}
 }
@@ -591,6 +596,35 @@ void World::MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc )
 
 }
 
+void World::ClearLightDirtyAndRemoveFromQueue( BlockLocator &toBeClearedBlockLoc )
+{
+	if( toBeClearedBlockLoc.IsValid() == false )
+		return;
+
+	Block &toBeClearedBlock = toBeClearedBlockLoc.GetBlock();
+	if( toBeClearedBlock.IsLightDirty() == false )
+		return;
+
+	// Clear IsLightDirty bitflag
+	toBeClearedBlock.ClearIsLightDirty();
+
+	// Dirty Queue
+	for( int i = 0; i < m_dirtyLightBlocks.size(); i++ )
+	{
+		BlockLocator inQueueBlockLoc = m_dirtyLightBlocks[i];
+
+		// If found
+		if( inQueueBlockLoc == toBeClearedBlockLoc )
+		{
+			// Erase from the list
+			std::swap( m_dirtyLightBlocks[i], m_dirtyLightBlocks.back() );
+			m_dirtyLightBlocks.pop_back();
+
+			return;
+		}
+	}
+}
+
 void World::GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const
 {
 	maxIndoorLightReceived_out  = 0;
@@ -745,6 +779,20 @@ void World::MarkNeighborsDirtyForLighting( BlockLocator &thisBlockLoc )
 	{
 		downBL.GetChunk()->SetDirty();
 		MarkLightDirtyAndAddUniqueToQueue( downBL );
+	}
+}
+
+void World::UndirtyAllBlocksLightInChunk( Chunk* chunk )
+{
+	for( int i = 0; i < NUM_BLOCKS_PER_CHUNK; i++ )
+	{
+		Block &thisBlock = chunk->GetBlockAtIndex( i );
+
+		if( thisBlock.IsLightDirty() == false )
+			continue;
+
+		BlockLocator thisBlockLoc = BlockLocator( chunk, i );
+		ClearLightDirtyAndRemoveFromQueue( thisBlockLoc );
 	}
 }
 

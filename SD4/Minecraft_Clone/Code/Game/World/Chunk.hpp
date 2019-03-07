@@ -47,6 +47,7 @@ public:
 	inline bool HasMesh() const { return m_gpuMesh != nullptr; }
 
 public:
+	Block&	GetBlockAtIndex( int index );
 	Vector3	GetBlockWorldPositionFromIndex	( uint blockIndex ) const;
 	AABB3	GetBlockWorldBounds				( int blockIndex, float blockSize ) const;
 
@@ -67,6 +68,11 @@ private:
 	void		SetBlockType( int xBlockCoord, int yBlockCoord, int zBlockCoord, eBlockType type );
 	inline void	SetBlockType( BlockCoord pos, eBlockType type ) { SetBlockType( pos.x, pos.y, pos.z, type ); }
 };
+
+inline Block& Chunk::GetBlockAtIndex( int index )
+{
+	return m_blocks[ index ];
+}
 
 inline int Chunk::GetIndexFromBlockCoord( int xBlockCoord, int yBlockCoord, int zBlockCoord )
 {

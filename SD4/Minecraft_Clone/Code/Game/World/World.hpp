@@ -60,6 +60,7 @@ public:
 
 public:
 	void	MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc );
+	void	ClearLightDirtyAndRemoveFromQueue( BlockLocator &toBeClearedBlockLoc );
 
 private:
 	// Input
@@ -80,6 +81,7 @@ private:
 	void	MarkBlocksLightingDirtyForDig( BlockLocator &targetBlockLoc );							// Call before changing the target block's type
 	void	MarkBlocksLightingDirtyForPlace( BlockLocator &targetBlockLoc, eBlockType newType );	// Call before changing the target block's type
 	void	MarkNeighborsDirtyForLighting( BlockLocator &thisBlockLoc );
+	void	UndirtyAllBlocksLightInChunk( Chunk* chunk );
 
 	void	RenderDirtyLightMesh() const;
 
