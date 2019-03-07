@@ -30,7 +30,6 @@ public:
 
 	// Neighbors
 	void		 SetNeighborBlockChunksDirty();
-	void		 MarkNeighborsDirtyForLighting( BlockLocQue &activeDirtyBlocksQue );
 
 	BlockLocator GetUpBlockLocator() const;
 	BlockLocator GetDownBlockLocator() const;

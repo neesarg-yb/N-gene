@@ -73,7 +73,11 @@ private:
 	void	UpdateDirtyLighting();
 	void	UpdateDirtyLightDebugMesh();
 	void	RecomputeLighting( BlockLocator &blockLocator );
+	void	MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc );
 	void	GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const;
+	void	MarkBlocksLightingDirtyForDig( BlockLocator &targetBlockLoc );							// Call before changing the target block's type
+	void	MarkBlocksLightingDirtyForPlace( BlockLocator &targetBlockLoc, eBlockType newType );	// Call before changing the target block's type
+	void	MarkNeighborsDirtyForLighting( BlockLocator &thisBlockLoc );
 
 	void	RenderDirtyLightMesh() const;
 

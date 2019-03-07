@@ -561,7 +561,7 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 		blockLocator.GetChunk()->SetDirty();
 
 		dBlock.SetIndoorLightLevel( finalIndoorLighting );
-		blockLocator.MarkNeighborsDirtyForLighting( m_dirtyLightBlocks );
+		MarkNeighborsDirtyForLighting( blockLocator );
 	}
 
 	// Set Outdoor Light
@@ -571,8 +571,19 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 		blockLocator.GetChunk()->SetDirty();
 
 		dBlock.SetOutdoorLightLevel( finalOutdoorLighting );
-		blockLocator.MarkNeighborsDirtyForLighting( m_dirtyLightBlocks );
+		MarkNeighborsDirtyForLighting( blockLocator );
 	}
+}
+
+void World::MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc )
+{
+	Block &toBeDirtyBlock = toBeDirtyBlockLoc.GetBlock();
+	if( toBeDirtyBlock.IsLightDirty() )
+		return;								// It's already in the list
+
+	toBeDirtyBlock.SetIsLightDirty();
+	m_dirtyLightBlocks.push_back( toBeDirtyBlockLoc );
+
 }
 
 void World::GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const
@@ -621,6 +632,115 @@ void World::GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock
 	int upMaxOutdoorLight	 = upNeighbor.GetOutdoorLightLevel() - 1;
 	maxIndoorLightReceived_out	= ( upMaxIndoorLight  > maxIndoorLightReceived_out  ) ? upMaxIndoorLight  : maxIndoorLightReceived_out;
 	maxOutdoorLightReceived_out	= ( upMaxOutdoorLight > maxOutdoorLightReceived_out ) ? upMaxOutdoorLight : maxOutdoorLightReceived_out;
+}
+
+void World::MarkBlocksLightingDirtyForDig( BlockLocator &targetBlockLoc )
+{
+	// Mark yourself dirty
+	targetBlockLoc.GetBlock().SetIsLightDirty();
+
+	BlockLocator upBlockLoc	= targetBlockLoc.GetUpBlockLocator();
+	Block		&upBlock	= upBlockLoc.GetBlock();
+	
+	if( upBlockLoc.IsValid() && (upBlock.IsSky() == false) )
+		return;
+
+	// Only if up block is sky, we'll mark all the blocks below, including ourself, as sky
+	BlockLocator blockLocBelow = targetBlockLoc;
+	while( blockLocBelow.IsValid() )
+	{
+		Block &blockBelow = blockLocBelow.GetBlock();
+
+		if( blockBelow.IsFullyOpaque() )
+			return;								// We reached the ground
+
+		blockBelow.SetIsSky();
+		MarkLightDirtyAndAddUniqueToQueue( blockLocBelow );
+
+		// Move to next down block
+		blockLocBelow = blockLocBelow.GetDownBlockLocator();
+	}
+}
+
+void World::MarkBlocksLightingDirtyForPlace( BlockLocator &targetBlockLoc, eBlockType newType )
+{
+	Block const &targetBlock = targetBlockLoc.GetBlock();
+
+	// Mark yourself dirty
+	MarkLightDirtyAndAddUniqueToQueue( targetBlockLoc );
+
+	// If we're about to replace a sky block with a non-air "opaque" block
+	if( targetBlock.IsSky() && (newType != BLOCK_AIR) )
+	{
+		BlockLocator blockLocBelow = targetBlockLoc.GetDownBlockLocator();
+
+		// Mark all the non-fully opaque blocks, below, as not sky
+		while( blockLocBelow.IsValid() )
+		{
+			Block &blockBelow = blockLocBelow.GetBlock();
+
+			if( blockBelow.IsFullyOpaque() )
+				return;							// We reached to the ground
+
+			blockBelow.ClearIsSky();
+			MarkLightDirtyAndAddUniqueToQueue( blockLocBelow );
+			
+			// Move to next down block
+			blockLocBelow = blockLocBelow.GetDownBlockLocator();
+		}
+	}
+}
+
+void World::MarkNeighborsDirtyForLighting( BlockLocator &thisBlockLoc )
+{
+	BlockLocator northBL = thisBlockLoc.GetNorthBlockLocator();
+	BlockLocator eastBL	 = thisBlockLoc.GetEastBlockLocator();
+	BlockLocator southBL = thisBlockLoc.GetSouthBlockLocator();
+	BlockLocator westBL	 = thisBlockLoc.GetWestBlockLocator();
+	BlockLocator upBL	 = thisBlockLoc.GetUpBlockLocator();
+	BlockLocator downBL	 = thisBlockLoc.GetDownBlockLocator();
+
+	Block &north = northBL.GetBlock();
+	if( north.IsFullyOpaque() == false && north.IsLightDirty() == false )
+	{
+		northBL.GetChunk()->SetDirty();
+		MarkLightDirtyAndAddUniqueToQueue( northBL );
+	}
+
+	Block &east = eastBL.GetBlock();
+	if( east.IsFullyOpaque() == false && east.IsLightDirty() == false )
+	{
+		eastBL.GetChunk()->SetDirty();
+		MarkLightDirtyAndAddUniqueToQueue( eastBL );
+	}
+
+	Block &south = southBL.GetBlock();
+	if( south.IsFullyOpaque() == false && south.IsLightDirty() == false )
+	{
+		southBL.GetChunk()->SetDirty();
+		MarkLightDirtyAndAddUniqueToQueue( southBL );
+	}
+
+	Block &west = westBL.GetBlock();
+	if( west.IsFullyOpaque() == false && west.IsLightDirty() == false )
+	{
+		westBL.GetChunk()->SetDirty();
+		MarkLightDirtyAndAddUniqueToQueue( westBL );
+	}
+
+	Block &up = upBL.GetBlock();
+	if( up.IsFullyOpaque() == false && up.IsLightDirty() == false )
+	{
+		upBL.GetChunk()->SetDirty();
+		MarkLightDirtyAndAddUniqueToQueue( upBL );
+	}
+
+	Block &down = downBL.GetBlock();
+	if( down.IsFullyOpaque() == false && down.IsLightDirty() == false )
+	{
+		downBL.GetChunk()->SetDirty();
+		MarkLightDirtyAndAddUniqueToQueue( downBL );
+	}
 }
 
 void World::RenderDirtyLightMesh() const
@@ -678,6 +798,8 @@ void World::PlaceOrDigBlock()
 		BlockLocator selectedBlock = m_blockSelectionRaycastResult.m_impactBlock;
 		if( selectedBlock.IsValid() )
 		{
+			MarkBlocksLightingDirtyForDig( selectedBlock );
+
 			selectedBlock.ChangeTypeTo( BLOCK_AIR );
 			selectedBlock.SetNeighborBlockChunksDirty();
 		}
@@ -698,16 +820,10 @@ void World::PlaceOrDigBlock()
 					newBlockType = BLOCK_GLOWSTONE;
 			}
 
+			MarkBlocksLightingDirtyForPlace( targetBlock, newBlockType );
+
 			targetBlock.ChangeTypeTo( newBlockType );
 			targetBlock.SetNeighborBlockChunksDirty();
-
-			if( newBlockType == BLOCK_GLOWSTONE )
-			{
-				targetBlock.GetBlock().SetIndoorLightLevel( 0 );
-				targetBlock.GetBlock().SetIsLightDirty();
-
-				m_dirtyLightBlocks.push_back( targetBlock );
-			}
 		}
 	}
 }
