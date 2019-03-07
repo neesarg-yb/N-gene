@@ -11,6 +11,8 @@ Block::Block()
 	ClearIsFullyOpaque();
 	SetIsNeverVisible();
 
+	SetIndoorLightLevel( 0 );
+	SetOutdoorLightLevel( 0 );
 	ClearIsLightDirty();
 }
 

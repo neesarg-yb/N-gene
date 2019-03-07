@@ -58,6 +58,9 @@ public:
 	RaycastResult_MC	Raycast( Vector3 const &start, Vector3 const &forwardDir, float maxDistance ) const;
 	BlockLocator const	GetBlockLocatorForWorldPosition( Vector3 const &worldPosition ) const;
 
+public:
+	void	MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc );
+
 private:
 	// Input
 	void	ProcessInput( float deltaSeconds );
@@ -73,7 +76,6 @@ private:
 	void	UpdateDirtyLighting();
 	void	UpdateDirtyLightDebugMesh();
 	void	RecomputeLighting( BlockLocator &blockLocator );
-	void	MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc );
 	void	GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock, int &maxIndoorLightReceived_out, int &maxOutdoorLightReceived_out ) const;
 	void	MarkBlocksLightingDirtyForDig( BlockLocator &targetBlockLoc );							// Call before changing the target block's type
 	void	MarkBlocksLightingDirtyForPlace( BlockLocator &targetBlockLoc, eBlockType newType );	// Call before changing the target block's type

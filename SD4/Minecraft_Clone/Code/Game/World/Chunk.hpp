@@ -5,6 +5,7 @@
 #include "Game/GameCommon.hpp"
 #include "Game/World/Block.hpp"
 
+class World;
 class BlockLocator;
 
 class Chunk
@@ -12,11 +13,12 @@ class Chunk
 	friend BlockLocator;
 
 public:
-	 Chunk( ChunkCoord position );
+	 Chunk( ChunkCoord position, World &parentWorld );
 	~Chunk();
 
 private:
 	// Position in world
+	World		&m_parentWorld;
 	ChunkCoord	 m_coord;
 	AABB3		 m_worldBounds;
 

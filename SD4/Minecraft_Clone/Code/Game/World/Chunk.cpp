@@ -9,8 +9,9 @@
 #include "Game/Utility/ChunkFile.hpp"
 #include "Game/Utility/ChunkFileHeader.hpp"
 
-Chunk::Chunk( ChunkCoord position )
+Chunk::Chunk( ChunkCoord position, World &parentWorld )
 	: m_coord( position )
+	, m_parentWorld( parentWorld )
 {
 	// World Bounds
 	m_worldBounds.mins.x = (float) m_coord.x * BLOCKS_WIDE_X;			// Mins
@@ -506,6 +507,37 @@ void Chunk::AddVertsForBlock( int blockIndex, MeshBuilder &meshBuilder )
 
 void Chunk::InitializeLightingOnActivation()
 {
+	// MARK NON-OPAQUE EDGE BLOCKS, DIRTY
+	//
+	//
+	for( int x = 0; x < BLOCKS_WIDE_X; x++ )
+	{
+		for( int y = 0; y < BLOCKS_WIDE_Y; y++ )
+		{
+			for( int z = 0; z < BLOCKS_WIDE_Z; z++ )
+			{
+				int  blockIndex	= GetIndexFromBlockCoord( x, y, z );
+				bool isOnEdge	= false;
+
+				// Only for the blocks on the edge
+				if( (blockIndex & BITS_MASK_X) == BITS_MASK_X )
+					isOnEdge = true;
+				else if( (blockIndex & BITS_MASK_Y) == BITS_MASK_Y )
+					isOnEdge = true;
+				else if( (blockIndex & BITS_MASK_X) == 0x00 )
+					isOnEdge = true;
+				else if( (blockIndex & BITS_MASK_Y) == 0x00 )
+					isOnEdge = true;
+
+				if( !isOnEdge )
+					continue;
+
+				BlockLocator blockLoc = BlockLocator(this, blockIndex);
+				m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( blockLoc );
+			}
+		}
+	}
+
 	// MARK BLOCKS AS SKY
 	//
 	// For each column
@@ -572,28 +604,28 @@ void Chunk::InitializeLightingOnActivation()
 				Block &southNeighbor = south.GetBlock();
 				if( south.IsValid() && southNeighbor.IsFullyOpaque() == false )
 				{
-					southNeighbor.SetIsLightDirty();
+					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( south );
 					south.GetChunk()->SetDirty();
 				}
 
 				Block &westNeighbor = west.GetBlock();
 				if( west.IsValid() && westNeighbor.IsFullyOpaque() == false )
 				{
-					westNeighbor.SetIsLightDirty();
+					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( west );
 					west.GetChunk()->SetDirty();
 				}
 
 				Block &eastNeighbor = east.GetBlock();
 				if( east.IsValid() && eastNeighbor.IsFullyOpaque() == false )
 				{
-					eastNeighbor.SetIsLightDirty();
+					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( east );
 					east.GetChunk()->SetDirty();
 				}
 
 				Block &northNeighbor = north.GetBlock();
 				if( north.IsValid() && northNeighbor.IsFullyOpaque() == false )
 				{
-					northNeighbor.SetIsLightDirty();
+					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( north );
 					north.GetChunk()->SetDirty();
 				}
 			}
@@ -616,10 +648,11 @@ void Chunk::InitializeLightingOnActivation()
 
 				// Only if emits light
 				if( thisBlock.DoesEmitLight() == false )
-					break;
+					continue;
 
 				// Set its light as dirty
-				thisBlock.SetIsLightDirty();
+				BlockLocator thisBlockLoc = BlockLocator(this, thisBlockIndex);
+				m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( thisBlockLoc );
 				thisBlock.SetIndoorLightLevel( 0 );
 			}
 		}

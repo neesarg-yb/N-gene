@@ -44,11 +44,13 @@ void World::Update()
 
 	// Chunk Management
 	ActivateChunkNearestToPosition( m_camera->m_position );
-	DeactivateChunkForPosition( m_camera->m_position );
-	RebuiltOneChunkIfRequired( m_camera->m_position );
 
 	// Lighting
 	UpdateDirtyLighting();
+
+	RebuiltOneChunkIfRequired( m_camera->m_position );
+
+	DeactivateChunkForPosition( m_camera->m_position );
 
 	// Block Selection
 	PerformRaycast();
@@ -355,7 +357,7 @@ void World::ActivateChunkNearestToPosition( Vector3 const &playerWorldPos )
 		if( itChunkToActivate == m_activeChunks.end() )
 		{
 			// Create the chunk, add it to activation list
-			Chunk *newChunk = new Chunk( activationChunkCoord );		// It should mark it dirty!
+			Chunk *newChunk = new Chunk( activationChunkCoord, *this );		// It should mark it dirty!
 			m_activeChunks[ activationChunkCoord ] = newChunk;
 
 			// Link Neighbors with each other
@@ -466,6 +468,10 @@ void World::GetNeighborsOfChunkAt( ChunkCoord const &chunkCoord, ChunkMap &neigh
 
 void World::UpdateDirtyLighting()
 {
+	// Dirty light debug mesh
+	if( DEBUG_RENDER_DIRTY_LIGHTS )
+		UpdateDirtyLightDebugMesh();
+
 	BlockLocQue  dirtyBlocksThisFrame;
 	BlockLocQue *operationQue = &m_dirtyLightBlocks;
 	
@@ -491,10 +497,6 @@ void World::UpdateDirtyLighting()
 		// Computes the block's theoretical indoor-outdoor lighting
 		RecomputeLighting( fDirtyBlock );
 	}
-
-	// Dirty light debug mesh
-	if( DEBUG_RENDER_DIRTY_LIGHTS )
-		UpdateDirtyLightDebugMesh();
 }
 
 void World::UpdateDirtyLightDebugMesh()
@@ -577,6 +579,9 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 
 void World::MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc )
 {
+	if( toBeDirtyBlockLoc.IsValid() == false )
+		return;
+
 	Block &toBeDirtyBlock = toBeDirtyBlockLoc.GetBlock();
 	if( toBeDirtyBlock.IsLightDirty() )
 		return;								// It's already in the list
@@ -637,7 +642,7 @@ void World::GetMaxIncomingLightFromNeighbors( BlockLocator const &receivingBlock
 void World::MarkBlocksLightingDirtyForDig( BlockLocator &targetBlockLoc )
 {
 	// Mark yourself dirty
-	targetBlockLoc.GetBlock().SetIsLightDirty();
+	MarkLightDirtyAndAddUniqueToQueue( targetBlockLoc );
 
 	BlockLocator upBlockLoc	= targetBlockLoc.GetUpBlockLocator();
 	Block		&upBlock	= upBlockLoc.GetBlock();
@@ -701,42 +706,42 @@ void World::MarkNeighborsDirtyForLighting( BlockLocator &thisBlockLoc )
 	BlockLocator downBL	 = thisBlockLoc.GetDownBlockLocator();
 
 	Block &north = northBL.GetBlock();
-	if( north.IsFullyOpaque() == false && north.IsLightDirty() == false )
+	if( northBL.IsValid() && north.IsFullyOpaque() == false && north.IsLightDirty() == false )
 	{
 		northBL.GetChunk()->SetDirty();
 		MarkLightDirtyAndAddUniqueToQueue( northBL );
 	}
 
 	Block &east = eastBL.GetBlock();
-	if( east.IsFullyOpaque() == false && east.IsLightDirty() == false )
+	if( eastBL.IsValid() && east.IsFullyOpaque() == false && east.IsLightDirty() == false )
 	{
 		eastBL.GetChunk()->SetDirty();
 		MarkLightDirtyAndAddUniqueToQueue( eastBL );
 	}
 
 	Block &south = southBL.GetBlock();
-	if( south.IsFullyOpaque() == false && south.IsLightDirty() == false )
+	if( southBL.IsValid() && south.IsFullyOpaque() == false && south.IsLightDirty() == false )
 	{
 		southBL.GetChunk()->SetDirty();
 		MarkLightDirtyAndAddUniqueToQueue( southBL );
 	}
 
 	Block &west = westBL.GetBlock();
-	if( west.IsFullyOpaque() == false && west.IsLightDirty() == false )
+	if( westBL.IsValid() && west.IsFullyOpaque() == false && west.IsLightDirty() == false )
 	{
 		westBL.GetChunk()->SetDirty();
 		MarkLightDirtyAndAddUniqueToQueue( westBL );
 	}
 
 	Block &up = upBL.GetBlock();
-	if( up.IsFullyOpaque() == false && up.IsLightDirty() == false )
+	if( upBL.IsValid() && up.IsFullyOpaque() == false && up.IsLightDirty() == false )
 	{
 		upBL.GetChunk()->SetDirty();
 		MarkLightDirtyAndAddUniqueToQueue( upBL );
 	}
 
 	Block &down = downBL.GetBlock();
-	if( down.IsFullyOpaque() == false && down.IsLightDirty() == false )
+	if( downBL.IsValid() && down.IsFullyOpaque() == false && down.IsLightDirty() == false )
 	{
 		downBL.GetChunk()->SetDirty();
 		MarkLightDirtyAndAddUniqueToQueue( downBL );
