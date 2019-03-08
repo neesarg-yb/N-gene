@@ -32,7 +32,7 @@ private:
 	// Gameplay
 	ChunkMap	 m_activeChunks;
 	int			 m_activationRadius		= ACTIVATION_RANGE_NUM_CHUNKS;	// chunks
-	int			 m_deactivationRadius	= m_activationRadius - 2;		// chunks
+	int			 m_deactivationRadius	= m_activationRadius + 2;		// chunks
 	
 	// Debug Mesh
 	MeshBuilder	*m_dirtyLightsMesh = nullptr;
