@@ -12,7 +12,8 @@ public:
 
 private:
 	// Static Members
-	static Material			*s_material;
+	static Shader			*s_shader;
+	static Texture			*s_texture;
 	static SpriteSheet		*s_spriteSheet;
 	static BlockDefinition	 s_definitions[ NUM_BLOCK_TYPES ];
 
@@ -30,7 +31,8 @@ public:
 	AABB2		m_uvTop				= AABB2::ONE_BY_ONE;
 
 public:
-	static Material*				GetMaterial();
+	static Shader*					GetShader();
+	static Texture*					GetTexture();
 	static SpriteSheet*				GetSpriteSheet();
 	static BlockDefinition const &	GetDefinitionForType( eBlockType type );
 
@@ -39,9 +41,14 @@ public:
 	static void DestroyDefinitions();
 };
 
-inline Material* BlockDefinition::GetMaterial()
+inline Shader* BlockDefinition::GetShader()
 {
-	return s_material;
+	return s_shader;
+}
+
+inline Texture* BlockDefinition::GetTexture()
+{
+	return s_texture;
 }
 
 inline SpriteSheet* BlockDefinition::GetSpriteSheet()

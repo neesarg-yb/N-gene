@@ -74,11 +74,14 @@ Chunk::~Chunk()
 	m_gpuMesh = nullptr;
 }
 
+void Chunk::BindShaderAndTexture( Renderer &theRenderer ) const
+{
+	theRenderer.UseShader( BlockDefinition::GetShader() );
+	theRenderer.BindTexture2D( 0, BlockDefinition::GetTexture()->GetHandle() );
+}
+
 void Chunk::Render( Renderer &theRenderer ) const
 {
-	// Bind Material
-	theRenderer.BindMaterialForShaderIndex( *BlockDefinition::GetMaterial() );
-
 	// Draw Mesh
 	theRenderer.DrawMesh( *m_gpuMesh, Matrix44() );
 	

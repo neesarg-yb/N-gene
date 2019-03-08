@@ -39,7 +39,11 @@ private:
 
 	// Lighting
 	BlockLocQue	 m_dirtyLightBlocks;									// Block Locater(s) whose lighting is dirty
-	
+
+	// Uniforms for shader
+	Vector3 const m_defaultOutdoorLight	= Vector3( 1.0f, 0.9f, 0.8f );
+	Vector3 const m_defaultIndoorLight	= Vector3( 0.8f, 0.9f, 1.0f );
+
 	// Relative offsets from origin
 	std::vector< ChunkCoord > m_activationPriorityCheatSheet;			// Sorted: smallest to largest distance from origin
 

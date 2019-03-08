@@ -1,7 +1,8 @@
 #pragma once
 #include "BlockDefinition.hpp"
 
-Material*			BlockDefinition::s_material		= nullptr;
+Shader*				BlockDefinition::s_shader		= nullptr;
+Texture*			BlockDefinition::s_texture		= nullptr;
 SpriteSheet*		BlockDefinition::s_spriteSheet	= nullptr;
 BlockDefinition		BlockDefinition::s_definitions[ NUM_BLOCK_TYPES ];
 
@@ -34,8 +35,9 @@ BlockDefinition::~BlockDefinition()
 
 void BlockDefinition::LoadDefinitions()
 {
-	s_material		= Material::CreateNewFromFile( "Data\\Materials\\block.material" );
-	s_spriteSheet	= new SpriteSheet( *s_material->GetTexture(0), 32, 32 );
+	s_shader		= g_theRenderer->CreateOrGetShader( "overworld_opaque" );
+	s_texture		= g_theRenderer->CreateOrGetTexture( "Data\\Images\\Terrain_32x32.png" );
+	s_spriteSheet	= new SpriteSheet( *s_texture, 32, 32 );
 
 	s_definitions[ BLOCK_AIR ]			= BlockDefinition( BLOCK_AIR,		false, false, true,	 00,	IntVector2(0, 0),	IntVector2(0, 0),	IntVector2(0, 0) );
 	s_definitions[ BLOCK_GRASS ]		= BlockDefinition( BLOCK_GRASS,		true,  true,  false, 00,	IntVector2(3, 3),	IntVector2(4, 3),	IntVector2(1, 0) );
@@ -48,9 +50,6 @@ void BlockDefinition::LoadDefinitions()
 
 void BlockDefinition::DestroyDefinitions()
 {
-	delete s_material;
-	s_material = nullptr;
-
 	delete s_spriteSheet;
 	s_spriteSheet = nullptr;
 }

@@ -82,7 +82,17 @@ void World::Render() const
 		Chunk const *thisChunk = it->second;
 
 		if( thisChunk->HasMesh() )
+		{
+			// Bind: Shader & Texture
+			thisChunk->BindShaderAndTexture( *g_theRenderer );
+
+			// Bind: Uniforms
+			g_theRenderer->SetUniform( "u_indoorLightRgb",  m_defaultIndoorLight );
+			g_theRenderer->SetUniform( "u_outdoorLightRgb", m_defaultOutdoorLight );
+
+			// Render
 			thisChunk->Render( *g_theRenderer );
+		}
 	}
 
 	// Raycast Selection

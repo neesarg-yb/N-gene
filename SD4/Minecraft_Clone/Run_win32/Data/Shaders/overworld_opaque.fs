@@ -4,8 +4,12 @@
 // layout binding = 0 is us binding it to texture slot 0.  
 layout(binding = 0) uniform sampler2D u_gTexDiffuse;
 
-uniform vec3 u_indoorLightRgb 	= vec3( 1.00, .90, .80 );
-uniform vec3 u_outdoorLightRgb 	= vec3( .80, .90, 1.00 );
+uniform vec3  u_indoorLightRgb 	= vec3( 0.00, 0.00, 0.00 );
+uniform vec3  u_outdoorLightRgb = vec3( 0.00, 0.00, 0.00 );
+uniform vec3  u_skyColor		= vec3( 0.00, 0.00, 0.00 );
+uniform vec3  u_cameraPosition	= vec3( 0.00, 0.00, 0.00 );
+uniform float u_fogNearDistance	= 100.0;
+uniform float u_fogFarDistance	= 200.0;
 
 in vec2 v_passUV;
 in vec4 v_passColor;
