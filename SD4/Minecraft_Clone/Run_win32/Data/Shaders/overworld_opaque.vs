@@ -23,7 +23,7 @@ in vec2 UV;
 
 out vec2 v_passUV; 
 out vec4 v_passColor;
-out vec4 v_worldPosition;
+out vec3 v_worldPosition;
 
 void main( void )
 {
@@ -34,5 +34,5 @@ void main( void )
    gl_Position       = clip_pos;
    v_passColor       = COLOR;
    v_passUV          = UV;
-   v_worldPosition   = world_pos;
+   v_worldPosition   = vec3( world_pos.x, world_pos.y, world_pos.z);
 }

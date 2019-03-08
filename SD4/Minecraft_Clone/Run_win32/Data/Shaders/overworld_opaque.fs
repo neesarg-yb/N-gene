@@ -13,7 +13,7 @@ uniform float u_fogFarDistance	= 200.0;
 
 in vec2 v_passUV;
 in vec4 v_passColor;
-in vec4 v_worldPosition;
+in vec3 v_worldPosition;
 
 // Outputs
 out vec4 f_outColor; 
@@ -26,11 +26,17 @@ void main( void )
 	float indoorLightLevel 	= v_passColor.r;			// Red   Channel == Indoor  Light Level
 	float outdoorLightLevel	= v_passColor.g;			// Green Channel == Outdoor Light Level
 
-	// Calculate final Rgb for the telex
+	// Calculate shaded telex Rgb
 	vec3 indoorLightRgb 	= indoorLightLevel  * u_indoorLightRgb;
 	vec3 outdoorLightRgb 	= outdoorLightLevel * u_outdoorLightRgb;
 	vec3 lightRgb 			= max( indoorLightRgb, outdoorLightRgb );
 	vec4 shadedTexel 		= diffuse * vec4( lightRgb, v_passColor.a );
+
+	// Apply Fog
+	float dist 			= distance( u_cameraPosition, v_worldPosition );
+	float fogFraction 	= (dist - u_fogNearDistance) / (u_fogFarDistance - u_fogNearDistance);
+	fogFraction 		= clamp( fogFraction, 0.0, 1.0 );
+	vec3 finalColor 	= mix( shadedTexel.rgb, u_skyColor, fogFraction );
 	
-   	f_outColor = shadedTexel;
+   	f_outColor = vec4( finalColor, shadedTexel.a );
 }

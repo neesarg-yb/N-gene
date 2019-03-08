@@ -39,7 +39,7 @@ ChunkCoord const WEST_CHUNKCOORD  = ChunkCoord( -1,  0 );
 ChunkCoord const NORTH_CHUNKCOORD = ChunkCoord(  0,  1 );
 ChunkCoord const SOUTH_CHUNKCOORD = ChunkCoord(  0, -1 );
 
-int constexpr ACTIVATION_RANGE_NUM_CHUNKS	= 10;
+int constexpr ACTIVATION_RANGE_NUM_CHUNKS	= 13;
 
 // Debug
 bool constexpr DEBUG_STEP_LIGHTING			= false;

@@ -139,7 +139,7 @@ void theGame::Update()
 	// Continue updating the currentGameState
 	m_currentGameState->Update();
 
-	DebugRender2DText( 0.f, Vector2( 700.f, 400.f), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf("FPS %3.d", (int)(1.f / deltaSeconds)) );
+	DebugRender2DText( 0.f, Vector2( 700.f, 400.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, Stringf("FPS %3.d", (int)(1.f / deltaSeconds)) );
 }
 
 void theGame::Render() const

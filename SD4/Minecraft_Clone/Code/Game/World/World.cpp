@@ -6,6 +6,8 @@
 
 World::World( Clock *parentClock )
 	: m_clock( parentClock )
+	, m_fogFarDistance( (ACTIVATION_RANGE_NUM_CHUNKS - 1) * BLOCKS_WIDE_X )
+	, m_fogNearDistance( m_fogFarDistance * 0.5f )
 {
 	// Setting up the Camera
 	m_camera = new MCamera( *g_theRenderer );
@@ -64,10 +66,14 @@ void World::Render() const
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
+	// Sky Color - Fog
+	Rgba currentSkyColor = m_defaultSkyColorNoon;
+	Vector4 skyColorVec4 = currentSkyColor.GetAsNormalizedRgba();
+
 	// Camera
 	Camera &camera = *m_camera->GetCamera();
 	g_theRenderer->BindCamera( &camera );
-	g_theRenderer->ClearColor( RGBA_BLACK_COLOR );
+	g_theRenderer->ClearColor( currentSkyColor );
 	g_theRenderer->ClearDepth( 1.0f ); 
 	g_theRenderer->EnableDepth( COMPARE_LESS, true );
 
@@ -87,8 +93,12 @@ void World::Render() const
 			thisChunk->BindShaderAndTexture( *g_theRenderer );
 
 			// Bind: Uniforms
-			g_theRenderer->SetUniform( "u_indoorLightRgb",  m_defaultIndoorLight );
-			g_theRenderer->SetUniform( "u_outdoorLightRgb", m_defaultOutdoorLight );
+			g_theRenderer->SetUniform( "u_indoorLightRgb",	m_defaultIndoorLight );
+			g_theRenderer->SetUniform( "u_outdoorLightRgb",	m_defaultOutdoorLight );
+			g_theRenderer->SetUniform( "u_skyColor",		skyColorVec4.IgnoreW() );
+			g_theRenderer->SetUniform( "u_cameraPosition",	m_camera->m_position );
+			g_theRenderer->SetUniform( "u_fogNearDistance",	m_fogNearDistance );
+			g_theRenderer->SetUniform( "u_fogFarDistance",	m_fogFarDistance );
 
 			// Render
 			thisChunk->Render( *g_theRenderer );
@@ -298,22 +308,22 @@ void World::ProcessInput( float deltaSeconds )
 void World::DebugRenderInputKeyInfo() const
 {
 	Vector2 mouseClickTxtPos = Vector2( -820.f, 450.f );
-	DebugRender2DText( 0.f, mouseClickTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Mouse Clicks: [Left - Dig] [Right - Place]" );
+	DebugRender2DText( 0.f, mouseClickTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Mouse Clicks: [Left - Dig] [Right - Place]" );
 	Vector2 movementTxtPos = mouseClickTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, movementTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Movement: [W, A, S, D - Horizontal] [Q, E - Vertical]" );
+	DebugRender2DText( 0.f, movementTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Movement: [W, A, S, D - Horizontal] [Q, E - Vertical]" );
 	Vector2 shiftFastTxtPos = movementTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, shiftFastTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Faster  : [SHIFT]" );
+	DebugRender2DText( 0.f, shiftFastTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Faster  : [SHIFT]" );
 
 	Vector2 placeTestBlockTxtPos = shiftFastTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, placeTestBlockTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "White Test-Block: [CTRL]" );
+	DebugRender2DText( 0.f, placeTestBlockTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "White Test-Block: [CTRL]" );
 	Vector2 placeGlowStoneTxtPos = placeTestBlockTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, placeGlowStoneTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Glowstone Block : [CTRL][SHIFT]" );
+	DebugRender2DText( 0.f, placeGlowStoneTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Glowstone Block : [CTRL][SHIFT]" );
 
 	Vector2 lightStepTxtPos = placeGlowStoneTxtPos + Vector2( 0.f, -20.f );
 	if( DEBUG_STEP_LIGHTING )
-		DebugRender2DText( 0.f, lightStepTxtPos, 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "Step-Light: [L]" );
+		DebugRender2DText( 0.f, lightStepTxtPos, 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Step-Light: [L]" );
 	Vector2 raycastTxtPos = lightStepTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, raycastTxtPos, 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "Raycast   : [R]" );
+	DebugRender2DText( 0.f, raycastTxtPos, 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Raycast   : [R]" );
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )

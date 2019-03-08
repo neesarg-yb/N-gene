@@ -41,8 +41,12 @@ private:
 	BlockLocQue	 m_dirtyLightBlocks;									// Block Locater(s) whose lighting is dirty
 
 	// Uniforms for shader
-	Vector3 const m_defaultOutdoorLight	= Vector3( 1.0f, 0.9f, 0.8f );
-	Vector3 const m_defaultIndoorLight	= Vector3( 0.8f, 0.9f, 1.0f );
+	Vector3	const m_defaultIndoorLight	= Vector3( 1.0f, 0.9f, 0.8f );
+	Vector3	const m_defaultOutdoorLight	= Vector3( 0.8f, 0.9f, 1.0f );
+	Rgba	const m_defaultSkyColorNight= Rgba(  20,  20,  40 );
+	Rgba	const m_defaultSkyColorNoon	= Rgba( 200, 230, 255 );
+	float	const m_fogNearDistance		= 100.f;
+	float	const m_fogFarDistance		= 200.f;
 
 	// Relative offsets from origin
 	std::vector< ChunkCoord > m_activationPriorityCheatSheet;			// Sorted: smallest to largest distance from origin
