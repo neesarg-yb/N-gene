@@ -1,6 +1,7 @@
 #pragma once
 #include "World.hpp"
 #include <algorithm>
+#include "Engine/Math/SmoothNoise.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
@@ -72,7 +73,7 @@ void World::Render() const
 
 	// Sky Color - Fog
 	Rgba currentSkyColor = GetSkyColorFromDayTimeFraction();
-	Vector4 skyColorVec4 = currentSkyColor.GetAsNormalizedRgba();
+	Vector3 skyColorVec3 = GetSkyColorUniformFromPerlineNoiseForLightning( currentSkyColor );
 
 	// Camera
 	Camera &camera = *m_camera->GetCamera();
@@ -97,13 +98,13 @@ void World::Render() const
 			thisChunk->BindShaderAndTexture( *g_theRenderer );
 
 			// Bind: Uniforms
-			g_theRenderer->SetUniform( "u_daylightFraction", GetDaylightFraction() );
-			g_theRenderer->SetUniform( "u_indoorLightRgb",	 m_defaultIndoorLight );
-			g_theRenderer->SetUniform( "u_outdoorLightRgb",	 m_defaultOutdoorLight );
-			g_theRenderer->SetUniform( "u_skyColor",		 skyColorVec4.IgnoreW() );
-			g_theRenderer->SetUniform( "u_cameraPosition",	 m_camera->m_position );
-			g_theRenderer->SetUniform( "u_fogNearDistance",	 m_fogNearDistance );
-			g_theRenderer->SetUniform( "u_fogFarDistance",	 m_fogFarDistance );
+			g_theRenderer->SetUniform( "u_daylightFraction",	GetDaylightFraction() );
+			g_theRenderer->SetUniform( "u_indoorLightRgb",		m_defaultIndoorLight );
+			g_theRenderer->SetUniform( "u_outdoorLightRgb",		m_defaultOutdoorLight );
+			g_theRenderer->SetUniform( "u_skyColor",			skyColorVec3 );
+			g_theRenderer->SetUniform( "u_cameraPosition",		m_camera->m_position );
+			g_theRenderer->SetUniform( "u_fogNearDistance",		m_fogNearDistance );
+			g_theRenderer->SetUniform( "u_fogFarDistance",		m_fogFarDistance );
 
 			// Render
 			thisChunk->Render( *g_theRenderer );
@@ -875,6 +876,26 @@ Rgba World::GetSkyColorFromDayTimeFraction() const
 		return m_defaultSkyColorNight;												// It is midnight
 	else
 		return Interpolate( m_defaultSkyColorNight, m_defaultSkyColorNoon, t );		// It is daylight
+}
+
+Vector3 World::GetSkyColorUniformFromPerlineNoiseForLightning( Rgba skyColor ) const
+{
+	float lightningPerlin = fabsf( Compute1dPerlinNoise( m_worldTimeInDays, 0.01f, 9 ) );
+	DebugRender2DText( 0.f, Vector2( 0.f, 20.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("lightningPerlin = %.3f", lightningPerlin) );
+
+	if( lightningPerlin < 0.6f )
+		return skyColor.GetAsNormalizedRgba().IgnoreW();
+	else
+	{
+		// Lightning strength calculation
+		lightningPerlin = ClampFloat01( lightningPerlin );
+		float lightningStrength = RangeMapFloat( lightningPerlin, 0.6f, 1.f, 0.f, 1.f );
+		skyColor = Interpolate( skyColor, RGBA_WHITE_COLOR, lightningStrength );
+
+		DebugRender2DText( 0.f, Vector2::ZERO, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("lightningStrength = %.3f", lightningStrength) );
+
+		return skyColor.GetAsNormalizedRgba().IgnoreW();
+	}
 }
 
 void World::PerformRaycast()
