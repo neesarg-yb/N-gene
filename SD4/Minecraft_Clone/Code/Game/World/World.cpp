@@ -1,6 +1,7 @@
 #pragma once
 #include "World.hpp"
 #include <algorithm>
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
 
@@ -44,6 +45,9 @@ void World::Update()
 	// Moves the camera, for now
 	ProcessInput( deltaSeconds );
 
+
+	UpdateWorldTime( deltaSeconds );
+
 	// Chunk Management
 	ActivateChunkNearestToPosition( m_camera->m_position );
 
@@ -67,7 +71,7 @@ void World::Render() const
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
 	// Sky Color - Fog
-	Rgba currentSkyColor = m_defaultSkyColorNoon;
+	Rgba currentSkyColor = GetSkyColorFromDayTimeFraction();
 	Vector4 skyColorVec4 = currentSkyColor.GetAsNormalizedRgba();
 
 	// Camera
@@ -93,12 +97,13 @@ void World::Render() const
 			thisChunk->BindShaderAndTexture( *g_theRenderer );
 
 			// Bind: Uniforms
-			g_theRenderer->SetUniform( "u_indoorLightRgb",	m_defaultIndoorLight );
-			g_theRenderer->SetUniform( "u_outdoorLightRgb",	m_defaultOutdoorLight );
-			g_theRenderer->SetUniform( "u_skyColor",		skyColorVec4.IgnoreW() );
-			g_theRenderer->SetUniform( "u_cameraPosition",	m_camera->m_position );
-			g_theRenderer->SetUniform( "u_fogNearDistance",	m_fogNearDistance );
-			g_theRenderer->SetUniform( "u_fogFarDistance",	m_fogFarDistance );
+			g_theRenderer->SetUniform( "u_daylightFraction", GetDaylightFraction() );
+			g_theRenderer->SetUniform( "u_indoorLightRgb",	 m_defaultIndoorLight );
+			g_theRenderer->SetUniform( "u_outdoorLightRgb",	 m_defaultOutdoorLight );
+			g_theRenderer->SetUniform( "u_skyColor",		 skyColorVec4.IgnoreW() );
+			g_theRenderer->SetUniform( "u_cameraPosition",	 m_camera->m_position );
+			g_theRenderer->SetUniform( "u_fogNearDistance",	 m_fogNearDistance );
+			g_theRenderer->SetUniform( "u_fogFarDistance",	 m_fogFarDistance );
 
 			// Render
 			thisChunk->Render( *g_theRenderer );
@@ -266,6 +271,25 @@ void World::RenderLineXRay( Vector3 const &startPos, Rgba const &startColor, Vec
 	activeRenderer.DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
 }
 
+void World::UpdateWorldTime( float deltaSeconds )
+{
+	float fastForwardMultiplier = 1.f;
+	if( g_theInput->IsKeyPressed( 'T' ) )
+		fastForwardMultiplier = 50.f;
+
+	float worldDeltaSecond = deltaSeconds * m_worldSecondsPerRealSeconds * fastForwardMultiplier;
+	m_worldTimeInDays += worldDeltaSecond / (60 * 60 * 24);
+}
+
+float World::GetDaylightFraction() const
+{
+	int worldIntTime = (int)m_worldTimeInDays;
+	float t = ( m_worldTimeInDays - (float)worldIntTime );
+	t = SinDegree( t * 360.f );
+
+	return t;
+}
+
 void World::ProcessInput( float deltaSeconds )
 {
 	// Camera Rotation
@@ -321,9 +345,13 @@ void World::DebugRenderInputKeyInfo() const
 
 	Vector2 lightStepTxtPos = placeGlowStoneTxtPos + Vector2( 0.f, -20.f );
 	if( DEBUG_STEP_LIGHTING )
-		DebugRender2DText( 0.f, lightStepTxtPos, 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Step-Light: [L]" );
+		DebugRender2DText( 0.f, lightStepTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,   "Step-Light       : [L]" );
 	Vector2 raycastTxtPos = lightStepTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, raycastTxtPos, 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Raycast   : [R]" );
+	DebugRender2DText( 0.f, raycastTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,         "Raycast          : [R]" );
+	Vector2 daytimeFractionTxtPos = raycastTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, daytimeFractionTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("Daylight Fraction: %.2f", GetDaylightFraction()) );
+	Vector2 daytimeFastForwardTxt = daytimeFractionTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, daytimeFastForwardTxt, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Fast Forward     : [T]" );
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
@@ -837,6 +865,16 @@ void World::RenderDirtyLightMesh() const
 		g_theRenderer->SetGLPointSize( 5.f );
 		g_theRenderer->DrawMesh( *m_dirtyLightsMesh->ConstructMesh<Vertex_3DPCU>() );
 	}
+}
+
+Rgba World::GetSkyColorFromDayTimeFraction() const
+{
+	float t = GetDaylightFraction();
+
+	if( t < 0.f )
+		return m_defaultSkyColorNight;												// It is midnight
+	else
+		return Interpolate( m_defaultSkyColorNight, m_defaultSkyColorNoon, t );		// It is daylight
 }
 
 void World::PerformRaycast()

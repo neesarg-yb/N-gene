@@ -29,11 +29,15 @@ private:
 	float		 m_flySpeed			= 8.f;
 	float		 m_camRotationSpeed = 0.2f;
 
-	// Gameplay
+	// World Chunks
 	ChunkMap	 m_activeChunks;
 	int			 m_activationRadius		= ACTIVATION_RANGE_NUM_CHUNKS;	// chunks
 	int			 m_deactivationRadius	= m_activationRadius + 2;		// chunks
 	
+	// Day Night Cycle
+	float		 m_worldTimeInDays				= 0.f;
+	float const	 m_worldSecondsPerRealSeconds	= 200.f;
+
 	// Debug Mesh
 	MeshBuilder	*m_dirtyLightsMesh = nullptr;
 
@@ -71,6 +75,9 @@ public:
 	void	ClearLightDirtyAndRemoveFromQueue( BlockLocator &toBeClearedBlockLoc );
 
 private:
+	void	UpdateWorldTime( float deltaSeconds );
+	float	GetDaylightFraction() const;
+
 	// Input
 	void	ProcessInput( float deltaSeconds );
 	void	DebugRenderInputKeyInfo() const;
@@ -92,6 +99,9 @@ private:
 	void	UndirtyAllBlocksLightInChunk( Chunk* chunk );
 
 	void	RenderDirtyLightMesh() const;
+
+	// Sky Color
+	Rgba	GetSkyColorFromDayTimeFraction() const;
 
 	// Pre-computation
 	void	PopulateChunkActivationCheatsheet( int deactivationRadius );
