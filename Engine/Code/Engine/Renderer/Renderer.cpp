@@ -767,7 +767,9 @@ void Renderer::ClearScreen( const Rgba& clearColor ) {
 
 void Renderer::ClearColor( const Rgba& clearColor )
 {
-	glClearColor( clearColor.r, clearColor.g, clearColor.b, clearColor.a );
+	Vector4 colorAsFloats = clearColor.GetAsNormalizedRgba();
+
+	glClearColor( colorAsFloats.x, colorAsFloats.y, colorAsFloats.z, colorAsFloats.w );
 	glClear( GL_COLOR_BUFFER_BIT );
 }
 
