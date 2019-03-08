@@ -1,6 +1,6 @@
 <material id="block">
 	<shadergroup>
-   		<shader fileName="default" />
+   		<shader fileName="overworld_opaque" />
    	</shadergroup>
 
    	<texture bind="0" src="Data\Images\Terrain_32x32.png" />
