@@ -531,17 +531,17 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 {
 	Block &dBlock = blockLocator.GetBlock();
 
-	// Sky has the highest outdoor light!
-	if( dBlock.IsSky() )
-		dBlock.SetOutdoorLightLevel( 14 );
-
-	// Block's lighting never goes below these
-	int const minIndoorLightLevel	= dBlock.GetIndoorLightLevelFromDefinition();
-	int const minOutdoorLightLevel	= dBlock.GetOutdoorLightLevel();
-
 	// Compute the final lighting
 	int finalIndoorLighting  = 0;
 	int finalOutdoorLighting = 0;
+
+	// Block's lighting never goes below these
+	int minIndoorLightLevel	 = dBlock.GetIndoorLightLevelFromDefinition();
+	int minOutdoorLightLevel = 0;
+
+	// Sky has the highest outdoor light!
+	if( dBlock.IsSky() )
+		minOutdoorLightLevel = 14;
 
 	if( dBlock.IsFullyOpaque() == false )
 	{
@@ -572,7 +572,8 @@ void World::RecomputeLighting( BlockLocator &blockLocator )
 	}
 
 	// Set Outdoor Light
-	if( dBlock.GetOutdoorLightLevel() != finalOutdoorLighting )
+	int testOutLightValue = dBlock.GetOutdoorLightLevel();
+	if( testOutLightValue != finalOutdoorLighting )
 	{
 		// Only if calculated light levels are different
 		blockLocator.GetChunk()->SetDirty();
@@ -684,8 +685,12 @@ void World::MarkBlocksLightingDirtyForDig( BlockLocator &targetBlockLoc )
 	if( upBlockLoc.IsValid() && (upBlock.IsSky() == false) )
 		return;
 
+	// Set target block to sky..
+	Block &targetBlock = targetBlockLoc.GetBlock();
+	targetBlock.SetIsSky();
+
 	// Only if up block is sky, we'll mark all the blocks below, including ourself, as sky
-	BlockLocator blockLocBelow = targetBlockLoc;
+	BlockLocator blockLocBelow = targetBlockLoc.GetDownBlockLocator();
 	while( blockLocBelow.IsValid() )
 	{
 		Block &blockBelow = blockLocBelow.GetBlock();
@@ -703,7 +708,7 @@ void World::MarkBlocksLightingDirtyForDig( BlockLocator &targetBlockLoc )
 
 void World::MarkBlocksLightingDirtyForPlace( BlockLocator &targetBlockLoc, eBlockType newType )
 {
-	Block const &targetBlock = targetBlockLoc.GetBlock();
+	Block &targetBlock = targetBlockLoc.GetBlock();
 
 	// Mark yourself dirty
 	MarkLightDirtyAndAddUniqueToQueue( targetBlockLoc );
@@ -711,6 +716,9 @@ void World::MarkBlocksLightingDirtyForPlace( BlockLocator &targetBlockLoc, eBloc
 	// If we're about to replace a sky block with a non-air "opaque" block
 	if( targetBlock.IsSky() && (newType != BLOCK_AIR) )
 	{
+		// Target block is not sky, anymore
+		targetBlock.ClearIsSky();
+
 		BlockLocator blockLocBelow = targetBlockLoc.GetDownBlockLocator();
 
 		// Mark all the non-fully opaque blocks, below, as not sky

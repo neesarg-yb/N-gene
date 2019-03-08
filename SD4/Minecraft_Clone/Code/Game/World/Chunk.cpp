@@ -527,6 +527,12 @@ void Chunk::InitializeLightingOnActivation()
 					continue;
 
 				BlockLocator blockLoc = BlockLocator(this, blockIndex);
+				Block &thisBlock = blockLoc.GetBlock();
+				
+				// Mark only non fully-opaque blocks dirty
+				if( thisBlock.IsFullyOpaque() )
+					continue;
+
 				m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( blockLoc );
 			}
 		}
@@ -546,7 +552,7 @@ void Chunk::InitializeLightingOnActivation()
 
 			// If top is fully opaque, like a stone, none blocks below are sky
 			if( topMostBlock.IsFullyOpaque() )
-				break;
+				continue;
 
 			// Start setting blocks as sky, going down
 			topMostBlock.SetIsSky();
@@ -583,7 +589,7 @@ void Chunk::InitializeLightingOnActivation()
 
 				// Only for the sky blocks
 				if( thisBlock.IsSky() == false )
-					break;
+					continue;
 
 				// Set my outdoor light to max
 				thisBlock.SetOutdoorLightLevel( 14 );
@@ -596,28 +602,28 @@ void Chunk::InitializeLightingOnActivation()
 				BlockLocator west	= thisBL.GetWestBlockLocator();
 				
 				Block &southNeighbor = south.GetBlock();
-				if( south.IsValid() && southNeighbor.IsFullyOpaque() == false )
+				if( south.IsValid() && southNeighbor.IsFullyOpaque() == false && southNeighbor.IsSky() == false )
 				{
 					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( south );
 					south.GetChunk()->SetDirty();
 				}
 
 				Block &westNeighbor = west.GetBlock();
-				if( west.IsValid() && westNeighbor.IsFullyOpaque() == false )
+				if( west.IsValid() && westNeighbor.IsFullyOpaque() == false && westNeighbor.IsSky() == false )
 				{
 					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( west );
 					west.GetChunk()->SetDirty();
 				}
 
 				Block &eastNeighbor = east.GetBlock();
-				if( east.IsValid() && eastNeighbor.IsFullyOpaque() == false )
+				if( east.IsValid() && eastNeighbor.IsFullyOpaque() == false && eastNeighbor.IsSky() == false )
 				{
 					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( east );
 					east.GetChunk()->SetDirty();
 				}
 
 				Block &northNeighbor = north.GetBlock();
-				if( north.IsValid() && northNeighbor.IsFullyOpaque() == false )
+				if( north.IsValid() && northNeighbor.IsFullyOpaque() == false && northNeighbor.IsSky() == false )
 				{
 					m_parentWorld.MarkLightDirtyAndAddUniqueToQueue( north );
 					north.GetChunk()->SetDirty();
