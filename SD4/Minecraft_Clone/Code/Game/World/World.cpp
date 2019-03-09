@@ -75,6 +75,7 @@ void World::Render() const
 	float	glowStrength		= GetGlowStrength();
 	float	daylightFraction	= ClampFloat01( GetDaytimeNormalizedUsingSine() );
 	Rgba	currentSkyColor		= GetSkyColorFromDayTimeFraction();
+	float	lightningStrength	= GetLightningStrengthFromPerlineNoise();
 	Vector3 skyColorVec3		= GetSkyColorUniformFromPerlineNoiseForLightning( currentSkyColor );
 
 	// Camera
@@ -99,7 +100,8 @@ void World::Render() const
 			// Bind: Shader & Texture
 			thisChunk->BindShaderAndTexture( *g_theRenderer );
 
-			// Bind: Uniforms
+			// Bind: Uniforms u_lightningStength
+			g_theRenderer->SetUniform( "u_lightningStength",	lightningStrength );
 			g_theRenderer->SetUniform( "u_glowStrength",		glowStrength );
 			g_theRenderer->SetUniform( "u_daylightFraction",	daylightFraction );
 			g_theRenderer->SetUniform( "u_indoorLightRgb",		m_defaultIndoorLight );
@@ -890,24 +892,29 @@ Rgba World::GetSkyColorFromDayTimeFraction() const
 		return Interpolate( m_defaultSkyColorNight, m_defaultSkyColorNoon, t );		// It is daylight
 }
 
-Vector3 World::GetSkyColorUniformFromPerlineNoiseForLightning( Rgba skyColor ) const
+float World::GetLightningStrengthFromPerlineNoise() const
 {
 	float lightningPerlin = fabsf( Compute1dPerlinNoise( m_worldTimeInDays, 0.01f, 9 ) );
 	DebugRender2DText( 0.f, Vector2( 0.f, 20.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("lightningPerlin = %.3f", lightningPerlin) );
-
+	
 	if( lightningPerlin < 0.6f )
-		return skyColor.GetAsNormalizedRgba().IgnoreW();
+		return 0.f;
 	else
 	{
 		// Lightning strength calculation
-		lightningPerlin = ClampFloat01( lightningPerlin );
-		float lightningStrength = RangeMapFloat( lightningPerlin, 0.6f, 1.f, 0.f, 1.f );
-		skyColor = Interpolate( skyColor, RGBA_WHITE_COLOR, lightningStrength );
-
-		DebugRender2DText( 0.f, Vector2::ZERO, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("lightningStrength = %.3f", lightningStrength) );
-
-		return skyColor.GetAsNormalizedRgba().IgnoreW();
+		lightningPerlin			= ClampFloat01( lightningPerlin );
+		float lightningStrength	= RangeMapFloat( lightningPerlin, 0.6f, 1.f, 0.f, 1.f );
+		
+		return lightningStrength;
 	}
+}
+
+Vector3 World::GetSkyColorUniformFromPerlineNoiseForLightning( Rgba skyColor ) const
+{
+	float lightningStrength = GetLightningStrengthFromPerlineNoise();
+	skyColor = Interpolate( skyColor, RGBA_WHITE_COLOR, lightningStrength );
+
+	return skyColor.GetAsNormalizedRgba().IgnoreW();
 }
 
 void World::PerformRaycast()

@@ -105,6 +105,7 @@ private:
 
 	// Sky Color
 	Rgba	GetSkyColorFromDayTimeFraction() const;
+	float	GetLightningStrengthFromPerlineNoise() const;
 	Vector3	GetSkyColorUniformFromPerlineNoiseForLightning( Rgba skyColor ) const;
 
 	// Pre-computation
