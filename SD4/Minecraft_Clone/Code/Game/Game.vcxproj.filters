@@ -182,6 +182,15 @@
     <None Include="..\..\Run_win32\Data\Materials\snow_miku_lambert.material">
       <Filter>Materials</Filter>
     </None>
+    <None Include="..\..\Run_win32\Data\Shaders\overworld_opaque.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\overworld_opaque.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Run_win32\Data\Shaders\overworld_opaque.vs">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Run_win32\Data\Shaders\default.shader">

@@ -422,6 +422,9 @@
     <None Include="..\..\Run_win32\Data\Shaders\lit.fs" />
     <None Include="..\..\Run_win32\Data\Shaders\lit.shader" />
     <None Include="..\..\Run_win32\Data\Shaders\lit.vs" />
+    <None Include="..\..\Run_win32\Data\Shaders\overworld_opaque.fs" />
+    <None Include="..\..\Run_win32\Data\Shaders\overworld_opaque.shader" />
+    <None Include="..\..\Run_win32\Data\Shaders\overworld_opaque.vs" />
     <None Include="..\..\Run_win32\Protogame.exe" />
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,7 @@
 // layout binding = 0 is us binding it to texture slot 0.  
 layout(binding = 0) uniform sampler2D u_gTexDiffuse;
 
+uniform float u_glowStrength		 = 1.f;
 uniform float u_daylightFraction	 = 1.f;
 uniform vec3  u_indoorLightRgb 		 = vec3( 0.00, 0.00, 0.00 );
 uniform vec3  u_outdoorLightRgb 	 = vec3( 0.00, 0.00, 0.00 );
@@ -28,7 +29,7 @@ void main( void )
 	float outdoorLightLevel	= v_passColor.g;			// Green Channel == Outdoor Light Level
 
 	// Calculate shaded telex Rgb
-	vec3 indoorLightRgb 	= indoorLightLevel  * u_indoorLightRgb;
+	vec3 indoorLightRgb 	= indoorLightLevel  * u_indoorLightRgb * u_glowStrength;
 	vec3 outdoorLightRgb 	= outdoorLightLevel * u_outdoorLightRgb * u_daylightFraction;
 	vec3 lightRgb 			= max( indoorLightRgb, outdoorLightRgb );
 	vec4 shadedTexel 		= diffuse * vec4( lightRgb, v_passColor.a );

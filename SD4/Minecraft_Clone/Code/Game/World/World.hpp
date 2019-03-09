@@ -76,7 +76,7 @@ public:
 
 private:
 	void	UpdateWorldTime( float deltaSeconds );
-	float	GetDaylightFraction() const;
+	float	GetDaytimeNormalizedUsingSine() const;													// Noon: +1.0 & Midnight: -1.0
 
 	// Input
 	void	ProcessInput( float deltaSeconds );
@@ -99,6 +99,9 @@ private:
 	void	UndirtyAllBlocksLightInChunk( Chunk* chunk );
 
 	void	RenderDirtyLightMesh() const;
+
+	// Glow Strength
+	float	GetGlowStrength() const;
 
 	// Sky Color
 	Rgba	GetSkyColorFromDayTimeFraction() const;

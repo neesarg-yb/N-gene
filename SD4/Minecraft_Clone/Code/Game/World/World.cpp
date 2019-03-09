@@ -72,8 +72,10 @@ void World::Render() const
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
 	// Sky Color - Fog
-	Rgba currentSkyColor = GetSkyColorFromDayTimeFraction();
-	Vector3 skyColorVec3 = GetSkyColorUniformFromPerlineNoiseForLightning( currentSkyColor );
+	float	glowStrength		= GetGlowStrength();
+	float	daylightFraction	= ClampFloat01( GetDaytimeNormalizedUsingSine() );
+	Rgba	currentSkyColor		= GetSkyColorFromDayTimeFraction();
+	Vector3 skyColorVec3		= GetSkyColorUniformFromPerlineNoiseForLightning( currentSkyColor );
 
 	// Camera
 	Camera &camera = *m_camera->GetCamera();
@@ -98,7 +100,8 @@ void World::Render() const
 			thisChunk->BindShaderAndTexture( *g_theRenderer );
 
 			// Bind: Uniforms
-			g_theRenderer->SetUniform( "u_daylightFraction",	GetDaylightFraction() );
+			g_theRenderer->SetUniform( "u_glowStrength",		glowStrength );
+			g_theRenderer->SetUniform( "u_daylightFraction",	daylightFraction );
 			g_theRenderer->SetUniform( "u_indoorLightRgb",		m_defaultIndoorLight );
 			g_theRenderer->SetUniform( "u_outdoorLightRgb",		m_defaultOutdoorLight );
 			g_theRenderer->SetUniform( "u_skyColor",			skyColorVec3 );
@@ -282,7 +285,7 @@ void World::UpdateWorldTime( float deltaSeconds )
 	m_worldTimeInDays += worldDeltaSecond / (60 * 60 * 24);
 }
 
-float World::GetDaylightFraction() const
+float World::GetDaytimeNormalizedUsingSine() const
 {
 	int worldIntTime = (int)m_worldTimeInDays;
 	float t = ( m_worldTimeInDays - (float)worldIntTime );
@@ -346,13 +349,14 @@ void World::DebugRenderInputKeyInfo() const
 
 	Vector2 lightStepTxtPos = placeGlowStoneTxtPos + Vector2( 0.f, -20.f );
 	if( DEBUG_STEP_LIGHTING )
-		DebugRender2DText( 0.f, lightStepTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,   "Step-Light       : [L]" );
+		DebugRender2DText( 0.f, lightStepTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,           "Step-Light         : [L]" );
 	Vector2 raycastTxtPos = lightStepTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, raycastTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,         "Raycast          : [R]" );
+	DebugRender2DText( 0.f, raycastTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,                 "Raycast            : [R]" );
 	Vector2 daytimeFractionTxtPos = raycastTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, daytimeFractionTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("Daylight Fraction: %.2f", GetDaylightFraction()) );
+	float daytimeNormalized = GetDaytimeNormalizedUsingSine();
+	DebugRender2DText( 0.f, daytimeFractionTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("Normalized Daytime : %.2f (%s)", daytimeNormalized, daytimeNormalized < 0.f ? "night" : "DAY" ) );
 	Vector2 daytimeFastForwardTxt = daytimeFractionTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, daytimeFastForwardTxt, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Fast Forward     : [T]" );
+	DebugRender2DText( 0.f, daytimeFastForwardTxt, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,         "Fast Forward       : [T]" );
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
@@ -868,9 +872,17 @@ void World::RenderDirtyLightMesh() const
 	}
 }
 
+float World::GetGlowStrength() const
+{
+	float glowPerlin	= Compute1dPerlinNoise( m_worldTimeInDays, 0.005f, 9 );
+	float glowStrength	= RangeMapFloat( glowPerlin, -1.f, 1.f, 0.7f, 1.f );
+
+	return glowStrength;
+}
+
 Rgba World::GetSkyColorFromDayTimeFraction() const
 {
-	float t = GetDaylightFraction();
+	float t = GetDaytimeNormalizedUsingSine();
 
 	if( t < 0.f )
 		return m_defaultSkyColorNight;												// It is midnight
