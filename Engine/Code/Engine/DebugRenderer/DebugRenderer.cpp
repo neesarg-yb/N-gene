@@ -10,7 +10,6 @@
 #include "Engine/Renderer/Camera.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 
-
 Renderer									*debugRenderer				= nullptr;
 Camera										*debugCamera2D				= nullptr;
 BitmapFont									*debugFont					= nullptr;
@@ -202,6 +201,11 @@ void AddTexturedAABBToMeshBuilder( MeshBuilder& mb, Vector3 const &mins, float h
 
 void DebugRender2DRound( float lifetime, Vector2 const &center, float const radius, uint const numSlices, Rgba const &startColor, Rgba const &endColor )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, true );
 
@@ -234,6 +238,11 @@ void DebugRender2DRound( float lifetime, Vector2 const &center, float const radi
 
 void DebugRender2DQuad( float lifetime, AABB2 const &bounds, Rgba const &startColor, Rgba const &endColor )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Vector3 const upperLeft		( bounds.mins.x, bounds.maxs.y, 0.f );
 	Vector3 const upperRight	( bounds.maxs.x, bounds.maxs.y, 0.f );
 	Vector3 const bottomRight	( bounds.maxs.x, bounds.mins.y, 0.f );
@@ -265,6 +274,11 @@ void DebugRender2DQuad( float lifetime, AABB2 const &bounds, Rgba const &startCo
 
 void DebugRender2DLine( float lifetime, Vector2 const &p0, Rgba const &p0Color, Vector2 const &p1, Rgba const &p1Color, Rgba const &tintStartColor, Rgba const &tintEndColor )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Vector2 centerPos = ( p0 + p1 ) * 0.5f;
 
 	MeshBuilder mb;
@@ -283,6 +297,11 @@ void DebugRender2DLine( float lifetime, Vector2 const &p0, Rgba const &p0Color, 
 
 void DebugRender2DText( float lifetime, Vector2 const &position, float const height, Rgba const &startColor, Rgba const &endColor, std::string asciiText )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, false );
 
@@ -312,6 +331,11 @@ void DebugRender2DText( float lifetime, Vector2 const &position, float const hei
 
 FloatRange DebugRenderXYCurve( float lifetime, AABB2 const &drawBounds, xyCurve_cb curveCB, FloatRange xRange, float step, Rgba const &curveColor, Rgba const &backgroundColor, Rgba const &gridlineColor )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return xRange;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Vector3 const upperLeft	 ( drawBounds.mins.x, drawBounds.maxs.y, 0.f );
 	Vector3 const upperRight ( drawBounds.maxs.x, drawBounds.maxs.y, 0.f );
 	Vector3 const bottomRight( drawBounds.maxs.x, drawBounds.mins.y, 0.f );
@@ -442,6 +466,11 @@ FloatRange DebugRenderXYCurve( float lifetime, AABB2 const &drawBounds, xyCurve_
 
 void DebugRenderPoint( float lifetime, float size, Vector3 const &position, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	float halfSize = size * 0.5f;
 
 	MeshBuilder mb;
@@ -464,6 +493,11 @@ void DebugRenderPoint( float lifetime, float size, Vector3 const &position, Rgba
 
 void DebugRenderLineSegment( float lifetime, Vector3 const &p0, Rgba const &p0Color, Vector3 const &p1, Rgba const &p1Color, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Vector3 centerPos = ( p0 + p1 ) * 0.5f;
 
 	MeshBuilder mb;
@@ -482,6 +516,11 @@ void DebugRenderLineSegment( float lifetime, Vector3 const &p0, Rgba const &p0Co
 
 void DebugRenderVector( float lifetime, Vector3 const &origin, Vector3 const &vector, Rgba const &color, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	float		length		 = vector.GetLength();
 	Matrix44	lookAt		 = Matrix44::MakeLookAtView( vector, Vector3::ZERO );
 	Quaternion	rotation	 = Quaternion::FromMatrix( lookAt ).GetInverse();
@@ -525,6 +564,11 @@ void DebugRenderVector( float lifetime, Vector3 const &origin, Vector3 const &ve
 
 void DebugRenderBasis( float lifetime, Matrix44 const &basis, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Vector3 localPosition = Vector3::ZERO;
 
 	MeshBuilder mb;
@@ -555,6 +599,11 @@ void DebugRenderBasis( float lifetime, Matrix44 const &basis, Rgba const &startC
 
 void DebugRenderSphere( float lifetime, Vector3 const &pos, float const radius, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, Vector3::ZERO );
 
 	Transform modelTransform = Transform( pos, Vector3::ZERO, Vector3::ONE_ALL );
@@ -564,6 +613,11 @@ void DebugRenderSphere( float lifetime, Vector3 const &pos, float const radius, 
 
 void DebugRenderWireSphere( float lifetime, Vector3 const &pos, float const radius, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode const mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, Vector3::ZERO );
 
 	Transform modelTransform = Transform( pos, Vector3::ZERO, Vector3::ONE_ALL );
@@ -573,6 +627,11 @@ void DebugRenderWireSphere( float lifetime, Vector3 const &pos, float const radi
 
 void DebugRenderWireCube( float lifetime, Vector3 const &bottomLeftFront, Vector3 const &topRightBack, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Vector3 center	= ( bottomLeftFront + topRightBack ) * 0.5f;
 	Vector3 size	= Vector3( abs(topRightBack.x - bottomLeftFront.x), abs(topRightBack.y - bottomLeftFront.y), abs(topRightBack.z - bottomLeftFront.z) );
 	Mesh* cubeMesh	= MeshBuilder::CreateCube( size, Vector3::ZERO );
@@ -584,6 +643,11 @@ void DebugRenderWireCube( float lifetime, Vector3 const &bottomLeftFront, Vector
 
 void DebugRenderQuad( float lifetime, Vector3 const &pos, Vector3 const &eulerRotation, Vector2 const &xySize, Texture *texture, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Transform modelTransform = Transform( pos, eulerRotation, Vector3::ONE_ALL );
 	Mesh* quadMesh	= MeshBuilder::CreatePlane( xySize, Vector3::ZERO );
 
@@ -593,6 +657,11 @@ void DebugRenderQuad( float lifetime, Vector3 const &pos, Vector3 const &eulerRo
 
 void DebugRenderTag( float lifetime, float const height, Vector3 const &startPos, Vector3 const &upDirection, Vector3 const &rightDirection, Rgba const &startColor, Rgba const &endColor, std::string asciiText )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_TRIANGES, false );
 
@@ -618,6 +687,11 @@ void DebugRenderTag( float lifetime, float const height, Vector3 const &startPos
 
 void DebugRenderRaycast( float lifetime, Vector3 const &startPosition, RaycastResult const &raycastResult, float const impactPointSize, Rgba const &colorOnImpact, Rgba const &colorOnNoImpact, Rgba const &impactPositionColor, Rgba const &impactNormalColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	MeshBuilder mb;
 	mb.Begin( PRIMITIVE_LINES, false );
 
@@ -681,6 +755,11 @@ void DebugRenderRaycast( float lifetime, Vector3 const &startPosition, RaycastRe
 
 void DebugRenderCamera( float lifetime, Camera const &camera, float const cameraBodySize, Rgba const &frustumColor, Rgba const &startColor, Rgba const &endColor, eDebugRenderMode mode )
 {
+	#ifdef DEBUG_RENDERER_DISABLED
+		return;
+	#endif // DEBUG_RENDERER_DISABLED
+
+
 	Vector3 cameraWorldPos = camera.m_cameraTransform.GetWorldPosition();
 
 	// World to Camera
