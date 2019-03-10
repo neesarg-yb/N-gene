@@ -135,13 +135,14 @@ public:
 	void SetUniform( char const *name, Matrix44 const &mat44 );
 	
 	void UpdateTime( float gameDeltaSeconds, float systemDeltaSeconds );
-		 
+	
 	void ClearScreen( const Rgba& clearColor );
 	void ClearColor( const Rgba& clearColor );
 	void EnableDepth( eCompare compare, bool should_write );
 	void DisableDepth();
 	void ClearDepth( float depth = 1.0f );
 	void SetCullingMode( eCullMode newCullMode );
+	void SetGLPointSize( float pixels );
 
 	void ApplyEffect( Shader* effectShader );
 	void EndEffect();

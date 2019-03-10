@@ -110,6 +110,8 @@ void Renderer::GLShutdown()
 
 void Renderer::PostStartup()
 {
+	wglSwapIntervalEXT( 0 );
+
 	// default_vao is a GLuint member variable
 	glGenVertexArrays( 1, &s_default_vao ); 
 	glBindVertexArray( s_default_vao ); 
@@ -550,6 +552,9 @@ void BindGLFunctions()
 
 	GL_BIND_FUNCTION( glGenerateMipmap );
 	GL_BIND_FUNCTION( glSamplerParameterf );
+
+	GL_BIND_FUNCTION( wglSwapIntervalEXT );
+	GL_BIND_FUNCTION( glPointSize );
 }
 	
 //------------------------------------------------------------------------
@@ -762,7 +767,9 @@ void Renderer::ClearScreen( const Rgba& clearColor ) {
 
 void Renderer::ClearColor( const Rgba& clearColor )
 {
-	glClearColor( clearColor.r, clearColor.g, clearColor.b, clearColor.a );
+	Vector4 colorAsFloats = clearColor.GetAsNormalizedRgba();
+
+	glClearColor( colorAsFloats.x, colorAsFloats.y, colorAsFloats.z, colorAsFloats.w );
 	glClear( GL_COLOR_BUFFER_BIT );
 }
 
@@ -1440,6 +1447,11 @@ void Renderer::SetCullingMode( eCullMode newCullMode )
 	}
 	else
 		glDisable( GL_CULL_FACE );
+}
+
+void Renderer::SetGLPointSize( float pixels )
+{
+	glPointSize( pixels );
 }
 
 Texture* Renderer::CreateRenderTarget( unsigned int width, unsigned int height, eTextureFormat fmt /* = TEXTURE_FORMAT_RGBA8 */ )

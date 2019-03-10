@@ -104,3 +104,6 @@ extern PFNGLVIEWPORTPROC					glViewport;
 extern PFNGLSAMPLERPARAMETERFVPROC			glSamplerParameterfv;
 extern PFNGLGENERATEMIPMAPPROC				glGenerateMipmap;
 extern PFNGLSAMPLERPARAMETERFPROC			glSamplerParameterf;
+
+extern PFNWGLSWAPINTERVALEXTPROC			wglSwapIntervalEXT;
+extern PFNGLPOINTSIZEPROC					glPointSize;

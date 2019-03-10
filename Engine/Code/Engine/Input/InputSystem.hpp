@@ -38,6 +38,7 @@ enum VK_Codes
 	ESCAPE		= 0x1B,				/* VK_ESCAPE */
 	ENTER		= 0x0D,				/* VK_RETURN */
 	SHIFT		= 0x10,				/* VK_SHIFT */
+	CONTROL		= 0x11,				/* VK_CONTROL */
 	PAGE_UP		= 0x21,				/* VK_PRIOR */
 	PAGE_DOWN	= 0x22,				/* VK_NEXT */
 	NUM_PAD_0	= 0x60,				/* VK_NUMPAD0 */
