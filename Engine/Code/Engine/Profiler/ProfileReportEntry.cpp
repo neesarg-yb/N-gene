@@ -122,10 +122,10 @@ void ProfileReportEntry::GetProfileReportAsStringsVector( std::vector<std::strin
 
 	std::string idStr			= Stringf( "%-*s%-*s", herairchyLevel, "", (50 - herairchyLevel), m_id.c_str() );
 	std::string callStr			= Stringf( "%-*u", 6, m_callCount );
-	std::string totalTimeStr	= Stringf( "%-*.2f", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_totalHPC ) );
-	std::string selfTimeStr		= Stringf( "%-*.2f", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_selfHPC ) );
-	std::string percentTotalStr = Stringf( "%-*.2f", 10, m_percentTotalTime );
-	std::string percentSelftStr = Stringf( "%-*.2f", 10, m_percentSelfTime );
+	std::string totalTimeStr	= Stringf( "%-*.3f", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_totalHPC ) );
+	std::string selfTimeStr		= Stringf( "%-*.3f", 10, Profiler::GetMillliSecondsFromPerformanceCounter( m_selfHPC ) );
+	std::string percentTotalStr = Stringf( "%-*.3f", 10, m_percentTotalTime );
+	std::string percentSelftStr = Stringf( "%-*.3f", 10, m_percentSelfTime );
 
 	std::string combinedStr = Stringf( "%s  %s  %s  %s  %s  %s", idStr.c_str(), callStr.c_str(), totalTimeStr.c_str(), percentTotalStr.c_str(), selfTimeStr.c_str(), percentSelftStr.c_str() );
 	outStrings.push_back( combinedStr );
