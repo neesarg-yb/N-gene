@@ -156,6 +156,11 @@ void Scene_EffecientRaycast::Update()
 	// Update Camera Stuffs
 	m_cameraManager->Update( deltaSeconds );
 
+	// Test Raycast
+	CameraState	currCameraState			= m_cameraManager->GetCurrentCameraState();
+	Matrix44	cameraTransformMatrix	= currCameraState.GetTransformMatrix();
+	PerformDebugTestRaycasts( cameraTransformMatrix );
+
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 	{
@@ -180,9 +185,11 @@ void Scene_EffecientRaycast::Render( Camera *gameCamera ) const
 	DebugRendererLateRender( m_camera );
 }
 
-RaycastResult Scene_EffecientRaycast::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance )
+RaycastResult Scene_EffecientRaycast::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const
 {
-	return RaycastResult( startPosition + (direction * maxDistance) );
+	Building const *firstBuilding = (Building const *) m_gameObjects[ ENTITY_BUILDING ][0];
+
+	return firstBuilding->DoPerfectRaycast( startPosition, direction, maxDistance );
 }
 
 void Scene_EffecientRaycast::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
@@ -204,4 +211,20 @@ void Scene_EffecientRaycast::AddNewLightToScene( Light *light )
 
 	// Add its renderable
 	m_scene->AddRenderable( *light->m_renderable );
+}
+
+void Scene_EffecientRaycast::PerformDebugTestRaycasts( Matrix44 const &cameraTransformMat )
+{
+	Vector3 rayStartPos	 = cameraTransformMat.GetTColumn();
+	Vector3 rayDirection = cameraTransformMat.GetKColumn();
+
+	// Do the raycast
+	if( g_theInput->WasKeyJustPressed( 'R' ) )
+	{
+		m_rayStartPos	= rayStartPos;
+		m_raycastResult	= Raycast( rayStartPos, rayDirection, m_rayMaxLength );
+	}
+
+	// Debug Render
+	DebugRenderRaycast( 0.f, m_rayStartPos, m_raycastResult, 0.5f, RGBA_RED_COLOR, RGBA_GREEN_COLOR, RGBA_PURPLE_COLOR, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY ); 
 }

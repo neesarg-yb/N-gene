@@ -27,5 +27,20 @@ public:
 
 	bool			IsPointInside( Vector3 const &position ) const;
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const;
+	RaycastResult	DoPerfectRaycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const;
 	Vector3			CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const;
+
+private:
+	bool	IsNearZero( float value ) const;
+	float	GetSignedFloatMax( float value ) const;
 };
+
+inline bool Building::IsNearZero( float value ) const
+{
+	return fabsf(value) < 0.0000001f;
+}
+
+inline float Building::GetSignedFloatMax( float value ) const
+{
+	return value < 0.f ? -FLT_MAX : FLT_MAX;
+}

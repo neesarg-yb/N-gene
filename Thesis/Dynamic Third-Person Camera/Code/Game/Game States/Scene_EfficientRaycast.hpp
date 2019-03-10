@@ -34,6 +34,11 @@ private:
 	float const				 m_cameraNear				= 0.001f;
 	float const				 m_cameraFar				= 1000.f;
 
+	// Raycast
+	float					 m_rayMaxLength				= 10.f;
+	Vector3					 m_rayStartPos				= Vector3::ZERO;
+	RaycastResult			 m_raycastResult			= RaycastResult( Vector3::ZERO );
+
 public:
 	void JustFinishedTransition();
 	void BeginFrame();
@@ -41,10 +46,12 @@ public:
 	void Update();
 	void Render( Camera *gameCamera ) const;
 
-	RaycastResult Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );
+	RaycastResult Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const;
 
 private:
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
+
+	void PerformDebugTestRaycasts( Matrix44 const &cameraTransformMat );
 };

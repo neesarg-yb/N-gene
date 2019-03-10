@@ -34,9 +34,6 @@ extern theApp* g_theApp;
 class theGame;
 extern theGame* g_theGame;
 
-class RemoteCommandService;
-extern RemoteCommandService* g_rcs;
-
 extern Renderer* g_theRenderer;
 extern InputSystem* g_theInput;
 

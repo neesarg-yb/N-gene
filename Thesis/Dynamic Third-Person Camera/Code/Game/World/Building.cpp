@@ -1,6 +1,7 @@
 #pragma once
 #include "Building.hpp"
 #include "Engine/Core/Ray3.hpp"
+#include "Engine/Math/FloatRange.hpp"
 #include "Engine/Math/Plane3.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
@@ -87,6 +88,61 @@ RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &di
 
 		return RaycastResult( position, normal, fractionTravelled );
 	}
+}
+
+RaycastResult Building::DoPerfectRaycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const
+{
+	Vector3	const rayDispacement = direction * maxDistance;
+	Vector3	const rayEndPosition = startPosition + rayDispacement;
+	RaycastResult hitResult		 = RaycastResult( rayEndPosition );			// Set up as if "NO IMPACT"
+
+	// How much it costs to move on the axis, in terms of parametric "t"
+	float const xDeltaT = IsNearZero(rayDispacement.x) ? GetSignedFloatMax(rayDispacement.x) : (1.f / rayDispacement.x);
+	float const yDeltaT = IsNearZero(rayDispacement.y) ? GetSignedFloatMax(rayDispacement.y) : (1.f / rayDispacement.y);
+	float const zDeltaT = IsNearZero(rayDispacement.z) ? GetSignedFloatMax(rayDispacement.z) : (1.f / rayDispacement.z);
+	
+	// What is range of "t" when the raycast is inside the building?
+	FloatRange xTRange;
+	xTRange.ExpandToInclude( (m_worldBounds.mins.x - startPosition.x) * xDeltaT );
+	xTRange.ExpandToInclude( (m_worldBounds.maxs.x - startPosition.x) * xDeltaT );
+
+	FloatRange yTRange;
+	yTRange.ExpandToInclude( (m_worldBounds.mins.y - startPosition.y) * yDeltaT );
+	yTRange.ExpandToInclude( (m_worldBounds.maxs.y - startPosition.y) * yDeltaT );
+
+	FloatRange zTRange;
+	zTRange.ExpandToInclude( (m_worldBounds.mins.z - startPosition.z) * zDeltaT );
+	zTRange.ExpandToInclude( (m_worldBounds.maxs.z - startPosition.z) * zDeltaT );
+	
+	// Set the mutual from ranges of xT, yT, zT
+	FloatRange xyzMutualOverlapRange( xTRange );
+
+	// Mins
+	if( yTRange.min > xyzMutualOverlapRange.min )
+		xyzMutualOverlapRange.min = yTRange.min;
+	if( zTRange.min > xyzMutualOverlapRange.min )
+		xyzMutualOverlapRange.min = zTRange.min;
+
+	// Maxs
+	if( yTRange.max < xyzMutualOverlapRange.max )
+		xyzMutualOverlapRange.max = yTRange.max;
+	if( zTRange.max < xyzMutualOverlapRange.max )
+		xyzMutualOverlapRange.max = zTRange.max;
+
+	// If there is no mutual overlap of "t" => Raycast doesn't go through the bounds
+	if( xyzMutualOverlapRange.IsValid() == false )
+		return hitResult;
+
+	// Raycast goes through the building
+	float const tFirstContact	= xyzMutualOverlapRange.min;
+
+	// Hit Result at impact point!
+	hitResult.didImpact			= tFirstContact <= 1.f;
+	hitResult.fractionTravelled	= tFirstContact;
+	hitResult.impactNormal		= Vector3::ZERO;
+	hitResult.impactPosition	= startPosition + (rayDispacement * tFirstContact);
+
+	return hitResult;
 }
 
 Vector3 Building::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
