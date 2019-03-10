@@ -336,8 +336,8 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 	for( int i = 0; i < buildings.size(); i++ )
 	{
 		Building		*thisBuilding		= (Building*)buildings[i];
-		RaycastResult	 buildingHitResult	= thisBuilding->Raycast( startPosition, direction, maxDistance, 0.2f );
-	//	RaycastResult	 buildingHitResult	= thisBuilding->DoPerfectRaycast( startPosition, direction, maxDistance );
+	//	RaycastResult	 buildingHitResult	= thisBuilding->Raycast( startPosition, direction, maxDistance, 0.2f );
+		RaycastResult	 buildingHitResult	= thisBuilding->DoPerfectRaycast( startPosition, direction, maxDistance );
 
 		// If this one is the closest hit point, from start position
 		if( closestResult.didImpact == true )

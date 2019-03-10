@@ -7,6 +7,7 @@
 #include "Engine/Math/Complex.hpp"
 #include "Engine/Math/Quaternion.hpp"
 #include "Engine/Input/Command.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Game/GameCommon.hpp"
@@ -74,6 +75,9 @@ CC_ModifiedConeRaycast::~CC_ModifiedConeRaycast()
 
 void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 {
+	PROFILE_SCOPE_FUNCTION();
+
+	Profiler::GetInstance()->Push( "CONTEXT SETUP" );
 	ChangeSettingsAccordingToInput();
 	DebugRenderSettingsDetails();
 
@@ -83,17 +87,23 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	Vector3 projectedVelocity			= ProjectVectorOnPlane( context.cameraStateLastFrame.m_velocity, suggestedCameraState.GetTransformMatrix().GetKColumn() );
 	Vector3 cameraPosRelativeToPlayer	= (cameraPosition - playerPosition);
 	Matrix44 debugCamMatrix				= g_activeDebugCamera->GetCameraModelMatrix();
+	Profiler::GetInstance()->Pop();
 
 	// Get points on sphere around the player, such that the camera is on its surface
+	Profiler::GetInstance()->Push( "SPHERE POINTS GENERATION" );
 	std::vector< Vector3 >	targetPointsOnSphere = { cameraPosRelativeToPlayer };
 	Matrix44				camToWorldMatrix	 = suggestedCameraState.GetTransformMatrix();
 	GeneratePointsOnSphere( targetPointsOnSphere, cameraPosRelativeToPlayer, camToWorldMatrix, m_maxRotationDegrees, m_numCircularLayers, m_numRaysInLayer );
+	Profiler::GetInstance()->Pop();
 
 	// Give weights to the target points
+	Profiler::GetInstance()->Push( "WEIGHT ASSIGNMENT" );
 	std::vector< WeightedTargetPoint_MCR > weightedTargetPoints;
 	AssignWeightToTargetPoints( weightedTargetPoints, targetPointsOnSphere, cameraPosRelativeToPlayer, projectedVelocity );
+	Profiler::GetInstance()->Pop();
 
 	// DEBUG RENDER
+	Profiler::GetInstance()->Push( "DEBUG RENDER TARGET POINTS" );
 	DebugRenderWeightedTargetPoints( weightedTargetPoints, suggestedCameraState, cameraPosRelativeToPlayer + projectedVelocity );
 
 	for each (WeightedTargetPoint_MCR point in weightedTargetPoints)
@@ -107,12 +117,16 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 		DebugRenderTag( 0.f, 0.08f, rrWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "rrW %.2f", point.weightRR ) );
 		DebugRenderTag( 0.f, 0.08f, arWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "arW %.2f", point.weightAR ) );
 	}
+	Profiler::GetInstance()->Pop();
 	
 	// Perform Raycasts
+	Profiler::GetInstance()->Push( "PERFORM RAYCAST" );
 	std::vector< WeightedRaycastResult_MCR > weightedRaycastResults;
 	PerformRaycastOnTargetPoints( weightedRaycastResults, weightedTargetPoints, playerPosition );
+	Profiler::GetInstance()->Pop();
 
 	// Polar coordinate of camera, relative to the player position
+	Profiler::GetInstance()->Push( "POLAR COORD. CHANGE" );
 	float cameraRadius, cameraRotation, cameraAltitude;
 	TODO( "See if you can make this code local-offset compativble.. Checkout CB_Follow!" );
 	CartesianToPolar( cameraPosRelativeToPlayer, cameraRadius, cameraRotation, cameraAltitude );
@@ -132,8 +146,10 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	{
 		// i.e. Constraint should not overwrite the player input..
 	}
+	Profiler::GetInstance()->Pop();
 
 	// Set new position!
+	Profiler::GetInstance()->Push( "NEW POSITION SET" );
 	cameraRadius	-= reductionInRadius;
 	cameraRotation	+= rotationChange;
 	cameraAltitude	+= altitudeChange;
@@ -149,6 +165,7 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 
 	DebugRenderBasis( 0.f, suggestedCameraState.GetTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRenderBasis( 0.f, context.anchorGameObject->m_transform.GetWorldTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	Profiler::GetInstance()->Pop();
 }
 
 float CC_ModifiedConeRaycast::WeightCurve( float x, float maxHeight, float width ) const

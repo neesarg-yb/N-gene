@@ -1,5 +1,6 @@
 #pragma once
 #include "CC_HandoverToFollow.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
@@ -21,6 +22,8 @@ CC_HandoverToFollow::~CC_HandoverToFollow()
 void CC_HandoverToFollow::Execute( CameraState &suggestedCameraState )
 {
 	UNUSED( suggestedCameraState );
+
+	PROFILE_SCOPE_FUNCTION();
 
 	CameraContext	context			= m_manager.GetCameraContext();
 	Vector3			playerPosition	= context.anchorGameObject->m_transform.GetWorldPosition();

@@ -1,5 +1,6 @@
 #pragma once
 #include "CC_LineOfSight.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 
 CC_LineOfSight::CC_LineOfSight( char const *name, CameraManager &manager, uint8_t priority )
@@ -15,6 +16,8 @@ CC_LineOfSight::~CC_LineOfSight()
 
 void CC_LineOfSight::Execute( CameraState &suggestedCameraState )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// Get context
 	CameraContext context = m_manager.GetCameraContext();
 
@@ -26,6 +29,6 @@ void CC_LineOfSight::Execute( CameraState &suggestedCameraState )
 
 	RaycastResult hitResult = context.raycastCallback( playerPosition, towardsCamera, raycastDistance );
 	if( hitResult.didImpact )
-		suggestedCameraState.m_position = hitResult.impactPosition;
+		suggestedCameraState.m_position = hitResult.impactPosition - (towardsCamera * context.cameraCollisionRadius);
 }
 

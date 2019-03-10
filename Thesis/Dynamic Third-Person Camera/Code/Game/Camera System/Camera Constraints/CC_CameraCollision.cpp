@@ -1,5 +1,6 @@
 #pragma once
 #include "CC_CameraCollision.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/CameraSystem/CameraContext.hpp"
 
@@ -16,6 +17,8 @@ CC_CameraCollision::~CC_CameraCollision()
 
 void CC_CameraCollision::Execute( CameraState &suggestedCameraState )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	CameraContext context	= m_manager.GetCameraContext();
 	Vector3		  newCenter	= context.sphereCollisionCallback( suggestedCameraState.m_position, context.cameraCollisionRadius );
 	

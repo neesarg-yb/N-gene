@@ -1,6 +1,7 @@
 #pragma once
 #include "CB_FreeLook.hpp"
 #include "Engine/Core/Window.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/GameCommon.hpp"
 
 CB_FreeLook::CB_FreeLook( float movementSpeed, float rotationSpeed, float minPitchAngle, float maxPitchAngle, char const *behaviourName, CameraManager *manager, eFreeLookInputSource inputSource )
@@ -31,6 +32,8 @@ void CB_FreeLook::PostUpdate()
 CameraState CB_FreeLook::Update( float deltaSeconds, CameraState const &currentState )
 {
 	UNUSED( currentState );
+
+	PROFILE_SCOPE_FUNCTION();
 
 	float	yAxisChange		 = 0.f;
 	Vector2	xzMovementChange = Vector2::ZERO;

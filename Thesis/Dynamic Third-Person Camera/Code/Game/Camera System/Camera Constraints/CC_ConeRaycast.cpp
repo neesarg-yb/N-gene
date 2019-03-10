@@ -3,6 +3,7 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/EngineCommon.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraContext.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
@@ -47,6 +48,8 @@ CC_ConeRaycast::~CC_ConeRaycast()
 
 void CC_ConeRaycast::Execute( CameraState &suggestedCameraState )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	ChangeSettingsAccordingToInput();
 
 	CameraContext	contex		= m_manager.GetCameraContext();

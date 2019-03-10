@@ -3,6 +3,7 @@
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
@@ -34,6 +35,8 @@ void CB_ShoulderView::PostUpdate()
 
 CameraState CB_ShoulderView::Update( float deltaSeconds, CameraState const &currentState )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	ProcessInput( deltaSeconds );
 
 	// Contextual Info.

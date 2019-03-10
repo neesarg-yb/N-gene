@@ -2,6 +2,7 @@
 #include "CB_Follow.hpp"
 #include "Engine/Math/Complex.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
@@ -31,6 +32,8 @@ CB_Follow::~CB_Follow()
 
 CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentState )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// Contextual Info.
 	CameraContext context = m_manager->GetCameraContext();
 

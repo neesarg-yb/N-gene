@@ -1,5 +1,6 @@
 #pragma once
 #include "CC_HandoverToShoulder.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_ShoulderView.hpp"
@@ -19,6 +20,8 @@ CC_HandoverToShoulder::~CC_HandoverToShoulder()
 
 void CC_HandoverToShoulder::Execute( CameraState &suggestedCameraState )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	GameObject const *anchor = m_manager.GetCameraContext().anchorGameObject;
 	Vector3 anchorWorldPos	 = anchor->m_transform.GetWorldPosition();
 	float distanceFromAnchor = (anchorWorldPos - suggestedCameraState.m_position).GetLength();
