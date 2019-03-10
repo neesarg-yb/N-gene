@@ -5,6 +5,7 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theApp.hpp"
 #include "Game/Game States/Attract.hpp"
 #include "Game/Game States/LevelSelect.hpp"
@@ -65,7 +66,7 @@ theGame::theGame()
 	m_gameCamera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );										// To set NDC styled ortho
-
+	m_gameCamera->RenderDebugObjects( true );
 }
 
 theGame::~theGame()
@@ -156,6 +157,10 @@ void theGame::Update()
 	// Calculating deltaTime
 	float deltaSeconds			= (float) g_gameClock->GetFrameDeltaSeconds();
 	deltaSeconds				= (deltaSeconds > 0.2f) ? 0.2f : deltaSeconds;									// Can't go slower than 5 fps
+
+	// FPS
+	float fps = 1.f / deltaSeconds;
+	DebugRender2DText( 0.f, Vector2(700.f, 460.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf( "FPS: %.1f", fps ) );
 
 	m_timeSinceTransitionBegan	+=	deltaSeconds;
 	m_timeSinceStartOfTheGame	+=	deltaSeconds;

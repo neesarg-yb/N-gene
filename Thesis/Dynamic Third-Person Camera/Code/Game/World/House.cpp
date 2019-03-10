@@ -5,6 +5,7 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/World/Terrain.hpp"
 
 House::House( Vector2 positionXZ, float const height, float const width, float const length, float const wallThickness, Terrain const &parentTerrain )
@@ -102,6 +103,8 @@ void House::RemoveRenderablesFromScene( Scene &activeScene )
 
 RaycastResult House::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// Ray
 	Ray3 ray = Ray3( startPosition, direction );
 	RaycastResult result( startPosition + (direction * maxDistance) );

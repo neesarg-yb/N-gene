@@ -6,7 +6,9 @@
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Game/World/Terrain.hpp"
+#include "Game/GameCommon.hpp"
 
 Building::Building( Vector2 positionXZ, float const height, float const width, Terrain const &parentTerrain, float const offsetFromGround /*= 0.f*/ )
 	: m_parentTerrain( parentTerrain )
@@ -60,6 +62,8 @@ bool Building::IsPointInside( Vector3 const &position ) const
 
 RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// Logic:
 	//
 	// For each step, until we reach the max distance
@@ -92,6 +96,8 @@ RaycastResult Building::Raycast( Vector3 const &startPosition, Vector3 const &di
 
 RaycastResult Building::DoPerfectRaycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance ) const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	Vector3	const rayDispacement = direction * maxDistance;
 	Vector3	const rayEndPosition = startPosition + rayDispacement;
 	RaycastResult hitResult		 = RaycastResult( rayEndPosition );			// Set up as if "NO IMPACT"
@@ -136,8 +142,11 @@ RaycastResult Building::DoPerfectRaycast( Vector3 const &startPosition, Vector3 
 	// Raycast goes through the building
 	float const tFirstContact	= xyzMutualOverlapRange.min;
 
+	if( tFirstContact > 1.f || tFirstContact < 0.f )
+		return hitResult;
+
 	// Hit Result at impact point!
-	hitResult.didImpact			= tFirstContact <= 1.f;
+	hitResult.didImpact			= true;
 	hitResult.fractionTravelled	= tFirstContact;
 	hitResult.impactNormal		= Vector3::ZERO;
 	hitResult.impactPosition	= startPosition + (rayDispacement * tFirstContact);

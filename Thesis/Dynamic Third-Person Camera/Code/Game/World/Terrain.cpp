@@ -174,6 +174,8 @@ Plane3 Terrain::GetPlaneForMyPositionAt( Vector2 myXZPosition ) const
 
 RaycastResult Terrain::Raycast( Vector3 const &startPosition, Vector3 direction, float const maxDistance, float const accuracy )
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	float const sampleSize = 1.f;
 	// Logic:
 	//

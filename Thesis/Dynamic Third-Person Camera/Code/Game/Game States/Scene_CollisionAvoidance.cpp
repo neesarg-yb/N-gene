@@ -85,7 +85,10 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 
 	// Set the Raycast std::function
 	raycast_std_func terrainRaycastStdFunc;
-	terrainRaycastStdFunc = [ this ]( Vector3 const &startPos, Vector3 const &direction, float maxDistance ) { return Raycast( startPos, direction, maxDistance ); };
+	terrainRaycastStdFunc = [ this ]( Vector3 const &startPos, Vector3 const &direction, float maxDistance ) 
+	{ 
+		return Raycast( startPos, direction, maxDistance ); 
+	};
 	m_cameraManager->SetRaycastCallback( terrainRaycastStdFunc );
 
 	// Set the Sphere Collision std::function
@@ -320,17 +323,21 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 {
 	PROFILE_SCOPE_FUNCTION();
 
+	Profiler::GetInstance()->Push( "AREA-1" );
 	RaycastResult closestResult( startPosition );
 
 	// Do Terrain Raycast
 	closestResult = m_terrain->Raycast( startPosition, direction, maxDistance, 0.05f );
+	Profiler::GetInstance()->Pop();
 
 	// Do Building Raycast
+	Profiler::GetInstance()->Push( "AREA-2" );
 	GameObjectList &buildings = m_gameObjects[ ENTITY_BUILDING ];
 	for( int i = 0; i < buildings.size(); i++ )
 	{
 		Building		*thisBuilding		= (Building*)buildings[i];
 		RaycastResult	 buildingHitResult	= thisBuilding->Raycast( startPosition, direction, maxDistance, 0.2f );
+	//	RaycastResult	 buildingHitResult	= thisBuilding->DoPerfectRaycast( startPosition, direction, maxDistance );
 
 		// If this one is the closest hit point, from start position
 		if( closestResult.didImpact == true )
@@ -347,8 +354,10 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 				closestResult = buildingHitResult;
 		}
 	}
+	Profiler::GetInstance()->Pop();
 
 	// Do House Raycast
+	Profiler::GetInstance()->Push( "AREA-3" );
 	GameObjectList &houses = m_gameObjects[ ENTITY_HOUSE ];
 	for( int i = 0; i < houses.size(); i++ )
 	{
@@ -370,6 +379,7 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 				closestResult = houseHitResult;
 		}
 	}
+	Profiler::GetInstance()->Pop();
 
 	return closestResult;
 }
@@ -472,7 +482,7 @@ void Scene_CollisionAvoidance::DebugRenderHotkeys()
 
 	// Change Camera Behavior
 	std::string camBehaviourChange = Stringf( "[B] Change Camera Behavior to \"%s\"", m_cameraManager->GetActiveCameraBehaviorName() != "Shoulder View" ? "Shoulder View" : "Follow" );
-	DebugRender2DText( 0.f, Vector2(160.f, 460.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, camBehaviourChange.c_str() );
+	DebugRender2DText( 0.f, Vector2(160.f, 440.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, camBehaviourChange.c_str() );
 }
 
 void Scene_CollisionAvoidance::DebugRenderRightStickInputVisualizer( Vector2 screenPosition, Matrix44 const &inputReferenceMat, Matrix44 const &actualCameraMat )
