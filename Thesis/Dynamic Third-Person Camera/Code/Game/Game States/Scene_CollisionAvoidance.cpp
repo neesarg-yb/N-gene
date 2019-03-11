@@ -424,10 +424,26 @@ void Scene_CollisionAvoidance::PerformSphereCollisionForPlayer( float deltaSecon
 		if( isCollided == false )
 			continue;
 
+		// Set new position
 		m_player->m_transform.SetPosition( newCenterPos );
 		
-		m_player->m_velocity.x = 0.f;
-		m_player->m_velocity.z = 0.f;
+		// Set new velocity
+		Vector3 &playerVelocityRef	= m_player->m_velocity;
+		Vector2  playerVelocityXZ	= Vector2( playerVelocityRef.x, playerVelocityRef.z );
+		Vector3	 pushbackVec3		= (newCenterPos - playerPosition);
+		Vector2	 pushbackXZ			= Vector2( pushbackVec3.x, pushbackVec3.z );
+		float	 pushbackLength		= pushbackXZ.NormalizeAndGetLength();
+		Vector2	 pushbackTangentXZ	= Vector2( -pushbackXZ.y, pushbackXZ.x );
+
+		if( AreEqualFloats( pushbackLength, 0.f, 4 ) )
+			return;
+
+		// We make the velocity on the normal ZERO, but let the player retain velocity on the tangent
+		float velocityOnSurfaceTangent = Vector2::DotProduct( pushbackTangentXZ, playerVelocityXZ );
+		Vector2 playerVelXZAfterImpact = (pushbackTangentXZ * velocityOnSurfaceTangent);
+
+		playerVelocityRef.x = playerVelXZAfterImpact.x;
+		playerVelocityRef.z = playerVelXZAfterImpact.y;
 
 		return;
 	}
