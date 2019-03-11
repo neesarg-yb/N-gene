@@ -411,9 +411,15 @@ void Scene_CollisionAvoidance::PerformSphereCollisionForPlayer( float deltaSecon
 {
 	UNUSED( deltaSeconds );
 
-	Vector3	playerPosition			= m_player->m_transform.GetWorldPosition();
-	float	playerBodyRadius		= m_player->m_bodyRadius;
-	
+	PerformPlayerCollisionAgainstBuildings();
+	PerformPlayerCollisionAgainstHouse();
+}
+
+void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstBuildings()
+{
+	Vector3	playerPosition	 = m_player->m_transform.GetWorldPosition();
+	float	playerBodyRadius = m_player->m_bodyRadius;
+
 	for( int b = 0; b < m_gameObjects[ ENTITY_BUILDING ].size(); b++ )
 	{
 		Building *thisBuilding = (Building*) m_gameObjects[ ENTITY_BUILDING ][ b ];
@@ -426,14 +432,14 @@ void Scene_CollisionAvoidance::PerformSphereCollisionForPlayer( float deltaSecon
 
 		// Set new position
 		m_player->m_transform.SetPosition( newCenterPos );
-		
+
 		// Set new velocity
 		Vector3 &playerVelocityRef	= m_player->m_velocity;
 		Vector2  playerVelocityXZ	= Vector2( playerVelocityRef.x, playerVelocityRef.z );
 		Vector3	 pushbackVec3		= (newCenterPos - playerPosition);
 		Vector2	 pushbackXZ			= Vector2( pushbackVec3.x, pushbackVec3.z );
 		float	 pushbackLength		= pushbackXZ.NormalizeAndGetLength();
-		Vector2	 pushbackTangentXZ	= Vector2( -pushbackXZ.y, pushbackXZ.x );
+		Vector2	 pushbackTangentXZ	= Vector2( -pushbackXZ.y, pushbackXZ.x );		// Fast rotating the normalized vector by 90 degrees
 
 		if( AreEqualFloats( pushbackLength, 0.f, 4 ) )
 			return;
@@ -447,6 +453,47 @@ void Scene_CollisionAvoidance::PerformSphereCollisionForPlayer( float deltaSecon
 
 		return;
 	}
+}
+
+void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstHouse()
+{
+	GameObjectList const &houseGOList = m_gameObjects[ ENTITY_HOUSE ];
+	if( houseGOList.size() == 0 )
+		return;
+
+	// There should be just one house in the scene
+	House const *house = (House*) houseGOList[0];
+	
+	Vector3	playerPosition	 = m_player->m_transform.GetWorldPosition();
+	float	playerBodyRadius = m_player->m_bodyRadius;
+	bool	isCollided		 = false;
+	Vector3	newCenterPos	 = house->CheckCollisionWithSphere( playerPosition, playerBodyRadius, isCollided );
+
+	if( isCollided == false )
+		return;
+
+	// Set new position
+	m_player->m_transform.SetPosition( newCenterPos );
+
+	// Set new velocity
+	Vector3 &playerVelocityRef	= m_player->m_velocity;
+	Vector2  playerVelocityXZ	= Vector2( playerVelocityRef.x, playerVelocityRef.z );
+	Vector3	 pushbackVec3		= (newCenterPos - playerPosition);
+	Vector2	 pushbackXZ			= Vector2( pushbackVec3.x, pushbackVec3.z );
+	float	 pushbackLength		= pushbackXZ.NormalizeAndGetLength();
+	Vector2	 pushbackTangentXZ	= Vector2( -pushbackXZ.y, pushbackXZ.x );		// Fast rotating the normalized vector by 90 degrees
+
+	if( AreEqualFloats( pushbackLength, 0.f, 4 ) )
+		return;
+
+	// We make the velocity on the normal ZERO, but let the player retain velocity on the tangent
+	float velocityOnSurfaceTangent = Vector2::DotProduct( pushbackTangentXZ, playerVelocityXZ );
+	Vector2 playerVelXZAfterImpact = (pushbackTangentXZ * velocityOnSurfaceTangent);
+
+	playerVelocityRef.x = playerVelXZAfterImpact.x;
+	playerVelocityRef.z = playerVelXZAfterImpact.y;
+
+	return;
 }
 
 void Scene_CollisionAvoidance::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )

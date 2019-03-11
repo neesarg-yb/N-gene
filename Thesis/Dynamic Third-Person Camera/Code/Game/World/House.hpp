@@ -24,5 +24,5 @@ public:
 	void RemoveRenderablesFromScene( Scene &activeScene );
 
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance, float accuracy ) const;
-	Vector3			CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding );
+	Vector3			CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const;
 };

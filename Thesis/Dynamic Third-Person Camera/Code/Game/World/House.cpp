@@ -134,7 +134,7 @@ RaycastResult House::Raycast( Vector3 const &startPosition, Vector3 const &direc
 	return result;
 }
 
-Vector3 House::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding )
+Vector3 House::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
 {
 	UNUSED( radius );
 	TODO( "Write a collision check!" );

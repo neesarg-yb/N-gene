@@ -62,6 +62,8 @@ public:
 
 private:
 	void PerformSphereCollisionForPlayer( float deltaSeconds );
+	void PerformPlayerCollisionAgainstBuildings();
+	void PerformPlayerCollisionAgainstHouse();
 
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
