@@ -61,6 +61,8 @@ public:
 	Vector3			SphereCollision( Sphere const &sphere );
 
 private:
+	void PerformSphereCollisionForPlayer( float deltaSeconds );
+
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );

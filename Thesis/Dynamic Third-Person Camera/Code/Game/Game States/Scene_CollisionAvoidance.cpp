@@ -262,6 +262,9 @@ void Scene_CollisionAvoidance::Update()
 			go->Update( deltaSeconds );
 	}
 
+	// Corrective Collision
+	PerformSphereCollisionForPlayer( deltaSeconds );
+
 	// Update Camera Stuffs
 	m_cameraManager->Update( deltaSeconds );
 
@@ -402,6 +405,32 @@ Vector3 Scene_CollisionAvoidance::SphereCollision( Sphere const &sphere )
 	}
 
 	return positionAfterCollision;
+}
+
+void Scene_CollisionAvoidance::PerformSphereCollisionForPlayer( float deltaSeconds )
+{
+	UNUSED( deltaSeconds );
+
+	Vector3	playerPosition			= m_player->m_transform.GetWorldPosition();
+	float	playerBodyRadius		= m_player->m_bodyRadius;
+	
+	for( int b = 0; b < m_gameObjects[ ENTITY_BUILDING ].size(); b++ )
+	{
+		Building *thisBuilding = (Building*) m_gameObjects[ ENTITY_BUILDING ][ b ];
+
+		bool isCollided = false;
+		Vector3 newCenterPos = thisBuilding->CheckCollisionWithSphere( playerPosition, playerBodyRadius, isCollided );
+
+		if( isCollided == false )
+			continue;
+
+		m_player->m_transform.SetPosition( newCenterPos );
+		
+		m_player->m_velocity.x = 0.f;
+		m_player->m_velocity.z = 0.f;
+
+		return;
+	}
 }
 
 void Scene_CollisionAvoidance::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
