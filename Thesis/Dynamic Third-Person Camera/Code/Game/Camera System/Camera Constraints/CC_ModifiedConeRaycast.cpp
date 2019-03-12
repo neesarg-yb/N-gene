@@ -14,7 +14,7 @@
 #include "Game/Camera System/DebugCamera.hpp"
 
 float s_raMultiplier				= 3.f;
-float s_rotDegreesChangeSpeed		= 55.f;
+float s_rotDegreesChangeSpeed		= 85.f;
 float s_minRotChangePerFrameReqired	= 0.6f;
 
 void ChaneRAMultiplier( Command &cmd )
@@ -132,7 +132,7 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	CartesianToPolar( cameraPosRelativeToPlayer, cameraRadius, cameraRotation, cameraAltitude );
 
 	// Calculate Reduction in Radius
-	float reductionInRadius = CalculateRadiusReduction( weightedRaycastResults, cameraRadius );
+	float reductionInRadius = m_radiusReductionMultiplier * CalculateRadiusReduction( weightedRaycastResults, cameraRadius );
 
 	// Calculate rotation & altitude change
 	float rotationChange = 0.f;

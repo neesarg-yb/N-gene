@@ -1,12 +1,16 @@
 #pragma once
 #include "CC_LineOfSight.hpp"
+#include "Engine/Core/Clock.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/GameCommon.hpp"
 
 CC_LineOfSight::CC_LineOfSight( char const *name, CameraManager &manager, uint8_t priority )
 	: CameraConstraint( name, manager, priority )
 {
-
+	
 }
 
 CC_LineOfSight::~CC_LineOfSight()
@@ -29,6 +33,22 @@ void CC_LineOfSight::Execute( CameraState &suggestedCameraState )
 
 	RaycastResult hitResult = context.raycastCallback( playerPosition, towardsCamera, raycastDistance );
 	if( hitResult.didImpact )
-		suggestedCameraState.m_position = hitResult.impactPosition - (towardsCamera * context.cameraCollisionRadius);
+		suggestedCameraState.m_position = hitResult.impactPosition - (towardsCamera * m_radiusReduction);
+}
+
+void CC_LineOfSight::ProcessDebugInput()
+{
+	float changeRate = 1.f;
+	float deltaSeconds = (float) GetMasterClock()->GetFrameDeltaSeconds();
+
+	bool increase = g_theInput->IsKeyPressed( 'M' );
+	bool decrease = g_theInput->IsKeyPressed( 'N' );
+
+	float deltaRadiusSize = 0.f;
+	deltaRadiusSize += increase ? (changeRate * deltaSeconds) : 0.f;
+	deltaRadiusSize -= decrease ? (changeRate * deltaSeconds) : 0.f;
+
+	m_radiusReduction += deltaRadiusSize;
+	DebugRender2DText( 0.f, Vector2( -50.f, -50.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, Stringf( "LoS RadiusSize = %.2f", m_radiusReduction ) );
 }
 

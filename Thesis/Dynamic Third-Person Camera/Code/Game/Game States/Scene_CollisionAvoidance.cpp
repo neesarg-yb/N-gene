@@ -278,6 +278,8 @@ void Scene_CollisionAvoidance::Update()
 	Matrix44 actualCamMatrix	= m_camera->m_cameraTransform.GetWorldTransformMatrix();
 	Vector2  rightStickVisPos	= Vector2( 139.f, -340.f );
 	DebugRenderRightStickInputVisualizer( rightStickVisPos, inputRefCamMatrix, actualCamMatrix );
+
+	DebugRenderWireSphere( 0.f, m_camera->m_cameraTransform.GetWorldPosition(), m_cameraManager->GetCameraContext().cameraCollisionRadius, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const

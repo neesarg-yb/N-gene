@@ -8,6 +8,12 @@ public:
 	~CC_LineOfSight();
 
 public:
+	float m_radiusReduction = 0.4f;			// Distance by which the camera is move towards the player from impact point of the raycast
+
+public:
 	void Execute( CameraState &suggestedDestination );
+
+private:
+	void ProcessDebugInput();
 
 };
