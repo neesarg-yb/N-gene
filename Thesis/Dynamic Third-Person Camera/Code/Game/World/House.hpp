@@ -16,7 +16,7 @@ public:
 	Terrain const &m_parentTerrain;
 
 public:
-	std::vector< AABB3 >	m_wallsWorldBounds;
+	std::vector< AABB3 > m_wallsWorldBounds;
 
 public:
 	void Update( float deltaSeconds );

@@ -136,9 +136,29 @@ RaycastResult House::Raycast( Vector3 const &startPosition, Vector3 const &direc
 
 Vector3 House::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
 {
-	UNUSED( radius );
-	TODO( "Write a collision check!" );
-
 	outIsColliding = false;
-	return center;
+	Vector3 newCenterPos = center;
+
+	for( int b = 0; b < m_wallsWorldBounds.size(); b++ )
+	{
+		AABB3 const &thisWallBounds = m_wallsWorldBounds[b];
+
+		Vector3	closestPoint	= thisWallBounds.GetClosestPointInsideBounds( newCenterPos );
+		Vector3	posDifference	= newCenterPos - closestPoint;
+		float	distFromWall	= posDifference.NormalizeAndGetLength();
+
+		if( AreEqualFloats(distFromWall, 0.f, 4) )
+			continue;
+
+		if( distFromWall >= radius )
+			continue;
+
+		// i.e. radius > distFromWall
+		float pushDistance = radius - distFromWall;
+		
+		newCenterPos += posDifference * pushDistance;
+		outIsColliding = true;
+	}
+
+	return newCenterPos;
 }
