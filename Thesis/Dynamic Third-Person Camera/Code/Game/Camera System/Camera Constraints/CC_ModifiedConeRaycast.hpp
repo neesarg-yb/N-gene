@@ -56,7 +56,7 @@ public:
 	std::vector< int >	 m_numRaysInLayer		= { 5, 10, 15, 20, 25 };
 
 	// Radius Reduction
-	float				 m_radiusReductionMultiplier = 1.2f;			// How much more the radius is reduced from the suggestion of cone raycasts
+	float				 m_radiusReductionMultiplier = 1.f;				// How much more the radius is reduced from the suggestion of cone raycasts
 
 	// Raycast Reduction Weight Reaction
 	float const			 m_velocityReactionFrac = 0.38f;				// How much weights reacts to the projected velocity

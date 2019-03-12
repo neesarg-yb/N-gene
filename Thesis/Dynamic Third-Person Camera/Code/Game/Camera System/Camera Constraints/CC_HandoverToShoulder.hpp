@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/CameraSystem/CameraConstraint.hpp"
+#include "Game/GameCommon.hpp"
 
 class CB_Follow;
 class CB_ShoulderView;
@@ -13,7 +14,7 @@ public:
 private:
 	CB_Follow		&m_followBehavior;
 	CB_ShoulderView	&m_shoulderBehavior;
-	float			 m_thresholdDistance = 1.f;		// Minimum required dist( camera, player ) to switch to Shoulder Behavior
+	float			 m_thresholdDistance = 1.f + LOS_RADIUS_REDUCTION;	// Minimum required dist( camera, player ) to switch to Shoulder Behavior
 
 public:
 	void Execute( CameraState &suggestedCameraState );

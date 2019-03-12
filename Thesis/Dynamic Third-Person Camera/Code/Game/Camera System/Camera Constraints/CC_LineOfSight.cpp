@@ -21,7 +21,7 @@ CC_LineOfSight::~CC_LineOfSight()
 void CC_LineOfSight::Execute( CameraState &suggestedCameraState )
 {
 	PROFILE_SCOPE_FUNCTION();
-
+	
 	// Get context
 	CameraContext context = m_manager.GetCameraContext();
 
@@ -29,11 +29,13 @@ void CC_LineOfSight::Execute( CameraState &suggestedCameraState )
 	Vector3	playerPosition	= context.anchorGameObject->m_transform.GetWorldPosition();
 	Vector3	cameraPosition	= suggestedCameraState.m_position;
 	Vector3	towardsCamera	= cameraPosition - playerPosition;
-	float	raycastDistance	= towardsCamera.NormalizeAndGetLength();
+	float	raycastDistance	= towardsCamera.NormalizeAndGetLength() + m_radiusReduction;
 
 	RaycastResult hitResult = context.raycastCallback( playerPosition, towardsCamera, raycastDistance );
 	if( hitResult.didImpact )
 		suggestedCameraState.m_position = hitResult.impactPosition - (towardsCamera * m_radiusReduction);
+
+	// DebugRenderRaycast( 0.f, playerPosition, hitResult, 1.f, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 }
 
 void CC_LineOfSight::ProcessDebugInput()

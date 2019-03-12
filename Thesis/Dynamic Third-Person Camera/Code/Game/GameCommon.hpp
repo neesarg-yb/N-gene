@@ -18,6 +18,7 @@ enum WorldEntityTypes
 //--------------------
 // GLOBAL CONSTANTS
 float constexpr PLAYER_MAX_SPEED = 7.f;
+float constexpr LOS_RADIUS_REDUCTION = 0.4f;
 
 
 //--------------------

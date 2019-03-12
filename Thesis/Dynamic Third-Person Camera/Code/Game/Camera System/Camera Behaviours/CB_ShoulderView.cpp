@@ -78,6 +78,9 @@ CameraState CB_ShoulderView::Update( float deltaSeconds, CameraState const &curr
 
 void CB_ShoulderView::SetupForIncomingHandover( float rotationAroundAnchor, Vector3 const &currentCameraPos )
 {
+	// It is going to be a new handover, so clear the previous pitch
+	m_localPitchOffset = 0.f;
+
 	// Set rotation
 	m_rotationAroundAnchor = rotationAroundAnchor;
 
@@ -125,7 +128,7 @@ void CB_ShoulderView::ProcessInput( float deltaSeconds )
 
 	m_rotationAroundAnchor	+= rightStickPosition.x * -1.f * m_rotationChangeSpeed * deltaSeconds;
 	m_localPitchOffset		+= rightStickPosition.y * +1.f * (m_rotationChangeSpeed * 0.7f) * deltaSeconds;
-	m_localPitchOffset = ClampFloat( m_localPitchOffset, m_cameraPitchOffsetLimits.min, m_cameraPitchOffsetLimits.max );
+	m_localPitchOffset		 = ClampFloat( m_localPitchOffset, m_cameraPitchOffsetLimits.min, m_cameraPitchOffsetLimits.max );
 }
 
 bool CB_ShoulderView::IsCurrentCameraPositionNearToRightShoulder( float rotationAroundAnchor, Vector3 const &cameraPos )

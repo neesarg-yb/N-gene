@@ -19,7 +19,7 @@ private:
 	float		m_heightFromAnchorPosition	= 0.f;		// On world Y Axis, from anchor's XZ position
 
 	float		m_rotationChangeSpeed		= 50.f;		// Degrees per seconds
-	FloatRange	m_cameraPitchOffsetLimits	= FloatRange( -45.f, 45.f );
+	FloatRange	m_cameraPitchOffsetLimits	= FloatRange( -16.f, 16.f );
 
 public:
 	void		PreUpdate();
