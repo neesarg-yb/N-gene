@@ -39,9 +39,7 @@ void CC_HandoverToShoulder::Execute( CameraState &suggestedCameraState )
 
 	RaycastResult	hitResults			= context.raycastCallback( startPosition, rayDirection, maxDistance );
 	float			distanceTravelled	= hitResults.fractionTravelled * maxDistance;
-
-	// DebugRenderRaycast( 0.f, startPosition, hitResults, 1.f, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
-
+	
 	// If too close from anchor
 	if( distanceTravelled < m_thresholdDistance )
 	{
