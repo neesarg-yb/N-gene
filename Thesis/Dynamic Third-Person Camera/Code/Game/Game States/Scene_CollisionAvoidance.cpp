@@ -101,7 +101,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->SetSphereCollisionCallback( collisionFunc );
 
 	// Camera Behaviour
-	CameraBehaviour* followBehaviour		= new CB_Follow( 6.3f, 80.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
+	CameraBehaviour* followBehaviour		= new CB_Follow( 6.3f, 70.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
 	CameraBehaviour* shoulderBehavior		= new CB_ShoulderView( 0.17f, 0.33f, 0.36f, -17.f, 17.f, "Shoulder View", m_cameraManager );
 	followBehaviour->m_motionControllerName = "Proportional Controller";	
 

@@ -14,7 +14,7 @@
 #include "Game/Camera System/DebugCamera.hpp"
 
 float s_raMultiplier				= 3.f;
-float s_rotDegreesChangeSpeed		= 85.f;
+float s_rotDegreesChangeSpeed		= 70.f;
 float s_minRotChangePerFrameReqired	= 0.6f;
 
 void ChaneRAMultiplier( Command &cmd )
