@@ -64,6 +64,7 @@ public:
 private:
 	float				 m_fNumCircularLayers	= (float) m_numCircularLayers;
 	CB_Follow			*m_followBehavior		= nullptr;
+	bool				 m_isDebuggingForImpact	= true;
 
 public:
 	void	Execute( CameraState &suggestedCameraState );
@@ -91,6 +92,6 @@ private:
 	void	CalculateRotationAltitudeChange( std::vector< WeightedTargetPoint_MCR > const &targetPoints, std::vector< WeightedRaycastResult_MCR > const &raycastResults, CameraState const &cameraState, float &rotationChange_out, float &altitudeChange_out );
 
 	// Renders all the target points on a 2D canvas, for debugging their weights
-	void	DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState, Vector3 const &projectedVelocity );
+	void	DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, std::vector< WeightedRaycastResult_MCR > const &raycastResults, CameraState const &cameraState, Vector3 const &projectedVelocity );
 	Rgba	GetColorFromWeight( float weight ) const;
 };

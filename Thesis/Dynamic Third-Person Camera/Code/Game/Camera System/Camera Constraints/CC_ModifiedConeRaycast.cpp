@@ -101,28 +101,16 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	std::vector< WeightedTargetPoint_MCR > weightedTargetPoints;
 	AssignWeightToTargetPoints( weightedTargetPoints, targetPointsOnSphere, cameraPosRelativeToPlayer, projectedVelocity );
 	Profiler::GetInstance()->Pop();
-
-	// DEBUG RENDER
-	Profiler::GetInstance()->Push( "DEBUG RENDER TARGET POINTS" );
-	DebugRenderWeightedTargetPoints( weightedTargetPoints, suggestedCameraState, cameraPosRelativeToPlayer + projectedVelocity );
-
-	for each (WeightedTargetPoint_MCR point in weightedTargetPoints)
-	{
-		Vector3 debugPointPos		= point.targetPoint + playerPosition;
-		Rgba	sphereWeightColor	= GetColorFromWeight( point.weightRR );
-		DebugRenderSphere( 0.f, debugPointPos, 0.1f, sphereWeightColor, sphereWeightColor, DEBUG_RENDER_XRAY );
-
-		Vector3 rrWPos = Vector3( debugPointPos );
-		Vector3 arWPos = Vector3( rrWPos.x, rrWPos.y - 0.10f, rrWPos.z );
-		DebugRenderTag( 0.f, 0.08f, rrWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "rrW %.2f", point.weightRR ) );
-		DebugRenderTag( 0.f, 0.08f, arWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "arW %.2f", point.weightAR ) );
-	}
-	Profiler::GetInstance()->Pop();
 	
 	// Perform Raycasts
 	Profiler::GetInstance()->Push( "PERFORM RAYCAST" );
 	std::vector< WeightedRaycastResult_MCR > weightedRaycastResults;
 	PerformRaycastOnTargetPoints( weightedRaycastResults, weightedTargetPoints, playerPosition );
+	Profiler::GetInstance()->Pop();
+
+	// DEBUG RENDER
+	Profiler::GetInstance()->Push( "DEBUG RENDER TARGET POINTS" );
+	DebugRenderWeightedTargetPoints( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, cameraPosRelativeToPlayer + projectedVelocity );
 	Profiler::GetInstance()->Pop();
 
 	// Polar coordinate of camera, relative to the player position
@@ -204,6 +192,11 @@ void CC_ModifiedConeRaycast::DebugRenderSettingsDetails()
 	std::string numLayersStr	 = Stringf( "+[U] -[J], to change number circular layers: %d",  m_numCircularLayers );
 	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 40.f ), 17.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, maxRotDegreesStr.c_str() );
 	DebugRender2DText( 0.f, Vector2( graphBounds.mins.x, graphBounds.maxs.y + 60.f ), 17.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, numLayersStr.c_str() );
+
+	AABB2 backgroundBounds = AABB2( Vector2(-710.f, -50.f), 150.f, 150.f );
+	Vector2 changeCircleDebugViewPos = Vector2( graphBounds.mins.x, 105.f );
+	std::string changeDebugViewStr = Stringf( "[I] Debug Circle Mode: %s", m_isDebuggingForImpact ? "IMPACT" : "WEIGHTS" );
+	DebugRender2DText( 0.f, changeCircleDebugViewPos, 17.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, changeDebugViewStr.c_str() );
 }
 
 void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
@@ -228,6 +221,8 @@ void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
 		IncrementNumCircularLayers( deltaSeconds,  1.f );			// Increment
 	if( g_theInput->IsKeyPressed( 'J' ) )
 		IncrementNumCircularLayers( deltaSeconds, -1.f );			// Decrement
+	if( g_theInput->WasKeyJustPressed( 'I' ) )
+		m_isDebuggingForImpact = !m_isDebuggingForImpact;
 
 	m_curveHeight		= ClampFloat( m_curveHeight, 0.0001f, 10.f );
 	m_curveWidthFactor	= ClampFloat( m_curveWidthFactor, 0.0001f, 10.f );
@@ -498,42 +493,20 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 	else
 		rotationChange_out = 0.f;
 
+	if( m_isDebuggingForImpact )
+	{
+		TODO( "INCOMPLETE!" );
+		Vector2 debugCircleCenter	= Vector2(-710.f, -50.f);
+		float	debugCircleRadius	= 150.f;
+		Vector2 lineEndPosition		= (reactionVector.x == 0.f) ? Vector2::ZERO : (Vector2(-reactionVector.x, 0.f).GetNormalized() * debugCircleRadius);
+		DebugRender2DLine( 0.f, debugCircleCenter, RGBA_BLUE_COLOR, debugCircleCenter + lineEndPosition, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	}
+
 	UNUSED( altitudeChange_out );
 	UNUSED( altitudeChangeDegrees );
-// 	if( fabsf(altitudeChangeDegrees) > s_minRotChangePerFrameReqired )
-// 		altitudeChange_out = altitudeChangeDegrees;
-// 	else
-// 		altitudeChange_out = 0.f;
-// 	
-// 
-// 	//--------------------------
-// 	// Debug Stuffs [ No Logic ]
-// 	//
-// 	DebugRender2DText( 0.f, raMultPos,				15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("RA Multiplier      =  %.3f", s_raMultiplier) );
-// 	DebugRender2DText( 0.f, radiusReductionPos,		15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rotation Reduction =  %.3f", reactionVector.x ) );
-// 	DebugRender2DText( 0.f, altitudeReductionPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Altitude Reduction =  %.3f", reactionVector.y ) );
-// 
-// 	Vector2 rotSpeedPos = Vector2( altitudeReductionPos.x, altitudeReductionPos.y - 20.f );
-// 	DebugRender2DText( 0.f, rotSpeedPos,			15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Rot Speed          =  %.1f (deg/sec)", s_rotDegreesChangeSpeed) );
-// 
-// 	Vector2 rotChangePerFramePos = Vector2( rotSpeedPos.x, rotSpeedPos.y - 20.f );
-// 	DebugRender2DText( 0.f, rotChangePerFramePos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Rot Change / Frame =  %.3f", s_rotDegreesChangeSpeed * deltaSeconds) );
-// 
-// 	Vector2 rotChangeAppliedPos  = Vector2( rotChangePerFramePos.x, rotChangePerFramePos.y - 20.f );
-// 	DebugRender2DText( 0.f, rotChangeAppliedPos,	15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("Applied Rot Change =  %.3f", rotationChangeDegrees) );
-// 
-// 	Vector2 minRotPerFramePos = Vector2( rotChangeAppliedPos.x, rotChangeAppliedPos.y - 20.f );
-// 	DebugRender2DText( 0.f, minRotPerFramePos,		15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf("Min Rot Change Req =  %.1f / frame", s_minRotChangePerFrameReqired) );
-// 
-//  	// If rotation change is greater than some threshold, apply it!
-//  	Vector2 rotAppliedNotAppliedPos = Vector2( minRotPerFramePos.x, minRotPerFramePos.y - 20.f );
-// 	if( fabsf(rotationChangeDegrees) > s_minRotChangePerFrameReqired )
-// 		rotationChange_out = rotationChangeDegrees;
-// 	else
-// 		DebugRender2DText( 0.f, rotAppliedNotAppliedPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("Rot [IGNORED]") );
 }
 
-void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< WeightedTargetPoint_MCR > const &targetPoints, CameraState const &cameraState, Vector3 const &projectedVelocity )
+void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector<WeightedTargetPoint_MCR> const &targetPoints, std::vector<WeightedRaycastResult_MCR> const &raycastResults, CameraState const &cameraState, Vector3 const &projectedVelocity )
 {
 	Vector3 playerPosition		= m_manager.GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
 	Vector3 cameraPosition		= cameraState.m_position;
@@ -549,15 +522,19 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 	AABB2					boundsPoints = AABB2( (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::min)(), (std::numeric_limits<float>::min)() );
 	std::vector< Vector2 >	pointsToRender;
 	std::vector< float >	weightsOfPoints;
+	std::vector< bool >		didImpactForPoints;
 
-	for each (WeightedTargetPoint_MCR point in targetPoints)
+	for(int tpId = 0; tpId < targetPoints.size(); tpId++)
 	{
+		WeightedTargetPoint_MCR point = targetPoints[ tpId ];
+
 		// Add vec2 point and its weight to the vector
 		Vector3 pointInCameraSpace = sphereToCameraMatrix.Multiply( point.targetPoint, 1.f );
 		Vector2 position2D( pointInCameraSpace.x, pointInCameraSpace.y );
 		
 		pointsToRender.push_back( position2D );
 		weightsOfPoints.push_back( point.weightRR );
+		didImpactForPoints.push_back( raycastResults[ tpId ].result.didImpact );
 
 		// Update min & max bounds
 		Vector2 &mins = boundsPoints.mins;
@@ -570,37 +547,64 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector< Weigh
 		maxs.y = ( position2D.y > maxs.y ) ? position2D.y : maxs.y;
 	}
 
-	// Render background
+	// Render background on Screen Space
 	AABB2 backgroundBounds = AABB2( Vector2(-710.f, -50.f), 150.f, 150.f );
 	DebugRender2DQuad( 0.f, backgroundBounds, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
 
-	// Bounds of canvas
+	// Bounds of canvas on Screen Space
 	float radiusOfPoint = 5.f;
 	AABB2 canvasBounds= AABB2(	backgroundBounds.mins.x + radiusOfPoint + 2.f, 
 								backgroundBounds.mins.y + radiusOfPoint + 2.f, 
 								backgroundBounds.maxs.x - radiusOfPoint - 2.f, 
 								backgroundBounds.maxs.y - radiusOfPoint - 2.f	);
 	
-	// Render velocity-line
+	// Render velocity-line on Screen Space
 	Vector3 projVelInCameraSpace	= sphereToCameraMatrix.Multiply( projectedVelocity, 1.f ) * m_velocityReactionFrac;
 	float	projVelScreenPositionX	= RangeMapFloat( projVelInCameraSpace.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
 	float	projVelScreenPositionY	= RangeMapFloat( projVelInCameraSpace.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
 	Vector2 projVelInCameraSpaceXY	= Vector2( projVelScreenPositionX, projVelScreenPositionY );
 	DebugRender2DLine( 0.f, canvasBounds.GetCenter(), RGBA_BLUE_COLOR, projVelInCameraSpaceXY, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
 
-	// Render each points
+	// Render each points on Screen Space
 	for( uint i = 0; i < pointsToRender.size(); i++ )
 	{
 		Vector2	&positionXY	= pointsToRender[i];
 		float	&weight		= weightsOfPoints[i];
 
-		float screenPositionX = RangeMapFloat( positionXY.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
-		float screenPositionY = RangeMapFloat( positionXY.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
-		
+		float	screenPositionX = RangeMapFloat( positionXY.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
+		float	screenPositionY = RangeMapFloat( positionXY.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
 		Vector2	screenPosition( screenPositionX, screenPositionY );
-		Rgba	weightColor = GetColorFromWeight( weight );
+		
+		Rgba dotColor = GetColorFromWeight( weight );
+		if( m_isDebuggingForImpact )
+			 dotColor = didImpactForPoints[i] ? RGBA_RED_COLOR : RGBA_GREEN_COLOR;
 
-		DebugRender2DRound( 0.f, screenPosition, radiusOfPoint, 10U, weightColor, weightColor );
+		DebugRender2DRound( 0.f, screenPosition, radiusOfPoint, 10U, dotColor, dotColor );
+	}
+
+	// Debug Render the target points in 3D world
+	Matrix44 debugCamMatrix = g_activeDebugCamera->GetCameraModelMatrix();
+	for( int tp = 0; tp < targetPoints.size(); tp++ )
+	{
+		WeightedTargetPoint_MCR point = targetPoints[tp];
+		Vector3	debugPointPos		  = point.targetPoint + playerPosition;
+		Rgba	debugSphereColor	  = GetColorFromWeight( point.weightRR );
+
+		if( m_isDebuggingForImpact )
+		{
+			bool didImpact	 = raycastResults[tp].result.didImpact;
+			debugSphereColor = didImpact ? RGBA_RED_COLOR : RGBA_GREEN_COLOR;
+		}
+
+		DebugRenderSphere( 0.f, debugPointPos, 0.1f, debugSphereColor, debugSphereColor, DEBUG_RENDER_XRAY );
+
+		if( m_isDebuggingForImpact == false )
+		{
+			Vector3 rrWPos = Vector3( debugPointPos );
+			Vector3 arWPos = Vector3( rrWPos.x, rrWPos.y - 0.10f, rrWPos.z );
+			DebugRenderTag( 0.f, 0.08f, rrWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "rrW %.2f", point.weightRR ) );
+			DebugRenderTag( 0.f, 0.08f, arWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "arW %.2f", point.weightAR ) );
+		}
 	}
 }
 
