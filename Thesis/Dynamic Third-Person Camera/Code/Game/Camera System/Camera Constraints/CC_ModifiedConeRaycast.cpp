@@ -498,8 +498,10 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 		TODO( "INCOMPLETE!" );
 		Vector2 debugCircleCenter	= Vector2(-710.f, -50.f);
 		float	debugCircleRadius	= 150.f;
-		Vector2 lineEndPosition		= (reactionVector.x == 0.f) ? Vector2::ZERO : (Vector2(-reactionVector.x, 0.f).GetNormalized() * debugCircleRadius);
-		DebugRender2DLine( 0.f, debugCircleCenter, RGBA_BLUE_COLOR, debugCircleCenter + lineEndPosition, RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+		Vector2 lineEndPosition		= Vector2(-rotationChange_out, 0.f) * debugCircleRadius * 0.6f;
+		
+		if( rotationChange_out != 0.f )
+			DebugRender2DLine( 0.f, debugCircleCenter, RGBA_WHITE_COLOR, debugCircleCenter + lineEndPosition, RGBA_MAGENTA_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
 	}
 
 	UNUSED( altitudeChange_out );
@@ -559,11 +561,14 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector<Weight
 								backgroundBounds.maxs.y - radiusOfPoint - 2.f	);
 	
 	// Render velocity-line on Screen Space
-	Vector3 projVelInCameraSpace	= sphereToCameraMatrix.Multiply( projectedVelocity, 1.f ) * m_velocityReactionFrac;
-	float	projVelScreenPositionX	= RangeMapFloat( projVelInCameraSpace.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
-	float	projVelScreenPositionY	= RangeMapFloat( projVelInCameraSpace.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
-	Vector2 projVelInCameraSpaceXY	= Vector2( projVelScreenPositionX, projVelScreenPositionY );
-	DebugRender2DLine( 0.f, canvasBounds.GetCenter(), RGBA_BLUE_COLOR, projVelInCameraSpaceXY, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	if( m_isDebuggingForImpact == false )
+	{
+		Vector3 projVelInCameraSpace	= sphereToCameraMatrix.Multiply( projectedVelocity, 1.f ) * m_velocityReactionFrac;
+		float	projVelScreenPositionX	= RangeMapFloat( projVelInCameraSpace.x, boundsPoints.mins.x, boundsPoints.maxs.x, canvasBounds.mins.x, canvasBounds.maxs.x );
+		float	projVelScreenPositionY	= RangeMapFloat( projVelInCameraSpace.y, boundsPoints.mins.y, boundsPoints.maxs.y, canvasBounds.mins.y, canvasBounds.maxs.y );
+		Vector2 projVelInCameraSpaceXY	= Vector2( projVelScreenPositionX, projVelScreenPositionY );
+		DebugRender2DLine( 0.f, canvasBounds.GetCenter(), RGBA_BLUE_COLOR, projVelInCameraSpaceXY, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+	}
 
 	// Render each points on Screen Space
 	for( uint i = 0; i < pointsToRender.size(); i++ )
@@ -601,8 +606,9 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector<Weight
 		if( m_isDebuggingForImpact == false )
 		{
 			Vector3 rrWPos = Vector3( debugPointPos );
+			DebugRenderTag( 0.f, 0.08f, rrWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "%.2f", point.weightRR ) );
+			
 			Vector3 arWPos = Vector3( rrWPos.x, rrWPos.y - 0.10f, rrWPos.z );
-			DebugRenderTag( 0.f, 0.08f, rrWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "rrW %.2f", point.weightRR ) );
 			DebugRenderTag( 0.f, 0.08f, arWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "arW %.2f", point.weightAR ) );
 		}
 	}
