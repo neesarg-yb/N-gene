@@ -581,8 +581,9 @@ void Scene_CollisionAvoidance::DebugRenderHotkeys()
 
 void Scene_CollisionAvoidance::DebugRenderRightStickInputVisualizer( Vector2 screenPosition, Matrix44 const &inputReferenceMat, Matrix44 const &actualCameraMat )
 {
-	float indicatorLength = 100.f;
-	Vector2 leftStick = g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	float	indicatorLength = 100.f;
+	Vector2 leftStick		= g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	bool	wasBJustPressed	= g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed;
 
 	//---------------------------------------
 	// Input relative to the REFERENCE matrix
@@ -635,9 +636,26 @@ void Scene_CollisionAvoidance::DebugRenderRightStickInputVisualizer( Vector2 scr
 	DebugRender2DText( 0.f, Vector2(leftMiddle.x, leftMiddle.y), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "W" );
 	DebugRender2DText( 0.f, Vector2(rightMiddle.x - 15.f, rightMiddle.y), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, "E" );
 
-	// Interpolated Player input relative to work
+	// Show the input line for few seconds after player has pressed reorient button
+	float static showInitialStateForSeconds = 0.f;
+	Vector2 static cachedScreenPos;
+	Vector2 static cachedRefMatDebugLineEndPoint;
+	if( wasBJustPressed )
+	{
+		showInitialStateForSeconds = 3.f;
+
+		cachedScreenPos = screenPosition;
+		cachedRefMatDebugLineEndPoint = refMatDebugLineEndPoint;
+	}
+
+	if( showInitialStateForSeconds > 0.f )
+		DebugRender2DLine( 0.f, cachedScreenPos, RGBA_KHAKI_COLOR, cachedRefMatDebugLineEndPoint, RGBA_RED_COLOR, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
+
+	// Interpolated Player input relative to world
 	DebugRender2DLine( 0.f, screenPosition, RGBA_GRAY_COLOR, camMatDebugLineEndPoint, RGBA_GRAY_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );		// Actual Camera Matrix - Input Line
 	DebugRender2DLine( 0.f, screenPosition, RGBA_KHAKI_COLOR, refMatDebugLineEndPoint, RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );		// Reference Matrix - Input Line
+
+	showInitialStateForSeconds -= (float) m_clock->GetFrameDeltaSeconds();
 }
 
 void Scene_CollisionAvoidance::SwitchBetweenFollowAndShoulderBehavior()
