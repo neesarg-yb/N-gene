@@ -453,9 +453,6 @@ Matrix44 Matrix44::MakeLookAtView( const Vector3& target_position, const Vector3
 	Vector3 zaxis = (target_position - camera_position).GetNormalized();
 	Vector3 xaxis = Vector3::CrossProduct(camera_up_vector, zaxis).GetNormalized();
 	Vector3 yaxis = Vector3::CrossProduct(zaxis, xaxis);
-	Vector3 taxis = Vector3( Vector3::DotProduct(xaxis, camera_position),
-							 Vector3::DotProduct(yaxis, camera_position),
-							 Vector3::DotProduct(zaxis, camera_position) );
 	
 	toReturn.Ix	= xaxis.x;
 	toReturn.Iy = yaxis.x;
