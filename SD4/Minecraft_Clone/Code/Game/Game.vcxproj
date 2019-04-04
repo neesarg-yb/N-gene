@@ -371,6 +371,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cameras\MCamera.cpp" />
+    <ClCompile Include="Debug\DebugRenderUtils.cpp" />
     <ClCompile Include="Game States\GameState.cpp" />
     <ClCompile Include="Game States\MinecraftWorld.cpp" />
     <ClCompile Include="Game States\Attract.cpp" />
@@ -390,6 +391,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cameras\MCamera.hpp" />
+    <ClInclude Include="Debug\DebugRenderUtils.hpp" />
     <ClInclude Include="Game States\GameState.hpp" />
     <ClInclude Include="Game States\MinecraftWorld.hpp" />
     <ClInclude Include="Game States\Attract.hpp" />

@@ -70,6 +70,24 @@ enum eNeighborChunkDirection
 	NUM_NEIGHBOR_CHUNKS
 };
 
+enum ePhysicsMode
+{
+	PHYSICS_NO_CLIP = 0,
+	PHYSICS_FLY,
+	PHYSICS_WALK,
+	NUM_PHYSICS_MODES
+};
+std::string GetAsString( ePhysicsMode physicsMode );
+
+enum eCameraMode
+{
+	CAMERA_DETATCHED = 0,
+	CAMERA_1ST_PERSON,
+	CAMERA_OVER_THE_SHOULDER,
+	CAMERA_FIXED_ANGLE,
+	NUM_CAMERA_MODES
+};
+std::string GetAsString( eCameraMode cameraMode );
 
 //-----------------
 // GLOBAL VARIABLES

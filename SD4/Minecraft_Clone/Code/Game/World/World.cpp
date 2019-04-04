@@ -5,6 +5,7 @@
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
+#include "Game/Debug/DebugRenderUtils.hpp"
 
 World::World( Clock *parentClock )
 	: m_clock( parentClock )
@@ -43,9 +44,7 @@ void World::Update()
 {
 	float const deltaSeconds = (float) m_clock.GetFrameDeltaSeconds();
 
-	// Moves the camera, for now
 	ProcessInput( deltaSeconds );
-
 
 	UpdateWorldTime( deltaSeconds );
 
@@ -330,6 +329,10 @@ void World::ProcessInput( float deltaSeconds )
 		upMovement += m_flySpeed * speedScale * deltaSeconds;
 	if( g_theInput->IsKeyPressed( 'E' ) )
 		upMovement -= m_flySpeed * speedScale * deltaSeconds;
+	if( g_theInput->WasKeyJustPressed( 'P' ) )
+		CyclePhysicsMode();
+	if( g_theInput->WasKeyJustPressed( 'C' ) )
+		CycleCameraMode();
 
 	Vector3 positionChange = (forwardDir * forwardMovement) + (leftDir * leftMovement) + (upDir * upMovement);
 	m_camera->m_position += positionChange;
@@ -359,6 +362,30 @@ void World::DebugRenderInputKeyInfo() const
 	DebugRender2DText( 0.f, daytimeFractionTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("Normalized Daytime : %.2f (%s)", daytimeNormalized, daytimeNormalized < 0.f ? "night" : "DAY" ) );
 	Vector2 daytimeFastForwardTxt = daytimeFractionTxtPos + Vector2( 0.f, -20.f );
 	DebugRender2DText( 0.f, daytimeFastForwardTxt, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR,         "Fast Forward       : [T]" );
+
+	// Physics and Camera Mode
+	Vector2 physicsModeTxtPos = daytimeFastForwardTxt + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, physicsModeTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( "Physics Mode       : [P] (%s)", GetAsString(m_physicsMode).c_str() ) );
+	Vector2 cameraModeTxtPos = physicsModeTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, cameraModeTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( "Camera Mode        : [C] (%s)", GetAsString(m_cameraMode).c_str() ) );
+}
+
+void World::CyclePhysicsMode()
+{
+	int nextEnumNumber = ( (int) m_physicsMode ) + 1;
+	if( nextEnumNumber >= NUM_PHYSICS_MODES )
+		nextEnumNumber = 0;
+
+	m_physicsMode = (ePhysicsMode) nextEnumNumber;
+}
+
+void World::CycleCameraMode()
+{
+	int nextEnumNumber = ( (int) m_cameraMode ) + 1;
+	if( nextEnumNumber >= NUM_CAMERA_MODES )
+		nextEnumNumber = 0;
+
+	m_cameraMode = (eCameraMode) nextEnumNumber;
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
@@ -992,110 +1019,14 @@ void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
 	if( raycastResult.DidImpact() == false )
 		return;
 
+	// Render the Selected Box
 	Vector3 const blockWorldCenter		= raycastResult.m_impactBlock.GetBlockWorldPosition() + Vector3(0.5f, 0.5f, 0.5f);
-	Vector3 const blockHalfDimensions	= Vector3( 1.1f, 1.1f, 1.1f ) * 0.5f;
+	Vector3 const blockHalfDimensions	= Vector3( 1.f, 1.f, 1.f );
 
-	/*
-	      7_________ 6			VERTEX[8] ORDER:
-		  /|       /|				( 0, 1, 2, 3, 4, 5, 6, 7 )
-		 / | top  / |				
-	   4/__|_____/5 |			
-		|  |_____|__|			   z|   
-		| 3/     |  /2				|  / x
-		| /  bot | /				| /
-		|/_______|/			y ______|/ 
-		0         1
-	*/
-	Rgba const &blockSelectionColor = RGBA_RED_COLOR;
-	Rgba const &faceSelectionColor  = RGBA_WHITE_COLOR;
-	Vector3 const vertexPos[8] = {
-		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
-		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
-		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
-		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z - blockHalfDimensions.z ),
-		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z ),
-		Vector3( blockWorldCenter.x - blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z ),
-		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y - blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z ),
-		Vector3( blockWorldCenter.x + blockHalfDimensions.x,	blockWorldCenter.y + blockHalfDimensions.y,	blockWorldCenter.z + blockHalfDimensions.z )
-	};
+ 	AABB3 blockBounds = AABB3( blockWorldCenter, blockHalfDimensions.x, blockHalfDimensions.y, blockHalfDimensions.z );
+ 	MDebugUtils::RenderCubeWireframe( blockBounds, RGBA_RED_COLOR, false );
 
-	Vertex_3DPCU vBuffer[32];
-	// Bottom Side
-	// Line 01
-	vBuffer[0].m_color = blockSelectionColor;
-	vBuffer[0].m_position = vertexPos[0];
-	vBuffer[1].m_color = blockSelectionColor;
-	vBuffer[1].m_position = vertexPos[1];
-
-	// Line 12
-	vBuffer[2].m_color = blockSelectionColor;
-	vBuffer[2].m_position = vertexPos[1];
-	vBuffer[3].m_color = blockSelectionColor;
-	vBuffer[3].m_position = vertexPos[2];
-
-	// Line 23
-	vBuffer[4].m_color = blockSelectionColor;
-	vBuffer[4].m_position = vertexPos[2];
-	vBuffer[5].m_color = blockSelectionColor;
-	vBuffer[5].m_position = vertexPos[3];
-
-	// Line 30
-	vBuffer[6].m_color = blockSelectionColor;
-	vBuffer[6].m_position = vertexPos[3];
-	vBuffer[7].m_color = blockSelectionColor;
-	vBuffer[7].m_position = vertexPos[0];
-
-	// Top Side
-	// Line 45
-	vBuffer[8].m_color = blockSelectionColor;
-	vBuffer[8].m_position = vertexPos[4];
-	vBuffer[9].m_color = blockSelectionColor;
-	vBuffer[9].m_position = vertexPos[5];
-
-	// Line 56
-	vBuffer[10].m_color = blockSelectionColor;
-	vBuffer[10].m_position = vertexPos[5];
-	vBuffer[11].m_color = blockSelectionColor;
-	vBuffer[11].m_position = vertexPos[6];
-
-	// Line 67
-	vBuffer[12].m_color = blockSelectionColor;
-	vBuffer[12].m_position = vertexPos[6];
-	vBuffer[13].m_color = blockSelectionColor;
-	vBuffer[13].m_position = vertexPos[7];
-
-	// Line 74
-	vBuffer[14].m_color = blockSelectionColor;
-	vBuffer[14].m_position = vertexPos[7];
-	vBuffer[15].m_color = blockSelectionColor;
-	vBuffer[15].m_position = vertexPos[4];
-	
-	// Vertical Four Edges
-	// Line 40
-	vBuffer[16].m_color = blockSelectionColor;
-	vBuffer[16].m_position = vertexPos[4];
-	vBuffer[17].m_color = blockSelectionColor;
-	vBuffer[17].m_position = vertexPos[0];
-
-	// Line 51
-	vBuffer[18].m_color = blockSelectionColor;
-	vBuffer[18].m_position = vertexPos[5];
-	vBuffer[19].m_color = blockSelectionColor;
-	vBuffer[19].m_position = vertexPos[1];
-
-	// Line 62
-	vBuffer[20].m_color = blockSelectionColor;
-	vBuffer[20].m_position = vertexPos[6];
-	vBuffer[21].m_color = blockSelectionColor;
-	vBuffer[21].m_position = vertexPos[2];
-
-	// Line 73
-	vBuffer[22].m_color = blockSelectionColor;
-	vBuffer[22].m_position = vertexPos[7];
-	vBuffer[23].m_color = blockSelectionColor;
-	vBuffer[23].m_position = vertexPos[3];
-
-	// Selected Side
+	// Render the Selected Side
 	float	halfFaceDim	 = 0.5f;
 	Vector3 topDirection = Vector3( 0.f, 0.f, 1.f );
 	if( fabsf( Vector3::DotProduct(raycastResult.m_impactNormal, topDirection) ) == 1.f  )
@@ -1103,39 +1034,10 @@ void World::RenderBlockSelection( RaycastResult_MC const &raycastResult ) const
 
 	Vector3 rightDirection	= Vector3::CrossProduct( topDirection, raycastResult.m_impactNormal );
 	Vector3 sideCenter	= blockWorldCenter + (raycastResult.m_impactNormal * 0.52f);
-	Vector3 ssTopLeft	= sideCenter + ( topDirection * halfFaceDim ) + (-rightDirection * halfFaceDim );
 	Vector3 ssTopRight	= sideCenter + ( topDirection * halfFaceDim ) + ( rightDirection * halfFaceDim );
 	Vector3 ssBotLeft	= sideCenter + (-topDirection * halfFaceDim ) + (-rightDirection * halfFaceDim );
-	Vector3 ssBotRight	= sideCenter + (-topDirection * halfFaceDim ) + ( rightDirection * halfFaceDim );
-
-	// Line top left to right
-	vBuffer[24].m_color = faceSelectionColor;
-	vBuffer[24].m_position = ssTopLeft;
-	vBuffer[25].m_color = faceSelectionColor;
-	vBuffer[25].m_position = ssTopRight;
-
-	// Line bot left to right
-	vBuffer[26].m_color = faceSelectionColor;
-	vBuffer[26].m_position = ssBotLeft;
-	vBuffer[27].m_color = faceSelectionColor;
-	vBuffer[27].m_position = ssBotRight;
-
-	// Line left bot to top
-	vBuffer[28].m_color = faceSelectionColor;
-	vBuffer[28].m_position = ssBotLeft;
-	vBuffer[29].m_color = faceSelectionColor;
-	vBuffer[29].m_position = ssTopLeft;
-
-	// Line right bot to top
-	vBuffer[30].m_color = faceSelectionColor;
-	vBuffer[30].m_position = ssBotRight;
-	vBuffer[31].m_color = faceSelectionColor;
-	vBuffer[31].m_position = ssTopRight;
-
-	// Render
-	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
-	g_theRenderer->EnableDepth( COMPARE_LESS, false );
-	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 32, PRIMITIVE_LINES );
+	AABB3	ssBoxBounds = AABB3( ssBotLeft, ssTopRight );
+	MDebugUtils::RenderCubeWireframe( ssBoxBounds, RGBA_WHITE_COLOR, true );
 }
 
 bool World::CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b )

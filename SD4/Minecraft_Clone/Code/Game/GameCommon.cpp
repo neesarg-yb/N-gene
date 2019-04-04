@@ -21,3 +21,36 @@ eBlockType GetBlockTypeFromInteger( int typeInt )
 	else
 		return (eBlockType) typeInt;
 }
+
+std::string GetAsString( ePhysicsMode physicsMode )
+{
+	switch (physicsMode)
+	{
+	case PHYSICS_NO_CLIP:
+		return "No Clip";
+	case PHYSICS_FLY:
+		return "Fly";
+	case PHYSICS_WALK:
+		return "Walk";
+	default:
+		return "INVALID";
+	}
+}
+
+std::string GetAsString( eCameraMode cameraMode )
+{
+	switch (cameraMode)
+	{
+	case CAMERA_DETATCHED:
+		return "Detached";
+	case CAMERA_1ST_PERSON:
+		return "1st Person";
+	case CAMERA_OVER_THE_SHOULDER:
+		return "Over the Shoulder";
+	case CAMERA_FIXED_ANGLE:
+		return "Fixed Angle";
+	default:
+		return "INVALID";
+	}
+}
+

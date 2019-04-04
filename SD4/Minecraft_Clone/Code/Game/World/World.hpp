@@ -25,9 +25,13 @@ private:
 	Vector4		 m_ambientLight		= Vector4( 1.f, 1.f, 1.f, 0.7f );
 
 	// Game Camera
+	eCameraMode	 m_cameraMode		= CAMERA_DETATCHED;
 	MCamera		*m_camera			= nullptr;
 	float		 m_flySpeed			= 8.f;
 	float		 m_camRotationSpeed = 0.2f;
+
+	// Entities
+	ePhysicsMode m_physicsMode		= PHYSICS_NO_CLIP;
 
 	// World Chunks
 	ChunkMap	 m_activeChunks;
@@ -81,6 +85,8 @@ private:
 	// Input
 	void	ProcessInput( float deltaSeconds );
 	void	DebugRenderInputKeyInfo() const;
+	void	CyclePhysicsMode();
+	void	CycleCameraMode();
 	
 	// Chunk Management
 	void	RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos );
