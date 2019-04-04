@@ -137,11 +137,85 @@ void MDebugUtils::RenderSphereWireframe( Vector3 const &center, float radius, Rg
 	UNUSED( useXRay );
 }
 
-void MDebugUtils::RenderVector( Vector3 const &originPosition, Vector3 const &vector, Rgba const &color, bool useXRay )
+void MDebugUtils::RenderLine( Vector3 const &startPos, Rgba const &startColor, Vector3 const &endPos, Rgba const &endColor, bool useXRay )
 {
-	UNUSED( originPosition );
-	UNUSED( vector );
-	UNUSED( color );
-	UNUSED( useXRay );
+	Vertex_3DPCU vBuffer[2];
+	vBuffer[0].m_color		= startColor;
+	vBuffer[0].m_position	= startPos;
+	vBuffer[1].m_color		= endColor;
+	vBuffer[1].m_position	= endPos;
+
+	// First Render Pass [ Normal ]
+	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
+	g_theRenderer->EnableDepth( COMPARE_LESS, true );
+	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+
+	// For, Second Render Pass [ X-Ray ]
+	if( useXRay )
+	{
+		for( int i = 0; i < 6; i++ )
+		{
+			Rgba &vertColor = vBuffer[i].m_color;
+
+			vertColor.r = (uchar)( (float)vertColor.r * 0.5f );
+			vertColor.g = (uchar)( (float)vertColor.g * 0.5f );
+			vertColor.b = (uchar)( (float)vertColor.b * 0.5f );
+		}
+
+		g_theRenderer->EnableDepth( COMPARE_GREATER, false );	// To Draw X-Ray without affecting the depth
+		g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+	}
 }
 
+void MDebugUtils::RenderBasis( Vector3 const &position, float length, bool useXRay )
+{
+	Vertex_3DPCU vBuffer[6];
+
+	vBuffer[0].m_color		= RGBA_RED_COLOR;
+	vBuffer[0].m_position	= position;
+	vBuffer[1].m_color		= RGBA_RED_COLOR;
+	vBuffer[1].m_position	= position + Vector3( length, 0.f, 0.f );
+
+	vBuffer[2].m_color		= RGBA_GREEN_COLOR;
+	vBuffer[2].m_position	= position;
+	vBuffer[3].m_color		= RGBA_GREEN_COLOR;
+	vBuffer[3].m_position	= position + Vector3( 0.f, length, 0.f );
+
+	vBuffer[4].m_color		= RGBA_BLUE_COLOR;
+	vBuffer[4].m_position	= position;
+	vBuffer[5].m_color		= RGBA_BLUE_COLOR;
+	vBuffer[5].m_position	= position + Vector3( 0.f, 0.f, length );
+
+	// First Render Pass [ Normal ]
+	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
+	g_theRenderer->EnableDepth( COMPARE_LESS, true );
+	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+
+	// For, Second Render Pass [ X-Ray ]
+	if( useXRay )
+	{
+		for( int i = 0; i < 6; i++ )
+		{
+			Rgba &vertColor = vBuffer[i].m_color;
+
+			vertColor.r = (uchar)( (float)vertColor.r * 0.5f );
+			vertColor.g = (uchar)( (float)vertColor.g * 0.5f );
+			vertColor.b = (uchar)( (float)vertColor.b * 0.5f );
+		}
+
+		g_theRenderer->EnableDepth( COMPARE_GREATER, false );	// To Draw X-Ray without affecting the depth
+		g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+	}
+}
+
+void MDebugUtils::RenderRaycast( RaycastResult_MC const &raycastResult )
+{
+	// Render line which did not hit
+	RenderLine( raycastResult.m_startPosition, RGBA_GREEN_COLOR, raycastResult.m_impactPosition, RGBA_GREEN_COLOR, true );
+
+	// The impact point!
+	RenderBasis( raycastResult.m_impactPosition, 0.5f, true );
+
+	// Render line which did hit
+	RenderLine( raycastResult.m_impactPosition, RGBA_RED_COLOR, raycastResult.m_endPosition, RGBA_RED_COLOR, true );
+}

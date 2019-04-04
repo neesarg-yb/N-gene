@@ -123,9 +123,6 @@ private:
 	void	RenderBlockSelection( RaycastResult_MC const &raycastResult ) const;
 
 public:
-	static void			RenderBasis( Vector3 const &position, float length, Renderer &activeRenderer );
-	static void			RenderRaycast( RaycastResult_MC const &raycastResult, Renderer &activeRenderer );
-	static void			RenderLineXRay( Vector3 const &startPos, Rgba const &startColor, Vector3 const &endPos, Rgba const &endColor, Renderer &activeRenderer );
 	static bool			CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b );
 	static ChunkCoord	ChunkCoordFromWorldPosition( Vector3 const &position );
 };
