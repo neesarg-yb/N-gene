@@ -253,14 +253,37 @@ void ProfileConsole::Render_ProfilingDetailsBox()
 	minBoundPercentage			+= padding;
 	maxBoundPercentage			-= padding;
 
-	AABB2	actualBounds		= m_drawBounds.GetBoundsFromPercentage( minBoundPercentage, maxBoundPercentage );
+	AABB2 actualBounds		= m_drawBounds.GetBoundsFromPercentage( minBoundPercentage, maxBoundPercentage );
+	float maxLinesInReport	= 45.f;
+	float entryLineHeight	= (actualBounds.maxs.y - actualBounds.mins.y) / maxLinesInReport;
 
 	// Draw background
 	m_currentRenderer->DrawAABB( actualBounds, m_boxBackgroudColor );
 
 	// Draw Report
 	if( m_profileReportString != "" )
-		m_currentRenderer->DrawTextInBox2D( m_profileReportString.c_str(), Vector2( 0.5f, 1.f ), actualBounds, 0.05f, m_accentColor, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+	{
+		Strings reportEntriesList = SplitIntoStringsByDelimiter( m_profileReportString, '\n' );
+		Rgba alteredAccentColor = Interpolate( m_accentColor, RGBA_WHITE_COLOR, 0.5f );
+		int const	totalEntries = (int)reportEntriesList.size();
+
+		// For each entry lines in the report
+		for( int i = 0; i < totalEntries; i++ )
+		{
+			std::string const &reportEntryString = reportEntriesList[i];
+
+			// Give alternate accent color
+			Rgba accentColor = m_accentColor;
+			if( i % 2 == 0 )
+				accentColor = alteredAccentColor;
+
+			// Render entry text
+			Vector2 boundsMaxs = Vector2( actualBounds.maxs.x, actualBounds.maxs.y - (entryLineHeight * i) );
+			Vector2 boundsMins = Vector2( actualBounds.mins.x, boundsMaxs.y - entryLineHeight );
+			AABB2 textDrawBounds = AABB2( boundsMins, boundsMaxs );
+			m_currentRenderer->DrawTextInBox2D( reportEntryString.c_str(), Vector2( 0.5f, -1.f ), textDrawBounds, 0.05f, accentColor, m_fonts, TEXT_DRAW_SHRINK_TO_FIT );
+		}
+	}
 }
 
 void ProfileConsole::HandleInput( InputSystem& currentInputSystem )

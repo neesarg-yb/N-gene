@@ -18,7 +18,13 @@ public:
 	float	GetRandomInRange() const;
 	void	ExpandToInclude( float number );
 	void	SetFromText	( const char* text );
+	bool	IsValid() const;
 };
 
-		bool		DoRangesOverlap	( const FloatRange& a , const FloatRange& b );
-const	FloatRange	Interpolate		( const FloatRange& start, const FloatRange& end, float fractionTowardEnd );
+bool			 DoRangesOverlap( const FloatRange& a , const FloatRange& b );
+const FloatRange Interpolate( const FloatRange& start, const FloatRange& end, float fractionTowardEnd );
+
+inline bool FloatRange::IsValid() const
+{
+	return min <= max;
+}

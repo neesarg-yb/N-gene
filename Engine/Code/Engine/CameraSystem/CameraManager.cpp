@@ -35,9 +35,12 @@ void CameraManager::Update( float deltaSeconds )
 {
 	PROFILE_SCOPE_FUNCTION();
 
+	Profiler::GetInstance()->Push( "BEHAVIOR" );
 	m_lastSuggestedState = m_activeBehaviour->Update( deltaSeconds, m_currentCameraState );
+	Profiler::GetInstance()->Pop();
 
 	// Constraints, if enabled
+	Profiler::GetInstance()->Push( "ALL CONSTRAINTS" );
 	if( m_constraintsEnabled == true )
 	{
 		// From lower priority to higher
@@ -52,11 +55,13 @@ void CameraManager::Update( float deltaSeconds )
 			constraint->Execute( m_lastSuggestedState );
 		}
 	}
+	Profiler::GetInstance()->Pop();
 
 	// Before using motion controller, this might change if in transition
 	CameraState constrainedCameraState = m_lastSuggestedState;
 
 	// Camera Motion Controller
+	Profiler::GetInstance()->Push( "MOTION CONTROLLER" );
 	if( m_behaviourTransitionTimeRemaining <= 0.f )
 	{
 		// If not in transition of changing Camera Behaviour..
@@ -79,14 +84,16 @@ void CameraManager::Update( float deltaSeconds )
 		constrainedCameraState = m_defaultMotionController.MoveCamera( m_currentCameraState, constrainedCameraState, deltaSeconds );
 		SetCurrentCameraStateTo( constrainedCameraState );
 	}
+	Profiler::GetInstance()->Pop();
 
+	Profiler::GetInstance()->Push( "FINAL CAM. STATE" );
 	// Add the final camera state to history
 	m_previousCameraStates.AddNewEntry( constrainedCameraState );
-
-
+	
 	// If there was a request to change to new behavior
 	if( m_cameraBehaviorToActivate != m_activeBehaviour->m_name )
 		SetActiveCameraBehaviourTo( m_cameraBehaviorToActivate );
+	Profiler::GetInstance()->Pop();
 }
 
 void CameraManager::PreUpdate()
