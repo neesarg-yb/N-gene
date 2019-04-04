@@ -120,7 +120,6 @@ void MDebugUtils::RenderCubeWireframe( AABB3 const &worldBounds, Rgba const &col
 			vBuffer[i].m_color.r = (uchar)( (float)vBuffer[i].m_color.r * 0.5f );
 			vBuffer[i].m_color.g = (uchar)( (float)vBuffer[i].m_color.g * 0.5f );
 			vBuffer[i].m_color.b = (uchar)( (float)vBuffer[i].m_color.b * 0.5f );
-			vBuffer[i].m_color.a = (uchar)( (float)vBuffer[i].m_color.a * 0.5f );
 		}
 
 		// Render only if hidden!
@@ -131,15 +130,39 @@ void MDebugUtils::RenderCubeWireframe( AABB3 const &worldBounds, Rgba const &col
 
 void MDebugUtils::RenderSphereWireframe( Vector3 const &center, float radius, Rgba const &color, bool useXRay )
 {
-	UNUSED( center );
-	UNUSED( radius );
-	UNUSED( color );
-	UNUSED( useXRay );
+	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, center, color );
+
+	g_theRenderer->EnableDepth( COMPARE_LESS, false );
+	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
+
+	// i.e. wire-frame => we want to see all the sides
+	g_theRenderer->SetCullingMode( CULLMODE_NONE );
+	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
+	g_theRenderer->DrawMesh( *wireSphereMesh );
+
+	if( useXRay )
+	{
+		Rgba xRayColor = color;
+		xRayColor.r = (uchar)( (float)xRayColor.r * 0.5f );
+		xRayColor.g = (uchar)( (float)xRayColor.g * 0.5f );
+		xRayColor.b = (uchar)( (float)xRayColor.b * 0.5f );
+
+		Mesh* wireSphereXRayMesh = MeshBuilder::CreateSphere( radius, 10, 6, center, xRayColor );
+
+		g_theRenderer->EnableDepth( COMPARE_GREATER, false );
+		g_theRenderer->DrawMesh( *wireSphereMesh );
+
+		delete wireSphereXRayMesh;
+	}
+
+	delete wireSphereMesh;
 }
 
 void MDebugUtils::RenderLine( Vector3 const &startPos, Rgba const &startColor, Vector3 const &endPos, Rgba const &endColor, bool useXRay )
 {
-	Vertex_3DPCU vBuffer[2];
+	constexpr int vBufferSize = 2;
+	Vertex_3DPCU vBuffer[vBufferSize];
 	vBuffer[0].m_color		= startColor;
 	vBuffer[0].m_position	= startPos;
 	vBuffer[1].m_color		= endColor;
@@ -148,12 +171,12 @@ void MDebugUtils::RenderLine( Vector3 const &startPos, Rgba const &startColor, V
 	// First Render Pass [ Normal ]
 	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
 	g_theRenderer->EnableDepth( COMPARE_LESS, true );
-	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, vBufferSize, PRIMITIVE_LINES );
 
 	// For, Second Render Pass [ X-Ray ]
 	if( useXRay )
 	{
-		for( int i = 0; i < 6; i++ )
+		for( int i = 0; i < vBufferSize; i++ )
 		{
 			Rgba &vertColor = vBuffer[i].m_color;
 
@@ -163,13 +186,14 @@ void MDebugUtils::RenderLine( Vector3 const &startPos, Rgba const &startColor, V
 		}
 
 		g_theRenderer->EnableDepth( COMPARE_GREATER, false );	// To Draw X-Ray without affecting the depth
-		g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+		g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, vBufferSize, PRIMITIVE_LINES );
 	}
 }
 
 void MDebugUtils::RenderBasis( Vector3 const &position, float length, bool useXRay )
 {
-	Vertex_3DPCU vBuffer[6];
+	constexpr int vBufferSize = 6;
+	Vertex_3DPCU vBuffer[vBufferSize];
 
 	vBuffer[0].m_color		= RGBA_RED_COLOR;
 	vBuffer[0].m_position	= position;
@@ -189,12 +213,12 @@ void MDebugUtils::RenderBasis( Vector3 const &position, float length, bool useXR
 	// First Render Pass [ Normal ]
 	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
 	g_theRenderer->EnableDepth( COMPARE_LESS, true );
-	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+	g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, vBufferSize, PRIMITIVE_LINES );
 
 	// For, Second Render Pass [ X-Ray ]
 	if( useXRay )
 	{
-		for( int i = 0; i < 6; i++ )
+		for( int i = 0; i < vBufferSize; i++ )
 		{
 			Rgba &vertColor = vBuffer[i].m_color;
 
@@ -204,7 +228,7 @@ void MDebugUtils::RenderBasis( Vector3 const &position, float length, bool useXR
 		}
 
 		g_theRenderer->EnableDepth( COMPARE_GREATER, false );	// To Draw X-Ray without affecting the depth
-		g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, 6, PRIMITIVE_LINES );
+		g_theRenderer->DrawMeshImmediate<Vertex_3DPCU>( vBuffer, vBufferSize, PRIMITIVE_LINES );
 	}
 }
 
@@ -214,7 +238,8 @@ void MDebugUtils::RenderRaycast( RaycastResult_MC const &raycastResult )
 	RenderLine( raycastResult.m_startPosition, RGBA_GREEN_COLOR, raycastResult.m_impactPosition, RGBA_GREEN_COLOR, true );
 
 	// The impact point!
-	RenderBasis( raycastResult.m_impactPosition, 0.5f, true );
+	// RenderBasis( raycastResult.m_impactPosition, 0.5f, true );
+	RenderSphereWireframe( raycastResult.m_impactPosition, 0.5f, RGBA_WHITE_COLOR, true );
 
 	// Render line which did hit
 	RenderLine( raycastResult.m_impactPosition, RGBA_RED_COLOR, raycastResult.m_endPosition, RGBA_RED_COLOR, true );
