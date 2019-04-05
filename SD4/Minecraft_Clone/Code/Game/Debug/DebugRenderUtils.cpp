@@ -130,7 +130,9 @@ void MDebugUtils::RenderCubeWireframe( AABB3 const &worldBounds, Rgba const &col
 
 void MDebugUtils::RenderSphereWireframe( Vector3 const &center, float radius, Rgba const &color, bool useXRay )
 {
-	Mesh* wireSphereMesh = MeshBuilder::CreateSphere( radius, 10, 6, center, color );
+	MeshBuilder mbSphere;
+	mbSphere.AddSphere( radius, 10, 6, center, color );
+	Mesh* wireSphereMesh = mbSphere.ConstructMesh<Vertex_3DPCU>();
 
 	g_theRenderer->EnableDepth( COMPARE_LESS, false );
 	g_theRenderer->BindMaterialForShaderIndex( *g_defaultMaterial );
@@ -138,20 +140,26 @@ void MDebugUtils::RenderSphereWireframe( Vector3 const &center, float radius, Rg
 	// i.e. wire-frame => we want to see all the sides
 	g_theRenderer->SetCullingMode( CULLMODE_NONE );
 	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-
+	
 	g_theRenderer->DrawMesh( *wireSphereMesh );
 
+	// if X-Ray enabled
 	if( useXRay )
 	{
-		Rgba xRayColor = color;
-		xRayColor.r = (uchar)( (float)xRayColor.r * 0.5f );
-		xRayColor.g = (uchar)( (float)xRayColor.g * 0.5f );
-		xRayColor.b = (uchar)( (float)xRayColor.b * 0.5f );
+		// Dim the color for X-Ray
+		for( int v = 0; v < mbSphere.m_vertices.size(); v++ )
+		{
+			Rgba &vColor = mbSphere.m_vertices[v].m_color;
 
-		Mesh* wireSphereXRayMesh = MeshBuilder::CreateSphere( radius, 10, 6, center, xRayColor );
+			vColor.r = (uchar)( (float)vColor.r * 0.5f );
+			vColor.g = (uchar)( (float)vColor.g * 0.5f );
+			vColor.b = (uchar)( (float)vColor.b * 0.5f );
+		}
+
+		Mesh* wireSphereXRayMesh = mbSphere.ConstructMesh<Vertex_3DPCU>();
 
 		g_theRenderer->EnableDepth( COMPARE_GREATER, false );
-		g_theRenderer->DrawMesh( *wireSphereMesh );
+		g_theRenderer->DrawMesh( *wireSphereXRayMesh );
 
 		delete wireSphereXRayMesh;
 	}
@@ -238,9 +246,8 @@ void MDebugUtils::RenderRaycast( RaycastResult_MC const &raycastResult )
 	RenderLine( raycastResult.m_startPosition, RGBA_GREEN_COLOR, raycastResult.m_impactPosition, RGBA_GREEN_COLOR, true );
 
 	// The impact point!
-	// RenderBasis( raycastResult.m_impactPosition, 0.5f, true );
-	RenderSphereWireframe( raycastResult.m_impactPosition, 0.5f, RGBA_WHITE_COLOR, true );
-
+	RenderBasis( raycastResult.m_impactPosition, 0.5f, true );
+	
 	// Render line which did hit
 	RenderLine( raycastResult.m_impactPosition, RGBA_RED_COLOR, raycastResult.m_endPosition, RGBA_RED_COLOR, true );
 }
