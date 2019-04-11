@@ -730,6 +730,8 @@ Renderer* Renderer::GetInstance()
 
 void Renderer::BeginFrame() 
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	UseShader( m_defaultShader );
 
 	m_lightsBlockUBO->UpdateGPU();
@@ -1064,8 +1066,6 @@ void Renderer::DrawTexturedCube( const Vector3& center, const Vector3& dimension
 
 void Renderer::DrawText2D( const Vector2& drawMins, const std::string& asciiText, float cellHeight, const Rgba& tint /* = RGBA_WHITE_COLOR */, const BitmapFont* font /* = nullptr */ )
 {
-	PROFILE_SCOPE_FUNCTION();
-
 	Vector2 newMins = drawMins;
 	float cellWidth = cellHeight * font->GetGlyphAspect( asciiText.at(0) );
 	Vector2 newMaxs = Vector2( drawMins.x + cellWidth , drawMins.y + cellHeight );
