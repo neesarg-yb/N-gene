@@ -37,7 +37,7 @@ private:
 	bool		 m_needsSaving	= false;
 
 public:
-	void		BindShaderAndTexture( Renderer &theRenderer ) const;
+	static void	BindShaderAndTexture( Renderer &theRenderer );
 	void		Render( Renderer &theRenderer ) const;
 	void		RebuildMesh();
 	void		SetNeighborAtCoordinate( Chunk *newNeighbor, ChunkCoord const & neighborCoord );

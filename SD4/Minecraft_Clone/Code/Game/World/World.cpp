@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "Engine/Math/SmoothNoise.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Profiler/Profiler.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/Debug/DebugRenderUtils.hpp"
@@ -67,6 +68,8 @@ void World::Update()
 
 void World::Render() const
 {
+	PROFILE_SCOPE_FUNCTION();
+
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
@@ -87,32 +90,27 @@ void World::Render() const
 	// Pre Render
 	camera.PreRender( *g_theRenderer );
 
-	//----------------------------
-	// The Rendering starts here..
-	//	
+	// Bind Shader & Texture for Chunk Rendering
+	Chunk::BindShaderAndTexture( *g_theRenderer );
+
+	// Bind Uniforms
+	g_theRenderer->SetUniform( "u_lightningStength",	lightningStrength );
+	g_theRenderer->SetUniform( "u_glowStrength",		glowStrength );
+	g_theRenderer->SetUniform( "u_daylightFraction",	daylightFraction );
+	g_theRenderer->SetUniform( "u_indoorLightRgb",		m_defaultIndoorLight );
+	g_theRenderer->SetUniform( "u_outdoorLightRgb",		m_defaultOutdoorLight );
+	g_theRenderer->SetUniform( "u_skyColor",			skyColorVec3 );
+	g_theRenderer->SetUniform( "u_cameraPosition",		m_camera->m_position );
+	g_theRenderer->SetUniform( "u_fogNearDistance",		m_fogNearDistance );
+	g_theRenderer->SetUniform( "u_fogFarDistance",		m_fogFarDistance );
+
+	// Chunk Rendering
 	for( ChunkMap::const_iterator it = m_activeChunks.begin(); it != m_activeChunks.end(); it++ )
 	{
 		Chunk const *thisChunk = it->second;
 
 		if( thisChunk->HasMesh() )
-		{
-			// Bind: Shader & Texture
-			thisChunk->BindShaderAndTexture( *g_theRenderer );
-
-			// Bind: Uniforms u_lightningStength
-			g_theRenderer->SetUniform( "u_lightningStength",	lightningStrength );
-			g_theRenderer->SetUniform( "u_glowStrength",		glowStrength );
-			g_theRenderer->SetUniform( "u_daylightFraction",	daylightFraction );
-			g_theRenderer->SetUniform( "u_indoorLightRgb",		m_defaultIndoorLight );
-			g_theRenderer->SetUniform( "u_outdoorLightRgb",		m_defaultOutdoorLight );
-			g_theRenderer->SetUniform( "u_skyColor",			skyColorVec3 );
-			g_theRenderer->SetUniform( "u_cameraPosition",		m_camera->m_position );
-			g_theRenderer->SetUniform( "u_fogNearDistance",		m_fogNearDistance );
-			g_theRenderer->SetUniform( "u_fogFarDistance",		m_fogFarDistance );
-
-			// Render
 			thisChunk->Render( *g_theRenderer );
-		}
 	}
 
 	// Raycast Selection

@@ -75,7 +75,7 @@ Chunk::~Chunk()
 	m_gpuMesh = nullptr;
 }
 
-void Chunk::BindShaderAndTexture( Renderer &theRenderer ) const
+void Chunk::BindShaderAndTexture( Renderer &theRenderer )
 {
 	theRenderer.UseShader( BlockDefinition::GetShader() );
 	theRenderer.BindTexture2D( 0, BlockDefinition::GetTexture()->GetHandle() );
@@ -85,9 +85,6 @@ void Chunk::Render( Renderer &theRenderer ) const
 {
 	// Draw Mesh
 	theRenderer.DrawMesh( *m_gpuMesh, Matrix44() );
-	
-	// Indicating the start location
-	MDebugUtils::RenderBasis( m_worldBounds.mins, 1.f, true );
 }
 
 void Chunk::RebuildMesh()
