@@ -88,6 +88,9 @@
     <ClCompile Include="Debug\DebugRenderUtils.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
+    <ClCompile Include="World\Entity.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -143,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="Debug\DebugRenderUtils.hpp">
       <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Entity.hpp">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
