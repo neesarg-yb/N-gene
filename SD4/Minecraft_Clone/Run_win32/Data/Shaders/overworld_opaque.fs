@@ -28,12 +28,13 @@ void main( void )
 
 	float indoorLightLevel 	= v_passColor.r;			// Red   Channel == Indoor  Light Level
 	float outdoorLightLevel	= v_passColor.g;			// Green Channel == Outdoor Light Level
+	float colorIntensity	= v_passColor.b;			// Cheap way of making adjacent sides of each block distinguishable 
 
 	// Calculate shaded telex Rgb
 	vec3 indoorLightRgb 	= indoorLightLevel  * u_indoorLightRgb * u_glowStrength;
 	vec3 outdoorLightRgb 	= outdoorLightLevel * u_outdoorLightRgb * u_daylightFraction;
 	outdoorLightRgb 		= mix( outdoorLightRgb, vec3(1.f, 1.f, 1.f), u_lightningStength );
-	vec3 lightRgb 			= max( indoorLightRgb, outdoorLightRgb );
+	vec3 lightRgb 			= max( indoorLightRgb, outdoorLightRgb ) * colorIntensity;
 	vec4 shadedTexel 		= diffuse * vec4( lightRgb, v_passColor.a );
 
 	// Apply Fog
