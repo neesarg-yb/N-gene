@@ -5,6 +5,7 @@
 #include "Engine/Math/IntVector2.hpp"
 #include "Game/GameCommon.hpp"
 #include "Game/World/Chunk.hpp"
+#include "Game/World/Player.hpp"
 #include "Game/Cameras/MCamera.hpp"
 #include "Game/Utility/RaycastResult_MC.hpp"
 
@@ -32,6 +33,7 @@ private:
 
 	// Entities
 	ePhysicsMode m_physicsMode		= PHYSICS_NO_CLIP;
+	Player		*m_player			= nullptr;
 
 	// World Chunks
 	ChunkMap	 m_activeChunks;

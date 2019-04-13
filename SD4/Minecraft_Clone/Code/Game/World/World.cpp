@@ -18,16 +18,23 @@ World::World( Clock *parentClock )
 	m_camera->m_cameraNear = 0.01f;
 	m_camera->m_cameraFar = 2000.f;
 
-	m_camera->m_position = Vector3( -3.f, 3.f, BLOCKS_WIDE_Z );
+	Vector3 cameraPosition = Vector3( 30.f, 5.f, 130.f );
+	m_camera->m_position = cameraPosition;
 	m_camera->m_yawDegreesAboutZ = -40.f;
 	m_camera->SetPitchDegreesAboutY( 25.f );
 
 	// Activation Cheat sheet
 	PopulateChunkActivationCheatsheet( m_deactivationRadius );
+
+	// Player
+	m_player = new Player( cameraPosition, &m_clock );
 }
 
 World::~World()
 {
+	delete m_player;
+	m_player = nullptr;
+
 	for( ChunkMap::iterator it = m_activeChunks.begin(); it != m_activeChunks.end(); it = m_activeChunks.begin() )
 	{
 		delete it->second;
@@ -58,6 +65,9 @@ void World::Update()
 	RebuiltOneChunkIfRequired( m_camera->m_position );
 
 	DeactivateChunkForPosition( m_camera->m_position );
+
+	// Player
+	m_player->Update();
 
 	// Block Selection
 	PerformRaycast();
@@ -112,6 +122,9 @@ void World::Render() const
 		if( thisChunk->HasMesh() )
 			thisChunk->Render( *g_theRenderer );
 	}
+
+	// Player
+	m_player->Render();
 
 	// Raycast Selection
 	RenderBlockSelection( m_blockSelectionRaycastResult );

@@ -91,6 +91,9 @@
     <ClCompile Include="World\Entity.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="World\Player.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -148,6 +151,9 @@
       <Filter>Debug</Filter>
     </ClInclude>
     <ClInclude Include="World\Entity.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Player.hpp">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
