@@ -89,6 +89,9 @@ private:
 	void	DebugRenderInputKeyInfo() const;
 	void	CyclePhysicsMode();
 	void	CycleCameraMode();
+
+	// Collision
+	void	PlayerToBlocksUniballCollision();
 	
 	// Chunk Management
 	void	RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos );

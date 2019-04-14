@@ -21,13 +21,13 @@ void Player::Update()
 	Vector2	debugUpdateStrPos =  Vector2( 350.f, 430.f );
 	DebugRender2DText( 0.f, debugUpdateStrPos, 15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf( "Player Update : [U] %s(%s)", paused ? "" : " ", paused ? "DISABLED" : "ENABLED" ) );
 
-	if( paused )
-		return;
+	if( !paused )
+	{
+		// According to input
+		SetWillpowerAndStrengths();
 
-	// According to input
-	SetWillpowerAndStrengths();
-
-	Entity::Update();
+		Entity::Update();
+	}
 }
 
 void Player::Render() const
@@ -35,7 +35,15 @@ void Player::Render() const
 	Vector3	worldBoundsCenter = m_position + Vector3( 0.f, 0.f, m_size.z * 0.5f);
 	AABB3	worldBounds		  = AABB3( worldBoundsCenter, m_size.x, m_size.y, m_size.z );
 
+	// Body
 	MDebugUtils::RenderCubeWireframe( worldBounds, RGBA_BLUE_COLOR, true );
+	
+	// Velocity
+	MDebugUtils::RenderLine( m_position, RGBA_WHITE_COLOR, m_position + m_velocity, RGBA_ORANGE_COLOR, true );
+
+	// Sphere - Collider
+	Sphere collider = GetCollider();
+	MDebugUtils::RenderSphereWireframe( collider.center, collider.radius, RGBA_GREEN_COLOR, false );
 }
 
 bool Player::DebugPausePhysics()

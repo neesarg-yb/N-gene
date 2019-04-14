@@ -70,6 +70,9 @@ void World::Update()
 	m_player->m_physicsMode = m_physicsMode;
 	m_player->Update();
 
+	// Collision
+	PlayerToBlocksUniballCollision();
+
 	// Block Selection
 	PerformRaycast();
 	PlaceOrDigBlock();
@@ -321,6 +324,11 @@ void World::CycleCameraMode()
 		nextEnumNumber = 0;
 
 	m_cameraMode = (eCameraMode) nextEnumNumber;
+}
+
+void World::PlayerToBlocksUniballCollision()
+{
+
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
