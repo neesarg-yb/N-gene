@@ -17,8 +17,8 @@ void Entity::Update()
 	float deltaSeconds = (float) m_clock.GetFrameDeltaSeconds();
 
 	// Compute willpower forces
-	Vector2 willpowerForceXY = m_willpowerMoveForce.IgnoreZ();
-	float	willpowerForceZ	 = m_willpowerMoveForce.z;
+	Vector2 willpowerForceXY = m_willpowerStrength * m_willpowerIntention.IgnoreZ();
+	float	willpowerForceZ	 = m_flyStrength * m_willpowerIntention.z;
 	
 	// Compute Friction
 	Vector2	frictionXY	= m_velocity.IgnoreZ() * m_frictionScale * -1.f;
@@ -29,7 +29,8 @@ void Entity::Update()
 	float totalForceZ	 = willpowerForceZ + frictionZ;
 
 	// Add up Gravity..
-	totalForceZ -= m_gravity;
+	if( m_physicsMode == PHYSICS_WALK )
+		totalForceZ -= m_gravity;
 
 	// Speed prior to applying forces
 	float speedBeforeXY = m_velocity.IgnoreZ().GetLength();

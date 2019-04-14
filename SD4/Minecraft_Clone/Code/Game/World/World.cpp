@@ -67,6 +67,7 @@ void World::Update()
 	DeactivateChunkForPosition( m_camera->m_position );
 
 	// Player
+	m_player->m_physicsMode = m_physicsMode;
 	m_player->Update();
 
 	// Block Selection
