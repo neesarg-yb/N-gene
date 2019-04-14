@@ -92,6 +92,7 @@ private:
 
 	// Collision
 	void	PlayerToBlocksUniballCollision();
+	void	PushSphereOutFromBlock( Sphere &collider, BlockLocator const &blockLoc );
 	
 	// Chunk Management
 	void	RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos );

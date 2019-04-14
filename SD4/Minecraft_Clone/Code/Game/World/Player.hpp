@@ -17,17 +17,12 @@ public:
 	void Render() const;
 
 public:
-	Sphere GetCollider() const;
+	Sphere	GetCollider() const;
+	void	SetPositionFrom( Sphere const &fromCollider );
 
 private:
 	bool DebugPausePhysics();			// Returns true if supposed to be paused
 	void SetWillpowerAndStrengths();	// XY & Fly Movement
 };
 
-inline Sphere Player::GetCollider() const
-{
-	constexpr float sphereRadius = 0.5f;
-	Vector3 center = m_position + Vector3( 0.f, 0.f, sphereRadius );
 
-	return Sphere( center, sphereRadius );
-}

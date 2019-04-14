@@ -140,6 +140,14 @@ void World::Render() const
 	if( m_raycastIsLocked )
 		MDebugUtils::RenderRaycast( m_blockSelectionRaycastResult );
 
+	//--------
+	Sphere playerCollider = m_player->GetCollider();
+	BlockLocator currBlockLoc = GetBlockLocatorForWorldPosition( playerCollider.center );
+
+	BlockLocator downBlockLoc = currBlockLoc.GetDownBlockLocator();
+	MDebugUtils::RenderCubeWireframe( downBlockLoc.GetBlockWorldBounds(), RGBA_WHITE_COLOR, true );
+	//--------
+
 	// Post Render
 	camera.PostRender( *g_theRenderer );
 
@@ -328,7 +336,32 @@ void World::CycleCameraMode()
 
 void World::PlayerToBlocksUniballCollision()
 {
+	Sphere playerCollider = m_player->GetCollider();
+	BlockLocator currBlockLoc = GetBlockLocatorForWorldPosition( playerCollider.center );
 
+	BlockLocator downBlockLoc = currBlockLoc.GetDownBlockLocator();
+	PushSphereOutFromBlock( playerCollider, downBlockLoc );
+
+	m_player->SetPositionFrom( playerCollider );
+}
+
+void World::PushSphereOutFromBlock( Sphere &collider, BlockLocator const &blockLoc )
+{
+	if( blockLoc.GetBlock().IsSolid() == false )
+		return;
+
+	AABB3	downBlockBounds		= blockLoc.GetBlockWorldBounds();
+	Vector3	closestPointInside	= downBlockBounds.GetClosestPointInsideBounds( collider.center );
+
+	Vector3	pushDirection		= collider.center - closestPointInside;
+	float	distanceToCenter	= pushDirection.NormalizeAndGetLength();
+
+	// Either already in the block, or away more that the radius
+	if( distanceToCenter == 0.f || distanceToCenter > collider.radius )
+		return;
+
+	float pushDistance = collider.radius - distanceToCenter;
+	collider.center += (pushDirection * pushDistance);
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )

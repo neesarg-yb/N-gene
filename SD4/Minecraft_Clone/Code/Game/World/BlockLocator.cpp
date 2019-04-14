@@ -30,6 +30,14 @@ Vector3 BlockLocator::GetBlockWorldPosition() const
 		return m_chunk->GetBlockWorldPositionFromIndex( m_blockIndex );
 }
 
+AABB3 BlockLocator::GetBlockWorldBounds() const
+{
+	if( m_chunk == nullptr )
+		return AABB3();
+	else
+		return m_chunk->GetBlockWorldBounds( m_blockIndex, 1.f );
+}
+
 void BlockLocator::ChangeTypeTo( eBlockType newType )
 {
 	if( m_chunk == nullptr )

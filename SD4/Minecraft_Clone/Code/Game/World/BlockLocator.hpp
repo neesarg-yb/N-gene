@@ -23,6 +23,7 @@ public:
 	Block&		 GetBlock();
 	Block const& GetBlock() const;
 	Vector3		 GetBlockWorldPosition() const;
+	AABB3		 GetBlockWorldBounds() const;
 	void		 ChangeTypeTo( eBlockType newType );
 
 	// Chunk

@@ -46,6 +46,22 @@ void Player::Render() const
 	MDebugUtils::RenderSphereWireframe( collider.center, collider.radius, RGBA_GREEN_COLOR, false );
 }
 
+Sphere Player::GetCollider() const
+{
+	// Assuming that the player's position is anchored at the bottom of the player's bounds
+	constexpr float sphereRadius = 0.5f;
+	Vector3 center = m_position + Vector3( 0.f, 0.f, sphereRadius );
+
+	return Sphere( center, sphereRadius );
+}
+
+void Player::SetPositionFrom( Sphere const &fromCollider )
+{
+	// Assuming that the sphere's bottom touches the bottom of the player's bounds
+	Vector3 playerPosition = fromCollider.center - Vector3( 0.f, 0.f, fromCollider.radius );
+	m_position = playerPosition;
+}
+
 bool Player::DebugPausePhysics()
 {
 	if( g_theInput->WasKeyJustPressed( 'U' ) )
