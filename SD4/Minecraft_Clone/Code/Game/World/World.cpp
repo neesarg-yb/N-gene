@@ -53,7 +53,6 @@ void World::Update()
 	float const deltaSeconds = (float) m_clock.GetFrameDeltaSeconds();
 
 	ProcessInput( deltaSeconds );
-
 	UpdateWorldTime( deltaSeconds );
 
 	// Chunk Management
@@ -63,7 +62,6 @@ void World::Update()
 	UpdateDirtyLighting();
 
 	RebuiltOneChunkIfRequired( m_camera->m_position );
-
 	DeactivateChunkForPosition( m_camera->m_position );
 
 	// Player
@@ -139,14 +137,6 @@ void World::Render() const
 
 	if( m_raycastIsLocked )
 		MDebugUtils::RenderRaycast( m_blockSelectionRaycastResult );
-
-	//--------
-	Sphere playerCollider = m_player->GetCollider();
-	BlockLocator currBlockLoc = GetBlockLocatorForWorldPosition( playerCollider.center );
-
-	BlockLocator downBlockLoc = currBlockLoc.GetDownBlockLocator();
-	MDebugUtils::RenderCubeWireframe( downBlockLoc.GetBlockWorldBounds(), RGBA_WHITE_COLOR, true );
-	//--------
 
 	// Post Render
 	camera.PostRender( *g_theRenderer );
@@ -336,16 +326,76 @@ void World::CycleCameraMode()
 
 void World::PlayerToBlocksUniballCollision()
 {
-	Sphere playerCollider = m_player->GetCollider();
+	Sphere	playerCollider = m_player->GetCollider();
+	Vector3	playerVelocity = m_player->m_velocity;
 	BlockLocator currBlockLoc = GetBlockLocatorForWorldPosition( playerCollider.center );
 
-	BlockLocator downBlockLoc = currBlockLoc.GetDownBlockLocator();
-	PushSphereOutFromBlock( playerCollider, downBlockLoc );
+	// Collision Check - TIER I
+	BlockLocator downBlockLoc = currBlockLoc.GetDownBlockLocator();							// Down
+	PushSphereOutFromBlock( playerCollider, downBlockLoc, playerVelocity );
+	BlockLocator upBlockLoc = currBlockLoc.GetUpBlockLocator();								// Up
+	PushSphereOutFromBlock( playerCollider, upBlockLoc, playerVelocity );
+	BlockLocator northBlockLoc = currBlockLoc.GetNorthBlockLocator();						// North
+	PushSphereOutFromBlock( playerCollider, northBlockLoc, playerVelocity );
+	BlockLocator southBlockLoc = currBlockLoc.GetSouthBlockLocator();						// South
+	PushSphereOutFromBlock( playerCollider, southBlockLoc, playerVelocity );
+	BlockLocator westBlockLoc = currBlockLoc.GetWestBlockLocator();							// West
+	PushSphereOutFromBlock( playerCollider, westBlockLoc, playerVelocity );
+	BlockLocator eastBlockLoc = currBlockLoc.GetEastBlockLocator();							// East
+	PushSphereOutFromBlock( playerCollider, eastBlockLoc, playerVelocity );
+	
+	// Collision Check - TIER II
+	BlockLocator northUpBlockLoc = upBlockLoc.GetNorthBlockLocator();						// North Up
+	PushSphereOutFromBlock( playerCollider, northUpBlockLoc, playerVelocity );
+	BlockLocator northDownBlockLoc = downBlockLoc.GetNorthBlockLocator();					// North Down
+	PushSphereOutFromBlock( playerCollider, northDownBlockLoc, playerVelocity );
+	BlockLocator southUpBlockLoc = upBlockLoc.GetSouthBlockLocator();						// South Up
+	PushSphereOutFromBlock( playerCollider, southUpBlockLoc, playerVelocity );
+	BlockLocator southDownBlockLoc = downBlockLoc.GetSouthBlockLocator();					// South Down
+	PushSphereOutFromBlock( playerCollider, southDownBlockLoc, playerVelocity );
+	BlockLocator westUpBlockLoc = upBlockLoc.GetWestBlockLocator();							// West Up
+	PushSphereOutFromBlock( playerCollider, westUpBlockLoc, playerVelocity );
+	BlockLocator westDownBlockLoc = downBlockLoc.GetWestBlockLocator();						// West Down
+	PushSphereOutFromBlock( playerCollider, westDownBlockLoc, playerVelocity );
+	BlockLocator eastUpBlockLoc = upBlockLoc.GetEastBlockLocator();							// East Up
+	PushSphereOutFromBlock( playerCollider, eastUpBlockLoc, playerVelocity );
+	BlockLocator eastDownBlockLoc = downBlockLoc.GetEastBlockLocator();						// East Down
+	PushSphereOutFromBlock( playerCollider, eastDownBlockLoc, playerVelocity );
+	BlockLocator northWestBlockLoc = westBlockLoc.GetNorthBlockLocator();					// North West
+	PushSphereOutFromBlock( playerCollider, northWestBlockLoc, playerVelocity );
+	BlockLocator northEastBlockLoc = eastBlockLoc.GetNorthBlockLocator();					// North East
+	PushSphereOutFromBlock( playerCollider, northEastBlockLoc, playerVelocity );
+	BlockLocator southWestBlockLoc = westBlockLoc.GetSouthBlockLocator();					// South West
+	PushSphereOutFromBlock( playerCollider, southWestBlockLoc, playerVelocity );
+	BlockLocator southEastBlockLoc = eastBlockLoc.GetSouthBlockLocator();					// South East
+	PushSphereOutFromBlock( playerCollider, southEastBlockLoc, playerVelocity );
+	
+	// Collision Check - TIER III
+	BlockLocator northWestUpBlockLoc = westUpBlockLoc.GetNorthBlockLocator();				// North West Up
+	PushSphereOutFromBlock( playerCollider, northWestUpBlockLoc, playerVelocity );
+	BlockLocator northWestDownBlockLoc = westDownBlockLoc.GetNorthBlockLocator();			// North West Down
+	PushSphereOutFromBlock( playerCollider, northWestDownBlockLoc, playerVelocity );
+	BlockLocator northEastUpBlockLoc = eastUpBlockLoc.GetNorthBlockLocator();				// North East Up
+	PushSphereOutFromBlock( playerCollider, northEastUpBlockLoc, playerVelocity );
+	BlockLocator northEastDownBlockLoc = eastDownBlockLoc.GetNorthBlockLocator();			// North East Down
+	PushSphereOutFromBlock( playerCollider, northEastDownBlockLoc, playerVelocity );
+	BlockLocator southWestUpBlockLoc = westUpBlockLoc.GetSouthBlockLocator();				// South West Up
+	PushSphereOutFromBlock( playerCollider, southWestUpBlockLoc, playerVelocity );
+	BlockLocator southWestDownBlockLoc = westDownBlockLoc.GetSouthBlockLocator();			// South West Down
+	PushSphereOutFromBlock( playerCollider, southWestDownBlockLoc, playerVelocity );
+	BlockLocator southEastUpBlockLoc = eastUpBlockLoc.GetSouthBlockLocator();				// South East Up
+	PushSphereOutFromBlock( playerCollider, southEastUpBlockLoc, playerVelocity );
+	BlockLocator southEastDownBlockLoc = eastDownBlockLoc.GetSouthBlockLocator();			// South East Down
+	PushSphereOutFromBlock( playerCollider, southEastDownBlockLoc, playerVelocity );
 
+	// Set Position
 	m_player->SetPositionFrom( playerCollider );
+	
+	// Set Velocity
+	m_player->m_velocity = playerVelocity;
 }
 
-void World::PushSphereOutFromBlock( Sphere &collider, BlockLocator const &blockLoc )
+void World::PushSphereOutFromBlock( Sphere &collider, BlockLocator const &blockLoc, Vector3 &velocity )
 {
 	if( blockLoc.GetBlock().IsSolid() == false )
 		return;
@@ -360,8 +410,13 @@ void World::PushSphereOutFromBlock( Sphere &collider, BlockLocator const &blockL
 	if( distanceToCenter == 0.f || distanceToCenter > collider.radius )
 		return;
 
+	// Update Position
 	float pushDistance = collider.radius - distanceToCenter;
 	collider.center += (pushDirection * pushDistance);
+
+	// Update Velocity
+	Vector3 projectedVelocity = velocity.ProjectOnDirection( pushDirection );
+	velocity -= projectedVelocity;
 }
 
 void World::RebuiltOneChunkIfRequired( Vector3 const &playerWorldPos )
