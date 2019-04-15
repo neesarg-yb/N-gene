@@ -162,6 +162,13 @@ Vector2 Vector3::IgnoreZ() const
 	return Vector2( x, y );
 }
 
+Vector3 Vector3::ProjectOnDirection( Vector3 const &normalizedDir ) const
+{
+	float projectedLength = Vector3::DotProduct( *this, normalizedDir );
+	
+	return normalizedDir * projectedLength;
+}
+
 Vector3 Vector3::CrossProduct( const Vector3& first_vec, const Vector3& second_vec )
 {
 	Vector3 toReturn;
