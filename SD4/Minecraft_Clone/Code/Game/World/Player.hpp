@@ -8,9 +8,8 @@ public:
 	 Player( Vector3 spawnPosition, Clock *parentClock );
 	~Player();
 
-private:
-	bool	m_updateEnabled	 = false;
-	Vector3	m_size			 = Vector3( 1.f, 1.f, 1.8f );
+public:
+	Vector3 const m_size = Vector3( 1.f, 1.f, 1.8f );
 
 public:
 	void Update();
@@ -18,11 +17,12 @@ public:
 
 public:
 	Sphere	GetCollider() const;
+	Vector3	GetEyePosition() const;
 	void	SetPositionFrom( Sphere const &fromCollider );
-
-private:
-	bool DebugPausePhysics();			// Returns true if supposed to be paused
-	void SetWillpowerAndStrengths();	// XY & Fly Movement
+	
+public:
+	void SetMovementWillpowerAndStrength( Vector2 const &xyMovementIntention, float strength );		// XY Movement
+	void SetFlyWillpowerAndStrength( float const flyIntention, float strength );					// Fly
 };
 
 

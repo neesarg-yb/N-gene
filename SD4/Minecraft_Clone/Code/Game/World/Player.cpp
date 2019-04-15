@@ -17,17 +17,7 @@ Player::~Player()
 
 void Player::Update()
 {
-	bool	paused = DebugPausePhysics();
-	Vector2	debugUpdateStrPos =  Vector2( 350.f, 430.f );
-	DebugRender2DText( 0.f, debugUpdateStrPos, 15.f, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, Stringf( "Player Update : [U] %s(%s)", paused ? "" : " ", paused ? "DISABLED" : "ENABLED" ) );
-
-	if( !paused )
-	{
-		// According to input
-		SetWillpowerAndStrengths();
-
-		Entity::Update();
-	}
+	Entity::Update();
 }
 
 void Player::Render() const
@@ -55,6 +45,11 @@ Sphere Player::GetCollider() const
 	return Sphere( center, sphereRadius );
 }
 
+Vector3 Player::GetEyePosition() const
+{
+	return m_position + Vector3( 0.f, 0.f, m_size.z * 0.9f );
+}
+
 void Player::SetPositionFrom( Sphere const &fromCollider )
 {
 	// Assuming that the sphere's bottom touches the bottom of the player's bounds
@@ -62,28 +57,17 @@ void Player::SetPositionFrom( Sphere const &fromCollider )
 	m_position = playerPosition;
 }
 
-bool Player::DebugPausePhysics()
+void Player::SetMovementWillpowerAndStrength( Vector2 const &xyMovementIntention, float strength )
 {
-	if( g_theInput->WasKeyJustPressed( 'U' ) )
-		m_updateEnabled = !m_updateEnabled;
-	
-	return (m_updateEnabled == false);
+	m_willpowerIntention.x = xyMovementIntention.x;
+	m_willpowerIntention.y = xyMovementIntention.y;
+
+	m_willpowerStrength = strength;
 }
 
-void Player::SetWillpowerAndStrengths()
+void Player::SetFlyWillpowerAndStrength( float const flyIntention, float strength )
 {
-	XboxController const &theController = g_theInput->m_controller[0];
+	m_willpowerIntention.z = flyIntention;
 
-	// Set the movement directions
-	float	flyIntention		= 0.f;
-	Vector2	movementIntentionXY	= theController.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
-
-	flyIntention += theController.m_xboxTriggerStates[ XBOX_TRIGGER_LEFT ];		// Go Up
-	flyIntention -= theController.m_xboxTriggerStates[ XBOX_TRIGGER_RIGHT ];	// Go Down
-
-	m_willpowerIntention = Vector3( movementIntentionXY.x, movementIntentionXY.y, flyIntention );
-
-	// Set the strengths
-	m_willpowerStrength = 5.f;
-	m_flyStrength = 10.f;
+	m_flyStrength = strength;
 }

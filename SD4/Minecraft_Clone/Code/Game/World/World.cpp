@@ -69,7 +69,8 @@ void World::Update()
 	m_player->Update();
 
 	// Collision
-	PlayerToBlocksUniballCollision();
+	if( m_physicsMode != PHYSICS_NO_CLIP )
+		PlayerToBlocksUniballCollision();
 
 	// Block Selection
 	PerformRaycast();
@@ -233,45 +234,51 @@ float World::GetDaytimeNormalizedUsingSine() const
 
 void World::ProcessInput( float deltaSeconds )
 {
-	// Camera Rotation
-	Vector2 mouseChange = g_theInput->GetMouseDelta();
-	float const curentCamPitch = m_camera->GetPitchDegreesAboutY();
+	Vector2	mouseChange = g_theInput->GetMouseDelta();
+	float	forwardMovement = 0.f;
+	float	leftMovement = 0.f;
+	float	upMovement = 0.f;
 
-	m_camera->m_yawDegreesAboutZ	-= mouseChange.x * m_camRotationSpeed;
-	m_camera->SetPitchDegreesAboutY( curentCamPitch + (mouseChange.y * m_camRotationSpeed) );
-
-	// Camera Position
-	float	const camYaw	 = m_camera->m_yawDegreesAboutZ;
-	Vector3 const forwardDir = Vector3( CosDegree(camYaw), SinDegree(camYaw), 0.f );
-	Vector3 const leftDir	 = Vector3( forwardDir.y * -1.f, forwardDir.x, 0.f );
-	Vector3 const upDir		 = Vector3( 0.f, 0.f, 1.f );
-
-	float forwardMovement = 0.f;
-	float leftMovement = 0.f;
-	float upMovement = 0.f;
-	float speedScale = 1.f;
-
-	if( g_theInput->IsKeyPressed( VK_SHIFT ) )
-		speedScale = 6.f;
 	if( g_theInput->IsKeyPressed( 'W' ) )
-		forwardMovement += m_flySpeed * speedScale * deltaSeconds;
+		forwardMovement += 1.f;
 	if( g_theInput->IsKeyPressed( 'S' ) )
-		forwardMovement -= m_flySpeed * speedScale * deltaSeconds;
+		forwardMovement -= 1.f;
 	if( g_theInput->IsKeyPressed( 'A' ) )
-		leftMovement += m_flySpeed * speedScale * deltaSeconds;
+		leftMovement += 1.f;
 	if( g_theInput->IsKeyPressed( 'D' ) )
-		leftMovement -= m_flySpeed * speedScale * deltaSeconds;
+		leftMovement -= 1.f;
 	if( g_theInput->IsKeyPressed( 'Q' ) )
-		upMovement += m_flySpeed * speedScale * deltaSeconds;
+		upMovement += 1.f;
 	if( g_theInput->IsKeyPressed( 'E' ) )
-		upMovement -= m_flySpeed * speedScale * deltaSeconds;
+		upMovement -= 1.f;
 	if( g_theInput->WasKeyJustPressed( 'P' ) )
 		CyclePhysicsMode();
 	if( g_theInput->WasKeyJustPressed( 'C' ) )
 		CycleCameraMode();
+	if( g_theInput->WasKeyJustPressed( 'V' ) )
+		m_inputControlsPlayerDetached = !m_inputControlsPlayerDetached;
 
-	Vector3 positionChange = (forwardDir * forwardMovement) + (leftDir * leftMovement) + (upDir * upMovement);
-	m_camera->m_position += positionChange;
+	switch (m_cameraMode)
+	{
+	case CAMERA_DETATCHED:
+		ControlsUpdate_CameraDetatched( forwardMovement, leftMovement, upMovement, mouseChange, deltaSeconds );
+		break;
+
+	case CAMERA_1ST_PERSON:
+		ControlsUpdate_Camera1stPerson( forwardMovement, leftMovement, upMovement, mouseChange, deltaSeconds );
+		break;
+
+	case CAMERA_OVER_THE_SHOULDER:
+		ControlsUpdate_CameraOverTheShoulder( forwardMovement, leftMovement, upMovement, mouseChange, deltaSeconds );
+		break;
+
+	case CAMERA_FIXED_ANGLE:
+		ControlsUpdate_CameraFixedAngle( forwardMovement, leftMovement, upMovement, mouseChange, deltaSeconds );
+		break;
+
+	default:
+		break;
+	}
 }
 
 void World::DebugRenderInputKeyInfo() const
@@ -304,6 +311,11 @@ void World::DebugRenderInputKeyInfo() const
 	DebugRender2DText( 0.f, physicsModeTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( "Physics Mode       : [P] (%s)", GetAsString(m_physicsMode).c_str() ) );
 	Vector2 cameraModeTxtPos = physicsModeTxtPos + Vector2( 0.f, -20.f );
 	DebugRender2DText( 0.f, cameraModeTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( "Camera Mode        : [C] (%s)", GetAsString(m_cameraMode).c_str() ) );
+	if( m_cameraMode == CAMERA_DETATCHED )
+	{
+		Vector2 controllingPlayerCameraTxtPos = cameraModeTxtPos + Vector2( 0.f, -20.f );
+		DebugRender2DText( 0.f, controllingPlayerCameraTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( " -> Controlling the \"%s\"; [V] to change", m_inputControlsPlayerDetached ? "Player" : "Camera" ) );
+	}
 }
 
 void World::CyclePhysicsMode()
@@ -322,6 +334,85 @@ void World::CycleCameraMode()
 		nextEnumNumber = 0;
 
 	m_cameraMode = (eCameraMode) nextEnumNumber;
+}
+
+void World::ControlsUpdate_CameraDetatched( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds )
+{
+	// Camera Orientation
+	float const curentCamPitch = m_camera->GetPitchDegreesAboutY();
+	m_camera->m_yawDegreesAboutZ -= mouseScreenDelta.x * m_camRotationSpeed;
+	m_camera->SetPitchDegreesAboutY( curentCamPitch + (mouseScreenDelta.y * m_camRotationSpeed) );
+
+	// Camera Position
+	float	const camYaw	 = m_camera->m_yawDegreesAboutZ;
+	Vector3 const forwardDir = Vector3( CosDegree(camYaw), SinDegree(camYaw), 0.f );
+	Vector3 const leftDir	 = Vector3( forwardDir.y * -1.f, forwardDir.x, 0.f );
+	Vector3 const upDir		 = Vector3( 0.f, 0.f, 1.f );
+
+	if( m_inputControlsPlayerDetached == true )
+	{
+		// Just controlling the player
+		float	xyMovementStrength	= 5.f;
+		float	flyMovmentStrength	= 10.f;
+		Vector2	xyMovementIntention	= (forwardDir.IgnoreZ() * forwardMovement) + (leftDir.IgnoreZ() * leftMovement);
+		float	flyMovmentIntention	= upMovement;
+
+		m_player->SetMovementWillpowerAndStrength( xyMovementIntention, xyMovementStrength );
+		m_player->SetFlyWillpowerAndStrength( flyMovmentIntention, flyMovmentStrength );
+	}
+	else
+	{
+		// Just controlling the camera
+		m_camera->m_position += ((forwardDir * forwardMovement * m_cameraFlySpeed * deltaSeconds)
+							 +   (leftDir * leftMovement * m_cameraFlySpeed * deltaSeconds )
+							 +   (upDir * upMovement * m_cameraFlySpeed * deltaSeconds ));
+	}
+}
+
+void World::ControlsUpdate_Camera1stPerson( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds )
+{
+	UNUSED( deltaSeconds );
+
+	// Camera Orientation
+	float const curentCamPitch = m_camera->GetPitchDegreesAboutY();
+	m_camera->m_yawDegreesAboutZ -= mouseScreenDelta.x * m_camRotationSpeed;
+	m_camera->SetPitchDegreesAboutY( curentCamPitch + (mouseScreenDelta.y * m_camRotationSpeed) );
+
+	// Camera Position
+	float	const camYaw	 = m_camera->m_yawDegreesAboutZ;
+	Vector3 const forwardDir = Vector3( CosDegree(camYaw), SinDegree(camYaw), 0.f );
+	Vector3 const leftDir	 = Vector3( forwardDir.y * -1.f, forwardDir.x, 0.f );
+	Vector3 const upDir		 = Vector3( 0.f, 0.f, 1.f );
+
+	// Player
+	float	xyMovementStrength	= 5.f;
+	float	flyMovmentStrength	= 10.f;
+	Vector2	xyMovementIntention	= (forwardDir.IgnoreZ() * forwardMovement) + (leftDir.IgnoreZ() * leftMovement);
+	float	flyMovmentIntention	= upMovement;
+
+	m_player->SetMovementWillpowerAndStrength( xyMovementIntention, xyMovementStrength );
+	m_player->SetFlyWillpowerAndStrength( flyMovmentIntention, flyMovmentStrength );
+
+	// Camera
+	m_camera->m_position = m_player->GetEyePosition();
+}
+
+void World::ControlsUpdate_CameraOverTheShoulder( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds )
+{
+	UNUSED( forwardMovement );
+	UNUSED( leftMovement );
+	UNUSED( upMovement );
+	UNUSED( mouseScreenDelta );
+	UNUSED( deltaSeconds );
+}
+
+void World::ControlsUpdate_CameraFixedAngle( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds )
+{
+	UNUSED( forwardMovement );
+	UNUSED( leftMovement );
+	UNUSED( upMovement );
+	UNUSED( mouseScreenDelta );
+	UNUSED( deltaSeconds );
 }
 
 void World::PlayerToBlocksUniballCollision()
@@ -407,7 +498,7 @@ void World::PushSphereOutFromBlock( Sphere &collider, BlockLocator const &blockL
 	float	distanceToCenter	= pushDirection.NormalizeAndGetLength();
 
 	// Either already in the block, or away more that the radius
-	if( distanceToCenter == 0.f || distanceToCenter > collider.radius )
+	if( distanceToCenter <= 0.0001f || distanceToCenter > collider.radius )
 		return;
 
 	// Update Position

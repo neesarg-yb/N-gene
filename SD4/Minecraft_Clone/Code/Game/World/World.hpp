@@ -28,8 +28,9 @@ private:
 	// Game Camera
 	eCameraMode	 m_cameraMode		= CAMERA_DETATCHED;
 	MCamera		*m_camera			= nullptr;
-	float		 m_flySpeed			= 8.f;
+	float		 m_cameraFlySpeed	= 8.f;
 	float		 m_camRotationSpeed = 0.2f;
+	bool		 m_inputControlsPlayerDetached = false;		// If false, the input controls the camera!
 
 	// Entities
 	ePhysicsMode m_physicsMode		= PHYSICS_NO_CLIP;
@@ -89,6 +90,11 @@ private:
 	void	DebugRenderInputKeyInfo() const;
 	void	CyclePhysicsMode();
 	void	CycleCameraMode();
+
+	void	ControlsUpdate_CameraDetatched		( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
+	void	ControlsUpdate_Camera1stPerson		( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
+	void	ControlsUpdate_CameraOverTheShoulder( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
+	void	ControlsUpdate_CameraFixedAngle		( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
 
 	// Collision
 	void	PlayerToBlocksUniballCollision();
