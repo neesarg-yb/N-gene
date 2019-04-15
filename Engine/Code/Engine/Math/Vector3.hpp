@@ -40,6 +40,7 @@ public:
 	Vector3			GetAsDirection() const;		// From Euler Rotation to Direction Vector
 	void			GetTangentAndBitangent( Vector3 *tangent, Vector3 *bitangent = nullptr ) const;	// If passed nullptr, it ignores that argument
 	Vector2			IgnoreZ() const;
+	Vector3			ProjectOnDirection( Vector3 const &normalizedDir ) const;
 
 	// Producers
 	static Vector3	CrossProduct( const Vector3& first_vec, const Vector3& second_vec );
