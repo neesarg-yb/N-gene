@@ -27,7 +27,7 @@ World::World( Clock *parentClock )
 	PopulateChunkActivationCheatsheet( m_deactivationRadius );
 
 	// Player
-	m_player = new Player( cameraPosition, &m_clock );
+	m_player = new Player( cameraPosition, this, &m_clock );
 }
 
 World::~World()
@@ -71,6 +71,8 @@ void World::Update()
 	// Collision
 	if( m_physicsMode != PHYSICS_NO_CLIP )
 		PlayerToBlocksUniballCollision();
+
+	m_player->UpdateIsInAir();
 
 	// Block Selection
 	PerformRaycast();
@@ -238,7 +240,9 @@ void World::ProcessInput( float deltaSeconds )
 	float	forwardMovement = 0.f;
 	float	leftMovement = 0.f;
 	float	upMovement = 0.f;
+	bool	tryJump = false;
 
+	// Input state
 	if( g_theInput->IsKeyPressed( 'W' ) )
 		forwardMovement += 1.f;
 	if( g_theInput->IsKeyPressed( 'S' ) )
@@ -251,6 +255,8 @@ void World::ProcessInput( float deltaSeconds )
 		upMovement += 1.f;
 	if( g_theInput->IsKeyPressed( 'E' ) )
 		upMovement -= 1.f;
+	if( g_theInput->WasKeyJustPressed( SPACE ) )
+		tryJump = true;
 	if( g_theInput->WasKeyJustPressed( 'P' ) )
 		CyclePhysicsMode();
 	if( g_theInput->WasKeyJustPressed( 'C' ) )
@@ -258,6 +264,11 @@ void World::ProcessInput( float deltaSeconds )
 	if( g_theInput->WasKeyJustPressed( 'V' ) )
 		m_inputControlsPlayerDetached = !m_inputControlsPlayerDetached;
 
+	// Jump impulse
+	if( m_physicsMode == PHYSICS_WALK && m_player->GetIsInAir() == false && tryJump )
+		m_player->AddWillPowerForceZ( 1500.f );
+
+	// Camera and Movement of the Player
 	switch (m_cameraMode)
 	{
 	case CAMERA_DETATCHED:
@@ -313,9 +324,13 @@ void World::DebugRenderInputKeyInfo() const
 	DebugRender2DText( 0.f, cameraModeTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( "Camera Mode        : [C] (%s)", GetAsString(m_cameraMode).c_str() ) );
 	if( m_cameraMode == CAMERA_DETATCHED )
 	{
-		Vector2 controllingPlayerCameraTxtPos = cameraModeTxtPos + Vector2( 0.f, -20.f );
-		DebugRender2DText( 0.f, controllingPlayerCameraTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( " -> Controlling the \"%s\"; [V] to change", m_inputControlsPlayerDetached ? "Player" : "Camera" ) );
+		cameraModeTxtPos += Vector2( 0.f, -20.f );
+		DebugRender2DText( 0.f, cameraModeTxtPos, 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, Stringf( " -> Controlling the \"%s\"; [V] to change", m_inputControlsPlayerDetached ? "Player" : "Camera" ) );
 	}
+
+	// Is player in air? 
+	Vector2 isInAirTxtPos = cameraModeTxtPos + Vector2( 0.f, -20.f );
+	DebugRender2DText( 0.f, isInAirTxtPos, 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, Stringf( "Is player in air?  : %s", m_player->GetIsInAir() ? "YES" : "NO" ) );
 }
 
 void World::CyclePhysicsMode()
@@ -357,8 +372,8 @@ void World::ControlsUpdate_CameraDetatched( float forwardMovement, float leftMov
 		Vector2	xyMovementIntention	= (forwardDir.IgnoreZ() * forwardMovement) + (leftDir.IgnoreZ() * leftMovement);
 		float	flyMovmentIntention	= upMovement;
 
-		m_player->SetMovementWillpowerAndStrength( xyMovementIntention, xyMovementStrength );
-		m_player->SetFlyWillpowerAndStrength( flyMovmentIntention, flyMovmentStrength );
+		m_player->AddWillpowerForceXY( xyMovementIntention * xyMovementStrength );
+		m_player->AddWillPowerForceZ ( flyMovmentIntention * flyMovmentStrength );
 	}
 	else
 	{
@@ -390,8 +405,8 @@ void World::ControlsUpdate_Camera1stPerson( float forwardMovement, float leftMov
 	Vector2	xyMovementIntention	= (forwardDir.IgnoreZ() * forwardMovement) + (leftDir.IgnoreZ() * leftMovement);
 	float	flyMovmentIntention	= upMovement;
 
-	m_player->SetMovementWillpowerAndStrength( xyMovementIntention, xyMovementStrength );
-	m_player->SetFlyWillpowerAndStrength( flyMovmentIntention, flyMovmentStrength );
+	m_player->AddWillpowerForceXY( xyMovementIntention * xyMovementStrength );
+	m_player->AddWillPowerForceZ ( flyMovmentIntention * flyMovmentStrength );
 
 	// Camera
 	m_camera->m_position = m_player->GetEyePosition();

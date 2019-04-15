@@ -2,10 +2,12 @@
 #include "Player.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
+#include "Game/World/World.hpp"
 #include "Game/Debug/DebugRenderUtils.hpp"
 
-Player::Player( Vector3 spawnPosition, Clock *parentClock )
+Player::Player( Vector3 spawnPosition, World const *inTheWorld, Clock *parentClock )
 	: Entity( parentClock )
+	, m_world( inTheWorld )
 {
 	m_position = spawnPosition;
 }
@@ -18,6 +20,8 @@ Player::~Player()
 void Player::Update()
 {
 	Entity::Update();
+
+	m_willpowerForce = Vector3::ZERO;
 }
 
 void Player::Render() const
@@ -34,6 +38,14 @@ void Player::Render() const
 	// Sphere - Collider
 	Sphere collider = GetCollider();
 	MDebugUtils::RenderSphereWireframe( collider.center, collider.radius, RGBA_GREEN_COLOR, false );
+}
+
+void Player::UpdateIsInAir()
+{
+	Vector3		 posJustBelow		= m_position - Vector3( 0.f, 0.f, 0.05f );
+	BlockLocator justBelowBlockLoc	= m_world->GetBlockLocatorForWorldPosition( posJustBelow );
+	
+	m_isInAir = (justBelowBlockLoc.GetBlock().IsSolid() == false);
 }
 
 Sphere Player::GetCollider() const
@@ -57,17 +69,13 @@ void Player::SetPositionFrom( Sphere const &fromCollider )
 	m_position = playerPosition;
 }
 
-void Player::SetMovementWillpowerAndStrength( Vector2 const &xyMovementIntention, float strength )
+void Player::AddWillpowerForceXY( Vector2 const &movementForce )
 {
-	m_willpowerIntention.x = xyMovementIntention.x;
-	m_willpowerIntention.y = xyMovementIntention.y;
-
-	m_willpowerStrength = strength;
+	m_willpowerForce.x += movementForce.x;
+	m_willpowerForce.y += movementForce.y;
 }
 
-void Player::SetFlyWillpowerAndStrength( float const flyIntention, float strength )
+void Player::AddWillPowerForceZ( float const flyForce )
 {
-	m_willpowerIntention.z = flyIntention;
-
-	m_flyStrength = strength;
+	m_willpowerForce.z += flyForce;
 }
