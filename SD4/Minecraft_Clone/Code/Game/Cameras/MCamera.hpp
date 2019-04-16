@@ -4,19 +4,20 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Game/GameCommon.hpp"
 
+class World;
 class Player;
 
 class MCamera
 {
 public:
-	 MCamera( Renderer &activeRenderer, Clock* parentClock, Player const *anchor );
+	 MCamera( Renderer &activeRenderer, Clock* parentClock, Player const *anchor, World const *inTheWorld );
 	~MCamera();
 
 public:
 	// Frustum
-	float		 m_initialFOV	= 45.f;	
-	float		 m_cameraNear	= 0.01f;
-	float		 m_cameraFar	= 100.f;
+	float		 m_initialFOV			= 45.f;	
+	float		 m_cameraNear			= 0.01f;
+	float		 m_cameraFar			= 100.f;
 
 	// Transform
 	Vector3		 m_position				= Vector3::ZERO;
@@ -25,8 +26,8 @@ public:
 	float		 m_pitchLimit			= 70.f;
 
 	// Movement
-	float		 m_cameraFlySpeed	= 8.f;
-	float		 m_camRotationSpeed = 0.2f;
+	float		 m_cameraFlySpeed		= 8.f;
+	float		 m_camRotationSpeed		= 0.2f;
 
 private:
 	Clock		 m_clock;
@@ -43,9 +44,12 @@ private:
 
 public:
 	// Camera Behavior
-	Player const	*m_anchorPlayer			= nullptr;
-	eCameraMode		 m_cameraMode			= CAMERA_DETATCHED;
-	bool			 m_inputControlsCamera	= false;
+	World  const	*m_world					= nullptr;
+	Player const	*m_anchorPlayer				= nullptr;
+	eCameraMode		 m_cameraMode				= CAMERA_DETATCHED;
+	bool			 m_inputControlsCamera		= false;
+	float			 m_overTheShoulderRadius	= 8.f;
+	float			 m_moveFasterScale			= 4.5;			// When pressed SHIFT, while in Detached Mode
 
 public:
 	void	Update();

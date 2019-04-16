@@ -1,11 +1,13 @@
 #pragma once
 #include "MCamera.hpp"
+#include "Game/World/World.hpp"
 #include "Game/World/Player.hpp"
 
-MCamera::MCamera( Renderer &activeRenderer, Clock* parentClock, Player const *anchor )
+MCamera::MCamera( Renderer &activeRenderer, Clock* parentClock, Player const *anchor, World const *inTheWorld )
 	: m_renderer( activeRenderer )
 	, m_clock( parentClock )
 	, m_anchorPlayer( anchor )
+	, m_world( inTheWorld )
 {
 	m_camera = new Camera();
 
@@ -61,6 +63,7 @@ void MCamera::Update_CameraDetatched( float deltaSeconds )
 	float	forwardMovement = 0.f;
 	float	leftMovement = 0.f;
 	float	upMovement = 0.f;
+	float	movementSpeedMultiplier = 1.f;
 
 	if( g_theInput->IsKeyPressed( 'W' ) )
 		forwardMovement += 1.f;
@@ -74,6 +77,8 @@ void MCamera::Update_CameraDetatched( float deltaSeconds )
 		upMovement += 1.f;
 	if( g_theInput->IsKeyPressed( 'E' ) )
 		upMovement -= 1.f;
+	if( g_theInput->IsKeyPressed( SHIFT ) )
+		movementSpeedMultiplier = m_moveFasterScale;
 
 	// Camera Orientation
 	m_yawDegreesAboutZ		-= mouseScreenDelta.x * m_camRotationSpeed;
@@ -86,9 +91,9 @@ void MCamera::Update_CameraDetatched( float deltaSeconds )
 	Vector3 const upDir		 = Vector3( 0.f, 0.f, 1.f );
 	
 	// Just controlling the camera
-	m_position	+= ((forwardDir * forwardMovement * m_cameraFlySpeed * deltaSeconds)
-				+   (leftDir * leftMovement * m_cameraFlySpeed * deltaSeconds )
-				+   (upDir * upMovement * m_cameraFlySpeed * deltaSeconds ));
+	m_position	+= ((forwardDir * forwardMovement * m_cameraFlySpeed * movementSpeedMultiplier * deltaSeconds)
+				+   (leftDir * leftMovement * m_cameraFlySpeed * movementSpeedMultiplier * deltaSeconds )
+				+   (upDir * upMovement * m_cameraFlySpeed * movementSpeedMultiplier * deltaSeconds ));
 }
 
 void MCamera::Update_Camera1stPerson( float deltaSeconds )
@@ -98,17 +103,29 @@ void MCamera::Update_Camera1stPerson( float deltaSeconds )
 	// Update according to the input
 	Vector2	mouseScreenDelta = g_theInput->GetMouseDelta();
 
-	// Camera Orientation
-	m_yawDegreesAboutZ		-= mouseScreenDelta.x * m_camRotationSpeed;
-	m_pitchDegreesAboutY	+= mouseScreenDelta.y * m_camRotationSpeed;
+	// Orientation
+	m_yawDegreesAboutZ -= mouseScreenDelta.x * m_camRotationSpeed;
+	SetPitchDegreesAboutY( m_pitchDegreesAboutY + (mouseScreenDelta.y * m_camRotationSpeed) );
 
-	// Camera
+	// Position
 	m_position = m_anchorPlayer->GetEyePosition();
 }
 
 void MCamera::Update_CameraOverTheShoulder( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
+
+	// Update according to the input
+	Vector2	mouseScreenDelta = g_theInput->GetMouseDelta();
+
+	// Camera Orientation
+	m_yawDegreesAboutZ -= mouseScreenDelta.x * m_camRotationSpeed;
+	SetPitchDegreesAboutY( m_pitchDegreesAboutY + (mouseScreenDelta.y * m_camRotationSpeed) );
+
+	// Position
+	Vector3 cameraForward  = GetForwardDirection();
+	RaycastResult_MC raycastResult = m_world->Raycast( m_anchorPlayer->GetEyePosition(), -cameraForward, m_overTheShoulderRadius );
+	m_position = raycastResult.m_impactPosition + (cameraForward * 0.1f);
 }
 
 void MCamera::Update_CameraFixedAngle( float deltaSeconds )

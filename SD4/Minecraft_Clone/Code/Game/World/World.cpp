@@ -18,7 +18,7 @@ World::World( Clock *parentClock )
 	m_player = new Player( playerPosition, this, &m_clock );
 
 	// Setting up the Camera
-	m_camera = new MCamera( *g_theRenderer, &m_clock, m_player );
+	m_camera = new MCamera( *g_theRenderer, &m_clock, m_player, this );
 	m_camera->m_cameraNear = 0.01f;
 	m_camera->m_cameraFar = 2000.f;
 
@@ -259,7 +259,7 @@ void World::DebugRenderInputKeyInfo() const
 	Vector2 movementTxtPos = mouseClickTxtPos + Vector2( 0.f, -20.f );
 	DebugRender2DText( 0.f, movementTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Movement: [W, A, S, D - Horizontal] [Q, E - Vertical]" );
 	Vector2 shiftFastTxtPos = movementTxtPos + Vector2( 0.f, -20.f );
-	DebugRender2DText( 0.f, shiftFastTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Faster  : [SHIFT]" );
+	DebugRender2DText( 0.f, shiftFastTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "Fast Cam: [SHIFT]" );
 
 	Vector2 placeTestBlockTxtPos = shiftFastTxtPos + Vector2( 0.f, -20.f );
 	DebugRender2DText( 0.f, placeTestBlockTxtPos, 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, "White Test-Block: [CTRL]" );
@@ -986,7 +986,10 @@ void World::PerformRaycast()
 		m_lockedRayDirection	= m_camera->GetForwardDirection();
 	}
 
-	m_blockSelectionRaycastResult = Raycast( m_lockedRayStartPos, m_lockedRayDirection, m_raycastMaxDistance );
+	if( m_cameraMode == CAMERA_OVER_THE_SHOULDER )
+		m_blockSelectionRaycastResult = Raycast( m_player->GetEyePosition(), m_camera->GetForwardDirection(), m_raycastMaxDistance );
+	else
+		m_blockSelectionRaycastResult = Raycast( m_lockedRayStartPos, m_lockedRayDirection, m_raycastMaxDistance );
 }
 
 void World::PlaceOrDigBlock()
