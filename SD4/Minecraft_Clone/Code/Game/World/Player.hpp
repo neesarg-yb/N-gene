@@ -14,14 +14,22 @@ public:
 	World	const *m_world	= nullptr;
 	Vector3 const  m_size	= Vector3( 1.f, 1.f, 1.8f );
 
+public:
+	bool m_inputControlsPlayer = false;
+
 private:
-	bool m_isInAir = true;
+	bool	m_isInAir			 = true;
+	float	m_xyMovementStrength = 5.f;
+	float	m_flyMovmentStrength = 10.f;
 
 public:
 	void Update();
 	void Render() const;
 
 	void UpdateIsInAir();
+
+private:
+	void SetWillpowerForceAccordingToInput();
 
 public:
 	bool	GetIsInAir() const;

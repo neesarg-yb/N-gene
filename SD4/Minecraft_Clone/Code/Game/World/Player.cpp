@@ -19,6 +19,8 @@ Player::~Player()
 
 void Player::Update()
 {
+	SetWillpowerForceAccordingToInput();
+
 	Entity::Update();
 
 	m_willpowerForce = Vector3::ZERO;
@@ -46,6 +48,52 @@ void Player::UpdateIsInAir()
 	BlockLocator justBelowBlockLoc	= m_world->GetBlockLocatorForWorldPosition( posJustBelow );
 	
 	m_isInAir = (justBelowBlockLoc.GetBlock().IsSolid() == false);
+}
+
+void Player::SetWillpowerForceAccordingToInput()
+{
+	// Return if the input just controls the camera
+	if( m_world->GetCamera()->m_cameraMode == CAMERA_DETATCHED && m_inputControlsPlayer == false )
+		return;
+
+	// Update this variables according to the input
+	Vector2	mouseScreenDelta = g_theInput->GetMouseDelta();
+	float	forwardMovement = 0.f;
+	float	leftMovement = 0.f;
+	float	upMovement = 0.f;
+	bool	tryJump = false;
+
+	if( g_theInput->IsKeyPressed( 'W' ) )
+		forwardMovement += 1.f;
+	if( g_theInput->IsKeyPressed( 'S' ) )
+		forwardMovement -= 1.f;
+	if( g_theInput->IsKeyPressed( 'A' ) )
+		leftMovement += 1.f;
+	if( g_theInput->IsKeyPressed( 'D' ) )
+		leftMovement -= 1.f;
+	if( g_theInput->IsKeyPressed( 'Q' ) )
+		upMovement += 1.f;
+	if( g_theInput->IsKeyPressed( 'E' ) )
+		upMovement -= 1.f;
+	if( g_theInput->WasKeyJustPressed( SPACE ) )
+		tryJump = true;
+
+	// Movement Direction
+	float	const camYaw	 = m_world->GetCamera()->m_yawDegreesAboutZ;
+	Vector3 const forwardDir = Vector3( CosDegree(camYaw), SinDegree(camYaw), 0.f );
+	Vector3 const leftDir	 = Vector3( forwardDir.y * -1.f, forwardDir.x, 0.f );
+	Vector3 const upDir		 = Vector3( 0.f, 0.f, 1.f );
+
+	Vector2	xyMovementIntention	= (forwardDir.IgnoreZ() * forwardMovement) + (leftDir.IgnoreZ() * leftMovement);
+	float	flyMovmentIntention	= upMovement;
+
+	// Set Willpower Forces
+	AddWillpowerForceXY( xyMovementIntention * m_xyMovementStrength );
+	AddWillPowerForceZ ( flyMovmentIntention * m_flyMovmentStrength );
+
+	// Jump Impulse
+	if( m_physicsMode == PHYSICS_WALK && m_isInAir == false && tryJump )
+		AddWillPowerForceZ( 1500.f );
 }
 
 Sphere Player::GetCollider() const

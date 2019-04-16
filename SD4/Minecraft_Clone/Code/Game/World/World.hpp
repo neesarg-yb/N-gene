@@ -28,8 +28,6 @@ private:
 	// Game Camera
 	eCameraMode	 m_cameraMode		= CAMERA_DETATCHED;
 	MCamera		*m_camera			= nullptr;
-	float		 m_cameraFlySpeed	= 8.f;
-	float		 m_camRotationSpeed = 0.2f;
 	bool		 m_inputControlsPlayerDetached = false;		// If false, the input controls the camera!
 
 	// Entities
@@ -76,6 +74,7 @@ public:
 public:
 	RaycastResult_MC	Raycast( Vector3 const &start, Vector3 const &forwardDir, float maxDistance ) const;
 	BlockLocator const	GetBlockLocatorForWorldPosition( Vector3 const &worldPosition ) const;
+	MCamera const*		GetCamera() const;
 
 public:
 	void	MarkLightDirtyAndAddUniqueToQueue( BlockLocator &toBeDirtyBlockLoc );
@@ -90,11 +89,6 @@ private:
 	void	DebugRenderInputKeyInfo() const;
 	void	CyclePhysicsMode();
 	void	CycleCameraMode();
-
-	void	ControlsUpdate_CameraDetatched		( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
-	void	ControlsUpdate_Camera1stPerson		( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
-	void	ControlsUpdate_CameraOverTheShoulder( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
-	void	ControlsUpdate_CameraFixedAngle		( float forwardMovement, float leftMovement, float upMovement, Vector2 const &mouseScreenDelta, float deltaSeconds );
 
 	// Collision
 	void	PlayerToBlocksUniballCollision();
@@ -138,3 +132,8 @@ public:
 	static bool			CheetsheetCompare( ChunkCoord const &a, ChunkCoord const &b );
 	static ChunkCoord	ChunkCoordFromWorldPosition( Vector3 const &position );
 };
+
+inline MCamera const* World::GetCamera() const
+{
+	return m_camera;
+}

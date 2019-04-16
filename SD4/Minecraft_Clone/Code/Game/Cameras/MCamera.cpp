@@ -1,8 +1,11 @@
 #pragma once
 #include "MCamera.hpp"
+#include "Game/World/Player.hpp"
 
-MCamera::MCamera( Renderer &activeRenderer )
+MCamera::MCamera( Renderer &activeRenderer, Clock* parentClock, Player const *anchor )
 	: m_renderer( activeRenderer )
+	, m_clock( parentClock )
+	, m_anchorPlayer( anchor )
 {
 	m_camera = new Camera();
 
@@ -19,6 +22,100 @@ MCamera::~MCamera()
 	delete m_camera;
 	m_camera = nullptr;
 }
+
+void MCamera::Update()
+{
+	float deltaSeconds = (float) m_clock.GetFrameDeltaSeconds();
+
+	switch (m_cameraMode)
+	{
+	case CAMERA_DETATCHED:
+		Update_CameraDetatched( deltaSeconds );
+		break;
+
+	case CAMERA_1ST_PERSON:
+		Update_Camera1stPerson( deltaSeconds );
+		break;
+
+	case CAMERA_OVER_THE_SHOULDER:
+		Update_CameraOverTheShoulder( deltaSeconds );
+		break;
+
+	case CAMERA_FIXED_ANGLE:
+		Update_CameraFixedAngle( deltaSeconds );
+		break;
+
+	default:
+		break;
+	}
+}
+
+void MCamera::Update_CameraDetatched( float deltaSeconds )
+{
+	// If input is controlling just the player, return
+	if( m_inputControlsCamera == false )
+		return;
+
+	// Update according to the input
+	Vector2	mouseScreenDelta = g_theInput->GetMouseDelta();
+	float	forwardMovement = 0.f;
+	float	leftMovement = 0.f;
+	float	upMovement = 0.f;
+
+	if( g_theInput->IsKeyPressed( 'W' ) )
+		forwardMovement += 1.f;
+	if( g_theInput->IsKeyPressed( 'S' ) )
+		forwardMovement -= 1.f;
+	if( g_theInput->IsKeyPressed( 'A' ) )
+		leftMovement += 1.f;
+	if( g_theInput->IsKeyPressed( 'D' ) )
+		leftMovement -= 1.f;
+	if( g_theInput->IsKeyPressed( 'Q' ) )
+		upMovement += 1.f;
+	if( g_theInput->IsKeyPressed( 'E' ) )
+		upMovement -= 1.f;
+
+	// Camera Orientation
+	m_yawDegreesAboutZ		-= mouseScreenDelta.x * m_camRotationSpeed;
+	m_pitchDegreesAboutY	+= mouseScreenDelta.y * m_camRotationSpeed;
+
+	// Camera Position
+	float	const camYaw	 = m_yawDegreesAboutZ;
+	Vector3 const forwardDir = Vector3( CosDegree(camYaw), SinDegree(camYaw), 0.f );
+	Vector3 const leftDir	 = Vector3( forwardDir.y * -1.f, forwardDir.x, 0.f );
+	Vector3 const upDir		 = Vector3( 0.f, 0.f, 1.f );
+	
+	// Just controlling the camera
+	m_position	+= ((forwardDir * forwardMovement * m_cameraFlySpeed * deltaSeconds)
+				+   (leftDir * leftMovement * m_cameraFlySpeed * deltaSeconds )
+				+   (upDir * upMovement * m_cameraFlySpeed * deltaSeconds ));
+}
+
+void MCamera::Update_Camera1stPerson( float deltaSeconds )
+{
+	UNUSED( deltaSeconds );
+
+	// Update according to the input
+	Vector2	mouseScreenDelta = g_theInput->GetMouseDelta();
+
+	// Camera Orientation
+	m_yawDegreesAboutZ		-= mouseScreenDelta.x * m_camRotationSpeed;
+	m_pitchDegreesAboutY	+= mouseScreenDelta.y * m_camRotationSpeed;
+
+	// Camera
+	m_position = m_anchorPlayer->GetEyePosition();
+}
+
+void MCamera::Update_CameraOverTheShoulder( float deltaSeconds )
+{
+	UNUSED( deltaSeconds );
+}
+
+void MCamera::Update_CameraFixedAngle( float deltaSeconds )
+{
+	UNUSED( deltaSeconds );
+}
+
 Camera* MCamera::GetCamera()
 {
 	RebuildMatrices();
