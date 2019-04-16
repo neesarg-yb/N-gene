@@ -81,8 +81,11 @@ void World::Update()
 	m_player->UpdateIsInAir();
 
 	// Block Selection
-	PerformRaycast();
-	PlaceOrDigBlock();
+	if( m_cameraMode != CAMERA_FIXED_ANGLE )		// Disabled while in Fixed Angle
+	{
+		PerformRaycast();
+		PlaceOrDigBlock();
+	}
 
 	m_camera->RebuildMatrices();
 }
@@ -138,7 +141,8 @@ void World::Render() const
 	m_player->Render();
 
 	// Raycast Selection
-	RenderBlockSelection( m_blockSelectionRaycastResult );
+	if( m_cameraMode != CAMERA_FIXED_ANGLE )						// Disabled while in Fixed Angle
+		RenderBlockSelection( m_blockSelectionRaycastResult );
 
 	// Dirty Lights Debug
 	if( DEBUG_RENDER_DIRTY_LIGHTS )
@@ -291,6 +295,13 @@ void World::DebugRenderInputKeyInfo() const
 	// Is player in air? 
 	Vector2 isInAirTxtPos = cameraModeTxtPos + Vector2( 0.f, -20.f );
 	DebugRender2DText( 0.f, isInAirTxtPos, 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf( "Is player in air?  : %s", m_player->GetIsInAir() ? "YES" : "NO" ) );
+
+	// Digging block is disabled!
+	if( m_cameraMode == CAMERA_FIXED_ANGLE )
+	{
+		isInAirTxtPos += Vector2( 0.f, -20.f );
+		DebugRender2DText( 0.f, isInAirTxtPos, 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf( "Place & Dig Block actions are DISABLED!") );
+	}
 }
 
 void World::CyclePhysicsMode()

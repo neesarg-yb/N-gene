@@ -31,15 +31,18 @@ void Player::Render() const
 	Vector3	worldBoundsCenter = m_position + Vector3( 0.f, 0.f, m_size.z * 0.5f);
 	AABB3	worldBounds		  = AABB3( worldBoundsCenter, m_size.x, m_size.y, m_size.z );
 
-	// Body
-	MDebugUtils::RenderCubeWireframe( worldBounds, RGBA_BLUE_COLOR, true );
-	
-	// Velocity
-	MDebugUtils::RenderLine( m_position, RGBA_WHITE_COLOR, m_position + m_velocity, RGBA_ORANGE_COLOR, true );
+	if( m_world->GetCamera()->m_cameraMode != CAMERA_1ST_PERSON )
+	{
+		// Body
+		MDebugUtils::RenderCubeWireframe( worldBounds, RGBA_BLUE_COLOR, true );
 
-	// Sphere - Collider
-	Sphere collider = GetCollider();
-	MDebugUtils::RenderSphereWireframe( collider.center, collider.radius, RGBA_GREEN_COLOR, false );
+		// Velocity
+		MDebugUtils::RenderLine( m_position, RGBA_WHITE_COLOR, m_position + m_velocity, RGBA_ORANGE_COLOR, true );
+
+		// Sphere - Collider
+		Sphere collider = GetCollider();
+		MDebugUtils::RenderSphereWireframe( collider.center, collider.radius, RGBA_GREEN_COLOR, false );
+	}
 }
 
 void Player::UpdateIsInAir()

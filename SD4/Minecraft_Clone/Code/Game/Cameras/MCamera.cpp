@@ -124,13 +124,23 @@ void MCamera::Update_CameraOverTheShoulder( float deltaSeconds )
 
 	// Position
 	Vector3 cameraForward  = GetForwardDirection();
-	RaycastResult_MC raycastResult = m_world->Raycast( m_anchorPlayer->GetEyePosition(), -cameraForward, m_overTheShoulderRadius );
+	RaycastResult_MC raycastResult = m_world->Raycast( m_anchorPlayer->GetEyePosition(), -cameraForward, m_overTheShoulderRadius );		// To get the camera out of wall or blocks
 	m_position = raycastResult.m_impactPosition + (cameraForward * 0.1f);
 }
 
 void MCamera::Update_CameraFixedAngle( float deltaSeconds )
 {
 	UNUSED( deltaSeconds );
+
+	// Camera Orientation
+	m_yawDegreesAboutZ	 = -155.f;
+	m_pitchDegreesAboutY = 30.f;
+	m_rollDegreesAboutX	 = 0.f;
+
+	// Position
+	Vector3 cameraForward  = GetForwardDirection();
+	RaycastResult_MC raycastResult = m_world->Raycast( m_anchorPlayer->GetEyePosition(), -cameraForward, m_overTheShoulderRadius * 1.5f );		// To get the camera out of wall or blocks
+	m_position = raycastResult.m_impactPosition + (cameraForward * 0.1f);
 }
 
 Camera* MCamera::GetCamera()
