@@ -67,9 +67,10 @@ public:
 	void		SetupForIncomingHandover( float rotationAroundAnchor, float altitudeFromTop );
 	void		SuggestChangedPolarCoordinate( float radius, float rotation, float altitude );	// A Camera Constrain can used this; meant to be used by CC_ModifiedConeRaycast
 	
+	bool		StartCameraReorientation();
+
 private:
 	void	GetPlayerInput( float &distChange_out, float &rotChange_out, float &altChange_out, float &hOffsetChange_out, float &vOffsetChange_out, float &fovChange_out ) const;
-	void	CheckEnableCameraReorientation( CameraState const &currentState, CameraContext const &context, float rotationChangeInput );
 	bool	CheckToTurnOnConstraintSuggestions( ConstraintSuggestionOverwriteState const &suggestionOverwriteState ) const;
 
 	void	CartesianToPolarTest( CameraState const &camState ) const;

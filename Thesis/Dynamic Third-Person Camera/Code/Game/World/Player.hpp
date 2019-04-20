@@ -1,5 +1,7 @@
 #pragma once
 #include "Engine/Core/GameObject.hpp"
+#include "Engine/CameraSystem/CameraState.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 
 class Terrain;
 
@@ -21,13 +23,17 @@ public:
 	bool m_isPlayerOnTerrainSurface = false;
 
 private:
-	Vector3 m_cameraForward = Vector3::FRONT;
+	Vector3			m_cameraForward				= Vector3::FRONT;
+
+	bool			m_lockReferenceCameraState	= false;
+	CameraState		m_inputReferenceCameraState;
+	Vector2			m_leftStickOnCameraStateLock;
 
 public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
 	void RemoveRenderablesFromScene( Scene &activeScene );
-	void InformAboutCameraForward( Vector3 const &cameraForward );
+	void InformAboutCameraForward( CameraState const &currentCamState, CB_Follow &followBehavior );
 
 	void ApplyResistantForces();
 	void ApplyMovementForces();
@@ -35,4 +41,15 @@ public:
 
 	void ApplyForce( float x, float y, float z );
 	inline void ApplyForce( Vector3 force ) { ApplyForce( force.x, force.y, force.z ); }
+
+private:
+	void UpdateCameraForward( CameraState const &currentCamState );
+	void LockInputReferenceCameraState	( CameraState const &camState );
+	void UnlockInputReferenceCameraState( CameraState const &camState );
+	bool InputReferenceCameraStateIsLocked() const;
 };
+
+inline bool Player::InputReferenceCameraStateIsLocked() const 
+{
+	return m_lockReferenceCameraState;
+}

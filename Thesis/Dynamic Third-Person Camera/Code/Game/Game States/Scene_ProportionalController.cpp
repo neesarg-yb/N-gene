@@ -161,7 +161,8 @@ void Scene_ProportionalController::Update()
 
 	m_cameraManager->PreUpdate();
 
-	m_player->InformAboutCameraForward( m_cameraManager->GetCameraMatrixForInputReference().GetKColumn() );
+	TODO( "Camera Relative Controls - DISABLED" );
+	// m_player->InformAboutCameraForward( m_cameraManager->GetCameraMatrixForInputReference().GetKColumn() );
 
 	// Update Game Objects
 	for( int i = 0; i < NUM_ENTITIES; i++ )

@@ -33,6 +33,7 @@ public:
 
 	// Camera Behaviours
 	CB_FreeLook					*m_debugFreelook			= nullptr;
+	CB_Follow					*m_followBehavior			= nullptr;
 	CMC_ProportionalController	*m_proportionalController	= nullptr;
 
 	// Game Specific

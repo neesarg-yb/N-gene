@@ -41,16 +41,8 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	float distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput;
 	GetPlayerInput( distChangePerInput, rotChangePerInput, altChangePerInput, hOffsetChangePerInput, vOffsetChangePerInput, fovChangePerInput );
 
-	// Scripted Reorient Camera Behavior
-	CheckEnableCameraReorientation( currentState, context, rotChangePerInput );
-
 	if( m_reorientCameraRotation )
 	{
-		// Start input interpolation
-		m_framesSinceReorientBegan++;
-		uint averageCountForInputReference = (m_framesSinceReorientBegan > CAMERASTATE_HISTORY_LENGTH) ? CAMERASTATE_HISTORY_LENGTH : m_framesSinceReorientBegan;
-		m_manager->SetAverageCountForInputReferenceMatrixCalculation( averageCountForInputReference );
-
 		// Do the reorientation
 		Complex targetRot( m_reorientTargetRotDegrees );
 		Complex currentRot( m_rotationAroundAnchor );
@@ -65,14 +57,6 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	}
 	else
 	{
-		// No input interpolation
-		m_framesSinceReorientBegan = (m_framesSinceReorientBegan > CAMERASTATE_HISTORY_LENGTH) ? CAMERASTATE_HISTORY_LENGTH : m_framesSinceReorientBegan;
-
-		if( m_framesSinceReorientBegan > 1U )
-			m_framesSinceReorientBegan--;
-
-		m_manager->SetAverageCountForInputReferenceMatrixCalculation( m_framesSinceReorientBegan );
-
 		// Change the rotation, normally
 		m_rotationAroundAnchor	+= rotChangePerInput * m_rotationSpeed * deltaSeconds;
 	}
@@ -143,6 +127,31 @@ void CB_Follow::SuggestChangedPolarCoordinate( float radius, float rotation, flo
 	m_altitudeAroundAnchor = altitude;
 }
 
+bool CB_Follow::StartCameraReorientation()
+{
+	// Start only if previous reorient operation is finished!
+	if( m_reorientCameraRotation == false )
+	{
+		// Enable reorientation
+		m_reorientCameraRotation = true;
+
+		// Set the target degrees
+		CameraContext context		= m_manager->GetCameraContext();
+		Vector3	playerFront			= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
+		Vector2	playerFrontDirXZ	= Vector2( playerFront.x, playerFront.z ).GetNormalized();
+		float	targetDegrees		= GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
+		m_reorientTargetRotDegrees	= targetDegrees;
+
+		return true;
+	}
+	else 
+	{
+		// Last reorientation has not finished, yet..
+		// Can not start another one
+		return false;
+	}
+}
+
 void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, float &altChange_out, float &hOffsetChange_out, float &vOffsetChange_out, float &fovChange_out ) const
 {
 	// Get input from Xbox Controller
@@ -190,28 +199,6 @@ void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, flo
 	fovChange += leftShoulderPressed  ?  1.f : 0.f;
 	fovChange += rightShoulderPressed ? -1.f : 0.f;
 	fovChange_out = fovChange;
-}
-
-void CB_Follow::CheckEnableCameraReorientation( CameraState const &currentState, CameraContext const &context, float rotationChangeInput )
-{
-	UNUSED( currentState );
-	UNUSED( rotationChangeInput );
-
-	// Manually triggers the reorientation when (B) button is pressed
- 	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed )
- 	{
- 		if( m_reorientCameraRotation == false )
-		{
-			// Enable reorientation
- 			m_reorientCameraRotation = true;
-
-			// Set the target degrees
-			Vector3	playerFront			= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
-			Vector2	playerFrontDirXZ	= Vector2( playerFront.x, playerFront.z ).GetNormalized();
-			float	targetDegrees		= GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
-			m_reorientTargetRotDegrees	= targetDegrees;
-		}
- 	}
 }
 
 bool CB_Follow::CheckToTurnOnConstraintSuggestions( ConstraintSuggestionOverwriteState const &suggestionOverwriteState ) const

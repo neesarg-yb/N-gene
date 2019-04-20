@@ -4,6 +4,7 @@
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Renderer/Scene.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
+#include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/World/Terrain.hpp"
 #include "Game/GameCommon.hpp"
 
@@ -77,9 +78,36 @@ void Player::RemoveRenderablesFromScene( Scene &activeScene )
 	activeScene.RemoveRenderable( *m_renderable );
 }
 
-void Player::InformAboutCameraForward( Vector3 const &cameraForward )
+void Player::InformAboutCameraForward( CameraState const &currentCamState, CB_Follow &followBehavior )
 {
-	m_cameraForward = cameraForward;
+	bool reorientButtonJustPressed = g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed;
+	if( reorientButtonJustPressed )
+	{
+		// If reorientation has started, retain the movement direction
+		if( followBehavior.StartCameraReorientation() )
+		{
+			LockInputReferenceCameraState( currentCamState );
+			DebugRender2DText( 2.f, Vector2( -120.f, -60.f), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, "Reorientation Started [Reference CameraState LOCKED]" );
+		}
+	}
+
+	if( InputReferenceCameraStateIsLocked() )
+	{
+		// i.e. Post-CameraReorientation
+		Vector2	currentStickPosition	= g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+		Vector2	stickPositionDifference	= m_leftStickOnCameraStateLock - currentStickPosition;
+		
+		// Player wants to move in different direction?
+		bool playerWantsToChangeMovementDirection = stickPositionDifference.GetLength() > 0.2f;
+		if( playerWantsToChangeMovementDirection )
+		{
+			// Makes the input direction relative to current camera state
+			UnlockInputReferenceCameraState( currentCamState );
+			DebugRender2DText( 2.f, Vector2( -120.f, -80.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Player changed direction [Reference CameraState UNLOCKED]" );
+		}
+	}
+
+	UpdateCameraForward( currentCamState );
 }
 
 void Player::ApplyResistantForces()
@@ -172,4 +200,26 @@ void Player::CheckAndSnapOnTerrainSurface()
 void Player::ApplyForce( float x, float y, float z )
 {
 	m_acceleration += ( Vector3( x, y, z ) / m_mass );
+}
+
+void Player::UpdateCameraForward( CameraState const &currentCamState )
+{
+	if( m_lockReferenceCameraState == false )
+		m_inputReferenceCameraState = currentCamState;
+
+	m_cameraForward = m_inputReferenceCameraState.GetTransformMatrix().GetKColumn();
+}
+
+void Player::LockInputReferenceCameraState( CameraState const &camState )
+{
+	m_inputReferenceCameraState = camState;
+	m_lockReferenceCameraState = true;
+
+	m_leftStickOnCameraStateLock = g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+}
+
+void Player::UnlockInputReferenceCameraState( CameraState const &camState )
+{
+	m_lockReferenceCameraState = false;
+	m_inputReferenceCameraState = camState;
 }

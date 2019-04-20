@@ -101,11 +101,12 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_cameraManager->SetSphereCollisionCallback( collisionFunc );
 
 	// Camera Behaviour
-	CameraBehaviour* followBehaviour		= new CB_Follow( 6.3f, 70.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
-	CameraBehaviour* shoulderBehavior		= new CB_ShoulderView( 0.17f, 0.33f, 0.36f, -17.f, 17.f, "Shoulder View", m_cameraManager );
-	followBehaviour->m_motionControllerName = "Proportional Controller";	
+	CameraBehaviour* shoulderBehavior = new CB_ShoulderView( 0.17f, 0.33f, 0.36f, -17.f, 17.f, "Shoulder View", m_cameraManager );
 
-	m_cameraManager->AddNewCameraBehaviour( followBehaviour );
+	m_followBehavior = new CB_Follow( 6.3f, 70.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
+	m_followBehavior->m_motionControllerName = "Proportional Controller";	
+
+	m_cameraManager->AddNewCameraBehaviour( m_followBehavior );
 	m_cameraManager->AddNewCameraBehaviour( shoulderBehavior );
 
 	m_proportionalController = new CMC_ProportionalController( "Proportional Controller", m_cameraManager );
@@ -114,10 +115,10 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	// Camera Constraints
 	CC_LineOfSight*			losConstarin		 = new CC_LineOfSight( "LineOfSight", *m_cameraManager, 3 );
 	CC_ConeRaycast*			conRaycastCC		 = new CC_ConeRaycast( "ConeRaycast", *m_cameraManager, 2 );
-	CC_ModifiedConeRaycast*	modConRaycastCC		 = new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1, (CB_Follow *)followBehaviour );
+	CC_ModifiedConeRaycast*	modConRaycastCC		 = new CC_ModifiedConeRaycast( "M_ConeRaycast", *m_cameraManager, 1, m_followBehavior );
 	CC_CameraCollision*		collisionConstrain	 = new CC_CameraCollision( "CameraCollision", *m_cameraManager, 4 );
-	CC_HandoverToFollow*	handOverToFollowCC	 = new CC_HandoverToFollow( "HandoverToFollow", *m_cameraManager, 5, *(CB_ShoulderView *)shoulderBehavior, *(CB_Follow *)followBehaviour );
-	CC_HandoverToShoulder*	handOverToShoulderCC = new CC_HandoverToShoulder( "HandoverToShoulder", *m_cameraManager, 5, *(CB_ShoulderView *)shoulderBehavior, *(CB_Follow *)followBehaviour );
+	CC_HandoverToFollow*	handOverToFollowCC	 = new CC_HandoverToFollow( "HandoverToFollow", *m_cameraManager, 5, *(CB_ShoulderView *)shoulderBehavior, *m_followBehavior );
+	CC_HandoverToShoulder*	handOverToShoulderCC = new CC_HandoverToShoulder( "HandoverToShoulder", *m_cameraManager, 5, *(CB_ShoulderView *)shoulderBehavior, *m_followBehavior );
 	m_cameraManager->RegisterConstraint( losConstarin );
 	m_cameraManager->RegisterConstraint( conRaycastCC );
 	m_cameraManager->RegisterConstraint( modConRaycastCC );
@@ -128,10 +129,10 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	shoulderBehavior->m_constraints.SetOrRemoveTags( "HandoverToFollow" );
 
 	TODO( "CameraCollision contraint is not working as expected when I enabled culling to none!" );
-	followBehaviour->m_constraints.SetOrRemoveTags( "CameraCollision" );
-	followBehaviour->m_constraints.SetOrRemoveTags( "M_ConeRaycast" );
-	followBehaviour->m_constraints.SetOrRemoveTags( "LineOfSight" );
-	followBehaviour->m_constraints.SetOrRemoveTags( "HandoverToShoulder" );
+	m_followBehavior->m_constraints.SetOrRemoveTags( "CameraCollision" );
+	m_followBehavior->m_constraints.SetOrRemoveTags( "M_ConeRaycast" );
+	m_followBehavior->m_constraints.SetOrRemoveTags( "LineOfSight" );
+	m_followBehavior->m_constraints.SetOrRemoveTags( "HandoverToShoulder" );
 
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
 	m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.f );
@@ -252,7 +253,7 @@ void Scene_CollisionAvoidance::Update()
 	Matrix44 inputRefCamMatrix	= m_cameraManager->GetCameraMatrixForInputReference();
 	Vector3	 cameraForward		= inputRefCamMatrix.GetKColumn();
 	DebugRenderVector( 0.f, m_player->m_transform.GetWorldPosition(), cameraForward, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
-	m_player->InformAboutCameraForward( cameraForward );
+	m_player->InformAboutCameraForward( m_cameraManager->GetCurrentCameraState(), *m_followBehavior );
 	
 	// Update Game Objects
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
