@@ -98,8 +98,9 @@ void Player::InformAboutCameraForward( CameraState const &currentCamState, CB_Fo
 		Vector2	stickPositionDifference	= m_leftStickOnCameraStateLock - currentStickPosition;
 		
 		// Player wants to move in different direction?
-		bool playerWantsToChangeMovementDirection = stickPositionDifference.GetLength() > 0.2f;
-		if( playerWantsToChangeMovementDirection )
+		bool playerWantsToChangeMovementDirection	= stickPositionDifference.GetLength() > m_retainInputRegionRadiusFraction;
+		bool playerReleasedTheLeftStick				= currentStickPosition.GetLength() <= m_leftStickReleasedRegionRadiusFraction;
+		if( playerWantsToChangeMovementDirection || playerReleasedTheLeftStick )
 		{
 			// Makes the input direction relative to current camera state
 			UnlockInputReferenceCameraState( currentCamState );
@@ -108,6 +109,10 @@ void Player::InformAboutCameraForward( CameraState const &currentCamState, CB_Fo
 	}
 
 	UpdateCameraForward( currentCamState );
+
+	// Debug Render
+	Vector2 leftStickVisPos = Vector2( 139.f, -340.f );
+	DebugRenderLeftStickInput( leftStickVisPos, 250.f );
 }
 
 void Player::ApplyResistantForces()
@@ -151,6 +156,10 @@ void Player::ApplyMovementForces()
 	XboxController &controller			= g_theInput->m_controller[0];
 	Vector2			inputDirectionXZ	= controller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
 	bool			jump				= controller.m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed;
+
+	// Keep moving the same way, if we went through camera reorientation, until the lock is lifted
+	if( m_lockReferenceCameraState )
+		inputDirectionXZ = m_leftStickOnCameraStateLock;
 
 	// Applying input force
 	Vector2 forceXZ					= inputDirectionXZ * m_xzMovementForce;
@@ -222,4 +231,33 @@ void Player::UnlockInputReferenceCameraState( CameraState const &camState )
 {
 	m_lockReferenceCameraState = false;
 	m_inputReferenceCameraState = camState;
+}
+
+void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float widthSize ) const
+{
+	float halfWidth		= widthSize * 0.5f;
+	float circleRadius	= halfWidth * 0.95f;
+	AABB2 frameBounds	= AABB2( screenPosition, halfWidth, halfWidth );
+
+	// Render the framing
+	DebugRender2DQuad( 0.f, frameBounds, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
+	DebugRender2DRound( 0.f, screenPosition, circleRadius, 25, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
+
+	if( m_lockReferenceCameraState )
+	{
+		// Region - Retain Input
+		Vector2 leftStickLockedScreenPosition = screenPosition + (m_leftStickOnCameraStateLock * circleRadius);
+		DebugRender2DRound( 0.f, leftStickLockedScreenPosition, circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR );
+
+		// Region - Left Stick Released
+		DebugRender2DRound( 0.f, screenPosition, circleRadius * m_leftStickReleasedRegionRadiusFraction, 15, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
+
+		// Position - Locked Left Stick
+		DebugRender2DRound( 0.f, leftStickLockedScreenPosition, 5.f, 10, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
+	}
+
+	// Render current Left Stick Position
+	Vector2 leftStickCurrentPosition	= g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	Vector2 leftStickCurrentScreenPos	= screenPosition + (leftStickCurrentPosition * circleRadius);
+	DebugRender2DRound( 0.f, leftStickCurrentScreenPos, 5.f, 10, RGBA_RED_COLOR, RGBA_RED_COLOR );
 }
