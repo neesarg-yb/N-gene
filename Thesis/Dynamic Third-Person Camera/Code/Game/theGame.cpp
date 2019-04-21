@@ -21,7 +21,7 @@
 
 void EchoTestCommand( Command& cmd )
 {
-	ConsolePrintf( "%s", cmd.GetNextString().c_str() );
+	ConsolePrintf( "%s", cmd.GetNextString().c_str() ); 
 }
 
 void ShowAllLogTags( Command& cmd )
