@@ -36,11 +36,12 @@ private:
 	eCameraRelativeInputState	m_movementInputState = INPUT_UNLOCKED;
 	CameraState					m_cameraStateOnInputLocked;
 	Vector2						m_leftStickOnInputLocked;
+	Vector2						m_leftStickWhenInterpolating;
 
 	float const m_leftStickReleasedRegionRadiusFraction	= 0.1f;
 	float const m_retainInputRegionRadiusFraction		= 0.4f;
 
-	float const	m_inputInterpolationSeconds				= 2.0f;
+	float const	m_inputInterpolationSeconds				= 0.5f;
 	Stopwatch	m_inputInterpolationTimer;
 
 public:
@@ -55,6 +56,8 @@ public:
 
 	void ApplyForce( float x, float y, float z );
 	inline void ApplyForce( Vector3 force ) { ApplyForce( force.x, force.y, force.z ); }
+
+	Vector2 InterpolateInput( Vector2 const &a, Vector2 const &b, float tGetsClamped01 ) const;		// a -> b; t is processed after clamping to [0, 1]
 
 private:
 	void UpdateCameraForward( CameraState const &currentCamState );

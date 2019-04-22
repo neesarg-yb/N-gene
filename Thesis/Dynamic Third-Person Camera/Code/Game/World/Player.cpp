@@ -1,5 +1,6 @@
 #pragma once
 #include "Player.hpp"
+#include "Engine/Math/Complex.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Renderer/Scene.hpp"
@@ -177,8 +178,9 @@ void Player::ApplyMovementForces()
 	{
 		float t = m_inputInterpolationTimer.GetNormalizedElapsedTime();
 
-		// Todo: Interpolation
-		inputDirectionXZ = m_leftStickOnInputLocked;
+		// Interpolation Interpolation - It is more like rotating a vector towards the other one
+		m_leftStickWhenInterpolating = InterpolateInput( m_leftStickOnInputLocked, inputDirectionXZ, t );
+		inputDirectionXZ = m_leftStickWhenInterpolating;
 
 		if( t >= 1.f )
 		{
@@ -235,6 +237,22 @@ void Player::CheckAndSnapOnTerrainSurface()
 void Player::ApplyForce( float x, float y, float z )
 {
 	m_acceleration += ( Vector3( x, y, z ) / m_mass );
+}
+
+Vector2 Player::InterpolateInput( Vector2 const &a, Vector2 const &b, float t ) const
+{
+	t = ClampFloat01( t );
+
+	Vector2 aDir = a;
+	Vector2 bDir = b;
+
+	float aLength = aDir.NormalizeAndGetLength();
+	float bLength = bDir.NormalizeAndGetLength();
+
+	Complex interpolatedDir		= Complex( aDir.x, aDir.y ).TurnTowardByFraction( Complex( bDir.x, bDir.y ), t );
+	float	interpolatedLength	= Interpolate( aLength, bLength, t );
+
+	return Vector2( interpolatedDir.r, interpolatedDir.i ) * interpolatedLength;
 }
 
 void Player::UpdateCameraForward( CameraState const &currentCamState )
@@ -299,7 +317,12 @@ void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float wid
 	if( m_movementInputState != INPUT_UNLOCKED )
 	{
 		// Region - Retain Input
-		Vector2 leftStickLockedScreenPosition = screenPosition + (m_leftStickOnInputLocked * circleRadius);
+		Vector2 leftStickLockedScreenPosition;
+		if( m_movementInputState == INPUT_LOCKED )
+			leftStickLockedScreenPosition = screenPosition + (m_leftStickOnInputLocked * circleRadius);
+		else if( m_movementInputState == INPUT_INTERPOLATION )
+			leftStickLockedScreenPosition = screenPosition + (m_leftStickWhenInterpolating * circleRadius);
+		
 		DebugRender2DRound( 0.f, leftStickLockedScreenPosition, circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR );
 
 		// Region - Left Stick Released
