@@ -44,6 +44,8 @@ private:
 	float const	m_inputInterpolationSeconds				= 0.5f;
 	Stopwatch	m_inputInterpolationTimer;
 
+	bool		m_debugAutoStopCameraReorientation		= true;
+
 public:
 	void Update( float deltaSeconds );
 	void AddRenderablesToScene( Scene &activeScene );
@@ -60,6 +62,7 @@ public:
 	Vector2 InterpolateInput( Vector2 const &a, Vector2 const &b, float tGetsClamped01 ) const;		// a -> b; t is processed after clamping to [0, 1]
 
 private:
+	void UpdateDebugStateFromInput();
 	void UpdateCameraForward( CameraState const &currentCamState );
 	void LockInputState( CameraState const &camState );
 	void StartInputInterpolation( CameraState const &camState );

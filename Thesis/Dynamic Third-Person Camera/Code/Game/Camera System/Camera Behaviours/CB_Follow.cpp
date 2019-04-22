@@ -152,6 +152,11 @@ bool CB_Follow::StartCameraReorientation()
 	}
 }
 
+void CB_Follow::StopCameraReorientation()
+{
+	m_reorientCameraRotation = false;
+}
+
 void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, float &altChange_out, float &hOffsetChange_out, float &vOffsetChange_out, float &fovChange_out ) const
 {
 	// Get input from Xbox Controller

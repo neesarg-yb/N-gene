@@ -1,6 +1,7 @@
 #pragma once
 #include "Player.hpp"
 #include "Engine/Math/Complex.hpp"
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/File/ModelLoader.hpp"
 #include "Engine/Renderer/Scene.hpp"
@@ -39,6 +40,8 @@ Player::~Player()
 
 void Player::Update( float deltaSeconds )
 {
+	UpdateDebugStateFromInput();
+
 	// Movement Input & Gravity
 	ApplyMovementForces();
 
@@ -106,6 +109,10 @@ void Player::InformAboutCameraForward( CameraState const &currentCamState, CB_Fo
 			// Makes the movement direction relative to current camera state, and then interpolate towards where player wants to go
 			StartInputInterpolation( currentCamState );
 			DebugRender2DText( 2.f, Vector2( -120.f, -60.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "[INPUT_INTERPOLATION] - Player initiated movement change" );
+
+			// If Camera Reorientation is still on-going, stop it to eliminate any confusions for player
+			if( m_debugAutoStopCameraReorientation )
+				followBehavior.StopCameraReorientation();
 		}
 	}
 
@@ -255,6 +262,12 @@ Vector2 Player::InterpolateInput( Vector2 const &a, Vector2 const &b, float t ) 
 	return Vector2( interpolatedDir.r, interpolatedDir.i ) * interpolatedLength;
 }
 
+void Player::UpdateDebugStateFromInput()
+{
+	if( g_theInput->WasKeyJustPressed( 'R' ) )
+		m_debugAutoStopCameraReorientation = !m_debugAutoStopCameraReorientation;
+}
+
 void Player::UpdateCameraForward( CameraState const &currentCamState )
 {
 	if( m_movementInputState == INPUT_LOCKED )
@@ -309,6 +322,10 @@ void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float wid
 	float halfWidth		= widthSize * 0.5f;
 	float circleRadius	= halfWidth * 0.95f;
 	AABB2 frameBounds	= AABB2( screenPosition, halfWidth, halfWidth );
+
+	// Auto-Stop Camera Reorientation state
+	Vector2 autoStopCamReorientationTxtPos = Vector2( frameBounds.mins.x, frameBounds.maxs.y ) + Vector2( 0.f, 40.f );
+	DebugRender2DText( 0.f, autoStopCamReorientationTxtPos, 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, Stringf( "[R] Auto-Stop Camera Reorientation - \"%s\"", m_debugAutoStopCameraReorientation ? "ENABLED" : "DISABLED" ) );
 
 	// Render the framing
 	DebugRender2DQuad( 0.f, frameBounds, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
