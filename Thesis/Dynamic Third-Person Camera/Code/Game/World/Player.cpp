@@ -8,9 +8,10 @@
 #include "Game/World/Terrain.hpp"
 #include "Game/GameCommon.hpp"
 
-Player::Player( Vector3 worldPosition, Terrain const &parentTerrain )
+Player::Player( Vector3 worldPosition, Terrain const &parentTerrain, Clock *parentClock )
 	: GameObject( worldPosition, Vector3::ZERO, Vector3::ONE_ALL )
 	, m_terrain( &parentTerrain )
+	, m_inputInterpolationTimer( parentClock )
 {
 	// Movement Presets
 	m_maxSpeed = PLAYER_MAX_SPEED;
@@ -86,25 +87,24 @@ void Player::InformAboutCameraForward( CameraState const &currentCamState, CB_Fo
 		// If reorientation has started, retain the movement direction
 		if( followBehavior.StartCameraReorientation() )
 		{
-			LockInputReferenceCameraState( currentCamState );
-			DebugRender2DText( 2.f, Vector2( -120.f, -60.f), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, "Reorientation Started [Reference CameraState LOCKED]" );
+			LockInputState( currentCamState );
+			DebugRender2DText( 2.f, Vector2( -120.f, -40.f), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, "[INPUT_LOCKED] - Reorientation Started" );
 		}
 	}
 
-	if( InputReferenceCameraStateIsLocked() )
+	if( m_movementInputState == INPUT_LOCKED )
 	{
 		// i.e. Post-CameraReorientation
 		Vector2	currentStickPosition	= g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
-		Vector2	stickPositionDifference	= m_leftStickOnCameraStateLock - currentStickPosition;
+		Vector2	stickPositionDifference	= m_leftStickOnInputLocked - currentStickPosition;
 		
 		// Player wants to move in different direction?
-		bool playerWantsToChangeMovementDirection	= stickPositionDifference.GetLength() > m_retainInputRegionRadiusFraction;
-		bool playerReleasedTheLeftStick				= currentStickPosition.GetLength() <= m_leftStickReleasedRegionRadiusFraction;
-		if( playerWantsToChangeMovementDirection || playerReleasedTheLeftStick )
+		bool playerWantsToChangeMovementDirection = stickPositionDifference.GetLength() > m_retainInputRegionRadiusFraction;
+		if( playerWantsToChangeMovementDirection )
 		{
-			// Makes the input direction relative to current camera state
-			UnlockInputReferenceCameraState( currentCamState );
-			DebugRender2DText( 2.f, Vector2( -120.f, -80.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Player changed direction [Reference CameraState UNLOCKED]" );
+			// Makes the movement direction relative to current camera state, and then interpolate towards where player wants to go
+			StartInputInterpolation( currentCamState );
+			DebugRender2DText( 2.f, Vector2( -120.f, -60.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "[INPUT_INTERPOLATION] - Player initiated movement change" );
 		}
 	}
 
@@ -156,10 +156,36 @@ void Player::ApplyMovementForces()
 	XboxController &controller			= g_theInput->m_controller[0];
 	Vector2			inputDirectionXZ	= controller.m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
 	bool			jump				= controller.m_xboxButtonStates[ XBOX_BUTTON_A ].keyJustPressed;
+	
+	if( m_movementInputState != INPUT_UNLOCKED )
+	{
+		bool playerReleasedTheLeftStick = inputDirectionXZ.GetLength() <= m_leftStickReleasedRegionRadiusFraction;
+		if( playerReleasedTheLeftStick )
+		{
+			// Makes the movement direction relative to current camera state, and player can instantly move in the direction they want to go
+			UnlockInputState();
+			DebugRender2DText( 2.f, Vector2( -120.f, -80.f ), 15.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, "[INPUT_UNLOCKED] - Player stopped moving" );
+		}
+	}
 
-	// Keep moving the same way, if we went through camera reorientation, until the lock is lifted
-	if( m_lockReferenceCameraState )
-		inputDirectionXZ = m_leftStickOnCameraStateLock;
+	if( m_movementInputState == INPUT_LOCKED )
+	{
+		// Keep moving the same way, if we went through camera reorientation, until the lock is lifted
+		inputDirectionXZ = m_leftStickOnInputLocked;
+	}
+	else if( m_movementInputState == INPUT_INTERPOLATION )
+	{
+		float t = m_inputInterpolationTimer.GetNormalizedElapsedTime();
+
+		// Todo: Interpolation
+		inputDirectionXZ = m_leftStickOnInputLocked;
+
+		if( t >= 1.f )
+		{
+			UnlockInputState();
+			DebugRender2DText( 2.f, Vector2( -120.f, -80.f ), 15.f, RGBA_BLUE_COLOR , RGBA_BLUE_COLOR, "[INPUT_UNLOCKED] - Input Interpolation finished" );
+		}
+	}
 
 	// Applying input force
 	Vector2 forceXZ					= inputDirectionXZ * m_xzMovementForce;
@@ -213,24 +239,33 @@ void Player::ApplyForce( float x, float y, float z )
 
 void Player::UpdateCameraForward( CameraState const &currentCamState )
 {
-	if( m_lockReferenceCameraState == false )
-		m_inputReferenceCameraState = currentCamState;
-
-	m_cameraForward = m_inputReferenceCameraState.GetTransformMatrix().GetKColumn();
+	if(m_movementInputState == INPUT_UNLOCKED)
+		m_cameraForward = currentCamState.GetTransformMatrix().GetKColumn();
+	else
+		m_cameraForward = m_cameraStateOnInputLocked.GetTransformMatrix().GetKColumn();
 }
 
-void Player::LockInputReferenceCameraState( CameraState const &camState )
+void Player::LockInputState( CameraState const &camState )
 {
-	m_inputReferenceCameraState = camState;
-	m_lockReferenceCameraState = true;
+	m_movementInputState = INPUT_LOCKED;
 
-	m_leftStickOnCameraStateLock = g_theInput->m_controller[0].m_xboxStickStates[ XBOX_STICK_LEFT ].correctedNormalizedPosition;
+	m_cameraStateOnInputLocked = camState;
+	m_leftStickOnInputLocked = g_theInput->m_controller[0].m_xboxStickStates[XBOX_STICK_LEFT].correctedNormalizedPosition;
 }
 
-void Player::UnlockInputReferenceCameraState( CameraState const &camState )
+void Player::StartInputInterpolation( CameraState const &camState )
 {
-	m_lockReferenceCameraState = false;
-	m_inputReferenceCameraState = camState;
+	m_movementInputState = INPUT_INTERPOLATION;
+
+	UNUSED( camState );
+	TODO( "Update cached input so that it is relative to current camState" );
+
+	m_inputInterpolationTimer.SetTimer( m_inputInterpolationSeconds );
+}
+
+void Player::UnlockInputState()
+{
+	m_movementInputState = INPUT_UNLOCKED;
 }
 
 void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float widthSize ) const
@@ -243,10 +278,10 @@ void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float wid
 	DebugRender2DQuad( 0.f, frameBounds, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
 	DebugRender2DRound( 0.f, screenPosition, circleRadius, 25, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
 
-	if( m_lockReferenceCameraState )
+	if( m_movementInputState != INPUT_UNLOCKED )
 	{
 		// Region - Retain Input
-		Vector2 leftStickLockedScreenPosition = screenPosition + (m_leftStickOnCameraStateLock * circleRadius);
+		Vector2 leftStickLockedScreenPosition = screenPosition + (m_leftStickOnInputLocked * circleRadius);
 		DebugRender2DRound( 0.f, leftStickLockedScreenPosition, circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR );
 
 		// Region - Left Stick Released

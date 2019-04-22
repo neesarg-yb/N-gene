@@ -1,14 +1,22 @@
 #pragma once
+#include "Engine/Core/Stopwatch.hpp"
 #include "Engine/Core/GameObject.hpp"
 #include "Engine/CameraSystem/CameraState.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 
 class Terrain;
 
+enum eCameraRelativeInputState
+{
+	INPUT_LOCKED,				// After the Camera Reorientation has started, when the player wants to keep moving in the same direction
+	INPUT_INTERPOLATION,		// When the player initiates a change the current movement direction, usually this would happen once the camera reorientation is finished
+	INPUT_UNLOCKED				// When the current movement direction matches with the player input relative to the camera, usually after the Input Interpolation
+};
+
 class Player : public GameObject
 {
 public:
-	 Player( Vector3 worldPosition, Terrain const &parentTerrain );
+	 Player( Vector3 worldPosition, Terrain const &parentTerrain, Clock *parentClock = nullptr );
 	~Player();
 
 public:
@@ -23,14 +31,17 @@ public:
 	bool m_isPlayerOnTerrainSurface		= false;
 
 private:
-	Vector3			m_cameraForward		= Vector3::FRONT;
+	Vector3 m_cameraForward				= Vector3::FRONT;
 
-	bool			m_lockReferenceCameraState = false;
-	CameraState		m_inputReferenceCameraState;
-	Vector2			m_leftStickOnCameraStateLock;
+	eCameraRelativeInputState	m_movementInputState = INPUT_UNLOCKED;
+	CameraState					m_cameraStateOnInputLocked;
+	Vector2						m_leftStickOnInputLocked;
 
-	float			m_leftStickReleasedRegionRadiusFraction	= 0.1f;
-	float			m_retainInputRegionRadiusFraction		= 0.4f;
+	float const m_leftStickReleasedRegionRadiusFraction	= 0.1f;
+	float const m_retainInputRegionRadiusFraction		= 0.4f;
+
+	float const	m_inputInterpolationSeconds				= 0.5f;
+	Stopwatch	m_inputInterpolationTimer;
 
 public:
 	void Update( float deltaSeconds );
@@ -47,14 +58,9 @@ public:
 
 private:
 	void UpdateCameraForward( CameraState const &currentCamState );
-	void LockInputReferenceCameraState	( CameraState const &camState );
-	void UnlockInputReferenceCameraState( CameraState const &camState );
-	bool InputReferenceCameraStateIsLocked() const;
+	void LockInputState( CameraState const &camState );
+	void StartInputInterpolation( CameraState const &camState );
+	void UnlockInputState();
 
 	void DebugRenderLeftStickInput( Vector2 const &screenPosition, float widthSize ) const;
 };
-
-inline bool Player::InputReferenceCameraStateIsLocked() const 
-{
-	return m_lockReferenceCameraState;
-}
