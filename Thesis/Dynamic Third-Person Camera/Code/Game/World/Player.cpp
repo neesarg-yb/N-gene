@@ -239,10 +239,10 @@ void Player::ApplyForce( float x, float y, float z )
 
 void Player::UpdateCameraForward( CameraState const &currentCamState )
 {
-	if(m_movementInputState == INPUT_UNLOCKED)
-		m_cameraForward = currentCamState.GetTransformMatrix().GetKColumn();
-	else
+	if( m_movementInputState == INPUT_LOCKED )
 		m_cameraForward = m_cameraStateOnInputLocked.GetTransformMatrix().GetKColumn();
+	else
+		m_cameraForward = currentCamState.GetTransformMatrix().GetKColumn();
 }
 
 void Player::LockInputState( CameraState const &camState )
@@ -257,8 +257,26 @@ void Player::StartInputInterpolation( CameraState const &camState )
 {
 	m_movementInputState = INPUT_INTERPOLATION;
 
-	UNUSED( camState );
-	TODO( "Update cached input so that it is relative to current camState" );
+	// Match the actual camera forward
+	m_cameraForward = camState.GetTransformMatrix().GetKColumn();
+
+	// Get the velocity (movement) direction in the Camera Space
+	Vector3 velocityDirection	= m_velocity;
+	float velotiyLength			= velocityDirection.NormalizeAndGetLength();
+	velocityDirection			= (velotiyLength == 0.f) ? Vector3::ZERO : velocityDirection;
+
+	Matrix44 cameraTransformMat	= camState.GetTransformMatrix();
+	Matrix44 worldToCameraMatrix;
+	
+	bool inverseSuccess = cameraTransformMat.GetInverse( worldToCameraMatrix );
+	GUARANTEE_RECOVERABLE( inverseSuccess, "Warning: Inverting the camera transform matrix FAILDED!" );
+
+	Vector3 camRelativeVelocityDirection	= worldToCameraMatrix.Multiply( velocityDirection, 0.f );
+	Vector2 camRelativeVelocityDirectionXZ	= Vector2( camRelativeVelocityDirection.x, camRelativeVelocityDirection.z ).GetNormalized();
+	
+	// Remap the left stick input with current camera's orientation such that the movement direction remains maintained
+	float leftStickNormalizedMagnitude	= m_leftStickOnInputLocked.GetLength();
+	m_leftStickOnInputLocked			= camRelativeVelocityDirectionXZ * leftStickNormalizedMagnitude;
 
 	m_inputInterpolationTimer.SetTimer( m_inputInterpolationSeconds );
 }
