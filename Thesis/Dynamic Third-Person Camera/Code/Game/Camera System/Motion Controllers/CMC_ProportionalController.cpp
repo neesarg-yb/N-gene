@@ -35,7 +35,7 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 	Vector3 const diffInPosition		= goalPosWithOffset - currentState.m_position;
 	Vector3 const suggestVelocity		= diffInPosition * m_controllingFactor;
 	Vector3 const velocityAtTarget		= context.anchorGameObject->m_velocity;
-	Vector3 const mpcVelocity			= suggestVelocity + velocityAtTarget;
+	Vector3 const mpcVelocity			= suggestVelocity + velocityAtTarget;		// Adding the velocityAtTarget might make the camera go into geometry
 	
 	// Final State to return
 	CameraState finalState( goalState );
