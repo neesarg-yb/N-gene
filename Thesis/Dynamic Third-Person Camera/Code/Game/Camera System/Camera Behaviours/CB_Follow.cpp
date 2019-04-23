@@ -33,6 +33,7 @@ CB_Follow::~CB_Follow()
 CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentState )
 {
 	PROFILE_SCOPE_FUNCTION();
+	UNUSED( currentState );
 
 	// Contextual Info.
 	CameraContext context = m_manager->GetCameraContext();

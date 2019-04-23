@@ -41,10 +41,10 @@ private:
 	float const m_leftStickReleasedRegionRadiusFraction	= 0.1f;
 	float const m_retainInputRegionRadiusFraction		= 0.4f;
 
-	float const	m_inputInterpolationSeconds				= 0.5f;
+	float const	m_inputInterpolationSeconds				= 0.25f;
 	Stopwatch	m_inputInterpolationTimer;
 
-	bool		m_debugAutoStopCameraReorientation		= true;
+	bool		m_debugAutoStopCameraReorientation		= false;
 
 public:
 	void Update( float deltaSeconds );
