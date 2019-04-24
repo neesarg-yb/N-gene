@@ -44,6 +44,7 @@ private:
 	float const	m_inputInterpolationSeconds				= 0.25f;
 	Stopwatch	m_inputInterpolationTimer;
 
+	bool		m_inputInterpolationDisabled			= false;
 	bool		m_debugAutoStopCameraReorientation		= false;
 
 public:
@@ -68,5 +69,6 @@ private:
 	void StartInputInterpolation( CameraState const &camState );
 	void UnlockInputState();
 
+	void ToggleInputInterpolationDisabled();
 	void DebugRenderLeftStickInput( Vector2 const &screenPosition, float widthSize ) const;
 };

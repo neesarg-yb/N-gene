@@ -149,7 +149,7 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 		m_followBehavior->SuggestChangedPolarCoordinate( cameraRadius, cameraRotation, cameraAltitude );
 
 	// DEBUG RENDER
-	DebugRenderTag( 0.f, 0.25f, newCamPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf( "-%.2f", reductionInRadius ) );
+	// DebugRenderTag( 0.f, 0.25f, newCamPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf( "-%.2f", reductionInRadius ) );
 
 	// DebugRenderBasis( 0.f, suggestedCameraState.GetTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
 	DebugRenderBasis( 0.f, context.anchorGameObject->m_transform.GetWorldTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
@@ -366,7 +366,7 @@ void CC_ModifiedConeRaycast::PerformRaycastOnTargetPoints( std::vector< Weighted
 		RaycastResult result = context.raycastCallback( rayStartPos, rayDirection, rayMaxLength );
 		outRaycastResult.push_back( WeightedRaycastResult_MCR(result, sPoint.weightRR, sPoint.weightAR) );
 
-		DebugRenderRaycast( 0.f, sphereCenter, result, 0.2f, RGBA_RED_COLOR, RGBA_GREEN_COLOR, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+		// DebugRenderRaycast( 0.f, sphereCenter, result, 0.2f, RGBA_RED_COLOR, RGBA_GREEN_COLOR, RGBA_KHAKI_COLOR, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 	}
 }
 
@@ -385,13 +385,13 @@ float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRay
 			sumWeightedReduction += 0.f;
 			sumWeights += raycast.weightRR;
 
-			// Debug the suggested-reduction
-			Vector3 srPos = Vector3( raycast.result.impactPosition.x, raycast.result.impactPosition.y - 0.18f, raycast.result.impactPosition.z );
-			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("srr %.1f", 0.f) );
-
-			// Debug the actual-reduction
-			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
-			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("frr %.2f", 0.f * raycast.weightRR) );
+			// // Debug the suggested-reduction
+			// Vector3 srPos = Vector3( raycast.result.impactPosition.x, raycast.result.impactPosition.y - 0.18f, raycast.result.impactPosition.z );
+			// DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("srr %.1f", 0.f) );
+			// 
+			// // Debug the actual-reduction
+			// Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
+			// DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("frr %.2f", 0.f * raycast.weightRR) );
 
 			continue;
 		}
@@ -403,13 +403,13 @@ float CC_ModifiedConeRaycast::CalculateRadiusReduction( std::vector< WeightedRay
 			sumWeightedReduction += suggestedReduction * raycast.weightRR;
 			sumWeights += raycast.weightRR;
 
-			// Debug the suggested-reduction
-			Vector3 srPos = Vector3( raycast.result.impactPosition.x, raycast.result.impactPosition.y - 0.18f, raycast.result.impactPosition.z );
-			DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("srr %.1f", suggestedReduction) );
-
-			// Debug the actual-reduction
-			Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
-			DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("frr %.2f", suggestedReduction * raycast.weightRR) );
+			// // Debug the suggested-reduction
+			// Vector3 srPos = Vector3( raycast.result.impactPosition.x, raycast.result.impactPosition.y - 0.18f, raycast.result.impactPosition.z );
+			// DebugRenderTag( 0.f, 0.03f, srPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("srr %.1f", suggestedReduction) );
+			// 
+			// // Debug the actual-reduction
+			// Vector3 arPos = Vector3( srPos.x, srPos.y - 0.05f, srPos.z );
+			// DebugRenderTag( 0.f, 0.03f, arPos, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf("frr %.2f", suggestedReduction * raycast.weightRR) );
 		}
 	}
 
@@ -601,15 +601,15 @@ void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector<Weight
 			debugSphereColor = didImpact ? RGBA_RED_COLOR : RGBA_GREEN_COLOR;
 		}
 
-		DebugRenderSphere( 0.f, debugPointPos, 0.1f, debugSphereColor, debugSphereColor, DEBUG_RENDER_XRAY );
+		// DebugRenderSphere( 0.f, debugPointPos, 0.1f, debugSphereColor, debugSphereColor, DEBUG_RENDER_XRAY );
 
 		if( m_isDebuggingForImpact == false )
 		{
-			Vector3 rrWPos = Vector3( debugPointPos );
-			DebugRenderTag( 0.f, 0.08f, rrWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "%.2f", point.weightRR ) );
-			
-			Vector3 arWPos = Vector3( rrWPos.x, rrWPos.y - 0.10f, rrWPos.z );
-			DebugRenderTag( 0.f, 0.08f, arWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "arW %.2f", point.weightAR ) );
+			// Vector3 rrWPos = Vector3( debugPointPos );
+			// DebugRenderTag( 0.f, 0.08f, rrWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "%.2f", point.weightRR ) );
+			// 
+			// Vector3 arWPos = Vector3( rrWPos.x, rrWPos.y - 0.10f, rrWPos.z );
+			// DebugRenderTag( 0.f, 0.08f, arWPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "arW %.2f", point.weightAR ) );
 		}
 	}
 }

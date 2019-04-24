@@ -247,6 +247,7 @@ void Scene_CollisionAvoidance::Update()
 	// All DebugRender must be added during update (not during render)
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 	DebugRenderCamera( 0.f, *m_camera, 1.f, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	// DebugRenderBasis( 0.f, m_camera->GetCameraModelMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 	DebugRenderHotkeys();
 
 	// Player moves relative to the direction of camera
@@ -280,7 +281,7 @@ void Scene_CollisionAvoidance::Update()
 	// Vector2  rightStickVisPos	= Vector2( 139.f, -340.f );
 	// DebugRenderRightStickInputVisualizer( rightStickVisPos, inputRefCamMatrix, actualCamMatrix );
 
-	DebugRenderWireSphere( 0.f, m_camera->m_cameraTransform.GetWorldPosition(), m_cameraManager->GetCameraContext().cameraCollisionRadius, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	// DebugRenderWireSphere( 0.f, m_camera->m_cameraTransform.GetWorldPosition(), m_cameraManager->GetCameraContext().cameraCollisionRadius, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const

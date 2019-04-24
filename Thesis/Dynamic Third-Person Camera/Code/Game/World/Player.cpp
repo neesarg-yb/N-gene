@@ -85,6 +85,9 @@ void Player::RemoveRenderablesFromScene( Scene &activeScene )
 
 void Player::InformAboutCameraForward( CameraState const &currentCamState, CB_Follow &followBehavior )
 {
+	if( g_theInput->WasKeyJustPressed( 'F' ) )
+		ToggleInputInterpolationDisabled();
+
 	bool reorientButtonJustPressed = g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_B ].keyJustPressed;
 	if( reorientButtonJustPressed )
 	{
@@ -92,7 +95,8 @@ void Player::InformAboutCameraForward( CameraState const &currentCamState, CB_Fo
 		if( followBehavior.StartCameraReorientation() )
 		{
 			LockInputState( currentCamState );
-			DebugRender2DText( 2.f, Vector2( -120.f, -40.f), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, "[INPUT_LOCKED] - Reorientation Started" );
+			if( !m_inputInterpolationDisabled )
+				DebugRender2DText( 2.f, Vector2( -120.f, -40.f), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, "[INPUT_LOCKED] - Reorientation Started" );
 		}
 	}
 
@@ -278,6 +282,9 @@ void Player::UpdateCameraForward( CameraState const &currentCamState )
 
 void Player::LockInputState( CameraState const &camState )
 {
+	if( m_inputInterpolationDisabled )
+		return;
+
 	m_movementInputState = INPUT_LOCKED;
 
 	m_cameraStateOnInputLocked = camState;
@@ -286,6 +293,9 @@ void Player::LockInputState( CameraState const &camState )
 
 void Player::StartInputInterpolation( CameraState const &camState )
 {
+	if( m_inputInterpolationDisabled )
+		return;
+
 	m_movementInputState = INPUT_INTERPOLATION;
 
 	// Match the actual camera forward
@@ -317,6 +327,12 @@ void Player::UnlockInputState()
 	m_movementInputState = INPUT_UNLOCKED;
 }
 
+void Player::ToggleInputInterpolationDisabled()
+{
+	m_inputInterpolationDisabled = !m_inputInterpolationDisabled;
+	m_movementInputState = INPUT_UNLOCKED;
+}
+
 void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float widthSize ) const
 {
 	float halfWidth		= widthSize * 0.5f;
@@ -325,7 +341,9 @@ void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float wid
 
 	// Auto-Stop Camera Reorientation state
 	Vector2 autoStopCamReorientationTxtPos = Vector2( frameBounds.mins.x, frameBounds.maxs.y ) + Vector2( 0.f, 40.f );
-	DebugRender2DText( 0.f, autoStopCamReorientationTxtPos, 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, Stringf( "[R] Auto-Stop Camera Reorientation - \"%s\"", m_debugAutoStopCameraReorientation ? "ENABLED" : "DISABLED" ) );
+	DebugRender2DText( 0.f, autoStopCamReorientationTxtPos, 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf( "[R] Auto-Stop Camera Reorientation - \"%s\"", m_debugAutoStopCameraReorientation ? "enabled" : "DISABLED" ) );
+	Vector2 inputInterpolationDisabledTxtPos = autoStopCamReorientationTxtPos + Vector2( 0.f, 20.f );
+	DebugRender2DText( 0.f, inputInterpolationDisabledTxtPos, 15.f, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR, Stringf("[F] Input Interpolation Feature - \"%s\"", m_inputInterpolationDisabled ? "DISABLED" : "enabled" ) );
 
 	// Render the framing
 	DebugRender2DQuad( 0.f, frameBounds, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );

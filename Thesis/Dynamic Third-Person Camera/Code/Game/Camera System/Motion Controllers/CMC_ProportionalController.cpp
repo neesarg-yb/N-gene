@@ -94,7 +94,7 @@ Vector2 CMC_ProportionalController::UpdateLeadOffset( GameObject const &player, 
 	m_leadOffsetFromGoal = Interpolate( m_leadOffsetFromGoal, desiredOffsetFromGoal, m_leadInterpolationFactor * deltaSeconds );
 
 	// Debug Render the offset relative to player
-	DebugRenderPoint( 0.f, 1.f, player.m_transform.GetWorldPosition() + Vector3( m_leadOffsetFromGoal.x, 0.f, m_leadOffsetFromGoal.y ), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	// DebugRenderPoint( 0.f, 1.f, player.m_transform.GetWorldPosition() + Vector3( m_leadOffsetFromGoal.x, 0.f, m_leadOffsetFromGoal.y ), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 
 	return m_leadOffsetFromGoal;
 }
