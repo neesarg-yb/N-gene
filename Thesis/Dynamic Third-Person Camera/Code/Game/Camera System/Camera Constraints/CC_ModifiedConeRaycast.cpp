@@ -13,9 +13,9 @@
 #include "Game/GameCommon.hpp"
 #include "Game/Camera System/DebugCamera.hpp"
 
-float s_raMultiplier				= 3.f;
-float s_rotDegreesChangeSpeed		= 70.f;
-float s_minRotChangePerFrameReqired	= 0.6f;
+float s_raMultiplier				 = 3.f;
+float s_rotDegreesChangeSpeed		 = 70.f;
+float s_minRotChangePerSecondReqired = 60.f;
 
 void ChaneRAMultiplier( Command &cmd )
 {
@@ -29,7 +29,7 @@ void ChangeRotationDegreesChangeSpeed( Command &cmd )
 
 void ChangeMinRotationRequired( Command &cmd )
 {
-	SetFromText( s_minRotChangePerFrameReqired, cmd.GetNextString().c_str() );
+	SetFromText( s_minRotChangePerSecondReqired, cmd.GetNextString().c_str() );
 }
 
 WeightedTargetPoint_MCR::WeightedTargetPoint_MCR( Vector3 const &inTargetPoint, float inWeightRR )
@@ -488,8 +488,8 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 	float rotationChangeDegrees = currentRotChange.GetRotation();
 	float altitudeChangeDegrees = currentAltChange.GetRotation();
 
-	if( fabsf(rotationChangeDegrees) > s_minRotChangePerFrameReqired )
-		rotationChange_out = rotationChangeDegrees;
+ 	if( fabsf(rotationChangeDegrees) > (s_minRotChangePerSecondReqired * deltaSeconds) )
+ 		rotationChange_out = rotationChangeDegrees;
 	else
 		rotationChange_out = 0.f;
 
@@ -503,9 +503,10 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 		if( rotationChange_out != 0.f )
 			DebugRender2DLine( 0.f, debugCircleCenter, RGBA_WHITE_COLOR, debugCircleCenter + lineEndPosition, RGBA_MAGENTA_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
 	}
-
-	UNUSED( altitudeChange_out );
-	UNUSED( altitudeChangeDegrees );
+	
+//	altitudeChange_out = altitudeChangeDegrees;
+ 	UNUSED( altitudeChange_out );
+ 	UNUSED( altitudeChangeDegrees );
 }
 
 void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector<WeightedTargetPoint_MCR> const &targetPoints, std::vector<WeightedRaycastResult_MCR> const &raycastResults, CameraState const &cameraState, Vector3 const &projectedVelocity )
