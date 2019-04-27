@@ -14,8 +14,8 @@
 #include "Game/Camera System/DebugCamera.hpp"
 
 float s_raMultiplier				 = 3.f;
-float s_rotDegreesChangeSpeed		 = 70.f;
-float s_minRotChangePerSecondReqired = 60.f;
+float s_rotDegreesChangeSpeed		 = 82.f;
+float s_minRotChangePerSecondReqired = 75.f;
 
 void ChaneRAMultiplier( Command &cmd )
 {
@@ -65,7 +65,7 @@ CC_ModifiedConeRaycast::CC_ModifiedConeRaycast( char const *name, CameraManager 
 	CommandRegister( "changeRotSpeed", ChangeRotationDegreesChangeSpeed );
 	CommandRegister( "changeMinRot", ChangeMinRotationRequired );
 
-	s_rotDegreesChangeSpeed = m_followBehavior->m_rotationSpeed;
+	// s_rotDegreesChangeSpeed = m_followBehavior->m_rotationSpeed;
 }
 
 CC_ModifiedConeRaycast::~CC_ModifiedConeRaycast()
@@ -488,8 +488,12 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 	float rotationChangeDegrees = currentRotChange.GetRotation();
 	float altitudeChangeDegrees = currentAltChange.GetRotation();
 
- 	if( fabsf(rotationChangeDegrees) > (s_minRotChangePerSecondReqired * deltaSeconds) )
- 		rotationChange_out = rotationChangeDegrees;
+	float absoluteRotationChange = fabsf( rotationChangeDegrees );
+ 	if( absoluteRotationChange > (s_minRotChangePerSecondReqired * deltaSeconds) )
+	{
+		float sign = rotationChangeDegrees >= 0.f ? +1.f : -1.f; 
+ 		rotationChange_out = sign * RangeMapFloat( absoluteRotationChange, s_minRotChangePerSecondReqired * deltaSeconds, s_rotDegreesChangeSpeed * deltaSeconds, 0.f, s_rotDegreesChangeSpeed * deltaSeconds );
+	}
 	else
 		rotationChange_out = 0.f;
 
