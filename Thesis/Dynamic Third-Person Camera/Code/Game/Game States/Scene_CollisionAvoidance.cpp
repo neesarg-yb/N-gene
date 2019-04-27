@@ -253,7 +253,7 @@ void Scene_CollisionAvoidance::Update()
 	// Player moves relative to the direction of camera
 	Matrix44 inputRefCamMatrix	= m_cameraManager->GetCameraMatrixForInputReference();
 	Vector3	 cameraForward		= inputRefCamMatrix.GetKColumn();
-	DebugRenderVector( 0.f, m_player->m_transform.GetWorldPosition(), cameraForward, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	// DebugRenderVector( 0.f, m_player->m_transform.GetWorldPosition(), cameraForward, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 	m_player->InformAboutCameraForward( m_cameraManager->GetCurrentCameraState(), *m_followBehavior );
 	
 	// Update Game Objects

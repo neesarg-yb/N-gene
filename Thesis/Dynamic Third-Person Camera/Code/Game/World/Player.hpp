@@ -46,6 +46,7 @@ private:
 
 	bool		m_inputInterpolationDisabled			= false;
 	bool		m_debugAutoStopCameraReorientation		= false;
+	Vector2		m_debugLeftStickOnInputInterpJustStarted;
 
 public:
 	void Update( float deltaSeconds );

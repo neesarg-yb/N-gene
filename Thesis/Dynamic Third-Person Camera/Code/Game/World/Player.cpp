@@ -297,6 +297,7 @@ void Player::StartInputInterpolation( CameraState const &camState )
 		return;
 
 	m_movementInputState = INPUT_INTERPOLATION;
+	m_debugLeftStickOnInputInterpJustStarted = m_leftStickOnInputLocked;
 
 	// Match the actual camera forward
 	m_cameraForward = camState.GetTransformMatrix().GetKColumn();
@@ -352,19 +353,32 @@ void Player::DebugRenderLeftStickInput( Vector2 const &screenPosition, float wid
 	if( m_movementInputState != INPUT_UNLOCKED )
 	{
 		// Region - Retain Input
-		Vector2 leftStickLockedScreenPosition;
+		Vector2 leftStickLockedScreenPos		= screenPosition + (m_leftStickOnInputLocked * circleRadius);
+		Vector2 leftStickInterpolationScreenPos	= screenPosition + (m_leftStickWhenInterpolating * circleRadius);
+		Vector2 leftStickScreenPos;
 		if( m_movementInputState == INPUT_LOCKED )
-			leftStickLockedScreenPosition = screenPosition + (m_leftStickOnInputLocked * circleRadius);
+			leftStickScreenPos = leftStickLockedScreenPos;
 		else if( m_movementInputState == INPUT_INTERPOLATION )
-			leftStickLockedScreenPosition = screenPosition + (m_leftStickWhenInterpolating * circleRadius);
+			leftStickScreenPos = leftStickInterpolationScreenPos;
 		
-		DebugRender2DRound( 0.f, leftStickLockedScreenPosition, circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR );
+		if( m_movementInputState == INPUT_LOCKED )
+		{
+			DebugRender2DRound( 0.f, leftStickLockedScreenPos, 1.05f * circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+			DebugRender2DRound( 0.f, leftStickLockedScreenPos, 1.f * circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
+		}
+		else if( m_movementInputState == INPUT_INTERPOLATION )
+		{
+			DebugRender2DRound( 0.f, screenPosition + (m_debugLeftStickOnInputInterpJustStarted * circleRadius), 1.05f * circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
+			DebugRender2DRound( 0.f, screenPosition + (m_debugLeftStickOnInputInterpJustStarted * circleRadius), 1.f * circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_BLACK_COLOR, RGBA_BLACK_COLOR );
+		}
+
+		DebugRender2DRound( 0.f, leftStickScreenPos, circleRadius * m_retainInputRegionRadiusFraction, 15, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR );
 
 		// Region - Left Stick Released
 		DebugRender2DRound( 0.f, screenPosition, circleRadius * m_leftStickReleasedRegionRadiusFraction, 15, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
 
 		// Position - Locked Left Stick
-		DebugRender2DRound( 0.f, leftStickLockedScreenPosition, 5.f, 10, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
+		DebugRender2DRound( 0.f, leftStickScreenPos, 5.f, 10, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR );
 	}
 
 	// Render current Left Stick Position
