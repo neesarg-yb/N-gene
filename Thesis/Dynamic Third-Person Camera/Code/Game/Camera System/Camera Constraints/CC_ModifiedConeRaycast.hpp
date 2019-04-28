@@ -60,6 +60,7 @@ public:
 
 	// Raycast Reduction Weight Reaction
 	float const			 m_velocityReactionFrac = 0.38f;				// How much weights reacts to the projected velocity
+	float				 m_cachedAltitude		= 0.f;					// To cache the player's desired altitude, so we can roll back to it once the collision is avoided..
 
 private:
 	float				 m_fNumCircularLayers	= (float) m_numCircularLayers;

@@ -14,8 +14,8 @@
 #include "Game/Camera System/DebugCamera.hpp"
 
 float s_raMultiplier				 = 3.f;
-float s_rotDegreesChangeSpeed		 = 82.f;
-float s_minRotChangePerSecondReqired = 75.f;
+float s_rotDegreesChangeSpeed		 = 82.f;		// This should be higher than m_minRotChangePerSecondRequired
+float s_minRotChangePerSecondReqired = 75.f;		//									<-----|
 
 void ChaneRAMultiplier( Command &cmd )
 {
@@ -125,22 +125,30 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	// Calculate rotation & altitude change
 	float rotationChange = 0.f;
 	float altitudeChange = 0.f;
-	if( (suggestedCameraState.m_constraintType & APPLY_SUGGESTION) == APPLY_SUGGESTION )
-	{
-		// i.e. There is no player input. The constraint is allowed to apply its suggestion
-		CalculateRotationAltitudeChange( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, rotationChange, altitudeChange );
-	}
-	else
-	{
-		// i.e. Constraint should not overwrite the player input..
-	}
+	float doNotApplyRotAltSuggestion = (suggestedCameraState.m_constraintType & APPLY_SUGGESTION) != APPLY_SUGGESTION;
+	CalculateRotationAltitudeChange( weightedTargetPoints, weightedRaycastResults, suggestedCameraState, rotationChange, altitudeChange );
 	Profiler::GetInstance()->Pop();
 
 	// Set new position!
 	Profiler::GetInstance()->Push( "NEW POSITION SET" );
-	cameraRadius	-= reductionInRadius;
-	cameraRotation	+= rotationChange;
-	cameraAltitude	+= altitudeChange;
+	cameraRadius -= reductionInRadius;
+	if( doNotApplyRotAltSuggestion )
+	{
+		// At this time player is controlling the camera..
+		// We want to cache the player's desired altitude, so we can roll back to it once the collision is avoided..
+		m_cachedAltitude = cameraAltitude;
+	}
+	else
+	{
+		cameraRotation += rotationChange;
+
+		float suggestedAltitude = cameraAltitude + altitudeChange;
+
+		// We never want to exceed the altitude greater than what the player has set consciously 
+		if( suggestedAltitude > m_cachedAltitude )
+			cameraAltitude = suggestedAltitude;
+	}
+
 	Vector3 newCamPos = PolarToCartesian( cameraRadius, cameraRotation, cameraAltitude ) + playerPosition;
 	suggestedCameraState.m_position = newCamPos;
 	
@@ -508,9 +516,9 @@ void CC_ModifiedConeRaycast::CalculateRotationAltitudeChange( std::vector<Weight
 			DebugRender2DLine( 0.f, debugCircleCenter, RGBA_WHITE_COLOR, debugCircleCenter + lineEndPosition, RGBA_MAGENTA_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR );
 	}
 	
-//	altitudeChange_out = altitudeChangeDegrees;
- 	UNUSED( altitudeChange_out );
- 	UNUSED( altitudeChangeDegrees );
+	altitudeChange_out = altitudeChangeDegrees;
+// 	UNUSED( altitudeChange_out );
+// 	UNUSED( altitudeChangeDegrees );
 }
 
 void CC_ModifiedConeRaycast::DebugRenderWeightedTargetPoints( std::vector<WeightedTargetPoint_MCR> const &targetPoints, std::vector<WeightedRaycastResult_MCR> const &raycastResults, CameraState const &cameraState, Vector3 const &projectedVelocity )
