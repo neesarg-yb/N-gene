@@ -186,8 +186,8 @@ void CB_Follow::GetPlayerInput( float &distChange_out, float &rotChange_out, flo
 	distanceChange += leftTrigger  *  1.f;
 	distChange_out  = distanceChange;
 
-	float rotationChange = -1.f * rightStick.x;
-	float altitudeChange = -1.f * rightStick.y;
+	float rotationChange = (g_cameraControlInverted ? -1.f : +1.f) * rightStick.x;
+	float altitudeChange = (g_cameraControlInverted ? -1.f : +1.f) * rightStick.y;
 	rotChange_out = rotationChange;
 	altChange_out = altitudeChange;
 

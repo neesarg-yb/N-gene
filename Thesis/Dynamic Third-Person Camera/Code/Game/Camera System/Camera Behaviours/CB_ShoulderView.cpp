@@ -126,8 +126,8 @@ void CB_ShoulderView::ProcessInput( float deltaSeconds )
 	if( wasRightStickJustPressed )
 		m_localCameraOffsetX *= -1.f;
 
-	m_rotationAroundAnchor	+= rightStickPosition.x * -1.f * m_rotationChangeSpeed * deltaSeconds;
-	m_localPitchOffset		+= rightStickPosition.y * +1.f * (m_rotationChangeSpeed * 0.7f) * deltaSeconds;
+	m_rotationAroundAnchor	+= rightStickPosition.x * (g_cameraControlInverted ? -1.f : +1.f) * m_rotationChangeSpeed * deltaSeconds;
+	m_localPitchOffset		+= rightStickPosition.y * (g_cameraControlInverted ? +1.f : -1.f) * (m_rotationChangeSpeed * 0.7f) * deltaSeconds;
 	m_localPitchOffset		 = ClampFloat( m_localPitchOffset, m_cameraPitchOffsetLimits.min, m_cameraPitchOffsetLimits.max );
 }
 

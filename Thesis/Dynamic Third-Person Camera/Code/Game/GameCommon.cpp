@@ -10,6 +10,7 @@ theGame*				g_theGame				= nullptr;
 Renderer*				g_theRenderer			= nullptr;
 InputSystem*			g_theInput				= nullptr;
 DebugCamera*			g_activeDebugCamera		= nullptr;
+float					g_cameraControlInverted = false;
 /*
 AudioSystem* g_theAudio = nullptr;
 */

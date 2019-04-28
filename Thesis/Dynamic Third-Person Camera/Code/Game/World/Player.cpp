@@ -270,6 +270,11 @@ void Player::UpdateDebugStateFromInput()
 {
 	if( g_theInput->WasKeyJustPressed( 'R' ) )
 		m_debugAutoStopCameraReorientation = !m_debugAutoStopCameraReorientation;
+	if( g_theInput->WasKeyJustPressed( 'C' ) )
+		g_cameraControlInverted = !g_cameraControlInverted;
+
+	Vector2 invertedControlTxtPos = Vector2( 160.f, 420.f );
+	DebugRender2DText( 0.f, invertedControlTxtPos, 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, Stringf("[C] Camera Controls : \"%s\"", g_cameraControlInverted ? "INVERTED" : "Normal" ) );
 }
 
 void Player::UpdateCameraForward( CameraState const &currentCamState )
