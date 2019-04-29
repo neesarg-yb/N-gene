@@ -17,6 +17,7 @@ CMC_ProportionalController::~CMC_ProportionalController()
 
 }
 
+Vector3 g_camMPCVelThisFrame;
 CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds )
 {
 	DebugRender2DText( 0.f, Vector2( 0.f, 100.f), 15.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf( "Current Cam Velocity: %.1f", currentState.m_velocity.GetLength() ) );
@@ -36,11 +37,12 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 	Vector3 const suggestVelocity		= diffInPosition * m_controllingFactor;
 	Vector3 const velocityAtTarget		= context.anchorGameObject->m_velocity;
 	Vector3 const mpcVelocity			= suggestVelocity + velocityAtTarget;		// Adding the velocityAtTarget might make the camera go into geometry
-	
+
 	// Final State to return
 	CameraState finalState( goalState );
-	finalState.m_position	= currentState.m_position;
-	finalState.m_velocity	= mpcVelocity;
+	finalState.m_position = currentState.m_position;
+	finalState.m_velocity = mpcVelocity;
+	g_camMPCVelThisFrame = mpcVelocity;
 
 	// Move according to velocity
 	finalState.m_position += finalState.m_velocity * deltaSeconds;
@@ -135,12 +137,33 @@ Vector3 CMC_ProportionalController::FinalCollisionCheck( Vector3 const &currentP
 {
 	CameraContext context = m_manager->GetCameraContext();
 	
-	bool	didCollide			= false;
-	Vector3	correctedPosition	= context.sphereCollisionCallback( goalPosition, context.cameraCollisionRadius, didCollide );
- 	
- 	if( didCollide == false )
+	// DEBUG-RENDER
+	bool didCurrentCollide = false;
+	Vector3	correctedCurrentPosition = context.sphereCollisionCallback( currentPosition, context.cameraCollisionRadius, didCurrentCollide );
+	Vector2 currentCollideTxtPos = Vector2( 400.f, 200.f );
+	Rgba currenCollideColor = didCurrentCollide ? RGBA_RED_COLOR : RGBA_GREEN_COLOR;
+	DebugRender2DText( 0.f, currentCollideTxtPos, 15.f, currenCollideColor, currenCollideColor, Stringf("Curr Pos: %s", didCurrentCollide ? "COLLIDED" : "No Collision" ) );
+	DebugRenderPoint( 0.f, 0.2f, currentPosition, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+
+	bool didSafeDestCollide = false;
+	Vector3	correctedSafePosition = context.sphereCollisionCallback( safeDestination, context.cameraCollisionRadius, didSafeDestCollide );
+	Vector2 safeDestTxtPos = currentCollideTxtPos + Vector2( 0.f, 20.f );
+	Rgba safeDestCollideColor = didSafeDestCollide ? RGBA_RED_COLOR : RGBA_GREEN_COLOR;
+	DebugRender2DText( 0.f, safeDestTxtPos, 15.f, safeDestCollideColor, safeDestCollideColor, Stringf("Safe Pos: %s", didSafeDestCollide ? "COLLIDED" : "No Collision") );
+	DebugRenderPoint( 0.f, 0.2f, safeDestination, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, DEBUG_RENDER_XRAY );
+
+	bool didGoalCollide = false;
+	Vector3	correctedGoalPosition = context.sphereCollisionCallback( goalPosition, context.cameraCollisionRadius, didGoalCollide );
+	Vector2 goalCollideTxtPos = safeDestTxtPos + Vector2( 0.f, 20.f );
+	Rgba goalCollideColor = didGoalCollide ? RGBA_RED_COLOR : RGBA_GREEN_COLOR;
+	DebugRender2DText( 0.f, goalCollideTxtPos, 15.f, goalCollideColor, goalCollideColor, Stringf("Goal Pos: %s", didGoalCollide ? "COLLIDED" : "No Collision" ) );
+	DebugRenderPoint( 0.f, 0.2f, goalPosition, goalCollideColor, goalCollideColor, DEBUG_RENDER_XRAY );
+
+ 	if( didGoalCollide == false )
  	{
  		// Not colliding, safe to move to the goal position
+		DebugRenderVector( 0.f, currentPosition, g_camMPCVelThisFrame * deltaSeconds, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+
  		return goalPosition;
  	}
  	else
@@ -151,9 +174,9 @@ Vector3 CMC_ProportionalController::FinalCollisionCheck( Vector3 const &currentP
 		// Proportional Controller
 		Vector3 const diffInPosition	= safeDestination - currentPosition;
 		Vector3 const suggestVelocity	= diffInPosition * m_controllingFactor;
+		DebugRenderVector( 0.f, currentPosition, suggestVelocity * deltaSeconds, RGBA_RED_COLOR, RGBA_RED_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 
 		Vector3 pcPosition = currentPosition + (suggestVelocity * deltaSeconds);
-
 		
  		return  pcPosition;
  	}
