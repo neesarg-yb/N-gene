@@ -246,7 +246,7 @@ void Scene_CollisionAvoidance::Update()
 
 	// All DebugRender must be added during update (not during render)
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-	// DebugRenderCamera( 0.f, *m_camera, 1.f, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+	DebugRenderCamera( 0.f, *m_camera, 1.f, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 	// DebugRenderBasis( 0.f, m_camera->GetCameraModelMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 	DebugRenderHotkeys();
 

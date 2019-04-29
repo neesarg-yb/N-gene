@@ -26,5 +26,5 @@ private:
 	void	ProcessInput();
 	Vector2 UpdateLeadOffset( GameObject const &player, float deltaSeconds );	// Updates the variable m_leadOffsetFromGoal
 	void	DebugPrintInformation() const;
-	Vector3	FinalCollisionCheck( Vector3 const &currentPosition, Vector3 const &safeDestination, Vector3 const &goalPosition, float deltaSeconds ) const;
+	Vector3	FinalCollisionCheck( Vector3 const &currentPosition, Vector3 const &safeDestination, Vector3 const &goalPosition, float deltaSeconds );
 };
