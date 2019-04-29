@@ -6,6 +6,8 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/GameCommon.hpp"
 
+Vector3 g_debugCameraMPCVelThisFrame;		// Only here for debug purpose
+
 CMC_ProportionalController::CMC_ProportionalController( char const *name, CameraManager const *manager )
 	: CameraMotionController( name, manager )
 {
@@ -17,7 +19,6 @@ CMC_ProportionalController::~CMC_ProportionalController()
 
 }
 
-Vector3 g_camMPCVelThisFrame;
 CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentState, CameraState const &goalState, float deltaSeconds )
 {
 	DebugRender2DText( 0.f, Vector2( 0.f, 100.f), 15.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf( "Current Cam Velocity: %.1f", currentState.m_velocity.GetLength() ) );
@@ -42,13 +43,14 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 	CameraState finalState( goalState );
 	finalState.m_position = currentState.m_position;
 	finalState.m_velocity = mpcVelocity;
-	g_camMPCVelThisFrame = mpcVelocity;
+	g_debugCameraMPCVelThisFrame = mpcVelocity;
 
 	// Move according to velocity
 	finalState.m_position += finalState.m_velocity * deltaSeconds;
 
 	// Make sure not in the collision
-	finalState.m_position = FinalCollisionCheck( currentState.m_position, goalState.m_position, finalState.m_position, deltaSeconds );
+	if( m_finalCollisionCheckEnabled )
+		FinalCollisionCheck( currentState.m_position, goalState.m_position, finalState, deltaSeconds );
 
 	// DebugRenderPoint( 10.f, 0.1f, finalState.m_position, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
@@ -78,6 +80,8 @@ void CMC_ProportionalController::ProcessInput()
 		m_leadInterpolationFactor -= 0.1f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
 	if( g_theInput->IsKeyPressed( PAGE_UP ) )
 		m_leadInterpolationFactor += 0.1f * (float)( GetMasterClock()->GetFrameDeltaSeconds() );
+	if( g_theInput->WasKeyJustPressed( 'Y' ) )
+		m_finalCollisionCheckEnabled = !m_finalCollisionCheckEnabled;
 
 	// Clamp the factors
 	m_controllingFactor			= (m_controllingFactor < 0.f)	 ? 0.f : m_controllingFactor;
@@ -131,9 +135,13 @@ void CMC_ProportionalController::DebugPrintInformation() const
 	// Lead Factor
 	std::string leadFactorStr = Stringf( "%-26s = %f", "Lead Interpolation Factor", m_leadInterpolationFactor );
 	DebugRender2DText( 0.f, Vector2(-850.f, 240.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, leadFactorStr.c_str() );
+
+	// Final Collision Check
+	Vector2 finalCollisionCheckTxtStrPos = Vector2( 300.f, 180.f );
+	DebugRender2DText( 0.f, finalCollisionCheckTxtStrPos, 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, Stringf( "[Y] Final Collision Check: \"%s\"", m_finalCollisionCheckEnabled ? "ENABLED" : "disabled" ) );
 }
 
-Vector3 CMC_ProportionalController::FinalCollisionCheck( Vector3 const &currentPosition, Vector3 const &safeDestination, Vector3 const &goalPosition, float deltaSeconds )
+void CMC_ProportionalController::FinalCollisionCheck( Vector3 const &currentPosition, Vector3 const &safeDestination, CameraState &goalState, float deltaSeconds )
 {
 	CameraContext context = m_manager->GetCameraContext();
 	
@@ -153,18 +161,18 @@ Vector3 CMC_ProportionalController::FinalCollisionCheck( Vector3 const &currentP
 	DebugRenderPoint( 0.f, 0.2f, safeDestination, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, DEBUG_RENDER_XRAY );
 
 	bool didGoalCollide = false;
-	Vector3	correctedGoalPosition = context.sphereCollisionCallback( goalPosition, context.cameraCollisionRadius, didGoalCollide );
+	Vector3	correctedGoalPosition = context.sphereCollisionCallback( goalState.m_position, context.cameraCollisionRadius, didGoalCollide );
 	Vector2 goalCollideTxtPos = safeDestTxtPos + Vector2( 0.f, 20.f );
 	Rgba goalCollideColor = didGoalCollide ? RGBA_RED_COLOR : RGBA_GREEN_COLOR;
 	DebugRender2DText( 0.f, goalCollideTxtPos, 15.f, goalCollideColor, goalCollideColor, Stringf("Goal Pos: %s", didGoalCollide ? "COLLIDED" : "No Collision" ) );
-	DebugRenderPoint( 0.f, 0.2f, goalPosition, goalCollideColor, goalCollideColor, DEBUG_RENDER_XRAY );
+	DebugRenderPoint( 0.f, 0.2f, goalState.m_position, goalCollideColor, goalCollideColor, DEBUG_RENDER_XRAY );
 
  	if( didGoalCollide == false )
  	{
- 		// Not colliding, safe to move to the goal position
-		DebugRenderVector( 0.f, currentPosition, g_camMPCVelThisFrame * deltaSeconds, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+ 		// Not colliding, safe to move to the goal
+		DebugRenderVector( 0.f, currentPosition, g_debugCameraMPCVelThisFrame * deltaSeconds, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 
- 		return goalPosition;
+		// i.e. Goal state stays unchanged!
  	}
  	else
  	{
@@ -178,6 +186,7 @@ Vector3 CMC_ProportionalController::FinalCollisionCheck( Vector3 const &currentP
 
 		Vector3 pcPosition = currentPosition + (suggestVelocity * deltaSeconds);
 		
- 		return  pcPosition;
+		goalState.m_position = pcPosition;
+		goalState.m_velocity = suggestVelocity;
  	}
 }
