@@ -6,7 +6,7 @@
 
 struct  RaycastResult;
 typedef std::function< RaycastResult(Vector3 const &startPosition, Vector3 const &rayDirection, float maxDistance) >	raycast_std_func;
-typedef std::function< Vector3		(Vector3 const &center, float radius) >												sphere_collision_func;
+typedef std::function< Vector3		(Vector3 const &center, float radius, bool &didCollide_out) >						sphere_collision_func;
 
 struct CameraContext
 {
