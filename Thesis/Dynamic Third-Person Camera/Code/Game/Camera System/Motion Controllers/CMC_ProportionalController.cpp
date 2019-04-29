@@ -45,6 +45,11 @@ CameraState CMC_ProportionalController::MoveCamera( CameraState const &currentSt
 	// Move according to velocity
 	finalState.m_position += finalState.m_velocity * deltaSeconds;
 
+	// Make sure not in the collision
+	finalState.m_position = FinalCollisionCheck( currentState.m_position, goalState.m_position, finalState.m_position, deltaSeconds );
+
+	// DebugRenderPoint( 10.f, 0.1f, finalState.m_position, RGBA_BLUE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
 	// Making sure that the camera is looking at the target position
 	Vector3		anchorWorldPosition	= context.anchorGameObject->m_transform.GetWorldPosition();
 	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition + leadOffsetFromGoal, finalState.m_position );
@@ -124,4 +129,49 @@ void CMC_ProportionalController::DebugPrintInformation() const
 	// Lead Factor
 	std::string leadFactorStr = Stringf( "%-26s = %f", "Lead Interpolation Factor", m_leadInterpolationFactor );
 	DebugRender2DText( 0.f, Vector2(-850.f, 240.f), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, leadFactorStr.c_str() );
+}
+
+Vector3 CMC_ProportionalController::FinalCollisionCheck( Vector3 const &currentPosition, Vector3 const &safeDestination, Vector3 const &goalPosition, float deltaSeconds ) const
+{
+	CameraContext context = m_manager->GetCameraContext();
+	
+	bool	didCollide			= false;
+	Vector3	correctedPosition	= context.sphereCollisionCallback( goalPosition, context.cameraCollisionRadius, didCollide );
+
+	if( didCollide )
+		DebugRenderWireSphere( 0.f, goalPosition, context.cameraCollisionRadius, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_USE_DEPTH );
+	else
+		DebugRenderWireSphere( 0.f, goalPosition, context.cameraCollisionRadius, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, DEBUG_RENDER_USE_DEPTH );
+	
+	return goalPosition;
+	
+	
+// 	bool	currentlyColliding	= 0.001f < (goalPosition - correctedPosition).GetLengthSquared();
+// 	
+// 	if( currentlyColliding == false )
+// 	{
+// 		// Not colliding, safe to move to the goal position
+// 		return goalPosition;
+// 	}
+// 	else
+// 	{
+// 		// Colliding, do not move to the goal position
+// 		Vector3 pushbackDirection = safeDestination - goalPosition;
+// 		float	posDifferenceDist = pushbackDirection.NormalizeAndGetLength();
+// 
+// 		Vector3 snapToPosition;
+// 		if( posDifferenceDist )
+// 			snapToPosition = safeDestination;
+// 		else
+// 			snapToPosition = (safeDestination + (pushbackDirection * 0.2f));
+// 
+// 
+// 		Vector3 const diffInPosition = snapToPosition - currentPosition;
+// 		Vector3 const suggestVelocity = diffInPosition * m_controllingFactor;
+// 
+// 		Vector3 safeGoalPosition = snapToPosition/*currentPosition + (suggestVelocity * deltaSeconds)*/;
+// 		DebugRenderPoint( 30.f, 1.f, safeGoalPosition, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_XRAY );
+// 		
+// 		return safeGoalPosition;
+// 	}
 }

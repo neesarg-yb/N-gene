@@ -157,23 +157,23 @@ RaycastResult Building::DoPerfectRaycast( Vector3 const &startPosition, Vector3 
 Vector3 Building::CheckCollisionWithSphere( Vector3 const &center, float radius, bool &outIsColliding ) const
 {
 	Vector3 closestPointInBounds = m_worldBounds.GetClosestPointInsideBounds( center );
-	Vector3 pushDirection		 = closestPointInBounds - center;
-	float	pushDistance		 = pushDirection.NormalizeAndGetLength() - radius;
+	Vector3 pushDirection		 = center - closestPointInBounds;
+	float	pushDistance		 = radius - pushDirection.NormalizeAndGetLength();
 
 	// Is Colliding ?
-	if( pushDistance > 0.f )
+	if( pushDistance > 0.f || AreEqualFloats( pushDistance, 0.f, 4 ) )
+	{
+		// Yes
+		outIsColliding = true;
+
+		Vector3 newCenter = center + (pushDirection * pushDistance);
+		return  newCenter;
+	}
+	else
 	{
 		// No
 		outIsColliding = false;
 
 		return center;
-	}
-	else
-	{
-		// Yes
-		outIsColliding = true;
-		
-		Vector3 newCenter = center + (pushDirection * pushDistance);
-		return  newCenter;
 	}
 }

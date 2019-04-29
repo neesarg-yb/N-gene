@@ -59,7 +59,7 @@ public:
 	void Render( Camera *gameCamera ) const;
 
 	RaycastResult	Raycast( Vector3 const &startPosition, Vector3 const &direction, float maxDistance );
-	Vector3			SphereCollision( Sphere const &sphere );
+	Vector3			SphereCollision( Sphere const &sphere, bool &didCollide_out );
 
 private:
 	void PerformSphereCollisionForPlayer( float deltaSeconds );

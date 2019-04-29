@@ -66,10 +66,10 @@ Scene_FollowCamera::Scene_FollowCamera( Clock const *parentClock )
 
 	// Set the Sphere Collision std::function
 	sphere_collision_func collisionFunc;
-	collisionFunc = [ this ] ( Vector3 const &center, float radius )
+	collisionFunc = [ this ] ( Vector3 const &center, float radius, bool &didCollide_out )
 		{ 
 			Sphere cameraRig( center, radius );
-			return SphereCollision( cameraRig ); 
+			return SphereCollision( cameraRig, didCollide_out ); 
 		};
 	m_cameraManager->SetSphereCollisionCallback( collisionFunc );
 
@@ -239,8 +239,9 @@ RaycastResult Scene_FollowCamera::Raycast( Vector3 const &startPosition, Vector3
 	return closestResult;
 }
 
-Vector3 Scene_FollowCamera::SphereCollision( Sphere const &sphere )
+Vector3 Scene_FollowCamera::SphereCollision( Sphere const &sphere, bool &didCollide_out )
 {
+	didCollide_out = false;
 	Vector3 positionAfterCollision = sphere.center;
 
 	for( uint i = 0; i < NUM_ENTITIES; i++ )
@@ -251,6 +252,9 @@ Vector3 Scene_FollowCamera::SphereCollision( Sphere const &sphere )
 		{
 			bool didCollide			= false;
 			positionAfterCollision	= gameObjects[ idx ]->CheckCollisionWithSphere( positionAfterCollision, sphere.radius, didCollide );
+
+			if( didCollide )
+				didCollide_out = true;
 		}
 	}
 

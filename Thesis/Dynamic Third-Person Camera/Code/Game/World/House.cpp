@@ -143,21 +143,23 @@ Vector3 House::CheckCollisionWithSphere( Vector3 const &center, float radius, bo
 	{
 		AABB3 const &thisWallBounds = m_wallsWorldBounds[b];
 
-		Vector3	closestPoint	= thisWallBounds.GetClosestPointInsideBounds( newCenterPos );
-		Vector3	posDifference	= newCenterPos - closestPoint;
-		float	distFromWall	= posDifference.NormalizeAndGetLength();
+		Vector3	closestPointInBounds = thisWallBounds.GetClosestPointInsideBounds( newCenterPos );
+		Vector3	pushDirection		 = newCenterPos - closestPointInBounds;
+		float	pushDistance		 = radius - pushDirection.NormalizeAndGetLength();
 
-		if( AreEqualFloats(distFromWall, 0.f, 4) )
+		// Is Colliding ?
+		if( pushDistance > 0.f || AreEqualFloats( pushDistance, 0.f, 4 ) )
+		{
+			// Yes
+			outIsColliding = true;
+
+			newCenterPos += pushDirection * pushDistance;
+		}
+		else
+		{
+			// No
 			continue;
-
-		if( distFromWall >= radius )
-			continue;
-
-		// i.e. radius > distFromWall
-		float pushDistance = radius - distFromWall;
-		
-		newCenterPos += posDifference * pushDistance;
-		outIsColliding = true;
+		}
 	}
 
 	return newCenterPos;

@@ -54,10 +54,10 @@ Scene_ProportionalController::Scene_ProportionalController( Clock const *parentC
 
 	// Set the Sphere Collision std::function
 	sphere_collision_func collisionFunc;
-	collisionFunc = [ this ] ( Vector3 const &center, float radius )
+	collisionFunc = [ this ] ( Vector3 const &center, float radius, bool &didCollide_out )
 	{ 
 		Sphere cameraRig( center, radius );
-		return SphereCollision( cameraRig ); 
+		return SphereCollision( cameraRig, didCollide_out ); 
 	};
 	m_cameraManager->SetSphereCollisionCallback( collisionFunc );
 
@@ -229,8 +229,9 @@ RaycastResult Scene_ProportionalController::Raycast( Vector3 const &startPositio
 	return closestResult;
 }
 
-Vector3 Scene_ProportionalController::SphereCollision( Sphere const &sphere )
+Vector3 Scene_ProportionalController::SphereCollision( Sphere const &sphere, bool &didCollide_out )
 {
+	didCollide_out = false;
 	Vector3 positionAfterCollision = sphere.center;
 
 	for( uint i = 0; i < NUM_ENTITIES; i++ )
@@ -241,6 +242,9 @@ Vector3 Scene_ProportionalController::SphereCollision( Sphere const &sphere )
 		{
 			bool didCollide			= false;
 			positionAfterCollision	= gameObjects[ idx ]->CheckCollisionWithSphere( positionAfterCollision, sphere.radius, didCollide );
+
+			if( didCollide )
+				didCollide_out = true;
 		}
 	}
 
