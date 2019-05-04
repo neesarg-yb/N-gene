@@ -135,3 +135,14 @@ void Complex::TurnToward( Complex const &target, float maxRotationDegreesPositiv
 
 	current *= rotator;
 }
+
+Complex Complex::TurnTowardByFraction( Complex const &target, float fractionRotation ) const
+{
+	float degreesDifference	= fabsf( (*this / target).GetRotation() );
+	float degreesRotation	= degreesDifference * fractionRotation;
+
+	Complex toReturn( *this );
+	toReturn.TurnToward( target, degreesRotation );
+
+	return toReturn;
+}

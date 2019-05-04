@@ -15,7 +15,10 @@ XBoxControllerStickState::XBoxControllerStickState() {
 
 XboxController::XboxController()
 {
+	m_controllerNumber = -1;
 
+	for( int i = 0; i < NUM_XBOX_TRIGGERS; i++ )
+		m_xboxTriggerStates[i] = 0.f;
 }
 
 XboxController::~XboxController()
