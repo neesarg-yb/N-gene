@@ -3,6 +3,7 @@
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
+#include "Engine/Core/NamedProperties.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
@@ -35,6 +36,24 @@ theGame::theGame()
 	m_gameCamera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );										// To set NDC styled ortho
 
+
+	std::string lastName( "Eiserloh" );
+
+	NamedProperties p;
+	p.Set( "FirstName", "Squirrel" ); 	// Setting as c-string (const char*) data...
+	p.Set( "LastName", lastName );	// Setting as std::string data...
+	p.Set( "Height", 1.93f );
+	p.Set( "Age", 45 );
+	p.Set( "IsMarried", true );
+	p.Set( "Position", Vector2( 3.5f, 6.2f ) );
+	p.Set( "EyeColor", Rgba( 77, 38, 23 ) );
+	p.Set( "Height", 2U );
+
+	float height = p.Get( "Height", 0.f );
+	std::string fname = p.Get( "FirstName1", "Neesarg" );
+
+	UNUSED( height );
+	UNUSED( fname );
 }
 
 theGame::~theGame()
