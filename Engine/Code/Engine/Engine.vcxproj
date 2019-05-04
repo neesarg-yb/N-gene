@@ -277,6 +277,7 @@
     <ClCompile Include="Core\GameObject.cpp" />
     <ClCompile Include="Core\Image.cpp" />
     <ClCompile Include="Core\MenuAction.cpp" />
+    <ClCompile Include="Core\NamedProperties.cpp" />
     <ClCompile Include="Core\Ray3.cpp" />
     <ClCompile Include="Core\RaycastResult.cpp" />
     <ClCompile Include="Core\Rgba.cpp" />
@@ -401,6 +402,9 @@
     <ClInclude Include="Core\GameObject.hpp" />
     <ClInclude Include="Core\Image.hpp" />
     <ClInclude Include="Core\MenuAction.hpp" />
+    <ClInclude Include="Core\NamedProperties.hpp" />
+    <ClInclude Include="Core\NamedPropertyBase.hpp" />
+    <ClInclude Include="Core\NamedPropertyType.hpp" />
     <ClInclude Include="Core\Ray3.hpp" />
     <ClInclude Include="Core\RaycastResult.hpp" />
     <ClInclude Include="Core\Rgba.hpp" />
