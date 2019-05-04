@@ -14,6 +14,15 @@ enum WorldEntityTypes
 	NUM_ENTITIES
 };
 
+enum eSphericalCoordinate : int
+{
+	SPHERICAL_RADIUS,
+	SPHERICAL_ROTATION,
+	SPHERICAL_ALTITUDE,
+	NUM_SPHERICAL_COORD
+};
+char const* GetAsString( eSphericalCoordinate coordEnum );
+
 //--------------------
 // GLOBAL CONSTANTS
 float constexpr PLAYER_MAX_SPEED = 7.f;

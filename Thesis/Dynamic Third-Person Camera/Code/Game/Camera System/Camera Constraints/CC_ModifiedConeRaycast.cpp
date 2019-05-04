@@ -160,7 +160,10 @@ void CC_ModifiedConeRaycast::Execute( CameraState &suggestedCameraState )
 	// DebugRenderTag( 0.f, 0.25f, newCamPos, debugCamMatrix.GetJColumn(), debugCamMatrix.GetIColumn(), RGBA_RED_COLOR, RGBA_RED_COLOR, Stringf( "-%.2f", reductionInRadius ) );
 
 	// DebugRenderBasis( 0.f, suggestedCameraState.GetTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	DebugRenderBasis( 0.f, context.anchorGameObject->m_transform.GetWorldTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	// DebugRenderBasis( 0.f, context.anchorGameObject->m_transform.GetWorldTransformMatrix(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+
+	DebugRenderSphericalCoordinates( suggestedCameraState, cameraRadius, cameraRotation, cameraAltitude );
+
 	Profiler::GetInstance()->Pop();
 }
 
@@ -205,6 +208,60 @@ void CC_ModifiedConeRaycast::DebugRenderSettingsDetails()
 	Vector2 changeCircleDebugViewPos = Vector2( graphBounds.mins.x, 105.f );
 	std::string changeDebugViewStr = Stringf( "[I] Debug Circle Mode: %s", m_isDebuggingForImpact ? "IMPACT" : "WEIGHTS" );
 	DebugRender2DText( 0.f, changeCircleDebugViewPos, 17.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, changeDebugViewStr.c_str() );
+
+	Vector2 sphericalCoordDebugTxtPos = changeCircleDebugViewPos + Vector2( 0.f, 20.f );
+	DebugRender2DText( 0.f, sphericalCoordDebugTxtPos, 15.f, RGBA_YELLOW_COLOR, RGBA_YELLOW_COLOR, Stringf("[D-pad RIGHT] Debug Spherical Coord: \"%s\"", GetAsString( m_debugSphericalCoord ) ) );
+}
+
+void CC_ModifiedConeRaycast::CycleNextSelectedSphericalCoord()
+{
+	int sphericalCoordIndex = ( (int)m_debugSphericalCoord + 1) % NUM_SPHERICAL_COORD;
+
+	m_debugSphericalCoord = (eSphericalCoordinate) sphericalCoordIndex;
+}
+
+void CC_ModifiedConeRaycast::DebugRenderSphericalCoordinates( CameraState updatedCamState, float radius, float rotation, float altitude ) const
+{
+	CameraContext context = m_manager.GetCameraContext();
+	Vector3 cameraPosition = updatedCamState.m_position;
+	Vector3 playerPosition = context.anchorGameObject->m_transform.GetWorldPosition();
+	Matrix44 debugCamMat = g_activeDebugCamera->m_cameraTransform.GetWorldTransformMatrix();
+
+	// Radius
+	if( m_debugSphericalCoord == SPHERICAL_RADIUS )
+	{
+		DebugRenderLineSegment( 0.f, playerPosition, RGBA_WHITE_COLOR, cameraPosition, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+		DebugRenderTag( 0.f, 0.3f, (cameraPosition + playerPosition) * 0.5f, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf( "Rad: %i m", (int)radius ) );
+	}
+
+	// Rotation
+	if( m_debugSphericalCoord == SPHERICAL_ROTATION )
+	{
+		int numSlices = 25;
+		float degreeRotPerSlice = 360.f / numSlices;
+		for( int i = 1; i <= 25; i++ )
+		{
+			Quaternion worldUpRotatorStart( Vector3::UP, degreeRotPerSlice * (i - 1) );
+			Quaternion worldUpRotatorEnd( Vector3::UP, degreeRotPerSlice * i );
+
+			Vector3 startPos = worldUpRotatorStart.RotatePoint( cameraPosition - playerPosition ) + playerPosition;
+			Vector3 endsPos = worldUpRotatorEnd.RotatePoint( cameraPosition - playerPosition ) + playerPosition;
+
+			DebugRenderLineSegment( 0.f, startPos, RGBA_WHITE_COLOR, endsPos, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+		}
+		DebugRenderTag( 0.f, 0.3f, cameraPosition + Vector3( 0.f, 0.3f, 0.f ), debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf( "Rot: %i deg", (int)rotation ) );
+	}
+
+
+	// Altitude
+	if( m_debugSphericalCoord == SPHERICAL_ALTITUDE )
+	{
+		Vector3 cameraPosAtPlayerLevel = Vector3( cameraPosition.x, playerPosition.y, cameraPosition.z );
+		DebugRenderLineSegment( 0.f, cameraPosition, RGBA_WHITE_COLOR, cameraPosAtPlayerLevel, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+		DebugRenderLineSegment( 0.f, playerPosition, RGBA_WHITE_COLOR, cameraPosition, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+		DebugRenderLineSegment( 0.f, playerPosition, RGBA_WHITE_COLOR, cameraPosAtPlayerLevel, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+		DebugRenderTag( 0.f, 0.3f, (cameraPosition + cameraPosAtPlayerLevel) * 0.5f, debugCamMat.GetJColumn(), debugCamMat.GetIColumn(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, Stringf( "Alt: %i deg", (int)(90.f - altitude) ) );
+	}
 }
 
 void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
@@ -213,6 +270,8 @@ void CC_ModifiedConeRaycast::ChangeSettingsAccordingToInput()
 	float widthChangeSpeed		= 0.01f;
 	float deltaSeconds			= (float)GetMasterClock()->GetFrameDeltaSeconds();
 
+	if( g_theInput->m_controller[0].m_xboxButtonStates[ XBOX_BUTTON_RIGHT ].keyJustPressed )
+		CycleNextSelectedSphericalCoord();
 	if( g_theInput->IsKeyPressed( NUM_PAD_8 ) )
 		m_curveHeight += hightChangeSpeed * deltaSeconds;
 	if( g_theInput->IsKeyPressed( NUM_PAD_2 ) )

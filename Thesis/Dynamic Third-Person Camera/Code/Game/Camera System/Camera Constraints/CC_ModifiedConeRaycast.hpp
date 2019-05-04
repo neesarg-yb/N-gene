@@ -66,6 +66,7 @@ private:
 	float				 m_fNumCircularLayers	= (float) m_numCircularLayers;
 	CB_Follow			*m_followBehavior		= nullptr;
 	bool				 m_isDebuggingForImpact	= true;
+	eSphericalCoordinate m_debugSphericalCoord	= SPHERICAL_RADIUS;
 
 public:
 	void	Execute( CameraState &suggestedCameraState );
@@ -73,6 +74,8 @@ public:
 
 private:
 	void	DebugRenderSettingsDetails();
+	void	CycleNextSelectedSphericalCoord();
+	void	DebugRenderSphericalCoordinates( CameraState updatedCamState, float radius, float rotation, float altitude ) const;
 	void	ChangeSettingsAccordingToInput();							// Updates property variables for the cone-raycast
 	void	IncrementMaxRotationDegrees( float deltaSeconds, float multiplier );
 	void	IncrementNumCircularLayers ( float deltaSeconds, float multiplier );

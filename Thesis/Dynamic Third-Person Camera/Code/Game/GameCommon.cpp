@@ -14,3 +14,18 @@ float					g_cameraControlInverted = false;
 /*
 AudioSystem* g_theAudio = nullptr;
 */
+
+char const* GetAsString( eSphericalCoordinate coordEnum )
+{
+	switch( coordEnum )
+	{
+	case SPHERICAL_RADIUS:
+		return "Radius";
+	case SPHERICAL_ROTATION:
+		return "Rotation";
+	case SPHERICAL_ALTITUDE:
+		return "Altitude";
+	default:
+		return "None";
+	}
+}
