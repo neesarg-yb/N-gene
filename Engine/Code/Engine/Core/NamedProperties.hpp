@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <string>
+#include "Engine/Core/StringUtils.hpp"
 #include "Engine/Core/NamedPropertyBase.hpp"
 #include "Engine/Core/NamedPropertyType.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
@@ -31,22 +32,27 @@ public:
 template <typename T>
 void NamedProperties::Set( std::string const &name, T const &value )
 {
-	NamedPropertiesMap::iterator it = m_properties.find( name );
-	
+	NamedPropertyBase *newValuePropBase	= new NamedPropertyType< T >( name, value );
+	NamedPropertiesMap::iterator it		= m_properties.find( name );
+
 	// If a value by this name already exists
 	if( it != m_properties.end() )
 	{
-		bool typeMismatched = ( typeid( value ) != typeid( *it->second ) );
+		// Check: new type should be same as old
+		type_info const &newValueTypeInfo = typeid( *newValuePropBase );
+		type_info const &oldValueTypeInfo = typeid( *it->second );
+
+		// If not, this must be a typo by programmer
+		bool typeMismatched = ( newValueTypeInfo != oldValueTypeInfo );
 		if( typeMismatched )
-			ERROR_RECOVERABLE( "NamedProperty's type is mimatched!" );
+			ERROR_RECOVERABLE( Stringf("Type Mismatched: \"%s\" is of %s. New value of %s should not be asigned!", name.c_str(), oldValueTypeInfo.name(), newValueTypeInfo.name() ) );
 
 		// delete the value
 		delete it->second;
 		it->second = nullptr;
 	}
 
-	NamedPropertyBase *valuePropBase = new NamedPropertyType< T >( value );
-	m_properties[ name ] = valuePropBase;
+	m_properties[ name ] = newValuePropBase;
 }
 
 template <typename T>
