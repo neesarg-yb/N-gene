@@ -8,7 +8,7 @@ public:
 	 NamedPropertyType( std::string const &name, T const &value );
 	~NamedPropertyType() { }
 
-protected:
+private:
 	T m_value;
 
 public:
