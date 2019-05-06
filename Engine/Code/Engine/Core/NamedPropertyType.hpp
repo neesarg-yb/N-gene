@@ -5,7 +5,7 @@ template <typename T>
 class NamedPropertyType : public NamedPropertyBase
 {
 public:
-	 NamedPropertyType( T const &value ) : m_value( value ) { }
+	 NamedPropertyType( std::string const &name, T const &value );
 	~NamedPropertyType() { }
 
 protected:
@@ -14,6 +14,11 @@ protected:
 public:
 	T GetValue() const;
 };
+
+template <typename T>
+NamedPropertyType<T>::NamedPropertyType( std::string const &name, T const &value )
+	: NamedPropertyBase( name )
+	, m_value( value ) { }
 
 template <typename T>
 T NamedPropertyType<T>::GetValue() const

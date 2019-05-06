@@ -4,9 +4,9 @@
 class NamedPropertyBase
 {
 public:
-			 NamedPropertyBase() { }
+			 NamedPropertyBase( std::string const &name ) : m_name( name ) { }
 	virtual ~NamedPropertyBase() { }
 
 protected:
-	std::string m_name = "NOT ASSIGNED";
+	std::string m_name;
 };
