@@ -3,7 +3,6 @@
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
-#include "Engine/Core/NamedProperties.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Engine/Profiler/Profiler.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
@@ -37,6 +36,7 @@ theGame::theGame()
 	m_gameCamera->SetProjectionOrtho( 2.f, -1.f, 1.f );										// To set NDC styled ortho
 
 
+	// TESTING : NAMED PROPERTIES
 	std::string lastName( "Eiserloh" );
 
 	NamedProperties p;
@@ -54,6 +54,13 @@ theGame::theGame()
 
 	UNUSED( height );
 	UNUSED( fname );
+
+	// TESTING : EVENT SYSTEM
+	FireEvent( "Sunrise" );
+	SubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticFunction );
+	FireEvent( "Sunrise" );
+	UnsubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticFunction );
+	FireEvent( "Sunrise" );
 }
 
 theGame::~theGame()
@@ -284,4 +291,10 @@ void theGame::RenderLoadingScreen() const
 double theGame::GetTimeSinceGameStarted() const
 {
 	return m_timeSinceStartOfTheGame;
+}
+
+bool theGame::MyTestEventStaticFunction( NamedProperties &args )
+{
+	UNUSED( args );
+	return false;
 }

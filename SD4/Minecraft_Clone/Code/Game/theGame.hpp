@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine/Core/Time.hpp"
 #include "Engine/Core/UIMenu.hpp"
+#include "Engine/Core/EventSystem.hpp"
+#include "Engine/Core/NamedProperties.hpp"
 #include "Engine/Math/Vector3.hpp"
 #include "Engine/Math/Matrix44.hpp"
 #include "Engine/Math/FloatRange.hpp"
@@ -52,7 +54,6 @@ private:
 	const float		m_transitionTime					=	0.5f;
 	const float		m_halfTransitionTime				=	m_transitionTime * 0.5f;
 	float			m_fadeEffectAlpha					=	0.f;						// 0 to 1
-
 	
 private:
 	// Game States
@@ -64,5 +65,7 @@ private:
 
 	// Time
 	double		GetTimeSinceGameStarted() const;
+
+	static bool	MyTestEventStaticFunction( NamedProperties &args );
 };
 
