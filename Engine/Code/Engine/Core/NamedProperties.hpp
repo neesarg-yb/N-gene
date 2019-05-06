@@ -24,7 +24,7 @@ public:
 	template <typename T>
 		T Get( std::string const &name, T defaultValue ) const;
 
-	// We treat "const char*" as "std::string"
+	// We treat "char const*" as "std::string"
 	inline void			Set( std::string const &name, char const *value );
 	inline std::string	Get( std::string const &name, char const *defaultValue );
 };
