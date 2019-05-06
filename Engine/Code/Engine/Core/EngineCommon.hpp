@@ -82,3 +82,10 @@ void EngineShutdown();
 
 Clock const*	GetMasterClock();
 void			TickMasterClock();		// Advances the master clock by a frame
+
+class NamedProperties;
+typedef bool ( *EventFunctionCallbackPtr ) (NamedProperties& args);
+
+void FireEvent( std::string const &eventName );
+void SubscribeEventCallbackFunction( std::string const &eventName, EventFunctionCallbackPtr functionPtr );
+void UnsubscribeEventCallbackFunction( std::string const &eventName, EventFunctionCallbackPtr functionPtr );
