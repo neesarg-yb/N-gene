@@ -1,5 +1,6 @@
 #pragma once
 #include <assert.h>
+#include "Engine/Core/EventSystem.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 #include "ThirdParty/tinyxml/tinyxml2.h"
 
@@ -82,3 +83,21 @@ void EngineShutdown();
 
 Clock const*	GetMasterClock();
 void			TickMasterClock();		// Advances the master clock by a frame
+
+extern EventSystem *g_eventSystem;
+
+void FireEvent( std::string const &eventName );
+void SubscribeEventCallbackFunction( std::string const &eventName, EventFunctionCallbackPtr functionPtr );
+void UnsubscribeEventCallbackFunction( std::string const &eventName, EventFunctionCallbackPtr functionPtr );
+
+template <typename T, typename METHOD>
+void SubscribeEventCallbackObjectMethod( std::string const &eventName, T &objectRef, METHOD methodPtr )
+{
+	g_eventSystem->SubscribeMethodToEvent( eventName, objectRef, methodPtr );
+}
+
+template <typename T, typename METHOD>
+void UnsubscribeEventCallbackObjectMethod( std::string const &eventName, T &objectRef, METHOD methodPtr )
+{
+	g_eventSystem->UnsubscribeMethodFromEvent( eventName, objectRef, methodPtr );
+}
