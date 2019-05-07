@@ -1,6 +1,32 @@
 #pragma once
 #include "EventSystem.hpp"
 
+EventSystem::EventSystem()
+{
+
+}
+
+EventSystem::~EventSystem()
+{
+	// Delete all the subscribers from all the events!
+	for( EventSubscriptionsMap::iterator itEventMap = m_subscriptions.begin(); itEventMap != m_subscriptions.end(); itEventMap++ )
+	{
+		EventSubscriptionList &thisSubList = itEventMap->second;
+		for( int i = 0; i < thisSubList.size(); i++ )
+		{
+			EventSubscription *thisSub = thisSubList[i];
+
+			if( thisSub == nullptr )
+				continue;
+
+			delete thisSub;
+			thisSub = nullptr;
+		}
+	}
+
+	m_subscriptions.clear();
+}
+
 void EventSystem::FireEvent( std::string const &eventName, NamedProperties &args )
 {
 	// Find the event
@@ -16,8 +42,6 @@ void EventSystem::FireEvent( std::string const &eventName, NamedProperties &args
 
 void EventSystem::SubscribeFunctionToEvent( std::string const &eventName, EventFunctionCallbackPtr functionPtr )
 {
-	TODO( "Avoid Duplicate Entries" );
-
 	EventSubscriptionList &currentSubscribers = m_subscriptions[ eventName ];
 	currentSubscribers.push_back( new EventFunctionSubscription( functionPtr ) );
 }

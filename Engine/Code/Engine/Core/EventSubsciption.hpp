@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Core/NamedProperties.hpp"
-#include "Engine/Core/EngineCommon.hpp"
+
+typedef bool ( *EventFunctionCallbackPtr ) (NamedProperties& args);
 
 class EventSystem;
 class EventSubscription
@@ -27,5 +28,29 @@ private:
 	EventFunctionCallbackPtr m_function = nullptr;
 
 public:
-	bool Execute( NamedProperties& args );
+	bool Execute( NamedProperties& args ) override;
 };
+
+template <typename T>
+class EventObjectMethodSubscription : public EventSubscription
+{
+	friend EventSystem;
+	typedef bool (T::*EventObjectMethodCallbackPtr) (NamedProperties &args );
+
+private:
+	T &m_object;
+	EventObjectMethodCallbackPtr m_method	= nullptr;
+
+public:
+	 EventObjectMethodSubscription( T &objectPtr, EventObjectMethodCallbackPtr registerMethod ) : m_object( objectPtr ), m_method( registerMethod ) { }
+	~EventObjectMethodSubscription() { }
+
+public:
+	bool Execute( NamedProperties& args ) override;
+};
+
+template <typename T>
+bool EventObjectMethodSubscription<T>::Execute( NamedProperties& args )
+{
+	return (m_object.*m_method)( args );
+}
