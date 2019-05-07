@@ -63,12 +63,14 @@ theGame::theGame()
 
 	// TESTING : EVENT SYSTEM
 	FireEvent( "Sunrise" );
-	SubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticMethod );
 	SubscribeEventCallbackFunction( "Sunrise", MyStandaloneFunction );
+	SubscribeEventCallbackObjectMethod( "Sunrise", *this, &theGame::MyTestObjectMethod1 );
+	SubscribeEventCallbackObjectMethod( "Sunrise", *this, &theGame::MyTestObjectMethod2 );
 	FireEvent( "Sunrise" );
-	UnsubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticMethod );
+	UnsubscribeEventCallbackObjectMethod( "Sunrise", *this, &theGame::MyTestObjectMethod2 );
 	FireEvent( "Sunrise" );
-	UnsubscribeEventCallbackFunction( "Sunrise", MyStandaloneFunction );
+ 	UnsubscribeEventCallbackFunction( "Sunrise", MyStandaloneFunction );
+ 	UnsubscribeEventCallbackObjectMethod( "Sunrise", *this, &theGame::MyTestObjectMethod2 );
 	FireEvent( "Sunrise" );
 }
 
@@ -302,8 +304,14 @@ double theGame::GetTimeSinceGameStarted() const
 	return m_timeSinceStartOfTheGame;
 }
 
-bool theGame::MyTestEventStaticMethod( NamedProperties &args )
+bool theGame::MyTestObjectMethod1( NamedProperties &args )
 {
 	UNUSED( args );
 	return false;
+}
+
+bool theGame::MyTestObjectMethod2( NamedProperties &args )
+{
+	UNUSED( args );
+	return true;
 }
