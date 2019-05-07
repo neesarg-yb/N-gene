@@ -33,13 +33,12 @@ void EventSystem::UnsubscribeFunctionFromEvent( std::string const &eventName, Ev
 	for( int i = 0; i < currentSubscibers.size(); i++ )
 	{
 		// Only if the type is same
-		EventSubscription *thisSubscription = currentSubscibers[i];
-		if( typeid(*thisSubscription) != typeid(EventFunctionSubscription(functionPtr)) )
+		EventFunctionSubscription *thisFunctionSubscription = dynamic_cast< EventFunctionSubscription* >( currentSubscibers[i] );
+		if( thisFunctionSubscription == nullptr )
 			continue;
 
 		// Only if the pointer location is same
-		EventFunctionSubscription *thisFunctionSubsciption = (EventFunctionSubscription *) thisSubscription;
-		if( thisFunctionSubsciption->m_function != functionPtr )
+		if( thisFunctionSubscription->m_function != functionPtr )
 			continue;
 
 		// Delete the subscriber
