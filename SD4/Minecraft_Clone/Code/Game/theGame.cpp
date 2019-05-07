@@ -16,6 +16,12 @@ void EchoTestCommand( Command& cmd )
 	ConsolePrintf( "%s", cmd.GetNextString().c_str() );
 }
 
+bool MyStandaloneFunction( NamedProperties &args )
+{
+	args.Set( "Duration", 1.2f );
+	return false;
+}
+
 theGame::theGame()
 {
 	// Set global variable
@@ -57,9 +63,12 @@ theGame::theGame()
 
 	// TESTING : EVENT SYSTEM
 	FireEvent( "Sunrise" );
-	SubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticFunction );
+	SubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticMethod );
+	SubscribeEventCallbackFunction( "Sunrise", MyStandaloneFunction );
 	FireEvent( "Sunrise" );
-	UnsubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticFunction );
+	UnsubscribeEventCallbackFunction( "Sunrise", MyTestEventStaticMethod );
+	FireEvent( "Sunrise" );
+	UnsubscribeEventCallbackFunction( "Sunrise", MyStandaloneFunction );
 	FireEvent( "Sunrise" );
 }
 
@@ -293,7 +302,7 @@ double theGame::GetTimeSinceGameStarted() const
 	return m_timeSinceStartOfTheGame;
 }
 
-bool theGame::MyTestEventStaticFunction( NamedProperties &args )
+bool theGame::MyTestEventStaticMethod( NamedProperties &args )
 {
 	UNUSED( args );
 	return false;

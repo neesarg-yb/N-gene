@@ -66,6 +66,7 @@ private:
 	// Time
 	double		GetTimeSinceGameStarted() const;
 
-	static bool	MyTestEventStaticFunction( NamedProperties &args );
+	static bool	MyTestEventStaticMethod( NamedProperties &args );
 };
 
+bool MyStandaloneFunction( NamedProperties &args );
