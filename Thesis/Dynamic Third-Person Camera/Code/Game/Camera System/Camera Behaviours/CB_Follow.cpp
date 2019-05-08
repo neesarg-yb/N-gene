@@ -14,8 +14,8 @@ ConstraintSuggestionOverwriteState::ConstraintSuggestionOverwriteState( bool pla
 
 }
 
-CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager )
-	: CB_DegreesOfFreedom( name, manager )
+CB_Follow::CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager, GameObject const *anchorOverwrite /* = nullptr */ )
+	: CB_DegreesOfFreedom( name, manager, anchorOverwrite )
 	, m_rotationSpeed( rotationSpeed )
 	, m_pitchRange( minPitchAngle, maxPitchAnngle )
 	, m_distanceFromAnchor( distFromAnchor )
@@ -84,7 +84,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 	{
 		// Player takes the control over camera
 		m_suggestionOverwriteState.m_playerHasCameraControl	= true;
-		m_suggestionOverwriteState.m_playerPositionOnBegin	= context.anchorGameObject->m_transform.GetWorldPosition();
+		m_suggestionOverwriteState.m_playerPositionOnBegin	= GetAnchor()->m_transform.GetWorldPosition();
 		m_suggestionOverwriteState.m_timeElapsedSecondsIdle	= 0.0;
 	}
 	else
@@ -100,7 +100,7 @@ CameraState CB_Follow::Update( float deltaSeconds, CameraState const &currentSta
 		{
 			// Register that we're taking away the control from the player
 			m_suggestionOverwriteState.m_playerHasCameraControl	= false;
-			m_suggestionOverwriteState.m_playerPositionOnBegin	= context.anchorGameObject->m_transform.GetWorldPosition();
+			m_suggestionOverwriteState.m_playerPositionOnBegin	= GetAnchor()->m_transform.GetWorldPosition();
 		}
 	}
 
@@ -138,7 +138,7 @@ bool CB_Follow::StartCameraReorientation()
 
 		// Set the target degrees
 		CameraContext context		= m_manager->GetCameraContext();
-		Vector3	playerFront			= context.anchorGameObject->m_transform.GetWorldTransformMatrix().GetKColumn();
+		Vector3	playerFront			= GetAnchor()->m_transform.GetWorldTransformMatrix().GetKColumn();
 		Vector2	playerFrontDirXZ	= Vector2( playerFront.x, playerFront.z ).GetNormalized();
 		float	targetDegrees		= GetRotationToFaceXZDirection( playerFrontDirXZ ) - 180.f;		// -180 because we want to set rotation such that the camera is on BACK-SIDE of the player
 		m_reorientTargetRotDegrees	= targetDegrees;
@@ -217,7 +217,7 @@ bool CB_Follow::CheckToTurnOnConstraintSuggestions( ConstraintSuggestionOverwrit
 
 void CB_Follow::CartesianToPolarTest( CameraState const &camState ) const
 {
-	Vector3 anchorPos	= m_manager->GetCameraContext().anchorGameObject->m_transform.GetWorldPosition();
+	Vector3 anchorPos	= GetAnchor()->m_transform.GetWorldPosition();
 	Vector3 position	= camState.m_position;
 	
 	float radius, rotation, altitude;

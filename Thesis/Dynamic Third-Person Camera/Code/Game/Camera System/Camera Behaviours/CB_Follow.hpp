@@ -22,7 +22,7 @@ class CB_Follow : public CB_DegreesOfFreedom
 	friend CC_HandoverToShoulder;
 
 public:
-	 CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager );
+	 CB_Follow( float distFromAnchor, float rotationSpeed, float minPitchAngle, float maxPitchAnngle, char const *name, CameraManager *manager, GameObject const *anchorOverwrite = nullptr );
 	~CB_Follow();
 
 public:

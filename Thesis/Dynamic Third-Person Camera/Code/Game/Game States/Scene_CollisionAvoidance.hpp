@@ -39,7 +39,7 @@ public:
 	// Game Specific
 	GameObjectList			 m_gameObjects[ NUM_ENTITIES ];
 	Terrain					*m_terrain			= nullptr;
-	Player					*m_player			= nullptr;
+	Player					*m_selectedPlayer	= nullptr;
 
 private:
 	// Camera
@@ -63,8 +63,9 @@ public:
 
 private:
 	void PerformSphereCollisionForPlayer( float deltaSeconds );
-	void PerformPlayerCollisionAgainstBuildings();
-	void PerformPlayerCollisionAgainstHouse();
+	void PerformPlayerCollisionAgainstBuildings( Player &player );
+	void PerformPlayerCollisionAgainstHouse( Player &player );
+	void PerformPlayerCollisionAgainstHallway( Player &player );
 
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
@@ -79,5 +80,5 @@ private:
 	void DebugRenderHotkeys();
 	void DebugRenderRightStickInputVisualizer( Vector2 screenPosition, Matrix44 const &inputReferenceMat, Matrix44 const &actualCameraMat );
 
-	void SwitchBetweenFollowAndShoulderBehavior();
+	void SwitchBetweenBB8();
 };

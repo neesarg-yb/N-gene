@@ -2,8 +2,9 @@
 #include "CB_DegreesOfFreedom.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
-CB_DegreesOfFreedom::CB_DegreesOfFreedom( char const *name, CameraManager *manager )
+CB_DegreesOfFreedom::CB_DegreesOfFreedom( char const *name, CameraManager *manager, GameObject const *anchorOverwrite /* = nullptr */ )
 	: CameraBehaviour( name, manager )
+	, m_anchorOverwrite( anchorOverwrite )
 {
 
 }
@@ -15,7 +16,7 @@ CB_DegreesOfFreedom::~CB_DegreesOfFreedom()
 
 void CB_DegreesOfFreedom::SetWorldPosition( float distanceFromAnchor, float rotationInDegrees, float altitudeInDegrees )
 {
-	Vector3 anchorWorldPosition		= m_anchor->m_transform.GetWorldPosition();
+	Vector3 anchorWorldPosition		= GetAnchor()->m_transform.GetWorldPosition();
 	Vector3 relativeCameraPosition	= GetPositionFromSpericalCoordinate( distanceFromAnchor, rotationInDegrees, altitudeInDegrees );
 	Vector3 worldCameraPosition		= anchorWorldPosition + relativeCameraPosition;
 
@@ -24,7 +25,7 @@ void CB_DegreesOfFreedom::SetWorldPosition( float distanceFromAnchor, float rota
 
 void CB_DegreesOfFreedom::SetOrientationToLookAtAnchor()
 {
-	Vector3		anchorWorldPosition	= m_anchor->m_transform.GetWorldPosition();
+	Vector3		anchorWorldPosition	= GetAnchor()->m_transform.GetWorldPosition();
 	Matrix44	lookAtAnchorMatrix	= Matrix44::MakeLookAtView( anchorWorldPosition, m_goalState.m_position );
 	Quaternion	cameraOrientation	= Quaternion::FromMatrix( lookAtAnchorMatrix ).GetInverse();
 
@@ -43,6 +44,14 @@ void CB_DegreesOfFreedom::SetOffsetToWorldPosition( float localHorizontalOffset,
 void CB_DegreesOfFreedom::SetFOV( float cameraFOV )
 {
 	m_goalState.m_fov = cameraFOV;
+}
+
+GameObject const* CB_DegreesOfFreedom::GetAnchor() const
+{
+	if( m_anchorOverwrite != nullptr )
+		return m_anchorOverwrite;
+	else
+		return m_anchor;
 }
 
 Vector3 CB_DegreesOfFreedom::GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude ) const

@@ -81,12 +81,17 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	AddNewGameObjectToScene( theHallway, ENTITY_HALLWAY );
 
 	// Player
-	m_player = new Player( Vector3( 0.f, 0.f, 15.f ), *m_terrain );
-	AddNewGameObjectToScene( m_player, ENTITY_PLAYER );
+	Player *player1 = new Player( Vector3( 0.f, 0.f, 15.f ), *m_terrain );
+	AddNewGameObjectToScene( player1, ENTITY_PLAYER );
+
+	Player *player2 = new Player ( Vector3(22.95f, -9.55f, -1.94f), *m_terrain );
+	AddNewGameObjectToScene( player2, ENTITY_PLAYER );
+
+	m_selectedPlayer = player1;
 
 	// Camera Manager
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput, 0.1f );
-	m_cameraManager->SetAnchor( m_player );
+	m_cameraManager->SetAnchor( m_selectedPlayer );
 
 	// Set the Raycast std::function
 	raycast_std_func terrainRaycastStdFunc;
@@ -108,7 +113,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	// Camera Behaviour
 	CameraBehaviour* shoulderBehavior = new CB_ShoulderView( 0.17f, 0.33f, 0.36f, -17.f, 17.f, "Shoulder View", m_cameraManager );
 
-	m_followBehavior = new CB_Follow( 6.3f, 70.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow", m_cameraManager );
+	m_followBehavior = new CB_Follow( 6.3f, 70.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow P1", m_cameraManager, player1 );
 	m_followBehavior->m_motionControllerName = "Proportional Controller";	
 
 	m_cameraManager->AddNewCameraBehaviour( m_followBehavior );
@@ -139,14 +144,18 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	m_followBehavior->m_constraints.SetOrRemoveTags( "LineOfSight" );
 	m_followBehavior->m_constraints.SetOrRemoveTags( "HandoverToShoulder" );
 
+	CB_Follow* followPlayer2 = new CB_Follow( 6.3f, 70.f, 70.f, 100.f/*, 1.f, 179.f*/, "Follow P2", m_cameraManager, player2 );
+	m_cameraManager->AddNewCameraBehaviour( followPlayer2 );
+
 	// Activate the behavior [MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR]
-	m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.f );
+	m_cameraManager->ChangeCameraBehaviourTo( "Follow P1", 0.f );
 }
 
 Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
 {
 	// Camera Behaviour
-	m_cameraManager->DeleteCameraBehaviour( "Follow" );
+	m_cameraManager->DeleteCameraBehaviour( "Follow P2" );
+	m_cameraManager->DeleteCameraBehaviour( "Follow P1" );
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
 
 	delete m_proportionalController;
@@ -157,7 +166,7 @@ Scene_CollisionAvoidance::~Scene_CollisionAvoidance()
 	m_cameraManager = nullptr;
 
 	// Player
-	m_player = nullptr;		// Gets deleted from m_gameObjects
+	m_selectedPlayer = nullptr;		// Gets deleted from m_gameObjects
 
 	// Terrain
 	m_terrain = nullptr;	// Gets deleted from m_gameObjects
@@ -221,7 +230,7 @@ void Scene_CollisionAvoidance::BeginFrame()
 	PROFILE_SCOPE_FUNCTION();
 	ChangeDebugCameraSettings();
 
-	SwitchBetweenFollowAndShoulderBehavior();
+	SwitchBetweenBB8();
 
 	// Update Debug Renderer Objects
 	DebugRendererBeginFrame( m_clock );
@@ -259,15 +268,24 @@ void Scene_CollisionAvoidance::Update()
 	Matrix44 inputRefCamMatrix	= m_cameraManager->GetCameraMatrixForInputReference();
 	Vector3	 cameraForward		= inputRefCamMatrix.GetKColumn();
 	// DebugRenderVector( 0.f, m_player->m_transform.GetWorldPosition(), cameraForward, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
-	m_player->InformAboutCameraForward( m_cameraManager->GetCurrentCameraState(), *m_followBehavior );
+
+	Player* player1 = (Player*)m_gameObjects[ENTITY_PLAYER][0];
+	player1->InformAboutCameraForward( m_cameraManager->GetCurrentCameraState(), *m_followBehavior );
 	
 	// Update Game Objects
 	float deltaSeconds = (float) m_clock->GetFrameDeltaSeconds();
 	for( int i = 0; i < NUM_ENTITIES; i++ )
 	{
+		if( i == ENTITY_PLAYER )		// Except the player
+			continue;
+
 		for each( GameObject* go in m_gameObjects[i] )
 			go->Update( deltaSeconds );
 	}
+
+	// Update player 1
+	if( m_selectedPlayer == player1 )
+		player1->Update( deltaSeconds );
 
 	// Corrective Collision
 	PerformSphereCollisionForPlayer( deltaSeconds );
@@ -293,8 +311,6 @@ void Scene_CollisionAvoidance::Render( Camera *gameCamera ) const
 {
 	UNUSED( gameCamera );
 	PROFILE_SCOPE_FUNCTION();
-
-	Vector3 playerPosition = m_player->m_transform.GetWorldPosition();
 
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
@@ -449,14 +465,20 @@ void Scene_CollisionAvoidance::PerformSphereCollisionForPlayer( float deltaSecon
 {
 	UNUSED( deltaSeconds );
 
-	PerformPlayerCollisionAgainstBuildings();
-	PerformPlayerCollisionAgainstHouse();
+	for( int p = 0; p < m_gameObjects[ENTITY_PLAYER].size(); p++ )
+	{
+		Player *thisPlayer = (Player *) m_gameObjects[ENTITY_PLAYER][p];
+
+		PerformPlayerCollisionAgainstBuildings( *thisPlayer );
+		PerformPlayerCollisionAgainstHouse( *thisPlayer );
+		PerformPlayerCollisionAgainstHallway( *thisPlayer );
+	}
 }
 
-void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstBuildings()
+void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstBuildings( Player &player )
 {
-	Vector3	playerPosition	 = m_player->m_transform.GetWorldPosition();
-	float	playerBodyRadius = m_player->m_bodyRadius;
+	Vector3	playerPosition	 = player.m_transform.GetWorldPosition();
+	float	playerBodyRadius = player.m_bodyRadius;
 
 	for( int b = 0; b < m_gameObjects[ ENTITY_BUILDING ].size(); b++ )
 	{
@@ -469,10 +491,10 @@ void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstBuildings()
 			continue;
 
 		// Set new position
-		m_player->m_transform.SetPosition( newCenterPos );
+		player.m_transform.SetPosition( newCenterPos );
 
 		// Set new velocity
-		Vector3 &playerVelocityRef	= m_player->m_velocity;
+		Vector3 &playerVelocityRef	= player.m_velocity;
 		Vector2  playerVelocityXZ	= Vector2( playerVelocityRef.x, playerVelocityRef.z );
 		Vector3	 pushbackVec3		= (newCenterPos - playerPosition);
 		Vector2	 pushbackXZ			= Vector2( pushbackVec3.x, pushbackVec3.z );
@@ -493,7 +515,7 @@ void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstBuildings()
 	}
 }
 
-void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstHouse()
+void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstHouse( Player &player )
 {
 	GameObjectList const &houseGOList = m_gameObjects[ ENTITY_HOUSE ];
 	if( houseGOList.size() == 0 )
@@ -502,8 +524,8 @@ void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstHouse()
 	// There should be just one house in the scene
 	House const *house = (House*) houseGOList[0];
 	
-	Vector3	playerPosition	 = m_player->m_transform.GetWorldPosition();
-	float	playerBodyRadius = m_player->m_bodyRadius;
+	Vector3	playerPosition	 = player.m_transform.GetWorldPosition();
+	float	playerBodyRadius = player.m_bodyRadius;
 	bool	isCollided		 = false;
 	Vector3	newCenterPos	 = house->CheckCollisionWithSphere( playerPosition, playerBodyRadius, isCollided );
 
@@ -511,15 +533,56 @@ void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstHouse()
 		return;
 
 	// Set new position
-	m_player->m_transform.SetPosition( newCenterPos );
+	player.m_transform.SetPosition( newCenterPos );
 
 	// Set new velocity
-	Vector3 &playerVelocityRef	= m_player->m_velocity;
+	Vector3 &playerVelocityRef	= player.m_velocity;
 	Vector2  playerVelocityXZ	= Vector2( playerVelocityRef.x, playerVelocityRef.z );
 	Vector3	 pushbackVec3		= (newCenterPos - playerPosition);
 	Vector2	 pushbackXZ			= Vector2( pushbackVec3.x, pushbackVec3.z );
 	float	 pushbackLength		= pushbackXZ.NormalizeAndGetLength();
 	Vector2	 pushbackTangentXZ	= Vector2( -pushbackXZ.y, pushbackXZ.x );		// Fast rotating the normalized vector by 90 degrees
+
+	if( AreEqualFloats( pushbackLength, 0.f, 4 ) )
+		return;
+
+	// We make the velocity on the normal ZERO, but let the player retain velocity on the tangent
+	float velocityOnSurfaceTangent = Vector2::DotProduct( pushbackTangentXZ, playerVelocityXZ );
+	Vector2 playerVelXZAfterImpact = (pushbackTangentXZ * velocityOnSurfaceTangent);
+
+	playerVelocityRef.x = playerVelXZAfterImpact.x;
+	playerVelocityRef.z = playerVelXZAfterImpact.y;
+
+	return;
+}
+
+void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstHallway( Player &player )
+{
+	GameObjectList const &hallwayGOList = m_gameObjects[ENTITY_HALLWAY];
+	if( hallwayGOList.size() == 0 )
+		return;
+
+	// There should be just one house in the scene
+	Hallway const *hallway = (Hallway*)hallwayGOList[0];
+
+	Vector3	playerPosition = player.m_transform.GetWorldPosition();
+	float	playerBodyRadius = player.m_bodyRadius;
+	bool	isCollided = false;
+	Vector3	newCenterPos = hallway->CheckCollisionWithSphere( playerPosition, playerBodyRadius, isCollided );
+
+	if( isCollided == false )
+		return;
+
+	// Set new position
+	player.m_transform.SetPosition( newCenterPos );
+
+	// Set new velocity
+	Vector3 &playerVelocityRef = player.m_velocity;
+	Vector2  playerVelocityXZ = Vector2( playerVelocityRef.x, playerVelocityRef.z );
+	Vector3	 pushbackVec3 = (newCenterPos - playerPosition);
+	Vector2	 pushbackXZ = Vector2( pushbackVec3.x, pushbackVec3.z );
+	float	 pushbackLength = pushbackXZ.NormalizeAndGetLength();
+	Vector2	 pushbackTangentXZ = Vector2( -pushbackXZ.y, pushbackXZ.x );		// Fast rotating the normalized vector by 90 degrees
 
 	if( AreEqualFloats( pushbackLength, 0.f, 4 ) )
 		return;
@@ -611,7 +674,8 @@ void Scene_CollisionAvoidance::DebugRenderHotkeys()
 	DebugRender2DText( 0.f, Vector2(-850.f, 400.f), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, mouseLock.c_str() );
 
 	// Change Camera Behavior
-	std::string camBehaviourChange = Stringf( "[B] Change Camera Behavior to \"%s\"", m_cameraManager->GetActiveCameraBehaviorName() != "Shoulder View" ? "Shoulder View" : "Follow" );
+	bool isDummy = (m_selectedPlayer == m_gameObjects[ENTITY_PLAYER][0]) ? false : true;
+	std::string camBehaviourChange = Stringf( "[B] Attach camera to the \"%s\" BB8!", isDummy ? "PLAYABLE" : "DUMMY" );
 	DebugRender2DText( 0.f, Vector2(160.f, 440.f), 15.f, RGBA_BLUE_COLOR, RGBA_BLUE_COLOR, camBehaviourChange.c_str() );
 }
 
@@ -694,15 +758,21 @@ void Scene_CollisionAvoidance::DebugRenderRightStickInputVisualizer( Vector2 scr
 	showInitialStateForSeconds -= (float) m_clock->GetFrameDeltaSeconds();
 }
 
-void Scene_CollisionAvoidance::SwitchBetweenFollowAndShoulderBehavior()
+void Scene_CollisionAvoidance::SwitchBetweenBB8()
 {
 	if( g_theInput->WasKeyJustPressed( 'B' ) == false )
 		return;
 
-	std::string activeBehavior = m_cameraManager->GetActiveCameraBehaviorName();
-	
-	if( activeBehavior != "Shoulder View" )
-		m_cameraManager->ChangeCameraBehaviourTo( "Shoulder View", 0.33f );
+	if( m_selectedPlayer == m_gameObjects[ENTITY_PLAYER][0] )
+	{
+		// Change to P2
+		m_selectedPlayer = (Player*)m_gameObjects[ENTITY_PLAYER][1];
+		m_cameraManager->ChangeCameraBehaviourTo( "Follow P2", 1.f );
+	}
 	else
-		m_cameraManager->ChangeCameraBehaviourTo( "Follow", 0.33f );
+	{
+		// Change to P1
+		m_selectedPlayer = (Player*)m_gameObjects[ENTITY_PLAYER][0];
+		m_cameraManager->ChangeCameraBehaviourTo( "Follow P1", 1.f );
+	}
 }

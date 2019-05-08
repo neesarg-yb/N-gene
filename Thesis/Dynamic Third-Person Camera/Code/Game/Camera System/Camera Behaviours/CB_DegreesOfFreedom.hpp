@@ -4,11 +4,14 @@
 class CB_DegreesOfFreedom : public CameraBehaviour
 {
 public:
-	 CB_DegreesOfFreedom( char const *name, CameraManager *manager );
+	 CB_DegreesOfFreedom( char const *name, CameraManager *manager, GameObject const *anchorOverwrite = nullptr );
 	~CB_DegreesOfFreedom();
 
 protected:
 	CameraState m_goalState;
+
+private:
+	GameObject const *m_anchorOverwrite = nullptr;
 
 public:
 	void		PreUpdate () = 0;
@@ -21,6 +24,8 @@ protected:
 	void SetOrientationToLookAtAnchor();
 	void SetOffsetToWorldPosition( float localHorizontalOffset, float localVerticalOffset );
 	void SetFOV( float cameraFOV );
+
+	GameObject const* GetAnchor() const;
 
 private:
 	Vector3 GetPositionFromSpericalCoordinate( float radius, float rotation, float altitude ) const;
