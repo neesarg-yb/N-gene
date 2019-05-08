@@ -139,6 +139,9 @@
     <ClCompile Include="World\Hallway.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="World\MagicBlock.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -241,6 +244,9 @@
       <Filter>Game States\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="World\Hallway.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\MagicBlock.hpp">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>

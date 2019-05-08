@@ -402,6 +402,7 @@
     <ClCompile Include="World\Building.cpp" />
     <ClCompile Include="World\Hallway.cpp" />
     <ClCompile Include="World\House.cpp" />
+    <ClCompile Include="World\MagicBlock.cpp" />
     <ClCompile Include="World\Player.cpp" />
     <ClCompile Include="World\Terrain.cpp" />
   </ItemGroup>
@@ -438,6 +439,7 @@
     <ClInclude Include="World\Building.hpp" />
     <ClInclude Include="World\Hallway.hpp" />
     <ClInclude Include="World\House.hpp" />
+    <ClInclude Include="World\MagicBlock.hpp" />
     <ClInclude Include="World\Player.hpp" />
     <ClInclude Include="World\Terrain.hpp" />
   </ItemGroup>

@@ -64,6 +64,7 @@ public:
 private:
 	void PerformSphereCollisionForPlayer( float deltaSeconds );
 	void PerformPlayerCollisionAgainstBuildings( Player &player );
+	void PerformPlayerCollisionAgainstMagicBlocks( Player &player );
 	void PerformPlayerCollisionAgainstHouse( Player &player );
 	void PerformPlayerCollisionAgainstHallway( Player &player );
 

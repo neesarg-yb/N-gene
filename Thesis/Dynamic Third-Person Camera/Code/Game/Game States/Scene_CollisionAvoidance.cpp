@@ -8,6 +8,7 @@
 #include "Game/World/House.hpp"
 #include "Game/World/Hallway.hpp"
 #include "Game/World/Building.hpp"
+#include "Game/World/MagicBlock.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_ShoulderView.hpp"
 #include "Game/Camera System/Camera Constraints/CC_LineOfSight.hpp"
@@ -77,8 +78,12 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	}
 
 	// Hallway
-	Hallway *theHallway = new Hallway( Vector2( 0.f, 10.f ), 4.f, 2.5f, 15.f, 12.f, 0.5f, *m_terrain );
+	Hallway *theHallway = new Hallway( Vector2( 0.f, -75.f ), 4.f, 2.5f, 15.f, 12.f, 0.5f, *m_terrain );
 	AddNewGameObjectToScene( theHallway, ENTITY_HALLWAY );
+
+	// Magic Block
+	MagicBlock *theMagicBlock = new MagicBlock( Vector2( 20.f, -70.f), 1.f, Vector3( 2.5f, 2.5f, 1.f ), Vector3::RIGHT, 5.5f, 3.f, *m_terrain, m_clock );
+	AddNewGameObjectToScene( theMagicBlock, ENTITY_MAGIC_BLOCK );
 
 	// Player
 	Player *player1 = new Player( Vector3( 0.f, 0.f, 15.f ), *m_terrain );
@@ -358,6 +363,7 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 	closestResult = m_terrain->Raycast( startPosition, direction, maxDistance, 0.05f );
 	Profiler::GetInstance()->Pop();
 
+
 	// Do Building Raycast
 	Profiler::GetInstance()->Push( "AREA-2" );
 	GameObjectList &buildings = m_gameObjects[ ENTITY_BUILDING ];
@@ -384,8 +390,35 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 	}
 	Profiler::GetInstance()->Pop();
 
-	// Do House Raycast
+
+	// Do Magic Block Raycast
 	Profiler::GetInstance()->Push( "AREA-3" );
+	GameObjectList &magicBlocks = m_gameObjects[ENTITY_MAGIC_BLOCK];
+	for( int i = 0; i < magicBlocks.size(); i++ )
+	{
+		MagicBlock *thisMB = (MagicBlock*)magicBlocks[i];
+		RaycastResult mbHitResult = thisMB->DoPerfectRaycast( startPosition, direction, maxDistance );
+
+		// If this one is the closest hit point, from start position
+		if( closestResult.didImpact == true )
+		{
+			if( mbHitResult.didImpact == true )
+			{
+				if( mbHitResult.fractionTravelled < closestResult.fractionTravelled )
+					closestResult = mbHitResult;
+			}
+		}
+		else
+		{
+			if( mbHitResult.didImpact == true )
+				closestResult = mbHitResult;
+		}
+	}
+	Profiler::GetInstance()->Pop();
+
+
+	// Do House Raycast
+	Profiler::GetInstance()->Push( "AREA-4" );
 	GameObjectList &houses = m_gameObjects[ ENTITY_HOUSE ];
 	for( int i = 0; i < houses.size(); i++ )
 	{
@@ -409,8 +442,9 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 	}
 	Profiler::GetInstance()->Pop();
 
+
 	// Do Hallway Raycast
-	Profiler::GetInstance()->Push( "AREA-4" );
+	Profiler::GetInstance()->Push( "AREA-5" );
 	GameObjectList &hallways = m_gameObjects[ENTITY_HALLWAY];
 	for( int i = 0; i < hallways.size(); i++ )
 	{
@@ -433,6 +467,7 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 		}
 	}
 	Profiler::GetInstance()->Pop();
+
 
 	return closestResult;
 }
@@ -470,6 +505,7 @@ void Scene_CollisionAvoidance::PerformSphereCollisionForPlayer( float deltaSecon
 		Player *thisPlayer = (Player *) m_gameObjects[ENTITY_PLAYER][p];
 
 		PerformPlayerCollisionAgainstBuildings( *thisPlayer );
+		PerformPlayerCollisionAgainstMagicBlocks( *thisPlayer );
 		PerformPlayerCollisionAgainstHouse( *thisPlayer );
 		PerformPlayerCollisionAgainstHallway( *thisPlayer );
 	}
@@ -500,6 +536,46 @@ void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstBuildings( Player &p
 		Vector2	 pushbackXZ			= Vector2( pushbackVec3.x, pushbackVec3.z );
 		float	 pushbackLength		= pushbackXZ.NormalizeAndGetLength();
 		Vector2	 pushbackTangentXZ	= Vector2( -pushbackXZ.y, pushbackXZ.x );		// Fast rotating the normalized vector by 90 degrees
+
+		if( AreEqualFloats( pushbackLength, 0.f, 4 ) )
+			return;
+
+		// We make the velocity on the normal ZERO, but let the player retain velocity on the tangent
+		float velocityOnSurfaceTangent = Vector2::DotProduct( pushbackTangentXZ, playerVelocityXZ );
+		Vector2 playerVelXZAfterImpact = (pushbackTangentXZ * velocityOnSurfaceTangent);
+
+		playerVelocityRef.x = playerVelXZAfterImpact.x;
+		playerVelocityRef.z = playerVelXZAfterImpact.y;
+
+		return;
+	}
+}
+
+void Scene_CollisionAvoidance::PerformPlayerCollisionAgainstMagicBlocks( Player &player )
+{
+	Vector3	playerPosition = player.m_transform.GetWorldPosition();
+	float	playerBodyRadius = player.m_bodyRadius;
+
+	for( int b = 0; b < m_gameObjects[ENTITY_MAGIC_BLOCK].size(); b++ )
+	{
+		MagicBlock *thisMB = (MagicBlock*)m_gameObjects[ENTITY_MAGIC_BLOCK][b];
+
+		bool isCollided = false;
+		Vector3 newCenterPos = thisMB->CheckCollisionWithSphere( playerPosition, playerBodyRadius, isCollided );
+
+		if( isCollided == false )
+			continue;
+
+		// Set new position
+		player.m_transform.SetPosition( newCenterPos );
+
+		// Set new velocity
+		Vector3 &playerVelocityRef = player.m_velocity;
+		Vector2  playerVelocityXZ = Vector2( playerVelocityRef.x, playerVelocityRef.z );
+		Vector3	 pushbackVec3 = (newCenterPos - playerPosition);
+		Vector2	 pushbackXZ = Vector2( pushbackVec3.x, pushbackVec3.z );
+		float	 pushbackLength = pushbackXZ.NormalizeAndGetLength();
+		Vector2	 pushbackTangentXZ = Vector2( -pushbackXZ.y, pushbackXZ.x );		// Fast rotating the normalized vector by 90 degrees
 
 		if( AreEqualFloats( pushbackLength, 0.f, 4 ) )
 			return;
