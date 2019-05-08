@@ -77,7 +77,7 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 	}
 
 	// Hallway
-	Hallway *theHallway = new Hallway( Vector2( 0.f, -10.f ), 7.5f, 2.5f, 10.f, 10.f, 0.5f, *m_terrain );
+	Hallway *theHallway = new Hallway( Vector2( 0.f, 10.f ), 4.f, 2.5f, 15.f, 12.f, 0.5f, *m_terrain );
 	AddNewGameObjectToScene( theHallway, ENTITY_HALLWAY );
 
 	// Player
@@ -389,6 +389,31 @@ RaycastResult Scene_CollisionAvoidance::Raycast( Vector3 const &startPosition, V
 		{
 			if( houseHitResult.didImpact == true )
 				closestResult = houseHitResult;
+		}
+	}
+	Profiler::GetInstance()->Pop();
+
+	// Do Hallway Raycast
+	Profiler::GetInstance()->Push( "AREA-4" );
+	GameObjectList &hallways = m_gameObjects[ENTITY_HALLWAY];
+	for( int i = 0; i < hallways.size(); i++ )
+	{
+		Hallway			*thisHallway = (Hallway*)hallways[i];
+		RaycastResult	 hallwayHitResult = thisHallway->Raycast( startPosition, direction, maxDistance, 0.2f );
+
+		// If this one is the closest hit point, from start position
+		if( closestResult.didImpact == true )
+		{
+			if( hallwayHitResult.didImpact == true )
+			{
+				if( hallwayHitResult.fractionTravelled < closestResult.fractionTravelled )
+					closestResult = hallwayHitResult;
+			}
+		}
+		else
+		{
+			if( hallwayHitResult.didImpact == true )
+				closestResult = hallwayHitResult;
 		}
 	}
 	Profiler::GetInstance()->Pop();
