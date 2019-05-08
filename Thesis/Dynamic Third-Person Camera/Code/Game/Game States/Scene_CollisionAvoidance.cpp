@@ -5,8 +5,9 @@
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
-#include "Game/World/Building.hpp"
 #include "Game/World/House.hpp"
+#include "Game/World/Hallway.hpp"
+#include "Game/World/Building.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_ShoulderView.hpp"
 #include "Game/Camera System/Camera Constraints/CC_LineOfSight.hpp"
@@ -74,6 +75,10 @@ Scene_CollisionAvoidance::Scene_CollisionAvoidance( Clock const *parentClock )
 		Building *aBuilding = new Building( positionXZ, 25.f, 5.f, *m_terrain );
 		AddNewGameObjectToScene( aBuilding, ENTITY_BUILDING );
 	}
+
+	// Hallway
+	Hallway *theHallway = new Hallway( Vector2( 0.f, -10.f ), 7.5f, 2.5f, 10.f, 10.f, 0.5f, *m_terrain );
+	AddNewGameObjectToScene( theHallway, ENTITY_HALLWAY );
 
 	// Player
 	m_player = new Player( Vector3( 0.f, 0.f, 15.f ), *m_terrain );

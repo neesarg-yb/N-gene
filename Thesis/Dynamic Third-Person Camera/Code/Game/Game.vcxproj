@@ -400,6 +400,7 @@
     <ClCompile Include="theApp.cpp" />
     <ClCompile Include="theGame.cpp" />
     <ClCompile Include="World\Building.cpp" />
+    <ClCompile Include="World\Hallway.cpp" />
     <ClCompile Include="World\House.cpp" />
     <ClCompile Include="World\Player.cpp" />
     <ClCompile Include="World\Terrain.cpp" />
@@ -435,6 +436,7 @@
     <ClInclude Include="theApp.hpp" />
     <ClInclude Include="theGame.hpp" />
     <ClInclude Include="World\Building.hpp" />
+    <ClInclude Include="World\Hallway.hpp" />
     <ClInclude Include="World\House.hpp" />
     <ClInclude Include="World\Player.hpp" />
     <ClInclude Include="World\Terrain.hpp" />
