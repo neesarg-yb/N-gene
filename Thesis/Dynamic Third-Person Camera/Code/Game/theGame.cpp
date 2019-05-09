@@ -110,22 +110,7 @@ void theGame::Startup()
 
 	GameState* averageRotation = new Scene_CameraStateAverage( g_gameClock );
 	AddNewGameState( averageRotation );
-
-	GameState* effecientRaycast = new Scene_EffecientRaycast( g_gameClock );
-	AddNewGameState( effecientRaycast );
-
-	GameState* degreesOfFreedom = new Scene_DegreesOfFreedom( g_gameClock );
-	AddNewGameState( degreesOfFreedom );
-
-	GameState* followCamera = new Scene_FollowCamera( g_gameClock );
-	AddNewGameState( followCamera );
-
-	GameState* pcScene = new Scene_ProportionalController( g_gameClock );
-	AddNewGameState( pcScene );
-
-	GameState* debugScene = new Scene_DebugSystem( g_gameClock );
-	AddNewGameState( debugScene );
-
+	
 	GameState* collisionAvoidanceScene = new Scene_CollisionAvoidance( g_gameClock );
 	AddNewGameState( collisionAvoidanceScene );
 
