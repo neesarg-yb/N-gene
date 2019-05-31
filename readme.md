@@ -1,6 +1,6 @@
 # Dynamic Third-Person Camera (Master's Thesis) | WIP
 
-Read more about the project [here](https://www.neesarg.me/dynamic-third-person-camera).
+Read more about the project [here](https://www.neesarg.me/third-person-camera-system).
 
 ### Quick links
 * Camera System [directory](Engine/Code/Engine/CameraSystem/) 
