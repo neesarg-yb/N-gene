@@ -21,5 +21,5 @@ Read more about the project [here](https://www.neesarg.me/third-person-camera-sy
 * Quaternion [.hpp](Engine/Code/Engine/Math/Quaternion.hpp?ts=4) [.cpp](Engine/Code/Engine/Math/Quaternion.cpp?ts=4) 
 * Transform [.hpp](Engine/Code/Engine/Math/Transform.hpp?ts=4) [.cpp](Engine/Code/Engine/Math/Transform.cpp?ts=4)
 * Game Object [.hpp](Engine/Code/Engine/Core/GameObject.hpp?ts=4) [.cpp](Engine/Code/Engine/Core/GameObject.cpp?ts=4) 
-* Reorient the Camera 
+* Reorient the Camera (The code you're looking for is in [Player::InformAboutCameraForward](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/World/Player.cpp?ts=4#L86) method)
 	* Player [.hpp](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/World/Player.hpp?ts=4) [.cpp](Thesis/Dynamic%20Third-Person%20Camera/Code/Game//World/Player.cpp?ts=4) 
