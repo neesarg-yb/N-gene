@@ -24,3 +24,5 @@ Read more about the project [here](https://www.neesarg.me/third-person-camera-sy
 * Reorient the Camera 
 	* Player [.hpp](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/World/Player.hpp?ts=4) [.cpp](Thesis/Dynamic%20Third-Person%20Camera/Code/Game//World/Player.cpp?ts=4) 
 	* Player::InformAboutCameraForward [method](Thesis/Dynamic%20Third-Person%20Camera/Code/Game/World/Player.cpp?ts=4#L86) 
+
+<span style="color:red">Note: Build the project in Release mode, and run the .exe with *High-performance NVIDIA processor*  </span> OR you can disable the debug system (from code) to significantly improve the fps!
