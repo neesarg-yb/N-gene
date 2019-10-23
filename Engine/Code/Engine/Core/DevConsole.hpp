@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "Engine/Core/Rgba.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"

@@ -20,7 +20,7 @@ public:
 	float GetDistanceFromPoint( Vector3 const &point ) const;	// Returns: POSITIVE if the point is on front side of the normal; NEGATIVE if point is on backside; ZERO if on plane
 	bool  IsValid() const;										// Returns false if normal is ZERO Vector
 
-	Vector3 VectorProjection( Vector3 const &vector );
+	Vector3 VectorProjection( Vector3 const &vector ) const;
 };
 
 Vector3 ProjectVectorOnPlane( Vector3 const &vector, Vector3 const &normal );

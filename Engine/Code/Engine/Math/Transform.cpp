@@ -78,6 +78,7 @@ void Transform::SetRotation( Vector3 const &rotation )
 void Transform::SetQuaternion( Quaternion const &quaternion )
 {
 	m_rotation = quaternion;
+	m_isDirty  = true;
 }
 
 void Transform::SetScale( Vector3 const &scale )

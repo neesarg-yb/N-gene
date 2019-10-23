@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include "AABB3.hpp"
 #include "Engine/Math/AABB2.hpp"
 #include "Engine/Core/EngineCommon.hpp"

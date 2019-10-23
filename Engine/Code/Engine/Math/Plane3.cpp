@@ -39,7 +39,7 @@ bool Plane3::IsValid() const
 		return true;
 }
 
-Vector3 Plane3::VectorProjection( Vector3 const &vector )
+Vector3 Plane3::VectorProjection( Vector3 const &vector ) const
 {
 	return ProjectVectorOnPlane( vector, normal );
 }

@@ -1,3 +1,4 @@
+#include <cmath>
 #include "Complex.hpp"
 #include "Engine/Math/MathUtil.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
