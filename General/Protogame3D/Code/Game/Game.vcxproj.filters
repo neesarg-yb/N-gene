@@ -73,6 +73,9 @@
     <ClCompile Include="Game States\GameState.cpp">
       <Filter>Game States</Filter>
     </ClCompile>
+    <ClCompile Include="Camera System\Camera Behaviours\CB_ZoomCamera.cpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="theGame.hpp">
@@ -116,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="Game States\GameState.hpp">
       <Filter>Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera System\Camera Behaviours\CB_ZoomCamera.hpp">
+      <Filter>Camera System\CameraBehaviours</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

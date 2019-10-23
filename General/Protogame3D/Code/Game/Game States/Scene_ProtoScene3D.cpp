@@ -8,6 +8,7 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 #include "Game/theGame.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
+#include "Game/Camera System/Camera Behaviours/CB_ZoomCamera.hpp"
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -39,6 +40,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager, USE_KEYBOARD_MOUSE_FL );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );					// MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR
+	m_zoomCameraActive = false;
 
 	// Loading Models
 	Vector3 snowMikuPosition = Vector3( -5.f, -3.f, 20.f );						// SNOW MIKU
@@ -47,28 +49,37 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	bool mikuLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\snow_miku\\ROOMITEMS011_ALL.obj", *m_snowMiku );
 	GUARANTEE_RECOVERABLE( mikuLoaded, "Snow Miku obj model loading FAILED!" );
 	
-	Vector3 spaceshipPosition = Vector3( 5.f, -3.f, 21.f );
-	Vector3 spaceshipRotation = Vector3( 0.f, 180.f, 0.f );
-	m_spaceship		= new Renderable( spaceshipPosition, spaceshipRotation, Vector3::ONE_ALL );
-	bool shipLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceship );
-	GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
+	//Vector3 spaceshipPosition = Vector3( 5.f, -3.f, 21.f );
+	//Vector3 spaceshipRotation = Vector3( 0.f, 180.f, 0.f );
+	//m_spaceship		= new Renderable( spaceshipPosition, spaceshipRotation, Vector3::ONE_ALL );
+	//bool shipLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceship );
+	//GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
 
 	if( mikuLoaded )
 		m_scene->AddRenderable( *m_snowMiku );
-	if( shipLoaded )
-		m_scene->AddRenderable( *m_spaceship );
+	//if( shipLoaded )
+	//	m_scene->AddRenderable( *m_spaceship );
 
 	// Test Cube
-	Mesh *cubeMesh = MeshBuilder::CreateCube( Vector3::ONE_ALL, Vector3( 5.f, 0.f, 5.f), RGBA_WHITE_COLOR, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE );
-	Material *testMaterial = Material::CreateNewFromFile( "Data\\Materials\\A01TestCube.material" );
-	m_testCubeRenderable = new Renderable( cubeMesh, testMaterial );
+	//Mesh *cubeMesh = MeshBuilder::CreateCube( Vector3::ONE_ALL, Vector3( 5.f, 0.f, 5.f), RGBA_WHITE_COLOR, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE );
+	//Material *testMaterial = Material::CreateNewFromFile( "Data\\Materials\\A01TestCube.material" );
+	//m_testCubeRenderable = new Renderable( cubeMesh, testMaterial );
 
-	m_scene->AddRenderable( *m_testCubeRenderable );
+	//m_scene->AddRenderable( *m_testCubeRenderable );
+
+	Vector3 const yOffsetFromMiku = Vector3( 0.f, 3.f, 0.f );
+	Vector3 const zoomCamOffset = Vector3( 1.75f, 0.f, -3.f );
+	m_zoomCameraBehavior = new CB_ZoomCamera( snowMikuPosition + yOffsetFromMiku, 45.f, "ZoomCamera", m_cameraManager );
+	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
+	m_cameraManager->AddNewCameraBehaviour( m_zoomCameraBehavior );
+	m_cameraManager->SetActiveCameraBehaviourTo( "ZoomCamera" );
+	m_zoomCameraActive = true;
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
 {
 	// Camera Behaviour
+	m_cameraManager->DeleteCameraBehaviour( "ZoomCamera" );
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
 
 	// Camera Manager
@@ -127,7 +138,7 @@ Scene_ProtoScene3D::~Scene_ProtoScene3D()
 
 void Scene_ProtoScene3D::JustFinishedTransition()
 {
-
+	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
 }
 
 void Scene_ProtoScene3D::BeginFrame()
@@ -137,12 +148,12 @@ void Scene_ProtoScene3D::BeginFrame()
 	// Update Debug Renderer Objects
 	DebugRendererBeginFrame( m_clock );
 
-	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "Mouse & WASD-QE: to move around." );
+	DebugRender2DText( 0.f, Vector2( -850.f, 440.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "FreeLook: Mouse & WASD-QE: to move around." );
 }
 
 void Scene_ProtoScene3D::EndFrame()
 {
-
+	m_newTargetJustSpawnned = false;
 }
 
 void Scene_ProtoScene3D::Update()
@@ -159,17 +170,24 @@ void Scene_ProtoScene3D::Update()
 			go->Update( deltaSeconds );
 	}
 
+	// Target for reticle
+	SpawnTargetOnSpaceBar();
+
 	// Update Camera Stuffs
+	CheckSwitchCameraBehavior();
 	m_cameraManager->Update( deltaSeconds );
 
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
+	{
+		g_theInput->SetMouseModeTo( MOUSE_MODE_ABSOLUTE );
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
+	}
 
 	m_cameraManager->PostUpdate();
 
 	// Debug Render
-	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	//DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
@@ -177,10 +195,43 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 	UNUSED( gameCamera );
 	PROFILE_SCOPE_FUNCTION();
 
+	// Target Ws
+	RenderTarget();
+
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
 	m_renderingPath->RenderScene( *m_scene );
+}
+
+void Scene_ProtoScene3D::CheckSwitchCameraBehavior()
+{
+	std::string debChangeCamText = Stringf( "[C] Change Camera to %s", ( m_zoomCameraActive ? "FreeLook" : "ZoomCam" ) );
+	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, debChangeCamText.c_str() );
+
+	if( !g_theInput->WasKeyJustPressed( 'C' ) )
+		return;
+
+	std::string switchToBehaviour = m_zoomCameraActive ? "FreeLook" : "ZoomCamera";
+	m_cameraManager->SetActiveCameraBehaviourTo( switchToBehaviour );
+
+	m_zoomCameraActive = !m_zoomCameraActive;
+}
+
+void Scene_ProtoScene3D::SpawnTargetOnSpaceBar()
+{
+	bool spaceBarJustPressed = g_theInput->WasKeyJustPressed( SPACE );
+
+	if( !spaceBarJustPressed )
+		return;
+
+	m_targetPointWs = m_camera->m_cameraTransform.GetWorldPosition();
+	m_newTargetJustSpawnned = true;
+}
+
+void Scene_ProtoScene3D::RenderTarget() const
+{
+	DebugRenderPoint( 0.0f, 1.5f, m_targetPointWs, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, DEBUG_RENDER_XRAY );
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )

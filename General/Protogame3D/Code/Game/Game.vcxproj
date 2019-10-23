@@ -31,45 +31,45 @@
     <ProjectGuid>{82E9B1B6-E227-48B7-869C-C53512A406FB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Asteroids</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <ProjectName>Protogame3D</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -283,6 +283,7 @@
     <ClCompile Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.cpp" />
     <ClCompile Include="Camera System\Camera Behaviours\CB_Follow.cpp" />
     <ClCompile Include="Camera System\Camera Behaviours\CB_FreeLook.cpp" />
+    <ClCompile Include="Camera System\Camera Behaviours\CB_ZoomCamera.cpp" />
     <ClCompile Include="Camera System\Motion Controllers\CMC_ProportionalController.cpp" />
     <ClCompile Include="Game States\GameState.cpp" />
     <ClCompile Include="Game States\Scene_ProtoScene3D.cpp" />
@@ -299,6 +300,7 @@
     <ClInclude Include="Camera System\Camera Behaviours\CB_DegreesOfFreedom.hpp" />
     <ClInclude Include="Camera System\Camera Behaviours\CB_Follow.hpp" />
     <ClInclude Include="Camera System\Camera Behaviours\CB_FreeLook.hpp" />
+    <ClInclude Include="Camera System\Camera Behaviours\CB_ZoomCamera.hpp" />
     <ClInclude Include="Camera System\Motion Controllers\CMC_ProportionalController.hpp" />
     <ClInclude Include="Game States\GameState.hpp" />
     <ClInclude Include="Game States\Scene_ProtoScene3D.hpp" />

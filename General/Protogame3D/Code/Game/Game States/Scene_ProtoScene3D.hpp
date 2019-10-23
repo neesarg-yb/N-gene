@@ -11,6 +11,8 @@
 typedef std::vector< GameObject* >	GameObjectList;
 typedef std::vector< Light* >		Lights;
 
+class CB_ZoomCamera;
+
 class Scene_ProtoScene3D : public GameState
 {
 public:
@@ -39,7 +41,15 @@ private:
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
 
-	Renderable*				 m_testCubeRenderable		= nullptr;
+	Renderable				*m_testCubeRenderable		= nullptr;
+
+	// Zoom Camera
+	bool					 m_zoomCameraActive			= false;
+	CB_ZoomCamera			*m_zoomCameraBehavior		= nullptr;
+
+	// Target Point
+	bool					 m_newTargetJustSpawnned = false;
+	Vector3					 m_targetPointWs;
 
 public:
 	void JustFinishedTransition();
@@ -49,6 +59,12 @@ public:
 	void Render( Camera *gameCamera ) const;
 
 private:
+	void CheckSwitchCameraBehavior();
+
+	// Zoom Camera
+	void SpawnTargetOnSpaceBar();
+	void RenderTarget() const;
+
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
