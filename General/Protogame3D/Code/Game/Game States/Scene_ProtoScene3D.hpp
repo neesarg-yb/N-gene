@@ -5,6 +5,7 @@
 #include "Engine/Renderer/ForwardRenderingPath.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Game/Game States/GameState.hpp"
+#include "Game/Camera System/DebugCamera.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_FreeLook.hpp"
 #include "Game/Camera System/Motion Controllers/CMC_ProportionalController.hpp"
 
@@ -37,9 +38,13 @@ private:
 	// Camera
 	Camera					*m_camera					= nullptr;
 	CameraManager			*m_cameraManager			= nullptr;
-	float const				 m_initialFOV				= 45.f;			// Degrees
+	float const				 m_initialFOV				= 50.f;			// Degrees
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
+
+	// Debug Camera
+	DebugCamera				*m_debugCamera				= nullptr;
+	CB_FreeLook				*m_debugCBFreeLook			= nullptr;
 
 	Renderable				*m_testCubeRenderable		= nullptr;
 
@@ -64,6 +69,7 @@ private:
 	// Zoom Camera
 	void SpawnTargetOnSpaceBar();
 	void RenderTarget() const;
+	void DebugRenderZoomCamera() const;
 
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );

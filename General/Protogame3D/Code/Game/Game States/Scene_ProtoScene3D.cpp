@@ -74,10 +74,21 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_cameraManager->AddNewCameraBehaviour( m_zoomCameraBehavior );
 	m_cameraManager->SetActiveCameraBehaviourTo( "ZoomCamera" );
 	m_zoomCameraActive = true;
+
+	// Debug Camera
+	m_debugCBFreeLook = new CB_FreeLook( 7.f, 35.f, -90.f, 90.f, "DebugFreeLook", nullptr, USE_CONTROLLER_FL );
+	m_debugCamera = new DebugCamera( m_debugCBFreeLook, g_theInput );
+	m_debugCamera->SetPerspectiveCameraProjectionMatrix( 60.f, g_aspectRatio, 0.1f, 1000.f );
+
+	m_scene->AddCamera( *m_debugCamera );
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
 {
+	// Debug Camera
+	delete m_debugCamera;
+	m_debugCamera = nullptr;
+
 	// Camera Behaviour
 	m_cameraManager->DeleteCameraBehaviour( "ZoomCamera" );
 	m_cameraManager->DeleteCameraBehaviour( "FreeLook" );
@@ -145,6 +156,8 @@ void Scene_ProtoScene3D::BeginFrame()
 {
 	PROFILE_SCOPE_FUNCTION();
 
+	m_debugCamera->Update();
+
 	// Update Debug Renderer Objects
 	DebugRendererBeginFrame( m_clock );
 
@@ -197,11 +210,16 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 
 	// Target Ws
 	RenderTarget();
+	DebugRenderZoomCamera();
 
 	// Ambient Light
 	g_theRenderer->SetAmbientLight( m_ambientLight );
 
 	m_renderingPath->RenderScene( *m_scene );
+	m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
+
+	// Render the mini overlay, too!
+	m_debugCamera->RenderAsMiniOverlay();
 }
 
 void Scene_ProtoScene3D::CheckSwitchCameraBehavior()
@@ -231,7 +249,17 @@ void Scene_ProtoScene3D::SpawnTargetOnSpaceBar()
 
 void Scene_ProtoScene3D::RenderTarget() const
 {
-	DebugRenderPoint( 0.0f, 1.5f, m_targetPointWs, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, DEBUG_RENDER_XRAY );
+	DebugRenderPoint( 0.0f, 1.5f, m_targetPointWs, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_XRAY );
+}
+
+void Scene_ProtoScene3D::DebugRenderZoomCamera() const
+{
+	Matrix44 const camTransformMat = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	Vector3 const cameraForward = camTransformMat.GetKColumn();
+	Vector3 const cameraPos = camTransformMat.GetTColumn();
+
+	DebugRenderVector( 0.f, cameraPos, cameraForward, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
