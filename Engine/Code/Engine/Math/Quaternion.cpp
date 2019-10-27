@@ -199,7 +199,7 @@ Quaternion Quaternion::FromMatrix( Matrix44 const &mat44 )
 	}
 	else if ( (m00 > m11)&(m00 > m22) ) 
 	{ 
-		float S	= sqrt(1.f + m00 - m11 - m22) * 2; // S = 4*qx 
+		float S	= sqrtf(1.f + m00 - m11 - m22) * 2; // S = 4*qx 
 		q.r		= (m21 - m12) / S;
 		q.i.x	= 0.25f * S;
 		q.i.y	= (m01 + m10) / S;
@@ -207,7 +207,7 @@ Quaternion Quaternion::FromMatrix( Matrix44 const &mat44 )
 	} 
 	else if (m11 > m22) 
 	{ 
-		float S	= sqrt(1.f + m11 - m00 - m22) * 2; // S = 4*qy
+		float S	= sqrtf(1.f + m11 - m00 - m22) * 2; // S = 4*qy
 		q.r		= (m02 - m20) / S;
 		q.i.x	= (m01 + m10) / S; 
 		q.i.y	= 0.25f * S;
@@ -215,7 +215,7 @@ Quaternion Quaternion::FromMatrix( Matrix44 const &mat44 )
 	} 
 	else 
 	{ 
-		float S	= sqrt(1.f + m22 - m00 - m11) * 2; // S = 4*qz
+		float S	= sqrtf(1.f + m22 - m00 - m11) * 2; // S = 4*qz
 		q.r		= (m10 - m01) / S;
 		q.i.x	= (m02 + m20) / S;
 		q.i.y	= (m12 + m21) / S;

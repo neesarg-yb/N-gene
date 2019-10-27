@@ -31,7 +31,7 @@ float Trajectory::GetMinimumLaunchSpeed( float gravity, float distance, float an
 {
 	float speedSquared = (gravity * distance) / SinDegree(2*angleDegrees);
 
-	return sqrt( speedSquared );
+	return sqrtf( speedSquared );
 }
 
 bool Trajectory::GetLaunchAngles( Vector2& out_angles, float gravity, float launchSpeed, float distance, float height /* = 0.f */ )
@@ -79,7 +79,7 @@ float Trajectory::GetMaxHeight( float gravity, float launch_speed, float distanc
 	float radians	= atan2f( y, 1.f );
  	
 	// Now use that theta into y equation of Trajectory, to get the height at that theta
-	float tanTheta	= tan( radians );
+	float tanTheta	= tanf( radians );
 	float maxHeight = c + (c * tanTheta * tanTheta) + (distance * tanTheta);
 	
 	return maxHeight;
@@ -90,7 +90,7 @@ Vector2 Trajectory::GetLaunchVelocity( float gravity, float apex_height, float d
 	// When projectile reaches the apex_height, its dy/dt = 0
 	// Use it to find tApex
 	// Use tApex to find Vy
-	float tApex		= sqrt( 2.f * apex_height / gravity );
+	float tApex		= sqrtf( 2.f * apex_height / gravity );
 	float Vy		= gravity * tApex;
 
 	// Now to get total t when projectile reaches the distance at given height
