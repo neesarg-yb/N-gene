@@ -43,29 +43,29 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_zoomCameraActive = false;
 
 	// Loading Models
-	Vector3 snowMikuPosition = Vector3( -5.f, -3.f, 20.f );						// SNOW MIKU
+	Vector3 snowMikuPosition = Vector3( 0.f, -3.f, 8.f );						// SNOW MIKU
 	Vector3 snowMikuRotation = Vector3( 0.f, 180.f, 0.f );
 	m_snowMiku		= new Renderable( snowMikuPosition, snowMikuRotation, Vector3::ONE_ALL );
 	bool mikuLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\snow_miku\\ROOMITEMS011_ALL.obj", *m_snowMiku );
 	GUARANTEE_RECOVERABLE( mikuLoaded, "Snow Miku obj model loading FAILED!" );
 	
-	//Vector3 spaceshipPosition = Vector3( 5.f, -3.f, 21.f );
-	//Vector3 spaceshipRotation = Vector3( 0.f, 180.f, 0.f );
-	//m_spaceship		= new Renderable( spaceshipPosition, spaceshipRotation, Vector3::ONE_ALL );
-	//bool shipLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceship );
-	//GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
+	Vector3 spaceshipPosition = Vector3( 15.f, -3.f, 21.f );
+	Vector3 spaceshipRotation = Vector3( 0.f, 180.f, 0.f );
+	m_spaceship		= new Renderable( spaceshipPosition, spaceshipRotation, Vector3::ONE_ALL );
+	bool shipLoaded = ModelLoader::LoadObjectModelFromPath( "Data\\Models\\scifi_fighter_mk6\\scifi_fighter_mk6.obj", *m_spaceship );
+	GUARANTEE_RECOVERABLE( shipLoaded, "Spaceship obj model loading FAILED" );
 
 	if( mikuLoaded )
 		m_scene->AddRenderable( *m_snowMiku );
-	//if( shipLoaded )
-	//	m_scene->AddRenderable( *m_spaceship );
+	if( shipLoaded )
+		m_scene->AddRenderable( *m_spaceship );
 
 	// Test Cube
-	//Mesh *cubeMesh = MeshBuilder::CreateCube( Vector3::ONE_ALL, Vector3( 5.f, 0.f, 5.f), RGBA_WHITE_COLOR, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE );
-	//Material *testMaterial = Material::CreateNewFromFile( "Data\\Materials\\A01TestCube.material" );
-	//m_testCubeRenderable = new Renderable( cubeMesh, testMaterial );
+	Mesh *cubeMesh = MeshBuilder::CreateCube( Vector3::ONE_ALL, Vector3( -5.f, 0.f, 5.f), RGBA_WHITE_COLOR, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE, AABB2::ONE_BY_ONE );
+	Material *testMaterial = Material::CreateNewFromFile( "Data\\Materials\\A01TestCube.material" );
+	m_testCubeRenderable = new Renderable( cubeMesh, testMaterial );
 
-	//m_scene->AddRenderable( *m_testCubeRenderable );
+	m_scene->AddRenderable( *m_testCubeRenderable );
 
 	Vector3 const yOffsetFromMiku = Vector3( 0.f, 3.f, 0.f );
 	Vector3 const zoomCamOffset = Vector3( 1.75f, 0.f, -3.f );
@@ -187,7 +187,7 @@ void Scene_ProtoScene3D::Update()
 	m_cameraManager->PostUpdate();
 
 	// Debug Render
-	//DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_ProtoScene3D::Render( Camera *gameCamera ) const

@@ -26,9 +26,10 @@ void CB_ZoomCamera::PostUpdate()
 
 CameraState CB_ZoomCamera::Update( float deltaSeconds, CameraState const &currentState )
 {
+	UNUSED( deltaSeconds );
 	CameraState modifiedCamState = currentState;
 
-	UpdateReferenceRotation( deltaSeconds );
+	UpdateReferenceRotation();
 
 	Matrix44 const	refTransformMat44 = m_referenceTranform.GetWorldTransformMatrix();
 	
@@ -39,24 +40,26 @@ CameraState CB_ZoomCamera::Update( float deltaSeconds, CameraState const &curren
 	return modifiedCamState;
 }
 
-void CB_ZoomCamera::UpdateReferenceRotation( float deltaSeconds )
+void CB_ZoomCamera::UpdateReferenceRotation()
 {
 	// Get controller input
-	Vector2 const rightStickXBox = m_inputSystem->m_controller[0].m_xboxStickStates[XBOX_STICK_RIGHT].correctedNormalizedPosition;
+	Vector2 const mousePosDelta = m_inputSystem->GetMouseDelta();
+	
+	// Yaw
+	float const deltaYawDegrees = m_mouseSensitivity * mousePosDelta.x;
+	m_refRotYaw += deltaYawDegrees;
 
-	// Set reference rotation
-	Quaternion refRot = m_referenceTranform.GetQuaternion();
+	// Pitch
+	float const deltaPitchDegrees = m_mouseSensitivity * mousePosDelta.y;
+	FloatRange allowedDeltaPitch = FloatRange( m_minPitchDegrees - m_refRotPitch, m_maxPitchDegrees - m_refRotPitch );
+	if( allowedDeltaPitch.Includes( deltaPitchDegrees ) )
+		m_refRotPitch += deltaPitchDegrees;
+	
+	Quaternion const yawRot		= Quaternion( Vector3::UP, m_refRotYaw );
+	Quaternion const pitchRot	= Quaternion( yawRot.GetRight(), m_refRotPitch );
 
-	// Delta Rotation
-	Quaternion yawRot = Quaternion( Vector3::UP, m_rotSpeed * rightStickXBox.x * deltaSeconds );
-	Quaternion pitchRot = Quaternion( m_referenceTranform.GetWorldTransformMatrix().GetIColumn(), m_rotSpeed * rightStickXBox.y * deltaSeconds );
-
-	// Add rotation
-	refRot = refRot.Multiply( yawRot );
-	refRot = refRot.Multiply( pitchRot );
-
-	// Set final
-	m_referenceTranform.SetQuaternion( refRot );
+	// Set final rotation
+	m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
 }
 
 void CB_ZoomCamera::SetReferencePosition( Vector3 const &refPosWs )

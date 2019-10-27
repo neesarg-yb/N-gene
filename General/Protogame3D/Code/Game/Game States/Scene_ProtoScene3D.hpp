@@ -48,8 +48,8 @@ private:
 	CB_ZoomCamera			*m_zoomCameraBehavior		= nullptr;
 
 	// Target Point
-	bool					 m_newTargetJustSpawnned = false;
-	Vector3					 m_targetPointWs;
+	bool					 m_newTargetJustSpawnned	= false;
+	Vector3					 m_targetPointWs			= Vector3( -5.f, 0.f, 10.f );
 
 public:
 	void JustFinishedTransition();

@@ -8,12 +8,18 @@ public:
 	~CB_ZoomCamera();
 
 private:
+	float		m_refRotYaw			= 0.f;
+	float		m_refRotPitch		= 0.f;
+
+	float const	m_minPitchDegrees	= -90.f;
+	float const m_maxPitchDegrees	=  90.f;
+
 	Transform	m_referenceTranform;
 	Vector3		m_cameraOffset;
 	float		m_fov;
 
 public:
-	float		m_rotSpeed = 40.f;	// Degrees per seconds
+	float		m_mouseSensitivity = 0.5f;	// Multiplier to delta mouse pos.
 
 public:
 	void		PreUpdate() override;
@@ -21,7 +27,7 @@ public:
 	CameraState	Update( float deltaSeconds, CameraState const &currentState );
 
 private:
-	void		UpdateReferenceRotation( float deltaSeconds );
+	void		UpdateReferenceRotation();
 
 public:
 	void		SetReferencePosition( Vector3 const &refPosWs );
