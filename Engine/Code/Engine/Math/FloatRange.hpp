@@ -18,6 +18,9 @@ public:
 	float	GetRandomInRange() const;
 	void	ExpandToInclude( float number );
 	void	SetFromText	( const char* text );
+
+public:
+	bool	Includes( float number ) const;
 };
 
 		bool		DoRangesOverlap	( const FloatRange& a , const FloatRange& b );

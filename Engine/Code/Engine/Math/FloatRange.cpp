@@ -55,6 +55,11 @@ void FloatRange::SetFromText( const char* text )
 	}
 }
 
+bool FloatRange::Includes( float number ) const
+{
+	return ( number >= min ) && ( number <= max );
+}
+
 bool DoRangesOverlap( const FloatRange& a , const FloatRange& b )
 {
 	bool condition1 = b.min >= a.min && b.min <= a.max;
