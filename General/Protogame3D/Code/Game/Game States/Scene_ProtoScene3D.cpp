@@ -161,7 +161,7 @@ void Scene_ProtoScene3D::BeginFrame()
 	// Update Debug Renderer Objects
 	DebugRendererBeginFrame( m_clock );
 
-	DebugRender2DText( 0.f, Vector2( -850.f, 440.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "FreeLook: Mouse & WASD-QE: to move around." );
+	DebugRender2DText( 0.f, Vector2( -850.f, 420.f ), 15.f, RGBA_PURPLE_COLOR, RGBA_PURPLE_COLOR, "FreeLook: Mouse & WASD-QE: to move around." );
 }
 
 void Scene_ProtoScene3D::EndFrame()
@@ -220,12 +220,20 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 	m_renderingPath->RenderScene( *m_scene );
 	m_renderingPath->RenderSceneForCamera( *m_debugCamera, *m_scene, nullptr );
 
-	// Render the mini overlay, too!
-	m_debugCamera->RenderAsMiniOverlay();
+	if( m_enableDebugOverlay )
+		m_debugCamera->RenderAsFulscreenOverlay();
+	else
+		m_debugCamera->RenderAsMiniOverlay();
 }
 
 void Scene_ProtoScene3D::CheckSwitchCameraBehavior()
 {
+	if( g_theInput->WasKeyJustPressed( 'O' ) )
+		m_enableDebugOverlay = !m_enableDebugOverlay;
+
+	std::string debChangeOverlayText = Stringf( "[O] Change Debug Overlay");
+	DebugRender2DText( 0.f, Vector2( -850.f, 440.f ), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, debChangeOverlayText.c_str() );
+
 	std::string debChangeCamText = Stringf( "[C] Change Camera to %s", ( m_zoomCameraActive ? "FreeLook" : "ZoomCam" ) );
 	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, debChangeCamText.c_str() );
 
@@ -257,15 +265,15 @@ void Scene_ProtoScene3D::RenderTarget() const
 
 void Scene_ProtoScene3D::DebugRenderZoomCamera() const
 {
-	Matrix44 const camTransformMat = m_camera->m_cameraTransform.GetWorldTransformMatrix();
-	Vector3 const cameraForward = camTransformMat.GetKColumn();
-	Vector3 const cameraPos = camTransformMat.GetTColumn();
-	DebugRenderVector( 0.f, cameraPos, cameraForward, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-
 	Transform const refTransform = m_zoomCameraBehavior->GetReferenceTransform();
 	Vector3 const refPosWs = refTransform.GetWorldPosition();
 	Vector3 const refDirWs = refTransform.GetQuaternion().GetFront();
-	DebugRenderLineSegment( 0.f, refPosWs, RGBA_WHITE_COLOR, refPosWs + ( refDirWs * 100.f ), RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderVector( 0.f, refPosWs, refDirWs, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
+	Matrix44 const camTransformMat = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	Vector3 const cameraForward = camTransformMat.GetKColumn();
+	Vector3 const cameraPos = camTransformMat.GetTColumn();
+	DebugRenderLineSegment( 0.f, cameraPos, RGBA_WHITE_COLOR, cameraPos + ( refDirWs * 100.f ), RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )

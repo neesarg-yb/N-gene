@@ -85,15 +85,16 @@ void CB_ZoomCamera::SetCameraOffsetFromReference( Vector3 const &camOffset )
 }
 
 void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
-{	
+{
+	Vector3 const refPosWs = m_referenceTranform.GetWorldPosition();
+	
 	// Calculate for yaw
+	float extraYawRot = 0.f;
 	{
-		// Get the plane for Yaw calculations
-		Vector3	const refPosWs = m_referenceTranform.GetWorldPosition();
+		// 2D Calculation in Yaw Plane (Yp)
 		Plane3	const yawPlane = Plane3( Vector3::UP, refPosWs );
 
-		// 2D Calculation
-		// Get target & reference positions in Yaw Plane (Yp)
+		// Get target & reference positions
 		Vector3 const targetProjected	= yawPlane.VectorProjection( targetWs );
 		Vector3 const refPosProjected	= yawPlane.VectorProjection( refPosWs );
 		Vector2 const targetYp			= Vector2( targetProjected.x, targetProjected.z );
@@ -101,11 +102,11 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 
 		// Make the reference to look at the target
 		Vector2 const refToTargetDispYp = targetYp - refPosYp;
-		Vector2 const refToTargetDirYp  = ( refToTargetDispYp ).GetNormalized();
+		Vector2 const refToTargetDirYp  = refToTargetDispYp.GetNormalized();
 		m_refRotYaw = GetYawAngleForReferenceDirection( refToTargetDirYp );
 
 		// Calculate extra rotation, so the camera looks at the target
-		Vector2 const rightDirYpRs				= Vector2( 1.f, 0.f );
+		Vector2 const rightDirYpRs				= Vector2( 1.f, 0.f );			// In Reference Transform's Local Space (Rs)
 		Vector3 const camOffsetProjected		= yawPlane.VectorProjection( m_cameraOffset );
 		Vector2 const camOffsetYp				= Vector2( camOffsetProjected.x, camOffsetProjected.z );
 		float	const parallelDistRefToCamera	= Vector2::DotProduct( rightDirYpRs, camOffsetYp );
@@ -114,15 +115,38 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 													? RadianToDegree( asinf( parallelDistRefToCamera / refToTargetDistanceYp ) )
 													: 0.f;
 		// Apply the extra rotation
-		m_refRotYaw += ( additionalYawDegrees * -1.f );
+		extraYawRot  = additionalYawDegrees * -1.f;
+		m_refRotYaw += ( extraYawRot );
 	}
 
 	// Calculate for pitch
 	{
-
+		Quaternion	const refPostYawRot		= Quaternion( Vector3::UP, m_refRotYaw );
+		Vector3		const refFrontDir		= refPostYawRot.GetFront();
+		Vector3		const refUpDir			= refPostYawRot.GetUp();
+		Vector3		const refToTargetDisp	= targetWs - refPosWs;
+	
+		// Make the reference's front to look at target (as far as pitch is concerned)
+		float const x = Vector3::DotProduct( refFrontDir, refToTargetDisp );
+		float const y = Vector3::DotProduct( refUpDir, refToTargetDisp );
+		m_refRotPitch = -1.0f * atan2fDegree( y, x );
+		
+		TODO("Fix additional pitch calc for ZoomCamera. Is not accurate for values m_cameraOffest.y != 0.0");
+		{
+			// Extra pitch rotation so that the camera looks at the target
+			float const		refToTargetDist			= refToTargetDisp.GetLength();
+			float const		cameraOffsetProjRefUp	= Vector3::DotProduct( refUpDir, m_cameraOffset );
+			float const		additionalPitchDegrees	= ( refToTargetDist != 0.f )
+														? RadianToDegree( asinf( cameraOffsetProjRefUp / refToTargetDist ) )
+														: 0.0f;
+			// Apply extra
+			m_refRotPitch += additionalPitchDegrees;
+		}
 	}
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );
+
+	TODO( "Restrict pitch as per m_minPitchDegrees & m_maxPitchDegrees" );
 }
 

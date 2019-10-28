@@ -45,6 +45,7 @@ private:
 	// Debug Camera
 	DebugCamera				*m_debugCamera				= nullptr;
 	CB_FreeLook				*m_debugCBFreeLook			= nullptr;
+	bool					 m_enableDebugOverlay		= false;		// true == full screen overlay
 
 	Renderable				*m_testCubeRenderable		= nullptr;
 
