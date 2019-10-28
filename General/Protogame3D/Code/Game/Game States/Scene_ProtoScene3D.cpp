@@ -185,6 +185,8 @@ void Scene_ProtoScene3D::Update()
 
 	// Target for reticle
 	SpawnTargetOnSpaceBar();
+	if( m_newTargetJustSpawnned )
+		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs );
 
 	// Update Camera Stuffs
 	CheckSwitchCameraBehavior();
@@ -239,11 +241,12 @@ void Scene_ProtoScene3D::CheckSwitchCameraBehavior()
 void Scene_ProtoScene3D::SpawnTargetOnSpaceBar()
 {
 	bool spaceBarJustPressed = g_theInput->WasKeyJustPressed( SPACE );
+	bool aKeyJustPressed = g_theInput->m_controller->m_xboxButtonStates[XBOX_BUTTON_A].keyJustPressed;
 
-	if( !spaceBarJustPressed )
+	if( !spaceBarJustPressed && !aKeyJustPressed )
 		return;
 
-	m_targetPointWs = m_camera->m_cameraTransform.GetWorldPosition();
+	m_targetPointWs = m_debugCamera->m_cameraTransform.GetWorldPosition();
 	m_newTargetJustSpawnned = true;
 }
 
@@ -257,9 +260,12 @@ void Scene_ProtoScene3D::DebugRenderZoomCamera() const
 	Matrix44 const camTransformMat = m_camera->m_cameraTransform.GetWorldTransformMatrix();
 	Vector3 const cameraForward = camTransformMat.GetKColumn();
 	Vector3 const cameraPos = camTransformMat.GetTColumn();
-
 	DebugRenderVector( 0.f, cameraPos, cameraForward, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
+	Transform const refTransform = m_zoomCameraBehavior->GetReferenceTransform();
+	Vector3 const refPosWs = refTransform.GetWorldPosition();
+	Vector3 const refDirWs = refTransform.GetQuaternion().GetFront();
+	DebugRenderLineSegment( 0.f, refPosWs, RGBA_WHITE_COLOR, refPosWs + ( refDirWs * 100.f ), RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )

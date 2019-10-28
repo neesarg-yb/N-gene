@@ -28,9 +28,12 @@ public:
 
 private:
 	void		UpdateReferenceRotation();
+	float		GetYawAngleForReferenceDirection( Vector2 const dirYp ) const;
 
 public:
 	void		SetReferencePosition( Vector3 const &refPosWs );
 	void		SetCameraOffsetFromReference( Vector3 const &camOffset );
 	void		LookAtTargetPosition( Vector3 const &targetWs );
+
+	Transform	GetReferenceTransform() const { return m_referenceTranform; }
 };
