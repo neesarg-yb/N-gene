@@ -64,16 +64,6 @@ void CB_ZoomCamera::UpdateReferenceRotation()
 	m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
 }
 
-float CB_ZoomCamera::GetYawAngleForReferenceDirection( Vector2 const dirYp ) const
-{
-	// In left-handed coordinate system
-	// When,
-	//		yaw   = 0.0
-	//		pitch = 0.0
-	//	Reference Transform will be pointing in the direction of world Z-Axis
-	return atan2fDegree( dirYp.x, dirYp.y );
-}
-
 void CB_ZoomCamera::SetReferencePosition( Vector3 const &refPosWs )
 {
 	m_referenceTranform.SetPosition( refPosWs );
@@ -86,63 +76,67 @@ void CB_ZoomCamera::SetCameraOffsetFromReference( Vector3 const &camOffset )
 
 void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 {
-	Vector3 const refPosWs = m_referenceTranform.GetWorldPosition();
+	Vector3 const refPosWs			= m_referenceTranform.GetWorldPosition();
+	Vector3 const refToTargetDisp	= targetWs - refPosWs;
 	
 	// Calculate for yaw
 	{
-		// 2D Calculation in Yaw Plane (Yp)
-		Plane3	const yawPlane = Plane3( Vector3::UP, refPosWs );
+		Vector3 const refRightDir = Vector3::RIGHT;
+		Vector3 const refFrontDir = Vector3::FRONT;
 
-		// Get target & reference positions
-		Vector3 const targetProjected	= yawPlane.VectorProjection( targetWs );
-		Vector3 const refPosProjected	= yawPlane.VectorProjection( refPosWs );
-		Vector2 const targetYp			= Vector2( targetProjected.x, targetProjected.z );
-		Vector2 const refPosYp			= Vector2( refPosProjected.x, refPosProjected.z );
+		// 2D Calculation in Yaw Plane (Yp)
+		float	const x = Vector3::DotProduct( refRightDir, refToTargetDisp );
+		float	const y = Vector3::DotProduct( refFrontDir, refToTargetDisp );
+		Vector2	const refToTargetDispYp = Vector2( x, y );
 
 		// Make the reference to look at the target
-		Vector2 const refToTargetDispYp = targetYp - refPosYp;
-		Vector2 const refToTargetDirYp  = refToTargetDispYp.GetNormalized();
-		m_refRotYaw = GetYawAngleForReferenceDirection( refToTargetDirYp );
+		//
+		//      (ref front dir)
+		//           Y |              
+		//             |     * target 
+		//             |    /         
+		//             |   /          
+		//             |  /            a = m_refRotYaw = atan( x / y );		// Referece rotates clock-wise, if viewed from Yp
+		//             |a/            
+		//  Yaw Plane  |/_____________ (ref right dir)
+		//    (Yp)     * ref         X 
+		m_refRotYaw = atan2fDegree( refToTargetDispYp.x, refToTargetDispYp.y );
 
 		// Calculate extra rotation, so the camera looks at the target
-		Vector2 const rightDirYpRs				= Vector2( 1.f, 0.f );			// In Reference Transform's Local Space (Rs)
-		Vector3 const camOffsetProjected		= yawPlane.VectorProjection( m_cameraOffset );
-		Vector2 const camOffsetYp				= Vector2( camOffsetProjected.x, camOffsetProjected.z );
-		float	const parallelDistRefToCamera	= Vector2::DotProduct( rightDirYpRs, camOffsetYp );
-		float	const refToTargetDistanceYp		= refToTargetDispYp.GetLength();
-		float	const additionalYawDegrees		= ( refToTargetDistanceYp != 0.f ) 
-													? RadianToDegree( asinf( parallelDistRefToCamera / refToTargetDistanceYp ) )
-													: 0.f;
+		float	const cameraOffsetYp	= Vector3::DotProduct( refRightDir, m_cameraOffset );
+		float	const refToTargetDistYp	= refToTargetDispYp.GetLength();
+		float	const additionalYawDegrees = ( refToTargetDistYp != 0.f ) 
+												? RadianToDegree( asinf( cameraOffsetYp / refToTargetDistYp ) )
+												: 0.f;
 		// Apply the extra rotation
-		m_refRotYaw += additionalYawDegrees * -1.f;
+		m_refRotYaw += ( -1.f * additionalYawDegrees );
 	}
 
 	// Calculate for pitch
 	{
-		Quaternion	const refPostYawRot		= Quaternion( Vector3::UP, m_refRotYaw );
-		Vector3		const refFrontDir		= refPostYawRot.GetFront();
-		Vector3		const refUpDir			= refPostYawRot.GetUp();
-		Vector3		const refRightDir		= refPostYawRot.GetRight();
-		Vector3		const refToTargetDisp	= targetWs - refPosWs;
-	
-		// Make the reference's front to look at target (as far as pitch is concerned)
-		float const x = Vector3::DotProduct( refFrontDir, refToTargetDisp );
-		float const y = Vector3::DotProduct( refUpDir, refToTargetDisp );
-		m_refRotPitch = -1.0f * atan2fDegree( y, x );
+		Quaternion	const refPostYawRot	= Quaternion( Vector3::UP, m_refRotYaw );
+		Vector3		const refFrontDir	= refPostYawRot.GetFront();
+		Vector3		const refUpDir		= refPostYawRot.GetUp();
 		
 		// For 2D calculations in Pitch Plane (Pp)
-		Plane3	const pitchPlane		= Plane3( refRightDir, refPosWs );
-		Vector3 const refPosProjected	= pitchPlane.VectorProjection( refPosWs );
-		Vector3 const targetProjected	= pitchPlane.VectorProjection( targetWs );
+		float	const x = Vector3::DotProduct( refFrontDir, refToTargetDisp );
+		float	const y = Vector3::DotProduct( refUpDir, refToTargetDisp );
+		Vector2	const refToTargetDispPp	= Vector2( x, y );
 
-		// UV coordinate axis - because we wanna do calculations inside Pp as if these points are 2D
-		Vector3 const uAxisPp = refFrontDir;
-		Vector3 const vAxisPp = refUpDir;
+		// Make the reference to look at target (as far as pitch is concerned)
+		//
+		//  Pitch Plane             (ref up dir)
+		//      (Pp)                     | Y
+		//                  target *     | 
+		//                          \    | 
+		//                           \   | 
+		//                            \  | 
+		//           m_refRotPitch = a \ |  a = -atan( y / x );		// Reference rotates anti clock-wise, if viewed from Pp
+		//                ______________\| 
+		// (ref front dir) X             * ref
+		m_refRotPitch = -1.0f * atan2fDegree( refToTargetDispPp.y, refToTargetDispPp.x );
 
 		// Calculate extra rotation, so that the camera looks at the target
-		Vector2	const refPosPp = Vector2( Vector3::DotProduct( uAxisPp, refPosProjected ), Vector3::DotProduct( vAxisPp, refPosProjected ) );
-		Vector2	const targetPp = Vector2( Vector3::DotProduct( uAxisPp, targetProjected ), Vector3::DotProduct( vAxisPp, targetProjected ) );
-		Vector2	const refToTargetDispPp = targetPp - refPosPp;
 		float	const refToTargetDistPp = refToTargetDispPp.GetLength();
 		float	const cameraOffsetPp	= Vector3::DotProduct( refUpDir, m_cameraOffset );
 		float	const additionaPitchDegrees = ( refToTargetDistPp != 0.f )
@@ -157,4 +151,3 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 
 	TODO( "Restrict pitch as per m_minPitchDegrees & m_maxPitchDegrees" );
 }
-

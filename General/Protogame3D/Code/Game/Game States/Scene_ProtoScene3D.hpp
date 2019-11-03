@@ -38,20 +38,21 @@ private:
 	// Camera
 	Camera					*m_camera					= nullptr;
 	CameraManager			*m_cameraManager			= nullptr;
-	float const				 m_initialFOV				= 50.f;			// Degrees
+	float const				 m_initialFOV				= 50.f;				// Degrees
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
 
 	// Debug Camera
 	DebugCamera				*m_debugCamera				= nullptr;
 	CB_FreeLook				*m_debugCBFreeLook			= nullptr;
-	bool					 m_enableDebugOverlay		= false;		// true == full screen overlay
+	bool					 m_enableDebugOverlay		= false;			// true == full screen overlay
 
 	Renderable				*m_testCubeRenderable		= nullptr;
 
 	// Zoom Camera
 	bool					 m_zoomCameraActive			= false;
 	CB_ZoomCamera			*m_zoomCameraBehavior		= nullptr;
+	Vector2					 m_reticlePos				= Vector2::ZERO;	// In screen space
 
 	// Target Point
 	bool					 m_newTargetJustSpawnned	= false;

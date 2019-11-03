@@ -28,7 +28,6 @@ public:
 
 private:
 	void		UpdateReferenceRotation();
-	float		GetYawAngleForReferenceDirection( Vector2 const dirYp ) const;
 
 public:
 	void		SetReferencePosition( Vector3 const &refPosWs );

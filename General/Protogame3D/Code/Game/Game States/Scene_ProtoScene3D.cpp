@@ -36,7 +36,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_cameraManager = new CameraManager( *m_camera, *g_theInput, 0.1f );
 	m_cameraManager->SetAnchor( nullptr );
 
-	// Camera Behaviour
+	// Camera Behavior
 	CameraBehaviour* freelookBehaviour	= new CB_FreeLook( 10.f, 40.f, -60.f, 60.f, "FreeLook", m_cameraManager, USE_KEYBOARD_MOUSE_FL );
 	m_cameraManager->AddNewCameraBehaviour( freelookBehaviour );
 	m_cameraManager->SetActiveCameraBehaviourTo( "FreeLook" );					// MUST HAPPEN AFTER ADDING ALL CONTRAINTS TO BEHAVIOUR
@@ -150,6 +150,7 @@ Scene_ProtoScene3D::~Scene_ProtoScene3D()
 void Scene_ProtoScene3D::JustFinishedTransition()
 {
 	g_theInput->SetMouseModeTo( MOUSE_MODE_RELATIVE );
+	g_theInput->ShowCursor( false );
 }
 
 void Scene_ProtoScene3D::BeginFrame()
@@ -195,6 +196,7 @@ void Scene_ProtoScene3D::Update()
 	// Transition to Level Select if pressed ESC
 	if( g_theInput->WasKeyJustPressed( VK_Codes::ESCAPE ) )
 	{
+		g_theInput->ShowCursor( true );
 		g_theInput->SetMouseModeTo( MOUSE_MODE_ABSOLUTE );
 		g_theGame->StartTransitionToState( "LEVEL SELECT" );
 	}
@@ -265,15 +267,20 @@ void Scene_ProtoScene3D::RenderTarget() const
 
 void Scene_ProtoScene3D::DebugRenderZoomCamera() const
 {
+	// Reference Direction
 	Transform const refTransform = m_zoomCameraBehavior->GetReferenceTransform();
 	Vector3 const refPosWs = refTransform.GetWorldPosition();
 	Vector3 const refDirWs = refTransform.GetQuaternion().GetFront();
-	DebugRenderVector( 0.f, refPosWs, refDirWs, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderVector( 0.f, refPosWs, refDirWs * 2.f, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
+	// Laser line to target
 	Matrix44 const camTransformMat = m_camera->m_cameraTransform.GetWorldTransformMatrix();
 	Vector3 const cameraForward = camTransformMat.GetKColumn();
 	Vector3 const cameraPos = camTransformMat.GetTColumn();
-	DebugRenderLineSegment( 0.f, cameraPos, RGBA_WHITE_COLOR, cameraPos + ( refDirWs * 100.f ), RGBA_PURPLE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderLineSegment( 0.f, cameraPos, RGBA_GREEN_COLOR, cameraPos + ( refDirWs * 100.f ), RGBA_ORANGE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
+	// Reticle
+	DebugRender2DRound( 0.f, m_reticlePos, 5.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
