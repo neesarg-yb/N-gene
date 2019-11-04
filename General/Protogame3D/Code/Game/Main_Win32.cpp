@@ -191,5 +191,5 @@ int WINAPI WinMain( HINSTANCE applicationInstanceHandle, HINSTANCE, LPSTR comman
 void QuitTheApp( Command& cmd )
 {
 	UNUSED( cmd )
-		g_theApp->m_isQuitting = true;
+	g_theApp->m_isQuitting = true;
 }

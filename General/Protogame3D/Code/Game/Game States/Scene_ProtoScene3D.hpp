@@ -52,11 +52,13 @@ private:
 	// Zoom Camera
 	bool					 m_zoomCameraActive			= false;
 	CB_ZoomCamera			*m_zoomCameraBehavior		= nullptr;
-	Vector2					 m_reticlePos				= Vector2::ZERO;	// In screen space
 
 	// Target Point
 	bool					 m_newTargetJustSpawnned	= false;
 	Vector3					 m_targetPointWs			= Vector3( -5.f, 0.f, 10.f );
+
+public:
+	static Vector2			 s_reticlePos;									// In screen space
 
 public:
 	void JustFinishedTransition();

@@ -1,6 +1,8 @@
 #pragma once
 #include "CB_ZoomCamera.hpp"
 #include "Engine/Math/Plane3.hpp"
+#include "Engine/Core/DevConsole.hpp"
+#include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 CB_ZoomCamera::CB_ZoomCamera( Vector3 const &refPos, float fov, std::string const behaviorName, CameraManager const *manager )
@@ -64,6 +66,31 @@ void CB_ZoomCamera::UpdateReferenceRotation()
 	m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
 }
 
+void CB_ZoomCamera::GetExtraRotationForReticleOffset( Vector2 const &reticlePos, Vector2 const screenDimensions, float &yawDegrees_out, float &pitchDegrees_out )
+{
+	if( screenDimensions.x == 0.f || screenDimensions.y == 0.f )
+		return;
+
+	CameraState	const &currCameraState	= m_manager->GetCurrentCameraState();
+	float		const  fovRadians		= DegreeToRadian( currCameraState.m_fov );
+	float		const  aspectRatio		= screenDimensions.x / screenDimensions.y;
+
+	float yawRadians = 0.f;
+	{
+		float const halfTanFov = tanf( fovRadians * 0.5f );
+		yawRadians = atanf( halfTanFov * ( reticlePos.x / screenDimensions.x ) * 2.f );
+	}
+
+	float pitchRadians = 0.f;
+	{
+		float const halfTanVertAngle = tanf( fovRadians * 0.5f / aspectRatio );
+		pitchRadians = atanf( halfTanVertAngle * ( reticlePos.y / screenDimensions.y ) * 2.f );
+	}
+
+	yawDegrees_out	 = RadianToDegree( yawRadians );
+	pitchDegrees_out = RadianToDegree( pitchRadians );
+}
+
 void CB_ZoomCamera::SetReferencePosition( Vector3 const &refPosWs )
 {
 	m_referenceTranform.SetPosition( refPosWs );
@@ -74,10 +101,17 @@ void CB_ZoomCamera::SetCameraOffsetFromReference( Vector3 const &camOffset )
 	m_cameraOffset = camOffset;
 }
 
-void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
+void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, Vector2 const &reticlePos, Vector2 const &screenDimensions )
 {
 	Vector3 const refPosWs			= m_referenceTranform.GetWorldPosition();
 	Vector3 const refToTargetDisp	= targetWs - refPosWs;
+
+	float yawDegreesReticleOffset = 0.f;
+	float pitchDegreesReticleOffset = 0.f;
+	{
+		GetExtraRotationForReticleOffset( reticlePos, screenDimensions, yawDegreesReticleOffset, pitchDegreesReticleOffset );
+		ConsolePrintf( "x-offset = %.1f, y-offset = %.1f degrees", yawDegreesReticleOffset, pitchDegreesReticleOffset );
+	}
 	
 	// Calculate for yaw
 	{

@@ -28,11 +28,12 @@ public:
 
 private:
 	void		UpdateReferenceRotation();
+	void		GetExtraRotationForReticleOffset( Vector2 const &reticlePos, Vector2 const screenDimensions, float &yawDegrees_out, float &pitchDegrees_out );
 
 public:
 	void		SetReferencePosition( Vector3 const &refPosWs );
 	void		SetCameraOffsetFromReference( Vector3 const &camOffset );
-	void		LookAtTargetPosition( Vector3 const &targetWs );
+	void		LookAtTargetPosition( Vector3 const &targetWs, Vector2 const &reticlePos, Vector2 const &screenDimensions );
 
 	Transform	GetReferenceTransform() const { return m_referenceTranform; }
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene_ProtoScene3D.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/File/ModelLoader.hpp"
@@ -9,6 +10,40 @@
 #include "Game/theGame.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_Follow.hpp"
 #include "Game/Camera System/Camera Behaviours/CB_ZoomCamera.hpp"
+
+void SetReticlePosSs( Command &cmd )
+{
+	std::string const xOffsetStr = cmd.GetNextString();
+	std::string const yOffsetStr = cmd.GetNextString();
+	
+	int xOffset = 0;
+	if( xOffsetStr != "" )
+		xOffset = ::atoi( xOffsetStr.c_str() );
+
+	int yOffset = 0;
+	if( yOffsetStr != "" )
+		yOffset = ::atoi( yOffsetStr.c_str() );
+
+	int const halfScreenWidth  = ( int ) ( Window::GetInstance()->GetWidth() * 0.5f );
+	int const halfScreenHeight = ( int ) ( Window::GetInstance()->GetHeight() * 0.5f );
+
+	if( abs( xOffset ) > halfScreenWidth )
+	{
+		xOffset = 0;
+		ConsolePrintf( RGBA_RED_COLOR, "Error! Pass x-offset in range [-%d, %d]", halfScreenWidth, halfScreenWidth );
+	}
+	if( abs( yOffset ) > halfScreenHeight )
+	{
+		yOffset = 0;
+		ConsolePrintf( RGBA_RED_COLOR, "Error! Pass y-offset in range [-%d, %d]", halfScreenHeight, halfScreenHeight );
+	}
+
+	Scene_ProtoScene3D::s_reticlePos.x = (float) xOffset;
+	Scene_ProtoScene3D::s_reticlePos.y = (float) yOffset;
+	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
+}
+
+Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2::ZERO;
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -81,6 +116,9 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( 60.f, g_aspectRatio, 0.1f, 1000.f );
 
 	m_scene->AddCamera( *m_debugCamera );
+
+	// Reticle
+	CommandRegister( "reticle_pos", SetReticlePosSs );
 }
 
 Scene_ProtoScene3D::~Scene_ProtoScene3D()
@@ -187,7 +225,7 @@ void Scene_ProtoScene3D::Update()
 	// Target for reticle
 	SpawnTargetOnSpaceBar();
 	if( m_newTargetJustSpawnned )
-		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs );
+		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs, s_reticlePos, Window::GetInstance()->GetDimensions() );
 
 	// Update Camera Stuffs
 	CheckSwitchCameraBehavior();
@@ -280,7 +318,7 @@ void Scene_ProtoScene3D::DebugRenderZoomCamera() const
 	DebugRenderLineSegment( 0.f, cameraPos, RGBA_GREEN_COLOR, cameraPos + ( refDirWs * 100.f ), RGBA_ORANGE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
 	// Reticle
-	DebugRender2DRound( 0.f, m_reticlePos, 5.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
+	DebugRender2DRound( 0.f, s_reticlePos, 5.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )
