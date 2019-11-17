@@ -72,6 +72,7 @@ private:
 
 	// Zoom Camera
 	void SpawnTargetOnSpaceBar();
+	void UpdateZoomCameraYawOffset( float deltaSeconds );
 	void RenderTarget() const;
 	void DebugRenderZoomCamera() const;
 

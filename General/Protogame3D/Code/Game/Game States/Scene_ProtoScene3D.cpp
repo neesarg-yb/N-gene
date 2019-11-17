@@ -227,6 +227,8 @@ void Scene_ProtoScene3D::Update()
 	if( m_newTargetJustSpawnned )
 		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs, s_reticlePos, Window::GetInstance()->GetDimensions() );
 
+	UpdateZoomCameraYawOffset( deltaSeconds );
+
 	// Update Camera Stuffs
 	CheckSwitchCameraBehavior();
 	m_cameraManager->Update( deltaSeconds );
@@ -296,6 +298,32 @@ void Scene_ProtoScene3D::SpawnTargetOnSpaceBar()
 
 	m_targetPointWs = m_debugCamera->m_cameraTransform.GetWorldPosition();
 	m_newTargetJustSpawnned = true;
+
+	// Reset extra yaw rotation of ZoomCamera
+	m_zoomCameraBehavior->SetCameraYawExtraRotation( 0.f );
+}
+
+void Scene_ProtoScene3D::UpdateZoomCameraYawOffset( float deltaSeconds )
+{
+	float const yawExtraRotSpeed = 5.f; // Degrees per seconds
+
+	float curYawExtraRot = m_zoomCameraBehavior->GetCameraYawExtraRotation();
+	float deltaYawRot = 0.f;
+
+	// Rotate right
+	if( g_theInput->IsKeyPressed( 'K' ) )
+		deltaYawRot += yawExtraRotSpeed * deltaSeconds;
+
+	// Rotate left
+	if( g_theInput->IsKeyPressed( 'H' ) )
+		deltaYawRot -= yawExtraRotSpeed * deltaSeconds;
+
+	curYawExtraRot += deltaYawRot;
+	m_zoomCameraBehavior->SetCameraYawExtraRotation( curYawExtraRot );
+
+	std::string debExtraYawRotText = Stringf( "Extra yaw rotation = %.2f", curYawExtraRot );
+	DebugRender2DText( 0.f, Vector2( -850.f, 400.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "[H] & [K] adds extra yaw rotation to ZoomCamera" );
+	DebugRender2DText( 0.f, Vector2( -850.f, 380.f ), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, debExtraYawRotText.c_str() );
 }
 
 void Scene_ProtoScene3D::RenderTarget() const

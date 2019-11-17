@@ -11,6 +11,8 @@ private:
 	float		m_refRotYaw			= 0.f;
 	float		m_refRotPitch		= 0.f;
 
+	float		m_camYawExtraRot	= 0.f;
+
 	float const	m_minPitchDegrees	= -90.f;
 	float const m_maxPitchDegrees	=  90.f;
 
@@ -33,7 +35,10 @@ private:
 public:
 	void		SetReferencePosition( Vector3 const &refPosWs );
 	void		SetCameraOffsetFromReference( Vector3 const &camOffset );
+	void		SetCameraYawExtraRotation( float yawDegreesExtra );
+
 	void		LookAtTargetPosition( Vector3 const &targetWs, Vector2 const &reticlePos, Vector2 const &screenDimensions );
 
 	Transform	GetReferenceTransform() const { return m_referenceTranform; }
+	float		GetCameraYawExtraRotation() const { return m_camYawExtraRot; }
 };

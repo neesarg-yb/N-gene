@@ -35,10 +35,12 @@ CameraState CB_ZoomCamera::Update( float deltaSeconds, CameraState const &curren
 
 	UpdateReferenceRotation();
 
-	Matrix44 const	refTransformMat44 = m_referenceTranform.GetWorldTransformMatrix();
-	
+	Matrix44 const   refTransformMat44	= m_referenceTranform.GetWorldTransformMatrix();
+	Quaternion const referenceRot		= m_referenceTranform.GetQuaternion();
+	Quaternion const extraYawRotation	= Quaternion( referenceRot.GetUp(), m_camYawExtraRot );
+
 	modifiedCamState.m_position		= refTransformMat44.Multiply( m_cameraOffset, 1.0f );
-	modifiedCamState.m_orientation	= m_referenceTranform.GetQuaternion();
+	modifiedCamState.m_orientation	= referenceRot.Multiply( extraYawRotation );
 	modifiedCamState.m_fov			= m_fov;
 	
 	return modifiedCamState;
@@ -99,6 +101,11 @@ void CB_ZoomCamera::SetReferencePosition( Vector3 const &refPosWs )
 void CB_ZoomCamera::SetCameraOffsetFromReference( Vector3 const &camOffset )
 {
 	m_cameraOffset = camOffset;
+}
+
+void CB_ZoomCamera::SetCameraYawExtraRotation( float yawDegreesExtra )
+{
+	m_camYawExtraRot = yawDegreesExtra;
 }
 
 void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, Vector2 const &reticlePos, Vector2 const &screenDimensions )
