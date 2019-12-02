@@ -38,7 +38,7 @@ private:
 	// Camera
 	Camera					*m_camera					= nullptr;
 	CameraManager			*m_cameraManager			= nullptr;
-	float const				 m_initialFOV				= 50.f;				// Degrees
+	float const				 m_initialFOV				= 90.f;				// Degrees
 	float const				 m_cameraNear				= 0.01f;
 	float const				 m_cameraFar				= 100.f;
 
