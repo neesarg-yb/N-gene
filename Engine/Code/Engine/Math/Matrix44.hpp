@@ -73,7 +73,7 @@ public:
 	static Matrix44 MakeScale2D				( float scaleX, float scaleY );
 	static Matrix44 MakeOrtho2D				( const Vector2& bottomLeft, const Vector2& topRight );
 	static Matrix44 MakeOrtho3D				( float screen_width, float screen_height, float screen_near, float screen_far );		// Center will be (0, 0, 0)
-	static Matrix44 MakePerspective3D		( float fovDegrees, float aspectRatio, float nearZ, float farZ );		// Makes the Projection Matrix for Perspective Camera
+	static Matrix44 MakePerspective3D		( float fovHorizDegrees, float aspectRatio, float nearZ, float farZ );		// Makes the Projection Matrix for Perspective Camera
 	static Matrix44 MakeLookAtView			( const Vector3& target_position, const Vector3& camera_position, const Vector3& camera_up_vector = Vector3( 0.f, 1.f, 0.f ) );	// Returns View Matrix, according to provided Look At arguments
 	static Matrix44 LerpMatrix				( Matrix44 const &a, Matrix44 const &b, float t );						// Lerps from a to b
 

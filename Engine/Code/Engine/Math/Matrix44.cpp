@@ -371,35 +371,35 @@ Matrix44 Matrix44::MakeOrtho3D( float screen_width, float screen_height, float s
 	return toReturn;
 }
 
-Matrix44 Matrix44::MakePerspective3D( float fovDegrees, float aspectRatio, float nearZ, float farZ )
+Matrix44 Matrix44::MakePerspective3D( float fovHorizDegrees, float aspectRatio, float nearZ, float farZ )
 {
-	float fovRadians = DegreeToRadian( fovDegrees * 0.5f );
-	float d = 1.f / atan2f( fovRadians, 1.f );
-	float q = 1.f / ( farZ - nearZ );
+	float const fovRadians	= DegreeToRadian( fovHorizDegrees );
+	float const tanHalfFov	= atan2f( fovRadians * 0.5f, 1.f );
+	float const farSubNear	= ( farZ - nearZ );
 
 	float array[16] = {
 		// I Column
-		 d / aspectRatio,	
+		 1.f / tanHalfFov,	
 		 0.f,	
 		 0.f,
 		 0.f,
 
 		// J Column
 		 0.f,
-		 d,
+		 aspectRatio / tanHalfFov,
 		 0.f,
 		 0.f,
 
 		// K Column
 		 0.f,
 		 0.f,
-		 (nearZ + farZ) * q,
+		 (farZ + nearZ) / farSubNear,
 		 1.f,
 
 		// T Column
 		 0.f,
 		 0.f,
-		-2.f * nearZ * farZ * q,
+		(-2.f * farZ * nearZ) / farSubNear,
 		 0.f
 	};
 
