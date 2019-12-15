@@ -2,6 +2,7 @@
 #include <fstream>
 #include "DevConsole.hpp"
 #include "Engine/Core/Time.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Input/Command.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/LogSystem/LogSystem.hpp"
@@ -33,6 +34,8 @@ void LogHookWritesToConsole( LogData const *logData, void * )
 
 DevConsole::DevConsole( Renderer* currentRenderer )
 	: m_currentRenderer( currentRenderer )
+	, m_bottomLeftOrtho( Vector2( -Window::GetInstance()->GetAspectRatio(), -1.f ) )
+	, m_topRightOrtho( Vector2( Window::GetInstance()->GetAspectRatio(), 1.f ) )
 {
 	GUARANTEE_OR_DIE( m_currentRenderer != nullptr, "Renderer passed to DevConsole can't be a nullptr!" );
 

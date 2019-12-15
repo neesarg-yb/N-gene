@@ -37,8 +37,8 @@ public:
 	Renderer*					m_theRenderer		= nullptr;
 	Camera*						m_uiCamera			= nullptr;
 	BitmapFont*					m_fonts				= nullptr;
-	Vector2 const				m_screenBottomLeft	= Vector2( -g_aspectRatio, -1.f );
-	Vector2 const				m_screenTopRight	= Vector2(  g_aspectRatio,  1.f );
+	Vector2 const				m_screenBottomLeft;
+	Vector2 const				m_screenTopRight;
 	AABB2	const				m_screenBounds		= AABB2  ( m_screenBottomLeft, m_screenTopRight );
 	Rgba	const				m_uiBackgroundColor = Rgba( 180, 180, 180, 100 );
 

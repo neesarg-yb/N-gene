@@ -80,8 +80,8 @@ private:
 	static	DevConsole*	s_devConsoleInstance;
 			Renderer*	m_currentRenderer;
 			BitmapFont* m_fonts;
-	const	Vector2		m_bottomLeftOrtho			= Vector2( -g_aspectRatio, -1.f );			//		Treat like a,
-	const	Vector2		m_topRightOrtho				= Vector2(  g_aspectRatio,  1.f );			//					 NDC
+	const	Vector2		m_bottomLeftOrtho;			//		Treat like a,
+	const	Vector2		m_topRightOrtho;			//				NDC
 	const	AABB2		m_consoleBackgroundBox		= AABB2( m_bottomLeftOrtho, m_topRightOrtho );
 	const	AABB2		m_inputAreaBox				= AABB2( m_bottomLeftOrtho, Vector2( m_topRightOrtho.x, m_bottomLeftOrtho.y + 0.06f ) );
 	const	Rgba		m_consoleBackgroundColor	= Rgba( 0, 0, 0, 200 );

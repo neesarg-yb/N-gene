@@ -11,7 +11,6 @@ typedef unsigned int	uint;
 typedef unsigned char	byte_t;
 
 #define MAX_LIGHTS 8U
-const   float	   g_aspectRatio = 1.77f;
 
 #define GAME_PORT 10084
 #define ETHERNET_MTU 1500  // maximum transmission unit - determined by hardware part of OSI model.

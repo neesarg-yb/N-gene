@@ -81,7 +81,7 @@ public:
 
 protected:
 	// Camera Properties
-	float			m_aspectRatio		=  g_aspectRatio;	// Screen aspect ratio
+	float			m_aspectRatio;							// Screen aspect ratio
 	float			m_fov				=  45.f;			// Field of View
 	float			m_size				=  2.f;				// Orthographic Camera Size
 	float			m_screen_near		= -1.f;				// Camera Near Plane

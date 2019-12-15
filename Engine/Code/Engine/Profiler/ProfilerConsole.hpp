@@ -26,7 +26,7 @@ public:
 	Camera*			m_profileConsoleCamera		= nullptr;
 	Renderer*		m_currentRenderer			= nullptr;
 	BitmapFont*		m_fonts						= nullptr;
-	AABB2	const	m_drawBounds				= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
+	AABB2	const	m_drawBounds;
 	Rgba	const	m_accentColor				= Rgba( 70, 141, 185, 200 );
 	Rgba	const	m_boxBackgroudColor			= Rgba( 0, 0, 0, 180 );
 

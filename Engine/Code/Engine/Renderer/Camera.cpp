@@ -10,9 +10,9 @@
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
 
 Camera::Camera()
+	: m_aspectRatio( Window::GetInstance()->GetAspectRatio() )
 {
 	m_cameraUBO = UniformBuffer::For<UBOCameraMatrices>( GetUBOCameraMatrices() );
-
 
 	uint width	= Window::GetInstance()->GetWidth();
 	uint height = Window::GetInstance()->GetHeight();

@@ -1,5 +1,6 @@
 #include "theGame.hpp"
 #include "Engine/Core/Clock.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Core/Vertex.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
@@ -42,6 +43,8 @@ void HideLogTag( Command& cmd )
 }
 
 theGame::theGame()
+	: m_default_screen_bounds( AABB2( -Window::GetInstance()->GetAspectRatio(), -1.f,
+									   Window::GetInstance()->GetAspectRatio(),  1.f ) )
 {
 	// Set global variable
 	g_theGame = this;

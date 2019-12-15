@@ -45,48 +45,20 @@ static void RegisterWindowClass()
 	RegisterClassEx( &windowClassDescription );
 }
 
-Window::Window( char const *app_name, float clientAspect )
+Window::Window( char const *app_name, uint width, uint height )
 {
 	RegisterWindowClass(); 
 
 	// #SD1ToDo: Add support for fullscreen mode (requires different window style flags than windowed mode)
 	const DWORD windowStyleFlags = WS_CAPTION | WS_BORDER | WS_THICKFRAME | WS_SYSMENU | WS_OVERLAPPED;
 	const DWORD windowStyleExFlags = WS_EX_APPWINDOW;
+	
+	RECT windowRect;
+	windowRect.left = 0;
+	windowRect.right = width;
+	windowRect.top = 0;
+	windowRect.bottom = height;
 
-	// Get desktop rect, dimensions, aspect
-	RECT desktopRect;
-	HWND desktopWindowHandle = GetDesktopWindow();
-	GetClientRect( desktopWindowHandle, &desktopRect );
-	float desktopWidth = (float)( desktopRect.right - desktopRect.left );
-	float desktopHeight = (float)( desktopRect.bottom - desktopRect.top );
-	float desktopAspect = desktopWidth / desktopHeight;
-
-	// Calculate maximum client size (as some % of desktop size)
-	constexpr float maxClientFractionOfDesktop = 0.90f;
-	float clientWidth = desktopWidth * maxClientFractionOfDesktop;
-	float clientHeight = desktopHeight * maxClientFractionOfDesktop;
-	if( clientAspect > desktopAspect )
-	{
-		// Client window has a wider aspect than desktop; shrink client height to match its width
-		clientHeight = clientWidth / clientAspect;
-	}
-	else
-	{
-		// Client window has a taller aspect than desktop; shrink client width to match its height
-		clientWidth = clientHeight * clientAspect;
-	}
-
-	// Calculate client rect bounds by centering the client area
-	float clientMarginX = 0.5f * (desktopWidth - clientWidth);
-	float clientMarginY = 0.5f * (desktopHeight - clientHeight);
-	RECT clientRect;
-	clientRect.left = (int) clientMarginX;
-	clientRect.right = clientRect.left + (int) clientWidth;
-	clientRect.top = (int) clientMarginY;
-	clientRect.bottom = clientRect.top + (int) clientHeight;
-
-	// Calculate the outer dimensions of the physical window, including frame et. al.
-	RECT windowRect = clientRect;
 	AdjustWindowRectEx( &windowRect, windowStyleFlags, FALSE, windowStyleExFlags );
 
 	WCHAR windowTitle[ 1024 ];
@@ -96,8 +68,8 @@ Window::Window( char const *app_name, float clientAspect )
 		GAME_WINDOW_CLASS,
 		windowTitle,
 		windowStyleFlags,
-		windowRect.left,
-		windowRect.top,
+		100,
+		50,
 		windowRect.right - windowRect.left,
 		windowRect.bottom - windowRect.top,
 		NULL,
@@ -139,10 +111,10 @@ void Window::RemoveMessageHandler( windows_message_handler_cb cb )
 }
 
 
-Window* Window::CreateInstance( char const *title, float aspect ) 
+Window* Window::CreateInstance( char const *title, uint width, uint height ) 
 {
 	if (gWindow == nullptr) {
-		gWindow = new Window( title, aspect ); 
+		gWindow = new Window( title, width, height ); 
 	}
 	return gWindow; 
 }
@@ -185,4 +157,12 @@ IntVector2 Window::GetDimensions() const
 	uint height	= GetHeight();
 
 	return IntVector2( (int)width, (int)height );
+}
+
+float Window::GetAspectRatio() const
+{
+	IntVector2 clientSize = GetDimensions();
+	GUARANTEE_OR_DIE( clientSize.y != 0, "Window's dimensions can't be zero!" );
+
+	return (float)(clientSize.x) / (float)(clientSize.y);
 }

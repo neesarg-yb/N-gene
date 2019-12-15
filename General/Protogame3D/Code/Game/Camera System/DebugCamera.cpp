@@ -7,6 +7,8 @@
 DebugCamera::DebugCamera( CameraBehaviour *newBehaviour, InputSystem *inputSystem, bool shadowMapDisabled /* = true */ )
 	: m_behaviour( newBehaviour )
 	, m_inputSystem( inputSystem )
+	, m_screenBottomLeft( Vector2( -Window::GetInstance()->GetAspectRatio(), -1.f ) )
+	, m_screenTopRight( Vector2(  Window::GetInstance()->GetAspectRatio(),  1.f ) )
 {
 	// Setup the Camera
 	uint width	= Window::GetInstance()->GetWidth();

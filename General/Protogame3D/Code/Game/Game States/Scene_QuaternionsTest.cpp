@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene_QuaternionsTest.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Math/Quaternion.hpp"
 #include "Engine/Profiler/Profiler.hpp"
@@ -14,7 +15,7 @@ Scene_QuaternionsTest::Scene_QuaternionsTest( Clock const *parentClock )
 	m_camera = new Camera();
 	m_camera->SetColorTarget( Renderer::GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( Renderer::GetDefaultDepthTarget() );
-	m_camera->SetPerspectiveCameraProjectionMatrix( 90.f, g_aspectRatio, 0.1f, 100.f );
+	m_camera->SetPerspectiveCameraProjectionMatrix( 90.f, Window::GetInstance()->GetAspectRatio(), 0.1f, 100.f );
 	m_camera->LookAt( Vector3( 0.f, 5.f, -20.f ), Vector3::ZERO );
 
 	// Skybox

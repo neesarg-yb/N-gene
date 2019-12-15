@@ -9,7 +9,7 @@ class IntVector2;
 class Window
 {
 private:
-	Window( char const *title, float clientAspect );
+	Window( char const *title, uint width, uint height );
 
 public:
 	~Window(); 
@@ -21,13 +21,14 @@ public:
 	unsigned int	GetWidth () const;
 	unsigned int	GetHeight() const;
 	IntVector2		GetDimensions() const;
+	float			GetAspectRatio() const;
 
 public:
 	void*	m_hwnd; 
 	std::vector<windows_message_handler_cb> m_message_handlers; 
 
 public:
-	static Window* CreateInstance( char const *title, float aspect );
+	static Window* CreateInstance( char const *title, uint width, uint height );
 	static Window* GetInstance();
 }; 
 

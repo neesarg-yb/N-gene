@@ -116,11 +116,11 @@ bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam
 //-----------------------------------------------------------------------------------------------
 // #SD1ToDo: We will move this function to a more appropriate place later on...
 //
-void CreateOpenGLWindow( HINSTANCE applicationInstanceHandle, float clientAspect )
+void CreateOpenGLWindow( HINSTANCE applicationInstanceHandle )
 {
 	UNUSED( applicationInstanceHandle );
 
-	Window *window = Window::CreateInstance( APP_NAME, clientAspect ); 
+	Window *window = Window::CreateInstance( APP_NAME, 1750, 980 ); 
 	window->AddMessageHandler( AppMessageHandler ); 
 	g_hWnd = (HWND) window->GetHandle();
 }
@@ -140,7 +140,7 @@ void Initialize( HINSTANCE applicationInstanceHandle )
 {
 	g_gameConfigBlackboard = new Blackboard();
 
-	CreateOpenGLWindow( applicationInstanceHandle, g_aspectRatio );
+	CreateOpenGLWindow( applicationInstanceHandle );
 
 	// ENGINE STARTUP
 	EngineStartup();

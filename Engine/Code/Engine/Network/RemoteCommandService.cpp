@@ -2,6 +2,7 @@
 #include "RemoteCommandService.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Camera.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
@@ -11,6 +12,8 @@
 
 RemoteCommandService::RemoteCommandService( Renderer *currentRenderer /* = nullptr */, uint16_t port /* = RCS_DEFAULT_HOST_PORT */ )
 	: m_theRenderer( currentRenderer )
+	, m_screenBottomLeft( Vector2( -Window::GetInstance()->GetAspectRatio(), -1.f ) )
+	, m_screenTopRight( Vector2( Window::GetInstance()->GetAspectRatio(), 1.f ) )
 {
 	// Set default hosting details
 	m_doHostingAtAddress		= NetworkAddress::GetLocal();

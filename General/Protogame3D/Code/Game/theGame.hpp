@@ -18,7 +18,7 @@ public:
 
 public:
 	// UI & Camera
-	const AABB2			m_default_screen_bounds	= AABB2( -g_aspectRatio, -1.f, g_aspectRatio, 1.f );
+	const AABB2			m_default_screen_bounds;
 	const Vector3		m_default_screen_center	= Vector3::ZERO;
 	const Rgba			m_default_screen_color	= RGBA_BLACK_COLOR;
 	BitmapFont*			m_textBmpFont			= nullptr;

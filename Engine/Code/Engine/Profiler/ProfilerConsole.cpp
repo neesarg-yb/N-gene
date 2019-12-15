@@ -1,6 +1,7 @@
 #pragma once
 #include "ProfilerConsole.hpp"
 #include "Engine/Math/BarGraph.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Renderer/MeshBuilder.hpp"
@@ -35,6 +36,8 @@ void ChangeSortingOnFlatReport()
 
 ProfileConsole::ProfileConsole( Renderer* currentRenderer )
 	: m_currentRenderer( currentRenderer )
+	, m_drawBounds( AABB2( -Window::GetInstance()->GetAspectRatio(), -1.f, 
+						    Window::GetInstance()->GetAspectRatio(),  1.f ))
 {
 	// Fonts
 	m_fonts = currentRenderer->CreateOrGetBitmapFont("SquirrelFixedFont");

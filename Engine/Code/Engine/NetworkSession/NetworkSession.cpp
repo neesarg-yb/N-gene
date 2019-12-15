@@ -2,6 +2,7 @@
 #include "NetworkSession.hpp"
 #include <bitset>
 #include "Engine/Core/Clock.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Core/StringUtils.hpp"
 #include "Engine/NetworkSession/NetworkPacket.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
@@ -145,6 +146,8 @@ std::string ToString( eNetworkSessionState inEnum )
 
 NetworkSession::NetworkSession( Renderer *currentRenderer /* = nullptr */ )
 	: m_theRenderer( currentRenderer )
+	, m_screenBottomLeft( Vector2( -Window::GetInstance()->GetAspectRatio(), -1.f ) )
+	, m_screenTopRight( Vector2(  Window::GetInstance()->GetAspectRatio(), 1.f ) )
 {
 	SetBoundConnectionsToNull();
 

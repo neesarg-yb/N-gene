@@ -62,7 +62,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_camera->SetColorTarget( g_theRenderer->GetDefaultColorTarget() );
 	m_camera->SetDepthStencilTarget( g_theRenderer->GetDefaultDepthTarget() );
 	m_camera->SetupForSkybox( "Data\\Images\\Skybox\\skybox.jpg" );
-	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, g_aspectRatio, m_cameraNear, m_cameraFar );
+	m_camera->SetPerspectiveCameraProjectionMatrix( m_initialFOV, Window::GetInstance()->GetAspectRatio(), m_cameraNear, m_cameraFar );
 	m_camera->EnableShadowMap();
 	m_camera->RenderDebugObjects( true );
 	m_scene->AddCamera( *m_camera );
@@ -104,7 +104,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	Vector3 const yOffsetFromMiku = Vector3( 0.f, 3.f, 0.f );
 	Vector3 const zoomCamOffset = Vector3( 1.75f, -0.5f, -3.f );
-	m_zoomCameraBehavior = new CB_ZoomCamera( snowMikuPosition + yOffsetFromMiku, 60.f, "ZoomCamera", m_cameraManager );
+	m_zoomCameraBehavior = new CB_ZoomCamera( snowMikuPosition + yOffsetFromMiku, 55.f, "ZoomCamera", m_cameraManager );
 	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
 	m_cameraManager->AddNewCameraBehaviour( m_zoomCameraBehavior );
 	m_cameraManager->SetActiveCameraBehaviourTo( "ZoomCamera" );
@@ -113,7 +113,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	// Debug Camera
 	m_debugCBFreeLook = new CB_FreeLook( 7.f, 35.f, -90.f, 90.f, "DebugFreeLook", nullptr, USE_CONTROLLER_FL );
 	m_debugCamera = new DebugCamera( m_debugCBFreeLook, g_theInput );
-	m_debugCamera->SetPerspectiveCameraProjectionMatrix( 60.f, g_aspectRatio, 0.1f, 1000.f );
+	m_debugCamera->SetPerspectiveCameraProjectionMatrix( 60.f, Window::GetInstance()->GetAspectRatio(), 0.1f, 1000.f );
 
 	m_scene->AddCamera( *m_debugCamera );
 
@@ -245,6 +245,51 @@ void Scene_ProtoScene3D::Update()
 
 	// Debug Render
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+
+	{
+		IntVector2 const screenDim		= Window::GetInstance()->GetDimensions();
+		
+		Vector2 const screenPosLeft		= Vector2(0, screenDim.y * 0.5f);
+		Vector3 const screenLeftPointWs	= m_camera->GetWorldPositionFromScreen( screenPosLeft, -1.f );
+		
+		Vector2 const screenPosRight	= Vector2(screenDim.x, screenDim.y * 0.5f);
+		Vector3 const screenRightPointWs= m_camera->GetWorldPositionFromScreen( screenPosRight, -1.f );
+		
+		Matrix44 const camMat44			= m_camera->m_cameraTransform.GetWorldTransformMatrix();
+		Vector3  const camPosWs			= camMat44.GetTColumn();
+		Vector3  const camForward		= camMat44.GetKColumn();
+		Vector3  const camRight			= camMat44.GetIColumn();
+		Vector3  const camUp			= camMat44.GetJColumn();
+
+		Vector3  const screenLeftDir	= ( screenLeftPointWs - camPosWs ).GetNormalized();
+		Vector3  const screenRightDir	= ( screenRightPointWs - camPosWs ).GetNormalized();
+
+		// Dot(vecA, vecB) = |vecA| |vecB| * Cos(theta)
+		float const leftRightDot = Vector3::DotProduct( screenLeftDir, screenRightDir );
+		float const horizFoVtheta = RadianToDegree( acosf( leftRightDot ) );
+		
+		Vector2 const screenPosTop		= Vector2( screenDim.x * 0.5f, 0.f );
+		Vector2 const screenPosBottom	= Vector2( screenDim.x * 0.5f, screenDim.y );
+
+		Vector3 const screenTopPointWs	 = m_camera->GetWorldPositionFromScreen( screenPosTop, -1.f );
+		Vector3 const screenBottomPointWs= m_camera->GetWorldPositionFromScreen( screenPosBottom, -1.f );
+
+		Vector3 const screenTopDir		= ( screenTopPointWs - camPosWs ).GetNormalized();
+		Vector3 const screenBottomDir	= ( screenBottomPointWs - camPosWs ).GetNormalized();
+
+		float const topBottomDot = Vector3::DotProduct( screenTopDir, screenBottomDir );
+		float const vertFoVtheta = RadianToDegree( acosf( topBottomDot ) );
+
+		Vector2 const debThetaPosSs = Vector2( 0.0f, -20.f );
+		std::string thetaStrH =	Stringf("Horizontal FOV = %.3f (degrees)", horizFoVtheta);
+		std::string thetaStrV = Stringf("Vertical   FOV = %.3f (degrees)", vertFoVtheta);
+		DebugRender2DText(0.0f, debThetaPosSs, 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, thetaStrH);
+		DebugRender2DText(0.0f, debThetaPosSs + Vector2( 0.f, -20.f ), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, thetaStrV);
+
+		DebugRenderVector( 0.0f, camPosWs, screenLeftDir,  RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+		DebugRenderVector( 0.0f, camPosWs, screenRightDir, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+		DebugRenderCamera( 0.0f, *m_camera, 0.35f, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
+	}
 }
 
 void Scene_ProtoScene3D::Render( Camera *gameCamera ) const

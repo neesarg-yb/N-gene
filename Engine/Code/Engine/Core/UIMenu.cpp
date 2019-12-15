@@ -1,5 +1,6 @@
 #pragma once
 #include "UIMenu.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
@@ -7,9 +8,11 @@ UIMenu::UIMenu( InputSystem& inputSystem, Renderer& renderer, AABB2 zero_to_one_
 	: m_activeInput( inputSystem )
 	, m_activeRenderer( renderer )
 {
-	Vector2 bounds_mins = Vector2( RangeMapFloat( zero_to_one_drawBounds.mins.x, 0.f, 1.f, -g_aspectRatio, g_aspectRatio ),
+	const float aspectRatio = Window::GetInstance()->GetAspectRatio();
+
+	Vector2 bounds_mins = Vector2( RangeMapFloat( zero_to_one_drawBounds.mins.x, 0.f, 1.f, -aspectRatio, aspectRatio ),
 								   RangeMapFloat( zero_to_one_drawBounds.mins.y, 0.f, 1.f, -1.f, 1.f ) );
-	Vector2 bounds_maxs = Vector2( RangeMapFloat( zero_to_one_drawBounds.maxs.x, 0.f, 1.f, -g_aspectRatio, g_aspectRatio ),
+	Vector2 bounds_maxs = Vector2( RangeMapFloat( zero_to_one_drawBounds.maxs.x, 0.f, 1.f, -aspectRatio, aspectRatio ),
 								   RangeMapFloat( zero_to_one_drawBounds.maxs.y, 0.f, 1.f, -1.f, 1.f ) );
 
 	m_drawBounds = AABB2( bounds_mins, bounds_maxs );
