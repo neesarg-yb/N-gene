@@ -43,7 +43,9 @@ CameraState CB_ZoomCamera::Update( float deltaSeconds, CameraState const &curren
 	modifiedCamState.m_orientation	= referenceRot.Multiply( extraYawRotation );
 	modifiedCamState.m_fov			= m_fov;
 	
-	return modifiedCamState;
+	m_cameraState = modifiedCamState;
+	
+	return m_cameraState;
 }
 
 void CB_ZoomCamera::UpdateReferenceRotation()
@@ -108,17 +110,10 @@ void CB_ZoomCamera::SetCameraYawExtraRotation( float yawDegreesExtra )
 	m_camYawExtraRot = yawDegreesExtra;
 }
 
-void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, Vector2 const &reticlePos, Vector2 const &screenDimensions )
+void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, float const reticleYawDeg, float const reticlePitchDeg )
 {
 	Vector3 const refPosWs			= m_referenceTranform.GetWorldPosition();
 	Vector3 const refToTargetDisp	= targetWs - refPosWs;
-
-	float yawDegreesReticleOffset = 0.f;
-	float pitchDegreesReticleOffset = 0.f;
-	{
-		GetExtraRotationForReticleOffset( reticlePos, screenDimensions, yawDegreesReticleOffset, pitchDegreesReticleOffset );
-		ConsolePrintf( "x-offset = %.1f, y-offset = %.1f degrees", yawDegreesReticleOffset, pitchDegreesReticleOffset );
-	}
 	
 	// Calculate for yaw
 	{
@@ -150,7 +145,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, Vector2 const
 												? RadianToDegree( asinf( cameraOffsetYp / refToTargetDistYp ) )
 												: 0.f;
 		// Apply the extra rotation
-		m_refRotYaw += ( -1.f * additionalYawDegrees );
+		m_refRotYaw += -1.f * (additionalYawDegrees + reticleYawDeg);
 	}
 
 	// Calculate for pitch
@@ -184,7 +179,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, Vector2 const
 												? RadianToDegree( asinf( cameraOffsetPp / refToTargetDistPp ) )
 												: 0.f;
 		// Apply extra rotation
-		m_refRotPitch += additionaPitchDegrees;
+		m_refRotPitch += (additionaPitchDegrees + reticlePitchDeg);
 	}
 
 	// Debug Render

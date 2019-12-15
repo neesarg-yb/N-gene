@@ -20,6 +20,8 @@ private:
 	Vector3		m_cameraOffset;
 	float		m_fov;
 
+	CameraState	m_cameraState;
+
 public:
 	float		m_mouseSensitivity = 0.5f;	// Multiplier to delta mouse pos.
 
@@ -37,7 +39,7 @@ public:
 	void		SetCameraOffsetFromReference( Vector3 const &camOffset );
 	void		SetCameraYawExtraRotation( float yawDegreesExtra );
 
-	void		LookAtTargetPosition( Vector3 const &targetWs, Vector2 const &reticlePos, Vector2 const &screenDimensions );
+	void		LookAtTargetPosition( Vector3 const &targetWs, float const reticleYawDeg, float const reticlePitchDeg );
 
 	Transform	GetReferenceTransform() const { return m_referenceTranform; }
 	float		GetCameraYawExtraRotation() const { return m_camYawExtraRot; }

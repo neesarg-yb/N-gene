@@ -43,7 +43,7 @@ void SetReticlePosSs( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
 }
 
-Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2::ZERO;
+Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2( 0.f, -50.f );
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -104,7 +104,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	Vector3 const yOffsetFromMiku = Vector3( 0.f, 3.f, 0.f );
 	Vector3 const zoomCamOffset = Vector3( 1.75f, -0.5f, -3.f );
-	m_zoomCameraBehavior = new CB_ZoomCamera( snowMikuPosition + yOffsetFromMiku, 55.f, "ZoomCamera", m_cameraManager );
+	m_zoomCameraBehavior = new CB_ZoomCamera( snowMikuPosition + yOffsetFromMiku, 60.f, "ZoomCamera", m_cameraManager );
 	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
 	m_cameraManager->AddNewCameraBehaviour( m_zoomCameraBehavior );
 	m_cameraManager->SetActiveCameraBehaviourTo( "ZoomCamera" );
@@ -225,7 +225,33 @@ void Scene_ProtoScene3D::Update()
 	// Target for reticle
 	SpawnTargetOnSpaceBar();
 	if( m_newTargetJustSpawnned )
-		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs, s_reticlePos, Window::GetInstance()->GetDimensions() );
+	{
+		Matrix44 const camMat44 = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+		Vector3  const camForwd = camMat44.GetKColumn();
+
+		float reticleYawDegrees = 0.f;
+		{
+			Vector3 const yawReticleDir	= GetDirectionWsFromReticleOffsetX( s_reticlePos.x );
+			float   const dotProduct	= Vector3::DotProduct( camForwd, yawReticleDir );
+			
+			reticleYawDegrees = RadianToDegree( acosf( dotProduct ) );
+			reticleYawDegrees = copysignf( reticleYawDegrees, s_reticlePos.x );
+		}
+
+		float reticlePitchDegrees = 0.f;
+		{
+			Vector3 const pitchReticleDir = GetDirectionWsFromReticleOffsetY( s_reticlePos.y );
+			float   const dotProduct	  = Vector3::DotProduct( camForwd, pitchReticleDir );
+
+			reticlePitchDegrees = RadianToDegree( acosf( dotProduct ) );
+			reticlePitchDegrees = copysignf( reticlePitchDegrees, s_reticlePos.y );
+		}
+
+		std::string const reticleDegDebStr = Stringf( "Reticle: Yaw Deg = %.2f, Pitch Deg = %.2f", reticleYawDegrees, reticlePitchDegrees );
+		DebugRender2DText( 10.f, Vector2( 0.f, -20.f ), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, reticleDegDebStr );
+
+		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs, reticleYawDegrees, reticlePitchDegrees);
+	}
 
 	UpdateZoomCameraYawOffset( deltaSeconds );
 
@@ -245,51 +271,6 @@ void Scene_ProtoScene3D::Update()
 
 	// Debug Render
 	DebugRenderBasis( 0.f, Matrix44(), RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
-
-	{
-		IntVector2 const screenDim		= Window::GetInstance()->GetDimensions();
-		
-		Vector2 const screenPosLeft		= Vector2(0, screenDim.y * 0.5f);
-		Vector3 const screenLeftPointWs	= m_camera->GetWorldPositionFromScreen( screenPosLeft, -1.f );
-		
-		Vector2 const screenPosRight	= Vector2(screenDim.x, screenDim.y * 0.5f);
-		Vector3 const screenRightPointWs= m_camera->GetWorldPositionFromScreen( screenPosRight, -1.f );
-		
-		Matrix44 const camMat44			= m_camera->m_cameraTransform.GetWorldTransformMatrix();
-		Vector3  const camPosWs			= camMat44.GetTColumn();
-		Vector3  const camForward		= camMat44.GetKColumn();
-		Vector3  const camRight			= camMat44.GetIColumn();
-		Vector3  const camUp			= camMat44.GetJColumn();
-
-		Vector3  const screenLeftDir	= ( screenLeftPointWs - camPosWs ).GetNormalized();
-		Vector3  const screenRightDir	= ( screenRightPointWs - camPosWs ).GetNormalized();
-
-		// Dot(vecA, vecB) = |vecA| |vecB| * Cos(theta)
-		float const leftRightDot = Vector3::DotProduct( screenLeftDir, screenRightDir );
-		float const horizFoVtheta = RadianToDegree( acosf( leftRightDot ) );
-		
-		Vector2 const screenPosTop		= Vector2( screenDim.x * 0.5f, 0.f );
-		Vector2 const screenPosBottom	= Vector2( screenDim.x * 0.5f, screenDim.y );
-
-		Vector3 const screenTopPointWs	 = m_camera->GetWorldPositionFromScreen( screenPosTop, -1.f );
-		Vector3 const screenBottomPointWs= m_camera->GetWorldPositionFromScreen( screenPosBottom, -1.f );
-
-		Vector3 const screenTopDir		= ( screenTopPointWs - camPosWs ).GetNormalized();
-		Vector3 const screenBottomDir	= ( screenBottomPointWs - camPosWs ).GetNormalized();
-
-		float const topBottomDot = Vector3::DotProduct( screenTopDir, screenBottomDir );
-		float const vertFoVtheta = RadianToDegree( acosf( topBottomDot ) );
-
-		Vector2 const debThetaPosSs = Vector2( 0.0f, -20.f );
-		std::string thetaStrH =	Stringf("Horizontal FOV = %.3f (degrees)", horizFoVtheta);
-		std::string thetaStrV = Stringf("Vertical   FOV = %.3f (degrees)", vertFoVtheta);
-		DebugRender2DText(0.0f, debThetaPosSs, 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, thetaStrH);
-		DebugRender2DText(0.0f, debThetaPosSs + Vector2( 0.f, -20.f ), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, thetaStrV);
-
-		DebugRenderVector( 0.0f, camPosWs, screenLeftDir,  RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
-		DebugRenderVector( 0.0f, camPosWs, screenRightDir, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
-		DebugRenderCamera( 0.0f, *m_camera, 0.35f, RGBA_YELLOW_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_IGNORE_DEPTH );
-	}
 }
 
 void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
@@ -392,6 +373,36 @@ void Scene_ProtoScene3D::DebugRenderZoomCamera() const
 
 	// Reticle
 	DebugRender2DRound( 0.f, s_reticlePos, 5.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
+}
+
+Vector3 Scene_ProtoScene3D::GetDirectionWsFromReticleOffsetX( float offsetFromCenter ) const
+{
+	IntVector2 const screenDim = Window::GetInstance()->GetDimensions();
+
+	Vector2 const screenPos		= Vector2( screenDim.x * 0.5f + offsetFromCenter, screenDim.y * 0.5f );
+	Vector3 const screenPointWs	= m_camera->GetWorldPositionFromScreen( screenPos, -1.f );
+
+	Matrix44 const camMat44 = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	Vector3  const camPosWs = camMat44.GetTColumn();
+
+	Vector3  const reticleDirectionWs = ( screenPointWs - camPosWs ).GetNormalized();
+
+	return reticleDirectionWs;
+}
+
+Vector3 Scene_ProtoScene3D::GetDirectionWsFromReticleOffsetY( float offsetFromCenter ) const
+{
+	IntVector2 const screenDim = Window::GetInstance()->GetDimensions();
+
+	Vector2 const screenPos		= Vector2( screenDim.x * 0.5f, screenDim.y * 0.5f + offsetFromCenter );
+	Vector3 const screenPointWs	= m_camera->GetWorldPositionFromScreen( screenPos, -1.f );
+
+	Matrix44 const camMat44 = m_camera->m_cameraTransform.GetWorldTransformMatrix();
+	Vector3  const camPosWs = camMat44.GetTColumn();
+
+	Vector3  const reticleDirectionWs = ( screenPointWs - camPosWs ).GetNormalized();
+
+	return reticleDirectionWs;
 }
 
 void Scene_ProtoScene3D::AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType )

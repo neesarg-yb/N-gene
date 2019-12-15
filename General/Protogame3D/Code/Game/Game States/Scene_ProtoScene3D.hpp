@@ -76,6 +76,9 @@ private:
 	void RenderTarget() const;
 	void DebugRenderZoomCamera() const;
 
+	Vector3 GetDirectionWsFromReticleOffsetX( float offsetFromCenter ) const;
+	Vector3 GetDirectionWsFromReticleOffsetY( float offsetFromCenter ) const;
+
 	// Scene Management
 	void AddNewGameObjectToScene( GameObject *go, WorldEntityTypes entityType );
 	void AddNewLightToScene( Light *light );
