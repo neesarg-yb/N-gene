@@ -31,6 +31,11 @@ const IntVector2 IntVector2::operator + ( const IntVector2& vecToAdd ) const
 	return IntVector2( (x + vecToAdd.x), (y + vecToAdd.y) );
 }
 
+//-----------------------------------------------------------------------------------------------
+const IntVector2 IntVector2::operator*( const float& mult ) const
+{
+	return IntVector2( (int)(x * mult), (int)(y * mult) );
+}
 
 //-----------------------------------------------------------------------------------------------
 const IntVector2 IntVector2::operator-( const IntVector2& vecToSubtract ) const
