@@ -36,13 +36,20 @@ CameraState CB_ZoomCamera::Update( float deltaSeconds, CameraState const &curren
 
 	UpdateReferenceRotation();
 
-	Matrix44 const   refTransformMat44	= m_referenceTranform.GetWorldTransformMatrix();
-	Quaternion const referenceRot		= m_referenceTranform.GetQuaternion();
-	Quaternion const extraYawRotation	= Quaternion( referenceRot.GetUp(), m_camYawExtraRot );
+	Matrix44 const refTransformMat44 = m_referenceTranform.GetWorldTransformMatrix();
+	modifiedCamState.m_fov			 = m_fov;
+	modifiedCamState.m_position		 = refTransformMat44.Multiply( m_cameraOffset, 1.0f );
+	modifiedCamState.m_orientation	 = m_referenceTranform.GetQuaternion();
 
-	modifiedCamState.m_position		= refTransformMat44.Multiply( m_cameraOffset, 1.0f );
-	modifiedCamState.m_orientation	= referenceRot.Multiply( extraYawRotation );
-	modifiedCamState.m_fov			= m_fov;
+	{
+		// Extra yaw rotation
+		Quaternion const extraYawRotation	= Quaternion( modifiedCamState.m_orientation.GetUp(), m_camYawExtraRot );
+		modifiedCamState.m_orientation		= modifiedCamState.m_orientation.Multiply( extraYawRotation );
+
+		// Extra pitch rotation
+		Quaternion const extraPitchRotation = Quaternion( modifiedCamState.m_orientation.GetRight(), m_camPitchExtraRot );
+		modifiedCamState.m_orientation		= modifiedCamState.m_orientation.Multiply( extraPitchRotation );
+	}
 	
 	m_cameraState = modifiedCamState;
 	
@@ -111,6 +118,11 @@ void CB_ZoomCamera::SetCameraYawExtraRotation( float yawDegreesExtra )
 	m_camYawExtraRot = yawDegreesExtra;
 }
 
+void CB_ZoomCamera::SetCameraPitchExtraRotation( float pitchDegreesExtra )
+{
+	m_camPitchExtraRot = pitchDegreesExtra;
+}
+
 void CB_ZoomCamera::SetReticleOffset( IntVector2 reticleOffsetSs )
 {
 	// Set reticle offset
@@ -120,17 +132,22 @@ void CB_ZoomCamera::SetReticleOffset( IntVector2 reticleOffsetSs )
 	{
 		IntVector2 const screenCenter = Window::GetInstance()->GetDimensions() * 0.5f;
 
-		Vector3 const screenCenterWs  = m_cameraState.GetWorldCoordFromScreen( screenCenter, m_camera->GetCameraNear(), m_camera->GetCameraFar() );
-		Vector3 const towardReticleWs = m_cameraState.GetWorldCoordFromScreen( screenCenter + m_reticleOffset, m_camera->GetCameraNear(), m_camera->GetCameraFar() );
-		Vector3 const cameraPosWs	  = m_cameraState.GetTransform().GetWorldPosition();
+		Vector3 const screenCenterWs = m_cameraState.GetWorldCoordFromScreen( screenCenter, m_camera->GetCameraNear(), m_camera->GetCameraFar() );
+		Vector3 const yawReticleWs	 = m_cameraState.GetWorldCoordFromScreen( screenCenter + IntVector2(m_reticleOffset.x, 0), m_camera->GetCameraNear(), m_camera->GetCameraFar() );
+		Vector3 const pitchReticleWs = m_cameraState.GetWorldCoordFromScreen( screenCenter + IntVector2(0, m_reticleOffset.y), m_camera->GetCameraNear(), m_camera->GetCameraFar() );
+		Vector3 const cameraPosWs	 = m_cameraState.GetTransform().GetWorldPosition();
 
 		Vector3 const screenCenterDir = ( screenCenterWs - cameraPosWs ).GetNormalized();
-		Vector3 const reticleDir	  = ( towardReticleWs - cameraPosWs ).GetNormalized();
+		Vector3 const yawReticleDir	  = ( yawReticleWs   - cameraPosWs ).GetNormalized();
+		Vector3 const pitchReticleDir = ( pitchReticleWs - cameraPosWs ).GetNormalized();
 
-		// TODO: For now only works if yaw offset is provided
-		//		 Fix to make it work for pitch too!
-		m_reticleYawDegrees = RadianToDegree( acosf( Vector3::DotProduct( screenCenterDir, reticleDir ) ) );
+		float const yawDotProduct = ClampFloat( Vector3::DotProduct(screenCenterDir, yawReticleDir), -1.f, 1.f );
+		m_reticleYawDegrees = RadianToDegree( acosf( yawDotProduct ) );
 		m_reticleYawDegrees = copysignf( m_reticleYawDegrees, (float)m_reticleOffset.x );
+		
+		float const pitchDotProduct = ClampFloat( Vector3::DotProduct( screenCenterDir, pitchReticleDir), -1.f, 1.f );
+		m_reticlePitchDegrees = RadianToDegree( acosf( pitchDotProduct ) );
+		m_reticlePitchDegrees = -1.f * copysignf( m_reticlePitchDegrees, (float)m_reticleOffset.y );	// -1 because the *negative* y-screen-offset means, the pitch rotation according to the left hand direction
 	}
 }
 
@@ -207,6 +224,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 	}
 
 	SetCameraYawExtraRotation( -m_reticleYawDegrees );
+	SetCameraPitchExtraRotation( -m_reticlePitchDegrees );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );

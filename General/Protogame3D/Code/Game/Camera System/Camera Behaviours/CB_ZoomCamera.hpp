@@ -11,8 +11,10 @@ private:
 	float		m_refRotYaw			= 0.f;
 	float		m_refRotPitch		= 0.f;
 
-	float		m_reticleYawDegrees = 0.f;				// Because of the reticle offset
-	float		m_camYawExtraRot	= 0.f;
+	float		m_reticleYawDegrees   = 0.f;			// Because of the reticle offset
+	float		m_reticlePitchDegrees = 0.f;
+	float		m_camYawExtraRot	  = 0.f;
+	float		m_camPitchExtraRot	  = 0.f;
 
 	float const	m_minPitchDegrees	= -90.f;
 	float const m_maxPitchDegrees	=  90.f;
@@ -41,6 +43,7 @@ public:
 	void		SetReferencePosition( Vector3 const &refPosWs );
 	void		SetCameraOffsetFromReference( Vector3 const &camOffset );
 	void		SetCameraYawExtraRotation( float yawDegreesExtra );
+	void		SetCameraPitchExtraRotation( float pitchDegreesExtra );
 	void		SetReticleOffset( IntVector2 reticleOffsetSs );
 
 	void		LookAtTargetPosition( Vector3 const &targetWs );
