@@ -11,7 +11,7 @@ CB_ZoomCamera::CB_ZoomCamera( Vector3 const &refPos, float fov, std::string cons
 	, m_referenceTranform( refPos, Quaternion::IDENTITY, Vector3::ONE_ALL )
 	, m_fov( fov )
 {
-
+	m_cameraState = Update( 0.f, m_manager->GetCurrentCameraState() );
 }
 
 CB_ZoomCamera::~CB_ZoomCamera()
@@ -59,7 +59,7 @@ CameraState CB_ZoomCamera::Update( float deltaSeconds, CameraState const &curren
 void CB_ZoomCamera::UpdateReferenceRotation()
 {
 	// Get controller input
-	Vector2 const mousePosDelta = m_inputSystem->GetMouseDelta();
+	Vector2 const mousePosDelta = m_inputSystem ? m_inputSystem->GetMouseDelta() : Vector2::ZERO;
 	
 	// Yaw
 	float const deltaYawDegrees = m_mouseSensitivity * mousePosDelta.x;
@@ -125,10 +125,10 @@ void CB_ZoomCamera::SetCameraPitchExtraRotation( float pitchDegreesExtra )
 
 void CB_ZoomCamera::SetReticleOffset( IntVector2 reticleOffsetSs )
 {
-	// Set reticle offset
+	// Set reticle offset - pixels
 	m_reticleOffset = reticleOffsetSs;
 	
-	// Set reticle degrees
+	// Set reticle offset - degrees
 	{
 		IntVector2 const screenCenter = Window::GetInstance()->GetDimensions() * 0.5f;
 
@@ -222,9 +222,6 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		// Apply extra rotation
 		m_refRotPitch += additionaPitchDegrees;
 	}
-
-	SetCameraYawExtraRotation( -m_reticleYawDegrees );
-	SetCameraPitchExtraRotation( -m_reticlePitchDegrees );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );

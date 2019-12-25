@@ -43,7 +43,7 @@ void SetReticlePosSs( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
 }
 
-Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2( -45.f, 100.f );
+Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2::ZERO/*Vector2( -45.f, 100.f )*/;
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -102,11 +102,14 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	m_scene->AddRenderable( *m_testCubeRenderable );
 
-	Vector3 const zoomCamOffset = Vector3::ZERO;
+	Vector3 const zoomCamOffset = Vector3::ZERO/*Vector3(1.0f, 2.0f, -1.3f)*/;
 	m_zoomCameraBehavior = new CB_ZoomCamera( Vector3::ZERO, 60.f, "ZoomCamera", m_cameraManager );
 	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
+	
 	m_cameraManager->AddNewCameraBehaviour( m_zoomCameraBehavior );
 	m_cameraManager->SetActiveCameraBehaviourTo( "ZoomCamera" );
+
+	m_zoomCameraBehavior->SetReticleOffset( IntVector2( s_reticlePos ) );
 	m_zoomCameraActive = true;
 
 	// Debug Camera
@@ -228,10 +231,7 @@ void Scene_ProtoScene3D::Update()
 	// Target for reticle
 	SpawnTargetOnSpaceBar();
 	if( m_newTargetJustSpawnned )
-	{
-		m_zoomCameraBehavior->SetReticleOffset( IntVector2( s_reticlePos ) );
 		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs );
-	}
 
 	UpdateZoomCameraYawOffset( deltaSeconds );
 
