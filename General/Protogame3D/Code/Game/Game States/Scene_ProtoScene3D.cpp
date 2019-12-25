@@ -43,7 +43,7 @@ void SetReticlePosSs( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
 }
 
-Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2( 0.f, -50.f );
+Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2( 143.f, 0.f );
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -226,31 +226,8 @@ void Scene_ProtoScene3D::Update()
 	SpawnTargetOnSpaceBar();
 	if( m_newTargetJustSpawnned )
 	{
-		Matrix44 const camMat44 = m_camera->m_cameraTransform.GetWorldTransformMatrix();
-		Vector3  const camForwd = camMat44.GetKColumn();
-
-		float reticleYawDegrees = 0.f;
-		{
-			Vector3 const yawReticleDir	= GetDirectionWsFromReticleOffsetX( s_reticlePos.x );
-			float   const dotProduct	= Vector3::DotProduct( camForwd, yawReticleDir );
-			
-			reticleYawDegrees = RadianToDegree( acosf( dotProduct ) );
-			reticleYawDegrees = copysignf( reticleYawDegrees, s_reticlePos.x );
-		}
-
-		float reticlePitchDegrees = 0.f;
-		{
-			Vector3 const pitchReticleDir = GetDirectionWsFromReticleOffsetY( s_reticlePos.y );
-			float   const dotProduct	  = Vector3::DotProduct( camForwd, pitchReticleDir );
-
-			reticlePitchDegrees = RadianToDegree( acosf( dotProduct ) );
-			reticlePitchDegrees = copysignf( reticlePitchDegrees, s_reticlePos.y );
-		}
-
-		std::string const reticleDegDebStr = Stringf( "Reticle: Yaw Deg = %.2f, Pitch Deg = %.2f", reticleYawDegrees, reticlePitchDegrees );
-		DebugRender2DText( 10.f, Vector2( 0.f, -20.f ), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, reticleDegDebStr );
-
-		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs, reticleYawDegrees, reticlePitchDegrees);
+		m_zoomCameraBehavior->SetReticleOffset( IntVector2( s_reticlePos ) );
+		m_zoomCameraBehavior->LookAtTargetPosition( m_targetPointWs );
 	}
 
 	UpdateZoomCameraYawOffset( deltaSeconds );

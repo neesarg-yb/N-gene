@@ -1,6 +1,7 @@
 #pragma once
 #include "CB_ZoomCamera.hpp"
 #include "Engine/Math/Plane3.hpp"
+#include "Engine/Core/Window.hpp"
 #include "Engine/Core/DevConsole.hpp"
 #include "Engine/CameraSystem/CameraManager.hpp"
 #include "Engine/DebugRenderer/DebugRenderer.hpp"
@@ -110,7 +111,30 @@ void CB_ZoomCamera::SetCameraYawExtraRotation( float yawDegreesExtra )
 	m_camYawExtraRot = yawDegreesExtra;
 }
 
-void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, float const reticleYawDeg, float const reticlePitchDeg )
+void CB_ZoomCamera::SetReticleOffset( IntVector2 reticleOffsetSs )
+{
+	// Set reticle offset
+	m_reticleOffset = reticleOffsetSs;
+	
+	// Set reticle degrees
+	{
+		IntVector2 const screenCenter = Window::GetInstance()->GetDimensions() * 0.5f;
+
+		Vector3 const screenCenterWs  = m_cameraState.GetWorldCoordFromScreen( screenCenter, m_camera->GetCameraNear(), m_camera->GetCameraFar() );
+		Vector3 const towardReticleWs = m_cameraState.GetWorldCoordFromScreen( screenCenter + m_reticleOffset, m_camera->GetCameraNear(), m_camera->GetCameraFar() );
+		Vector3 const cameraPosWs	  = m_cameraState.GetTransform().GetWorldPosition();
+
+		Vector3 const screenCenterDir = ( screenCenterWs - cameraPosWs ).GetNormalized();
+		Vector3 const reticleDir	  = ( towardReticleWs - cameraPosWs ).GetNormalized();
+
+		// TODO: For now only works if yaw offset is provided
+		//		 Fix to make it work for pitch too!
+		m_reticleYawDegrees = RadianToDegree( acosf( Vector3::DotProduct( screenCenterDir, reticleDir ) ) );
+		m_reticleYawDegrees = copysignf( m_reticleYawDegrees, (float)m_reticleOffset.x );
+	}
+}
+
+void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 {
 	Vector3 const refPosWs			= m_referenceTranform.GetWorldPosition();
 	Vector3 const refToTargetDisp	= targetWs - refPosWs;
@@ -145,7 +169,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, float const r
 												? RadianToDegree( asinf( cameraOffsetYp / refToTargetDistYp ) )
 												: 0.f;
 		// Apply the extra rotation
-		m_refRotYaw += -1.f * (additionalYawDegrees + reticleYawDeg);
+		m_refRotYaw += -1.f * additionalYawDegrees;
 	}
 
 	// Calculate for pitch
@@ -179,8 +203,10 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs, float const r
 												? RadianToDegree( asinf( cameraOffsetPp / refToTargetDistPp ) )
 												: 0.f;
 		// Apply extra rotation
-		m_refRotPitch += (additionaPitchDegrees + reticlePitchDeg);
+		m_refRotPitch += additionaPitchDegrees;
 	}
+
+	SetCameraYawExtraRotation( -m_reticleYawDegrees );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );

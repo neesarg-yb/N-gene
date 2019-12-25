@@ -11,10 +11,13 @@ private:
 	float		m_refRotYaw			= 0.f;
 	float		m_refRotPitch		= 0.f;
 
+	float		m_reticleYawDegrees = 0.f;				// Because of the reticle offset
 	float		m_camYawExtraRot	= 0.f;
 
 	float const	m_minPitchDegrees	= -90.f;
 	float const m_maxPitchDegrees	=  90.f;
+
+	IntVector2	m_reticleOffset		= IntVector2::ZERO;	// In screen space
 
 	Transform	m_referenceTranform;
 	Vector3		m_cameraOffset;
@@ -23,7 +26,7 @@ private:
 	CameraState	m_cameraState;
 
 public:
-	float		m_mouseSensitivity = 0.5f;	// Multiplier to delta mouse pos.
+	float		m_mouseSensitivity = 0.5f;				// Multiplier to delta mouse pos.
 
 public:
 	void		PreUpdate() override;
@@ -38,8 +41,9 @@ public:
 	void		SetReferencePosition( Vector3 const &refPosWs );
 	void		SetCameraOffsetFromReference( Vector3 const &camOffset );
 	void		SetCameraYawExtraRotation( float yawDegreesExtra );
+	void		SetReticleOffset( IntVector2 reticleOffsetSs );
 
-	void		LookAtTargetPosition( Vector3 const &targetWs, float const reticleYawDeg, float const reticlePitchDeg );
+	void		LookAtTargetPosition( Vector3 const &targetWs );
 
 	Transform	GetReferenceTransform() const { return m_referenceTranform; }
 	float		GetCameraYawExtraRotation() const { return m_camYawExtraRot; }
