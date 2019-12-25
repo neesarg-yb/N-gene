@@ -102,9 +102,8 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	m_scene->AddRenderable( *m_testCubeRenderable );
 
-	Vector3 const yOffsetFromMiku = Vector3( 0.f, 3.f, 0.f );
-	Vector3 const zoomCamOffset = Vector3( 1.75f, -0.5f, -3.f );
-	m_zoomCameraBehavior = new CB_ZoomCamera( snowMikuPosition + yOffsetFromMiku, 60.f, "ZoomCamera", m_cameraManager );
+	Vector3 const zoomCamOffset = Vector3::ZERO;
+	m_zoomCameraBehavior = new CB_ZoomCamera( Vector3::ZERO, 60.f, "ZoomCamera", m_cameraManager );
 	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
 	m_cameraManager->AddNewCameraBehaviour( m_zoomCameraBehavior );
 	m_cameraManager->SetActiveCameraBehaviourTo( "ZoomCamera" );
@@ -114,6 +113,10 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_debugCBFreeLook = new CB_FreeLook( 7.f, 35.f, -90.f, 90.f, "DebugFreeLook", nullptr, USE_CONTROLLER_FL );
 	m_debugCamera = new DebugCamera( m_debugCBFreeLook, g_theInput );
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( 60.f, Window::GetInstance()->GetAspectRatio(), 0.1f, 1000.f );
+	m_debugCamera->SetCameraPositionTo( snowMikuPosition + Vector3(-10.f, 2.f, 10.f) );
+	m_debugCamera->LookAt( m_debugCamera->m_cameraTransform.GetWorldPosition(), Vector3::ZERO, Vector3::UP );
+
+	m_targetPointWs = snowMikuPosition;
 
 	m_scene->AddCamera( *m_debugCamera );
 
@@ -340,13 +343,13 @@ void Scene_ProtoScene3D::DebugRenderZoomCamera() const
 	Transform const refTransform = m_zoomCameraBehavior->GetReferenceTransform();
 	Vector3 const refPosWs = refTransform.GetWorldPosition();
 	Vector3 const refDirWs = refTransform.GetQuaternion().GetFront();
-	DebugRenderVector( 0.f, refPosWs, refDirWs * 2.f, RGBA_GREEN_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderVector( 0.f, refPosWs, refDirWs * 2.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
 	// Laser line to target
 	Matrix44 const camTransformMat = m_camera->m_cameraTransform.GetWorldTransformMatrix();
 	Vector3 const cameraForward = camTransformMat.GetKColumn();
 	Vector3 const cameraPos = camTransformMat.GetTColumn();
-	DebugRenderLineSegment( 0.f, cameraPos, RGBA_GREEN_COLOR, cameraPos + ( refDirWs * 100.f ), RGBA_ORANGE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
+	DebugRenderLineSegment( 0.f, cameraPos, RGBA_WHITE_COLOR, cameraPos + ( refDirWs * 100.f ), RGBA_ORANGE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
 	// Reticle
 	DebugRender2DRound( 0.f, s_reticlePos, 5.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
