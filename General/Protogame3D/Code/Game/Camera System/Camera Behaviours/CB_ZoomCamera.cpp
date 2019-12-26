@@ -181,6 +181,16 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		m_refRotYaw -= m_reticleYawDegrees;											// Because we have the reticle offset, we need to rotate by this much, extra
 
 		// Calculate extra rotation, so the camera looks at the target
+		//
+		//          (up dir)                  _____________
+		//            Y |                    |    Note:    |
+		//              |   (front dir)      | Left handed |
+		//              |    /               |    system   |
+		//              |   / Z               -------------
+		//              |  /                       
+		//              | /                        
+		//  World Space |/_____________ (right dir)
+		//     (Ws)     * origin      X            
 		Vector3	const yawRightDir			= Quaternion( Vector3::UP, m_reticleYawDegrees ).RotatePoint( Vector3::RIGHT );
 		float	const cameraProjOnYawRight	= Vector3::DotProduct( yawRightDir, m_cameraOffset );
 		float	const refToTargetDistYp		= refToTargetDispYp.GetLength();
@@ -218,6 +228,16 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		m_refRotPitch -= m_reticlePitchDegrees;												// Because we have the reticle offset, we need to rotate by this much, extra
 
 		// Calculate extra rotation, so that the camera looks at the target
+		//
+		//          (up dir)                  _____________
+		//            Y |                    |    Note:    |
+		//              |   (front dir)      | Left handed |
+		//              |    /               |    system   |
+		//              |   / Z               -------------
+		//              |  /                       
+		//              | /                        
+		//  World Space |/_____________ (right dir)
+		//     (Ws)     * origin      X            
 		Vector3	const pitchUpDir			= Quaternion( Vector3::RIGHT, -m_reticlePitchDegrees ).RotatePoint( Vector3::UP );
 		float	const cameraProjOnPitchUp	= Vector3::DotProduct( pitchUpDir, m_cameraOffset );
 		float	const refToTargetDistPp		= refToTargetDispPp.GetLength();
