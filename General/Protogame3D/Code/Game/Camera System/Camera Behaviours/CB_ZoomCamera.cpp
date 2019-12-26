@@ -181,12 +181,11 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		m_refRotYaw -= m_reticleYawDegrees;											// Because we have the reticle offset, we need to rotate by this much, extra
 
 		// Calculate extra rotation, so the camera looks at the target
-		Quaternion	const reticleYawRotation		= Quaternion( Vector3::UP, -m_reticleYawDegrees );
-		Vector3		const rightRefDirPostReticleRot	= reticleYawRotation.RotatePoint( refRightDir );
-		float	const cameraOffsetYp	= Vector3::DotProduct( rightRefDirPostReticleRot, m_cameraOffset );
-		float	const refToTargetDistYp	= refToTargetDispYp.GetLength();
-		float	const additionalYawDegrees = ( refToTargetDistYp != 0.f ) 
-												? RadianToDegree( asinf( cameraOffsetYp / refToTargetDistYp ) )
+		Vector3	const yawRightDir			= Quaternion( Vector3::UP, m_reticleYawDegrees ).RotatePoint( Vector3::RIGHT );
+		float	const cameraProjOnYawRight	= Vector3::DotProduct( yawRightDir, m_cameraOffset );
+		float	const refToTargetDistYp		= refToTargetDispYp.GetLength();
+		float	const additionalYawDegrees	= ( refToTargetDistYp != 0.f ) 
+												? RadianToDegree( asinf( cameraProjOnYawRight / refToTargetDistYp ) )
 												: 0.f;
 		// Apply the extra rotation
 		m_refRotYaw += -1.f * additionalYawDegrees;
@@ -219,12 +218,11 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		m_refRotPitch -= m_reticlePitchDegrees;												// Because we have the reticle offset, we need to rotate by this much, extra
 
 		// Calculate extra rotation, so that the camera looks at the target
-		Quaternion	const reticlePitchRotation	 = Quaternion(refRightDir * -1.f, -m_reticlePitchDegrees);
-		Vector3		const upRefDirPostReticleRot = reticlePitchRotation.RotatePoint( refUpDir );
-		float	const cameraOffsetPp	= Vector3::DotProduct( upRefDirPostReticleRot, m_cameraOffset );
-		float	const refToTargetDistPp = refToTargetDispPp.GetLength();
+		Vector3	const pitchUpDir			= Quaternion( Vector3::RIGHT, -m_reticlePitchDegrees ).RotatePoint( Vector3::UP );
+		float	const cameraProjOnPitchUp	= Vector3::DotProduct( pitchUpDir, m_cameraOffset );
+		float	const refToTargetDistPp		= refToTargetDispPp.GetLength();
 		float	const additionaPitchDegrees = ( refToTargetDistPp != 0.f )
-												? RadianToDegree( asinf( cameraOffsetPp / refToTargetDistPp ) )
+												? RadianToDegree( asinf( cameraProjOnPitchUp / refToTargetDistPp ) )
 												: 0.f;
 		// Apply extra rotation
 		m_refRotPitch += additionaPitchDegrees;

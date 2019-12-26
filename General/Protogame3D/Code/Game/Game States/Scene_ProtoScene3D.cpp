@@ -43,7 +43,7 @@ void SetReticlePosSs( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
 }
 
-Vector2 Scene_ProtoScene3D::s_reticlePos = /*Vector2::ZERO*/Vector2( 0.f/*-45.f*/, -150.f );
+Vector2 Scene_ProtoScene3D::s_reticlePos = /*Vector2::ZERO*/Vector2( 60.f, 0.f/*-150.f*/ );
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -102,7 +102,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	m_scene->AddRenderable( *m_testCubeRenderable );
 
-	Vector3 const zoomCamOffset = /*Vector3(1.f, 1.f, -1.0f)*//*Vector3::ZERO*/Vector3(1.0f, 2.0f, -1.3f);
+	Vector3 const zoomCamOffset = Vector3(1.0f, 2.0f, -1.3f)/*Vector3::ZERO*/;
 	m_zoomCameraBehavior = new CB_ZoomCamera( Vector3::ZERO, 60.f, "ZoomCamera", m_cameraManager );
 	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
 	
@@ -113,10 +113,11 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_zoomCameraActive = true;
 
 	// Debug Camera
+	Vector3 const debugCamStartPos = Vector3( 3.f, 4.f, -22.f );
 	m_debugCBFreeLook = new CB_FreeLook( 7.f, 35.f, -90.f, 90.f, "DebugFreeLook", nullptr, USE_CONTROLLER_FL );
 	m_debugCamera = new DebugCamera( m_debugCBFreeLook, g_theInput );
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( 60.f, Window::GetInstance()->GetAspectRatio(), 0.1f, 1000.f );
-	m_debugCamera->SetCameraPositionTo( snowMikuPosition + Vector3(-10.f, 2.f, 10.f) );
+	m_debugCamera->SetCameraPositionTo( debugCamStartPos );
 	m_debugCamera->LookAt( m_debugCamera->m_cameraTransform.GetWorldPosition(), Vector3::ZERO, Vector3::UP );
 
 	m_targetPointWs = snowMikuPosition;
