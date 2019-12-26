@@ -43,7 +43,7 @@ void SetReticlePosSs( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
 }
 
-Vector2 Scene_ProtoScene3D::s_reticlePos = /*Vector2::ZERO*/Vector2( -45.f, 100.f );
+Vector2 Scene_ProtoScene3D::s_reticlePos = /*Vector2::ZERO*/Vector2( 0.f/*-45.f*/, -150.f );
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -102,7 +102,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	m_scene->AddRenderable( *m_testCubeRenderable );
 
-	Vector3 const zoomCamOffset = Vector3::ZERO/*Vector3(1.0f, 2.0f, -1.3f)*/;
+	Vector3 const zoomCamOffset = /*Vector3(1.f, 1.f, -1.0f)*//*Vector3::ZERO*/Vector3(1.0f, 2.0f, -1.3f);
 	m_zoomCameraBehavior = new CB_ZoomCamera( Vector3::ZERO, 60.f, "ZoomCamera", m_cameraManager );
 	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
 	
@@ -352,7 +352,7 @@ void Scene_ProtoScene3D::DebugRenderZoomCamera() const
 	DebugRenderLineSegment( 0.f, cameraPos, RGBA_WHITE_COLOR, cameraPos + ( refDirWs * 100.f ), RGBA_ORANGE_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_USE_DEPTH );
 
 	// Reticle
-	DebugRender2DRound( 0.f, s_reticlePos, 5.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
+	DebugRender2DRound( 0.f, s_reticlePos, 3.5f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR );
 }
 
 Vector3 Scene_ProtoScene3D::GetDirectionWsFromReticleOffsetX( float offsetFromCenter ) const

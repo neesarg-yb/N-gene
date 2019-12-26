@@ -177,10 +177,13 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		//             |a/            
 		//  Yaw Plane  |/_____________ (ref right dir)
 		//    (Yp)     * ref         X 
-		m_refRotYaw = atan2fDegree( refToTargetDispYp.x, refToTargetDispYp.y ) - m_reticleYawDegrees;
+		m_refRotYaw  = atan2fDegree( refToTargetDispYp.x, refToTargetDispYp.y );	// Without any reticle offset, this would work
+		m_refRotYaw -= m_reticleYawDegrees;											// Because we have the reticle offset, we need to rotate by this much, extra
 
 		// Calculate extra rotation, so the camera looks at the target
-		float	const cameraOffsetYp	= Vector3::DotProduct( refRightDir, m_cameraOffset );
+		Quaternion	const reticleYawRotation		= Quaternion( Vector3::UP, -m_reticleYawDegrees );
+		Vector3		const rightRefDirPostReticleRot	= reticleYawRotation.RotatePoint( refRightDir );
+		float	const cameraOffsetYp	= Vector3::DotProduct( rightRefDirPostReticleRot, m_cameraOffset );
 		float	const refToTargetDistYp	= refToTargetDispYp.GetLength();
 		float	const additionalYawDegrees = ( refToTargetDistYp != 0.f ) 
 												? RadianToDegree( asinf( cameraOffsetYp / refToTargetDistYp ) )
@@ -194,7 +197,8 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		Quaternion	const refPostYawRot	= Quaternion( Vector3::UP, m_refRotYaw );
 		Vector3		const refFrontDir	= refPostYawRot.GetFront();
 		Vector3		const refUpDir		= refPostYawRot.GetUp();
-		
+		Vector3		const refRightDir	= refPostYawRot.GetRight();
+
 		// For 2D calculations in Pitch Plane (Pp)
 		float	const x = Vector3::DotProduct( refFrontDir, refToTargetDisp );
 		float	const y = Vector3::DotProduct( refUpDir, refToTargetDisp );
@@ -211,11 +215,14 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		//           m_refRotPitch = a \ |  a = -atan( y / x );		// Reference rotates anti clock-wise, if viewed from Pp
 		//                ______________\| 
 		// (ref front dir) X             * ref
-		m_refRotPitch = -atan2fDegree( refToTargetDispPp.y, refToTargetDispPp.x ) - m_reticlePitchDegrees;
+		m_refRotPitch  = -1.f * atan2fDegree( refToTargetDispPp.y, refToTargetDispPp.x );	// Without any reticle offset, this would work
+		m_refRotPitch -= m_reticlePitchDegrees;												// Because we have the reticle offset, we need to rotate by this much, extra
 
 		// Calculate extra rotation, so that the camera looks at the target
+		Quaternion	const reticlePitchRotation	 = Quaternion(refRightDir * -1.f, -m_reticlePitchDegrees);
+		Vector3		const upRefDirPostReticleRot = reticlePitchRotation.RotatePoint( refUpDir );
+		float	const cameraOffsetPp	= Vector3::DotProduct( upRefDirPostReticleRot, m_cameraOffset );
 		float	const refToTargetDistPp = refToTargetDispPp.GetLength();
-		float	const cameraOffsetPp	= Vector3::DotProduct( refUpDir, m_cameraOffset );
 		float	const additionaPitchDegrees = ( refToTargetDistPp != 0.f )
 												? RadianToDegree( asinf( cameraOffsetPp / refToTargetDistPp ) )
 												: 0.f;
