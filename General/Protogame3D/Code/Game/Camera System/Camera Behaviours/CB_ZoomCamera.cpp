@@ -177,7 +177,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		//             |a/            
 		//  Yaw Plane  |/_____________ (ref right dir)
 		//    (Yp)     * ref         X 
-		m_refRotYaw = atan2fDegree( refToTargetDispYp.x, refToTargetDispYp.y );
+		m_refRotYaw = atan2fDegree( refToTargetDispYp.x, refToTargetDispYp.y ) - m_reticleYawDegrees;
 
 		// Calculate extra rotation, so the camera looks at the target
 		float	const cameraOffsetYp	= Vector3::DotProduct( refRightDir, m_cameraOffset );
@@ -211,7 +211,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		//           m_refRotPitch = a \ |  a = -atan( y / x );		// Reference rotates anti clock-wise, if viewed from Pp
 		//                ______________\| 
 		// (ref front dir) X             * ref
-		m_refRotPitch = -1.0f * atan2fDegree( refToTargetDispPp.y, refToTargetDispPp.x );
+		m_refRotPitch = -atan2fDegree( refToTargetDispPp.y, refToTargetDispPp.x ) - m_reticlePitchDegrees;
 
 		// Calculate extra rotation, so that the camera looks at the target
 		float	const refToTargetDistPp = refToTargetDispPp.GetLength();
