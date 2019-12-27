@@ -8,16 +8,16 @@ public:
 	~CB_ZoomCamera();
 
 private:
-	float		m_refRotYaw			= 0.f;
-	float		m_refRotPitch		= 0.f;
+	float		m_refRotYawWs			= 0.f;
+	float		m_refRotPitchWs			= 0.f;
 
-	float		m_reticleYawDegrees   = 0.f;			// Because of the reticle offset
-	float		m_reticlePitchDegrees = 0.f;
-	float		m_camYawExtraRot	  = 0.f;
-	float		m_camPitchExtraRot	  = 0.f;
+	float		m_reticleYawDegreesWs	= 0.f;			// Because of the reticle offset
+	float		m_reticlePitchDegreesWs	= 0.f;
+	float		m_camYawExtraRot		= 0.f;
+	float		m_camPitchExtraRot		= 0.f;
 
-	float const	m_minPitchDegrees	= -90.f;
-	float const m_maxPitchDegrees	=  90.f;
+	float const	m_minPitchDegrees		= -90.f;
+	float const m_maxPitchDegrees		=  90.f;
 
 	IntVector2	m_reticleOffset		= IntVector2::ZERO;	// In screen space
 
