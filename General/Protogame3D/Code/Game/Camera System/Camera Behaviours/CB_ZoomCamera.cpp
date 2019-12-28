@@ -163,7 +163,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 	// Make the reticle look at the target yaw
 	{
 		// Step 1: 
-		// Make reference's yaw look at the target                                                                    
+		// Make reference's forward look at the target                                                                    
 		//                                                       //                                                   
 		//   (forward) Y |                                       //          (up) Y |                                 
 		//               |                                       //                 |                                 
@@ -185,7 +185,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		refFinalRotation = refFinalRotation.Multiply( rotRefLookAtTarget );
 
 		// Step 2:
-		// If the camera is at reference position, make its reticle look at target
+		// If the camera is at reference position, make its reticle x-offset look at target
 		Quaternion const rotReticleLookAtTargetDelta = Quaternion( Vector3::UP, -m_reticleYawDegreesWs );
 		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTargetDelta );
 
@@ -236,8 +236,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		Vector3 const rppUpDir		= reticlePitchPlaneOrienatation.GetUp();
 		Vector3 const rppRightDir	= reticlePitchPlaneOrienatation.GetRight();
 		Vector3 const rppForwardDir	= reticlePitchPlaneOrienatation.GetFront();
-		DebugRenderVector( 30.f, Vector3::ZERO, rppRightDir, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
-		
+
 		Vector2 const refPosRpp = Vector2::ZERO;
 		Vector2 targetRpp;
 		{
@@ -250,7 +249,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTarget );
 
 		// Step 2:
-		// If the camera was on reference pos, make it's reticle y-offset look at the target
+		// If the camera was on reference pos, make its reticle y-offset look at the target
 		Quaternion const rotReticleLookAtTargetDelta = Quaternion( rppRightDir, -m_reticlePitchDegreesWs );
 		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTargetDelta );
 
@@ -262,12 +261,12 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 			//                 camera *.                p = extra rotation 
 			//                       /   ^ .                on reticle dir 
 			//                      /        ^ .            (from ref pos) 
-			//                     /___________(_^_                        
+			//               (0,0) /___________(_^_                        
 			//                ref *. ) p           * target                
 			//    Reticle     pos    ^ .          /                        
 			//  Pitch Plane              ^ .     /                         
 			//    (Rpp)                      ^ ./                          
-			Vector3	const reticleUpDir		= Quaternion( Vector3::RIGHT, m_reticlePitchDegreesWs ).RotatePoint( Vector3::UP );		// TODO: Do we want Vector3::RIGHT here?
+			Vector3	const reticleUpDir		= Quaternion( Vector3::RIGHT, m_reticlePitchDegreesWs ).RotatePoint( Vector3::UP );		// TODO: Do we want Vector3::RIGHT here? rppRightDir is not equal to refRightDir, won't it matter?
 			float	const refToCamProj		= Vector3::DotProduct( reticleUpDir, m_cameraOffset );									// TODO: Double check if the reticleUpDir we're getting is the correct one for using here
 			float	const refToTargetLenRpp	= targetRpp.GetLength();
 			float	const pitchAngleRadians	= asinf( refToCamProj / refToTargetLenRpp );
@@ -278,8 +277,10 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 	}
 
 	m_referenceTranform.SetQuaternion( refFinalRotation );
+	
+	TODO( "Calculate m_refRotYawWs & m_refRotPitchWs from the refFinalRotation. We don't want any roll." );
+	TODO( "Restrict pitch as per m_minPitchDegrees & m_maxPitchDegrees" );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );
-	TODO( "Restrict pitch as per m_minPitchDegrees & m_maxPitchDegrees" );
 }
