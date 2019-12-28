@@ -156,14 +156,16 @@ void CB_ZoomCamera::SetReticleOffset( IntVector2 reticleOffsetSs )
 void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 {
 	Vector3 const refToTargetDisp = targetWs - m_referenceTranform.GetWorldPosition();
+	
 	Quaternion refFinalRotation = Quaternion::IDENTITY;
+	Quaternion refToTargetOrientationYaw = Quaternion::IDENTITY;
 	
 	// Make the reticle look at the target yaw
 	{
 		// Step 1: 
 		// Make reference's yaw look at the target                                                                    
 		//                                                       //                                                   
-		//   (forward) Y |                                       //         (up)  Y |                                 
+		//   (forward) Y |                                       //          (up) Y |                                 
 		//               |                                       //                 |                                 
 		//               |    * target                           //                 |    / Z (forward)                
 		//               |   /               a = angle to look   //                 |   /                  LEFT HANDED
@@ -181,6 +183,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		float const refLookAtTargetDeg = atan2fDegree( targetYp.x, targetYp.y );
 		Quaternion const rotRefLookAtTarget = Quaternion( Vector3::UP, refLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotRefLookAtTarget );
+		refToTargetOrientationYaw = refFinalRotation;
 
 		// Step 2:
 		// If the camera is at reference position, make its reticle look at target
@@ -194,11 +197,11 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 			//                                               
 			//           * target        a = extra rotation  
 			//          .|\                  on reticle dir  
-			//       . ` |a\                 (from ref pos)  
+			//       .`  |a\                 (from ref pos)  
 			//       \   |  \                                
 			// reticle\  |   \                               
 			//    dir  \a|    * cam     Yaw Plane            
-			//          \| . `            (Yp)               
+			//          \| .`             (Yp)               
 			//    (0,0)  * ref                               
 			Vector3	const reticleRightDir	= Quaternion( Vector3::UP, m_reticleYawDegreesWs ).RotatePoint( Vector3::RIGHT );
 			float	const refToCamProj		= Vector3::DotProduct( reticleRightDir, m_cameraOffset );
@@ -214,8 +217,40 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 	// Make the reticle look at the target pitch
 	{
 		// Note:
-		// Reticle is looking at the target's yaw
-		//  to maintain its yaw, we'll APPLY THE PITCH ON RETICLE DIR'S RIGHT AXES
+		// Reticle is already looking at the target's yaw.
+		// So, to maintain its yaw, we'll APPLY THE PITCH ON RETICLE DIR'S RIGHT AXES.
+
+		// Step 1:
+		// Make the reticle look at target pitch, as if the camera was at reference pos
+		//                                                                                                              
+		//                                                        //                                                    
+		//      (up) Y |                                          //           (up) Y |                                 
+		//             |     *  target                            //                  |                                 
+		//   Reticle   |    /                                     //                  |    / Z (forward)                
+		// Pitch Plane |   /             p = angle to look        //                  |   /                  LEFT HANDED
+		//   (Rpp)     |  /                     at target         //    World Space   |  /                      SYSTEM  
+		//             | / p                                      //       (Ws)       | /                               
+		//             |/________________                         //                  |/________________                
+		//       (0,0) *  ref pos       X (forward)               //          (0,0,0) * origin        X (right)         
+		Vector3 const rppUpDir = refToTargetOrientationYaw.GetUp();
+		Vector3 const rppRightDir = refToTargetOrientationYaw.GetRight();
+		Vector3 const rppForwardDir = refToTargetOrientationYaw.GetFront();
+		
+		Vector2 const refPosRpp = Vector2::ZERO;
+		Vector2 targetRpp;
+		{
+			targetRpp.x = Vector3::DotProduct( rppForwardDir, refToTargetDisp );
+			targetRpp.y = Vector3::DotProduct( rppUpDir, refToTargetDisp );
+		}
+
+		float const reticleLookAtTargetDeg = atan2fDegree( targetRpp.y, targetRpp.x );
+		Quaternion const rotReticleLookAtTarget = Quaternion( rppRightDir, -reticleLookAtTargetDeg );
+		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTarget );
+
+		// Step 2:
+		// If the camera was on reference pos, make it's reticle y-offset look at the target
+		Quaternion const rotReticleLookAtTargetDelta = Quaternion( rppRightDir, -m_reticlePitchDegreesWs );
+		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTargetDelta );
 	}
 
 
