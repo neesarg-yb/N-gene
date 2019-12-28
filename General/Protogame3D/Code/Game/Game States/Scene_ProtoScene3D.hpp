@@ -73,7 +73,7 @@ private:
 	// Zoom Camera
 	void SpawnTargetOnSpaceBar();
 	void UpdateZoomCameraYawOffset( float deltaSeconds );
-	void RenderTarget() const;
+	void DebugRenderTarget() const;
 	void DebugRenderZoomCamera() const;
 
 	Vector3 GetDirectionWsFromReticleOffsetX( float offsetFromCenter ) const;

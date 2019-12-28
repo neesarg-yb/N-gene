@@ -62,8 +62,8 @@ void CB_ZoomCamera::UpdateReferenceRotation()
 	Vector2 const mousePosDelta = m_inputSystem ? m_inputSystem->GetMouseDelta() : Vector2::ZERO;
 	
 	// Yaw
-	float const deltaYawDegrees = m_mouseSensitivity * mousePosDelta.x;
-	m_refRotYawWs += deltaYawDegrees;
+	// float const deltaYawDegrees = m_mouseSensitivity * mousePosDelta.x;
+	// m_refRotYawWs += deltaYawDegrees;
 
 	// Pitch
 	float const deltaPitchDegrees = m_mouseSensitivity * mousePosDelta.y;
@@ -71,11 +71,13 @@ void CB_ZoomCamera::UpdateReferenceRotation()
 	if( allowedDeltaPitch.Includes( deltaPitchDegrees ) )
 		m_refRotPitchWs += deltaPitchDegrees;
 	
-	Quaternion const yawRot		= Quaternion( Vector3::UP, m_refRotYawWs );
-	Quaternion const pitchRot	= Quaternion( yawRot.GetRight(), m_refRotPitchWs );
+	Quaternion const yawRot			= Quaternion( Vector3::UP, m_refRotYawWs );
+	Quaternion const pitchRot		= Quaternion( yawRot.GetRight(), m_refRotPitchWs );
+	// Quaternion const yawRticleRot	= Quaternion( Vector3::UP, m_refRotYawWs + m_reticleYawDegreesWs );
+	// Quaternion const pitchRot		= Quaternion( yawRticleRot.GetRight(), m_refRotPitchWs );
 
 	// Set final rotation
-	m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
+	// m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
 }
 
 void CB_ZoomCamera::GetExtraRotationForReticleOffset( Vector2 const &reticlePos, Vector2 const screenDimensions, float &yawDegrees_out, float &pitchDegrees_out )
@@ -153,8 +155,13 @@ void CB_ZoomCamera::SetReticleOffset( IntVector2 reticleOffsetSs )
 
 void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 {
+	TODO("FIXME: Pitch is inaccurate. Yaw is accurate only when the camera's y-coord is similar to target's y-coord.");
+
 	Vector3 const refPosWs			= m_referenceTranform.GetWorldPosition();
 	Vector3 const refToTargetDisp	= targetWs - refPosWs;
+	
+	Quaternion refFinalRotationWs	= Quaternion::IDENTITY;
+	Quaternion reticleRotationWs	= Quaternion::IDENTITY;
 	
 	// Calculate for yaw
 	{
@@ -200,11 +207,14 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 												: 0.f;
 		// Apply the extra rotation
 		m_refRotYawWs += -1.f * additionalYawDegrees;
+
+		refFinalRotationWs	= refFinalRotationWs.Multiply( Quaternion( Vector3::UP, m_refRotYawWs ) );
+		reticleRotationWs	= reticleRotationWs.Multiply( Quaternion( Vector3::UP, m_refRotYawWs + m_reticleYawDegreesWs ) );
 	}
 
 	// Calculate for pitch
 	{
-		Quaternion	const refPostYawRot	= Quaternion( Vector3::UP, m_refRotYawWs );
+		Quaternion	const refPostYawRot	= Quaternion( Vector3::UP, m_refRotYawWs + m_reticleYawDegreesWs );
 		Vector3		const refFrontDir	= refPostYawRot.GetFront();
 		Vector3		const refUpDir		= refPostYawRot.GetUp();
 
@@ -247,7 +257,11 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 												: 0.f;
 		// Apply extra rotation
 		m_refRotPitchWs += additionaPitchDegrees;
+
+		refFinalRotationWs = refFinalRotationWs.Multiply( Quaternion(reticleRotationWs.GetRight(), m_refRotPitchWs) );
 	}
+
+	m_referenceTranform.SetQuaternion( refFinalRotationWs );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );

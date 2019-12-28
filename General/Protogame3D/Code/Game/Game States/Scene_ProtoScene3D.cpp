@@ -43,7 +43,7 @@ void SetReticlePosSs( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
 }
 
-Vector2 Scene_ProtoScene3D::s_reticlePos = Vector2::ZERO/*Vector2( 60.f, -150.f )*/;
+Vector2 Scene_ProtoScene3D::s_reticlePos = /*Vector2::ZERO*/Vector2( 60.f, 0.f/*-150.f*/ );
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
@@ -113,7 +113,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	m_zoomCameraActive = true;
 
 	// Debug Camera
-	Vector3 const debugCamStartPos = Vector3( 3.f, 4.f, -22.f );
+	Vector3 const debugCamStartPos = Vector3( 3.f, -28.f, -22.f );
 	m_debugCBFreeLook = new CB_FreeLook( 7.f, 35.f, -90.f, 90.f, "DebugFreeLook", nullptr, USE_CONTROLLER_FL );
 	m_debugCamera = new DebugCamera( m_debugCBFreeLook, g_theInput );
 	m_debugCamera->SetPerspectiveCameraProjectionMatrix( 60.f, Window::GetInstance()->GetAspectRatio(), 0.1f, 1000.f );
@@ -260,7 +260,7 @@ void Scene_ProtoScene3D::Render( Camera *gameCamera ) const
 	PROFILE_SCOPE_FUNCTION();
 
 	// Target Ws
-	RenderTarget();
+	DebugRenderTarget();
 	DebugRenderZoomCamera();
 
 	// Ambient Light
@@ -333,9 +333,16 @@ void Scene_ProtoScene3D::UpdateZoomCameraYawOffset( float deltaSeconds )
 	DebugRender2DText( 0.f, Vector2( -850.f, 380.f ), 15.f, RGBA_RED_COLOR, RGBA_RED_COLOR, debExtraYawRotText.c_str() );
 }
 
-void Scene_ProtoScene3D::RenderTarget() const
+void Scene_ProtoScene3D::DebugRenderTarget() const
 {
+	// 3D Cross
 	DebugRenderPoint( 0.0f, 1.5f, m_targetPointWs, RGBA_RED_COLOR, RGBA_RED_COLOR, DEBUG_RENDER_XRAY );
+
+	// Vertical line
+	float const length = 100.f;
+	Vector3 const lineBottom = m_targetPointWs + Vector3( 0.f, -length * 0.5f, 0.f );
+	Vector3 const lineTop = m_targetPointWs + Vector3( 0.f, length * 0.5f, 0.f );
+	DebugRenderLineSegment( 0.f, lineBottom, RGBA_RED_COLOR, lineTop, RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 }
 
 void Scene_ProtoScene3D::DebugRenderZoomCamera() const
