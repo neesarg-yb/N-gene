@@ -71,13 +71,13 @@ void CB_ZoomCamera::UpdateReferenceRotation()
 	if( allowedDeltaPitch.Includes( deltaPitchDegrees ) )
 		m_refRotPitchWs += deltaPitchDegrees;
 	
-	Quaternion const yawRot			= Quaternion( Vector3::UP, m_refRotYawWs );
-	Quaternion const pitchRot		= Quaternion( yawRot.GetRight(), m_refRotPitchWs );
+	// Quaternion const yawRot			= Quaternion( Vector3::UP, m_refRotYawWs );
+	// Quaternion const pitchRot		= Quaternion( yawRot.GetRight(), m_refRotPitchWs );
 	// Quaternion const yawRticleRot	= Quaternion( Vector3::UP, m_refRotYawWs + m_reticleYawDegreesWs );
 	// Quaternion const pitchRot		= Quaternion( yawRticleRot.GetRight(), m_refRotPitchWs );
 
 	// Set final rotation
-	// m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
+	// m_referenceTranform.SetQuaternion( m_referenceTranform.GetQuaternion().Multiply(pitchRot) );
 }
 
 void CB_ZoomCamera::GetExtraRotationForReticleOffset( Vector2 const &reticlePos, Vector2 const screenDimensions, float &yawDegrees_out, float &pitchDegrees_out )
@@ -155,113 +155,71 @@ void CB_ZoomCamera::SetReticleOffset( IntVector2 reticleOffsetSs )
 
 void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 {
-	TODO("FIXME: Pitch is inaccurate. Yaw is accurate only when the camera's y-coord is similar to target's y-coord.");
-
-	Vector3 const refPosWs			= m_referenceTranform.GetWorldPosition();
-	Vector3 const refToTargetDisp	= targetWs - refPosWs;
+	Vector3 const refToTargetDisp = targetWs - m_referenceTranform.GetWorldPosition();
+	Quaternion refFinalRotation = Quaternion::IDENTITY;
 	
-	Quaternion refFinalRotationWs	= Quaternion::IDENTITY;
-	Quaternion reticleRotationWs	= Quaternion::IDENTITY;
-	
-	// Calculate for yaw
+	// Make the reticle look at the target yaw
 	{
-		Vector3 const refRightDir = Vector3::RIGHT;
-		Vector3 const refFrontDir = Vector3::FRONT;
+		// Step 1: 
+		// Make reference's yaw look at the target                                                                    
+		//                                                       //                                                   
+		//   (forward) Y |                                       //         (up)  Y |                                 
+		//               |                                       //                 |                                 
+		//               |    * target                           //                 |    / Z (forward)                
+		//               |   /               a = angle to look   //                 |   /                  LEFT HANDED
+		//   Yaw Plane   |  /                      at target     //   World Space   |  /                      SYSTEM  
+		//     (Yp)      |a/                                     //      (Ws)       | /                               
+		//               |/_______________                       //                 |/________________                
+		//         (0,0) * ref pos       X (right)               //         (0,0,0) * origin        X (right)         
+		Vector2 const refPosYp = Vector2::ZERO;
+		Vector2 targetYp;
+		{
+			targetYp.y = Vector3::DotProduct( Vector3::FRONT, refToTargetDisp );
+			targetYp.x = Vector3::DotProduct( Vector3::RIGHT, refToTargetDisp );
+		}
 
-		// 2D Calculation in Yaw Plane (Yp)
-		float	const x = Vector3::DotProduct( refRightDir, refToTargetDisp );
-		float	const y = Vector3::DotProduct( refFrontDir, refToTargetDisp );
-		Vector2	const refToTargetDispYp = Vector2( x, y );
+		float const refLookAtTargetDeg = atan2fDegree( targetYp.x, targetYp.y );
+		Quaternion const rotRefLookAtTarget = Quaternion( Vector3::UP, refLookAtTargetDeg );
+		refFinalRotation = refFinalRotation.Multiply( rotRefLookAtTarget );
 
-		// Make the reference to look at the target
-		//
-		//      (ref front dir)
-		//           Y |              
-		//             |     * target 
-		//             |    /         
-		//             |   /          
-		//             |  /            a = m_refRotYaw = atan( x / y );		// Referece rotates clock-wise, if viewed from Yp
-		//             |a/            
-		//  Yaw Plane  |/_____________ (ref right dir)
-		//    (Yp)     * ref         X 
-		float const refRotLookAtTargetYp = atan2fDegree( refToTargetDispYp.x, refToTargetDispYp.y );	// Without any reticle offset, makes the reference-yaw look at target
-		m_refRotYawWs  = refRotLookAtTargetYp;
-		m_refRotYawWs -= m_reticleYawDegreesWs;															// Because we have the reticle offset, we need to rotate by this much, extra
+		// Step 2:
+		// If the camera is at reference position, make its reticle look at target
+		Quaternion const rotReticleLookAtTargetDelta = Quaternion( Vector3::UP, -m_reticleYawDegreesWs );
+		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTargetDelta );
 
-		// Calculate extra rotation, so the camera looks at the target
-		//
-		//          (up dir)                  _____________
-		//            Y |                    |    Note:    |
-		//              |   (front dir)      | Left handed |
-		//              |    /               |    system   |
-		//              |   / Z               -------------
-		//              |  /                       
-		//              | /                        
-		//  World Space |/_____________ (right dir)
-		//     (Ws)     * origin      X            
-		Vector3	const yawRightDir			= Quaternion( Vector3::UP, m_reticleYawDegreesWs ).RotatePoint( Vector3::RIGHT );
-		float	const cameraProjOnYawRight	= Vector3::DotProduct( yawRightDir, m_cameraOffset );
-		float	const refToTargetDistYp		= refToTargetDispYp.GetLength();
-		float	const additionalYawDegrees	= ( refToTargetDistYp != 0.f ) 
-												? RadianToDegree( asinf( cameraProjOnYawRight / refToTargetDistYp ) )
-												: 0.f;
-		// Apply the extra rotation
-		m_refRotYawWs += -1.f * additionalYawDegrees;
-
-		refFinalRotationWs	= refFinalRotationWs.Multiply( Quaternion( Vector3::UP, m_refRotYawWs ) );
-		reticleRotationWs	= reticleRotationWs.Multiply( Quaternion( Vector3::UP, m_refRotYawWs + m_reticleYawDegreesWs ) );
+		// Step 3:
+		// Consider the camera-offset from reference pos. Apply extra rotation to make the camera's reticle look at target
+		float camOffsetLookAtTargetDeg = 0.f;
+		{
+			//                                               
+			//           * target        a = extra rotation  
+			//          .|\                  on reticle dir  
+			//       . ` |a\                 (from ref pos)  
+			//       \   |  \                                
+			// reticle\  |   \                               
+			//    dir  \a|    * cam     Yaw Plane            
+			//          \| . `            (Yp)               
+			//    (0,0)  * ref                               
+			Vector3	const reticleRightDir	= Quaternion( Vector3::UP, m_reticleYawDegreesWs ).RotatePoint( Vector3::RIGHT );
+			float	const refToCamProj		= Vector3::DotProduct( reticleRightDir, m_cameraOffset );
+			float	const refToTargetLen	= targetYp.GetLength();
+			float	const angleRadians		= asinf( refToCamProj / refToTargetLen );
+			
+			camOffsetLookAtTargetDeg = RadianToDegree( angleRadians );
+		}
+		Quaternion const rotCamOffsetLookAtTargetDelta = Quaternion( Vector3::UP, -camOffsetLookAtTargetDeg );
+		refFinalRotation = refFinalRotation.Multiply( rotCamOffsetLookAtTargetDelta );
 	}
 
-	// Calculate for pitch
+	// Make the reticle look at the target pitch
 	{
-		Quaternion	const refPostYawRot	= Quaternion( Vector3::UP, m_refRotYawWs + m_reticleYawDegreesWs );
-		Vector3		const refFrontDir	= refPostYawRot.GetFront();
-		Vector3		const refUpDir		= refPostYawRot.GetUp();
-
-		// For 2D calculations in Pitch Plane (Pp)
-		float	const x = Vector3::DotProduct( refFrontDir, refToTargetDisp );
-		float	const y = Vector3::DotProduct( refUpDir, refToTargetDisp );
-		Vector2	const refToTargetDispPp	= Vector2( x, y );
-
-		// Make the reference to look at target (as far as pitch is concerned)
-		//
-		//  Pitch Plane             (ref up dir)
-		//      (Pp)                     | Y
-		//                  target *     | 
-		//                          \    | 
-		//                           \   | 
-		//                            \  | 
-		//           m_refRotPitch = a \ |  a = -atan( y / x );		// Reference rotates anti clock-wise, if viewed from Pp
-		//                ______________\| 
-		// (ref front dir) X             * ref
-		float const refRotLookAtTargetPp = atan2fDegree( refToTargetDispPp.y, refToTargetDispPp.x );	// Without any reticle offset, makes the reference-pitch look at target
-		m_refRotPitchWs  = -1.f * refRotLookAtTargetPp;
-		m_refRotPitchWs -= m_reticlePitchDegreesWs;														// Because we have the reticle offset, we need to rotate by this much, extra
-
-		// Calculate extra rotation, so that the camera looks at the target
-		//
-		//          (up dir)                  _____________
-		//            Y |                    |    Note:    |
-		//              |   (front dir)      | Left handed |
-		//              |    /               |    system   |
-		//              |   / Z               -------------
-		//              |  /                       
-		//              | /                        
-		//  World Space |/_____________ (right dir)
-		//     (Ws)     * origin      X            
-		Vector3	const pitchUpDir			= Quaternion( Vector3::RIGHT, -m_reticlePitchDegreesWs ).RotatePoint( Vector3::UP );
-		float	const cameraProjOnPitchUp	= Vector3::DotProduct( pitchUpDir, m_cameraOffset );
-		float	const refToTargetDistPp		= refToTargetDispPp.GetLength();
-		float	const additionaPitchDegrees = ( refToTargetDistPp != 0.f )
-												? RadianToDegree( asinf( cameraProjOnPitchUp / refToTargetDistPp ) )
-												: 0.f;
-		// Apply extra rotation
-		m_refRotPitchWs += additionaPitchDegrees;
-
-		refFinalRotationWs = refFinalRotationWs.Multiply( Quaternion(reticleRotationWs.GetRight(), m_refRotPitchWs) );
+		// Note:
+		// Reticle is looking at the target's yaw
+		//  to maintain its yaw, we'll APPLY THE PITCH ON RETICLE DIR'S RIGHT AXES
 	}
 
-	m_referenceTranform.SetQuaternion( refFinalRotationWs );
+
+	m_referenceTranform.SetQuaternion( refFinalRotation );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );

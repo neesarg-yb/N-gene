@@ -43,7 +43,7 @@ void SetReticlePosSs( Command &cmd )
 	ConsolePrintf( RGBA_GREEN_COLOR, "Reticle offset set to [%d, %d]", xOffset, yOffset );
 }
 
-Vector2 Scene_ProtoScene3D::s_reticlePos = /*Vector2::ZERO*/Vector2( 60.f, 0.f/*-150.f*/ );
+Vector2 Scene_ProtoScene3D::s_reticlePos = /*Vector2::ZERO*/Vector2( -100.f, 0.f/*-150.f*/ );
 
 Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 	: GameState( "PROTOSCENE 3D", parentClock )
