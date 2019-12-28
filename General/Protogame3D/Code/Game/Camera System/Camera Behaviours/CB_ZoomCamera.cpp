@@ -158,7 +158,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 	Vector3 const refToTargetDisp = targetWs - m_referenceTranform.GetWorldPosition();
 	
 	Quaternion refFinalRotation = Quaternion::IDENTITY;
-	Quaternion refToTargetOrientationYaw = Quaternion::IDENTITY;
+	Quaternion reticlePitchPlaneOrienatation = Quaternion::IDENTITY;
 	
 	// Make the reticle look at the target yaw
 	{
@@ -183,7 +183,6 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		float const refLookAtTargetDeg = atan2fDegree( targetYp.x, targetYp.y );
 		Quaternion const rotRefLookAtTarget = Quaternion( Vector3::UP, refLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotRefLookAtTarget );
-		refToTargetOrientationYaw = refFinalRotation;
 
 		// Step 2:
 		// If the camera is at reference position, make its reticle look at target
@@ -212,13 +211,15 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		}
 		Quaternion const rotCamOffsetLookAtTargetDelta = Quaternion( Vector3::UP, -camOffsetLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotCamOffsetLookAtTargetDelta );
+
+		reticlePitchPlaneOrienatation = Quaternion( Vector3::UP, refLookAtTargetDeg - camOffsetLookAtTargetDeg );		// TODO: Why the hell rotation on its right dir maintains the reticle yaw?!
 	}
 
 	// Make the reticle look at the target pitch
 	{
 		// Note:
 		// Reticle is already looking at the target's yaw.
-		// So, to maintain its yaw, we'll APPLY THE PITCH ON RETICLE DIR'S RIGHT AXES.
+		// So, to maintain its yaw, we'll APPLY THE PITCH ON AN AXIS WHICH MAINTAINS THE YAW
 
 		// Step 1:
 		// Make the reticle look at target pitch, as if the camera was at reference pos
@@ -232,9 +233,10 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		//             | / p                                      //       (Ws)       | /                               
 		//             |/________________                         //                  |/________________                
 		//       (0,0) *  ref pos       X (forward)               //          (0,0,0) * origin        X (right)         
-		Vector3 const rppUpDir = refToTargetOrientationYaw.GetUp();
-		Vector3 const rppRightDir = refToTargetOrientationYaw.GetRight();
-		Vector3 const rppForwardDir = refToTargetOrientationYaw.GetFront();
+		Vector3 const rppUpDir		= reticlePitchPlaneOrienatation.GetUp();
+		Vector3 const rppRightDir	= reticlePitchPlaneOrienatation.GetRight();
+		Vector3 const rppForwardDir	= reticlePitchPlaneOrienatation.GetFront();
+		DebugRenderVector( 30.f, Vector3::ZERO, rppRightDir, RGBA_KHAKI_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
 		
 		Vector2 const refPosRpp = Vector2::ZERO;
 		Vector2 targetRpp;
@@ -275,11 +277,9 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		refFinalRotation = refFinalRotation.Multiply( rotCameraOffsetLookAtTarget );
 	}
 
-
 	m_referenceTranform.SetQuaternion( refFinalRotation );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );
-
 	TODO( "Restrict pitch as per m_minPitchDegrees & m_maxPitchDegrees" );
 }
