@@ -102,7 +102,7 @@ Scene_ProtoScene3D::Scene_ProtoScene3D( Clock const *parentClock )
 
 	m_scene->AddRenderable( *m_testCubeRenderable );
 
-	Vector3 const zoomCamOffset = /*Vector3(1.0f, 2.0f, -1.3f)*/Vector3::ZERO;
+	Vector3 const zoomCamOffset = Vector3(1.0f, 2.0f, -1.3f)/*Vector3::ZERO*/;
 	m_zoomCameraBehavior = new CB_ZoomCamera( Vector3::ZERO, 60.f, "ZoomCamera", m_cameraManager );
 	m_zoomCameraBehavior->SetCameraOffsetFromReference( zoomCamOffset );
 	

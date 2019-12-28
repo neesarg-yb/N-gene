@@ -205,8 +205,8 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 			//    (0,0)  * ref                               
 			Vector3	const reticleRightDir	= Quaternion( Vector3::UP, m_reticleYawDegreesWs ).RotatePoint( Vector3::RIGHT );
 			float	const refToCamProj		= Vector3::DotProduct( reticleRightDir, m_cameraOffset );
-			float	const refToTargetLen	= targetYp.GetLength();
-			float	const angleRadians		= asinf( refToCamProj / refToTargetLen );
+			float	const refToTargetLenYp	= targetYp.GetLength();
+			float	const angleRadians		= asinf( refToCamProj / refToTargetLenYp );
 			
 			camOffsetLookAtTargetDeg = RadianToDegree( angleRadians );
 		}
@@ -251,6 +251,28 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		// If the camera was on reference pos, make it's reticle y-offset look at the target
 		Quaternion const rotReticleLookAtTargetDelta = Quaternion( rppRightDir, -m_reticlePitchDegreesWs );
 		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTargetDelta );
+
+		// Step 3:
+		// Consider camera-offset from reference pos. Apply extra rotation so the camera's reticle looks at the target
+		float camOffsetLookAtTargetDeg = 0.f;
+		{
+			//                                                             
+			//                 camera *.                p = extra rotation 
+			//                       /   ^ .                on reticle dir 
+			//                      /        ^ .            (from ref pos) 
+			//                     /___________(_^_                        
+			//                ref *. ) p           * target                
+			//    Reticle     pos    ^ .          /                        
+			//  Pitch Plane              ^ .     /                         
+			//    (Rpp)                      ^ ./                          
+			Vector3	const reticleUpDir		= Quaternion( Vector3::RIGHT, m_reticlePitchDegreesWs ).RotatePoint( Vector3::UP );		// TODO: Do we want Vector3::RIGHT here?
+			float	const refToCamProj		= Vector3::DotProduct( reticleUpDir, m_cameraOffset );									// TODO: Double check if the reticleUpDir we're getting is the correct one for using here
+			float	const refToTargetLenRpp	= targetRpp.GetLength();
+			float	const pitchAngleRadians	= asinf( refToCamProj / refToTargetLenRpp );
+			camOffsetLookAtTargetDeg = RadianToDegree( pitchAngleRadians );
+		}
+		Quaternion const rotCameraOffsetLookAtTarget = Quaternion( rppRightDir, camOffsetLookAtTargetDeg );
+		refFinalRotation = refFinalRotation.Multiply( rotCameraOffsetLookAtTarget );
 	}
 
 
