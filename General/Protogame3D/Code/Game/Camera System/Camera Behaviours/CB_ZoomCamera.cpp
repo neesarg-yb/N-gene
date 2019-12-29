@@ -280,8 +280,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 	// Note: 
 	// refFinalRotation will have roll in it, right?
 	// You can't just get rid of that roll & only extract the yaw-pitch of ref rotation. 
-	// -> Roll doesn't matter if the camera is at reference position.
-	// -> But as soon as the camera has some offset from ref pos, the roll in refFinalRotation matters for the ZoomCamera to look at the target.
+	// (B/c the roll in refFinalRotation matters for the ZoomCamera to look at the target)
 	//
 	// Sadly it defeats the purpose for us. Because we're in a model where roll can not be applied.
 	m_referenceTranform.SetQuaternion( refFinalRotation );
