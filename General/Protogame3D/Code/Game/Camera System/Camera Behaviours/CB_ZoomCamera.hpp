@@ -8,18 +8,18 @@ public:
 	~CB_ZoomCamera();
 
 private:
-	float		m_refRotYawWs			= 0.f;
-	float		m_refRotPitchWs			= 0.f;
+	float		m_refRotYawWs			= 0.f;				// Degrees
+	float		m_refRotPitchWs			= 0.f;				// Degrees
 
-	float		m_reticleYawDegreesWs	= 0.f;			// Because of the reticle offset
+	float		m_reticleYawDegreesWs	= 0.f;				// Because of the reticle offset
 	float		m_reticlePitchDegreesWs	= 0.f;
-	float		m_camYawExtraRot		= 0.f;
-	float		m_camPitchExtraRot		= 0.f;
+	float		m_camYawExtraRot		= 0.f;				// Degrees
+	float		m_camPitchExtraRot		= 0.f;				// Degrees
 
 	float const	m_minPitchDegrees		= -90.f;
 	float const m_maxPitchDegrees		=  90.f;
 
-	IntVector2	m_reticleOffset		= IntVector2::ZERO;	// In screen space
+	IntVector2	m_reticleOffset			= IntVector2::ZERO;	// In screen space
 
 	Transform	m_referenceTranform;
 	Vector3		m_cameraOffset;
@@ -28,7 +28,7 @@ private:
 	CameraState	m_cameraState;
 
 public:
-	float		m_mouseSensitivity = 0.5f;				// Multiplier to delta mouse pos.
+	float		m_mouseSensitivity = 0.5f;					// Multiplier to delta mouse pos.
 
 public:
 	void		PreUpdate() override;
@@ -38,7 +38,7 @@ public:
 private:
 	void		UpdateReferenceRotation();
 	void		GetExtraRotationForReticleOffset( Vector2 const &reticlePos, Vector2 const screenDimensions, float &yawDegrees_out, float &pitchDegrees_out );
-
+	
 public:
 	void		SetReferencePosition( Vector3 const &refPosWs );
 	void		SetCameraOffsetFromReference( Vector3 const &camOffset );

@@ -62,22 +62,23 @@ void CB_ZoomCamera::UpdateReferenceRotation()
 	Vector2 const mousePosDelta = m_inputSystem ? m_inputSystem->GetMouseDelta() : Vector2::ZERO;
 	
 	// Yaw
-	// float const deltaYawDegrees = m_mouseSensitivity * mousePosDelta.x;
-	// m_refRotYawWs += deltaYawDegrees;
+	float const deltaYawDegrees = m_mouseSensitivity * mousePosDelta.x;
+	m_refRotYawWs += deltaYawDegrees;
 
 	// Pitch
 	float const deltaPitchDegrees = m_mouseSensitivity * mousePosDelta.y;
 	FloatRange allowedDeltaPitch = FloatRange( m_minPitchDegrees - m_refRotPitchWs, m_maxPitchDegrees - m_refRotPitchWs );
 	if( allowedDeltaPitch.Includes( deltaPitchDegrees ) )
-		m_refRotPitchWs += deltaPitchDegrees;
+	 	m_refRotPitchWs += deltaPitchDegrees;
 	
-	// Quaternion const yawRot			= Quaternion( Vector3::UP, m_refRotYawWs );
-	// Quaternion const pitchRot		= Quaternion( yawRot.GetRight(), m_refRotPitchWs );
-	// Quaternion const yawRticleRot	= Quaternion( Vector3::UP, m_refRotYawWs + m_reticleYawDegreesWs );
-	// Quaternion const pitchRot		= Quaternion( yawRticleRot.GetRight(), m_refRotPitchWs );
+	Quaternion const yawRot		= Quaternion( Vector3::UP, m_refRotYawWs );
+	Quaternion const pitchRot	= Quaternion( yawRot.GetRight(), m_refRotPitchWs );
 
-	// Set final rotation
-	// m_referenceTranform.SetQuaternion( m_referenceTranform.GetQuaternion().Multiply(pitchRot) );
+	// For now, only the LookAtTargetPosition() sets ref orienatation. So leave it commented
+	{
+		// Set final rotation
+		// m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
+	}
 }
 
 void CB_ZoomCamera::GetExtraRotationForReticleOffset( Vector2 const &reticlePos, Vector2 const screenDimensions, float &yawDegrees_out, float &pitchDegrees_out )
@@ -212,15 +213,15 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		Quaternion const rotCamOffsetLookAtTargetDelta = Quaternion( Vector3::UP, -camOffsetLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotCamOffsetLookAtTargetDelta );
 
-		reticlePitchPlaneOrienatation = Quaternion( Vector3::UP, refLookAtTargetDeg - camOffsetLookAtTargetDeg );		// TODO: Why the hell rotation on its right dir maintains the reticle yaw?!
+		// Note:
+		// As of now, the reticle is already looking at the target as far as yaw is considered.
+		// So, to maintain its yaw, we can APPLY PITCH ROTATION ON THE RIGHT DIRECTION OF FOLLOWING ORIENTATION!
+		// P.S. : No matter how much reticle x-offset your ZoomCamera has, rotation along Right Dir of this orientation will maintain the reticle-yaw.
+		reticlePitchPlaneOrienatation = Quaternion( Vector3::UP, refLookAtTargetDeg - camOffsetLookAtTargetDeg );
 	}
 
 	// Make the reticle look at the target pitch
 	{
-		// Note:
-		// Reticle is already looking at the target's yaw.
-		// So, to maintain its yaw, we'll APPLY THE PITCH ON AN AXIS WHICH MAINTAINS THE YAW
-
 		// Step 1:
 		// Make the reticle look at target pitch, as if the camera was at reference pos
 		//                                                                                                              
@@ -276,10 +277,14 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		refFinalRotation = refFinalRotation.Multiply( rotCameraOffsetLookAtTarget );
 	}
 
+	// Note: 
+	// refFinalRotation will have roll in it, right?
+	// You can't just get rid of that roll & only extract the yaw-pitch of ref rotation. 
+	// -> Roll doesn't matter if the camera is at reference position.
+	// -> But as soon as the camera has some offset from ref pos, the roll in refFinalRotation matters for the ZoomCamera to look at the target.
+	//
+	// Sadly it defeats the purpose for us. Because we're in a model where roll can not be applied.
 	m_referenceTranform.SetQuaternion( refFinalRotation );
-	
-	TODO( "Calculate m_refRotYawWs & m_refRotPitchWs from the refFinalRotation. We don't want any roll." );
-	TODO( "Restrict pitch as per m_minPitchDegrees & m_maxPitchDegrees" );
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );

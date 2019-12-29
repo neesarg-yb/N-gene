@@ -280,11 +280,11 @@ void Scene_ProtoScene3D::CheckSwitchCameraBehavior()
 	if( g_theInput->WasKeyJustPressed( 'O' ) )
 		m_enableDebugOverlay = !m_enableDebugOverlay;
 
-	std::string debChangeOverlayText = Stringf( "[O] Change Debug Overlay");
-	DebugRender2DText( 0.f, Vector2( -850.f, 440.f ), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, debChangeOverlayText.c_str() );
-
 	std::string debChangeCamText = Stringf( "[C] Change Camera to %s", ( m_zoomCameraActive ? "FreeLook" : "ZoomCam" ) );
 	DebugRender2DText( 0.f, Vector2( -850.f, 460.f ), 15.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, debChangeCamText.c_str() );
+
+	std::string debChangeOverlayText = Stringf( "[O] Change Debug Overlay");
+	DebugRender2DText( 0.f, Vector2( -850.f, 440.f ), 15.f, RGBA_GRAY_COLOR, RGBA_GRAY_COLOR, debChangeOverlayText.c_str() );
 
 	if( !g_theInput->WasKeyJustPressed( 'C' ) )
 		return;
@@ -343,6 +343,16 @@ void Scene_ProtoScene3D::DebugRenderTarget() const
 	Vector3 const lineBottom = m_targetPointWs + Vector3( 0.f, -length * 0.5f, 0.f );
 	Vector3 const lineTop = m_targetPointWs + Vector3( 0.f, length * 0.5f, 0.f );
 	DebugRenderLineSegment( 0.f, lineBottom, RGBA_RED_COLOR, lineTop, RGBA_RED_COLOR, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, DEBUG_RENDER_XRAY );
+
+	// How to make ZoomCamera look at target
+	std::string debInstructionStr0 = "How to make ZoomCamera look at Target?";
+	std::string debInstructionStr1 = "(1) Use Xbox Controller to move the debug camera,";
+	std::string debInstructionStr2 = "(2) Use SPACE or Controller A-button to spawn the target,";
+	std::string debInstructionStr3 = "-> ZoomCamera should automatically look at the target!";
+	DebugRender2DText( 0.f, Vector2( -850.f, 360.f ), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, debInstructionStr0.c_str() );
+	DebugRender2DText( 0.f, Vector2( -850.f, 340.f ), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, debInstructionStr1.c_str() );
+	DebugRender2DText( 0.f, Vector2( -850.f, 320.f ), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, debInstructionStr2.c_str() );
+	DebugRender2DText( 0.f, Vector2( -850.f, 300.f ), 15.f, RGBA_GREEN_COLOR, RGBA_GREEN_COLOR, debInstructionStr3.c_str() );
 }
 
 void Scene_ProtoScene3D::DebugRenderZoomCamera() const
