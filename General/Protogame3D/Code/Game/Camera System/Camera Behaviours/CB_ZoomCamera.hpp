@@ -47,6 +47,7 @@ public:
 	void		SetReticleOffset( IntVector2 reticleOffsetSs );
 
 	void		LookAtTargetPosition( Vector3 const &targetWs );
+	bool		LookAtCalcDoesNotHaveRoll() const;
 
 	Transform	GetReferenceTransform() const { return m_referenceTranform; }
 	float		GetCameraYawExtraRotation() const { return m_camYawExtraRot; }

@@ -74,11 +74,11 @@ void CB_ZoomCamera::UpdateReferenceRotation()
 	Quaternion const yawRot		= Quaternion( Vector3::UP, m_refRotYawWs );
 	Quaternion const pitchRot	= Quaternion( yawRot.GetRight(), m_refRotPitchWs );
 
-	// For now, only the LookAtTargetPosition() sets ref orienatation. So leave it commented
-	{
-		// Set final rotation
-		// m_referenceTranform.SetQuaternion( yawRot.Multiply(pitchRot) );
-	}
+	// Set final rotation
+	if( LookAtCalcDoesNotHaveRoll() )
+		m_referenceTranform.SetQuaternion( yawRot.Multiply( pitchRot ) );
+	else
+		DebugRender2DText( 0.f, Vector2( -850.f, 280.f ), 15.f, RGBA_ORANGE_COLOR, RGBA_ORANGE_COLOR, "!! ZoomCamera control disabled b/c reticle x-offset is non-zero !!" );
 }
 
 void CB_ZoomCamera::GetExtraRotationForReticleOffset( Vector2 const &reticlePos, Vector2 const screenDimensions, float &yawDegrees_out, float &pitchDegrees_out )
@@ -160,6 +160,9 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 	
 	Quaternion refFinalRotation = Quaternion::IDENTITY;
 	Quaternion reticlePitchPlaneOrienatation = Quaternion::IDENTITY;
+
+	float calcPitchRotWs = m_refRotPitchWs;
+	float calcYawRotWs = m_refRotYawWs;
 	
 	// Make the reticle look at the target yaw
 	{
@@ -184,6 +187,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		float const refLookAtTargetDeg = atan2fDegree( targetYp.x, targetYp.y );
 		Quaternion const rotRefLookAtTarget = Quaternion( Vector3::UP, refLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotRefLookAtTarget );
+		calcYawRotWs = refLookAtTargetDeg;
 
 		// Step 2:
 		// If the camera is at reference position, make its reticle x-offset look at target
@@ -212,6 +216,7 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		}
 		Quaternion const rotCamOffsetLookAtTargetDelta = Quaternion( Vector3::UP, -camOffsetLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotCamOffsetLookAtTargetDelta );
+		calcYawRotWs += -camOffsetLookAtTargetDeg;
 
 		// Note:
 		// As of now, the reticle is already looking at the target as far as yaw is considered.
@@ -248,11 +253,13 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		float const reticleLookAtTargetDeg = atan2fDegree( targetRpp.y, targetRpp.x );
 		Quaternion const rotReticleLookAtTarget = Quaternion( rppRightDir, -reticleLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTarget );
+		calcPitchRotWs = -reticleLookAtTargetDeg;
 
 		// Step 2:
 		// If the camera was on reference pos, make its reticle y-offset look at the target
 		Quaternion const rotReticleLookAtTargetDelta = Quaternion( rppRightDir, -m_reticlePitchDegreesWs );
 		refFinalRotation = refFinalRotation.Multiply( rotReticleLookAtTargetDelta );
+		calcPitchRotWs += -m_reticlePitchDegreesWs;
 
 		// Step 3:
 		// Consider camera-offset from reference pos. Apply extra rotation so the camera's reticle looks at the target
@@ -275,16 +282,32 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 		}
 		Quaternion const rotCameraOffsetLookAtTarget = Quaternion( rppRightDir, camOffsetLookAtTargetDeg );
 		refFinalRotation = refFinalRotation.Multiply( rotCameraOffsetLookAtTarget );
+		calcPitchRotWs += camOffsetLookAtTargetDeg;
 	}
 
-	// Note: 
-	// refFinalRotation will have roll in it, right?
-	// You can't just get rid of that roll & only extract the yaw-pitch of ref rotation. 
-	// (B/c the roll in refFinalRotation matters for the ZoomCamera to look at the target)
-	//
-	// Sadly it defeats the purpose for us. Because we're in a model where roll can not be applied.
-	m_referenceTranform.SetQuaternion( refFinalRotation );
+	if( LookAtCalcDoesNotHaveRoll() )
+	{
+		m_refRotYawWs = calcYawRotWs;
+		m_refRotPitchWs = calcPitchRotWs;
+	}
+	else
+	{
+		// Note: 
+		// refFinalRotation will have roll in it, right?
+		// You can't just get rid of that roll & only extract the yaw-pitch of ref rotation. 
+		// (B/c the roll in refFinalRotation matters for the ZoomCamera to look at the target)
+		//
+		// Sadly it defeats the purpose for us. Because we're in a model where roll can not be applied.
+		m_referenceTranform.SetQuaternion( refFinalRotation );
+	}
 
 	// Debug Render
 	DebugRender2DText( 1.f, Vector2::ZERO, 20.f, RGBA_WHITE_COLOR, RGBA_WHITE_COLOR, "Looked at the Target!" );
+}
+
+bool CB_ZoomCamera::LookAtCalcDoesNotHaveRoll() const
+{
+	// As long as the reticle x-offset it ZERO, the ReticlePitchPlane's Right Dir will match with the reference right dir.
+	// Which means there won't be any roll in the ZoomCamera::LookAtTargetPosition() calculations.
+	return (m_reticleOffset.x == 0.f);
 }
