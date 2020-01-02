@@ -120,7 +120,7 @@ void CreateOpenGLWindow( HINSTANCE applicationInstanceHandle )
 {
 	UNUSED( applicationInstanceHandle );
 
-	Window *window = Window::CreateInstance( APP_NAME, 1750, 980 ); 
+	Window *window = Window::CreateInstance( APP_NAME, 1720, 980 ); 
 	window->AddMessageHandler( AppMessageHandler ); 
 	g_hWnd = (HWND) window->GetHandle();
 }
