@@ -220,9 +220,26 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 
 		// Note:
 		// As of now, the reticle is already looking at the target as far as yaw is considered.
-		// So, to maintain its yaw, we can APPLY PITCH ROTATION ON THE RIGHT DIRECTION OF FOLLOWING ORIENTATION!
-		// P.S. : No matter how much reticle x-offset your ZoomCamera has, rotation along Right Dir of this orientation will maintain the reticle-yaw.
-		reticlePitchPlaneOrienatation = Quaternion( Vector3::UP, refLookAtTargetDeg - camOffsetLookAtTargetDeg );
+		//                                                                                               
+		//              target                                                                           
+		//               pos                       Angles:                                               
+		//               .*\                           a = -reticleYawDegrees;                           
+		//            .   | \                          b = -camOffsetLookAtTargetDeg;                    
+		//        .       |  \                         c =  90 degrees;                                  
+		// reticle\ c     |   \                                                                          
+		//   dir   \      |    \ reticle                                                                 
+		//          \     |     \  dir                                                                   
+		//           \    |      \                 ref final yaw rot = ( refLookAtTargetDeg + a + b )    
+		//  ref ^.    \ b |       \                                                                      
+		// front  ^. a \  |     c .* camera                                                              
+		//  dir     ^.  \ |    .      pos                                                                
+		//            ^. \| .                              Yaw Plane                                     
+		//              ^.* ref                              (Yp)                                        
+		//                  pos                                                                          
+		//                                                                                               
+		// So, to maintain its yaw, we can only APPLY PITCH ROT ON RIGHT OF THE reticle dir!             
+		//                       i.e. the right of a vector at ( refLookAtTargetDeg + b ) yaw angle.     
+		reticlePitchPlaneOrienatation = Quaternion( Vector3::UP, refLookAtTargetDeg + (-camOffsetLookAtTargetDeg) );
 	}
 
 	// Make the reticle look at the target pitch
@@ -274,8 +291,8 @@ void CB_ZoomCamera::LookAtTargetPosition( Vector3 const &targetWs )
 			//    Reticle     pos    ^ .          /                        
 			//  Pitch Plane              ^ .     /                         
 			//    (Rpp)                      ^ ./                          
-			Vector3	const reticleUpDir		= Quaternion( Vector3::RIGHT, m_reticlePitchDegreesWs ).RotatePoint( Vector3::UP );		// TODO: Do we want Vector3::RIGHT here? rppRightDir is not equal to refRightDir, won't it matter?
-			float	const refToCamProj		= Vector3::DotProduct( reticleUpDir, m_cameraOffset );									// TODO: Double check if the reticleUpDir we're getting is the correct one for using here
+			Vector3	const reticleUpDir		= Quaternion( Vector3::RIGHT, m_reticlePitchDegreesWs ).RotatePoint( Vector3::UP );
+			float	const refToCamProj		= Vector3::DotProduct( reticleUpDir, m_cameraOffset );
 			float	const refToTargetLenRpp	= targetRpp.GetLength();
 			float	const pitchAngleRadians	= asinf( refToCamProj / refToTargetLenRpp );
 			camOffsetLookAtTargetDeg = RadianToDegree( pitchAngleRadians );
